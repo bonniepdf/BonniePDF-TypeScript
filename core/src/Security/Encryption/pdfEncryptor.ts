@@ -1,0 +1,166 @@
+import { PdfEncryptionKey } from './pdfEncryptionKey';
+import { Aes256EncryptionKey } from './aes256EncryptionKey';
+import { AesCipher } from './aesCipher';
+import { RC4Cipher } from './rc4Cipher';
+import { EncryptionSettings } from '../Models/EncryptionSettings';
+import { EncryptionAlgorithm } from '../Models/EncryptionAlgorithm';
+
+/**
+ * Main orchestrator for PDF encryption.
+ * Handles encryption of streams and generation of the encryption dictionary.
+ * Supports RC4 (40/128-bit) and AES-256 encryption.
+ *
+ * Sync construction (`new PdfEncryptor(settings)`) fully initialises RC4 encryption.
+ * For AES-256, use `await PdfEncryptor.create(settings)` to get correct key material;
+ * sync construction for AES-256 will have uninitialised keys and is not safe to use.
+ */
+export class PdfEncryptor {
+  private readonly key?: PdfEncryptionKey;
+  private aesKey?: Aes256EncryptionKey;
+  private readonly isAes256: boolean;
+  public readonly settings: EncryptionSettings;
+
+  /**
+   * Sync constructor. Fully functional for RC4.
+   * For AES-256 prefer `PdfEncryptor.create(settings)`.
+   */
+  constructor(settings: EncryptionSettings, documentId?: Uint8Array) {
+    if (!settings) throw new Error('Encryption settings cannot be null');
+    settings.validate();
+    this.settings = settings;
+    this.isAes256 = settings.algorithm === EncryptionAlgorithm.AES_256;
+
+    if (!this.isAes256) {
+      this.key = new PdfEncryptionKey(settings, documentId ?? PdfEncryptionKey.generateDocumentId());
+    }
+    // AES-256: aesKey intentionally null until create() is called
+  }
+
+  /**
+   * Async factory — correctly initialises AES-256 key material via SubtleCrypto.
+   * For RC4 this is equivalent to `new PdfEncryptor(settings, documentId)`.
+   */
+  public static async create(settings: EncryptionSettings, documentId?: Uint8Array): Promise<PdfEncryptor> {
+    const encryptor = new PdfEncryptor(settings, documentId);
+    if (encryptor.isAes256) {
+      encryptor.aesKey = await Aes256EncryptionKey.create(settings);
+    }
+    return encryptor;
+  }
+
+  /** Gets the document ID used in encryption. */
+  public get documentId(): Uint8Array {
+    return this.isAes256 ? this.aesKey!.documentId : this.key!.documentId;
+  }
+
+  /**
+   * Encrypts binary data for a specific PDF object — **synchronous RC4 path only**.
+   * For AES-256 documents use `encryptDataAsync` or the async serialization pipeline.
+   */
+  public encryptData(data: Uint8Array, objectNumber: number, generationNumber = 0): Uint8Array {
+    if (!data || data.length === 0) return data;
+
+    if (this.isAes256) {
+      // AES-256 requires async; return data unencrypted in the sync path.
+      // Callers that need AES-256 encryption must use encryptDataAsync.
+      console.warn('PdfEncryptor: AES-256 sync encryptData called — data not encrypted. Use encryptDataAsync.');
+      return data;
+    }
+
+    const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
+    return RC4Cipher.forObject(objectKey).transformCopy(data);
+  }
+
+  /**
+   * Encrypts binary data asynchronously — works for both RC4 and AES-256.
+   */
+  public async encryptDataAsync(data: Uint8Array, objectNumber: number, generationNumber = 0): Promise<Uint8Array> {
+    if (!data || data.length === 0) return data;
+
+    if (this.isAes256) {
+      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+      const cipher = new AesCipher(this.aesKey.fileEncryptionKey);
+      return cipher.encrypt(data);
+    }
+
+    const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
+    return RC4Cipher.forObject(objectKey).transformCopy(data);
+  }
+
+  /**
+   * Encrypts a string for a specific PDF object (sync RC4 path only).
+   */
+  public encryptString(text: string, objectNumber: number, generationNumber = 0): Uint8Array {
+    if (!text) return new Uint8Array(0);
+    // ISO-8859-1: each char maps to its code point
+    const data = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) data[i] = text.charCodeAt(i) & 0xFF;
+    return this.encryptData(data, objectNumber, generationNumber);
+  }
+
+  /**
+   * Encrypts data in-place — sync RC4 only. AES-256 is a no-op with a warning.
+   */
+  public encryptInPlace(data: Uint8Array, objectNumber: number, generationNumber = 0): void {
+    if (!data || data.length === 0) return;
+    if (this.isAes256) {
+      console.warn('PdfEncryptor: AES-256 in-place encryption not supported in sync path.');
+      return;
+    }
+    const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
+    RC4Cipher.forObject(objectKey).transform(data);
+  }
+
+  /**
+   * Returns the /Encrypt dictionary entries for the PDF trailer.
+   */
+  public getEncryptDictionary(): Map<string, string> {
+    return this.isAes256 ? this.getAes256EncryptDictionary() : this.getRc4EncryptDictionary();
+  }
+
+  private getRc4EncryptDictionary(): Map<string, string> {
+    const dict = new Map<string, string>([
+      ['/Filter', '/Standard'],
+      ['/V', this.settings.versionValue.toString()],
+      ['/R', this.settings.revisionValue.toString()],
+      ['/O', PdfEncryptor.fmtHex(this.key!.ownerEntry)],
+      ['/U', PdfEncryptor.fmtHex(this.key!.userEntry)],
+      ['/P', this.key!.permissionsValue.toString()]
+    ]);
+    if (this.settings.revisionValue >= 3) dict.set('/Length', this.settings.keyLengthBits.toString());
+    return dict;
+  }
+
+  private getAes256EncryptDictionary(): Map<string, string> {
+    if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+    return new Map<string, string>([
+      ['/Filter', '/Standard'],
+      ['/V', '5'],
+      ['/R', '6'],
+      ['/Length', '256'],
+      ['/O',     PdfEncryptor.fmtHex(this.aesKey.ownerEntry)],
+      ['/U',     PdfEncryptor.fmtHex(this.aesKey.userEntry)],
+      ['/OE',    PdfEncryptor.fmtHex(this.aesKey.ownerEncryptionEntry)],
+      ['/UE',    PdfEncryptor.fmtHex(this.aesKey.userEncryptionEntry)],
+      ['/Perms', PdfEncryptor.fmtHex(this.aesKey.permsEntry)],
+      ['/P',     this.aesKey.permissionsValue.toString()],
+      ['/CF',    '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
+      ['/StmF',  '/StdCF'],
+      ['/StrF',  '/StdCF']
+    ]);
+  }
+
+  /** Returns the /ID array string for the PDF trailer. */
+  public getIdArray(): string {
+    const docId = this.isAes256 ? this.aesKey!.documentId : this.key!.documentId;
+    const hex = PdfEncryptor.fmtHex(docId);
+    return `[ ${hex} ${hex} ]`;
+  }
+
+  private static fmtHex(data: Uint8Array): string {
+    if (!data || data.length === 0) return '<>';
+    let s = '<';
+    for (const b of data) s += b.toString(16).padStart(2, '0').toUpperCase();
+    return s + '>';
+  }
+}

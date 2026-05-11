@@ -1,0 +1,46 @@
+name: Changeset check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  changeset:
+    name: Require changeset for core changes
+    runs-on: ubuntu-latest
+    # Skip on the automated "Version Packages" PR that Changesets itself opens
+    if: github.head_ref != 'changeset-release/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for changeset when core is modified
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          CORE_CHANGED=$(echo "$CHANGED" | grep -c '^core/' || true)
+          if [ "$CORE_CHANGED" -gt 0 ]; then
+            echo "Changes detected in core/ — checking for a changeset..."
+            CHANGESETS=$(ls .changeset/*.md 2>/dev/null | grep -v README | wc -l)
+            if [ "$CHANGESETS" -eq 0 ]; then
+              echo ""
+              echo "ERROR: core/ was modified but no .changeset/*.md file was found."
+              echo "Run 'pnpm changeset' to create one describing the change."
+              exit 1
+            fi
+            echo "Changeset found. ✓"
+          else
+            echo "No core/ changes — changeset not required."
+          fi

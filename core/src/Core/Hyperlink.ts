@@ -1,0 +1,251 @@
+import { IElement } from '../Elements/IElement';
+import { RenderContext } from '../Rendering/RenderContext';
+import { Color } from './Color';
+import { Thickness } from './Thickness';
+import { FontMetrics } from '../Typography/FontMetrics';
+import { StandardFonts } from '../Typography/StandardFonts';
+import { TtfFont } from '../Typography/TrueType/TtfFont';
+import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
+import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
+
+/**
+ * Represents a hyperlink annotation in a PDF document.
+ * Hyperlinks are clickable areas that navigate to a URI.
+ * This element implements IElement so it can be added like other elements.
+ */
+export class Hyperlink implements IElement {
+  /**
+   * Gets or sets the URI (URL) that this hyperlink points to
+   */
+  uri: string = "";
+  /**
+   * Gets or sets the target 0-based page index (for internal links)
+   */
+  targetPageIndex: number | undefined;
+  /**
+   * Gets the link text to display
+   */
+  text: string;
+  /**
+   * Gets or sets the font name for the link text
+   */
+  fontName: string = StandardFonts.Helvetica;
+  /**
+   * Gets or sets the font size for the link text
+   */
+  fontSize: number = 12;
+  /**
+   * Gets or sets the text color for the link
+   */
+  textColor: Color = Color.blue;
+  /**
+   * Gets or sets the margin around the hyperlink
+   */
+  margin: Thickness = new Thickness(0);
+
+  // Internal properties set during rendering
+  /**
+   * @internal - Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).
+   */
+  renderX: number = 0;
+  /**
+   * @internal - Gets the Y position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).
+   */
+  renderY: number = 0;
+  /**
+   * @internal - Gets the width of the rendered annotation rectangle in points.
+   */
+  renderWidth: number = 0;
+  /**
+   * @internal - Gets the height of the rendered annotation rectangle in points.
+   */
+  renderHeight: number = 0;
+
+  /**
+   * Line height derived from fontSize with a standard 1.2× leading factor.
+   */
+  private get lineHeight(): number {
+    return this.fontSize * 1.2;
+  }
+
+  /**
+   * Creates a new hyperlink with the specified URI and display text
+   * @param text - The link text to display
+   * @param uri - The URI (URL) that this hyperlink points to
+   */
+  constructor(text: string, uri?: string) {
+    if (!text || text === "") {
+      throw new Error("TextBlock cannot be null or empty");
+    }
+    this.text = text;
+
+    if (uri !== undefined) {
+      if (!uri || uri === "") {
+        throw new Error("URI cannot be null or empty");
+      }
+      this.uri = uri;
+    }
+  }
+
+  /**
+   * Sets the rendered bounding rectangle in PDF coordinates (bottom-left origin).
+   * Called during rendering so that the annotation can be written after layout is complete.
+   */
+  setRenderBounds(x: number, y: number, width: number, height: number): void {
+    this.renderX = x;
+    this.renderY = y;
+    this.renderWidth = width;
+    this.renderHeight = height;
+  }
+
+  /**
+   * Gets the preferred width of this element, if any.
+   */
+  getPreferredWidth(): number {
+    return FontMetrics.getStringWidth(this.text, this.fontName, this.fontSize) + this.margin.left + this.margin.right;
+  }
+
+  /**
+   * Measures the height of this hyperlink given the available width
+   * @param availableWidth - The available width for the hyperlink
+   */
+  measureHeight(availableWidth: number): number {
+    const contentWidth = availableWidth - this.margin.left - this.margin.right;
+    const contentHeight = this.computeLineCount(contentWidth) * this.lineHeight;
+    return contentHeight + this.margin.top + this.margin.bottom;
+  }
+
+  /**
+   * Renders this hyperlink to the PDF context and registers the annotation
+   * @param ctx - The render context
+   * @param width - The available width
+   */
+  render(ctx: RenderContext, width: number): void {
+    // Save starting Y position for correct advancement
+    const startY = ctx.currentY;
+
+    // Apply top margin
+    ctx.currentY += this.margin.top;
+
+    // Register font
+    const fontResourceName = ctx.registerFont(this.fontName);
+    const embeddedFont = ctx.resolveEmbeddedFont(this.fontName);
+    const isEmbedded = embeddedFont !== undefined;
+
+    const contentWidth = width - this.margin.left - this.margin.right;
+    const lines = this.computeLines(contentWidth);
+    let localY = ctx.currentY;
+
+    const ops: string[] = [];
+    PdfOperators.beginText(ops);
+    PdfOperators.setFont(ops, fontResourceName, this.fontSize);
+    PdfOperators.setFillColor(ops, this.textColor);
+
+    let maxWidth = 0;
+    for (const line of lines) {
+      const lineWidth = FontMetrics.getStringWidth(line, this.fontName, this.fontSize);
+      if (lineWidth > maxWidth) {
+        maxWidth = lineWidth;
+      }
+
+      const pdfY = ctx.pageSize.height - (localY + this.fontSize);
+
+      PdfOperators.setTextPosition(ops, ctx.currentX + this.margin.left, pdfY);
+
+      if (isEmbedded) {
+        PdfOperators.showText(ops, this.encodeTextAsGlyphIds(ctx, line));
+      } else {
+        PdfOperators.showText(ops, `(${PdfSyntax.escape(line)})`);
+      }
+
+      localY += this.lineHeight;
+    }
+
+    PdfOperators.endText(ops);
+    ctx.pages[ctx.currentPageIndex] += ops.join('');
+
+    // Calculate total content height
+    const contentHeight = lines.length * this.lineHeight;
+
+    // Store render position for annotation (PDF coordinates: bottom-left origin)
+    // The rectangle should be in PDF coordinates where (0,0) is bottom-left
+    this.renderX = ctx.currentX + this.margin.left;
+    // Convert from top-down to bottom-up coordinates
+    this.renderY = ctx.pageSize.height - (startY + this.margin.top + contentHeight);
+    this.renderWidth = maxWidth;
+    this.renderHeight = contentHeight;
+
+    // Register this hyperlink in the render context
+    ctx.registerHyperlink(this);
+
+    // Advance Y by the total height (margins + content)
+    ctx.currentY = startY + this.margin.top + contentHeight + this.margin.bottom;
+  }
+
+  /**
+   * Gets the PDF rectangle string for this hyperlink in the format [x1 y1 x2 y2]
+   * where (x1, y1) is the bottom-left corner and (x2, y2) is the top-right corner
+   */
+  getRectangleString(): string {
+    // PDF coordinates: (0,0) is bottom-left
+    // RenderX, RenderY are already in PDF coordinates (bottom-left based)
+    return `[${PdfSyntax.formatDecimal(this.renderX)} ${PdfSyntax.formatDecimal(this.renderY)} ${PdfSyntax.formatDecimal(this.renderX + this.renderWidth)} ${PdfSyntax.formatDecimal(this.renderY + this.renderHeight)}]`;
+  }
+
+  /**
+   * Returns the number of wrapped lines required to render text within the given width.
+   * @param maxWidth - The maximum width for text wrapping
+   */
+  private computeLineCount(maxWidth: number): number {
+    if (!this.text || this.text === "") return 0;
+    return this.computeLines(maxWidth).length;
+  }
+
+  /**
+   * Wraps text into a list of lines that each fit within maxWidth.
+   * Uses a greedy word-wrap algorithm measured with FontMetrics.
+   * @param maxWidth - The maximum width for each line
+   */
+  private computeLines(maxWidth: number): string[] {
+    const lines: string[] = [];
+    if (!this.text || this.text === "") return lines;
+
+    const words = this.text.split(' ');
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine === "" ? word : currentLine + ' ' + word;
+
+      const testWidth = FontMetrics.getStringWidth(testLine, this.fontName, this.fontSize);
+
+      if (testWidth > maxWidth) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+
+    if (currentLine !== "") lines.push(currentLine);
+    return lines;
+  }
+
+  /**
+   * Encodes text as a PDF hex string of Glyph IDs for the current font,
+   * and records glyph usage for subsetting. Falls back to a plain escaped PDF string if the
+   * font is not embedded (i.e. a standard PDF font).
+   * @param ctx - The render context
+   * @param text - The text to encode
+   */
+  private encodeTextAsGlyphIds(ctx: RenderContext, text: string): string {
+    const font = ctx.resolveEmbeddedFont(this.fontName);
+    if (font === undefined) {
+      return `(${PdfSyntax.escape(text)})`;
+    }
+
+    // Track glyph usage for font subsetting (alias-aware)
+    ctx.trackGlyphUsage(this.fontName, text);
+
+    return PdfSyntax.toGlyphIdHexString(text, font);
+  }
+}

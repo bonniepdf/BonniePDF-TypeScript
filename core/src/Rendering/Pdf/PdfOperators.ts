@@ -1,0 +1,129 @@
+import { PdfSyntax } from './PdfSyntax';
+export class PdfOperators {
+  public static saveState(s: string[]): void {
+    s.push('q\n');
+  }
+
+  public static restoreState(s: string[]): void {
+    s.push('Q\n');
+  }
+
+  public static translate(s: string[], x: number, y: number): void {
+    s.push(`1 0 0 1 ${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} cm\n`);
+  }
+
+  public static scale(s: string[], sx: number, sy: number): void {
+    s.push(`${PdfSyntax.formatDecimal(sx)} 0 0 ${PdfSyntax.formatDecimal(sy)} 0 0 cm\n`);
+  }
+
+  public static rotate(s: string[], angleDegrees: number): void {
+    const radians = angleDegrees * (Math.PI / 180.0);
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+    s.push(`${PdfSyntax.formatDecimal(cos)} ${PdfSyntax.formatDecimal(sin)} ${PdfSyntax.formatDecimal(-sin)} ${PdfSyntax.formatDecimal(cos)} 0 0 cm\n`);
+  }
+
+  public static concatMatrix(s: string[], a: number, b: number, c: number, d: number, e: number, f: number): void {
+    s.push(`${PdfSyntax.formatDecimal(a)} ${PdfSyntax.formatDecimal(b)} ${PdfSyntax.formatDecimal(c)} ${PdfSyntax.formatDecimal(d)} ${PdfSyntax.formatDecimal(e)} ${PdfSyntax.formatDecimal(f)} cm\n`);
+  }
+
+  public static setGraphicsState(s: string[], name: string): void {
+    s.push(`${name} gs\n`);
+  }
+
+  public static setFillColor(s: string[], color: { scR: number; scG: number; scB: number }): void {
+    s.push(`${PdfSyntax.formatColor(color)} rg\n`);
+  }
+
+  public static setStrokeColor(s: string[], color: { scR: number; scG: number; scB: number }): void {
+    s.push(`${PdfSyntax.formatColor(color)} RG\n`);
+  }
+
+  public static setLineWidth(s: string[], width: number): void {
+    s.push(`${PdfSyntax.formatDecimal(width)} w\n`);
+  }
+
+  public static setLineJoin(s: string[], style: number): void {
+    s.push(`${style} j\n`);
+  }
+
+  public static setMiterLimit(s: string[], limit: number): void {
+    s.push(`${PdfSyntax.formatDecimal(limit)} M\n`);
+  }
+
+  public static moveTo(s: string[], x: number, y: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} m\n`);
+  }
+
+  public static lineTo(s: string[], x: number, y: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} l\n`);
+  }
+
+  public static curveTo(s: string[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} ${PdfSyntax.formatDecimal(x3)} ${PdfSyntax.formatDecimal(y3)} c\n`);
+  }
+
+  public static rectangle(s: string[], x: number, y: number, width: number, height: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re\n`);
+  }
+
+  public static closePath(s: string[]): void {
+    s.push('h\n');
+  }
+
+  public static stroke(s: string[]): void {
+    s.push('S\n');
+  }
+
+  public static rectangleFill(s: string[], x: number, y: number, width: number, height: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re f\n`);
+  }
+
+  public static rectangleStroke(s: string[], x: number, y: number, width: number, height: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re S\n`);
+  }
+
+  public static setWordSpacing(s: string[], spacing: number): void {
+    s.push(`${PdfSyntax.formatDecimal(spacing)} Tw\n`);
+  }
+
+  public static strokeLine(s: string[], x1: number, y1: number, x2: number, y2: number): void {
+    s.push(`${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} m ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} l S\n`);
+  }
+
+  public static fill(s: string[]): void {
+    s.push('f\n');
+  }
+
+  public static closePathFillStroke(s: string[]): void {
+    s.push('b\n');
+  }
+
+  public static closePathStroke(s: string[]): void {
+    s.push('s\n');
+  }
+
+  public static beginText(s: string[]): void {
+    s.push('BT\n');
+  }
+
+  public static endText(s: string[]): void {
+    s.push('ET\n');
+  }
+
+  public static setFont(s: string[], fontResourceName: string, size: number): void {
+    s.push(`${fontResourceName} ${size} Tf\n`);
+  }
+
+  public static setTextPosition(s: string[], x: number, y: number): void {
+    s.push(`1 0 0 1 ${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} Tm\n`);
+  }
+
+  public static showText(s: string[], operand: string): void {
+    s.push(`${operand} Tj\n`);
+  }
+
+  public static paintXObject(s: string[], name: string): void {
+    s.push(`${name} Do\n`);
+  }
+}

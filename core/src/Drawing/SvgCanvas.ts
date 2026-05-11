@@ -1,0 +1,110 @@
+import { ICanvas } from './ICanvas';
+import { Color } from '../Core/Color';
+import { Point } from '../Core/Point';
+import { TextAlignment } from '../Elements/Text/TextAlignment';
+import { Size } from '../Core/Size';
+
+export class SvgCanvas implements ICanvas {
+  public readonly width: number;
+  public readonly height: number;
+  private readonly svgElements: string[] = [];
+
+  constructor(width: number, height: number) {
+    this.width = width;
+    this.height = height;
+  }
+
+  public saveState(): void {
+    // SVG handles state through grouping
+  }
+
+  public restoreState(): void {
+    // SVG handles state through grouping
+  }
+
+  public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${hex}"/>`);
+  }
+
+  public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`);
+  }
+
+  public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${hex}" stroke-width="${lineWidth}"/>`);
+  }
+
+  public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${hex}"/>`);
+  }
+
+  public fillPath(points: Point[], color: Color): void {
+    if (points.length < 3) return;
+    const hex = color.toHexString();
+    const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
+    this.svgElements.push(`<path d="${pathData}" fill="${hex}"/>`);
+  }
+
+  public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="${hex}"/>`);
+  }
+
+  public strokeRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`);
+  }
+
+  public drawText(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, align: TextAlignment): void {
+    const hex = color.toHexString();
+    const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
+    this.svgElements.push(`<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`);
+  }
+
+  public drawTextRotated(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, angleDegrees: number): void {
+    const hex = color.toHexString();
+    this.svgElements.push(`<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${y})">${this.escapeXml(text)}</text>`);
+  }
+
+  public drawTextJustified(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, availableWidth: number): void {
+    // SVG doesn't support text justification natively
+    this.drawText(x, y, text, color, fontSize, fontFamily, TextAlignment.Left);
+  }
+
+  public measureText(text: string, fontSize: number, fontFamily: string): Size {
+    // Stub measurement
+    const width = text.length * fontSize * 0.5;
+    const height = fontSize * 1.2;
+    return new Size(width, height);
+  }
+
+  public drawImage(image: any, x: number, y: number, width: number, height: number): void {
+    // TODO: Implement SVG image embedding
+  }
+
+  public drawFormXObject(resourceName: string, x: number, y: number): void {
+    // Not applicable for SVG
+  }
+
+  public toSvg(): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width}" height="${this.height}">${this.svgElements.join('')}</svg>`;
+  }
+
+  private escapeXml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  public getSvg(): string {
+    const inner = this.svgElements.join('\n');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width}" height="${this.height}">\n${inner}\n</svg>`;
+  }
+}

@@ -1,0 +1,5 @@
+# Global fallback — all PRs need at least one maintainer review
+*   @bonniepdf/js-maintainers
+
+# Published package — extra scrutiny
+core/   @bonniepdf/js-maintainers

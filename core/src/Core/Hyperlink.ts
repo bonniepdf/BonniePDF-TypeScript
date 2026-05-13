@@ -130,7 +130,9 @@ export class Hyperlink implements IElement {
     // Register font
     const fontResourceName = ctx.registerFont(this.fontName);
     const embeddedFont = ctx.resolveEmbeddedFont(this.fontName);
-    const isEmbedded = embeddedFont !== undefined;
+    // resolveEmbeddedFont returns null (not undefined) for standard fonts —
+    // use != null so both null and undefined are treated as "not embedded".
+    const isEmbedded = embeddedFont != null;
 
     const contentWidth = width - this.margin.left - this.margin.right;
     const lines = this.computeLines(contentWidth);
@@ -239,7 +241,8 @@ export class Hyperlink implements IElement {
    */
   private encodeTextAsGlyphIds(ctx: RenderContext, text: string): string {
     const font = ctx.resolveEmbeddedFont(this.fontName);
-    if (font === undefined) {
+    // resolveEmbeddedFont returns null for standard fonts, not undefined.
+    if (font == null) {
       return `(${PdfSyntax.escape(text)})`;
     }
 

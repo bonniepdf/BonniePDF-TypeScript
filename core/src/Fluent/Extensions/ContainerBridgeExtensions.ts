@@ -11,7 +11,7 @@ import { IContentContainer } from '../IContentContainer';
      * This is the core method that enables: .Padding(10).Border(1).Text("Hello")
      */
     static element(parent: IContentContainer, child: IElement): IContentContainer {
-      if (parent.child !== null) {
+      if (parent.child != null) {
         throw new Error(
           "This container already has a child element. " +
           "Each container slot can only hold one child. " +
@@ -35,7 +35,7 @@ import { IContentContainer } from '../IContentContainer';
      * Used by terminal methods like .Text() that return the concrete element type.
      */
     static elementTyped<T extends IElement>(parent: IContentContainer, child: T): T {
-      if (parent.child !== null) {
+      if (parent.child != null) {
         throw new Error(
           "This container already has a child element. " +
           "Each container slot can only hold one child. " +

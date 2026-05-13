@@ -11,6 +11,9 @@ const TextLight        = Color.fromHex('#888888');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function ta(b: TextBlock, a: TextAlignment): TextBlock { b.alignment = a; return b }
+function alignLeft(b: TextBlock):   TextBlock { return ta(b, TextAlignment.Left) }
+function alignCenter(b: TextBlock): TextBlock { return ta(b, TextAlignment.Center) }
+function alignRight(b: TextBlock):  TextBlock { return ta(b, TextAlignment.Right) }
 
 function tb(text: string, font: string, size: number, color: Color, margin?: Thickness): TextBlock {
   const b = new TextBlock(text);

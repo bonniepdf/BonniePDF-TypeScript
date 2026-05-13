@@ -8,6 +8,7 @@ export * from './Core/BorderStyle';
 export * from './Core/BorderColors';
 export * from './Core/Thickness';
 export * from './Core/HorizontalAlignment';
+export * from './Core/Hyperlink';
 
 export * from './Configuration/PdfSize';
 export * from './Configuration/PageOrientation';

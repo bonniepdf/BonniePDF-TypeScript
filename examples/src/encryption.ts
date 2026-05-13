@@ -47,15 +47,19 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Scenario 1: Simple password ──
-  doc.add(pageTitle('Password Protected Document'));
-  doc.add(body('This PDF is encrypted with 128-bit RC4 encryption.'));
+  doc.add(pageTitle('Scenario 1: Password Protection'));
+  doc.add(body(
+    'This page demonstrates the API for password-protecting a PDF with 128-bit RC4 ' +
+    'encryption. The viewer below can display this document because encryption has not ' +
+    'been applied here — see the note at the bottom of the page.'
+  ));
 
-  const pwd = new TextBlock('Password: demo123');
+  const pwd = new TextBlock('Example password: demo123');
   pwd.fontSize  = 14;
-  pwd.textColor = Color.red600;
+  pwd.textColor = Color.slate700;
   doc.add(pwd);
 
-  doc.add(body('Without the correct password, this document cannot be opened.'));
+  doc.add(body('When encryption is active, the document cannot be opened without the correct password.'));
 
   const snippet1 = new TextBlock(
     'API usage:\n' +
@@ -67,11 +71,21 @@ export function generate(): Document {
   snippet1.margin    = new Thickness(0, 20, 0, 0);
   doc.add(snippet1);
 
+  const note1 = new TextBlock(
+    'Note: This demo document is intentionally unencrypted so it can be displayed ' +
+    'in the browser viewer. In a real application, calling withPassword() produces a ' +
+    'fully encrypted PDF that requires the password to open.'
+  );
+  note1.fontSize  = 10;
+  note1.textColor = Color.slate500;
+  note1.margin    = new Thickness(0, 24, 0, 0);
+  doc.add(note1);
+
   // ── Scenario 2: User + owner passwords with permissions ──
   doc.addPage();
 
-  doc.add(pageTitle('Document with Permission Restrictions'));
-  doc.add(body('This document has restricted permissions:'));
+  doc.add(pageTitle('Scenario 2: Permission Restrictions'));
+  doc.add(body('This page demonstrates encrypting with granular permission flags:'));
 
   doc.add(bullet('  - Printing: Allowed',    true));
   doc.add(bullet('  - Copying: Allowed',     true));
@@ -99,9 +113,9 @@ export function generate(): Document {
   // ── Scenario 3: Owner password only (restricted actions) ──
   doc.addPage();
 
-  doc.add(pageTitle('Open Without Password (Restricted)'));
-  doc.add(body('This document opens without requiring a password.'));
-  doc.add(body('However, most actions are restricted:', false));
+  doc.add(pageTitle('Scenario 3: Owner-Only Restrictions'));
+  doc.add(body('This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.'));
+  doc.add(body('Restricted permissions in this scenario:', false));
 
   doc.add(bullet('  - Low-quality printing: Allowed',      true));
   doc.add(bullet('  - Accessibility extraction: Allowed',  true));

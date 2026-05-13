@@ -2,3 +2,5 @@ packages:
   - 'core'
   - 'examples'
   - 'ui-shared'
+allowBuilds:
+  esbuild: true

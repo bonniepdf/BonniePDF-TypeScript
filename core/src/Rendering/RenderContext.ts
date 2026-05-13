@@ -19,7 +19,7 @@ export class DeferredXObjectInfo {
 export class RenderContext {
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];
-  public readonly pageHyperlinks: Map<number, Hyperlink[]> = new Map();
+  public readonly pageHyperlinks: Map<number, any[]> = new Map();
   public readonly tocEntries: Map<string, number> = new Map();
   
   public canvas: ICanvas;
@@ -187,7 +187,7 @@ export class RenderContext {
     return this.resources.getImageResourceName(imageId);
   }
 
-  public registerHyperlink(hyperlink: Hyperlink): void {
+  public registerHyperlink(hyperlink: any): void {
     if (!this.pageHyperlinks.has(this.currentPageIndex)) {
       this.pageHyperlinks.set(this.currentPageIndex, []);
     }
@@ -207,17 +207,3 @@ export class RenderContext {
   }
 }
 
-export class Hyperlink {
-  public uri?: string;
-  public targetPageIndex?: number;
-  public text: string;
-  public fontName: string;
-  public fontSize: number;
-  public textColor: Color;
-  public margin: any;
-  
-  public renderX: number = 0;
-  public renderY: number = 0;
-  public renderWidth: number = 0;
-  public renderHeight: number = 0;
-}

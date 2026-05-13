@@ -133,7 +133,7 @@ export class PdfDrawing {
     PdfOperators.lineTo(stream, x + r, y + height);
     PdfOperators.curveTo(stream, x + r - kr, y + height, x, y + height - r + kr, x, y + height - r);
     PdfOperators.lineTo(stream, x, y + r);
-    PdfOperators.curveTo(stream, x, y + r - kr, x - r + kr, y, x + r, y);
+    PdfOperators.curveTo(stream, x, y + r - kr, x + r - kr, y, x + r, y);
     PdfOperators.closePath(stream);
   }
 }

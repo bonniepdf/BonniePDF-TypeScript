@@ -14,7 +14,7 @@ import { IContentContainer } from '../IContentContainer';
    */
   export class ContainerStyleExtensions {
     private static getOrCreateContainer(c: IContentContainer): Container {
-      if (c instanceof Container && c.child === null) {
+      if (c instanceof Container && c.child == null) {
         return c;
       }
 

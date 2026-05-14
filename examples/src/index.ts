@@ -33,6 +33,7 @@ import { generate as encryption }           from './encryption';
 import { generate as businessInvoice }      from './business-invoice';
 import { generate as userDirectory }        from './user-directory';
 import { generate as movieCatalog }         from './movie-catalog';
+import { generate as financialDashboard }   from './financial-dashboard';
 
 export interface ExampleDef {
   id:          string;
@@ -328,5 +329,13 @@ export const examples: ExampleDef[] = [
     description: 'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
     filename:    'movie-catalog.pdf',
     generate:    movieCatalog,
+  },
+  {
+    id:          'financial-dashboard',
+    name:        'Financial Dashboard',
+    category:    'Templates',
+    description: 'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table — all styled with a warm earth-tone palette.',
+    filename:    'financial-dashboard.pdf',
+    generate:    financialDashboard,
   },
 ];

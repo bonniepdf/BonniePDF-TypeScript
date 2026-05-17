@@ -36,12 +36,13 @@ import { generate as movieCatalog }         from './movie-catalog';
 import { generate as financialDashboard }   from './financial-dashboard';
 
 export interface ExampleDef {
-  id:          string;
-  name:        string;
-  category:    string;
-  description: string;
-  filename:    string;
-  generate:    () => Document;
+  id:            string;
+  name:          string;
+  category:      string;
+  description:   string;
+  filename:      string;
+  generate:      () => Document;
+  thumbnailsOpen?: boolean;
 }
 
 export const examples: ExampleDef[] = [
@@ -81,12 +82,13 @@ export const examples: ExampleDef[] = [
     generate:    headersFooters,
   },
   {
-    id:          'horizontal-stacks',
-    name:        'Horizontal Stacks',
-    category:    'Layout',
-    description: 'Flex-like horizontal layout with equal, weighted, and centre-aligned distributions.',
-    filename:    'horizontal-stacks.pdf',
-    generate:    horizontalStacks,
+    id:             'horizontal-stacks',
+    name:           'Horizontal Stacks',
+    category:       'Layout',
+    description:    'Flex-like horizontal layout with equal, weighted, and centre-aligned distributions.',
+    filename:       'horizontal-stacks.pdf',
+    generate:       horizontalStacks,
+    thumbnailsOpen: false,
   },
   {
     id:          'text-block-overflow',
@@ -115,20 +117,22 @@ export const examples: ExampleDef[] = [
 
   // ── Typography ────────────────────────────────────────────────────────────
   {
-    id:          'text-alignment',
-    name:        'Text Alignment',
-    category:    'Typography',
-    description: 'Left, center, right and justified text alignment including book-style paragraphs.',
-    filename:    'text-alignment.pdf',
-    generate:    textAlignment,
+    id:             'text-alignment',
+    name:           'Text Alignment',
+    category:       'Typography',
+    description:    'Left, center, right and justified text alignment including book-style paragraphs.',
+    filename:       'text-alignment.pdf',
+    generate:       textAlignment,
+    thumbnailsOpen: false,
   },
   {
-    id:          'book-page-layout',
-    name:        'Book Page Layout',
-    category:    'Typography',
-    description: 'Advanced book-style typography with Times family fonts, pull-quote block, and a chapter footer.',
-    filename:    'book-page-layout.pdf',
-    generate:    bookPageLayout,
+    id:             'book-page-layout',
+    name:           'Book Page Layout',
+    category:       'Typography',
+    description:    'Advanced book-style typography with Times family fonts, pull-quote block, and a chapter footer.',
+    filename:       'book-page-layout.pdf',
+    generate:       bookPageLayout,
+    thumbnailsOpen: false,
   },
   {
     id:          'rich-text-styles',
@@ -139,28 +143,31 @@ export const examples: ExampleDef[] = [
     generate:    richTextStyles,
   },
   {
-    id:          'text-decorations',
-    name:        'Text Decorations',
-    category:    'Typography',
-    description: 'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes.',
-    filename:    'text-decorations.pdf',
-    generate:    textDecorations,
+    id:             'text-decorations',
+    name:           'Text Decorations',
+    category:       'Typography',
+    description:    'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes.',
+    filename:       'text-decorations.pdf',
+    generate:       textDecorations,
+    thumbnailsOpen: false,
   },
   {
-    id:          'custom-fonts',
-    name:        'Custom Fonts',
-    category:    'Typography',
-    description: 'TrueType font embedding with full Unicode symbol coverage — currency, Greek, mathematical, and arrow characters.',
-    filename:    'custom-fonts.pdf',
-    generate:    customFonts,
+    id:             'custom-fonts',
+    name:           'Custom Fonts',
+    category:       'Typography',
+    description:    'TrueType font embedding with full Unicode symbol coverage — currency, Greek, mathematical, and arrow characters.',
+    filename:       'custom-fonts.pdf',
+    generate:       customFonts,
+    thumbnailsOpen: false,
   },
   {
-    id:          'emojis-and-unicode',
-    name:        'Emojis & Unicode',
-    category:    'Typography',
-    description: 'Supplementary Unicode plane support with emoji sections and mixed text/emoji status lines.',
-    filename:    'emojis-and-unicode.pdf',
-    generate:    emojisAndUnicode,
+    id:             'emojis-and-unicode',
+    name:           'Emojis & Unicode',
+    category:       'Typography',
+    description:    'Supplementary Unicode plane support with emoji sections and mixed text/emoji status lines.',
+    filename:       'emojis-and-unicode.pdf',
+    generate:       emojisAndUnicode,
+    thumbnailsOpen: false,
   },
   {
     id:          'dickens-novel',
@@ -181,12 +188,13 @@ export const examples: ExampleDef[] = [
     generate:    lists,
   },
   {
-    id:          'hyperlinks',
-    name:        'Hyperlinks',
-    category:    'Elements',
-    description: 'External hyperlinks with custom font, size, and colour styling.',
-    filename:    'hyperlinks.pdf',
-    generate:    hyperlinks,
+    id:             'hyperlinks',
+    name:           'Hyperlinks',
+    category:       'Elements',
+    description:    'External hyperlinks with custom font, size, and colour styling.',
+    filename:       'hyperlinks.pdf',
+    generate:       hyperlinks,
+    thumbnailsOpen: false,
   },
   {
     id:          'shapes-and-borders',

@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3)](https://www.npmjs.com/package/@bonniepdf/core)
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core)](https://www.npmjs.com/package/@bonniepdf/core)
-[![CI](https://github.com/BonniePDF/bonniepdf-js/actions/workflows/ci.yml/badge.svg)](https://github.com/BonniePDF/bonniepdf-js/actions/workflows/ci.yml)
+[![CI](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](./core/LICENSE)
 
 High-performance, zero-dependency PDF generation for TypeScript and JavaScript — runs in the **browser** and **Node.js**.

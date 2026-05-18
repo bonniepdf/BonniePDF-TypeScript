@@ -11,10 +11,8 @@ dist/
 # pnpm
 .pnpm-store/
 
-# Changesets
-.changeset/*.md
-!.changeset/config.json
-!.changeset/README.md
+# Changesets — only ignore pre-release state files, not changeset descriptors
+.changeset/pre.json
 
 # Editor
 .vscode/

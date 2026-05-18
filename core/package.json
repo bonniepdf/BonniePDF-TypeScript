@@ -25,6 +25,19 @@
   },
   "keywords": ["pdf", "document", "generation", "typescript"],
   "license": "UNLICENSED",
+  "author": "BonniePDF Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bonniepdf/bonniepdf-typescript",
+    "directory": "core"
+  },
+  "bugs": {
+    "url": "https://github.com/bonniepdf/bonniepdf-typescript/issues"
+  },
+  "homepage": "https://bonniepdf.dev",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^25.8.0",
     "tsup": "^8.0.0",

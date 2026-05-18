@@ -2,24 +2,24 @@ name: Changeset check
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   changeset:
     name: Require changeset for core changes
     runs-on: ubuntu-latest
     # Skip on the automated "Version Packages" PR that Changesets itself opens
-    if: github.head_ref != 'changeset-release/main'
+    if: github.head_ref != 'changeset-release/master'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v4
         with:
           version: 11
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm

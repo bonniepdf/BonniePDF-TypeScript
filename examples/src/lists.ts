@@ -1,4 +1,4 @@
-import { Document, DocumentMetadata, PdfVersion, TextBlock, OrderedList, NumberFormat, UnorderedList, BulletStyle, Color, Thickness, StandardFonts } from '@bonniepdf/core'
+import { Document, DocumentMetadata, PdfVersion, TextBlock, OrderedList, ListNumberFormat, UnorderedList, BulletStyle, Color, Thickness, StandardFonts } from '@bonniepdf/core'
 
 function heading(text: string, size = 24): TextBlock {
   const b = new TextBlock(text);
@@ -40,7 +40,7 @@ export function generate(): Document {
   // Decimal
   doc.add(subheading('Decimal Numbered List (1, 2, 3...)'));
   const decimalList = new OrderedList();
-  decimalList.numberFormat = NumberFormat.Decimal;
+  decimalList.numberFormat = ListNumberFormat.Decimal;
   decimalList.startNumber  = 1;
   decimalList.fontSize     = 12;
   decimalList.itemSpacing  = 8;
@@ -53,7 +53,7 @@ export function generate(): Document {
   // Upper Roman
   doc.add(subheadingSpaced('Upper Roman Numerals (I, II, III...)'));
   const romanList = new OrderedList();
-  romanList.numberFormat = NumberFormat.UpperRoman;
+  romanList.numberFormat = ListNumberFormat.UpperRoman;
   romanList.startNumber  = 1;
   romanList.fontSize     = 12;
   romanList.itemSpacing  = 8;
@@ -66,7 +66,7 @@ export function generate(): Document {
   // Lower Alpha
   doc.add(subheadingSpaced('Lowercase Letters (a, b, c...)'));
   const alphaList = new OrderedList();
-  alphaList.numberFormat = NumberFormat.LowerAlpha;
+  alphaList.numberFormat = ListNumberFormat.LowerAlpha;
   alphaList.startNumber  = 1;
   alphaList.fontSize     = 12;
   alphaList.itemSpacing  = 8;
@@ -78,7 +78,7 @@ export function generate(): Document {
   // Custom start number
   doc.add(subheadingSpaced('List Starting at Number 5'));
   const customStartList = new OrderedList();
-  customStartList.numberFormat = NumberFormat.Decimal;
+  customStartList.numberFormat = ListNumberFormat.Decimal;
   customStartList.startNumber  = 5;
   customStartList.fontSize     = 12;
   customStartList.itemSpacing  = 8;
@@ -92,7 +92,7 @@ export function generate(): Document {
   doc.add(heading('Nested Ordered Lists'));
 
   const mainOrdered = new OrderedList();
-  mainOrdered.numberFormat = NumberFormat.Decimal;
+  mainOrdered.numberFormat = ListNumberFormat.Decimal;
   mainOrdered.startNumber  = 1;
   mainOrdered.fontSize     = 12;
   mainOrdered.itemSpacing  = 8;
@@ -100,7 +100,7 @@ export function generate(): Document {
   mainOrdered.addItem('Main item two with nested list below');
 
   const nestedOrdered = new OrderedList();
-  nestedOrdered.numberFormat = NumberFormat.LowerAlpha;
+  nestedOrdered.numberFormat = ListNumberFormat.LowerAlpha;
   nestedOrdered.startNumber  = 1;
   nestedOrdered.fontSize     = 12;
   nestedOrdered.itemSpacing  = 6;

@@ -45,5 +45,5 @@ export enum QrErrorCorrection {
   Quartile = 2,
 
   /** ~30% of codewords can be restored. */
-  High = 3
+  High = 3,
 }

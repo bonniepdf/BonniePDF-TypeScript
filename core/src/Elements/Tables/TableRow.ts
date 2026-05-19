@@ -40,14 +40,16 @@ export class TableRow implements IElement, IBackgroundColor {
    * Otherwise, it's wrapped in a TableCell.
    */
   public static fromElements(...elements: IElement[]): TableRow {
-    return new TableRow(elements.map(e => {
-      if (e instanceof TableCell) {
-        return e;
-      }
-      const cell = new TableCell();
-      cell.content = e;
-      return cell;
-    }));
+    return new TableRow(
+      elements.map(e => {
+        if (e instanceof TableCell) {
+          return e;
+        }
+        const cell = new TableCell();
+        cell.content = e;
+        return cell;
+      })
+    );
   }
 
   /**
@@ -115,8 +117,12 @@ export class TableRow implements IElement, IBackgroundColor {
     return this;
   }
 
-  public measureHeight(availableWidth: number): number { return 0; }
-  public getPreferredWidth(): number { return 0; }
+  public measureHeight(availableWidth: number): number {
+    return 0;
+  }
+  public getPreferredWidth(): number {
+    return 0;
+  }
   public render(ctx: any, width: number): void {}
 }
 

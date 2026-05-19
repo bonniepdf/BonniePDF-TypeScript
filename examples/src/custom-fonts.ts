@@ -32,7 +32,16 @@
  * To disable TTF embedding and use standard Helvetica (limited to the
  * WinAnsi charset), set FONT = StandardFonts.Helvetica.
  */
-import { Document, DocumentSettings, DocumentMetadata, PdfVersion, TextBlock, Color, Thickness, StandardFonts } from '@bonniepdf/core'
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfVersion,
+  TextBlock,
+  Color,
+  Thickness,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 // ── Font selection ─────────────────────────────────────────────────────────────
 //
@@ -54,17 +63,17 @@ const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 
 function heading(text: string): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = FONT;
-  b.fontSize  = 12;
+  b.fontName = FONT;
+  b.fontSize = 12;
   b.textColor = Color.slate700;
-  b.margin    = new Thickness(0, 0, 0, 6);
+  b.margin = new Thickness(0, 0, 0, 6);
   return b;
 }
 
 function sym(text: string, bottomMargin = 0): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = FONT;
-  b.fontSize  = 11;
+  b.fontName = FONT;
+  b.fontSize = 11;
   b.textColor = Color.slate600;
   if (bottomMargin) b.margin = new Thickness(0, 0, 0, bottomMargin);
   return b;
@@ -72,27 +81,27 @@ function sym(text: string, bottomMargin = 0): TextBlock {
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version     = PdfVersion.Pdf17;
+  settings.version = PdfVersion.Pdf17;
   settings.pdfAEnabled = true;
 
   const metadata = new DocumentMetadata();
-  metadata.title  = 'Embedded Font Example';
+  metadata.title = 'Embedded Font Example';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
 
   const title = new TextBlock('TrueType Font Embedding Demo');
-  title.fontName  = FONT;
-  title.fontSize  = 24;
+  title.fontName = FONT;
+  title.fontSize = 24;
   title.textColor = Color.slate800;
-  title.margin    = new Thickness(0, 0, 0, 12);
+  title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
   const subtitle = new TextBlock('Full Unicode Support with Embedded Fonts');
-  subtitle.fontName  = FONT;
-  subtitle.fontSize  = 14;
+  subtitle.fontName = FONT;
+  subtitle.fontSize = 14;
   subtitle.textColor = Color.slate600;
-  subtitle.margin    = new Thickness(0, 0, 0, 16);
+  subtitle.margin = new Thickness(0, 0, 0, 16);
   doc.add(subtitle);
 
   // ── Unicode Symbols (Latin-1 range — covered by NotoSans) ────────────────
@@ -111,8 +120,8 @@ export function generate(): Document {
   // NotoSansMath explicitly covers both Arrows and Mathematical Operators.
   const mathBlock = (text: string, bottom = 0): TextBlock => {
     const b = new TextBlock(text);
-    b.fontName  = MATH_FONT;
-    b.fontSize  = 11;
+    b.fontName = MATH_FONT;
+    b.fontSize = 11;
     b.textColor = Color.slate600;
     if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
     return b;
@@ -120,8 +129,8 @@ export function generate(): Document {
   // ── Dingbats & Misc Symbols (U+2600–U+27FF — NotoSansSymbols2) ───────────
   const symBlock = (text: string, bottom = 0): TextBlock => {
     const b = new TextBlock(text);
-    b.fontName  = SYMBOLS_FONT;
-    b.fontSize  = 11;
+    b.fontName = SYMBOLS_FONT;
+    b.fontSize = 11;
     b.textColor = Color.slate600;
     if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
     return b;
@@ -145,26 +154,22 @@ export function generate(): Document {
   doc.add(heading('Mixed Font Demonstration:'));
 
   const stdLine = new TextBlock('This line uses standard Helvetica (Type1, not embedded)');
-  stdLine.fontName  = StandardFonts.Helvetica;
-  stdLine.fontSize  = 11;
+  stdLine.fontName = StandardFonts.Helvetica;
+  stdLine.fontSize = 11;
   stdLine.textColor = Color.slate600;
   doc.add(stdLine);
 
-  const embeddedLine = new TextBlock(
-    'This line uses an embedded TrueType font — full Unicode range supported'
-  );
-  embeddedLine.fontName  = FONT;
-  embeddedLine.fontSize  = 11;
+  const embeddedLine = new TextBlock('This line uses an embedded TrueType font — full Unicode range supported');
+  embeddedLine.fontName = FONT;
+  embeddedLine.fontSize = 11;
   embeddedLine.textColor = Color.slate600;
-  embeddedLine.margin    = new Thickness(0, 0, 0, 16);
+  embeddedLine.margin = new Thickness(0, 0, 0, 16);
   doc.add(embeddedLine);
 
   // ── Footer ─────────────────────────────────────────────────────────────────
-  const footer = new TextBlock(
-    `© ${new Date().getFullYear()} BonniePDF • TrueType Font Embedding`
-  );
-  footer.fontName  = FONT;
-  footer.fontSize  = 10;
+  const footer = new TextBlock(`© ${new Date().getFullYear()} BonniePDF • TrueType Font Embedding`);
+  footer.fontName = FONT;
+  footer.fontSize = 10;
   footer.textColor = Color.slate400;
   doc.add(footer);
 

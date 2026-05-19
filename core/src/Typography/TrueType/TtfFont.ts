@@ -54,7 +54,7 @@ export class TtfFont {
     if (typeof process === 'undefined' || !process.versions?.node) {
       throw new Error(
         'TtfFont.fromFileSync() is only available in Node.js. ' +
-        'Use TtfFont.fromFile(url) with BrowserPlatformIO in browser environments.'
+          'Use TtfFont.fromFile(url) with BrowserPlatformIO in browser environments.'
       );
     }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -68,26 +68,26 @@ export class TtfFont {
    */
   public static loadFromBytes(data: Uint8Array): TtfFont {
     const font = Object.create(TtfFont.prototype) as TtfFont;
-    (font as any).charToGlyph      = new Map<number, number>();
-    (font as any).glyphWidths      = new Map<number, number>();
-    (font as any).tables           = new Map<string, { offset: number; length: number }>();
-    (font as any).kernPairs        = new Map<string, number>();
-    (font as any).rawData          = data;
-    (font as any).filePath         = '<from bytes>';
+    (font as any).charToGlyph = new Map<number, number>();
+    (font as any).glyphWidths = new Map<number, number>();
+    (font as any).tables = new Map<string, { offset: number; length: number }>();
+    (font as any).kernPairs = new Map<string, number>();
+    (font as any).rawData = data;
+    (font as any).filePath = '<from bytes>';
     (font as any).numberOfHMetrics = 0;
-    font.postScriptName  = 'Unknown';
-    font.fontFamily      = 'Unknown';
-    font.fontSubfamily   = 'Regular';
-    font.unitsPerEm      = 1000;
-    font.ascender        = 0;
-    font.descender       = 0;
-    font.capHeight       = 0;
-    font.xHeight         = 0;
-    (font as any).bBox   = [0, 0, 0, 0] as [number, number, number, number];
-    font.italicAngle     = 0;
-    font.stemV           = 80;
-    font.flags           = 32;
-    font.numberOfGlyphs  = 0;
+    font.postScriptName = 'Unknown';
+    font.fontFamily = 'Unknown';
+    font.fontSubfamily = 'Regular';
+    font.unitsPerEm = 1000;
+    font.ascender = 0;
+    font.descender = 0;
+    font.capHeight = 0;
+    font.xHeight = 0;
+    (font as any).bBox = [0, 0, 0, 0] as [number, number, number, number];
+    font.italicAngle = 0;
+    font.stemV = 80;
+    font.flags = 32;
+    font.numberOfGlyphs = 0;
     (font as any).parse();
     return font;
   }
@@ -179,7 +179,7 @@ export class TtfFont {
    */
   public getCharWidthInPoints(codepoint: number, fontSize: number): number {
     const width = this.getCharWidth(codepoint);
-    return width / this.unitsPerEm * fontSize;
+    return (width / this.unitsPerEm) * fontSize;
   }
 
   /**
@@ -430,19 +430,19 @@ export class TtfFont {
       const start = startCounts[seg];
       const end = endCounts[seg];
 
-      if (start === 0xFFFF) continue; // End segment
+      if (start === 0xffff) continue; // End segment
 
       for (let charCode = start; charCode <= end; charCode++) {
         let glyphId: number;
 
         if (idRangeOffsets[seg] === 0) {
-          glyphId = (charCode + idDeltas[seg]) & 0xFFFF;
+          glyphId = (charCode + idDeltas[seg]) & 0xffff;
         } else {
           const glyphOffsetLoc = idRangeOffsetPos + seg * 2 + idRangeOffsets[seg] + 2 * (charCode - start);
           reader.seek(glyphOffsetLoc);
           glyphId = reader.readUInt16();
           if (glyphId !== 0) {
-            glyphId = (glyphId + idDeltas[seg]) & 0xFFFF;
+            glyphId = (glyphId + idDeltas[seg]) & 0xffff;
           }
         }
 
@@ -515,7 +515,9 @@ export class TtfFont {
         value = decoded;
       } else {
         const bytes = reader.readBytes(length);
-        value = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+        value = Array.from(bytes)
+          .map(b => String.fromCharCode(b))
+          .join('');
       }
 
       reader.seek(currentPos);

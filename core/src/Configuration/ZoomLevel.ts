@@ -19,4 +19,3 @@ export class ZoomLevel {
    */
   static readonly Custom = 'Custom' as const;
 }
-

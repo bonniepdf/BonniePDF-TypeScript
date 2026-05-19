@@ -15,5 +15,5 @@ export enum TextAlignment {
   Middle = 3,
 
   /** Text is justified to fill the full width (spreads words evenly) */
-  Justify = 4
+  Justify = 4,
 }

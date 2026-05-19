@@ -20,11 +20,15 @@ export class PdfOperators {
     const radians = angleDegrees * (Math.PI / 180.0);
     const cos = Math.cos(radians);
     const sin = Math.sin(radians);
-    s.push(`${PdfSyntax.formatDecimal(cos)} ${PdfSyntax.formatDecimal(sin)} ${PdfSyntax.formatDecimal(-sin)} ${PdfSyntax.formatDecimal(cos)} 0 0 cm\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(cos)} ${PdfSyntax.formatDecimal(sin)} ${PdfSyntax.formatDecimal(-sin)} ${PdfSyntax.formatDecimal(cos)} 0 0 cm\n`
+    );
   }
 
   public static concatMatrix(s: string[], a: number, b: number, c: number, d: number, e: number, f: number): void {
-    s.push(`${PdfSyntax.formatDecimal(a)} ${PdfSyntax.formatDecimal(b)} ${PdfSyntax.formatDecimal(c)} ${PdfSyntax.formatDecimal(d)} ${PdfSyntax.formatDecimal(e)} ${PdfSyntax.formatDecimal(f)} cm\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(a)} ${PdfSyntax.formatDecimal(b)} ${PdfSyntax.formatDecimal(c)} ${PdfSyntax.formatDecimal(d)} ${PdfSyntax.formatDecimal(e)} ${PdfSyntax.formatDecimal(f)} cm\n`
+    );
   }
 
   public static setGraphicsState(s: string[], name: string): void {
@@ -60,11 +64,15 @@ export class PdfOperators {
   }
 
   public static curveTo(s: string[], x1: number, y1: number, x2: number, y2: number, x3: number, y3: number): void {
-    s.push(`${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} ${PdfSyntax.formatDecimal(x3)} ${PdfSyntax.formatDecimal(y3)} c\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} ${PdfSyntax.formatDecimal(x3)} ${PdfSyntax.formatDecimal(y3)} c\n`
+    );
   }
 
   public static rectangle(s: string[], x: number, y: number, width: number, height: number): void {
-    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re\n`
+    );
   }
 
   public static closePath(s: string[]): void {
@@ -76,11 +84,15 @@ export class PdfOperators {
   }
 
   public static rectangleFill(s: string[], x: number, y: number, width: number, height: number): void {
-    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re f\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re f\n`
+    );
   }
 
   public static rectangleStroke(s: string[], x: number, y: number, width: number, height: number): void {
-    s.push(`${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re S\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(x)} ${PdfSyntax.formatDecimal(y)} ${PdfSyntax.formatDecimal(width)} ${PdfSyntax.formatDecimal(height)} re S\n`
+    );
   }
 
   public static setWordSpacing(s: string[], spacing: number): void {
@@ -88,7 +100,9 @@ export class PdfOperators {
   }
 
   public static strokeLine(s: string[], x1: number, y1: number, x2: number, y2: number): void {
-    s.push(`${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} m ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} l S\n`);
+    s.push(
+      `${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} m ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} l S\n`
+    );
   }
 
   public static fill(s: string[]): void {

@@ -2,7 +2,9 @@ import { IPdfWriter, IAsyncPdfWriter } from '../Writers/PdfWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
 
 function _toHex(bytes: Uint8Array): string {
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(bytes)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**

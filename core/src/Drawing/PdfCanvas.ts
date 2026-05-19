@@ -34,9 +34,13 @@ export class PdfCanvas implements ICanvas {
     this.height = pageHeight;
     this.xOffset = xOffset;
     this.yOffset = yOffset;
-    this._fontResolver = fontResolver ?? ((f) => this.getDefaultFontResourceName(f));
-    this._imageResolver = imageResolver ?? (() => { throw new Error('Image resolver not provided'); });
-    this._embeddedFontResolver = embeddedFontResolver ?? ((_f) => null);
+    this._fontResolver = fontResolver ?? (f => this.getDefaultFontResourceName(f));
+    this._imageResolver =
+      imageResolver ??
+      (() => {
+        throw new Error('Image resolver not provided');
+      });
+    this._embeddedFontResolver = embeddedFontResolver ?? (_f => null);
     this._glyphTracker = glyphTracker ?? ((_id, _t) => {});
   }
 
@@ -74,7 +78,15 @@ export class PdfCanvas implements ICanvas {
     PdfDrawing.fillRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color);
   }
 
-  public strokeRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void {
+  public strokeRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color,
+    strokeWidth: number
+  ): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     PdfDrawing.strokeRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color, strokeWidth);
@@ -102,7 +114,15 @@ export class PdfCanvas implements ICanvas {
     PdfDrawing.fillPath(this.stream, pdfPoints, color);
   }
 
-  public drawText(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, align: TextAlignment): void {
+  public drawText(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    align: TextAlignment
+  ): void {
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
     PdfOperators.beginText(this.stream);
@@ -123,15 +143,21 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setTextPosition(this.stream, pdfX, pdfY);
 
     const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null)
-      PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else
-      PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
+    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
 
     PdfOperators.endText(this.stream);
   }
 
-  public drawTextRotated(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, angleDegrees: number): void {
+  public drawTextRotated(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    angleDegrees: number
+  ): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
@@ -147,19 +173,24 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setTextPosition(this.stream, 0, 0);
 
     const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null)
-      PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else
-      PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
+    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
 
     PdfOperators.endText(this.stream);
     PdfOperators.restoreState(this.stream);
   }
 
-  public drawTextJustified(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, availableWidth: number): void {
+  public drawTextJustified(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    availableWidth: number
+  ): void {
     let spaceCount = 0;
-    for (const c of text)
-      if (c === ' ') spaceCount++;
+    for (const c of text) if (c === ' ') spaceCount++;
 
     if (spaceCount === 0) {
       this.drawText(x, y, text, color, fontSize, fontFamily, TextAlignment.Left);
@@ -181,10 +212,8 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setTextPosition(this.stream, pdfX, pdfY);
 
     const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null)
-      PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else
-      PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
+    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
 
     PdfOperators.setWordSpacing(this.stream, 0);
     PdfOperators.endText(this.stream);

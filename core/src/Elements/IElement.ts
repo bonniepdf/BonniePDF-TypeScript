@@ -60,5 +60,5 @@ export interface IStatefulElement extends IElement {
 export enum RenderStatus {
   Complete = 'Complete',
   Overflow = 'Overflow',
-  WrapRequired = 'WrapRequired'
+  WrapRequired = 'WrapRequired',
 }

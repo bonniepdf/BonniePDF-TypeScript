@@ -19,4 +19,3 @@ export class HorizontalAlignment {
    */
   static readonly Stretch = 'Stretch' as const;
 }
-

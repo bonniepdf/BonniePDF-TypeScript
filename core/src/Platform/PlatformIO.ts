@@ -23,15 +23,13 @@ export interface IPlatformIO {
 class DefaultPlatformIO implements IPlatformIO {
   async readFile(_path: string): Promise<Uint8Array> {
     throw new Error(
-      'PlatformIO: readFile not available. ' +
-      'Call configurePlatform(new NodePlatformIO()) before saving files.'
+      'PlatformIO: readFile not available. ' + 'Call configurePlatform(new NodePlatformIO()) before saving files.'
     );
   }
 
   async writeFile(_path: string, _data: Uint8Array): Promise<void> {
     throw new Error(
-      'PlatformIO: writeFile not available. ' +
-      'Call configurePlatform(new NodePlatformIO()) before saving files.'
+      'PlatformIO: writeFile not available. ' + 'Call configurePlatform(new NodePlatformIO()) before saving files.'
     );
   }
 
@@ -102,6 +100,9 @@ async function deflateWithCompressionStream(data: Uint8Array): Promise<Uint8Arra
   const totalLen = chunks.reduce((n, c) => n + c.length, 0);
   const result = new Uint8Array(totalLen);
   let offset = 0;
-  for (const chunk of chunks) { result.set(chunk, offset); offset += chunk.length; }
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
   return result;
 }

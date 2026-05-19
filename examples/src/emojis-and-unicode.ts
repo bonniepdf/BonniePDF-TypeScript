@@ -22,33 +22,33 @@
  * Without the fonts at those paths the example falls back to a console
  * warning and renders .notdef boxes for missing glyphs.
  */
-import { Document, DocumentSettings, DocumentMetadata, PdfVersion, TextBlock, Color, Thickness } from '@bonniepdf/core'
+import { Document, DocumentSettings, DocumentMetadata, PdfVersion, TextBlock, Color, Thickness } from '@bonniepdf/core';
 
 // Fonts served as static assets from public/fonts/
-const TEXT_FONT    = '/fonts/NotoSans-Regular.ttf';       // Latin, Greek, Cyrillic, currency
+const TEXT_FONT = '/fonts/NotoSans-Regular.ttf'; // Latin, Greek, Cyrillic, currency
 // NotoSansMath covers Arrows (U+2190–U+21FF) and Mathematical Operators
 // (U+2200–U+22FF).  Neither NotoSansSymbols nor NotoSansSymbols2 contains
 // these blocks — they must be routed through NotoSansMath.
-const MATH_FONT    = '/fonts/NotoSansMath-Regular.ttf';
+const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
 // NotoSansSymbols2 covers Miscellaneous Symbols (U+2600) and Dingbats (U+2700).
 const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf'; // Misc symbols, dingbats
-const EMOJI_FONT   = '/fonts/NotoEmoji-Regular.ttf';      // Supplementary emoji (U+1F000+)
+const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf'; // Supplementary emoji (U+1F000+)
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function heading(text: string): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = TEXT_FONT;
-  b.fontSize  = 13;
+  b.fontName = TEXT_FONT;
+  b.fontSize = 13;
   b.textColor = Color.slate700;
-  b.margin    = new Thickness(0, 14, 0, 4);
+  b.margin = new Thickness(0, 14, 0, 4);
   return b;
 }
 
 function uniLine(text: string, bottom = 0): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = TEXT_FONT;
-  b.fontSize  = 12;
+  b.fontName = TEXT_FONT;
+  b.fontSize = 12;
   b.textColor = Color.slate600;
   if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
   return b;
@@ -57,8 +57,8 @@ function uniLine(text: string, bottom = 0): TextBlock {
 // Arrows & math operators — routed through NotoSansMath
 function mathLine(text: string, bottom = 0): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = MATH_FONT;
-  b.fontSize  = 12;
+  b.fontName = MATH_FONT;
+  b.fontSize = 12;
   b.textColor = Color.slate600;
   if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
   return b;
@@ -67,8 +67,8 @@ function mathLine(text: string, bottom = 0): TextBlock {
 // Misc symbols & dingbats — routed through NotoSansSymbols2
 function symLine(text: string, bottom = 0): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = SYMBOLS_FONT;
-  b.fontSize  = 12;
+  b.fontName = SYMBOLS_FONT;
+  b.fontSize = 12;
   b.textColor = Color.slate600;
   if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
   return b;
@@ -76,10 +76,10 @@ function symLine(text: string, bottom = 0): TextBlock {
 
 function emojiLine(text: string): TextBlock {
   const b = new TextBlock(text);
-  b.fontName  = EMOJI_FONT;
-  b.fontSize  = 20;
+  b.fontName = EMOJI_FONT;
+  b.fontSize = 20;
   b.textColor = Color.slate800;
-  b.margin    = new Thickness(0, 0, 0, 4);
+  b.margin = new Thickness(0, 0, 0, 4);
   return b;
 }
 
@@ -87,35 +87,35 @@ function emojiLine(text: string): TextBlock {
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version     = PdfVersion.Pdf17;
+  settings.version = PdfVersion.Pdf17;
   // PDF/A compliance is disabled here — color emoji fonts often contain
   // proprietary tables (COLR, CBDT) that require relaxed validation.
   settings.pdfAEnabled = false;
 
   const metadata = new DocumentMetadata();
-  metadata.title   = 'Emoji & Unicode Demo';
-  metadata.author  = 'BonniePDF';
+  metadata.title = 'Emoji & Unicode Demo';
+  metadata.author = 'BonniePDF';
   metadata.subject = 'Full Unicode range including supplementary planes';
 
   const doc = new Document(settings, metadata);
 
   // Title
   const title = new TextBlock('Emoji & Supplementary Unicode Support');
-  title.fontName  = TEXT_FONT;
-  title.fontSize  = 22;
+  title.fontName = TEXT_FONT;
+  title.fontSize = 22;
   title.textColor = Color.slate800;
-  title.margin    = new Thickness(0, 0, 0, 6);
+  title.margin = new Thickness(0, 0, 0, 6);
   doc.add(title);
 
   const intro = new TextBlock(
     'BonniePDF embeds TrueType subsets for the full Unicode range. ' +
-    'Latin, Greek, and Cyrillic render via NotoSans; arrows and math via NotoSansMath; ' +
-    'symbols and dingbats via NotoSansSymbols2; emoji via NotoEmoji.'
+      'Latin, Greek, and Cyrillic render via NotoSans; arrows and math via NotoSansMath; ' +
+      'symbols and dingbats via NotoSansSymbols2; emoji via NotoEmoji.'
   );
-  intro.fontName  = TEXT_FONT;
-  intro.fontSize  = 11;
+  intro.fontName = TEXT_FONT;
+  intro.fontSize = 11;
   intro.textColor = Color.slate500;
-  intro.margin    = new Thickness(0, 0, 0, 20);
+  intro.margin = new Thickness(0, 0, 0, 20);
   doc.add(intro);
 
   // ── BMP characters (NotoSans) ─────────────────────────────────────────────

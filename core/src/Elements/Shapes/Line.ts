@@ -61,5 +61,5 @@ export class Line extends ElementBase {
  */
 export enum LineOrientation {
   Horizontal,
-  Vertical
+  Vertical,
 }

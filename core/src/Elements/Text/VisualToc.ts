@@ -165,8 +165,11 @@ export class VisualToc extends ElementBase implements IStatefulElement {
       renderWidth: contentWidth,
       renderHeight: lineHeight,
       setRenderBounds(rx: number, ry: number, rw: number, rh: number) {
-        this.renderX = rx; this.renderY = ry; this.renderWidth = rw; this.renderHeight = rh;
-      }
+        this.renderX = rx;
+        this.renderY = ry;
+        this.renderWidth = rw;
+        this.renderHeight = rh;
+      },
     } as any;
     ctx.registerHyperlink(link);
   }

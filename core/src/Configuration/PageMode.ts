@@ -28,4 +28,4 @@ export class PageModeEnum {
   static readonly UseAttachments = 'UseAttachments' as const;
 }
 
-export type PageMode = typeof PageModeEnum[keyof typeof PageModeEnum];
+export type PageMode = (typeof PageModeEnum)[keyof typeof PageModeEnum];

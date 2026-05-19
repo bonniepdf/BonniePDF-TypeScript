@@ -5,12 +5,12 @@ export class AxisOptions {
   /**
    * Prefix for value labels (e.g., "£", "$")
    */
-  prefix: string = "";
+  prefix: string = '';
 
   /**
    * Suffix for value labels (e.g., "%", "k")
    */
-  suffix: string = "";
+  suffix: string = '';
 
   /**
    * Maximum value for the axis scale
@@ -30,7 +30,7 @@ export class AxisOptions {
   /**
    * Legend/title for this axis (e.g., "Sales (£)", "Month")
    */
-  legend: string = "";
+  legend: string = '';
 
   /**
    * Whether to show grid lines for this axis

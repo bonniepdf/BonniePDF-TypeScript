@@ -15,5 +15,5 @@ export enum BulletStyle {
   Dash = 3,
 
   /** Custom bullet character */
-  Custom = 4
+  Custom = 4,
 }

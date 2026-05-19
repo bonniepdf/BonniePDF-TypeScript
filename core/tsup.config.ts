@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsup'
-import { builtinModules } from 'module'
+import { defineConfig } from 'tsup';
+import { builtinModules } from 'module';
 
 export default defineConfig({
   entry: {
@@ -22,4 +22,4 @@ export default defineConfig({
   minifyWhitespace: false,
   clean: true,
   outDir: 'dist',
-})
+});

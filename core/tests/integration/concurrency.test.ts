@@ -17,9 +17,7 @@ async function generateDocumentBytes(text: string): Promise<Uint8Array> {
 
 describe('Concurrency', () => {
   it('10 documents in parallel all produce valid PDFs', async () => {
-    const tasks = Array.from({ length: 10 }, (_, i) =>
-      generateDocumentBytes(`Document ${i + 1}`)
-    );
+    const tasks = Array.from({ length: 10 }, (_, i) => generateDocumentBytes(`Document ${i + 1}`));
     const results = await Promise.all(tasks);
     for (const bytes of results) {
       assertValidPdf(bytes);
@@ -27,9 +25,7 @@ describe('Concurrency', () => {
   }, 30_000);
 
   it('all parallel documents have fonts', async () => {
-    const tasks = Array.from({ length: 5 }, (_, i) =>
-      generateDocumentBytes(`Font doc ${i + 1}`)
-    );
+    const tasks = Array.from({ length: 5 }, (_, i) => generateDocumentBytes(`Font doc ${i + 1}`));
     const results = await Promise.all(tasks);
     for (const bytes of results) {
       assertPdfHasFonts(bytes);
@@ -37,9 +33,7 @@ describe('Concurrency', () => {
   });
 
   it('parallel documents with different content are all unique', async () => {
-    const tasks = Array.from({ length: 5 }, (_, i) =>
-      generateDocumentBytes(`Unique content for document number ${i}`)
-    );
+    const tasks = Array.from({ length: 5 }, (_, i) => generateDocumentBytes(`Unique content for document number ${i}`));
     const results = await Promise.all(tasks);
     // All should be valid
     for (const bytes of results) {
@@ -70,9 +64,7 @@ describe('Concurrency', () => {
 
   it('50 documents stress test completes within 60 seconds', async () => {
     const start = Date.now();
-    const tasks = Array.from({ length: 50 }, (_, i) =>
-      generateDocumentBytes(`Stress test doc ${i}`)
-    );
+    const tasks = Array.from({ length: 50 }, (_, i) => generateDocumentBytes(`Stress test doc ${i}`));
     const results = await Promise.all(tasks);
     const elapsed = Date.now() - start;
 

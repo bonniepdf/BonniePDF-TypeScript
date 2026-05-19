@@ -61,7 +61,7 @@ export class TtfSubsetter {
 
     // 3. Build each required table
     const newTables = new Map<string, Uint8Array>();
-    
+
     // Required tables (must be present)
     newTables.set('head', this.buildHeadTable());
     newTables.set('hhea', this.buildHheaTable());
@@ -128,7 +128,7 @@ export class TtfSubsetter {
   private readHeadTable(): void {
     const headInfo = this.tables.get('head');
     if (!headInfo) {
-      throw new Error('Missing required \'head\' table');
+      throw new Error("Missing required 'head' table");
     }
 
     const view = new DataView(this.originalData.buffer, this.originalData.byteOffset);
@@ -276,7 +276,7 @@ export class TtfSubsetter {
   private buildHeadTable(): Uint8Array {
     const info = this.tables.get('head');
     if (!info) {
-      throw new Error('Missing \'head\' table');
+      throw new Error("Missing 'head' table");
     }
 
     // Copy original head table
@@ -299,7 +299,7 @@ export class TtfSubsetter {
   private buildHheaTable(): Uint8Array {
     const info = this.tables.get('hhea');
     if (!info) {
-      throw new Error('Missing \'hhea\' table');
+      throw new Error("Missing 'hhea' table");
     }
 
     // Copy original hhea table
@@ -308,8 +308,8 @@ export class TtfSubsetter {
 
     // Update numberOfHMetrics to match subset glyph count
     const numGlyphs = this.newToOldGid.size;
-    data[34] = (numGlyphs >> 8) & 0xFF;
-    data[35] = numGlyphs & 0xFF;
+    data[34] = (numGlyphs >> 8) & 0xff;
+    data[35] = numGlyphs & 0xff;
 
     return data;
   }
@@ -317,7 +317,7 @@ export class TtfSubsetter {
   private buildMaxpTable(): Uint8Array {
     const info = this.tables.get('maxp');
     if (!info) {
-      throw new Error('Missing \'maxp\' table');
+      throw new Error("Missing 'maxp' table");
     }
 
     // Copy original maxp table
@@ -326,8 +326,8 @@ export class TtfSubsetter {
 
     // Update numGlyphs
     const numGlyphs = this.newToOldGid.size;
-    data[4] = (numGlyphs >> 8) & 0xFF;
-    data[5] = numGlyphs & 0xFF;
+    data[4] = (numGlyphs >> 8) & 0xff;
+    data[5] = numGlyphs & 0xff;
 
     return data;
   }
@@ -335,7 +335,7 @@ export class TtfSubsetter {
   private buildHmtxTable(): Uint8Array {
     const hmtxInfo = this.tables.get('hmtx');
     if (!hmtxInfo) {
-      throw new Error('Missing \'hmtx\' table');
+      throw new Error("Missing 'hmtx' table");
     }
 
     const numGlyphs = this.newToOldGid.size;
@@ -347,7 +347,7 @@ export class TtfSubsetter {
     // Read original hhea to get numberOfHMetrics
     const hheaInfo = this.tables.get('hhea');
     if (!hheaInfo) {
-      throw new Error('Missing \'hhea\' table');
+      throw new Error("Missing 'hhea' table");
     }
 
     const originalNumberOfHMetrics = view.getUint16(hheaInfo.offset + 34);
@@ -373,10 +373,10 @@ export class TtfSubsetter {
 
       // Write to new hmtx
       const offset = newGid * 4;
-      data[offset] = (advanceWidth >> 8) & 0xFF;
-      data[offset + 1] = advanceWidth & 0xFF;
-      data[offset + 2] = (lsb >> 8) & 0xFF;
-      data[offset + 3] = lsb & 0xFF;
+      data[offset] = (advanceWidth >> 8) & 0xff;
+      data[offset + 1] = advanceWidth & 0xff;
+      data[offset + 2] = (lsb >> 8) & 0xff;
+      data[offset + 3] = lsb & 0xff;
     }
 
     return data;
@@ -392,12 +392,12 @@ export class TtfSubsetter {
       if (newGid === undefined) continue;
 
       allMappings.set(codepoint, newGid);
-      if (codepoint <= 0xFFFF) {
+      if (codepoint <= 0xffff) {
         bmpMappings.set(codepoint, newGid);
       }
     }
 
-    const hasSupplementary = Array.from(allMappings.keys()).some(cp => cp > 0xFFFF);
+    const hasSupplementary = Array.from(allMappings.keys()).some(cp => cp > 0xffff);
 
     if (hasSupplementary) {
       return this.buildCmapWithFormat12(bmpMappings, allMappings);
@@ -465,12 +465,14 @@ export class TtfSubsetter {
     return result;
   }
 
-  private buildCmapSegments(unicodeToGid: Map<number, number>): Array<{ startCode: number; endCode: number; idDelta: number }> {
+  private buildCmapSegments(
+    unicodeToGid: Map<number, number>
+  ): Array<{ startCode: number; endCode: number; idDelta: number }> {
     const segments: Array<{ startCode: number; endCode: number; idDelta: number }> = [];
 
     if (unicodeToGid.size === 0) {
       // Empty font - just add the required ending segment
-      segments.push({ startCode: 0xFFFF, endCode: 0xFFFF, idDelta: 1 });
+      segments.push({ startCode: 0xffff, endCode: 0xffff, idDelta: 1 });
       return segments;
     }
 
@@ -503,7 +505,7 @@ export class TtfSubsetter {
     }
 
     // Add required ending segment
-    segments.push({ startCode: 0xFFFF, endCode: 0xFFFF, idDelta: 1 });
+    segments.push({ startCode: 0xffff, endCode: 0xffff, idDelta: 1 });
 
     return segments;
   }
@@ -595,7 +597,7 @@ export class TtfSubsetter {
     const locaInfo = this.tables.get('loca');
 
     if (!glyfInfo || !locaInfo) {
-      throw new Error('Missing \'glyf\' or \'loca\' table');
+      throw new Error("Missing 'glyf' or 'loca' table");
     }
 
     const numGlyphs = this.newToOldGid.size;
@@ -629,7 +631,10 @@ export class TtfSubsetter {
       if (glyphLength === 0) continue; // Empty glyph
 
       // Read original glyph data
-      const glyphData = this.originalData.subarray(glyfInfo.offset + glyphOffset, glyfInfo.offset + glyphOffset + glyphLength);
+      const glyphData = this.originalData.subarray(
+        glyfInfo.offset + glyphOffset,
+        glyfInfo.offset + glyphOffset + glyphLength
+      );
 
       // Check if composite and remap component GIDs
       const numberOfContours = (glyphData[0] << 8) | glyphData[1];
@@ -643,7 +648,7 @@ export class TtfSubsetter {
       glyfData.push(...Array.from(finalGlyphData));
 
       // Pad to 4-byte boundary
-      const padding = (4 - glyfData.length % 4) % 4;
+      const padding = (4 - (glyfData.length % 4)) % 4;
       for (let p = 0; p < padding; p++) {
         glyfData.push(0);
       }
@@ -654,7 +659,7 @@ export class TtfSubsetter {
 
     return {
       glyfData: new Uint8Array(glyfData),
-      locaData: new Uint8Array(locaData)
+      locaData: new Uint8Array(locaData),
     };
   }
 
@@ -677,8 +682,8 @@ export class TtfSubsetter {
       // Remap the component GID
       const newComponentGid = this.oldToNewGid.get(oldComponentGid);
       if (newComponentGid !== undefined) {
-        result[offset + 2] = (newComponentGid >> 8) & 0xFF;
-        result[offset + 3] = newComponentGid & 0xFF;
+        result[offset + 2] = (newComponentGid >> 8) & 0xff;
+        result[offset + 3] = newComponentGid & 0xff;
       }
 
       offset += 4; // flags + glyphIndex
@@ -770,7 +775,7 @@ export class TtfSubsetter {
       result.push(...Array.from(tableData));
 
       // Pad to 4-byte boundary
-      const padding = (4 - tableData.length % 4) % 4;
+      const padding = (4 - (tableData.length % 4)) % 4;
       for (let i = 0; i < padding; i++) {
         result.push(0);
       }
@@ -799,19 +804,19 @@ export class TtfSubsetter {
   // =====================================================
 
   private writeUInt16BE(data: number[], value: number): void {
-    data.push((value >> 8) & 0xFF);
-    data.push(value & 0xFF);
+    data.push((value >> 8) & 0xff);
+    data.push(value & 0xff);
   }
 
   private writeInt16BE(data: number[], value: number): void {
-    data.push((value >> 8) & 0xFF);
-    data.push(value & 0xFF);
+    data.push((value >> 8) & 0xff);
+    data.push(value & 0xff);
   }
 
   private writeUInt32BE(data: number[], value: number): void {
-    data.push((value >> 24) & 0xFF);
-    data.push((value >> 16) & 0xFF);
-    data.push((value >> 8) & 0xFF);
-    data.push(value & 0xFF);
+    data.push((value >> 24) & 0xff);
+    data.push((value >> 16) & 0xff);
+    data.push((value >> 8) & 0xff);
+    data.push(value & 0xff);
   }
 }

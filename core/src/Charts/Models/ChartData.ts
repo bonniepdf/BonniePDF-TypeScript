@@ -9,7 +9,7 @@ export class ChartData {
   /**
    * Chart title displayed at the top
    */
-  title: string = "";
+  title: string = '';
 
   /**
    * Multiple data series to display in the chart.

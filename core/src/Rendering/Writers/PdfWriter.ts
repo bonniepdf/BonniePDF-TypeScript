@@ -18,7 +18,7 @@ import { ToUnicodeCMapBuilder } from '../../Typography/TrueType/ToUnicodeCMapBui
 function encodeIso88591(s: string): Uint8Array {
   const bytes = new Uint8Array(s.length);
   for (let i = 0; i < s.length; i++) {
-    bytes[i] = s.charCodeAt(i) & 0xFF;
+    bytes[i] = s.charCodeAt(i) & 0xff;
   }
   return bytes;
 }
@@ -35,7 +35,9 @@ class BinaryOutputStream {
   private _position = 0;
 
   /** Current byte offset from the start of the stream. */
-  get bytePosition(): number { return this._position; }
+  get bytePosition(): number {
+    return this._position;
+  }
 
   /** Encode string as ISO-8859-1 and append. */
   writeString(s: string): void {
@@ -84,11 +86,29 @@ export interface IAsyncPdfWriter {
   getNewId(): number;
   writeObjectAsync(id: number, dictionary: Map<string, string>, stream?: string): Promise<void>;
   writeCompressedObjectAsync(id: number, dictionary: Map<string, string>, stream: string): Promise<void>;
-  writeBinaryObjectAsync(id: number, dictionary: Map<string, string>, bytes: Uint8Array, length?: number, ct?: any): Promise<void>;
-  writeCompressedBinaryObjectAsync(id: number, dictionary: Map<string, string>, bytes: Uint8Array, length?: number, ct?: any): Promise<void>;
+  writeBinaryObjectAsync(
+    id: number,
+    dictionary: Map<string, string>,
+    bytes: Uint8Array,
+    length?: number,
+    ct?: any
+  ): Promise<void>;
+  writeCompressedBinaryObjectAsync(
+    id: number,
+    dictionary: Map<string, string>,
+    bytes: Uint8Array,
+    length?: number,
+    ct?: any
+  ): Promise<void>;
   writeLinkAnnotationAsync(id: number, link: any, pageIds: number[]): Promise<void>;
   writeViewerPreferencesAsync(id: number, settings: any): Promise<number>;
-  writeCatalogAsync(id: number, pagesId: number, firstPageId: number, settings: any, options: CatalogOptions): Promise<void>;
+  writeCatalogAsync(
+    id: number,
+    pagesId: number,
+    firstPageId: number,
+    settings: any,
+    options: CatalogOptions
+  ): Promise<void>;
   writeEncryptDictionaryAsync(id: number): Promise<number>;
   closeAsync(catalogId: number, infoId: number): Promise<void>;
 }
@@ -107,11 +127,11 @@ export class PdfWriter implements IPdfWriter {
   private _encryptId = 0;
   public encryptor: any = null;
 
-  constructor(version: typeof PdfVersion[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
+  constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
     const header = version === PdfVersion.Pdf17 ? '%PDF-1.7\n' : '%PDF-1.4\n';
     this._output.writeString(header);
     // Binary comment (4 bytes > 127) — signals to PDF readers that this is binary
-    this._output.writeBytes(new Uint8Array([0x25, 0xE2, 0xE3, 0xCF, 0xD3, 0x0A])); // %âãÏÓ\n
+    this._output.writeBytes(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a])); // %âãÏÓ\n
   }
 
   /** Returns the current accumulated output as a Uint8Array. Call after close(). */
@@ -138,9 +158,7 @@ export class PdfWriter implements IPdfWriter {
     if (stream != null) {
       const contentBytes = encodeIso88591(stream);
       // Encrypt if encryptor is set
-      const toWrite = this.encryptor?.encryptData
-        ? this.encryptor.encryptData(contentBytes, id)
-        : contentBytes;
+      const toWrite = this.encryptor?.encryptData ? this.encryptor.encryptData(contentBytes, id) : contentBytes;
       this._output.writeString(`  /Length ${toWrite.length}\n>>\nstream\n`);
       this._output.writeBytes(toWrite);
       this._output.writeString('\nendstream\n');
@@ -164,9 +182,7 @@ export class PdfWriter implements IPdfWriter {
    * Writes a PDF object with raw binary stream content (e.g. font data, images).
    */
   public writeBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void {
-    const toWrite = this.encryptor?.encryptData
-      ? this.encryptor.encryptData(bytes, id)
-      : bytes;
+    const toWrite = this.encryptor?.encryptData ? this.encryptor.encryptData(bytes, id) : bytes;
 
     this._offsets.set(id, this._output.bytePosition);
     this._output.writeString(`${id} 0 obj\n<<\n`);
@@ -209,7 +225,7 @@ export class PdfWriter implements IPdfWriter {
       ['/Type', '/Annot'],
       ['/Subtype', '/Link'],
       ['/Rect', link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
-      ['/F', '4']  // Print flag (required for PDF/A-1B)
+      ['/F', '4'], // Print flag (required for PDF/A-1B)
     ]);
 
     if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {
@@ -242,11 +258,11 @@ export class PdfWriter implements IPdfWriter {
    */
   public writeViewerPreferences(id: number, settings: any): number {
     const dict = new Map<string, string>();
-    if (settings.hideToolbar)    dict.set('/HideToolbar', 'true');
-    if (settings.hideMenubar)    dict.set('/HideMenubar', 'true');
-    if (settings.hideWindowUI)   dict.set('/HideWindowUI', 'true');
-    if (settings.fitWindow)      dict.set('/FitWindow', 'true');
-    if (settings.centerWindow)   dict.set('/CenterWindow', 'true');
+    if (settings.hideToolbar) dict.set('/HideToolbar', 'true');
+    if (settings.hideMenubar) dict.set('/HideMenubar', 'true');
+    if (settings.hideWindowUI) dict.set('/HideWindowUI', 'true');
+    if (settings.fitWindow) dict.set('/FitWindow', 'true');
+    if (settings.centerWindow) dict.set('/CenterWindow', 'true');
     if (settings.displayDocTitle) dict.set('/DisplayDocTitle', 'true');
     if (dict.size === 0) return 0;
     this.writeObject(id, dict);
@@ -261,28 +277,22 @@ export class PdfWriter implements IPdfWriter {
     const dict = new Map<string, string>([
       ['/Type', '/Catalog'],
       ['/Pages', `${pagesId} 0 R`],
-      ['/OpenAction', this.getOpenActionString(firstPageId, settings)]
+      ['/OpenAction', this.getOpenActionString(firstPageId, settings)],
     ]);
 
-    if (options?.outlinesId > 0)
-      dict.set('/PageMode', '/UseOutlines');
+    if (options?.outlinesId > 0) dict.set('/PageMode', '/UseOutlines');
     else if (settings.pageMode && settings.pageMode !== PageModeEnum.UseNone)
       dict.set('/PageMode', `/${settings.pageMode}`);
 
-    if (options?.viewerPrefsId > 0)
-      dict.set('/ViewerPreferences', `${options.viewerPrefsId} 0 R`);
-    if (options?.outlinesId > 0)
-      dict.set('/Outlines', `${options.outlinesId} 0 R`);
-    if (options?.xmpMetadataId > 0)
-      dict.set('/Metadata', `${options.xmpMetadataId} 0 R`);
+    if (options?.viewerPrefsId > 0) dict.set('/ViewerPreferences', `${options.viewerPrefsId} 0 R`);
+    if (options?.outlinesId > 0) dict.set('/Outlines', `${options.outlinesId} 0 R`);
+    if (options?.xmpMetadataId > 0) dict.set('/Metadata', `${options.xmpMetadataId} 0 R`);
     if (options?.outputIntentIds?.length > 0) {
       const refs = options.outputIntentIds.map(oid => `${oid} 0 R`).join(' ');
       dict.set('/OutputIntents', `[ ${refs} ]`);
     }
-    if (options?.pdfAEnabled)
-      dict.set('/MarkInfo', '<< /Marked true >>');
-    if (options?.destsId != null && options.destsId > 0)
-      dict.set('/Dests', `${options.destsId} 0 R`);
+    if (options?.pdfAEnabled) dict.set('/MarkInfo', '<< /Marked true >>');
+    if (options?.destsId != null && options.destsId > 0) dict.set('/Dests', `${options.destsId} 0 R`);
 
     this.writeObject(id, dict);
   }
@@ -309,10 +319,7 @@ export class PdfWriter implements IPdfWriter {
     this._output.writeString(xref);
 
     // Trailer dictionary
-    const trailerParts: string[] = [
-      `/Size ${this._currentObjId + 1}`,
-      `/Root ${catalogId} 0 R`
-    ];
+    const trailerParts: string[] = [`/Size ${this._currentObjId + 1}`, `/Root ${catalogId} 0 R`];
     if (infoId > 0) trailerParts.push(`/Info ${infoId} 0 R`);
 
     if (this.encryptor != null && this._encryptId > 0) {
@@ -326,7 +333,9 @@ export class PdfWriter implements IPdfWriter {
       } else {
         for (let i = 0; i < 16; i++) idBytes[i] = Math.floor(Math.random() * 256);
       }
-      const hexId = Array.from(idBytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join('');
+      const hexId = Array.from(idBytes)
+        .map(b => b.toString(16).padStart(2, '0').toUpperCase())
+        .join('');
       trailerParts.push(`/ID [<${hexId}> <${hexId}>]`);
     }
 
@@ -336,11 +345,16 @@ export class PdfWriter implements IPdfWriter {
 
   private getOpenActionString(firstPageId: number, settings: any): string {
     switch (settings.defaultZoom) {
-      case ZoomLevel.FitPage:   return `[ ${firstPageId} 0 R /Fit ]`;
-      case ZoomLevel.FitWidth:  return `[ ${firstPageId} 0 R /FitH 0 ]`;
-      case ZoomLevel.FitHeight: return `[ ${firstPageId} 0 R /FitV 0 ]`;
-      case ZoomLevel.Custom:    return `[ ${firstPageId} 0 R /XYZ 0 ${settings.customZoomLevel} null ]`;
-      default:                  return `[ ${firstPageId} 0 R /Fit ]`;
+      case ZoomLevel.FitPage:
+        return `[ ${firstPageId} 0 R /Fit ]`;
+      case ZoomLevel.FitWidth:
+        return `[ ${firstPageId} 0 R /FitH 0 ]`;
+      case ZoomLevel.FitHeight:
+        return `[ ${firstPageId} 0 R /FitV 0 ]`;
+      case ZoomLevel.Custom:
+        return `[ ${firstPageId} 0 R /XYZ 0 ${settings.customZoomLevel} null ]`;
+      default:
+        return `[ ${firstPageId} 0 R /Fit ]`;
     }
   }
 }
@@ -353,12 +367,16 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
   private readonly _inner: PdfWriter;
   public encryptor: any = null;
 
-  constructor(version: typeof PdfVersion[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
+  constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
     this._inner = new PdfWriter(version);
   }
 
-  public getNewId(): number { return this._inner.getNewId(); }
-  public toUint8Array(): Uint8Array { return this._inner.toUint8Array(); }
+  public getNewId(): number {
+    return this._inner.getNewId();
+  }
+  public toUint8Array(): Uint8Array {
+    return this._inner.toUint8Array();
+  }
 
   public async writeObjectAsync(id: number, dictionary: Map<string, string>, stream?: string): Promise<void> {
     this._inner.writeObject(id, dictionary, stream);
@@ -367,7 +385,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
   public async writeCompressedObjectAsync(id: number, dictionary: Map<string, string>, stream: string): Promise<void> {
     // Encode as ISO-8859-1 then compress via the configured platform
     const rawBytes = new Uint8Array(stream.length);
-    for (let i = 0; i < stream.length; i++) rawBytes[i] = stream.charCodeAt(i) & 0xFF;
+    for (let i = 0; i < stream.length; i++) rawBytes[i] = stream.charCodeAt(i) & 0xff;
 
     const { deflate } = await import('../../Platform/PlatformIO');
     const compressed = await deflate(rawBytes);
@@ -377,12 +395,24 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     this._inner.writeBinaryObject(id, dict, compressed);
   }
 
-  public async writeBinaryObjectAsync(id: number, dictionary: Map<string, string>, bytes: Uint8Array, length?: number, _ct?: any): Promise<void> {
+  public async writeBinaryObjectAsync(
+    id: number,
+    dictionary: Map<string, string>,
+    bytes: Uint8Array,
+    length?: number,
+    _ct?: any
+  ): Promise<void> {
     const slice = length != null ? bytes.slice(0, length) : bytes;
     this._inner.writeBinaryObject(id, dictionary, slice);
   }
 
-  public async writeCompressedBinaryObjectAsync(id: number, dictionary: Map<string, string>, bytes: Uint8Array, length?: number, _ct?: any): Promise<void> {
+  public async writeCompressedBinaryObjectAsync(
+    id: number,
+    dictionary: Map<string, string>,
+    bytes: Uint8Array,
+    length?: number,
+    _ct?: any
+  ): Promise<void> {
     const slice = length != null ? bytes.slice(0, length) : bytes;
     const { deflate } = await import('../../Platform/PlatformIO');
     const compressed = await deflate(slice);
@@ -399,7 +429,13 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     return this._inner.writeViewerPreferences(id, settings);
   }
 
-  public async writeCatalogAsync(id: number, pagesId: number, firstPageId: number, settings: any, options: CatalogOptions): Promise<void> {
+  public async writeCatalogAsync(
+    id: number,
+    pagesId: number,
+    firstPageId: number,
+    settings: any,
+    options: CatalogOptions
+  ): Promise<void> {
     this._inner.writeCatalog(id, pagesId, firstPageId, settings, options);
   }
 
@@ -426,11 +462,14 @@ export class FontWriter {
   // ─── Type1 (standard, non-embedded) ─────────────────────────────────────────
 
   public writeType1Font(id: number, fontName: string): void {
-    this.writer.writeObject(id, new Map([
-      ['/Type',     '/Font'],
-      ['/Subtype',  '/Type1'],
-      ['/BaseFont', `/${fontName}`]
-    ]));
+    this.writer.writeObject(
+      id,
+      new Map([
+        ['/Type', '/Font'],
+        ['/Subtype', '/Type1'],
+        ['/BaseFont', `/${fontName}`],
+      ])
+    );
   }
 
   // ─── Embedded TrueType (Type0 composite) ─────────────────────────────────────
@@ -440,18 +479,14 @@ export class FontWriter {
    * Type0 → CIDFontType2 → FontDescriptor + FontFile2 + CIDToGIDMap + ToUnicode CMap.
    * Subsets the font by default (only includes used glyphs).
    */
-  public writeEmbeddedTtfFont(
-    type0Id: number,
-    fontInfo: EmbeddedFontInfo,
-    enableSubsetting = true
-  ): number {
-    const font    = fontInfo.font    as TtfFont;
+  public writeEmbeddedTtfFont(type0Id: number, fontInfo: EmbeddedFontInfo, enableSubsetting = true): number {
+    const font = fontInfo.font as TtfFont;
     const tracker = fontInfo.tracker as GlyphUsageTracker;
 
-    const cidFontId        = this.writer.getNewId();
+    const cidFontId = this.writer.getNewId();
     const fontDescriptorId = this.writer.getNewId();
-    const fontFile2Id      = this.writer.getNewId();
-    const toUnicodeId      = this.writer.getNewId();
+    const fontFile2Id = this.writer.getNewId();
+    const toUnicodeId = this.writer.getNewId();
 
     const baseFontName = fontInfo.subsetFontName;
 
@@ -497,14 +532,17 @@ export class FontWriter {
     this.writeToUnicodeCMap(toUnicodeId, cmapBuilder.build());
 
     // 7. Type0 font dictionary
-    this.writer.writeObject(type0Id, new Map([
-      ['/Type',            '/Font'],
-      ['/Subtype',         '/Type0'],
-      ['/BaseFont',        `/${baseFontName}`],
-      ['/Encoding',        '/Identity-H'],
-      ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
-      ['/ToUnicode',       `${toUnicodeId} 0 R`]
-    ]));
+    this.writer.writeObject(
+      type0Id,
+      new Map([
+        ['/Type', '/Font'],
+        ['/Subtype', '/Type0'],
+        ['/BaseFont', `/${baseFontName}`],
+        ['/Encoding', '/Identity-H'],
+        ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
+        ['/ToUnicode', `${toUnicodeId} 0 R`],
+      ])
+    );
 
     return type0Id;
   }
@@ -512,9 +550,7 @@ export class FontWriter {
   // ─── Private helpers ─────────────────────────────────────────────────────────
 
   private writeFontFile2(id: number, fontData: Uint8Array): void {
-    this.writer.writeCompressedBinaryObject(id, new Map([
-      ['/Length1', fontData.length.toString()]
-    ]), fontData);
+    this.writer.writeCompressedBinaryObject(id, new Map([['/Length1', fontData.length.toString()]]), fontData);
   }
 
   private writeCIDSet(id: number, usedGlyphIds: ReadonlySet<number>): void {
@@ -527,62 +563,68 @@ export class FontWriter {
     const byteCount = Math.floor(maxCid / 8) + 1;
     const data = new Uint8Array(byteCount);
     for (const cid of usedGlyphIds) {
-      data[Math.floor(cid / 8)] |= (1 << (7 - (cid % 8)));
+      data[Math.floor(cid / 8)] |= 1 << (7 - (cid % 8));
     }
     return data;
   }
 
   private writeFontDescriptor(
-    id: number, font: TtfFont, baseFontName: string, fontFile2Id: number, cidSetId = 0
+    id: number,
+    font: TtfFont,
+    baseFontName: string,
+    fontFile2Id: number,
+    cidSetId = 0
   ): void {
     const scale = 1000 / font.unitsPerEm;
-    const bbox  = font.bBox.map(v => Math.round(v * scale));
-    const dict  = new Map<string, string>([
-      ['/Type',        '/FontDescriptor'],
-      ['/FontName',    `/${baseFontName}`],
-      ['/Flags',       font.flags.toString()],
-      ['/FontBBox',    `[ ${bbox[0]} ${bbox[1]} ${bbox[2]} ${bbox[3]} ]`],
+    const bbox = font.bBox.map(v => Math.round(v * scale));
+    const dict = new Map<string, string>([
+      ['/Type', '/FontDescriptor'],
+      ['/FontName', `/${baseFontName}`],
+      ['/Flags', font.flags.toString()],
+      ['/FontBBox', `[ ${bbox[0]} ${bbox[1]} ${bbox[2]} ${bbox[3]} ]`],
       ['/ItalicAngle', font.italicAngle.toFixed(1)],
-      ['/Ascent',      Math.round(font.ascender  * scale).toString()],
-      ['/Descent',     Math.round(font.descender * scale).toString()],
-      ['/CapHeight',   Math.round(font.capHeight * scale).toString()],
-      ['/StemV',       font.stemV.toString()],
-      ['/FontFile2',   `${fontFile2Id} 0 R`]
+      ['/Ascent', Math.round(font.ascender * scale).toString()],
+      ['/Descent', Math.round(font.descender * scale).toString()],
+      ['/CapHeight', Math.round(font.capHeight * scale).toString()],
+      ['/StemV', font.stemV.toString()],
+      ['/FontFile2', `${fontFile2Id} 0 R`],
     ]);
     if (cidSetId > 0) dict.set('/CIDSet', `${cidSetId} 0 R`);
     this.writer.writeObject(id, dict);
   }
 
-  private writeCIDToGIDMap(
-    id: number,
-    oldToNewGid: ReadonlyMap<number, number>,
-    maxOriginalGid: number
-  ): void {
+  private writeCIDToGIDMap(id: number, oldToNewGid: ReadonlyMap<number, number>, maxOriginalGid: number): void {
     const mapSize = (maxOriginalGid + 1) * 2;
     const mapData = new Uint8Array(mapSize);
     for (const [orig, newGid] of oldToNewGid) {
       const offset = orig * 2;
       if (offset + 1 < mapData.length) {
-        mapData[offset]     = (newGid >> 8) & 0xFF;
-        mapData[offset + 1] =  newGid       & 0xFF;
+        mapData[offset] = (newGid >> 8) & 0xff;
+        mapData[offset + 1] = newGid & 0xff;
       }
     }
     this.writer.writeCompressedBinaryObject(id, new Map(), mapData);
   }
 
   private writeCIDFont(
-    id: number, baseFontName: string, fontDescriptorId: number,
-    widthArray: string, cidToGidMapRef: string
+    id: number,
+    baseFontName: string,
+    fontDescriptorId: number,
+    widthArray: string,
+    cidToGidMapRef: string
   ): void {
-    this.writer.writeObject(id, new Map([
-      ['/Type',          '/Font'],
-      ['/Subtype',       '/CIDFontType2'],
-      ['/BaseFont',      `/${baseFontName}`],
-      ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
-      ['/FontDescriptor', `${fontDescriptorId} 0 R`],
-      ['/W',             widthArray],
-      ['/CIDToGIDMap',   cidToGidMapRef]
-    ]));
+    this.writer.writeObject(
+      id,
+      new Map([
+        ['/Type', '/Font'],
+        ['/Subtype', '/CIDFontType2'],
+        ['/BaseFont', `/${baseFontName}`],
+        ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
+        ['/FontDescriptor', `${fontDescriptorId} 0 R`],
+        ['/W', widthArray],
+        ['/CIDToGIDMap', cidToGidMapRef],
+      ])
+    );
   }
 
   private writeToUnicodeCMap(id: number, cmapContent: string): void {
@@ -590,9 +632,8 @@ export class FontWriter {
   }
 
   private generateWidthArray(font: TtfFont, tracker: GlyphUsageTracker): string {
-    const scale  = 1000 / font.unitsPerEm;
-    const glyphs = Array.from(tracker.getUsedGlyphIds() as ReadonlySet<number>)
-      .sort((a, b) => a - b);
+    const scale = 1000 / font.unitsPerEm;
+    const glyphs = Array.from(tracker.getUsedGlyphIds() as ReadonlySet<number>).sort((a, b) => a - b);
 
     let result = '[ ';
     let i = 0;
@@ -617,7 +658,9 @@ export class FontWriter {
   }
 
   public async writeEmbeddedTtfFontAsync(
-    id: number, fontInfo: EmbeddedFontInfo, enableSubsetting = true
+    id: number,
+    fontInfo: EmbeddedFontInfo,
+    enableSubsetting = true
   ): Promise<number> {
     return this.writeEmbeddedTtfFont(id, fontInfo, enableSubsetting);
   }
@@ -633,14 +676,14 @@ export class MetadataWriter {
 
   public writeDocumentInfo(id: number, metadata: any): number {
     const dict = new Map<string, string>();
-    if (metadata.title)     dict.set('/Title',    this.encodeMetadataString(metadata.title));
-    if (metadata.author)    dict.set('/Author',   this.encodeMetadataString(metadata.author));
-    if (metadata.subject)   dict.set('/Subject',  this.encodeMetadataString(metadata.subject));
-    if (metadata.keywords)  dict.set('/Keywords', this.encodeMetadataString(metadata.keywords));
-    if (metadata.creator)   dict.set('/Creator',  this.encodeMetadataString(metadata.creator));
-    if (metadata.producer)  dict.set('/Producer', this.encodeMetadataString(metadata.producer));
+    if (metadata.title) dict.set('/Title', this.encodeMetadataString(metadata.title));
+    if (metadata.author) dict.set('/Author', this.encodeMetadataString(metadata.author));
+    if (metadata.subject) dict.set('/Subject', this.encodeMetadataString(metadata.subject));
+    if (metadata.keywords) dict.set('/Keywords', this.encodeMetadataString(metadata.keywords));
+    if (metadata.creator) dict.set('/Creator', this.encodeMetadataString(metadata.creator));
+    if (metadata.producer) dict.set('/Producer', this.encodeMetadataString(metadata.producer));
     if (metadata.creationDate) dict.set('/CreationDate', `(${this.formatDate(metadata.creationDate)})`);
-    if (metadata.modifiedDate) dict.set('/ModDate',      `(${this.formatDate(metadata.modifiedDate)})`);
+    if (metadata.modifiedDate) dict.set('/ModDate', `(${this.formatDate(metadata.modifiedDate)})`);
     if (metadata.trapped !== undefined) dict.set('/Trapped', metadata.trapped ? '/True' : '/False');
     if (metadata.customProperties) {
       for (const [key, value] of Object.entries(metadata.customProperties)) {
@@ -663,14 +706,14 @@ export class MetadataWriter {
   public async writeDocumentInfoAsync(id: number, metadata: any): Promise<number> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     const dict = new Map<string, string>();
-    if (metadata.title)     dict.set('/Title',    this.encodeMetadataString(metadata.title));
-    if (metadata.author)    dict.set('/Author',   this.encodeMetadataString(metadata.author));
-    if (metadata.subject)   dict.set('/Subject',  this.encodeMetadataString(metadata.subject));
-    if (metadata.keywords)  dict.set('/Keywords', this.encodeMetadataString(metadata.keywords));
-    if (metadata.creator)   dict.set('/Creator',  this.encodeMetadataString(metadata.creator));
-    if (metadata.producer)  dict.set('/Producer', this.encodeMetadataString(metadata.producer));
+    if (metadata.title) dict.set('/Title', this.encodeMetadataString(metadata.title));
+    if (metadata.author) dict.set('/Author', this.encodeMetadataString(metadata.author));
+    if (metadata.subject) dict.set('/Subject', this.encodeMetadataString(metadata.subject));
+    if (metadata.keywords) dict.set('/Keywords', this.encodeMetadataString(metadata.keywords));
+    if (metadata.creator) dict.set('/Creator', this.encodeMetadataString(metadata.creator));
+    if (metadata.producer) dict.set('/Producer', this.encodeMetadataString(metadata.producer));
     if (metadata.creationDate) dict.set('/CreationDate', `(${this.formatDate(metadata.creationDate)})`);
-    if (metadata.modifiedDate) dict.set('/ModDate',      `(${this.formatDate(metadata.modifiedDate)})`);
+    if (metadata.modifiedDate) dict.set('/ModDate', `(${this.formatDate(metadata.modifiedDate)})`);
     if (metadata.trapped !== undefined) dict.set('/Trapped', metadata.trapped ? '/True' : '/False');
     if (metadata.customProperties) {
       for (const [key, value] of Object.entries(metadata.customProperties)) {
@@ -693,12 +736,12 @@ export class MetadataWriter {
   }
 
   private formatDate(date: Date): string {
-    const year  = date.getFullYear();
+    const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day   = String(date.getDate()).padStart(2, '0');
-    const hh    = String(date.getHours()).padStart(2, '0');
-    const mm    = String(date.getMinutes()).padStart(2, '0');
-    const ss    = String(date.getSeconds()).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
     return `D:${year}${month}${day}${hh}${mm}${ss}`;
   }
 
@@ -740,18 +783,21 @@ export class NavigationWriter {
       const children = childrenByParent.get(parentId);
       if (!children) return 0;
       let count = 0;
-      for (const idx of children) { count++; count += countVisible(flatList[idx].id); }
+      for (const idx of children) {
+        count++;
+        count += countVisible(flatList[idx].id);
+      }
       return count;
     };
 
     const rootChildren = childrenByParent.get(rootId) ?? [];
     const rootDict = new Map<string, string>([
       ['/Type', '/Outlines'],
-      ['/Count', countVisible(rootId).toString()]
+      ['/Count', countVisible(rootId).toString()],
     ]);
     if (rootChildren.length > 0) {
       rootDict.set('/First', `${flatList[rootChildren[0]].id} 0 R`);
-      rootDict.set('/Last',  `${flatList[rootChildren[rootChildren.length - 1]].id} 0 R`);
+      rootDict.set('/Last', `${flatList[rootChildren[rootChildren.length - 1]].id} 0 R`);
     }
     this.writer.writeObject(rootId, rootDict);
 
@@ -761,9 +807,9 @@ export class NavigationWriter {
       const siblingIdx = siblings.indexOf(i);
 
       const dict = new Map<string, string>([
-        ['/Title',  `(${this.escape(item.title)})`],
+        ['/Title', `(${this.escape(item.title)})`],
         ['/Parent', `${parentId} 0 R`],
-        ['/Dest',   `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`]
+        ['/Dest', `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`],
       ]);
       if (siblingIdx > 0) dict.set('/Prev', `${flatList[siblings[siblingIdx - 1]].id} 0 R`);
       if (siblingIdx < siblings.length - 1) dict.set('/Next', `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
@@ -772,7 +818,7 @@ export class NavigationWriter {
       if (myChildren?.length > 0) {
         dict.set('/Count', countVisible(itemId).toString());
         dict.set('/First', `${flatList[myChildren[0]].id} 0 R`);
-        dict.set('/Last',  `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
+        dict.set('/Last', `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
       }
       this.writer.writeObject(itemId, dict);
     }
@@ -801,19 +847,22 @@ export class ComplianceWriter {
     // sRGB ICC profile generation deferred to Session 4
     const dict = new Map<string, string>([
       ['/N', '3'],
-      ['/Filter', '/FlateDecode']
+      ['/Filter', '/FlateDecode'],
     ]);
     this.writer.writeBinaryObject(id, dict, new Uint8Array(0));
   }
 
   public writeOutputIntent(id: number, iccProfileId: number): void {
-    this.writer.writeObject(id, new Map<string, string>([
-      ['/Type', '/OutputIntent'],
-      ['/S', '/GTS_PDFA1'],
-      ['/OutputConditionIdentifier', '(sRGB IEC61966-2.1)'],
-      ['/RegistryName', '(http://www.color.org)'],
-      ['/DestOutputProfile', `${iccProfileId} 0 R`]
-    ]));
+    this.writer.writeObject(
+      id,
+      new Map<string, string>([
+        ['/Type', '/OutputIntent'],
+        ['/S', '/GTS_PDFA1'],
+        ['/OutputConditionIdentifier', '(sRGB IEC61966-2.1)'],
+        ['/RegistryName', '(http://www.color.org)'],
+        ['/DestOutputProfile', `${iccProfileId} 0 R`],
+      ])
+    );
   }
 
   public async writeIccProfileAsync(id: number): Promise<void> {

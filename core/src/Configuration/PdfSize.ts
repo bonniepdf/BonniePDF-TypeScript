@@ -42,53 +42,93 @@ export class PdfSize {
   static fromMM(width: number, height: number, name?: string): PdfSize {
     const PointsPerInch = 72;
     const MillimetersPerInch = 25.4;
-    return new PdfSize((width / MillimetersPerInch) * PointsPerInch, (height / MillimetersPerInch) * PointsPerInch, name);
+    return new PdfSize(
+      (width / MillimetersPerInch) * PointsPerInch,
+      (height / MillimetersPerInch) * PointsPerInch,
+      name
+    );
   }
 
   /// ISO A-Series
 
   /// ISO A0 size (841 x 1189 mm).
-  static get a0(): PdfSize { return PdfSize.fromMM(841, 1189, 'A0'); }
+  static get a0(): PdfSize {
+    return PdfSize.fromMM(841, 1189, 'A0');
+  }
   /// ISO A1 size (594 x 841 mm).
-  static get a1(): PdfSize { return PdfSize.fromMM(594, 841, 'A1'); }
+  static get a1(): PdfSize {
+    return PdfSize.fromMM(594, 841, 'A1');
+  }
   /// ISO A2 size (420 x 594 mm).
-  static get a2(): PdfSize { return PdfSize.fromMM(420, 594, 'A2'); }
+  static get a2(): PdfSize {
+    return PdfSize.fromMM(420, 594, 'A2');
+  }
   /// ISO A3 size (297 x 420 mm).
-  static get a3(): PdfSize { return PdfSize.fromMM(297, 420, 'A3'); }
+  static get a3(): PdfSize {
+    return PdfSize.fromMM(297, 420, 'A3');
+  }
   /// ISO A4 size (210 x 297 mm).
-  static get a4(): PdfSize { return PdfSize.fromMM(210, 297, 'A4'); }
+  static get a4(): PdfSize {
+    return PdfSize.fromMM(210, 297, 'A4');
+  }
   /// ISO A5 size (148 x 210 mm).
-  static get a5(): PdfSize { return PdfSize.fromMM(148, 210, 'A5'); }
+  static get a5(): PdfSize {
+    return PdfSize.fromMM(148, 210, 'A5');
+  }
 
   /// ISO B-Series (Common for Books/Posters)
 
   /// ISO B0 size (1000 x 1414 mm).
-  static get b0(): PdfSize { return PdfSize.fromMM(1000, 1414, 'B0'); }
+  static get b0(): PdfSize {
+    return PdfSize.fromMM(1000, 1414, 'B0');
+  }
   /// ISO B1 size (707 x 1000 mm).
-  static get b1(): PdfSize { return PdfSize.fromMM(707, 1000, 'B1'); }
+  static get b1(): PdfSize {
+    return PdfSize.fromMM(707, 1000, 'B1');
+  }
   /// ISO B2 size (500 x 707 mm).
-  static get b2(): PdfSize { return PdfSize.fromMM(500, 707, 'B2'); }
+  static get b2(): PdfSize {
+    return PdfSize.fromMM(500, 707, 'B2');
+  }
   /// ISO B3 size (353 x 500 mm).
-  static get b3(): PdfSize { return PdfSize.fromMM(353, 500, 'B3'); }
+  static get b3(): PdfSize {
+    return PdfSize.fromMM(353, 500, 'B3');
+  }
   /// ISO B4 size (250 x 353 mm).
-  static get b4(): PdfSize { return PdfSize.fromMM(250, 353, 'B4'); }
+  static get b4(): PdfSize {
+    return PdfSize.fromMM(250, 353, 'B4');
+  }
   /// ISO B5 size (176 x 250 mm).
-  static get b5(): PdfSize { return PdfSize.fromMM(176, 250, 'B5'); }
+  static get b5(): PdfSize {
+    return PdfSize.fromMM(176, 250, 'B5');
+  }
 
   /// North American Standards
 
   /// Letter size (8.5 x 11 inches).
-  static get letter(): PdfSize { return PdfSize.fromInches(8.5, 11, 'Letter'); }
+  static get letter(): PdfSize {
+    return PdfSize.fromInches(8.5, 11, 'Letter');
+  }
   /// Legal size (8.5 x 14 inches).
-  static get legal(): PdfSize { return PdfSize.fromInches(8.5, 14, 'Legal'); }
+  static get legal(): PdfSize {
+    return PdfSize.fromInches(8.5, 14, 'Legal');
+  }
   /// Tabloid size (11 x 17 inches).
-  static get tabloid(): PdfSize { return PdfSize.fromInches(11, 17, 'Tabloid'); }
+  static get tabloid(): PdfSize {
+    return PdfSize.fromInches(11, 17, 'Tabloid');
+  }
   /// Ledger size (17 x 11 inches).
-  static get ledger(): PdfSize { return PdfSize.fromInches(17, 11, 'Ledger'); }
+  static get ledger(): PdfSize {
+    return PdfSize.fromInches(17, 11, 'Ledger');
+  }
   /// Statement size (5.5 x 8.5 inches).
-  static get statement(): PdfSize { return PdfSize.fromInches(5.5, 8.5, 'Statement'); }
+  static get statement(): PdfSize {
+    return PdfSize.fromInches(5.5, 8.5, 'Statement');
+  }
   /// Executive size (7.25 x 10.5 inches).
-  static get executive(): PdfSize { return PdfSize.fromInches(7.25, 10.5, 'Executive'); }
+  static get executive(): PdfSize {
+    return PdfSize.fromInches(7.25, 10.5, 'Executive');
+  }
 
   /// Orientation Logic (Idempotent)
 

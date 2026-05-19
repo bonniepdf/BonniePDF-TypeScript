@@ -12,7 +12,7 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
 export class BarChart extends CartesianChartBase {
-  private static readonly BAR_COLOR_HEX = "#4f46e5";
+  private static readonly BAR_COLOR_HEX = '#4f46e5';
 
   /**
    * Color for the bars (backward compatibility).
@@ -62,23 +62,11 @@ export class BarChart extends CartesianChartBase {
    * Draws bars for each data point.
    * In vertical mode bars grow upward; in horizontal mode bars grow rightward from LeftPadding.
    */
-  private drawBars(
-    canvas: ICanvas,
-    coordinates: Point[],
-    thickness: number,
-    baselineY: number,
-    color: Color
-  ): void {
+  private drawBars(canvas: ICanvas, coordinates: Point[], thickness: number, baselineY: number, color: Color): void {
     for (const p of coordinates) {
       if (this.orientation === ChartOrientation.Horizontal) {
         const barWidth = p.x - CartesianChartBase.LEFT_PADDING;
-        canvas.fillRect(
-          CartesianChartBase.LEFT_PADDING,
-          p.y - thickness / 2,
-          barWidth,
-          thickness,
-          color
-        );
+        canvas.fillRect(CartesianChartBase.LEFT_PADDING, p.y - thickness / 2, barWidth, thickness, color);
       } else {
         const barHeight = baselineY - p.y;
         const barX = p.x - thickness / 2;

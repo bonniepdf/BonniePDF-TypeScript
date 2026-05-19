@@ -54,7 +54,7 @@ export class Aes256EncryptionKey {
   private async computeUserEntries(password: string): Promise<void> {
     const passwordBytes = Aes256EncryptionKey.truncatePassword(password);
     const validationSalt = crypto.getRandomValues(new Uint8Array(8));
-    const keySalt        = crypto.getRandomValues(new Uint8Array(8));
+    const keySalt = crypto.getRandomValues(new Uint8Array(8));
 
     // /U = SHA-256(password + validation_salt) + validation_salt + key_salt
     const hash = await Aes256EncryptionKey.sha256(concat(passwordBytes, validationSalt));
@@ -72,7 +72,7 @@ export class Aes256EncryptionKey {
   private async computeOwnerEntries(password: string): Promise<void> {
     const passwordBytes = Aes256EncryptionKey.truncatePassword(password);
     const validationSalt = crypto.getRandomValues(new Uint8Array(8));
-    const keySalt        = crypto.getRandomValues(new Uint8Array(8));
+    const keySalt = crypto.getRandomValues(new Uint8Array(8));
 
     // /O = SHA-256(password + validation_salt + /U) + validation_salt + key_salt
     const hash = await Aes256EncryptionKey.sha256(concat(passwordBytes, validationSalt, this.userEntry));
@@ -90,16 +90,18 @@ export class Aes256EncryptionKey {
   private async computePermsEntry(): Promise<void> {
     const permsBlock = new Uint8Array(16);
     // Bytes 0-3: permissions (little-endian)
-    permsBlock[0] = this.permissionsValue & 0xFF;
-    permsBlock[1] = (this.permissionsValue >> 8)  & 0xFF;
-    permsBlock[2] = (this.permissionsValue >> 16) & 0xFF;
-    permsBlock[3] = (this.permissionsValue >> 24) & 0xFF;
+    permsBlock[0] = this.permissionsValue & 0xff;
+    permsBlock[1] = (this.permissionsValue >> 8) & 0xff;
+    permsBlock[2] = (this.permissionsValue >> 16) & 0xff;
+    permsBlock[3] = (this.permissionsValue >> 24) & 0xff;
     // Bytes 4-7: 0xFFFFFFFF
-    permsBlock[4] = permsBlock[5] = permsBlock[6] = permsBlock[7] = 0xFF;
+    permsBlock[4] = permsBlock[5] = permsBlock[6] = permsBlock[7] = 0xff;
     // Byte 8: 'T' (always encrypt metadata)
     permsBlock[8] = 0x54;
     // Bytes 9-11: 'adb'
-    permsBlock[9] = 0x61; permsBlock[10] = 0x64; permsBlock[11] = 0x62;
+    permsBlock[9] = 0x61;
+    permsBlock[10] = 0x64;
+    permsBlock[11] = 0x62;
     // Bytes 12-15: random
     permsBlock.set(crypto.getRandomValues(new Uint8Array(4)), 12);
 
@@ -129,6 +131,11 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
   const total = arrays.reduce((n, a) => n + (a?.length ?? 0), 0);
   const result = new Uint8Array(total);
   let offset = 0;
-  for (const a of arrays) { if (a?.length) { result.set(a, offset); offset += a.length; } }
+  for (const a of arrays) {
+    if (a?.length) {
+      result.set(a, offset);
+      offset += a.length;
+    }
+  }
   return result;
 }

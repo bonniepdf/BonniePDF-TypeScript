@@ -40,12 +40,12 @@ export class ChartSeries {
    * Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")
    * Used in legends and tooltips.
    */
-  name: string = "";
+  name: string = '';
 
   /**
    * Color to use for this series (lines, bars, markers, etc.)
    */
-  color: Color = Color.fromHex("#4f46e5");
+  color: Color = Color.fromHex('#4f46e5');
 
   /**
    * Data points for this series.

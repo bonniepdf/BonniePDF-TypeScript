@@ -77,19 +77,19 @@ export class GlyphUsageTracker {
 
     for (let i = 0; i < text.length; i++) {
       const code = text.charCodeAt(i);
-      
+
       // Check for surrogate pair
-      if (code >= 0xD800 && code <= 0xDBFF && i + 1 < text.length) {
+      if (code >= 0xd800 && code <= 0xdbff && i + 1 < text.length) {
         const nextCode = text.charCodeAt(i + 1);
-        if (nextCode >= 0xDC00 && nextCode <= 0xDFFF) {
+        if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
           // Valid surrogate pair
-          const surrogatePair = (code - 0xD800) * 0x400 + (nextCode - 0xDC00) + 0x10000;
+          const surrogatePair = (code - 0xd800) * 0x400 + (nextCode - 0xdc00) + 0x10000;
           this.markUsed(surrogatePair);
           i++; // Skip next character
           continue;
         }
       }
-      
+
       this.markUsed(code);
     }
   }

@@ -18,7 +18,9 @@ describe('LargeDocument integration', () => {
     doc = new Document();
     for (let i = 0; i < 100; i++) {
       if (i > 0) doc.addPage();
-      doc.add(new TextBlock(`Page ${i + 1} — This is a test paragraph with some content.`, 12, StandardFonts.Helvetica));
+      doc.add(
+        new TextBlock(`Page ${i + 1} — This is a test paragraph with some content.`, 12, StandardFonts.Helvetica)
+      );
     }
     const bytes = doc.generateBytes();
     assertValidPdf(bytes);

@@ -1,4 +1,3 @@
-
 export class Mode {
   public static readonly Numeric = new Mode(0x1, [10, 12, 14]);
   public static readonly Alphanumeric = new Mode(0x2, [9, 11, 13]);
@@ -98,8 +97,9 @@ export class QrSegment {
     const bits: boolean[] = [];
     let i = 0;
     while (i + 1 < text.length) {
-      const val = this.alphanumericCharset.indexOf(text[i].toUpperCase()) * 45 +
-                    this.alphanumericCharset.indexOf(text[i + 1].toUpperCase());
+      const val =
+        this.alphanumericCharset.indexOf(text[i].toUpperCase()) * 45 +
+        this.alphanumericCharset.indexOf(text[i + 1].toUpperCase());
       this.appendBits(val, 11, bits);
       i += 2;
     }
@@ -129,7 +129,7 @@ export class QrSegment {
   // ---- Helpers ----
 
   public static appendBits(val: number, len: number, buffer: boolean[]): void {
-    if (len < 0 || len > 31 || (val >>> len) !== 0) {
+    if (len < 0 || len > 31 || val >>> len !== 0) {
       throw new Error('Value out of range');
     }
     for (let i = len - 1; i >= 0; i--) {

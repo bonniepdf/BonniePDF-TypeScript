@@ -9,7 +9,7 @@ export class PermissionEncoder {
    * Reserved bits that must always be set to 1 in the permissions value.
    * Bits 1-2, 7-8, and 13-32 are reserved and must be 1 for PDF 1.4+.
    */
-  private static readonly RESERVED_BITS = 0xFFFFF0C0;
+  private static readonly RESERVED_BITS = 0xfffff0c0;
 
   /**
    * Encodes the permission flags into the signed 32-bit integer format

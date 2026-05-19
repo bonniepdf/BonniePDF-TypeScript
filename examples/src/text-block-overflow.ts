@@ -1,4 +1,15 @@
-import { Document, DocumentSettings, DocumentMetadata, PdfVersion, TextBlock, TextElementBase, TextAlignment, Color, Thickness, StandardFonts } from '@bonniepdf/core'
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfVersion,
+  TextBlock,
+  TextElementBase,
+  TextAlignment,
+  Color,
+  Thickness,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 const PARAGRAPHS = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
@@ -10,29 +21,29 @@ const PARAGRAPHS = [
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version     = PdfVersion.Pdf17;
+  settings.version = PdfVersion.Pdf17;
   settings.pdfAEnabled = true;
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontName  = StandardFonts.Helvetica;
-    b.fontSize  = 10;
+    b.fontName = StandardFonts.Helvetica;
+    b.fontSize = 10;
     b.textColor = Color.slate500;
     b.alignment = TextAlignment.Right;
     return b;
   };
 
   const metadata = new DocumentMetadata();
-  metadata.title   = 'TextBlock Overflow Demo';
-  metadata.author  = 'BonniePDF';
+  metadata.title = 'TextBlock Overflow Demo';
+  metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates text flowing across page boundaries';
 
   const doc = new Document(settings, metadata);
 
   const title = new TextBlock('Long Text Document');
-  title.fontName  = StandardFonts.HelveticaBold;
-  title.fontSize  = 24;
+  title.fontName = StandardFonts.HelveticaBold;
+  title.fontSize = 24;
   title.textColor = Color.slate800;
-  title.margin    = new Thickness(0, 0, 0, 20);
+  title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
   // Build 20 sections that repeat the lorem ipsum paragraphs — enough for several pages.
@@ -42,8 +53,8 @@ export function generate(): Document {
   });
 
   const body = new TextBlock(sections.join('\n\n'));
-  body.fontName  = StandardFonts.Helvetica;
-  body.fontSize  = 11;
+  body.fontName = StandardFonts.Helvetica;
+  body.fontSize = 11;
   body.textColor = Color.slate700;
   doc.add(body);
 

@@ -1,25 +1,24 @@
+/**
+ * PDF color space for images
+ */
+export enum ImageColorSpace {
+  /**
+   * RGB color space (3 components: red, green, blue)
+   */
+  DeviceRGB = 'DeviceRGB',
 
   /**
-   * PDF color space for images
+   * CMYK color space (4 components: cyan, magenta, yellow, black)
    */
-  export enum ImageColorSpace {
-    /**
-     * RGB color space (3 components: red, green, blue)
-     */
-    DeviceRGB = "DeviceRGB",
+  DeviceCMYK = 'DeviceCMYK',
 
-    /**
-     * CMYK color space (4 components: cyan, magenta, yellow, black)
-     */
-    DeviceCMYK = "DeviceCMYK",
+  /**
+   * Grayscale color space (1 component)
+   */
+  DeviceGray = 'DeviceGray',
 
-    /**
-     * Grayscale color space (1 component)
-     */
-    DeviceGray = "DeviceGray",
-
-    /**
-     * Indexed color space (palette-based)
-     */
-    Indexed = "Indexed"
-  }
+  /**
+   * Indexed color space (palette-based)
+   */
+  Indexed = 'Indexed',
+}

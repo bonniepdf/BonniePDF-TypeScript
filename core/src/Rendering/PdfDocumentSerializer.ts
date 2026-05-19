@@ -2,7 +2,16 @@ import { Document } from '../Document';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { PdfResourceRegistry } from './PdfResourceRegistry';
-import { PdfWriter, AsyncPdfWriter, MetadataWriter, NavigationWriter, ComplianceWriter, CatalogOptions, IPdfWriter, IAsyncPdfWriter } from './Writers/PdfWriter';
+import {
+  PdfWriter,
+  AsyncPdfWriter,
+  MetadataWriter,
+  NavigationWriter,
+  ComplianceWriter,
+  CatalogOptions,
+  IPdfWriter,
+  IAsyncPdfWriter,
+} from './Writers/PdfWriter';
 import { PdfVersion } from '../Configuration/PdfVersion';
 
 export class PdfDocumentSerializer {
@@ -29,8 +38,8 @@ export class PdfDocumentSerializer {
 
     // 1. Allocate top-level IDs up front
     const catalogId = writer.getNewId();
-    const infoId    = writer.getNewId();
-    const pagesId   = writer.getNewId(); // /Pages parent — written after all page objects
+    const infoId = writer.getNewId();
+    const pagesId = writer.getNewId(); // /Pages parent — written after all page objects
 
     // 2. Initialize render context (inject pre-loaded resources when available)
     const orientedPageSize = settings.getOrientedPageSize();
@@ -44,7 +53,9 @@ export class PdfDocumentSerializer {
     let pageIndex = 0;
 
     for (const pageOutput of PdfRenderPipeline.renderPagesStreaming(
-      (this.document as any).pages ?? [], settings, ctx
+      (this.document as any).pages ?? [],
+      settings,
+      ctx
     )) {
       let pageId: number;
       if (pageIndex < pageIds.length) {
@@ -62,10 +73,10 @@ export class PdfDocumentSerializer {
 
       // Build page dictionary — /Resources goes on the parent /Pages object
       const pageDict = new Map<string, string>([
-        ['/Type',     '/Page'],
-        ['/Parent',   `${pagesId} 0 R`],
+        ['/Type', '/Page'],
+        ['/Parent', `${pagesId} 0 R`],
         ['/MediaBox', `[0 0 ${pageOutput.size.width} ${pageOutput.size.height}]`],
-        ['/Contents', `${contentId} 0 R`]
+        ['/Contents', `${contentId} 0 R`],
       ]);
 
       // Write link annotations if present
@@ -83,30 +94,35 @@ export class PdfDocumentSerializer {
     }
 
     // 4. Write global resource dictionary (fonts, images)
-    let globalResources: string =
-      (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
+    let globalResources: string = (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
 
     // 5. Write ExtGState for watermark opacity if configured
     if (settings.watermark != null) {
       const gsId = writer.getNewId();
       // PDF/A-1B forbids CA/ca < 1.0 — use full opacity for compliant docs
       const opacity = settings.pdfAEnabled ? 1.0 : (settings.watermark.opacity ?? 1.0);
-      writer.writeObject(gsId, new Map<string, string>([
-        ['/Type', '/ExtGState'],
-        ['/ca',   opacity.toFixed(4)],
-        ['/CA',   opacity.toFixed(4)]
-      ]));
+      writer.writeObject(
+        gsId,
+        new Map<string, string>([
+          ['/Type', '/ExtGState'],
+          ['/ca', opacity.toFixed(4)],
+          ['/CA', opacity.toFixed(4)],
+        ])
+      );
       const extGStateRes = `<< /ExtGState << /GS_WM ${gsId} 0 R >> >>`;
       globalResources = mergeDicts(globalResources, extGStateRes);
     }
 
     // 6. Write the /Pages parent object
-    writer.writeObject(pagesId, new Map<string, string>([
-      ['/Type',      '/Pages'],
-      ['/Kids',      '[ ' + pageIds.map(id => `${id} 0 R`).join(' ') + ' ]'],
-      ['/Count',     pageIds.length.toString()],
-      ['/Resources', globalResources]
-    ]));
+    writer.writeObject(
+      pagesId,
+      new Map<string, string>([
+        ['/Type', '/Pages'],
+        ['/Kids', '[ ' + pageIds.map(id => `${id} 0 R`).join(' ') + ' ]'],
+        ['/Count', pageIds.length.toString()],
+        ['/Resources', globalResources],
+      ])
+    );
 
     // 7. Write document info (/Info)
     const metadataWriter = new MetadataWriter(writer);
@@ -130,9 +146,7 @@ export class PdfDocumentSerializer {
     if (settings.version === PdfVersion.Pdf17 && settings.hasBookmarks) {
       const navWriter = new NavigationWriter(writer);
       const outlinesStartId = writer.getNewId();
-      catalogOptions.outlinesId = navWriter.writeOutlineTree(
-        outlinesStartId, settings.bookmarks, pageIds
-      );
+      catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
     }
 
     // 11. Write PDF/A output intents for PDF 1.7 + pdfA
@@ -183,9 +197,8 @@ export class PdfDocumentSerializer {
    */
   public async serializeAsync(writer: IPdfWriter | IAsyncPdfWriter): Promise<void> {
     // Resolve to a synchronous IPdfWriter regardless of which variant was passed.
-    const syncWriter: IPdfWriter = (writer instanceof AsyncPdfWriter)
-      ? (writer as any)['_inner'] as IPdfWriter
-      : writer as unknown as IPdfWriter;
+    const syncWriter: IPdfWriter =
+      writer instanceof AsyncPdfWriter ? ((writer as any)['_inner'] as IPdfWriter) : (writer as unknown as IPdfWriter);
 
     const settings = this.document.settings;
 
@@ -193,9 +206,7 @@ export class PdfDocumentSerializer {
     const embeddedPaths = new Set<string>();
     const pages: any[] = (this.document as any).pages ?? [];
     for (const page of pages) {
-      const elements: any[] = typeof page.getElements === 'function'
-        ? page.getElements()
-        : (page.elements ?? []);
+      const elements: any[] = typeof page.getElements === 'function' ? page.getElements() : (page.elements ?? []);
       for (const el of elements) {
         collectEmbeddedFonts(el, embeddedPaths);
       }
@@ -224,7 +235,7 @@ export class PdfDocumentSerializer {
     const preRegistry = new PdfResourceRegistry();
     preRegistry.pdfAEnabled = settings.pdfAEnabled;
     for (const path of embeddedPaths) {
-      preRegistry.registerFont(path);   // registers with font=null initially
+      preRegistry.registerFont(path); // registers with font=null initially
     }
     await preRegistry.preloadAllFontsAsync();
 
@@ -250,12 +261,14 @@ export class PdfDocumentSerializer {
  * indicating that a /ViewerPreferences dictionary should be written.
  */
 function hasViewerPreferences(settings: any): boolean {
-  return settings.hideToolbar  ||
-         settings.hideMenubar  ||
-         settings.hideWindowUI ||
-         settings.fitWindow    ||
-         settings.centerWindow ||
-         settings.displayDocTitle;
+  return (
+    settings.hideToolbar ||
+    settings.hideMenubar ||
+    settings.hideWindowUI ||
+    settings.fitWindow ||
+    settings.centerWindow ||
+    settings.displayDocTitle
+  );
 }
 
 /**
@@ -298,14 +311,20 @@ function collectEmbeddedFonts(element: any, paths: Set<string>): void {
   }
 
   // ── defaultStyle (RichText) ───────────────────────────────────────────────
-  if (element.defaultStyle && typeof element.defaultStyle.fontName === 'string'
-      && PdfResourceRegistry.isEmbeddedFont(element.defaultStyle.fontName)) {
+  if (
+    element.defaultStyle &&
+    typeof element.defaultStyle.fontName === 'string' &&
+    PdfResourceRegistry.isEmbeddedFont(element.defaultStyle.fontName)
+  ) {
     paths.add(element.defaultStyle.fontName);
   }
 
   // ── style (TextSpan) ─────────────────────────────────────────────────────
-  if (element.style && typeof element.style.fontName === 'string'
-      && PdfResourceRegistry.isEmbeddedFont(element.style.fontName)) {
+  if (
+    element.style &&
+    typeof element.style.fontName === 'string' &&
+    PdfResourceRegistry.isEmbeddedFont(element.style.fontName)
+  ) {
     paths.add(element.style.fontName);
   }
 
@@ -313,15 +332,15 @@ function collectEmbeddedFonts(element: any, paths: Set<string>): void {
   const childCollections: any[][] = [];
 
   // VerticalStack / HorizontalStack style
-  if (Array.isArray(element.children))  childCollections.push(element.children);
-  if (Array.isArray(element.Children))  childCollections.push(element.Children);
+  if (Array.isArray(element.children)) childCollections.push(element.children);
+  if (Array.isArray(element.Children)) childCollections.push(element.Children);
   if (typeof element.getChildren === 'function') {
     const c = element.getChildren();
     if (Array.isArray(c)) childCollections.push(c);
   }
 
   // Container / Page style
-  if (Array.isArray(element.content))   childCollections.push(element.content);
+  if (Array.isArray(element.content)) childCollections.push(element.content);
   if (typeof element.getElements === 'function') {
     const e = element.getElements();
     if (Array.isArray(e)) childCollections.push(e);
@@ -335,12 +354,18 @@ function collectEmbeddedFonts(element: any, paths: Set<string>): void {
   }
 
   // Table rows → cells → cell content
-  const rows: any[] = Array.isArray(element.rows) ? element.rows
-    : (typeof element.getRows === 'function' ? (element.getRows() ?? []) : []);
+  const rows: any[] = Array.isArray(element.rows)
+    ? element.rows
+    : typeof element.getRows === 'function'
+      ? (element.getRows() ?? [])
+      : [];
   for (const row of rows) {
     if (!row) continue;
-    const cells: any[] = Array.isArray(row.cells) ? row.cells
-      : (typeof row.getCells === 'function' ? (row.getCells() ?? []) : []);
+    const cells: any[] = Array.isArray(row.cells)
+      ? row.cells
+      : typeof row.getCells === 'function'
+        ? (row.getCells() ?? [])
+        : [];
     for (const cell of cells) {
       if (!cell) continue;
       if (Array.isArray(cell.content)) {

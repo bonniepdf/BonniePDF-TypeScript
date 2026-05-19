@@ -84,6 +84,7 @@ TypeScript/BonniePDF/
 ## Key Features Converted
 
 ### Core Types
+
 - ✅ Unit conversion utilities (Unit, Units)
 - ✅ Geometry types (Size, Point, Thickness)
 - ✅ Color system with Tailwind v4 colors
@@ -91,6 +92,7 @@ TypeScript/BonniePDF/
 - ✅ Alignment and orientation enums
 
 ### Configuration
+
 - ✅ Document settings (DocumentSettings, DocumentMetadata)
 - ✅ Page sizes and orientations (PdfSize)
 - ✅ PDF version and viewer modes (PdfVersion, PageMode, ZoomLevel)
@@ -98,6 +100,7 @@ TypeScript/BonniePDF/
 - ✅ Encryption settings
 
 ### Elements
+
 - ✅ Element base classes (ElementBase, StatefulElementBase)
 - ✅ Layout containers (Container, HorizontalStack, VerticalStack)
 - ✅ Page and spacer elements
@@ -105,22 +108,26 @@ TypeScript/BonniePDF/
 - ✅ Stateful rendering for pagination
 
 ### Fluent API
+
 - ✅ Builder pattern for document creation
 - ✅ Component composition system
 - ✅ Content slot mechanism
 
 ### Typography
+
 - ✅ Standard PDF fonts
 - ✅ Font weight enumeration
 - ✅ Font metrics for text measurement
 - ✅ Embedded font info structure
 
 ### Security
+
 - ✅ Encryption algorithms (RC4, AES)
 - ✅ Permission flags
 - ✅ Fluent encryption options builder
 
 ### Drawing
+
 - ✅ Canvas abstraction (ICanvas)
 - ✅ PDF canvas implementation
 - ✅ SVG canvas implementation
@@ -147,6 +154,7 @@ TypeScript/BonniePDF/
 ## Status
 
 This is a structural conversion. Core types, configuration, element system, and fluent API are converted. Implementation stubs are provided for:
+
 - PDF rendering operations (marked with TODO)
 - Font parsing (FontMetrics.SimpleTtfReader)
 - Binary encoding (ICC profile generation)
@@ -162,9 +170,7 @@ const pdf = Pdf.create(builder => {
     page.size(PdfSize.a4);
     page.margin(50);
     page.content().column(col => {
-      col.item().text("Hello World")
-        .fontSize(24)
-        .color(Color.blue500);
+      col.item().text('Hello World').fontSize(24).color(Color.blue500);
     });
   });
 });
@@ -175,6 +181,7 @@ pdf.save('output.pdf');
 ## Next Steps
 
 To complete the implementation:
+
 1. Implement PDF rendering operators
 2. Add TrueType font parsing
 3. Implement binary encoding helpers
@@ -193,6 +200,7 @@ To complete the implementation:
 ## Recently Completed
 
 ### Rendering Module (17 files)
+
 - ✅ Core rendering pipeline with streaming support
 - ✅ PDF resource registry (fonts, images, XObjects)
 - ✅ PDF operators and syntax utilities

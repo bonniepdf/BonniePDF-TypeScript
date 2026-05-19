@@ -29,12 +29,16 @@ export class SvgCanvas implements ICanvas {
 
   public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
     const hex = color.toHexString();
-    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`);
+    this.svgElements.push(
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`
+    );
   }
 
   public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
     const hex = color.toHexString();
-    this.svgElements.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${hex}" stroke-width="${lineWidth}"/>`);
+    this.svgElements.push(
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${hex}" stroke-width="${lineWidth}"/>`
+    );
   }
 
   public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
@@ -54,23 +58,61 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="${hex}"/>`);
   }
 
-  public strokeRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void {
+  public strokeRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color,
+    strokeWidth: number
+  ): void {
     const hex = color.toHexString();
-    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`);
+    this.svgElements.push(
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`
+    );
   }
 
-  public drawText(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, align: TextAlignment): void {
+  public drawText(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    align: TextAlignment
+  ): void {
     const hex = color.toHexString();
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
-    this.svgElements.push(`<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`);
+    this.svgElements.push(
+      `<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`
+    );
   }
 
-  public drawTextRotated(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, angleDegrees: number): void {
+  public drawTextRotated(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    angleDegrees: number
+  ): void {
     const hex = color.toHexString();
-    this.svgElements.push(`<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${y})">${this.escapeXml(text)}</text>`);
+    this.svgElements.push(
+      `<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${y})">${this.escapeXml(text)}</text>`
+    );
   }
 
-  public drawTextJustified(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, availableWidth: number): void {
+  public drawTextJustified(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    availableWidth: number
+  ): void {
     // SVG doesn't support text justification natively
     this.drawText(x, y, text, color, fontSize, fontFamily, TextAlignment.Left);
   }

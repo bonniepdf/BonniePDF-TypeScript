@@ -13,7 +13,10 @@ function concatBytes(...arrays: Uint8Array[]): Uint8Array {
   const total = arrays.reduce((t, a) => t + a.length, 0);
   const out = new Uint8Array(total);
   let offset = 0;
-  for (const a of arrays) { out.set(a, offset); offset += a.length; }
+  for (const a of arrays) {
+    out.set(a, offset);
+    offset += a.length;
+  }
   return out;
 }
 
@@ -33,9 +36,7 @@ export class AesCipher {
     if (!data || data.length === 0) return data ?? new Uint8Array(0);
     const iv = crypto.getRandomValues(new Uint8Array(16));
     const cryptoKey = await crypto.subtle.importKey('raw', asBuffer(this.key), 'AES-CBC', false, ['encrypt']);
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: 'AES-CBC', iv: asBuffer(iv) }, cryptoKey, asBuffer(data)
-    );
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-CBC', iv: asBuffer(iv) }, cryptoKey, asBuffer(data));
     return concatBytes(iv, new Uint8Array(ciphertext));
   }
 
@@ -47,9 +48,7 @@ export class AesCipher {
    */
   async encryptNoPadding(data: Uint8Array, iv: Uint8Array): Promise<Uint8Array> {
     const cryptoKey = await crypto.subtle.importKey('raw', asBuffer(this.key), 'AES-CBC', false, ['encrypt']);
-    const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-CBC', iv: asBuffer(iv) }, cryptoKey, asBuffer(data)
-    );
+    const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv: asBuffer(iv) }, cryptoKey, asBuffer(data));
     // Drop the trailing PKCS7 padding block; keep only the real ciphertext
     return new Uint8Array(encrypted, 0, data.length);
   }
@@ -63,14 +62,14 @@ export class AesCipher {
   async encryptEcb(data: Uint8Array): Promise<Uint8Array> {
     const result = new Uint8Array(data.length);
     for (let i = 0; i < data.length; i += 16) {
-      const block = new Uint8Array(data.buffer.slice(
-        data.byteOffset + i, data.byteOffset + i + 16
-      ) as ArrayBuffer);
+      const block = new Uint8Array(data.buffer.slice(data.byteOffset + i, data.byteOffset + i + 16) as ArrayBuffer);
       const zeroIv = new Uint8Array(16);
       const cryptoKey = await crypto.subtle.importKey('raw', asBuffer(this.key), 'AES-CBC', false, ['encrypt']);
       // CBC on one block with zero IV: encrypted[0..15] == ECB(block)
       const encrypted = await crypto.subtle.encrypt(
-        { name: 'AES-CBC', iv: asBuffer(zeroIv) }, cryptoKey, asBuffer(block)
+        { name: 'AES-CBC', iv: asBuffer(zeroIv) },
+        cryptoKey,
+        asBuffer(block)
       );
       result.set(new Uint8Array(encrypted, 0, 16), i);
     }

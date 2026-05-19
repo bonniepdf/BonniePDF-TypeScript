@@ -84,10 +84,14 @@ export class EncryptionSettings {
    */
   public keyLengthValue(): number {
     switch (this.algorithm) {
-      case EncryptionAlgorithm.RC4_40: return 40;
-      case EncryptionAlgorithm.RC4_128: return 128;
-      case EncryptionAlgorithm.AES_256: return 256;
-      default: return 128;
+      case EncryptionAlgorithm.RC4_40:
+        return 40;
+      case EncryptionAlgorithm.RC4_128:
+        return 128;
+      case EncryptionAlgorithm.AES_256:
+        return 256;
+      default:
+        return 128;
     }
   }
 
@@ -96,10 +100,14 @@ export class EncryptionSettings {
    */
   public versionValue(): number {
     switch (this.algorithm) {
-      case EncryptionAlgorithm.RC4_40: return 1;
-      case EncryptionAlgorithm.RC4_128: return 2;
-      case EncryptionAlgorithm.AES_256: return 5;
-      default: return 2;
+      case EncryptionAlgorithm.RC4_40:
+        return 1;
+      case EncryptionAlgorithm.RC4_128:
+        return 2;
+      case EncryptionAlgorithm.AES_256:
+        return 5;
+      default:
+        return 2;
     }
   }
 
@@ -108,10 +116,14 @@ export class EncryptionSettings {
    */
   private revisionValueInner(): number {
     switch (this.algorithm) {
-      case EncryptionAlgorithm.RC4_40: return 2;
-      case EncryptionAlgorithm.RC4_128: return 3;
-      case EncryptionAlgorithm.AES_256: return 6;
-      default: return 3;
+      case EncryptionAlgorithm.RC4_40:
+        return 2;
+      case EncryptionAlgorithm.RC4_128:
+        return 3;
+      case EncryptionAlgorithm.AES_256:
+        return 6;
+      default:
+        return 3;
     }
   }
 

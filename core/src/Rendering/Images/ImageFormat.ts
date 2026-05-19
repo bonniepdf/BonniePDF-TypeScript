@@ -1,25 +1,24 @@
+/**
+ * Supported image formats
+ */
+export enum ImageFormat {
+  /**
+   * JPEG format (Phase 1)
+   */
+  Jpeg = 'Jpeg',
 
   /**
-   * Supported image formats
+   * PNG format (Phase 2 - future)
    */
-  export enum ImageFormat {
-    /**
-     * JPEG format (Phase 1)
-     */
-    Jpeg = "Jpeg",
+  Png = 'Png',
 
-    /**
-     * PNG format (Phase 2 - future)
-     */
-    Png = "Png",
+  /**
+   * BMP format (future)
+   */
+  Bmp = 'Bmp',
 
-    /**
-     * BMP format (future)
-     */
-    Bmp = "Bmp",
-
-    /**
-     * GIF format (future)
-     */
-    Gif = "Gif"
-  }
+  /**
+   * GIF format (future)
+   */
+  Gif = 'Gif',
+}

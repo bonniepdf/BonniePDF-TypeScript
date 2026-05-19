@@ -1,6 +1,6 @@
 {
   "name": "@bonniepdf/core",
-  "version": "1.0.0",
+  "version": "2026.5.0",
   "description": "BonniePDF - PDF generation library for TypeScript/JavaScript",
   "type": "module",
   "main": "./dist/index.cjs",

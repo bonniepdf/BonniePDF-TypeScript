@@ -43,7 +43,7 @@ export class PdfRenderPipeline {
 
       result.pageDimensions.set(currentOutputIndex, {
         size: page.size,
-        margin: pageMargin
+        margin: pageMargin,
       });
 
       this.renderElementsWithOverflow(page.getElements() as IElement[], ctx, contentWidth);
@@ -51,7 +51,7 @@ export class PdfRenderPipeline {
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         result.pageDimensions.set(i, {
           size: page.size,
-          margin: pageMargin
+          margin: pageMargin,
         });
       }
 
@@ -104,7 +104,11 @@ export class PdfRenderPipeline {
     }
   }
 
-  public static* renderPagesStreaming(pages: Page[], settings: DocumentSettings, ctx: RenderContext): Generator<PageRenderOutput> {
+  public static *renderPagesStreaming(
+    pages: Page[],
+    settings: DocumentSettings,
+    ctx: RenderContext
+  ): Generator<PageRenderOutput> {
     if (!pages || !ctx) {
       throw new Error('Pages and context cannot be null');
     }
@@ -129,7 +133,7 @@ export class PdfRenderPipeline {
 
       pageDimensions.set(currentOutputIndex, {
         size: page.size,
-        margin: page.margin
+        margin: page.margin,
       });
 
       this.renderElementsWithOverflow(page.getElements() as IElement[], ctx, contentWidth);
@@ -137,7 +141,7 @@ export class PdfRenderPipeline {
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         pageDimensions.set(i, {
           size: page.size,
-          margin: page.margin
+          margin: page.margin,
         });
       }
 
@@ -160,17 +164,19 @@ export class PdfRenderPipeline {
       this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
       this.renderTemplate(ctx, settings, i);
 
-      const output = new PageRenderOutput(
-        ctx.pages[i],
-        pageSize,
-        ctx.pageHyperlinks.get(i) || []
-      );
+      const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
 
       yield output;
     }
   }
 
-  private static renderWatermark(ctx: RenderContext, settings: DocumentSettings, pageIndex: number, pageWidth: number, pageHeight: number): void {
+  private static renderWatermark(
+    ctx: RenderContext,
+    settings: DocumentSettings,
+    pageIndex: number,
+    pageWidth: number,
+    pageHeight: number
+  ): void {
     if (!settings.watermark || !settings.watermark.text) return;
 
     const wm = settings.watermark;

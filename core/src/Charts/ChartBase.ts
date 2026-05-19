@@ -12,8 +12,8 @@ export abstract class ChartBase {
   // Title styling constants (matching SVG chart implementation)
   private static readonly TITLE_FONT_SIZE = 20;
   private static readonly TITLE_Y = 35;
-  private static readonly TITLE_FONT_FAMILY = "Arial, sans-serif";
-  private static readonly TITLE_COLOR = Color.fromHex("#333333");
+  private static readonly TITLE_FONT_FAMILY = 'Arial, sans-serif';
+  private static readonly TITLE_COLOR = Color.fromHex('#333333');
 
   /**
    * Width of the chart canvas in points
@@ -51,7 +51,7 @@ export abstract class ChartBase {
     }
 
     // Draw title if present
-    if (data.title !== "") {
+    if (data.title !== '') {
       this.drawTitle(canvas, data.title);
     }
 

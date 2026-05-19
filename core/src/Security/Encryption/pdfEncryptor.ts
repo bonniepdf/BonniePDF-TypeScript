@@ -94,7 +94,7 @@ export class PdfEncryptor {
     if (!text) return new Uint8Array(0);
     // ISO-8859-1: each char maps to its code point
     const data = new Uint8Array(text.length);
-    for (let i = 0; i < text.length; i++) data[i] = text.charCodeAt(i) & 0xFF;
+    for (let i = 0; i < text.length; i++) data[i] = text.charCodeAt(i) & 0xff;
     return this.encryptData(data, objectNumber, generationNumber);
   }
 
@@ -125,7 +125,7 @@ export class PdfEncryptor {
       ['/R', this.settings.revisionValue.toString()],
       ['/O', PdfEncryptor.fmtHex(this.key!.ownerEntry)],
       ['/U', PdfEncryptor.fmtHex(this.key!.userEntry)],
-      ['/P', this.key!.permissionsValue.toString()]
+      ['/P', this.key!.permissionsValue.toString()],
     ]);
     if (this.settings.revisionValue >= 3) dict.set('/Length', this.settings.keyLengthBits.toString());
     return dict;
@@ -138,15 +138,15 @@ export class PdfEncryptor {
       ['/V', '5'],
       ['/R', '6'],
       ['/Length', '256'],
-      ['/O',     PdfEncryptor.fmtHex(this.aesKey.ownerEntry)],
-      ['/U',     PdfEncryptor.fmtHex(this.aesKey.userEntry)],
-      ['/OE',    PdfEncryptor.fmtHex(this.aesKey.ownerEncryptionEntry)],
-      ['/UE',    PdfEncryptor.fmtHex(this.aesKey.userEncryptionEntry)],
+      ['/O', PdfEncryptor.fmtHex(this.aesKey.ownerEntry)],
+      ['/U', PdfEncryptor.fmtHex(this.aesKey.userEntry)],
+      ['/OE', PdfEncryptor.fmtHex(this.aesKey.ownerEncryptionEntry)],
+      ['/UE', PdfEncryptor.fmtHex(this.aesKey.userEncryptionEntry)],
       ['/Perms', PdfEncryptor.fmtHex(this.aesKey.permsEntry)],
-      ['/P',     this.aesKey.permissionsValue.toString()],
-      ['/CF',    '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
-      ['/StmF',  '/StdCF'],
-      ['/StrF',  '/StdCF']
+      ['/P', this.aesKey.permissionsValue.toString()],
+      ['/CF', '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
+      ['/StmF', '/StdCF'],
+      ['/StrF', '/StdCF'],
     ]);
   }
 

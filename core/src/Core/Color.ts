@@ -405,7 +405,10 @@ export class Color {
     let h = hex.trim().replace(/^#/, '');
 
     if (h.length === 3 || h.length === 4) {
-      h = h.split('').map(c => c + c).join('');
+      h = h
+        .split('')
+        .map(c => c + c)
+        .join('');
     }
 
     if (h.length !== 6 && h.length !== 8) return Color.black;
@@ -434,9 +437,15 @@ export class Color {
    * Converts the color to a hex string (e.g. "#FF0000").
    */
   toHexString(): string {
-    const r = Math.round(this.r * 255).toString(16).padStart(2, '0');
-    const g = Math.round(this.g * 255).toString(16).padStart(2, '0');
-    const b = Math.round(this.b * 255).toString(16).padStart(2, '0');
+    const r = Math.round(this.r * 255)
+      .toString(16)
+      .padStart(2, '0');
+    const g = Math.round(this.g * 255)
+      .toString(16)
+      .padStart(2, '0');
+    const b = Math.round(this.b * 255)
+      .toString(16)
+      .padStart(2, '0');
     return `#${r}${g}${b}`;
   }
 

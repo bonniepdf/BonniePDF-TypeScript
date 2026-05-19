@@ -311,19 +311,28 @@ export class Table extends BorderedElementBase {
     ctx.currentY += rowHeight;
   }
 
-   private renderCell(ctx: RenderContext, cell: TableCell, row: TableRow, x: number, width: number, rowHeight: number): void {
+  private renderCell(
+    ctx: RenderContext,
+    cell: TableCell,
+    row: TableRow,
+    x: number,
+    width: number,
+    rowHeight: number
+  ): void {
     // Determine effective styling (cell > row > table defaults)
-    const bgColor = cell.backgroundColor ??
-                     row.backgroundColor ??
-                     (row.isHeader ? this.headerBackgroundColor : undefined) ??
-                     (row.isFooter ? this.footerBackgroundColor : undefined) ??
-                     this.rowBackgroundColor;
+    const bgColor =
+      cell.backgroundColor ??
+      row.backgroundColor ??
+      (row.isHeader ? this.headerBackgroundColor : undefined) ??
+      (row.isFooter ? this.footerBackgroundColor : undefined) ??
+      this.rowBackgroundColor;
 
-    const textColor = cell.textColor ??
-                      row.textColor ??
-                      (row.isHeader ? this.headerTextColor : undefined) ??
-                      (row.isFooter ? this.footerTextColor : undefined) ??
-                      this.rowTextColor;
+    const textColor =
+      cell.textColor ??
+      row.textColor ??
+      (row.isHeader ? this.headerTextColor : undefined) ??
+      (row.isFooter ? this.footerTextColor : undefined) ??
+      this.rowTextColor;
 
     const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
 

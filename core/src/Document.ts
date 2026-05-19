@@ -29,10 +29,7 @@ export class Document {
   constructor(metadata: DocumentMetadata);
   /** Creates a new document with the given settings and metadata. */
   constructor(settings: DocumentSettings, metadata: DocumentMetadata);
-  constructor(
-    settingsOrMetadata?: DocumentSettings | DocumentMetadata,
-    metadata?: DocumentMetadata
-  ) {
+  constructor(settingsOrMetadata?: DocumentSettings | DocumentMetadata, metadata?: DocumentMetadata) {
     if (settingsOrMetadata instanceof DocumentMetadata) {
       this.settings = new DocumentSettings();
       this.metadata = settingsOrMetadata;
@@ -76,11 +73,7 @@ export class Document {
   public addPage(pageSize: PdfSize, orientation: PageOrientation): Page;
   /** Adds a new page with the given size, orientation, and margin. */
   public addPage(pageSize: PdfSize, orientation: PageOrientation, margin: number): Page;
-  public addPage(
-    pageSize?: PdfSize,
-    orientationOrMargin?: PageOrientation | number,
-    margin?: number
-  ): Page {
+  public addPage(pageSize?: PdfSize, orientationOrMargin?: PageOrientation | number, margin?: number): Page {
     if (!pageSize) {
       // Default: use document settings
       const size = this.settings.getOrientedPageSize();
@@ -115,11 +108,7 @@ export class Document {
    * Replaces the current (last) page with a new page of the given settings,
    * preserving any elements already added to it.
    */
-  public setCurrentPageSettings(
-    pageSize: PdfSize,
-    orientation: PageOrientation,
-    margin: number
-  ): void {
+  public setCurrentPageSettings(pageSize: PdfSize, orientation: PageOrientation, margin: number): void {
     if (this._pages.length === 0) return;
     const orientedSize = pageSize.getOrientedSize(orientation);
     const newPage = new Page(orientedSize, margin);
@@ -196,9 +185,7 @@ export class Document {
       const fs: typeof import('fs') = require('fs');
       fs.writeFileSync(path, bytes);
     } catch (err) {
-      throw new Error(
-        `Document.save() requires Node.js. Use saveAsync() in browser environments. (${err})`
-      );
+      throw new Error(`Document.save() requires Node.js. Use saveAsync() in browser environments. (${err})`);
     }
   }
 
@@ -216,20 +203,12 @@ export class Document {
   private validateSettings(): void {
     const s = this.settings;
 
-    if (
-      s.isEncrypted &&
-      s.encryption!.algorithm === EncryptionAlgorithm.AES_256 &&
-      s.version !== PdfVersion.Pdf17
-    ) {
-      throw new Error(
-        'AES-256 encryption requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.'
-      );
+    if (s.isEncrypted && s.encryption!.algorithm === EncryptionAlgorithm.AES_256 && s.version !== PdfVersion.Pdf17) {
+      throw new Error('AES-256 encryption requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
     }
 
     if (s.pdfAEnabled && s.version !== PdfVersion.Pdf17) {
-      throw new Error(
-        'PDF/A-1b mode requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.'
-      );
+      throw new Error('PDF/A-1b mode requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
     }
 
     if (s.pdfAEnabled && s.isEncrypted) {
@@ -237,9 +216,7 @@ export class Document {
     }
 
     if (s.hasBookmarks && s.version !== PdfVersion.Pdf17) {
-      throw new Error(
-        'Bookmarks require PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.'
-      );
+      throw new Error('Bookmarks require PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
     }
   }
 

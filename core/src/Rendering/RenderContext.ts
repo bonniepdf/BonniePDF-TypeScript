@@ -21,7 +21,7 @@ export class RenderContext {
   public readonly pages: string[] = [];
   public readonly pageHyperlinks: Map<number, any[]> = new Map();
   public readonly tocEntries: Map<string, number> = new Map();
-  
+
   public canvas: ICanvas;
   public readonly isSvgMode: boolean;
   public currentPageIndex: number = 0;
@@ -79,19 +79,22 @@ export class RenderContext {
     if (!pdfCanvas || typeof pdfCanvas.getStream !== 'function') return;
     const ops = pdfCanvas.getStream();
     if (ops.length === 0) return;
-    this.pages[this.currentPageIndex] =
-      (this.pages[this.currentPageIndex] ?? '') + ops.join('');
+    this.pages[this.currentPageIndex] = (this.pages[this.currentPageIndex] ?? '') + ops.join('');
   }
 
   private updateCanvas(): void {
     if (this.isSvgMode) {
       this.canvas = new SvgCanvas(this.pageSize.width, this.pageSize.height);
     } else {
-      this.canvas = new PdfCanvas(this.pageSize.height, 0, 0,
+      this.canvas = new PdfCanvas(
+        this.pageSize.height,
+        0,
+        0,
         this.registerFont.bind(this),
         this.resolveImageResource.bind(this),
         this.resolveEmbeddedFont.bind(this),
-        this.trackGlyphUsage.bind(this));
+        this.trackGlyphUsage.bind(this)
+      );
     }
   }
 
@@ -99,11 +102,15 @@ export class RenderContext {
     if (this.isSvgMode) {
       return new SvgCanvas(this.pageSize.width, this.pageSize.height);
     }
-    return new PdfCanvas(this.pageSize.height, x, y,
+    return new PdfCanvas(
+      this.pageSize.height,
+      x,
+      y,
       this.registerFont.bind(this),
       this.resolveImageResource.bind(this),
       this.resolveEmbeddedFont.bind(this),
-      this.trackGlyphUsage.bind(this));
+      this.trackGlyphUsage.bind(this)
+    );
   }
 
   private resolveImageResource(info: ImageInfo): string {
@@ -132,7 +139,7 @@ export class RenderContext {
   }
 
   public newPage(): void {
-    this.flushCanvasToPage();   // save current page before moving on
+    this.flushCanvasToPage(); // save current page before moving on
     this.pages.push('');
     this.currentPageIndex++;
     this.currentX = this.margin;
@@ -158,8 +165,7 @@ export class RenderContext {
     if (!pdfCanvas || typeof pdfCanvas.getStream !== 'function') return;
     const ops = pdfCanvas.getStream();
     if (ops.length === 0) return;
-    this.pages[this.currentPageIndex] =
-      (this.pages[this.currentPageIndex] ?? '') + ops.join('');
+    this.pages[this.currentPageIndex] = (this.pages[this.currentPageIndex] ?? '') + ops.join('');
   }
 
   public setCanvas(canvas: ICanvas): void {
@@ -170,7 +176,7 @@ export class RenderContext {
     if (index < 0 || index >= this.pages.length) {
       throw new Error(`Page index ${index} out of range`);
     }
-    this.flushCanvasToPage();   // save current canvas before switching
+    this.flushCanvasToPage(); // save current canvas before switching
     this.currentPageIndex = index;
     this.updateCanvas();
   }
@@ -206,4 +212,3 @@ export class RenderContext {
     await this.resources.preloadAllFontsAsync();
   }
 }
-

@@ -51,5 +51,12 @@ export enum PdfPermissions {
   /**
    * All permissions granted.
    */
-  All = Print | Modify | Copy | AnnotateAndFillForms | FillForms | ExtractForAccessibility | Assemble | PrintHighQuality
+  All = Print |
+    Modify |
+    Copy |
+    AnnotateAndFillForms |
+    FillForms |
+    ExtractForAccessibility |
+    Assemble |
+    PrintHighQuality,
 }

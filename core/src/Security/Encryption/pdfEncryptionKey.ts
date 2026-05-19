@@ -12,10 +12,8 @@ export class PdfEncryptionKey {
    * Standard 32-byte padding string used in PDF encryption (from PDF spec).
    */
   private static readonly PADDING_BYTES: Uint8Array = new Uint8Array([
-    0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41,
-    0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08,
-    0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80,
-    0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A
+    0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41, 0x64, 0x00, 0x4e, 0x56, 0xff, 0xfa, 0x01, 0x08, 0x2e, 0x2e, 0x00,
+    0xb6, 0xd0, 0x68, 0x3e, 0x80, 0x2f, 0x0c, 0xa9, 0xfe, 0x64, 0x53, 0x69, 0x7a,
   ]);
 
   private readonly keyLength: number;
@@ -160,15 +158,15 @@ export class PdfEncryptionKey {
 
     // Step b: Concatenate: password + O + P + ID + (metadata flag)
     const permBytes = new Uint8Array(4);
-    permBytes[0] = permissions & 0xFF;
-    permBytes[1] = (permissions >> 8) & 0xFF;
-    permBytes[2] = (permissions >> 16) & 0xFF;
-    permBytes[3] = (permissions >> 24) & 0xFF;
+    permBytes[0] = permissions & 0xff;
+    permBytes[1] = (permissions >> 8) & 0xff;
+    permBytes[2] = (permissions >> 16) & 0xff;
+    permBytes[3] = (permissions >> 24) & 0xff;
 
     let toHash: Uint8Array;
     if (this.revision >= 3 && !encryptMetadata) {
       // Add 0xFFFFFFFF if not encrypting metadata
-      const noEncryptFlag = new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF]);
+      const noEncryptFlag = new Uint8Array([0xff, 0xff, 0xff, 0xff]);
       toHash = PdfEncryptionKey.concatenate(userPadded, oEntry, permBytes, documentId, noEncryptFlag);
     } else {
       toHash = PdfEncryptionKey.concatenate(userPadded, oEntry, permBytes, documentId);
@@ -238,11 +236,11 @@ export class PdfEncryptionKey {
     const data = new Uint8Array(this.keyLength + 5);
     data.set(this.encryptionKey, 0);
 
-    data[this.keyLength] = objectNumber & 0xFF;
-    data[this.keyLength + 1] = (objectNumber >> 8) & 0xFF;
-    data[this.keyLength + 2] = (objectNumber >> 16) & 0xFF;
-    data[this.keyLength + 3] = generationNumber & 0xFF;
-    data[this.keyLength + 4] = (generationNumber >> 8) & 0xFF;
+    data[this.keyLength] = objectNumber & 0xff;
+    data[this.keyLength + 1] = (objectNumber >> 8) & 0xff;
+    data[this.keyLength + 2] = (objectNumber >> 16) & 0xff;
+    data[this.keyLength + 3] = generationNumber & 0xff;
+    data[this.keyLength + 4] = (generationNumber >> 8) & 0xff;
 
     // Hash and use first n+5 bytes (max 16)
     const hash = Md5Hash.compute(data);
@@ -256,7 +254,7 @@ export class PdfEncryptionKey {
   private static concatenate(...arrays: Uint8Array[]): Uint8Array {
     const totalLength = arrays.reduce((sum, arr) => sum + (arr?.length || 0), 0);
     const result = new Uint8Array(totalLength);
-    
+
     let offset = 0;
     for (const arr of arrays) {
       if (arr && arr.length > 0) {

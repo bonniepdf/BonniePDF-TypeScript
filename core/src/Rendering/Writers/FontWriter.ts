@@ -10,21 +10,28 @@ export class FontWriter {
 
   public writeType1Font(id: number, fontName: string): void {
     if ('writeObject' in this.writer) {
-      (this.writer as any).writeObject(id, new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/Type1'],
-        ['/BaseFont', `/${fontName}`]
-      ]));
+      (this.writer as any).writeObject(
+        id,
+        new Map([
+          ['/Type', '/Font'],
+          ['/Subtype', '/Type1'],
+          ['/BaseFont', `/${fontName}`],
+        ])
+      );
     }
   }
 
   public async writeType1FontAsync(id: number, fontName: string): Promise<void> {
     if ('writeObjectAsync' in this.writer) {
-      await (this.writer as any).writeObjectAsync(id, new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/Type1'],
-        ['/BaseFont', `/${fontName}`]
-      ]), null);
+      await (this.writer as any).writeObjectAsync(
+        id,
+        new Map([
+          ['/Type', '/Font'],
+          ['/Subtype', '/Type1'],
+          ['/BaseFont', `/${fontName}`],
+        ]),
+        null
+      );
     }
   }
 
@@ -98,19 +105,26 @@ export class FontWriter {
     this.writeToUnicodeCMap(toUnicodeId, cmapBuilder.build());
 
     // 7. Write Type0 font
-    (this.writer as any).writeObject(id, new Map([
-      ['/Type', '/Font'],
-      ['/Subtype', '/Type0'],
-      ['/BaseFont', `/${baseFontName}`],
-      ['/Encoding', '/Identity-H'],
-      ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
-      ['/ToUnicode', `${toUnicodeId} 0 R`]
-    ]));
+    (this.writer as any).writeObject(
+      id,
+      new Map([
+        ['/Type', '/Font'],
+        ['/Subtype', '/Type0'],
+        ['/BaseFont', `/${baseFontName}`],
+        ['/Encoding', '/Identity-H'],
+        ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
+        ['/ToUnicode', `${toUnicodeId} 0 R`],
+      ])
+    );
 
     return id;
   }
 
-  public async writeEmbeddedTtfFontAsync(id: number, fontInfo: EmbeddedFontInfo, enableSubsetting = true): Promise<number> {
+  public async writeEmbeddedTtfFontAsync(
+    id: number,
+    fontInfo: EmbeddedFontInfo,
+    enableSubsetting = true
+  ): Promise<number> {
     if (!('writeObjectAsync' in this.writer)) {
       throw new Error('AsyncFontWriter requires IAsyncPdfWriter');
     }
@@ -175,31 +189,50 @@ export class FontWriter {
     await this.writeToUnicodeCMapAsync(toUnicodeId, cmapBuilder.build());
 
     // 7. Write Type0 font
-    await (this.writer as any).writeObjectAsync(id, new Map([
-      ['/Type', '/Font'],
-      ['/Subtype', '/Type0'],
-      ['/BaseFont', `/${baseFontName}`],
-      ['/Encoding', '/Identity-H'],
-      ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
-      ['/ToUnicode', `${toUnicodeId} 0 R`]
-    ]), null);
+    await (this.writer as any).writeObjectAsync(
+      id,
+      new Map([
+        ['/Type', '/Font'],
+        ['/Subtype', '/Type0'],
+        ['/BaseFont', `/${baseFontName}`],
+        ['/Encoding', '/Identity-H'],
+        ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
+        ['/ToUnicode', `${toUnicodeId} 0 R`],
+      ]),
+      null
+    );
 
     return id;
   }
 
   private writeFontFile2(id: number, fontData: Uint8Array): void {
     if ('writeObject' in this.writer) {
-      (this.writer as any).writeCompressedBinaryObject(id, new Map([['/Length1', fontData.length.toString()]]), fontData);
+      (this.writer as any).writeCompressedBinaryObject(
+        id,
+        new Map([['/Length1', fontData.length.toString()]]),
+        fontData
+      );
     }
   }
 
   private async writeFontFile2Async(id: number, fontData: Uint8Array): Promise<void> {
     if ('writeObjectAsync' in this.writer) {
-      await (this.writer as any).writeCompressedBinaryObjectAsync(id, new Map([['/Length1', fontData.length.toString()]]), fontData, fontData.length);
+      await (this.writer as any).writeCompressedBinaryObjectAsync(
+        id,
+        new Map([['/Length1', fontData.length.toString()]]),
+        fontData,
+        fontData.length
+      );
     }
   }
 
-  private writeFontDescriptor(id: number, font: TtfFont, baseFontName: string, fontFile2Id: number, cidSetId = 0): void {
+  private writeFontDescriptor(
+    id: number,
+    font: TtfFont,
+    baseFontName: string,
+    fontFile2Id: number,
+    cidSetId = 0
+  ): void {
     if ('writeObject' in this.writer) {
       const scale = 1000 / font.unitsPerEm;
       const ascent = Math.round(font.ascender * scale);
@@ -227,7 +260,13 @@ export class FontWriter {
     }
   }
 
-  private async writeFontDescriptorAsync(id: number, font: TtfFont, baseFontName: string, fontFile2Id: number, cidSetId = 0): Promise<void> {
+  private async writeFontDescriptorAsync(
+    id: number,
+    font: TtfFont,
+    baseFontName: string,
+    fontFile2Id: number,
+    cidSetId = 0
+  ): Promise<void> {
     if ('writeObjectAsync' in this.writer) {
       const scale = 1000 / font.unitsPerEm;
       const ascent = Math.round(font.ascender * scale);
@@ -277,37 +316,56 @@ export class FontWriter {
     for (const cid of usedGlyphIds) {
       const byteIndex = Math.floor(cid / 8);
       const bitIndex = 7 - (cid % 8);
-      data[byteIndex] |= (1 << bitIndex);
+      data[byteIndex] |= 1 << bitIndex;
     }
 
     return data;
   }
 
-  private writeCIDFont(id: number, baseFontName: string, fontDescriptorId: number, widthArray: string, cidToGidMapRef: string): void {
+  private writeCIDFont(
+    id: number,
+    baseFontName: string,
+    fontDescriptorId: number,
+    widthArray: string,
+    cidToGidMapRef: string
+  ): void {
     if ('writeObject' in this.writer) {
-      (this.writer as any).writeObject(id, new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/CIDFontType2'],
-        ['/BaseFont', `/${baseFontName}`],
-        ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
-        ['/FontDescriptor', `${fontDescriptorId} 0 R`],
-        ['/W', widthArray],
-        ['/CIDToGIDMap', cidToGidMapRef]
-      ]));
+      (this.writer as any).writeObject(
+        id,
+        new Map([
+          ['/Type', '/Font'],
+          ['/Subtype', '/CIDFontType2'],
+          ['/BaseFont', `/${baseFontName}`],
+          ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
+          ['/FontDescriptor', `${fontDescriptorId} 0 R`],
+          ['/W', widthArray],
+          ['/CIDToGIDMap', cidToGidMapRef],
+        ])
+      );
     }
   }
 
-  private async writeCIDFontAsync(id: number, baseFontName: string, fontDescriptorId: number, widthArray: string, cidToGidMapRef: string): Promise<void> {
+  private async writeCIDFontAsync(
+    id: number,
+    baseFontName: string,
+    fontDescriptorId: number,
+    widthArray: string,
+    cidToGidMapRef: string
+  ): Promise<void> {
     if ('writeObjectAsync' in this.writer) {
-      await (this.writer as any).writeObjectAsync(id, new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/CIDFontType2'],
-        ['/BaseFont', `/${baseFontName}`],
-        ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
-        ['/FontDescriptor', `${fontDescriptorId} 0 R`],
-        ['/W', widthArray],
-        ['/CIDToGIDMap', cidToGidMapRef]
-      ]), null);
+      await (this.writer as any).writeObjectAsync(
+        id,
+        new Map([
+          ['/Type', '/Font'],
+          ['/Subtype', '/CIDFontType2'],
+          ['/BaseFont', `/${baseFontName}`],
+          ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
+          ['/FontDescriptor', `${fontDescriptorId} 0 R`],
+          ['/W', widthArray],
+          ['/CIDToGIDMap', cidToGidMapRef],
+        ]),
+        null
+      );
     }
   }
 
@@ -318,23 +376,27 @@ export class FontWriter {
 
       for (const [originalGid, newGid] of oldToNewGidMap) {
         const offset = originalGid * 2;
-        mapData[offset] = (newGid >> 8);
-        mapData[offset + 1] = (newGid & 0xFF);
+        mapData[offset] = newGid >> 8;
+        mapData[offset + 1] = newGid & 0xff;
       }
 
       (this.writer as any).writeCompressedBinaryObject(id, new Map(), mapData);
     }
   }
 
-  private async writeCIDToGIDMapAsync(id: number, oldToNewGidMap: Map<number, number>, maxOriginalGid: number): Promise<void> {
+  private async writeCIDToGIDMapAsync(
+    id: number,
+    oldToNewGidMap: Map<number, number>,
+    maxOriginalGid: number
+  ): Promise<void> {
     if ('writeObjectAsync' in this.writer) {
       const mapSize = (maxOriginalGid + 1) * 2;
       const mapData = new Uint8Array(mapSize);
 
       for (const [originalGid, newGid] of oldToNewGidMap) {
         const offset = originalGid * 2;
-        mapData[offset] = (newGid >> 8);
-        mapData[offset + 1] = (newGid & 0xFF);
+        mapData[offset] = newGid >> 8;
+        mapData[offset + 1] = newGid & 0xff;
       }
 
       await (this.writer as any).writeCompressedBinaryObjectAsync(id, new Map(), mapData, mapData.length);
@@ -376,5 +438,4 @@ export class FontWriter {
 
     return result + ']';
   }
-
 }

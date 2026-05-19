@@ -62,7 +62,11 @@ describe('FontEmbedding integration', () => {
 
   it('text alignment justify generates valid PDF', () => {
     doc = new Document();
-    const tb = new TextBlock('This is a justified paragraph with enough text to span across the full width.', 12, StandardFonts.Helvetica);
+    const tb = new TextBlock(
+      'This is a justified paragraph with enough text to span across the full width.',
+      12,
+      StandardFonts.Helvetica
+    );
     tb.alignment = TextAlignment.Justify;
     doc.add(tb);
     assertValidPdf(doc.generateBytes());

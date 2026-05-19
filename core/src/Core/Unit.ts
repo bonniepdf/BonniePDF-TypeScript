@@ -18,5 +18,5 @@ export enum Unit {
   /**
    * Millimeters - 2.835 points
    */
-  Millimeter = 'Millimeter'
+  Millimeter = 'Millimeter',
 }

@@ -17,7 +17,7 @@ export class Hyperlink implements IElement {
   /**
    * Gets or sets the URI (URL) that this hyperlink points to
    */
-  uri: string = "";
+  uri: string = '';
   /**
    * Gets or sets the target 0-based page index (for internal links)
    */
@@ -74,14 +74,14 @@ export class Hyperlink implements IElement {
    * @param uri - The URI (URL) that this hyperlink points to
    */
   constructor(text: string, uri?: string) {
-    if (!text || text === "") {
-      throw new Error("TextBlock cannot be null or empty");
+    if (!text || text === '') {
+      throw new Error('TextBlock cannot be null or empty');
     }
     this.text = text;
 
     if (uri !== undefined) {
-      if (!uri || uri === "") {
-        throw new Error("URI cannot be null or empty");
+      if (!uri || uri === '') {
+        throw new Error('URI cannot be null or empty');
       }
       this.uri = uri;
     }
@@ -199,7 +199,7 @@ export class Hyperlink implements IElement {
    * @param maxWidth - The maximum width for text wrapping
    */
   private computeLineCount(maxWidth: number): number {
-    if (!this.text || this.text === "") return 0;
+    if (!this.text || this.text === '') return 0;
     return this.computeLines(maxWidth).length;
   }
 
@@ -210,13 +210,13 @@ export class Hyperlink implements IElement {
    */
   private computeLines(maxWidth: number): string[] {
     const lines: string[] = [];
-    if (!this.text || this.text === "") return lines;
+    if (!this.text || this.text === '') return lines;
 
     const words = this.text.split(' ');
-    let currentLine = "";
+    let currentLine = '';
 
     for (const word of words) {
-      const testLine = currentLine === "" ? word : currentLine + ' ' + word;
+      const testLine = currentLine === '' ? word : currentLine + ' ' + word;
 
       const testWidth = FontMetrics.getStringWidth(testLine, this.fontName, this.fontSize);
 
@@ -228,7 +228,7 @@ export class Hyperlink implements IElement {
       }
     }
 
-    if (currentLine !== "") lines.push(currentLine);
+    if (currentLine !== '') lines.push(currentLine);
     return lines;
   }
 

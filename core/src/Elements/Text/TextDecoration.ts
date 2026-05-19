@@ -9,5 +9,5 @@ export enum TextDecoration {
   Underline = 1,
 
   /** Line drawn through the middle of the text */
-  Strikethrough = 2
+  Strikethrough = 2,
 }

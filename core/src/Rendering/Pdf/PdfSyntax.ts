@@ -3,7 +3,7 @@ export class PdfSyntax {
     if (!input) return '()';
 
     for (const c of input) {
-      if (c.charCodeAt(0) > 0xFF) {
+      if (c.charCodeAt(0) > 0xff) {
         const utf16be = new TextEncoder().encode(input);
         let sb = '<FEFF';
         for (const b of utf16be) {
@@ -22,15 +22,33 @@ export class PdfSyntax {
     let result = '';
     for (const c of input) {
       switch (c) {
-        case '\\': result += '\\\\'; break;
-        case '(': result += '\\('; break;
-        case ')': result += '\\)'; break;
-        case '\r': result += '\\r'; break;
-        case '\n': result += '\\n'; break;
-        case '\t': result += '\\t'; break;
-        case '\b': result += '\\b'; break;
-        case '\f': result += '\\f'; break;
-        default: result += c; break;
+        case '\\':
+          result += '\\\\';
+          break;
+        case '(':
+          result += '\\(';
+          break;
+        case ')':
+          result += '\\)';
+          break;
+        case '\r':
+          result += '\\r';
+          break;
+        case '\n':
+          result += '\\n';
+          break;
+        case '\t':
+          result += '\\t';
+          break;
+        case '\b':
+          result += '\\b';
+          break;
+        case '\f':
+          result += '\\f';
+          break;
+        default:
+          result += c;
+          break;
       }
     }
     return result;
@@ -44,7 +62,9 @@ export class PdfSyntax {
     }
     const sign = offset > 0 ? '-' : '+';
     const absOffset = Math.abs(offset);
-    const hours = Math.floor(absOffset / 60).toString().padStart(2, '0');
+    const hours = Math.floor(absOffset / 60)
+      .toString()
+      .padStart(2, '0');
     const mins = (absOffset % 60).toString().padStart(2, '0');
     return `D:${datePart}${sign}${hours}'${mins}'`;
   }
@@ -68,9 +88,7 @@ export class PdfSyntax {
       // Resolve the Unicode codepoint to the font's actual glyph ID.
       // CIDToGIDMap, W array, and ToUnicode CMap are all keyed by original GID,
       // so the content stream CIDs must be original GIDs too.
-      const gid = (font && typeof font.getGlyphId === 'function')
-        ? font.getGlyphId(code)
-        : code;
+      const gid = font && typeof font.getGlyphId === 'function' ? font.getGlyphId(code) : code;
       result += gid.toString(16).toUpperCase().padStart(4, '0');
     }
     return result + '>';

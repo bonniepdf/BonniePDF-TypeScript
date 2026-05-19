@@ -13,7 +13,15 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
-  public static strokeRect(stream: string[], x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
+  public static strokeRect(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: Color,
+    strokeWidth: number
+  ): void {
     if (strokeWidth <= 0) return;
 
     const halfStroke = strokeWidth / 2;
@@ -31,8 +39,16 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
-  public static drawBox(stream: string[], x: number, y: number, width: number, height: number,
-    backgroundColor?: Color, borderColor?: Color, borderWidth = 0): void {
+  public static drawBox(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    backgroundColor?: Color,
+    borderColor?: Color,
+    borderWidth = 0
+  ): void {
     if (!backgroundColor && (!borderColor || borderWidth <= 0)) return;
 
     if (backgroundColor) {
@@ -52,16 +68,56 @@ export class PdfDrawing {
     PdfOperators.setFillColor(stream, color);
 
     PdfOperators.moveTo(stream, centerX + radius, centerY);
-    PdfOperators.curveTo(stream, centerX + radius, centerY + kr, centerX + kr, centerY + radius, centerX, centerY + radius);
-    PdfOperators.curveTo(stream, centerX - kr, centerY + radius, centerX - radius, centerY + kr, centerX - radius, centerY);
-    PdfOperators.curveTo(stream, centerX - radius, centerY - kr, centerX - kr, centerY - radius, centerX, centerY - radius);
-    PdfOperators.curveTo(stream, centerX + kr, centerY - radius, centerX + radius, centerY - kr, centerX + radius, centerY);
+    PdfOperators.curveTo(
+      stream,
+      centerX + radius,
+      centerY + kr,
+      centerX + kr,
+      centerY + radius,
+      centerX,
+      centerY + radius
+    );
+    PdfOperators.curveTo(
+      stream,
+      centerX - kr,
+      centerY + radius,
+      centerX - radius,
+      centerY + kr,
+      centerX - radius,
+      centerY
+    );
+    PdfOperators.curveTo(
+      stream,
+      centerX - radius,
+      centerY - kr,
+      centerX - kr,
+      centerY - radius,
+      centerX,
+      centerY - radius
+    );
+    PdfOperators.curveTo(
+      stream,
+      centerX + kr,
+      centerY - radius,
+      centerX + radius,
+      centerY - kr,
+      centerX + radius,
+      centerY
+    );
 
     PdfOperators.fill(stream);
     PdfOperators.restoreState(stream);
   }
 
-  public static fillRoundedRect(stream: string[], x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+  public static fillRoundedRect(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color
+  ): void {
     if (radius <= 0) {
       this.fillRect(stream, x, y, width, height, color);
       return;
@@ -77,7 +133,16 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
-  public static strokeRoundedRect(stream: string[], x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void {
+  public static strokeRoundedRect(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color,
+    strokeWidth: number
+  ): void {
     if (strokeWidth <= 0) return;
 
     if (radius <= 0) {
@@ -120,7 +185,14 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
-  private static appendRoundedRectPath(stream: string[], x: number, y: number, width: number, height: number, radius: number): void {
+  private static appendRoundedRectPath(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+  ): void {
     const k = 0.552284749831;
     const kr = k * radius;
     const r = radius;
@@ -129,7 +201,15 @@ export class PdfDrawing {
     PdfOperators.lineTo(stream, x + width - r, y);
     PdfOperators.curveTo(stream, x + width - r + kr, y, x + width, y + r - kr, x + width, y + r);
     PdfOperators.lineTo(stream, x + width, y + height - r);
-    PdfOperators.curveTo(stream, x + width, y + height - r + kr, x + width - r + kr, y + height, x + width - r, y + height);
+    PdfOperators.curveTo(
+      stream,
+      x + width,
+      y + height - r + kr,
+      x + width - r + kr,
+      y + height,
+      x + width - r,
+      y + height
+    );
     PdfOperators.lineTo(stream, x + r, y + height);
     PdfOperators.curveTo(stream, x + r - kr, y + height, x, y + height - r + kr, x, y + height - r);
     PdfOperators.lineTo(stream, x, y + r);

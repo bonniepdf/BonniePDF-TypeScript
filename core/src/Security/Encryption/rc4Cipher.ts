@@ -34,7 +34,7 @@ export class RC4Cipher {
     // Key scheduling
     let j = 0;
     for (let i = 0; i < 256; i++) {
-      j = (j + this.state[i] + key[i % key.length]) & 0xFF;
+      j = (j + this.state[i] + key[i % key.length]) & 0xff;
       this.swap(i, j);
     }
   }
@@ -53,10 +53,10 @@ export class RC4Cipher {
    * Pseudo-Random Generation Algorithm (PRGA).
    */
   private nextByte(): number {
-    this.i = (this.i + 1) & 0xFF;
-    this.j = (this.j + this.state[this.i]) & 0xFF;
+    this.i = (this.i + 1) & 0xff;
+    this.j = (this.j + this.state[this.i]) & 0xff;
     this.swap(this.i, this.j);
-    return this.state[(this.state[this.i] + this.state[this.j]) & 0xFF];
+    return this.state[(this.state[this.i] + this.state[this.j]) & 0xff];
   }
 
   /**

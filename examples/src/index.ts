@@ -1,349 +1,359 @@
-import { Document } from '@bonniepdf/core'
-import { generate as simpleDocument }       from './simple-document';
-import { generate as marginExample }        from './margin-example';
-import { generate as pageSettings }         from './page-settings';
-import { generate as headersFooters }       from './headers-footers';
-import { generate as horizontalStacks }     from './horizontal-stacks';
-import { generate as textBlockOverflow }    from './text-block-overflow';
-import { generate as verticalStackOverflow} from './vertical-stack-overflow';
-import { generate as multiPageFlow }        from './multi-page-flow';
-import { generate as textAlignment }        from './text-alignment';
-import { generate as bookPageLayout }       from './book-page-layout';
-import { generate as richTextStyles }       from './rich-text-styles';
-import { generate as textDecorations }      from './text-decorations';
-import { generate as customFonts }          from './custom-fonts';
-import { generate as emojisAndUnicode }     from './emojis-and-unicode';
-import { generate as dickensNovel }         from './dickens-novel';
-import { generate as lists }                from './lists';
-import { generate as hyperlinks }           from './hyperlinks';
-import { generate as shapesAndBorders }     from './shapes-and-borders';
-import { generate as qrCodes }              from './qr-codes';
-import { generate as images }               from './images';
-import { generate as chartShowcase }        from './chart-showcase';
-import { generate as barChart }             from './bar-chart';
-import { generate as groupedBarChart }      from './grouped-bar-chart';
-import { generate as lineChart }            from './line-chart';
-import { generate as areaChart }            from './area-chart';
-import { generate as lollipopChart }        from './lollipop-chart';
-import { generate as dotPlotChart }         from './dot-plot-chart';
-import { generate as pieChart }             from './pie-chart';
+import { Document } from '@bonniepdf/core';
+import { generate as simpleDocument } from './simple-document';
+import { generate as marginExample } from './margin-example';
+import { generate as pageSettings } from './page-settings';
+import { generate as headersFooters } from './headers-footers';
+import { generate as horizontalStacks } from './horizontal-stacks';
+import { generate as textBlockOverflow } from './text-block-overflow';
+import { generate as verticalStackOverflow } from './vertical-stack-overflow';
+import { generate as multiPageFlow } from './multi-page-flow';
+import { generate as textAlignment } from './text-alignment';
+import { generate as bookPageLayout } from './book-page-layout';
+import { generate as richTextStyles } from './rich-text-styles';
+import { generate as textDecorations } from './text-decorations';
+import { generate as customFonts } from './custom-fonts';
+import { generate as emojisAndUnicode } from './emojis-and-unicode';
+import { generate as dickensNovel } from './dickens-novel';
+import { generate as lists } from './lists';
+import { generate as hyperlinks } from './hyperlinks';
+import { generate as shapesAndBorders } from './shapes-and-borders';
+import { generate as qrCodes } from './qr-codes';
+import { generate as images } from './images';
+import { generate as chartShowcase } from './chart-showcase';
+import { generate as barChart } from './bar-chart';
+import { generate as groupedBarChart } from './grouped-bar-chart';
+import { generate as lineChart } from './line-chart';
+import { generate as areaChart } from './area-chart';
+import { generate as lollipopChart } from './lollipop-chart';
+import { generate as dotPlotChart } from './dot-plot-chart';
+import { generate as pieChart } from './pie-chart';
 import { generate as multiSeriesLineChart } from './multi-series-line-chart';
-import { generate as watermarking }         from './watermarking';
-import { generate as encryption }           from './encryption';
-import { generate as businessInvoice }      from './business-invoice';
-import { generate as userDirectory }        from './user-directory';
-import { generate as movieCatalog }         from './movie-catalog';
-import { generate as financialDashboard }   from './financial-dashboard';
+import { generate as watermarking } from './watermarking';
+import { generate as encryption } from './encryption';
+import { generate as businessInvoice } from './business-invoice';
+import { generate as userDirectory } from './user-directory';
+import { generate as movieCatalog } from './movie-catalog';
+import { generate as financialDashboard } from './financial-dashboard';
 
 export interface ExampleDef {
-  id:            string;
-  name:          string;
-  category:      string;
-  description:   string;
-  filename:      string;
-  generate:      () => Document;
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  filename: string;
+  generate: () => Document;
   thumbnailsOpen?: boolean;
 }
 
 export const examples: ExampleDef[] = [
   // ── Basics ────────────────────────────────────────────────────────────────
   {
-    id:          'simple-document',
-    name:        'Simple Document',
-    category:    'Basics',
+    id: 'simple-document',
+    name: 'Simple Document',
+    category: 'Basics',
     description: '3-page document demonstrating the core Document API — text, spacers, and custom page sizes.',
-    filename:    'simple-document.pdf',
-    generate:    simpleDocument,
+    filename: 'simple-document.pdf',
+    generate: simpleDocument,
   },
   {
-    id:          'margin-example',
-    name:        'Margins & Units',
-    category:    'Basics',
+    id: 'margin-example',
+    name: 'Margins & Units',
+    category: 'Basics',
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
-    filename:    'margin-example.pdf',
-    generate:    marginExample,
+    filename: 'margin-example.pdf',
+    generate: marginExample,
   },
   {
-    id:          'page-settings',
-    name:        'Page Settings',
-    category:    'Basics',
+    id: 'page-settings',
+    name: 'Page Settings',
+    category: 'Basics',
     description: 'Gallery of every standard page size in both portrait and landscape orientation.',
-    filename:    'page-settings.pdf',
-    generate:    pageSettings,
+    filename: 'page-settings.pdf',
+    generate: pageSettings,
   },
 
   // ── Layout ────────────────────────────────────────────────────────────────
   {
-    id:          'headers-footers',
-    name:        'Headers & Footers',
-    category:    'Layout',
+    id: 'headers-footers',
+    name: 'Headers & Footers',
+    category: 'Layout',
     description: 'Page templates with dynamic header and footer content on every page.',
-    filename:    'headers-footers.pdf',
-    generate:    headersFooters,
+    filename: 'headers-footers.pdf',
+    generate: headersFooters,
   },
   {
-    id:             'horizontal-stacks',
-    name:           'Horizontal Stacks',
-    category:       'Layout',
-    description:    'Flex-like horizontal layout with equal, weighted, and centre-aligned distributions.',
-    filename:       'horizontal-stacks.pdf',
-    generate:       horizontalStacks,
+    id: 'horizontal-stacks',
+    name: 'Horizontal Stacks',
+    category: 'Layout',
+    description: 'Flex-like horizontal layout with equal, weighted, and centre-aligned distributions.',
+    filename: 'horizontal-stacks.pdf',
+    generate: horizontalStacks,
     thumbnailsOpen: false,
   },
   {
-    id:          'text-block-overflow',
-    name:        'TextBlock Overflow',
-    category:    'Layout',
+    id: 'text-block-overflow',
+    name: 'TextBlock Overflow',
+    category: 'Layout',
     description: 'Long text content flowing automatically across multiple pages with a page-count footer.',
-    filename:    'text-block-overflow.pdf',
-    generate:    textBlockOverflow,
+    filename: 'text-block-overflow.pdf',
+    generate: textBlockOverflow,
   },
   {
-    id:          'vertical-stack-overflow',
-    name:        'VerticalStack Overflow',
-    category:    'Layout',
+    id: 'vertical-stack-overflow',
+    name: 'VerticalStack Overflow',
+    category: 'Layout',
     description: '75-item card list inside a VerticalStack that paginates automatically.',
-    filename:    'vertical-stack-overflow.pdf',
-    generate:    verticalStackOverflow,
+    filename: 'vertical-stack-overflow.pdf',
+    generate: verticalStackOverflow,
   },
   {
-    id:          'multi-page-flow',
-    name:        'Multi-Page Flow',
-    category:    'Layout',
+    id: 'multi-page-flow',
+    name: 'Multi-Page Flow',
+    category: 'Layout',
     description: 'Landscape document combining a 150-row table with repeating headers and multi-page text sections.',
-    filename:    'multi-page-flow.pdf',
-    generate:    multiPageFlow,
+    filename: 'multi-page-flow.pdf',
+    generate: multiPageFlow,
   },
 
   // ── Typography ────────────────────────────────────────────────────────────
   {
-    id:             'text-alignment',
-    name:           'Text Alignment',
-    category:       'Typography',
-    description:    'Left, center, right and justified text alignment including book-style paragraphs.',
-    filename:       'text-alignment.pdf',
-    generate:       textAlignment,
+    id: 'text-alignment',
+    name: 'Text Alignment',
+    category: 'Typography',
+    description: 'Left, center, right and justified text alignment including book-style paragraphs.',
+    filename: 'text-alignment.pdf',
+    generate: textAlignment,
     thumbnailsOpen: false,
   },
   {
-    id:             'book-page-layout',
-    name:           'Book Page Layout',
-    category:       'Typography',
-    description:    'Advanced book-style typography with Times family fonts, pull-quote block, and a chapter footer.',
-    filename:       'book-page-layout.pdf',
-    generate:       bookPageLayout,
+    id: 'book-page-layout',
+    name: 'Book Page Layout',
+    category: 'Typography',
+    description: 'Advanced book-style typography with Times family fonts, pull-quote block, and a chapter footer.',
+    filename: 'book-page-layout.pdf',
+    generate: bookPageLayout,
     thumbnailsOpen: false,
   },
   {
-    id:          'rich-text-styles',
-    name:        'Rich Text Styles',
-    category:    'Typography',
-    description: 'Mixed inline formatting — bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
-    filename:    'rich-text-styles.pdf',
-    generate:    richTextStyles,
+    id: 'rich-text-styles',
+    name: 'Rich Text Styles',
+    category: 'Typography',
+    description:
+      'Mixed inline formatting — bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
+    filename: 'rich-text-styles.pdf',
+    generate: richTextStyles,
   },
   {
-    id:             'text-decorations',
-    name:           'Text Decorations',
-    category:       'Typography',
-    description:    'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes.',
-    filename:       'text-decorations.pdf',
-    generate:       textDecorations,
+    id: 'text-decorations',
+    name: 'Text Decorations',
+    category: 'Typography',
+    description:
+      'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes.',
+    filename: 'text-decorations.pdf',
+    generate: textDecorations,
     thumbnailsOpen: false,
   },
   {
-    id:             'custom-fonts',
-    name:           'Custom Fonts',
-    category:       'Typography',
-    description:    'TrueType font embedding with full Unicode symbol coverage — currency, Greek, mathematical, and arrow characters.',
-    filename:       'custom-fonts.pdf',
-    generate:       customFonts,
+    id: 'custom-fonts',
+    name: 'Custom Fonts',
+    category: 'Typography',
+    description:
+      'TrueType font embedding with full Unicode symbol coverage — currency, Greek, mathematical, and arrow characters.',
+    filename: 'custom-fonts.pdf',
+    generate: customFonts,
     thumbnailsOpen: false,
   },
   {
-    id:             'emojis-and-unicode',
-    name:           'Emojis & Unicode',
-    category:       'Typography',
-    description:    'Supplementary Unicode plane support with emoji sections and mixed text/emoji status lines.',
-    filename:       'emojis-and-unicode.pdf',
-    generate:       emojisAndUnicode,
+    id: 'emojis-and-unicode',
+    name: 'Emojis & Unicode',
+    category: 'Typography',
+    description: 'Supplementary Unicode plane support with emoji sections and mixed text/emoji status lines.',
+    filename: 'emojis-and-unicode.pdf',
+    generate: emojisAndUnicode,
     thumbnailsOpen: false,
   },
   {
-    id:          'dickens-novel',
-    name:        'Dickens: A Tale of Two Cities',
-    category:    'Typography',
-    description: 'Multi-hundred-page book layout with VisualToc, alternating running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
-    filename:    'dickens-novel.pdf',
-    generate:    dickensNovel,
+    id: 'dickens-novel',
+    name: 'Dickens: A Tale of Two Cities',
+    category: 'Typography',
+    description:
+      'Multi-hundred-page book layout with VisualToc, alternating running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
+    filename: 'dickens-novel.pdf',
+    generate: dickensNovel,
   },
 
   // ── Elements ──────────────────────────────────────────────────────────────
   {
-    id:          'lists',
-    name:        'Lists',
-    category:    'Elements',
-    description: 'Ordered (decimal, roman, alpha) and unordered (disc, circle, square, dash, custom) lists including nested lists.',
-    filename:    'lists.pdf',
-    generate:    lists,
+    id: 'lists',
+    name: 'Lists',
+    category: 'Elements',
+    description:
+      'Ordered (decimal, roman, alpha) and unordered (disc, circle, square, dash, custom) lists including nested lists.',
+    filename: 'lists.pdf',
+    generate: lists,
   },
   {
-    id:             'hyperlinks',
-    name:           'Hyperlinks',
-    category:       'Elements',
-    description:    'External hyperlinks with custom font, size, and colour styling.',
-    filename:       'hyperlinks.pdf',
-    generate:       hyperlinks,
+    id: 'hyperlinks',
+    name: 'Hyperlinks',
+    category: 'Elements',
+    description: 'External hyperlinks with custom font, size, and colour styling.',
+    filename: 'hyperlinks.pdf',
+    generate: hyperlinks,
     thumbnailsOpen: false,
   },
   {
-    id:          'shapes-and-borders',
-    name:        'Shapes & Borders',
-    category:    'Elements',
+    id: 'shapes-and-borders',
+    name: 'Shapes & Borders',
+    category: 'Elements',
     description: 'Rounded rectangles, bordered containers, card layouts, and status banners.',
-    filename:    'shapes-and-borders.pdf',
-    generate:    shapesAndBorders,
+    filename: 'shapes-and-borders.pdf',
+    generate: shapesAndBorders,
   },
   {
-    id:          'qr-codes',
-    name:        'QR Codes',
-    category:    'Elements',
-    description: 'Native vector QR codes with all four error correction levels, custom colours, and transparent backgrounds.',
-    filename:    'qr-codes.pdf',
-    generate:    qrCodes,
+    id: 'qr-codes',
+    name: 'QR Codes',
+    category: 'Elements',
+    description:
+      'Native vector QR codes with all four error correction levels, custom colours, and transparent backgrounds.',
+    filename: 'qr-codes.pdf',
+    generate: qrCodes,
   },
   {
-    id:          'images',
-    name:        'Images',
-    category:    'Elements',
+    id: 'images',
+    name: 'Images',
+    category: 'Elements',
     description: 'PNG embedding with contain, cover, and fill fit modes, plus alpha transparency support.',
-    filename:    'images.pdf',
-    generate:    images,
+    filename: 'images.pdf',
+    generate: images,
   },
 
   // ── Charting ──────────────────────────────────────────────────────────────
   {
-    id:          'chart-showcase',
-    name:        'Chart Showcase',
-    category:    'Charting',
-    description: 'Eight-page landscape showcase of all chart types: bar, grouped bar, line, area, lollipop, dot plot, pie, and multi-series line.',
-    filename:    'chart-showcase.pdf',
-    generate:    chartShowcase,
+    id: 'chart-showcase',
+    name: 'Chart Showcase',
+    category: 'Charting',
+    description:
+      'Eight-page landscape showcase of all chart types: bar, grouped bar, line, area, lollipop, dot plot, pie, and multi-series line.',
+    filename: 'chart-showcase.pdf',
+    generate: chartShowcase,
   },
   {
-    id:          'bar-chart',
-    name:        'Bar Chart',
-    category:    'Charting',
+    id: 'bar-chart',
+    name: 'Bar Chart',
+    category: 'Charting',
     description: 'Vertical bar chart showing monthly sales with grid lines and value labels.',
-    filename:    'bar-chart.pdf',
-    generate:    barChart,
+    filename: 'bar-chart.pdf',
+    generate: barChart,
   },
   {
-    id:          'grouped-bar-chart',
-    name:        'Grouped Bar Chart',
-    category:    'Charting',
+    id: 'grouped-bar-chart',
+    name: 'Grouped Bar Chart',
+    category: 'Charting',
     description: 'Side-by-side bars comparing three product lines across 12 months with a colour legend.',
-    filename:    'grouped-bar-chart.pdf',
-    generate:    groupedBarChart,
+    filename: 'grouped-bar-chart.pdf',
+    generate: groupedBarChart,
   },
   {
-    id:          'line-chart',
-    name:        'Line Chart',
-    category:    'Charting',
+    id: 'line-chart',
+    name: 'Line Chart',
+    category: 'Charting',
     description: 'Connected data points with circular markers and value labels showing monthly revenue trends.',
-    filename:    'line-chart.pdf',
-    generate:    lineChart,
+    filename: 'line-chart.pdf',
+    generate: lineChart,
   },
   {
-    id:          'area-chart',
-    name:        'Area Chart',
-    category:    'Charting',
+    id: 'area-chart',
+    name: 'Area Chart',
+    category: 'Charting',
     description: 'Filled area under a line with configurable opacity showing monthly sales performance.',
-    filename:    'area-chart.pdf',
-    generate:    areaChart,
+    filename: 'area-chart.pdf',
+    generate: areaChart,
   },
   {
-    id:          'lollipop-chart',
-    name:        'Lollipop Chart',
-    category:    'Charting',
+    id: 'lollipop-chart',
+    name: 'Lollipop Chart',
+    category: 'Charting',
     description: 'Stems with circular heads — a clear, minimal alternative to bar charts for quarterly metrics.',
-    filename:    'lollipop-chart.pdf',
-    generate:    lollipopChart,
+    filename: 'lollipop-chart.pdf',
+    generate: lollipopChart,
   },
   {
-    id:          'dot-plot-chart',
-    name:        'Dot Plot Chart',
-    category:    'Charting',
+    id: 'dot-plot-chart',
+    name: 'Dot Plot Chart',
+    category: 'Charting',
     description: 'Circular markers positioned along a value axis to compare product performance at a glance.',
-    filename:    'dot-plot-chart.pdf',
-    generate:    dotPlotChart,
+    filename: 'dot-plot-chart.pdf',
+    generate: dotPlotChart,
   },
   {
-    id:          'pie-chart',
-    name:        'Pie Chart',
-    category:    'Charting',
+    id: 'pie-chart',
+    name: 'Pie Chart',
+    category: 'Charting',
     description: 'Donut chart with a colour legend and total value in the centre showing monthly sales share.',
-    filename:    'pie-chart.pdf',
-    generate:    pieChart,
+    filename: 'pie-chart.pdf',
+    generate: pieChart,
   },
   {
-    id:          'multi-series-line-chart',
-    name:        'Multi-Series Line Chart',
-    category:    'Charting',
+    id: 'multi-series-line-chart',
+    name: 'Multi-Series Line Chart',
+    category: 'Charting',
     description: 'Two overlapping line series comparing year-over-year revenue on a shared axis with a legend.',
-    filename:    'multi-series-line-chart.pdf',
-    generate:    multiSeriesLineChart,
+    filename: 'multi-series-line-chart.pdf',
+    generate: multiSeriesLineChart,
   },
 
   // ── Security ──────────────────────────────────────────────────────────────
   {
-    id:          'watermarking',
-    name:        'Watermarking',
-    category:    'Security',
+    id: 'watermarking',
+    name: 'Watermarking',
+    category: 'Security',
     description: 'Semi-transparent diagonal DRAFT watermark rendered behind page content on every page.',
-    filename:    'watermarking.pdf',
-    generate:    watermarking,
+    filename: 'watermarking.pdf',
+    generate: watermarking,
   },
   {
-    id:          'encryption',
-    name:        'Encryption',
-    category:    'Security',
-    description: 'Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.',
-    filename:    'encryption.pdf',
-    generate:    encryption,
+    id: 'encryption',
+    name: 'Encryption',
+    category: 'Security',
+    description:
+      'Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.',
+    filename: 'encryption.pdf',
+    generate: encryption,
   },
 
   // ── Templates ─────────────────────────────────────────────────────────────
   {
-    id:          'business-invoice',
-    name:        'Business Invoice',
-    category:    'Templates',
+    id: 'business-invoice',
+    name: 'Business Invoice',
+    category: 'Templates',
     description: 'Professional invoice with company branding, line-items table, totals, and payment details.',
-    filename:    'business-invoice.pdf',
-    generate:    businessInvoice,
+    filename: 'business-invoice.pdf',
+    generate: businessInvoice,
   },
   {
-    id:          'user-directory',
-    name:        'User Directory',
-    category:    'Templates',
+    id: 'user-directory',
+    name: 'User Directory',
+    category: 'Templates',
     description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
-    filename:    'user-directory.pdf',
-    generate:    userDirectory,
+    filename: 'user-directory.pdf',
+    generate: userDirectory,
   },
   {
-    id:          'movie-catalog',
-    name:        'Movie Catalog',
-    category:    'Templates',
-    description: 'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
-    filename:    'movie-catalog.pdf',
-    generate:    movieCatalog,
+    id: 'movie-catalog',
+    name: 'Movie Catalog',
+    category: 'Templates',
+    description:
+      'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
+    filename: 'movie-catalog.pdf',
+    generate: movieCatalog,
   },
   {
-    id:          'financial-dashboard',
-    name:        'Financial Dashboard',
-    category:    'Templates',
-    description: 'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table — all styled with a warm earth-tone palette.',
-    filename:    'financial-dashboard.pdf',
-    generate:    financialDashboard,
+    id: 'financial-dashboard',
+    name: 'Financial Dashboard',
+    category: 'Templates',
+    description:
+      'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table — all styled with a warm earth-tone palette.',
+    filename: 'financial-dashboard.pdf',
+    generate: financialDashboard,
   },
 ];

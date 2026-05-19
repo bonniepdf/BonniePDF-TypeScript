@@ -49,8 +49,7 @@ export class PdfResourceRegistry {
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {
-    return fontIdentifier.toLowerCase().endsWith('.ttf') || 
-           fontIdentifier.toLowerCase().endsWith('.otf');
+    return fontIdentifier.toLowerCase().endsWith('.ttf') || fontIdentifier.toLowerCase().endsWith('.otf');
   }
 
   public getEmbeddedFont(filePath: string): EmbeddedFontInfo | null {
@@ -99,7 +98,7 @@ export class PdfResourceRegistry {
    */
   public async preloadEmbeddedFont(filePath: string): Promise<void> {
     const info = this.embeddedFonts.get(filePath);
-    if (!info) return;                      // not registered — nothing to do
+    if (!info) return; // not registered — nothing to do
     if (info.font instanceof TtfFont) return; // already loaded
 
     const font = await TtfFont.fromFile(filePath);
@@ -180,7 +179,10 @@ export class PdfResourceRegistry {
 
   private computeHash(data: Uint8Array): string {
     // Stub: would use SHA256
-    return Array.from(data).slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(data)
+      .slice(0, 16)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
   }
 
   public getImageResourceName(imageId: number): string {
@@ -203,7 +205,7 @@ export class PdfResourceRegistry {
         fontIdentifier: fontFamily,
         fontResourceName: fontResName,
         fontSize,
-        color
+        color,
       };
       this.deferredXObjects.set(signature, info);
     }
@@ -291,16 +293,19 @@ export class PdfResourceRegistry {
         textOperand = `(${PdfSyntax.escape(text)})`;
       }
 
-      const content =
-        `BT ${info.fontResourceName} ${info.fontSize} Tf ${colorCmd} 0 -${info.fontSize} Td ${textOperand} Tj ET`;
+      const content = `BT ${info.fontResourceName} ${info.fontSize} Tf ${colorCmd} 0 -${info.fontSize} Td ${textOperand} Tj ET`;
 
       const fontObjId = this.resolveFontObjectId(info.fontIdentifier);
-      writer.writeObject(id, new Map([
-        ['/Type',      '/XObject'],
-        ['/Subtype',   '/Form'],
-        ['/BBox',      `[0 -${info.fontSize * 2} 100 0]`],
-        ['/Resources', `<< /Font << ${info.fontResourceName} ${fontObjId} 0 R >> >>`]
-      ]), content);
+      writer.writeObject(
+        id,
+        new Map([
+          ['/Type', '/XObject'],
+          ['/Subtype', '/Form'],
+          ['/BBox', `[0 -${info.fontSize * 2} 100 0]`],
+          ['/Resources', `<< /Font << ${info.fontResourceName} ${fontObjId} 0 R >> >>`],
+        ]),
+        content
+      );
     }
 
     // 4. Build font resource string
@@ -326,9 +331,7 @@ export class PdfResourceRegistry {
       if (info) xobjRefs.push(`${info.resourceName} ${objectId} 0 R`);
     }
 
-    const imageResources = xobjRefs.length > 0
-      ? `<< /XObject << ${xobjRefs.join(' ')} >> >>`
-      : '';
+    const imageResources = xobjRefs.length > 0 ? `<< /XObject << ${xobjRefs.join(' ')} >> >>` : '';
 
     return this.combineResources(fontResources, imageResources);
   }

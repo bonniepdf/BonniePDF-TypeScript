@@ -93,7 +93,7 @@ export class FontFamilyResolver {
     ['courier', 'Courier'],
     ['courier new', 'Courier'],
     ['monospace', 'Courier'],
-    ['mono', 'Courier']
+    ['mono', 'Courier'],
   ]);
 
   /**
@@ -169,16 +169,18 @@ export class FontFamilyResolver {
    * so that Weight and Italic parameters are still applied when resolving them.
    */
   private static isStandardFontName(name: string): boolean {
-    return name === StandardFonts.HelveticaBold ||
-           name === StandardFonts.HelveticaOblique ||
-           name === StandardFonts.HelveticaBoldOblique ||
-           name === StandardFonts.TimesBold ||
-           name === StandardFonts.TimesItalic ||
-           name === StandardFonts.TimesBoldItalic ||
-           name === StandardFonts.CourierBold ||
-           name === StandardFonts.CourierOblique ||
-           name === StandardFonts.CourierBoldOblique ||
-           name === StandardFonts.Symbol ||
-           name === StandardFonts.ZapfDingbats;
+    return (
+      name === StandardFonts.HelveticaBold ||
+      name === StandardFonts.HelveticaOblique ||
+      name === StandardFonts.HelveticaBoldOblique ||
+      name === StandardFonts.TimesBold ||
+      name === StandardFonts.TimesItalic ||
+      name === StandardFonts.TimesBoldItalic ||
+      name === StandardFonts.CourierBold ||
+      name === StandardFonts.CourierOblique ||
+      name === StandardFonts.CourierBoldOblique ||
+      name === StandardFonts.Symbol ||
+      name === StandardFonts.ZapfDingbats
+    );
   }
 }

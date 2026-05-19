@@ -36,7 +36,14 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
    * Draws a background rectangle with the specified color.
    * Uses rounded corners when cornerRadius > 0.
    */
-  protected drawBackground(ctx: RenderContext, x: number, y: number, width: number, height: number, color: Color): void {
+  protected drawBackground(
+    ctx: RenderContext,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: Color
+  ): void {
     if (this.cornerRadius > 0) {
       ctx.canvas.fillRoundedRect(x, y, width, height, this.cornerRadius, color);
     } else {
@@ -54,15 +61,13 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
 
     if (this.cornerRadius > 0) {
       // Rounded rectangle — use the first available colour and the max side width
-      const strokeColor = this.borderColors.top ??
-                          this.borderColors.left ??
-                          this.borderColors.bottom ??
-                          this.borderColors.right ??
-                          Color.black;
-      const strokeWidth = Math.max(
-        this.border.top, this.border.left,
-        this.border.bottom, this.border.right
-      );
+      const strokeColor =
+        this.borderColors.top ??
+        this.borderColors.left ??
+        this.borderColors.bottom ??
+        this.borderColors.right ??
+        Color.black;
+      const strokeWidth = Math.max(this.border.top, this.border.left, this.border.bottom, this.border.right);
       if (strokeWidth > 0) {
         ctx.canvas.strokeRoundedRect(x, y, width, height, this.cornerRadius, strokeColor, strokeWidth);
       }
@@ -72,27 +77,29 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
     // Flat rectangle — draw each active side independently so per-side
     // colours and widths are respected (e.g. left-only accent borders).
     if (this.border.top > 0) {
-      ctx.canvas.drawLine(
-        x, y, x + width, y,
-        this.borderColors.top ?? Color.black, this.border.top
-      );
+      ctx.canvas.drawLine(x, y, x + width, y, this.borderColors.top ?? Color.black, this.border.top);
     }
     if (this.border.bottom > 0) {
       ctx.canvas.drawLine(
-        x, y + height, x + width, y + height,
-        this.borderColors.bottom ?? Color.black, this.border.bottom
+        x,
+        y + height,
+        x + width,
+        y + height,
+        this.borderColors.bottom ?? Color.black,
+        this.border.bottom
       );
     }
     if (this.border.left > 0) {
-      ctx.canvas.drawLine(
-        x, y, x, y + height,
-        this.borderColors.left ?? Color.black, this.border.left
-      );
+      ctx.canvas.drawLine(x, y, x, y + height, this.borderColors.left ?? Color.black, this.border.left);
     }
     if (this.border.right > 0) {
       ctx.canvas.drawLine(
-        x + width, y, x + width, y + height,
-        this.borderColors.right ?? Color.black, this.border.right
+        x + width,
+        y,
+        x + width,
+        y + height,
+        this.borderColors.right ?? Color.black,
+        this.border.right
       );
     }
   }
@@ -101,8 +108,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
    * Checks if this element has any border to draw.
    */
   protected hasAnyBorder(): boolean {
-    return this.border.left > 0 || this.border.right > 0 ||
-           this.border.top > 0 || this.border.bottom > 0;
+    return this.border.left > 0 || this.border.right > 0 || this.border.top > 0 || this.border.bottom > 0;
   }
 
   /**

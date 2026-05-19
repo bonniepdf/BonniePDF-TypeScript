@@ -199,11 +199,7 @@ export class RichText extends ElementBase implements IStatefulElement {
     let totalWidth = 0;
     for (const span of this.spans) {
       const resolved = this.resolveStyle(span.style);
-      totalWidth += FontMetrics.getStringWidth(
-        span.text ?? '',
-        resolved.effectiveFontName,
-        resolved.effectiveFontSize
-      );
+      totalWidth += FontMetrics.getStringWidth(span.text ?? '', resolved.effectiveFontName, resolved.effectiveFontSize);
     }
 
     return totalWidth;
@@ -277,7 +273,10 @@ export class RichText extends ElementBase implements IStatefulElement {
         // Add leading space with its own style
         if (currentWidth > 0 && word.hasLeadingSpace) {
           const spaceStyle = word.leadingSpaceStyle ?? word.style;
-          if (currentLine.runs.length > 0 && this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, spaceStyle)) {
+          if (
+            currentLine.runs.length > 0 &&
+            this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, spaceStyle)
+          ) {
             currentLine.runs[currentLine.runs.length - 1].text += ' ';
           } else {
             currentLine.runs.push(new StyledRun(' ', spaceStyle));
@@ -286,7 +285,10 @@ export class RichText extends ElementBase implements IStatefulElement {
         }
 
         // Add the word text with its own style
-        if (currentLine.runs.length > 0 && this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, word.style)) {
+        if (
+          currentLine.runs.length > 0 &&
+          this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, word.style)
+        ) {
           currentLine.runs[currentLine.runs.length - 1].text += word.text;
         } else {
           currentLine.runs.push(new StyledRun(word.text, word.style));
@@ -537,11 +539,7 @@ export class RichText extends ElementBase implements IStatefulElement {
   }
 
   private measureRunWidth(run: StyledRun, extraWordSpacing: number): number {
-    let baseWidth = FontMetrics.getStringWidth(
-      run.text,
-      run.style.effectiveFontName,
-      run.style.effectiveFontSize
-    );
+    let baseWidth = FontMetrics.getStringWidth(run.text, run.style.effectiveFontName, run.style.effectiveFontSize);
 
     if (extraWordSpacing > 0) {
       let spaceCount = 0;

@@ -106,10 +106,12 @@ export class OrderedList extends ListElementBase {
     const tens = ['', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC'];
     const ones = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
 
-    return thousands[Math.floor(number / 1000)] +
-           hundreds[Math.floor((number % 1000) / 100)] +
-           tens[Math.floor((number % 100) / 10)] +
-           ones[number % 10];
+    return (
+      thousands[Math.floor(number / 1000)] +
+      hundreds[Math.floor((number % 1000) / 100)] +
+      tens[Math.floor((number % 100) / 10)] +
+      ones[number % 10]
+    );
   }
 
   private static toAlpha(number: number): string {
@@ -146,5 +148,5 @@ export enum NumberFormat {
   UpperAlpha = 3,
 
   /** a, b, c, ... */
-  LowerAlpha = 4
+  LowerAlpha = 4,
 }

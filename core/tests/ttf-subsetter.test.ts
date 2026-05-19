@@ -46,11 +46,11 @@ describeIfFont('TtfSubsetter (Arial)', () => {
   it('subset is smaller than original font', () => {
     const f = getFont();
     const subsetter = new TtfSubsetter(f);
-    const usedGlyphs = new Set<number>([
-      f.getGlyphId('A'.charCodeAt(0)),
-      f.getGlyphId('B'.charCodeAt(0)),
-      f.getGlyphId('C'.charCodeAt(0)),
-    ].filter(g => g > 0));
+    const usedGlyphs = new Set<number>(
+      [f.getGlyphId('A'.charCodeAt(0)), f.getGlyphId('B'.charCodeAt(0)), f.getGlyphId('C'.charCodeAt(0))].filter(
+        g => g > 0
+      )
+    );
     const charMap = new Map<number, number>();
     const subsetData = subsetter.createSubset(usedGlyphs, charMap);
     expect(subsetData.length).toBeLessThan(f.getRawFontData().length);

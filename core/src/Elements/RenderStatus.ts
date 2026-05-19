@@ -19,5 +19,5 @@ export enum RenderStatus {
    * The pipeline should move to a new page before retrying.
    * Unlike Overflow, this indicates zero progress was made.
    */
-  WrapRequired = 'WrapRequired'
+  WrapRequired = 'WrapRequired',
 }

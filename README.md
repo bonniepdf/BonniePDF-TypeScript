@@ -21,7 +21,7 @@ pnpm add @bonniepdf/core
 ```
 
 ```typescript
-import { Document, TextBlock, PdfSize } from '@bonniepdf/core'
+import { Document, TextBlock, PdfSize } from '@bonniepdf/core';
 
 const bytes = await new Document()
   .addPage(page =>
@@ -29,32 +29,32 @@ const bytes = await new Document()
       .add(new TextBlock('Hello, BonniePDF!').fontSize(24).bold())
       .add(new TextBlock('Generated entirely in TypeScript — no server required.'))
   )
-  .generateAsync()
+  .generateAsync();
 
 // Browser: open in a new tab
-const blob = new Blob([bytes], { type: 'application/pdf' })
-window.open(URL.createObjectURL(blob))
+const blob = new Blob([bytes], { type: 'application/pdf' });
+window.open(URL.createObjectURL(blob));
 ```
 
 ---
 
 ## Features
 
-| Category | Capabilities |
-|---|---|
-| **Text** | Fonts (built-in + custom TTF/OTF), bold, italic, underline, strikethrough, letter-spacing, alignment, overflow |
-| **Layout** | Pages, margins, padding, vertical stacks, horizontal stacks, columns, headers & footers |
-| **Tables** | Multi-column, cell styling, borders, merged cells |
-| **Images** | JPEG & PNG embed, aspect-ratio fit modes |
-| **Shapes** | Rectangles, lines, ellipses, borders, fills |
-| **Charts** | Bar, grouped bar, line, multi-series line, area, pie, dot-plot, lollipop |
-| **Lists** | Ordered & unordered, nested |
-| **Links** | Internal anchors, external hyperlinks |
-| **Security** | AES-128/256 encryption, owner/user passwords, print/copy permissions |
-| **Metadata** | XMP metadata, PDF version control, document properties |
-| **Watermarks** | Text or image watermarks with opacity and rotation |
-| **Unicode** | Full Unicode support including emoji |
-| **Platform** | Browser (no WASM, no server) · Node.js · Bun · Deno |
+| Category       | Capabilities                                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Text**       | Fonts (built-in + custom TTF/OTF), bold, italic, underline, strikethrough, letter-spacing, alignment, overflow |
+| **Layout**     | Pages, margins, padding, vertical stacks, horizontal stacks, columns, headers & footers                        |
+| **Tables**     | Multi-column, cell styling, borders, merged cells                                                              |
+| **Images**     | JPEG & PNG embed, aspect-ratio fit modes                                                                       |
+| **Shapes**     | Rectangles, lines, ellipses, borders, fills                                                                    |
+| **Charts**     | Bar, grouped bar, line, multi-series line, area, pie, dot-plot, lollipop                                       |
+| **Lists**      | Ordered & unordered, nested                                                                                    |
+| **Links**      | Internal anchors, external hyperlinks                                                                          |
+| **Security**   | AES-128/256 encryption, owner/user passwords, print/copy permissions                                           |
+| **Metadata**   | XMP metadata, PDF version control, document properties                                                         |
+| **Watermarks** | Text or image watermarks with opacity and rotation                                                             |
+| **Unicode**    | Full Unicode support including emoji                                                                           |
+| **Platform**   | Browser (no WASM, no server) · Node.js · Bun · Deno                                                            |
 
 ---
 
@@ -62,15 +62,15 @@ window.open(URL.createObjectURL(blob))
 
 All examples run live in your browser at **[bonniepdf.dev/examples](https://bonniepdf.dev/examples)**.
 
-| Example | What it shows |
-|---|---|
-| [Simple document](https://bonniepdf.dev/examples/01/simple-document) | Basic text, paragraphs |
-| [Business invoice](https://bonniepdf.dev/examples/02/business-invoice) | Tables, alignment, branding |
-| [Charts showcase](https://bonniepdf.dev/examples/03/chart-showcase) | All chart types in one doc |
-| [Custom fonts](https://bonniepdf.dev/examples/01/custom-fonts) | Loading TTF/OTF at runtime |
-| [Encryption](https://bonniepdf.dev/examples/01/encryption) | Password-protected PDFs |
+| Example                                                                | What it shows                |
+| ---------------------------------------------------------------------- | ---------------------------- |
+| [Simple document](https://bonniepdf.dev/examples/01/simple-document)   | Basic text, paragraphs       |
+| [Business invoice](https://bonniepdf.dev/examples/02/business-invoice) | Tables, alignment, branding  |
+| [Charts showcase](https://bonniepdf.dev/examples/03/chart-showcase)    | All chart types in one doc   |
+| [Custom fonts](https://bonniepdf.dev/examples/01/custom-fonts)         | Loading TTF/OTF at runtime   |
+| [Encryption](https://bonniepdf.dev/examples/01/encryption)             | Password-protected PDFs      |
 | [Headers & footers](https://bonniepdf.dev/examples/01/headers-footers) | Page-level repeating content |
-| [Multi-page flow](https://bonniepdf.dev/examples/01/multi-page-flow) | Content that spans pages |
+| [Multi-page flow](https://bonniepdf.dev/examples/01/multi-page-flow)   | Content that spans pages     |
 
 ---
 
@@ -79,50 +79,50 @@ All examples run live in your browser at **[bonniepdf.dev/examples](https://bonn
 ### Document
 
 ```typescript
-import { Document } from '@bonniepdf/core'
+import { Document } from '@bonniepdf/core';
 
 const doc = new Document()
   .metadata({ title: 'My Report', author: 'ACME Corp' })
-  .addPage(page => page.size(PdfSize.A4).add(...elements))
+  .addPage(page => page.size(PdfSize.A4).add(...elements));
 
-const bytes: Uint8Array = await doc.generateAsync()
+const bytes: Uint8Array = await doc.generateAsync();
 ```
 
 ### Text
 
 ```typescript
-import { TextBlock, RichText } from '@bonniepdf/core'
+import { TextBlock, RichText } from '@bonniepdf/core';
 
 // Simple
-new TextBlock('Hello world').fontSize(14).bold().color('#1a1a1a')
+new TextBlock('Hello world').fontSize(14).bold().color('#1a1a1a');
 
 // Rich text (mixed styles in one block)
 new RichText()
   .add('Normal ')
   .add('bold', t => t.bold())
   .add(' and ')
-  .add('coloured', t => t.color('#2196F3'))
+  .add('coloured', t => t.color('#2196F3'));
 ```
 
 ### Tables
 
 ```typescript
-import { Table, TableRow, TableCell } from '@bonniepdf/core'
+import { Table, TableRow, TableCell } from '@bonniepdf/core';
 
 new Table()
-  .columns([150, 100, '*'])              // px widths, '*' fills remaining
+  .columns([150, 100, '*']) // px widths, '*' fills remaining
   .addRow(row =>
     row
       .addCell(cell => cell.text('Product'))
       .addCell(cell => cell.text('Qty'))
       .addCell(cell => cell.text('Total'))
-  )
+  );
 ```
 
 ### Charts
 
 ```typescript
-import { BarChart } from '@bonniepdf/core'
+import { BarChart } from '@bonniepdf/core';
 
 new BarChart()
   .title('Monthly Revenue')
@@ -132,7 +132,7 @@ new BarChart()
     { label: 'Mar', value: 51000 },
   ])
   .color('#2196F3')
-  .height(200)
+  .height(200);
 ```
 
 ### Security
@@ -155,15 +155,15 @@ new Document()
 
 ## Installation & environment support
 
-| Environment | Support |
-|---|---|
-| Node.js ≥ 16 (ESM) | ✅ |
-| Node.js ≥ 16 (CommonJS) | ✅ |
-| Browser (native ESM) | ✅ |
-| Vite / webpack / esbuild | ✅ |
-| Bun | ✅ |
-| Deno | ✅ (via npm: specifier) |
-| Edge / Cloudflare Workers | ✅ |
+| Environment               | Support                 |
+| ------------------------- | ----------------------- |
+| Node.js ≥ 16 (ESM)        | ✅                      |
+| Node.js ≥ 16 (CommonJS)   | ✅                      |
+| Browser (native ESM)      | ✅                      |
+| Vite / webpack / esbuild  | ✅                      |
+| Bun                       | ✅                      |
+| Deno                      | ✅ (via npm: specifier) |
+| Edge / Cloudflare Workers | ✅                      |
 
 No native addons. No WASM. No server. The library is a pure TypeScript/JavaScript implementation.
 
@@ -206,9 +206,11 @@ cd core && pnpm dev
 This repo uses [Changesets](https://github.com/changesets/changesets) for version management and npm publishing.
 
 1. After making changes to `core/`, run:
+
    ```bash
    pnpm changeset
    ```
+
    Follow the prompts to describe your change (patch / minor / major).
 
 2. Commit the generated `.changeset/*.md` file with your PR.
@@ -235,12 +237,12 @@ Please follow the [PR template](.github/PULL_REQUEST_TEMPLATE.md) and fill in al
 
 BonniePDF uses a **dual-license** model:
 
-| Use case | License required |
-|---|---|
-| Personal projects | [Community](./core/LICENSE) — free |
-| Open source projects (OSI-approved license) | [Community](./core/LICENSE) — free |
-| Commercial / for-profit use | [Commercial License](https://bonniepdf.dev/license) |
-| Internal business tools | [Commercial License](https://bonniepdf.dev/license) |
+| Use case                                    | License required                                    |
+| ------------------------------------------- | --------------------------------------------------- |
+| Personal projects                           | [Community](./core/LICENSE) — free            |
+| Open source projects (OSI-approved license) | [Community](./core/LICENSE) — free            |
+| Commercial / for-profit use                 | [Commercial License](https://bonniepdf.dev/license) |
+| Internal business tools                     | [Commercial License](https://bonniepdf.dev/license) |
 
 See [`core/LICENSE`](./core/LICENSE) for the full terms of both options, or visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** to purchase a Commercial license.
 

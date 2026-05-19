@@ -17,9 +17,7 @@ export class BrowserPlatformIO implements IPlatformIO {
   async readFile(url: string): Promise<Uint8Array> {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(
-        `BrowserPlatformIO: fetch failed for "${url}" — ${response.status} ${response.statusText}`
-      );
+      throw new Error(`BrowserPlatformIO: fetch failed for "${url}" — ${response.status} ${response.statusText}`);
     }
     const buffer = await response.arrayBuffer();
     return new Uint8Array(buffer);
@@ -29,7 +27,7 @@ export class BrowserPlatformIO implements IPlatformIO {
     // In the browser, "writing" a file triggers a download instead.
     throw new Error(
       'BrowserPlatformIO: writeFile() is not supported. ' +
-      'Use Document.generateBytes() and create a Blob URL for download.'
+        'Use Document.generateBytes() and create a Blob URL for download.'
     );
   }
 
@@ -56,7 +54,10 @@ export class BrowserPlatformIO implements IPlatformIO {
     const total = chunks.reduce((n, c) => n + c.length, 0);
     const result = new Uint8Array(total);
     let offset = 0;
-    for (const chunk of chunks) { result.set(chunk, offset); offset += chunk.length; }
+    for (const chunk of chunks) {
+      result.set(chunk, offset);
+      offset += chunk.length;
+    }
     return result;
   }
 }

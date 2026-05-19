@@ -1,39 +1,50 @@
-import { Document, DocumentSettings, DocumentMetadata, PdfVersion, ZoomLevel, TextBlock, Hyperlink, Color, Thickness, StandardFonts } from '@bonniepdf/core'
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfVersion,
+  ZoomLevel,
+  TextBlock,
+  Hyperlink,
+  Color,
+  Thickness,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version          = PdfVersion.Pdf17;
-  settings.pdfAEnabled      = true;
-  settings.defaultZoom      = ZoomLevel.FitPage;
-  settings.displayDocTitle  = true;
+  settings.version = PdfVersion.Pdf17;
+  settings.pdfAEnabled = true;
+  settings.defaultZoom = ZoomLevel.FitPage;
+  settings.displayDocTitle = true;
 
   const metadata = new DocumentMetadata();
-  metadata.title   = 'Hyperlink Examples';
-  metadata.author  = 'BonniePDF';
+  metadata.title = 'Hyperlink Examples';
+  metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrating hyperlink support in PDFs';
 
   const doc = new Document(settings, metadata);
 
   // ── Title ──
   const title = new TextBlock('Hyperlink Support Demo');
-  title.fontName  = StandardFonts.HelveticaBold;
-  title.fontSize  = 24;
+  title.fontName = StandardFonts.HelveticaBold;
+  title.fontSize = 24;
   title.textColor = Color.slate800;
-  title.margin    = new Thickness(0, 0, 0, 12);
+  title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
   // ── Basic links ──
   const basicLabel = new TextBlock('Basic Links:');
-  basicLabel.fontName  = StandardFonts.HelveticaBold;
-  basicLabel.fontSize  = 14;
+  basicLabel.fontName = StandardFonts.HelveticaBold;
+  basicLabel.fontSize = 14;
   basicLabel.textColor = Color.slate700;
-  basicLabel.margin    = new Thickness(0, 0, 0, 8);
+  basicLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(basicLabel);
 
   for (const [text, uri, mb] of [
-    ['Visit GitHub',      'https://github.com',       8],
-    ['Visit Microsoft',   'https://microsoft.com',    8],
-    ['Search on Google',  'https://google.com',      16],
+    ['Visit GitHub', 'https://github.com', 8],
+    ['Visit Microsoft', 'https://microsoft.com', 8],
+    ['Search on Google', 'https://google.com', 16],
   ] as [string, string, number][]) {
     // TS constructor: Hyperlink(text, uri) — note .NET swaps the order
     const link = new Hyperlink(text, uri);
@@ -43,10 +54,10 @@ export function generate(): Document {
 
   // ── Styled links ──
   const styledLabel = new TextBlock('Styled Links:');
-  styledLabel.fontName  = StandardFonts.HelveticaBold;
-  styledLabel.fontSize  = 14;
+  styledLabel.fontName = StandardFonts.HelveticaBold;
+  styledLabel.fontSize = 14;
   styledLabel.textColor = Color.slate700;
-  styledLabel.margin    = new Thickness(0, 0, 0, 8);
+  styledLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(styledLabel);
 
   // Default blue
@@ -57,28 +68,28 @@ export function generate(): Document {
   // Green
   const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
   greenLink.textColor = Color.green500;
-  greenLink.margin    = new Thickness(0, 0, 0, 8);
+  greenLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(greenLink);
 
   // Large purple
   const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
-  purpleLink.fontSize  = 16;
+  purpleLink.fontSize = 16;
   purpleLink.textColor = Color.purple500;
-  purpleLink.margin    = new Thickness(0, 0, 0, 8);
+  purpleLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(purpleLink);
 
   // Bold red
   const redLink = new Hyperlink('Bold Red Link', 'https://stackoverflow.com');
-  redLink.fontName  = StandardFonts.HelveticaBold;
-  redLink.fontSize  = 14;
+  redLink.fontName = StandardFonts.HelveticaBold;
+  redLink.fontSize = 14;
   redLink.textColor = Color.red;
-  redLink.margin    = new Thickness(0, 0, 0, 16);
+  redLink.margin = new Thickness(0, 0, 0, 16);
   doc.add(redLink);
 
   // ── Links with margins ──
   const marginLabel = new TextBlock('Links with Margins:');
-  marginLabel.fontName  = StandardFonts.HelveticaBold;
-  marginLabel.fontSize  = 14;
+  marginLabel.fontName = StandardFonts.HelveticaBold;
+  marginLabel.fontSize = 14;
   marginLabel.textColor = Color.slate700;
   doc.add(marginLabel);
 

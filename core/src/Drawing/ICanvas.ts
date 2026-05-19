@@ -16,11 +16,43 @@ export interface ICanvas {
   fillCircle(cx: number, cy: number, radius: number, color: Color): void;
   fillPath(points: Point[], color: Color): void;
   fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void;
-  strokeRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void;
+  strokeRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color,
+    strokeWidth: number
+  ): void;
 
-  drawText(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, align: TextAlignment): void;
-  drawTextRotated(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, angleDegrees: number): void;
-  drawTextJustified(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, availableWidth: number): void;
+  drawText(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    align: TextAlignment
+  ): void;
+  drawTextRotated(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    angleDegrees: number
+  ): void;
+  drawTextJustified(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    availableWidth: number
+  ): void;
   measureText(text: string, fontSize: number, fontFamily: string): Size;
 
   drawImage(image: any, x: number, y: number, width: number, height: number): void;

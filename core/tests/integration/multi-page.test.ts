@@ -9,12 +9,7 @@ import { PdfSize } from '../../src/Configuration/PdfSize';
 import { PageOrientation } from '../../src/Core/PageOrientation';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { asPdf17 } from '../../src/Extensions/DocumentSettingsExtensions';
-import {
-  assertValidPdf,
-  assertPdfHasFonts,
-  assertPdfHasPages,
-  createMinimalJpeg,
-} from '../helpers/test-base';
+import { assertValidPdf, assertPdfHasFonts, assertPdfHasPages, createMinimalJpeg } from '../helpers/test-base';
 
 describe('MultiPage integration', () => {
   let doc: Document;
@@ -109,7 +104,13 @@ describe('MultiPage integration', () => {
   it('document size is substantial', () => {
     doc = new Document();
     for (let i = 0; i < 5; i++) {
-      doc.add(new TextBlock(`Paragraph ${i + 1}: This is some sample text to generate a reasonable sized PDF file.`, 12, StandardFonts.Helvetica));
+      doc.add(
+        new TextBlock(
+          `Paragraph ${i + 1}: This is some sample text to generate a reasonable sized PDF file.`,
+          12,
+          StandardFonts.Helvetica
+        )
+      );
     }
     const bytes = doc.generateBytes();
     expect(bytes.length).toBeGreaterThan(500);

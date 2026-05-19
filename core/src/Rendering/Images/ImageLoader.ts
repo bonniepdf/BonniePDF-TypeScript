@@ -12,13 +12,21 @@ export class ImageLoader {
     }
 
     // Check for PNG signature (89 50 4E 47 0D 0A 1A 0A)
-    if (data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4E && data[3] === 0x47 &&
-        data[4] === 0x0D && data[5] === 0x0A && data[6] === 0x1A && data[7] === 0x0A) {
+    if (
+      data[0] === 0x89 &&
+      data[1] === 0x50 &&
+      data[2] === 0x4e &&
+      data[3] === 0x47 &&
+      data[4] === 0x0d &&
+      data[5] === 0x0a &&
+      data[6] === 0x1a &&
+      data[7] === 0x0a
+    ) {
       return this.parsePng(data);
     }
 
     // Check for JPEG signature (FF D8 FF)
-    if (data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
+    if (data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) {
       return this.parseJpeg(data);
     }
 
@@ -40,7 +48,7 @@ export class ImageLoader {
   }
 
   private static parseJpeg(data: Uint8Array): ImageInfo {
-    if (data.length < 3 || data[0] !== 0xFF || data[1] !== 0xD8 || data[2] !== 0xFF) {
+    if (data.length < 3 || data[0] !== 0xff || data[1] !== 0xd8 || data[2] !== 0xff) {
       throw new Error('Invalid JPEG file: Missing JPEG signature');
     }
 
@@ -51,7 +59,7 @@ export class ImageLoader {
 
     let pos = 2;
     while (pos < data.length - 1) {
-      if (data[pos] !== 0xFF) {
+      if (data[pos] !== 0xff) {
         pos++;
         continue;
       }
@@ -59,7 +67,7 @@ export class ImageLoader {
       const marker = data[pos + 1];
 
       // SOF0 markers (0xFFC0, 0xFFC1, 0xFFC2)
-      if (marker === 0xC0 || marker === 0xC1 || marker === 0xC2) {
+      if (marker === 0xc0 || marker === 0xc1 || marker === 0xc2) {
         pos += 2;
         const length = (data[pos] << 8) | data[pos + 1];
         pos += 2;
@@ -79,10 +87,17 @@ export class ImageLoader {
         info.components = data[pos];
 
         switch (info.components) {
-          case 1: info.colorSpace = ImageColorSpace.DeviceGray; break;
-          case 3: info.colorSpace = ImageColorSpace.DeviceRGB; break;
-          case 4: info.colorSpace = ImageColorSpace.DeviceCMYK; break;
-          default: info.colorSpace = ImageColorSpace.DeviceRGB;
+          case 1:
+            info.colorSpace = ImageColorSpace.DeviceGray;
+            break;
+          case 3:
+            info.colorSpace = ImageColorSpace.DeviceRGB;
+            break;
+          case 4:
+            info.colorSpace = ImageColorSpace.DeviceCMYK;
+            break;
+          default:
+            info.colorSpace = ImageColorSpace.DeviceRGB;
         }
 
         if (info.width <= 0 || info.height <= 0) {
@@ -93,7 +108,7 @@ export class ImageLoader {
       }
 
       // SOS marker - end of metadata
-      if (marker === 0xDA) break;
+      if (marker === 0xda) break;
 
       pos += 2;
       if (pos < data.length - 1) {
@@ -107,9 +122,17 @@ export class ImageLoader {
 
   private static parsePng(data: Uint8Array): ImageInfo {
     // Verify PNG signature
-    if (data.length < 8 ||
-      data[0] !== 0x89 || data[1] !== 0x50 || data[2] !== 0x4E || data[3] !== 0x47 ||
-      data[4] !== 0x0D || data[5] !== 0x0A || data[6] !== 0x1A || data[7] !== 0x0A) {
+    if (
+      data.length < 8 ||
+      data[0] !== 0x89 ||
+      data[1] !== 0x50 ||
+      data[2] !== 0x4e ||
+      data[3] !== 0x47 ||
+      data[4] !== 0x0d ||
+      data[5] !== 0x0a ||
+      data[6] !== 0x1a ||
+      data[7] !== 0x0a
+    ) {
       throw new Error('Invalid PNG file: Missing PNG signature');
     }
 
@@ -212,7 +235,10 @@ export class ImageLoader {
     return info;
   }
 
-  private static decompressPng(compressedData: Uint8Array, info: ImageInfo): { pixelData: Uint8Array; alphaData?: Uint8Array } {
+  private static decompressPng(
+    compressedData: Uint8Array,
+    info: ImageInfo
+  ): { pixelData: Uint8Array; alphaData?: Uint8Array } {
     // Stub: would use zlib/pako for decompression
     const bytesPerPixel = info.components * (info.bitsPerComponent / 8);
     const rawDataLength = info.width * info.height * bytesPerPixel;
@@ -225,7 +251,12 @@ export class ImageLoader {
     return { pixelData };
   }
 
-  private static defilterScanline(scanline: Uint8Array, prevScanline: Uint8Array, bytesPerPixel: number, filter: number): void {
+  private static defilterScanline(
+    scanline: Uint8Array,
+    prevScanline: Uint8Array,
+    bytesPerPixel: number,
+    filter: number
+  ): void {
     switch (filter) {
       case 0: // None
         break;
@@ -246,7 +277,7 @@ export class ImageLoader {
         for (let i = 0; i < scanline.length; i++) {
           const a = i >= bytesPerPixel ? scanline[i - bytesPerPixel] : 0;
           const b = prevScanline[i];
-          scanline[i] = (scanline[i] + (a + b) / 2);
+          scanline[i] = scanline[i] + (a + b) / 2;
         }
         break;
 

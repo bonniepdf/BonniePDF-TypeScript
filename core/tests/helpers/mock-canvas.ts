@@ -7,21 +7,53 @@ import { TextAlignment } from '../../src/Elements/Text/TextAlignment';
 export class MockCanvas implements ICanvas {
   public readonly operations: string[] = [];
 
-  get width(): number { return 800; }
-  get height(): number { return 450; }
+  get width(): number {
+    return 800;
+  }
+  get height(): number {
+    return 450;
+  }
 
-  saveState(): void { this.operations.push('SaveState()'); }
-  restoreState(): void { this.operations.push('RestoreState()'); }
+  saveState(): void {
+    this.operations.push('SaveState()');
+  }
+  restoreState(): void {
+    this.operations.push('RestoreState()');
+  }
 
-  drawText(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, align: TextAlignment): void {
+  drawText(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    align: TextAlignment
+  ): void {
     this.operations.push(`DrawText(${x},${y},'${text}',${fontSize},${fontFamily},${align})`);
   }
 
-  drawTextRotated(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, angleDegrees: number): void {
+  drawTextRotated(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    angleDegrees: number
+  ): void {
     this.operations.push(`DrawTextRotated(${x},${y},'${text}',${fontSize},${fontFamily},${angleDegrees})`);
   }
 
-  drawTextJustified(x: number, y: number, text: string, color: Color, fontSize: number, fontFamily: string, availableWidth: number): void {
+  drawTextJustified(
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    fontSize: number,
+    fontFamily: string,
+    availableWidth: number
+  ): void {
     this.operations.push(`DrawTextJustified(${x},${y},'${text}',${fontSize},${fontFamily},${availableWidth})`);
   }
 
@@ -61,7 +93,15 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`FillRoundedRect(${x},${y},${width},${height},${radius})`);
   }
 
-  strokeRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color, strokeWidth: number): void {
+  strokeRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    color: Color,
+    strokeWidth: number
+  ): void {
     this.operations.push(`StrokeRoundedRect(${x},${y},${width},${height},${radius},${strokeWidth})`);
   }
 }

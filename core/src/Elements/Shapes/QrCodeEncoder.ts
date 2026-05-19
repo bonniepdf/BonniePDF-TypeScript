@@ -20,18 +20,42 @@ export class QrCodeEncoder {
 
   // EC codewords per block, indexed [ecl.ordinal][version] (index 0 unused, sentinel -1)
   private static readonly ECC_CODEWORDS_PER_BLOCK: readonly (readonly number[])[] = [
-    [-1,  7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
-    [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
-    [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
-    [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    [
+      -1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30,
+      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    ],
+    [
+      -1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28,
+      28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+    ],
+    [
+      -1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30,
+      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    ],
+    [
+      -1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30,
+      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+    ],
   ];
 
   // Number of EC blocks, indexed [ecl.ordinal][version] (index 0 unused, sentinel -1)
   private static readonly NUM_ERROR_CORRECTION_BLOCKS: readonly (readonly number[])[] = [
-    [-1,  1,  1,  1,  1,  1,  2,  2,  2,  2,  4,  4,  4,  4,  4,  6,  6,  6,  6,  7,  8,  8,  9,  9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
-    [-1,  1,  1,  1,  2,  2,  4,  4,  4,  5,  5,  5,  8,  9,  9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
-    [-1,  1,  1,  2,  2,  4,  4,  6,  6,  8,  8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 19, 22, 25, 26, 28, 31, 33, 35, 37, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65],
-    [-1,  1,  1,  2,  4,  4,  4,  5,  6,  8,  8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81],
+    [
+      -1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18,
+      19, 19, 20, 21, 22, 24, 25,
+    ],
+    [
+      -1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31,
+      33, 35, 37, 38, 40, 43, 45, 47, 49,
+    ],
+    [
+      -1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 19, 22, 25, 26, 28, 31, 33, 35, 37, 38,
+      40, 43, 45, 48, 51, 53, 56, 59, 62, 65,
+    ],
+    [
+      -1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48,
+      51, 54, 57, 60, 63, 66, 70, 74, 77, 81,
+    ],
   ];
 
   private constructor(version: number, ecl: QrEcc, dataCodewords: Uint8Array, msk: number) {
@@ -39,7 +63,7 @@ export class QrCodeEncoder {
     this.size = version * 4 + 17;
     this.errorCorrectionLevel = ecl;
 
-    this.modules    = Array.from({ length: this.size }, () => new Array<boolean>(this.size).fill(false));
+    this.modules = Array.from({ length: this.size }, () => new Array<boolean>(this.size).fill(false));
     this.isFunction = Array.from({ length: this.size }, () => new Array<boolean>(this.size).fill(false));
 
     this.drawFunctionPatterns();
@@ -53,7 +77,10 @@ export class QrCodeEncoder {
         this.applyMask(m);
         this.drawFormatBits(m);
         const penalty = this.getPenaltyScore();
-        if (penalty < minPenalty) { bestMsk = m; minPenalty = penalty; }
+        if (penalty < minPenalty) {
+          bestMsk = m;
+          minPenalty = penalty;
+        }
         this.applyMask(m); // undo
       }
       msk = bestMsk;
@@ -80,7 +107,7 @@ export class QrCodeEncoder {
     minVersion: number = QrCodeEncoder.MIN_VERSION,
     maxVersion: number = QrCodeEncoder.MAX_VERSION,
     mask: number = -1,
-    boostEcl: boolean = true,
+    boostEcl: boolean = true
   ): QrCodeEncoder {
     // Find minimum version that fits all segments
     let version: number;
@@ -113,14 +140,14 @@ export class QrCodeEncoder {
     }
     const dataCapacityBits = QrCodeEncoder.getNumDataCodewords(version, ecl) * 8;
     QrSegment.appendBits(0, Math.min(4, dataCapacityBits - bb.length), bb);
-    QrSegment.appendBits(0, (8 - bb.length % 8) % 8, bb);
-    for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11) {
+    QrSegment.appendBits(0, (8 - (bb.length % 8)) % 8, bb);
+    for (let padByte = 0xec; bb.length < dataCapacityBits; padByte ^= 0xec ^ 0x11) {
       QrSegment.appendBits(padByte, 8, bb);
     }
 
     const dataCodewords = new Uint8Array(bb.length / 8);
     for (let i = 0; i < bb.length; i++) {
-      if (bb[i]) dataCodewords[i >> 3] |= (1 << (7 - (i & 7)));
+      if (bb[i]) dataCodewords[i >> 3] |= 1 << (7 - (i & 7));
     }
 
     return new QrCodeEncoder(version, ecl, dataCodewords, mask);
@@ -164,10 +191,10 @@ export class QrCodeEncoder {
 
   private drawFormatBits(msk: number): void {
     const ecl = this.errorCorrectionLevel;
-    const data = ecl.formatBits << 3 | msk;
+    const data = (ecl.formatBits << 3) | msk;
     let rem = data;
     for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
-    const bits = (data << 10 | rem) ^ 0x5412;
+    const bits = ((data << 10) | rem) ^ 0x5412;
 
     // Copy 1 — around top-left finder
     for (let i = 0; i <= 5; i++) this.setFunctionModule(8, i, getBit(bits, i));
@@ -185,11 +212,11 @@ export class QrCodeEncoder {
   private drawVersion(): void {
     if (this.version < 7) return;
     let rem = this.version;
-    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
-    const bits = this.version << 12 | rem;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+    const bits = (this.version << 12) | rem;
     for (let i = 0; i < 18; i++) {
       const color = getBit(bits, i);
-      const a = this.size - 11 + i % 3;
+      const a = this.size - 11 + (i % 3);
       const b = Math.floor(i / 3);
       this.setFunctionModule(a, b, color);
       this.setFunctionModule(b, a, color);
@@ -200,7 +227,8 @@ export class QrCodeEncoder {
     for (let dy = -4; dy <= 4; dy++) {
       for (let dx = -4; dx <= 4; dx++) {
         const dist = Math.max(Math.abs(dx), Math.abs(dy));
-        const xx = cx + dx, yy = cy + dy;
+        const xx = cx + dx,
+          yy = cy + dy;
         if (xx >= 0 && xx < this.size && yy >= 0 && yy < this.size) {
           this.setFunctionModule(xx, yy, dist !== 2 && dist !== 4);
         }
@@ -226,11 +254,11 @@ export class QrCodeEncoder {
   private addEccAndInterleave(data: Uint8Array): Uint8Array {
     const ver = this.version;
     const ecl = this.errorCorrectionLevel;
-    const numBlocks   = QrCodeEncoder.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+    const numBlocks = QrCodeEncoder.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
     const blockEccLen = QrCodeEncoder.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver];
     const rawCodewords = Math.floor(QrCodeEncoder.getNumRawDataModules(ver) / 8);
-    const numShortBlocks = numBlocks - rawCodewords % numBlocks;
-    const shortDataLen   = Math.floor(rawCodewords / numBlocks) - blockEccLen;
+    const numShortBlocks = numBlocks - (rawCodewords % numBlocks);
+    const shortDataLen = Math.floor(rawCodewords / numBlocks) - blockEccLen;
 
     const blocks: number[][] = [];
     const rsDiv = QrCodeEncoder.reedSolomonComputeDivisor(blockEccLen);
@@ -284,14 +312,30 @@ export class QrCodeEncoder {
         if (this.isFunction[y][x]) continue;
         let inv: boolean;
         switch (msk) {
-          case 0: inv = (x + y) % 2 === 0; break;
-          case 1: inv = y % 2 === 0; break;
-          case 2: inv = x % 3 === 0; break;
-          case 3: inv = (x + y) % 3 === 0; break;
-          case 4: inv = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; break;
-          case 5: inv = x * y % 2 + x * y % 3 === 0; break;
-          case 6: inv = (x * y % 2 + x * y % 3) % 2 === 0; break;
-          default: inv = ((x + y) % 2 + x * y % 3) % 2 === 0; break;
+          case 0:
+            inv = (x + y) % 2 === 0;
+            break;
+          case 1:
+            inv = y % 2 === 0;
+            break;
+          case 2:
+            inv = x % 3 === 0;
+            break;
+          case 3:
+            inv = (x + y) % 3 === 0;
+            break;
+          case 4:
+            inv = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+            break;
+          case 5:
+            inv = ((x * y) % 2) + ((x * y) % 3) === 0;
+            break;
+          case 6:
+            inv = (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+            break;
+          default:
+            inv = (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
+            break;
         }
         if (inv) this.modules[y][x] = !this.modules[y][x];
       }
@@ -299,7 +343,7 @@ export class QrCodeEncoder {
   }
 
   private getPenaltyScore(): number {
-    const sz  = this.size;
+    const sz = this.size;
     const mod = this.modules;
     let result = 0;
 
@@ -307,7 +351,7 @@ export class QrCodeEncoder {
     for (let y = 0; y < sz; y++) {
       for (let xOrY = 0; xOrY < 2; xOrY++) {
         let runColor = false;
-        let runLen   = 0;
+        let runLen = 0;
         for (let x = 0; x < sz; x++) {
           const c = xOrY === 0 ? mod[y][x] : mod[x][y];
           if (c === runColor) {
@@ -316,7 +360,7 @@ export class QrCodeEncoder {
             else if (runLen > 5) result++;
           } else {
             runColor = c;
-            runLen   = 1;
+            runLen = 1;
           }
         }
       }
@@ -334,14 +378,66 @@ export class QrCodeEncoder {
     for (let y = 0; y < sz; y++) {
       for (let x = 0; x < sz - 10; x++) {
         const r = mod[y];
-        if ( r[x] && !r[x+1] &&  r[x+2] &&  r[x+3] &&  r[x+4] && !r[x+5] &&  r[x+6] && !r[x+7] && !r[x+8] && !r[x+9] && !r[x+10]) result += 40;
-        if (!r[x] && !r[x+1] && !r[x+2] && !r[x+3] &&  r[x+4] && !r[x+5] &&  r[x+6] &&  r[x+7] &&  r[x+8] && !r[x+9] &&  r[x+10]) result += 40;
+        if (
+          r[x] &&
+          !r[x + 1] &&
+          r[x + 2] &&
+          r[x + 3] &&
+          r[x + 4] &&
+          !r[x + 5] &&
+          r[x + 6] &&
+          !r[x + 7] &&
+          !r[x + 8] &&
+          !r[x + 9] &&
+          !r[x + 10]
+        )
+          result += 40;
+        if (
+          !r[x] &&
+          !r[x + 1] &&
+          !r[x + 2] &&
+          !r[x + 3] &&
+          r[x + 4] &&
+          !r[x + 5] &&
+          r[x + 6] &&
+          r[x + 7] &&
+          r[x + 8] &&
+          !r[x + 9] &&
+          r[x + 10]
+        )
+          result += 40;
       }
     }
     for (let x = 0; x < sz; x++) {
       for (let y = 0; y < sz - 10; y++) {
-        if ( mod[y][x] && !mod[y+1][x] &&  mod[y+2][x] &&  mod[y+3][x] &&  mod[y+4][x] && !mod[y+5][x] &&  mod[y+6][x] && !mod[y+7][x] && !mod[y+8][x] && !mod[y+9][x] && !mod[y+10][x]) result += 40;
-        if (!mod[y][x] && !mod[y+1][x] && !mod[y+2][x] && !mod[y+3][x] &&  mod[y+4][x] && !mod[y+5][x] &&  mod[y+6][x] &&  mod[y+7][x] &&  mod[y+8][x] && !mod[y+9][x] &&  mod[y+10][x]) result += 40;
+        if (
+          mod[y][x] &&
+          !mod[y + 1][x] &&
+          mod[y + 2][x] &&
+          mod[y + 3][x] &&
+          mod[y + 4][x] &&
+          !mod[y + 5][x] &&
+          mod[y + 6][x] &&
+          !mod[y + 7][x] &&
+          !mod[y + 8][x] &&
+          !mod[y + 9][x] &&
+          !mod[y + 10][x]
+        )
+          result += 40;
+        if (
+          !mod[y][x] &&
+          !mod[y + 1][x] &&
+          !mod[y + 2][x] &&
+          !mod[y + 3][x] &&
+          mod[y + 4][x] &&
+          !mod[y + 5][x] &&
+          mod[y + 6][x] &&
+          mod[y + 7][x] &&
+          mod[y + 8][x] &&
+          !mod[y + 9][x] &&
+          mod[y + 10][x]
+        )
+          result += 40;
       }
     }
 
@@ -387,7 +483,7 @@ export class QrCodeEncoder {
   private static reedSolomonMultiply(x: number, y: number): number {
     let z = 0;
     for (let i = 7; i >= 0; i--) {
-      z = (z << 1) ^ ((z >>> 7) * 0x11D);
+      z = (z << 1) ^ ((z >>> 7) * 0x11d);
       z ^= ((y >>> i) & 1) * x;
     }
     return z;
@@ -396,9 +492,11 @@ export class QrCodeEncoder {
   // ---- Static geometry helpers ----
 
   public static getNumDataCodewords(version: number, ecl: QrEcc): number {
-    return Math.floor(QrCodeEncoder.getNumRawDataModules(version) / 8) -
+    return (
+      Math.floor(QrCodeEncoder.getNumRawDataModules(version) / 8) -
       QrCodeEncoder.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][version] *
-      QrCodeEncoder.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][version];
+        QrCodeEncoder.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][version]
+    );
   }
 
   private static getNumRawDataModules(ver: number): number {

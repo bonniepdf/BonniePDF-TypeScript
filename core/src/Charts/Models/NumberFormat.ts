@@ -5,25 +5,25 @@ export enum NumberFormat {
   /**
    * Decimal numbers: 1, 2, 3, ...
    */
-  Decimal = "Decimal",
+  Decimal = 'Decimal',
 
   /**
    * Uppercase Roman numerals: I, II, III, ...
    */
-  UpperRoman = "UpperRoman",
+  UpperRoman = 'UpperRoman',
 
   /**
    * Lowercase Roman numerals: i, ii, iii, ...
    */
-  LowerRoman = "LowerRoman",
+  LowerRoman = 'LowerRoman',
 
   /**
    * Uppercase letters: A, B, C, ...
    */
-  UpperAlpha = "UpperAlpha",
+  UpperAlpha = 'UpperAlpha',
 
   /**
    * Lowercase letters: a, b, c, ...
    */
-  LowerAlpha = "LowerAlpha"
+  LowerAlpha = 'LowerAlpha',
 }

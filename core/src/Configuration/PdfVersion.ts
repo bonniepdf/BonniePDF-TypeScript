@@ -11,4 +11,3 @@ export class PdfVersion {
    */
   static readonly Pdf17 = 'Pdf17' as const;
 }
-

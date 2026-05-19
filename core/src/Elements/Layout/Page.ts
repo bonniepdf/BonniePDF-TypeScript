@@ -60,14 +60,14 @@ export class Page {
     return this.height - this.margin * 2;
   }
 
-   /**
-    * Adds an element to this page
-    * @param element - The element to add
-    */
-   public add(element: IElement): void {
-     if (!element) throw new Error('Element cannot be null');
-     this.elements.push(element);
-   }
+  /**
+   * Adds an element to this page
+   * @param element - The element to add
+   */
+  public add(element: IElement): void {
+    if (!element) throw new Error('Element cannot be null');
+    this.elements.push(element);
+  }
 
   /**
    * Gets the elements on this page (alias for the elements getter)

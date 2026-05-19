@@ -129,19 +129,19 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     return maxHeight;
   }
 
-   protected renderContent(ctx: RenderContext, contentWidth: number): void {
-     const [childWidths, totalSpacing] = this.calculateChildWidths(contentWidth);
+  protected renderContent(ctx: RenderContext, contentWidth: number): void {
+    const [childWidths, totalSpacing] = this.calculateChildWidths(contentWidth);
 
-     // Calculate maximum height for alignment
-     let maxHeight = this.height ?? 0;
-     const childHeights: number[] = new Array(this.children.length);
+    // Calculate maximum height for alignment
+    let maxHeight = this.height ?? 0;
+    const childHeights: number[] = new Array(this.children.length);
 
-     for (let i = 0; i < this.children.length; i++) {
-       childHeights[i] = this.children[i].measureHeight(childWidths[i]);
-       if (!this.height && childHeights[i] > maxHeight) {
-         maxHeight = childHeights[i];
-       }
-     }
+    for (let i = 0; i < this.children.length; i++) {
+      childHeights[i] = this.children[i].measureHeight(childWidths[i]);
+      if (!this.height && childHeights[i] > maxHeight) {
+        maxHeight = childHeights[i];
+      }
+    }
 
     const originalX = ctx.currentX;
 

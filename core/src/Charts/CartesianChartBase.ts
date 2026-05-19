@@ -25,13 +25,13 @@ export abstract class CartesianChartBase extends ChartBase {
   protected static readonly LEGEND_FONT_SIZE = 11;
 
   // Styling constants
-  protected static readonly AXIS_COLOR = Color.fromHex("#666666");
-  protected static readonly GRID_LINE_COLOR = Color.fromHex("#e0e0e0");
+  protected static readonly AXIS_COLOR = Color.fromHex('#666666');
+  protected static readonly GRID_LINE_COLOR = Color.fromHex('#e0e0e0');
 
   /**
    * Font family for labels
    */
-  fontFamily: string = "Arial, sans-serif";
+  fontFamily: string = 'Arial, sans-serif';
 
   /**
    * Whether to show value labels above each data point
@@ -73,8 +73,15 @@ export abstract class CartesianChartBase extends ChartBase {
     this.drawYAxisLabels(canvas, data, layout.chartAreaHeight, layout.baselineY, layout.topY);
 
     // 3. Draw value-axis legend
-    if (data.yAxis.legend !== "") {
-      this.drawYAxisLegend(canvas, data.yAxis, layout.chartAreaWidth, layout.chartAreaHeight, layout.topY, layout.baselineY);
+    if (data.yAxis.legend !== '') {
+      this.drawYAxisLegend(
+        canvas,
+        data.yAxis,
+        layout.chartAreaWidth,
+        layout.chartAreaHeight,
+        layout.topY,
+        layout.baselineY
+      );
     }
 
     // 4. Draw chart-specific data elements
@@ -89,7 +96,7 @@ export abstract class CartesianChartBase extends ChartBase {
     this.drawXAxisLabels(canvas, data, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY);
 
     // 7. Draw category-axis legend
-    if (data.xAxis.legend !== "") {
+    if (data.xAxis.legend !== '') {
       this.drawXAxisLegend(canvas, data.xAxis.legend, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY);
     }
 
@@ -114,13 +121,7 @@ export abstract class CartesianChartBase extends ChartBase {
     topY: number
   ): void {
     for (const series of data.series) {
-      const coordinates = this.calculateSeriesCoordinates(
-        series,
-        data,
-        chartAreaWidth,
-        chartAreaHeight,
-        baselineY
-      );
+      const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
       this.drawSeriesElements(canvas, data, series, coordinates, chartAreaWidth, chartAreaHeight, baselineY, topY);
     }
@@ -191,13 +192,7 @@ export abstract class CartesianChartBase extends ChartBase {
     if (!this.showValueLabels) return;
 
     for (const series of data.series) {
-      const coordinates = this.calculateSeriesCoordinates(
-        series,
-        data,
-        chartAreaWidth,
-        chartAreaHeight,
-        baselineY
-      );
+      const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
       const labelColor = series.color;
       const offset = this.getLabelVerticalOffset(series);
@@ -299,12 +294,7 @@ export abstract class CartesianChartBase extends ChartBase {
   /**
    * Draws the X and Y axis lines.
    */
-  protected static drawAxisLines(
-    canvas: ICanvas,
-    chartAreaWidth: number,
-    baselineY: number,
-    topY: number
-  ): void {
+  protected static drawAxisLines(canvas: ICanvas, chartAreaWidth: number, baselineY: number, topY: number): void {
     // Left vertical line
     canvas.drawLine(
       CartesianChartBase.LEFT_PADDING,
@@ -525,7 +515,7 @@ export abstract class CartesianChartBase extends ChartBase {
    * Gets the default color for the first series.
    */
   protected getDefaultSeriesColor(): Color {
-    return Color.fromHex("#4f46e5");
+    return Color.fromHex('#4f46e5');
   }
 
   /**

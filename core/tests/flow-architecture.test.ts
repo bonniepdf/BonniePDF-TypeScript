@@ -35,7 +35,9 @@ describe('RenderContext', () => {
   it('onPageCreated callback fires on newPage', () => {
     const ctx = new RenderContext(PdfSize.a4, 20);
     let called = false;
-    ctx.onPageCreated = () => { called = true; };
+    ctx.onPageCreated = () => {
+      called = true;
+    };
     ctx.newPage();
     expect(called).toBe(true);
   });

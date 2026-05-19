@@ -2,12 +2,12 @@ export enum ImageColorSpace {
   DeviceRGB = 'DeviceRGB',
   DeviceCMYK = 'DeviceCMYK',
   DeviceGray = 'DeviceGray',
-  Indexed = 'Indexed'
+  Indexed = 'Indexed',
 }
 
 export enum ImageFormat {
   Jpeg = 'Jpeg',
-  Png = 'Png'
+  Png = 'Png',
 }
 
 export class ImageInfo {

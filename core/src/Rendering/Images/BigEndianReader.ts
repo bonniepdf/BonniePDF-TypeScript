@@ -13,26 +13,28 @@ export class BigEndianReader {
   }
 
   public readUInt32(): number {
-    const value = (this.data[this.position] << 24) |
-                  (this.data[this.position + 1] << 16) |
-                  (this.data[this.position + 2] << 8) |
-                  this.data[this.position + 3];
+    const value =
+      (this.data[this.position] << 24) |
+      (this.data[this.position + 1] << 16) |
+      (this.data[this.position + 2] << 8) |
+      this.data[this.position + 3];
     this.position += 4;
     return value;
   }
 
   public readFixed(): number {
     // TrueType Fixed is a 4-byte 16.16 fixed-point: 2-byte signed integer + 2-byte fraction.
-    const integer = this.readInt16();    // 2 bytes
-    const fraction = this.readUInt16();  // 2 bytes  (total = 4)
+    const integer = this.readInt16(); // 2 bytes
+    const fraction = this.readUInt16(); // 2 bytes  (total = 4)
     return integer + fraction / 65536.0;
   }
 
   public readInt32(): number {
-    const value = (this.data[this.position] << 24) |
-                  (this.data[this.position + 1] << 16) |
-                  (this.data[this.position + 2] << 8) |
-                  this.data[this.position + 3];
+    const value =
+      (this.data[this.position] << 24) |
+      (this.data[this.position + 1] << 16) |
+      (this.data[this.position + 2] << 8) |
+      this.data[this.position + 3];
     this.position += 4;
     return value;
   }

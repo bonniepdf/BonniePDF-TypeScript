@@ -8,7 +8,9 @@ class MockPdfWriter implements IPdfWriter {
   private _idCounter = 1;
   public readonly writtenObjects: Array<{ id: number; dict: Map<string, string>; bytes?: Uint8Array }> = [];
 
-  getNewId(): number { return this._idCounter++; }
+  getNewId(): number {
+    return this._idCounter++;
+  }
 
   writeObject(id: number, dictionary: Map<string, string>, _stream?: string): void {
     this.writtenObjects.push({ id, dict: new Map(dictionary) });

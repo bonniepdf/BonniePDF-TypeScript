@@ -60,9 +60,7 @@ export class ToUnicodeCMapBuilder {
     // Sort mappings by glyph ID for consistent output
     const sorted = this.mappings
       .sort((a, b) => a.glyphId - b.glyphId)
-      .filter((mapping, index, self) => 
-        index === self.findIndex(m => m.glyphId === mapping.glyphId)
-      );
+      .filter((mapping, index, self) => index === self.findIndex(m => m.glyphId === mapping.glyphId));
 
     // Write bfchar entries in chunks of 100 (PDF limit per block)
     const count = sorted.length;
@@ -92,14 +90,14 @@ export class ToUnicodeCMapBuilder {
    * BMP codepoints use 4-digit hex; supplementary codepoints use UTF-16 surrogate pairs.
    */
   private formatUnicode(codepoint: number): string {
-    if (codepoint <= 0xFFFF) {
+    if (codepoint <= 0xffff) {
       return `<${codepoint.toString(16).padStart(4, '0').toUpperCase()}>`;
     }
 
     // Supplementary plane: encode as UTF-16 surrogate pair
     const offset = codepoint - 0x10000;
-    const highSurrogate = 0xD800 + (offset >> 10);
-    const lowSurrogate = 0xDC00 + (offset & 0x3FF);
+    const highSurrogate = 0xd800 + (offset >> 10);
+    const lowSurrogate = 0xdc00 + (offset & 0x3ff);
     return `<${highSurrogate.toString(16).padStart(4, '0').toUpperCase()}${lowSurrogate.toString(16).padStart(4, '0').toUpperCase()}>`;
   }
 

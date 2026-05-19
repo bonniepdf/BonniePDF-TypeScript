@@ -44,7 +44,7 @@ jobs:
         with:
           # When changesets exist → open/update "Version Packages" PR
           # When that PR is merged → publish to npm
-          version: pnpm changeset version
+          version: node scripts/calver-version.mjs
           publish: pnpm changeset publish
           title: "chore: release packages"
           commit: "chore: version packages"

@@ -5,6 +5,9 @@ export default defineConfig({
   entry: {
     index: 'src/index.ts',
     'index.node': 'src/index.node.ts',
+    charts: 'src/charts.ts',
+    security: 'src/security.ts',
+    qr: 'src/qr.ts',
   },
   format: ['esm', 'cjs'],
   platform: 'neutral',

@@ -164,3 +164,4 @@ export * from './Rendering/Writers/PdfWriter';
 
 export * from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
+export * from './Platform/NodePlatformIO';

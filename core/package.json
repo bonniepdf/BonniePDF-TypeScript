@@ -6,27 +6,69 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "./dist/index.node.js",
+    "./dist/index.node.cjs"
+  ],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./src/index.ts",
+      "node": {
+        "types": "./dist/index.node.d.ts",
+        "import": "./dist/index.node.js",
+        "require": "./dist/index.node.cjs"
+      },
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./charts": {
+      "types": "./dist/charts.d.ts",
+      "import": "./dist/charts.js",
+      "require": "./dist/charts.cjs"
+    },
+    "./security": {
+      "types": "./dist/security.d.ts",
+      "import": "./dist/security.js",
+      "require": "./dist/security.cjs"
+    },
+    "./qr": {
+      "types": "./dist/qr.d.ts",
+      "import": "./dist/qr.js",
+      "require": "./dist/qr.cjs"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\""
+    "prepack": "pnpm run build",
+    "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist', { recursive: true, force: true });\""
   },
   "keywords": ["pdf", "document", "generation", "typescript"],
   "license": "UNLICENSED",
+  "author": "BonniePDF Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bonniepdf/bonniepdf-typescript",
+    "directory": "core"
+  },
+  "bugs": {
+    "url": "https://github.com/bonniepdf/bonniepdf-typescript/issues"
+  },
+  "homepage": "https://bonniepdf.dev",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^25.8.0",
     "tsup": "^8.0.0",
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   }
 }

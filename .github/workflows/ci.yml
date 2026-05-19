@@ -35,6 +35,9 @@ jobs:
       - name: Build
         run: pnpm turbo build
 
+      - name: Test
+        run: pnpm --filter @bonniepdf/core run test
+
       - name: Verify package exports
         run: node --input-type=module -e "import('@bonniepdf/core')"
         working-directory: core

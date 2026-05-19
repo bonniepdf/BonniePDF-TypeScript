@@ -9,7 +9,7 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
+    "@changesets/cli": "^2.31.0",
     "turbo": "latest"
   },
   "engines": {
@@ -17,6 +17,8 @@
     "pnpm": ">=11.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

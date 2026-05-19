@@ -46,11 +46,19 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "pnpm run build",
-    "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist', { recursive: true, force: true });\""
+    "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist', { recursive: true, force: true });\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
-  "keywords": ["pdf", "document", "generation", "typescript"],
+  "keywords": [
+    "pdf",
+    "document",
+    "generation",
+    "typescript"
+  ],
   "license": "UNLICENSED",
-  "author": "BonniePDF Contributors",
+  "author": "BonniePDF",
   "repository": {
     "type": "git",
     "url": "https://github.com/bonniepdf/bonniepdf-typescript",
@@ -65,8 +73,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.8.0",
+    "@vitest/coverage-v8": "^4.1.6",
     "tsup": "^8.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   },
   "engines": {
     "node": ">=18.0.0"

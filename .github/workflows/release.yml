@@ -11,6 +11,8 @@ jobs:
     name: Publish to npm
     runs-on: ubuntu-latest
     environment: production
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write        # push version-bump commits and create releases
       pull-requests: write   # create and update the "Version Packages" PR

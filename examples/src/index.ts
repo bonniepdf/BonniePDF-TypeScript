@@ -50,7 +50,7 @@ export const examples: ExampleDef[] = [
   {
     id: 'simple-document',
     name: 'Simple Document',
-    category: 'Basics',
+    category: 'Basic',
     description: '3-page document demonstrating the core Document API — text, spacers, and custom page sizes.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
@@ -58,7 +58,7 @@ export const examples: ExampleDef[] = [
   {
     id: 'margin-example',
     name: 'Margins & Units',
-    category: 'Basics',
+    category: 'Basic',
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
     filename: 'margin-example.pdf',
     generate: marginExample,
@@ -66,7 +66,7 @@ export const examples: ExampleDef[] = [
   {
     id: 'page-settings',
     name: 'Page Settings',
-    category: 'Basics',
+    category: 'Basic',
     description: 'Gallery of every standard page size in both portrait and landscape orientation.',
     filename: 'page-settings.pdf',
     generate: pageSettings,

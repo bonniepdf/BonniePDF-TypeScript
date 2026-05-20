@@ -134,29 +134,69 @@ export class ImageWriter {
   }
 
   /**
-   * Compresses data using zlib/Deflate (Legacy Sync Version)
-   * TODO: Implement actual zlib compression
+   * Wraps `data` in a valid zlib stream (RFC 1950) using stored (uncompressed)
+   * deflate blocks (RFC 1951, BTYPE=00).  Each block carries at most 65 535
+   * bytes, so large images are split automatically.
+   *
+   * The resulting bytes can be written to a PDF stream with /Filter /FlateDecode
+   * and will be correctly decoded by any conforming PDF reader.
    */
   private compressData(data: Uint8Array): Uint8Array {
-    // TODO: Implement zlib compression with Adler-32 checksum
-    // For now, return uncompressed data
-    return data;
+    const MAX_BLOCK = 0xffff; // maximum payload per stored deflate block
+
+    // Count blocks needed.
+    const blockCount = Math.max(1, Math.ceil(data.length / MAX_BLOCK));
+    // Per block: 1 (BFINAL+BTYPE) + 2 (LEN) + 2 (NLEN) + payload
+    const blocksBytes = data.length + blockCount * 5;
+    const result = new Uint8Array(2 + blocksBytes + 4); // header + blocks + adler32
+
+    let pos = 0;
+
+    // zlib header: CMF=0x78 (deflate, window=32K), FLG=0x01
+    // (0x78*256 + 0x01 = 30721 = 31*991, satisfies the check-bits constraint)
+    result[pos++] = 0x78;
+    result[pos++] = 0x01;
+
+    let dataPos = 0;
+    for (let b = 0; b < blockCount; b++) {
+      const remaining = data.length - dataPos;
+      const blockLen = Math.min(remaining, MAX_BLOCK);
+      const isFinal = b === blockCount - 1;
+      const nlen = ~blockLen & 0xffff;
+
+      result[pos++] = isFinal ? 0x01 : 0x00; // BFINAL | BTYPE=00
+      result[pos++] = blockLen & 0xff;
+      result[pos++] = (blockLen >>> 8) & 0xff;
+      result[pos++] = nlen & 0xff;
+      result[pos++] = (nlen >>> 8) & 0xff;
+
+      result.set(data.subarray(dataPos, dataPos + blockLen), pos);
+      pos += blockLen;
+      dataPos += blockLen;
+    }
+
+    // Adler-32 checksum of the original (uncompressed) data, big-endian.
+    const adler = this.calculateAdler32(data);
+    result[pos++] = (adler >>> 24) & 0xff;
+    result[pos++] = (adler >>> 16) & 0xff;
+    result[pos++] = (adler >>> 8) & 0xff;
+    result[pos++] = adler & 0xff;
+
+    return result;
   }
 
   /**
-   * Calculates Adler-32 checksum for zlib
+   * Calculates the Adler-32 checksum (used by zlib).
    */
   private calculateAdler32(data: Uint8Array): number {
-    const MOD_ADLER = 65521;
+    const MOD = 65521;
     let a = 1;
     let b = 0;
-
     for (const d of data) {
-      a = (a + d) % MOD_ADLER;
-      b = (b + a) % MOD_ADLER;
+      a = (a + d) % MOD;
+      b = (b + a) % MOD;
     }
-
-    return (b << 16) | a;
+    return ((b << 16) | a) >>> 0;
   }
 
   /**

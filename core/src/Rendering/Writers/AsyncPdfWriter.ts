@@ -8,6 +8,7 @@
 import { DocumentSettings } from '../../Configuration/DocumentSettings';
 import { Hyperlink } from '../../Core/Hyperlink';
 import { PdfVersion } from '../../Configuration/PdfVersion';
+import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
 import { CatalogOptions } from './CatalogOptions';
@@ -205,9 +206,22 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
       dict.set('/OutputIntents', `[ ${refs} ]`);
     }
 
-    // MarkInfo for PDF/A
-    if (options.pdfAEnabled) {
+    // /MarkInfo whenever either PDF/A or tagging is on. Both standards
+    // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+    // it once when either is set covers both cases.
+    if (options.pdfAEnabled || options.tagged) {
       dict.set('/MarkInfo', '<< /Marked true >>');
+    }
+
+    // /StructTreeRoot when tagging is on.
+    if (options.structTreeRootId != null && options.structTreeRootId > 0) {
+      dict.set('/StructTreeRoot', `${options.structTreeRootId} 0 R`);
+    }
+
+    // /Lang when the document declares a natural language. Required by
+    // PDF/UA-1.
+    if (options.language) {
+      dict.set('/Lang', `(${PdfSyntax.escape(options.language)})`);
     }
 
     // Dests

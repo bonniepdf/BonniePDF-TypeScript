@@ -12,7 +12,10 @@ import {
   IPdfWriter,
   IAsyncPdfWriter,
 } from './Writers/PdfWriter';
+import { StructureTreeWriter } from './Writers/StructureTreeWriter';
+import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { PdfVersion } from '../Configuration/PdfVersion';
+import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 
 export class PdfDocumentSerializer {
   constructor(private document: Document) {}
@@ -158,6 +161,19 @@ export class PdfDocumentSerializer {
       const outputIntentId = writer.getNewId();
       complianceWriter.writeOutputIntent(outputIntentId, iccProfileId);
       catalogOptions.outputIntentIds = [outputIntentId];
+    }
+
+    // 11b. Write PDF/UA structure tree. The in-memory tree currently only
+    // contains the implicit Document root — actual semantic tagging arrives
+    // once the renderer populates the tree. What lands here in this feature
+    // is the catalog wiring: a valid empty StructTreeRoot referencing a
+    // Document StructElem, plus /MarkInfo and /Lang.
+    if (settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17) {
+      const structureTree = new StructureTreeBuilder();
+      const structureTreeWriter = new StructureTreeWriter(writer);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(structureTree);
+      catalogOptions.tagged = true;
+      catalogOptions.language = settings.language;
     }
 
     // 12. Write /Catalog

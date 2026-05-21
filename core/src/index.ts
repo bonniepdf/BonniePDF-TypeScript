@@ -27,6 +27,7 @@ export * from './Rendering/Tagging/StructureElement';
 export * from './Rendering/Tagging/IStructureVisitor';
 export * from './Rendering/Tagging/StructureTreeBuilder';
 export * from './Rendering/Tagging/StructureTreeException';
+export * from './Rendering/Writers/StructureTreeWriter';
 
 export * from './Security/Models/EncryptionAlgorithm';
 export * from './Security/Models/EncryptionSettings';

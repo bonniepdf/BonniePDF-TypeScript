@@ -291,7 +291,22 @@ export class PdfWriter implements IPdfWriter {
       const refs = options.outputIntentIds.map(oid => `${oid} 0 R`).join(' ');
       dict.set('/OutputIntents', `[ ${refs} ]`);
     }
-    if (options?.pdfAEnabled) dict.set('/MarkInfo', '<< /Marked true >>');
+    // /MarkInfo whenever either PDF/A or tagging is on. Both standards
+    // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+    // it once when either is set covers both cases.
+    if (options?.pdfAEnabled || options?.tagged) dict.set('/MarkInfo', '<< /Marked true >>');
+
+    // /StructTreeRoot when tagging is on.
+    if (options?.structTreeRootId != null && options.structTreeRootId > 0) {
+      dict.set('/StructTreeRoot', `${options.structTreeRootId} 0 R`);
+    }
+
+    // /Lang when the document declares a natural language. Required by
+    // PDF/UA-1; useful generally for assistive tech.
+    if (options?.language) {
+      dict.set('/Lang', `(${PdfSyntax.escape(options.language)})`);
+    }
+
     if (options?.destsId != null && options.destsId > 0) dict.set('/Dests', `${options.destsId} 0 R`);
 
     this.writeObject(id, dict);
@@ -883,4 +898,24 @@ export class CatalogOptions {
   public destsId?: number;
   public pdfAEnabled = false;
   public outputIntentIds: number[] = [];
+
+  /**
+   * The structure tree root object ID (0 if none). Set when the document
+   * opts into PDF/UA tagging.
+   */
+  public structTreeRootId = 0;
+
+  /**
+   * Whether the document carries a structure tree and should claim to be
+   * tagged in the catalog. When true the catalog emits
+   * `/MarkInfo <</Marked true>>` regardless of {@link pdfAEnabled}
+   * (the two flags are orthogonal).
+   */
+  public tagged = false;
+
+  /**
+   * BCP-47 language tag for the document (e.g. `"en-GB"`). When non-empty,
+   * emitted as `/Lang` on the catalog. Required by PDF/UA-1.
+   */
+  public language?: string;
 }

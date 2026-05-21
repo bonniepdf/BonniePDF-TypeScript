@@ -43,6 +43,8 @@ export interface ExampleDef {
   filename: string;
   generate: () => Document;
   thumbnailsOpen?: boolean;
+  /** Corresponding .NET class name in BonniePDF-NET/Examples/. null = TypeScript-only. */
+  dotnetClass?: string | null;
 }
 
 export const examples: ExampleDef[] = [
@@ -54,6 +56,7 @@ export const examples: ExampleDef[] = [
     description: '3-page document demonstrating the core Document API — text, spacers, and custom page sizes.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
+    dotnetClass: 'SimpleDocumentExample',
   },
   {
     id: 'margins',
@@ -62,6 +65,7 @@ export const examples: ExampleDef[] = [
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
     filename: 'margins.pdf',
     generate: margins,
+    dotnetClass: 'MarginExample',
   },
   {
     id: 'page-settings',
@@ -70,6 +74,7 @@ export const examples: ExampleDef[] = [
     description: 'Gallery of every standard page size in both portrait and landscape orientation.',
     filename: 'page-settings.pdf',
     generate: pageSettings,
+    dotnetClass: 'PageSettingsExample',
   },
 
   // ── Layout ────────────────────────────────────────────────────────────────
@@ -80,6 +85,7 @@ export const examples: ExampleDef[] = [
     description: 'Page templates with dynamic header and footer content on every page.',
     filename: 'headers-footers.pdf',
     generate: headersFooters,
+    dotnetClass: 'HeadersFootersExample',
   },
   {
     id: 'horizontal-stacks',
@@ -89,6 +95,7 @@ export const examples: ExampleDef[] = [
     filename: 'horizontal-stacks.pdf',
     generate: horizontalStacks,
     thumbnailsOpen: false,
+    dotnetClass: 'HorizontalStacksExample',
   },
   {
     id: 'text-block-overflow',
@@ -97,6 +104,7 @@ export const examples: ExampleDef[] = [
     description: 'Long text content flowing automatically across multiple pages with a page-count footer.',
     filename: 'text-block-overflow.pdf',
     generate: textBlockOverflow,
+    dotnetClass: 'TextBlockOverflowExample',
   },
   {
     id: 'vertical-stack-overflow',
@@ -105,6 +113,7 @@ export const examples: ExampleDef[] = [
     description: '75-item card list inside a VerticalStack that paginates automatically.',
     filename: 'vertical-stack-overflow.pdf',
     generate: verticalStackOverflow,
+    dotnetClass: 'VerticalStackOverflowExample',
   },
   {
     id: 'multi-page-flow',
@@ -113,6 +122,7 @@ export const examples: ExampleDef[] = [
     description: 'Landscape document combining a 150-row table with repeating headers and multi-page text sections.',
     filename: 'multi-page-flow.pdf',
     generate: multiPageFlow,
+    dotnetClass: 'MultiPageFlowExample',
   },
 
   // ── Typography ────────────────────────────────────────────────────────────
@@ -124,6 +134,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnailsOpen: false,
+    dotnetClass: null,
   },
   {
     id: 'book-page-layout',
@@ -133,6 +144,7 @@ export const examples: ExampleDef[] = [
     filename: 'book-page-layout.pdf',
     generate: bookPageLayout,
     thumbnailsOpen: false,
+    dotnetClass: 'BookPageLayoutExample',
   },
   {
     id: 'rich-text-styles',
@@ -142,6 +154,7 @@ export const examples: ExampleDef[] = [
       'Mixed inline formatting — bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
     filename: 'rich-text-styles.pdf',
     generate: richTextStyles,
+    dotnetClass: 'RichTextExample',
   },
   {
     id: 'text-decorations',
@@ -152,6 +165,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-decorations.pdf',
     generate: textDecorations,
     thumbnailsOpen: false,
+    dotnetClass: 'TextDecorationExample',
   },
   {
     id: 'custom-fonts',
@@ -162,6 +176,7 @@ export const examples: ExampleDef[] = [
     filename: 'custom-fonts.pdf',
     generate: customFonts,
     thumbnailsOpen: false,
+    dotnetClass: 'CustomFontExample',
   },
   {
     id: 'emojis-and-unicode',
@@ -171,6 +186,7 @@ export const examples: ExampleDef[] = [
     filename: 'emojis-and-unicode.pdf',
     generate: emojisAndUnicode,
     thumbnailsOpen: false,
+    dotnetClass: 'EmojiExample',
   },
   {
     id: 'dickens-novel',
@@ -180,6 +196,7 @@ export const examples: ExampleDef[] = [
       'Multi-hundred-page book layout with VisualToc, alternating running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
     filename: 'dickens-novel.pdf',
     generate: dickensNovel,
+    dotnetClass: 'DickensNovelExample',
   },
 
   // ── Elements ──────────────────────────────────────────────────────────────
@@ -191,6 +208,7 @@ export const examples: ExampleDef[] = [
       'Ordered (decimal, roman, alpha) and unordered (disc, circle, square, dash, custom) lists including nested lists.',
     filename: 'lists.pdf',
     generate: lists,
+    dotnetClass: 'ListsExample',
   },
   {
     id: 'hyperlinks',
@@ -200,6 +218,7 @@ export const examples: ExampleDef[] = [
     filename: 'hyperlinks.pdf',
     generate: hyperlinks,
     thumbnailsOpen: false,
+    dotnetClass: 'HyperlinksExample',
   },
   {
     id: 'shapes-and-borders',
@@ -208,6 +227,7 @@ export const examples: ExampleDef[] = [
     description: 'Rounded rectangles, bordered containers, card layouts, and status banners.',
     filename: 'shapes-and-borders.pdf',
     generate: shapesAndBorders,
+    dotnetClass: 'ShapesAndBordersExample',
   },
   {
     id: 'qr-codes',
@@ -217,6 +237,8 @@ export const examples: ExampleDef[] = [
       'Native vector QR codes with all four error correction levels, custom colours, and transparent backgrounds.',
     filename: 'qr-codes.pdf',
     generate: qrCodes,
+    // .NET ships the Fluent variant as the canonical source
+    dotnetClass: 'QRCodesExampleFluent',
   },
   {
     id: 'images',
@@ -225,6 +247,7 @@ export const examples: ExampleDef[] = [
     description: 'PNG embedding with contain, cover, and fill fit modes, plus alpha transparency support.',
     filename: 'images.pdf',
     generate: images,
+    dotnetClass: 'ImagesExample',
   },
 
   // ── Charting ──────────────────────────────────────────────────────────────
@@ -236,6 +259,7 @@ export const examples: ExampleDef[] = [
       'Eight-page landscape showcase of all chart types: bar, grouped bar, line, area, lollipop, dot plot, pie, and multi-series line.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
+    dotnetClass: 'ChartShowcaseExample',
   },
   {
     id: 'bar-chart',
@@ -244,6 +268,7 @@ export const examples: ExampleDef[] = [
     description: 'Vertical bar chart showing monthly sales with grid lines and value labels.',
     filename: 'bar-chart.pdf',
     generate: barChart,
+    dotnetClass: 'BarChartExample',
   },
   {
     id: 'grouped-bar-chart',
@@ -252,6 +277,7 @@ export const examples: ExampleDef[] = [
     description: 'Side-by-side bars comparing three product lines across 12 months with a colour legend.',
     filename: 'grouped-bar-chart.pdf',
     generate: groupedBarChart,
+    dotnetClass: 'GroupedBarChartExample',
   },
   {
     id: 'line-chart',
@@ -260,6 +286,7 @@ export const examples: ExampleDef[] = [
     description: 'Connected data points with circular markers and value labels showing monthly revenue trends.',
     filename: 'line-chart.pdf',
     generate: lineChart,
+    dotnetClass: 'LineChartExample',
   },
   {
     id: 'area-chart',
@@ -268,6 +295,7 @@ export const examples: ExampleDef[] = [
     description: 'Filled area under a line with configurable opacity showing monthly sales performance.',
     filename: 'area-chart.pdf',
     generate: areaChart,
+    dotnetClass: 'AreaChartExample',
   },
   {
     id: 'lollipop-chart',
@@ -276,6 +304,7 @@ export const examples: ExampleDef[] = [
     description: 'Stems with circular heads — a clear, minimal alternative to bar charts for quarterly metrics.',
     filename: 'lollipop-chart.pdf',
     generate: lollipopChart,
+    dotnetClass: 'LollipopChartExample',
   },
   {
     id: 'dot-plot-chart',
@@ -284,6 +313,7 @@ export const examples: ExampleDef[] = [
     description: 'Circular markers positioned along a value axis to compare product performance at a glance.',
     filename: 'dot-plot-chart.pdf',
     generate: dotPlotChart,
+    dotnetClass: 'DotPlotChartExample',
   },
   {
     id: 'pie-chart',
@@ -292,6 +322,7 @@ export const examples: ExampleDef[] = [
     description: 'Donut chart with a colour legend and total value in the centre showing monthly sales share.',
     filename: 'pie-chart.pdf',
     generate: pieChart,
+    dotnetClass: 'PieChartExample',
   },
   {
     id: 'multi-series-line-chart',
@@ -300,6 +331,8 @@ export const examples: ExampleDef[] = [
     description: 'Two overlapping line series comparing year-over-year revenue on a shared axis with a legend.',
     filename: 'multi-series-line-chart.pdf',
     generate: multiSeriesLineChart,
+    // .NET implements this as a private method inside ChartShowcaseExample
+    dotnetClass: null,
   },
 
   // ── Security ──────────────────────────────────────────────────────────────
@@ -310,6 +343,8 @@ export const examples: ExampleDef[] = [
     description: 'Semi-transparent diagonal DRAFT watermark rendered behind page content on every page.',
     filename: 'watermarking.pdf',
     generate: watermarking,
+    // .NET has three variants; Draft is canonical
+    dotnetClass: 'WatermarkDraftExample',
   },
   {
     id: 'encryption',
@@ -319,6 +354,8 @@ export const examples: ExampleDef[] = [
       'Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.',
     filename: 'encryption.pdf',
     generate: encryption,
+    // .NET has three variants; Password is canonical
+    dotnetClass: 'EncryptionPasswordExample',
   },
 
   // ── Templates ─────────────────────────────────────────────────────────────
@@ -329,6 +366,7 @@ export const examples: ExampleDef[] = [
     description: 'Professional invoice with company branding, line-items table, totals, and payment details.',
     filename: 'business-invoice.pdf',
     generate: businessInvoice,
+    dotnetClass: 'BusinessInvoiceExample',
   },
   {
     id: 'user-directory',
@@ -337,6 +375,7 @@ export const examples: ExampleDef[] = [
     description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
     filename: 'user-directory.pdf',
     generate: userDirectory,
+    dotnetClass: 'UserDirectoryExample',
   },
   {
     id: 'movie-catalog',
@@ -346,6 +385,7 @@ export const examples: ExampleDef[] = [
       'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
     filename: 'movie-catalog.pdf',
     generate: movieCatalog,
+    dotnetClass: 'MovieCatalogExample',
   },
   {
     id: 'financial-dashboard',
@@ -355,5 +395,6 @@ export const examples: ExampleDef[] = [
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table — all styled with a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
+    dotnetClass: null,
   },
 ];

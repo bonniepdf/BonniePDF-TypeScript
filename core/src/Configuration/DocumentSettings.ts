@@ -6,6 +6,7 @@ import { PdfVersion } from './PdfVersion';
 import { BookmarkItem } from './BookmarkItem';
 import { WatermarkSettings } from './WatermarkSettings';
 import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
+import { AccessibilityMode } from './AccessibilityMode';
 
 interface _LocalIElement {
   getPreferredWidth(): number;
@@ -87,6 +88,27 @@ export class DocumentSettings {
    */
   public pdfAEnabled: boolean;
   /**
+   * Gets or sets the accessibility / tagged-PDF conformance mode.
+   * Default {@link AccessibilityMode.None} — the writer produces an
+   * untagged PDF and ignores all tagging machinery. Set to
+   * {@link AccessibilityMode.PdfUa1} to opt the document into PDF/UA-1
+   * emission (structure tree, MCIDs, XMP conformance claim, `/Lang`,
+   * `/MarkInfo`).
+   *
+   * Orthogonal to {@link pdfAEnabled}: a document can be PDF/A, PDF/UA,
+   * both, or neither. See
+   * `the specification`.
+   */
+  public accessibility: AccessibilityMode;
+  /**
+   * Document natural language as a BCP-47 tag (e.g. `"en-GB"`,
+   * `"de-DE"`, `"fr"`). Written to the catalog as `/Lang` when set;
+   * required for PDF/UA-1 conformance, where it tells assistive tech
+   * the language of unmarked content.
+   * Default `undefined` (no language declared).
+   */
+  public language?: string;
+  /**
    * Gets or sets the bookmark items for the document outline tree.
    */
   public bookmarks: BookmarkItem[];
@@ -136,6 +158,7 @@ export class DocumentSettings {
     this.displayDocTitle = false;
     this.version = PdfVersion.Pdf14;
     this.pdfAEnabled = false;
+    this.accessibility = AccessibilityMode.None;
     this.bookmarks = [];
     this.namedDestinations = new Map();
 

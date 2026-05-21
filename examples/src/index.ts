@@ -1,6 +1,6 @@
 import { Document } from '@bonniepdf/core';
 import { generate as simpleDocument } from './basic/simple-document';
-import { generate as marginExample } from './basic/margin-example';
+import { generate as margins } from './basic/margins';
 import { generate as pageSettings } from './basic/page-settings';
 import { generate as headersFooters } from './layout/headers-footers';
 import { generate as horizontalStacks } from './layout/horizontal-stacks';
@@ -56,12 +56,12 @@ export const examples: ExampleDef[] = [
     generate: simpleDocument,
   },
   {
-    id: 'margin-example',
+    id: 'margins',
     name: 'Margins & Units',
     category: 'Basic',
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
-    filename: 'margin-example.pdf',
-    generate: marginExample,
+    filename: 'margins.pdf',
+    generate: margins,
   },
   {
     id: 'page-settings',

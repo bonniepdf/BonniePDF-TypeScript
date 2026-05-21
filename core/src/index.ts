@@ -22,6 +22,12 @@ export * from './Configuration/DocumentSettings';
 export * from './Configuration/AccessibilityMode';
 export * from './Configuration/InternalConfiguration';
 
+export * from './Rendering/Tagging/SemanticRole';
+export * from './Rendering/Tagging/StructureElement';
+export * from './Rendering/Tagging/IStructureVisitor';
+export * from './Rendering/Tagging/StructureTreeBuilder';
+export * from './Rendering/Tagging/StructureTreeException';
+
 export * from './Security/Models/EncryptionAlgorithm';
 export * from './Security/Models/EncryptionSettings';
 export * from './Security/Models/EncryptionOptions';

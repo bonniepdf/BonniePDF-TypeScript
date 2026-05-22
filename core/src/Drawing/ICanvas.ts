@@ -79,4 +79,19 @@ export interface ICanvas {
    * when tagging is disabled.
    */
   endMarkedContent(): void;
+
+  /**
+   * Begin an artifact (decorative/navigational) marked-content region.
+   * Emits `/Artifact BMC` on PDF. Unlike {@link beginMarkedContent},
+   * artifact regions are not registered in the structure tree and do not
+   * allocate an MCID. No-op when the document is not tagged or when using
+   * SVG output.
+   */
+  beginArtifact(): void;
+
+  /**
+   * End the artifact region opened by {@link beginArtifact}. Emits `EMC`
+   * on PDF; no-op on SVG.
+   */
+  endArtifact(): void;
 }

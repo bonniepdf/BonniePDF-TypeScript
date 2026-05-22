@@ -143,6 +143,12 @@ export class SvgCanvas implements ICanvas {
     // See beginMarkedContent — no-op for SVG output.
   }
 
+  /** @inheritdoc */
+  public beginArtifact(): void {} // no-op for SVG output
+
+  /** @inheritdoc */
+  public endArtifact(): void {} // no-op for SVG output
+
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width}" height="${this.height}">${this.svgElements.join('')}</svg>`;
   }

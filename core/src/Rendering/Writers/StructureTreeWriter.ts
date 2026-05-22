@@ -48,7 +48,7 @@ export class StructureTreeWriter {
    * @param pageIds Page object IDs in document order. Empty/undefined
    *   when no page-aware output is needed (test fixtures).
    */
-  write(builder: StructureTreeBuilder, pageIds?: number[]): number {
+  write(builder: StructureTreeBuilder, pageIds?: number[], annotBindings?: AnnotBinding[]): number {
     if (!this._writer) {
       throw new Error('StructureTreeWriter.write: writer is async; call writeAsync().');
     }
@@ -63,12 +63,12 @@ export class StructureTreeWriter {
     this.writeSubtree(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
 
     if (parentTreeId > 0 && parentTreeNums) {
-      writer.writeObject(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds));
+      writer.writeObject(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds, annotBindings));
     }
 
     writer.writeObject(
       structTreeRootId,
-      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums)
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings)
     );
 
     return structTreeRootId;
@@ -98,6 +98,7 @@ export class StructureTreeWriter {
   async writeAsync(
     builder: StructureTreeBuilder,
     pageIds?: number[],
+    annotBindings?: AnnotBinding[],
     _cancellationToken?: AbortSignal
   ): Promise<number> {
     if (!this._asyncWriter) {
@@ -114,12 +115,12 @@ export class StructureTreeWriter {
     await this.writeSubtreeAsync(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
 
     if (parentTreeId > 0 && parentTreeNums) {
-      await writer.writeObjectAsync(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds));
+      await writer.writeObjectAsync(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds, annotBindings));
     }
 
     await writer.writeObjectAsync(
       structTreeRootId,
-      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums)
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings)
     );
 
     return structTreeRootId;
@@ -151,6 +152,14 @@ export class StructureTreeWriter {
 interface ParentTreeEntry {
   mcid: number;
   elem: StructureElement;
+}
+
+/** annotation binding record for /StructParent + /OBJR wiring. */
+interface AnnotBinding {
+  structElem: StructureElement;
+  annotId: number;
+  pageObjectId: number;
+  structParentKey: number;
 }
 
 function buildStructElemDict(
@@ -185,7 +194,8 @@ function buildStructTreeRootDict(
   documentRoot: StructureElement,
   elementIds: Map<StructureElement, number>,
   parentTreeId: number,
-  parentTreeNums: ParentTreeEntry[][] | undefined
+  parentTreeNums: ParentTreeEntry[][] | undefined,
+  annotBindings?: AnnotBinding[]
 ): Map<string, string> {
   const dict = new Map<string, string>();
   dict.set('/Type', '/StructTreeRoot');
@@ -193,7 +203,15 @@ function buildStructTreeRootDict(
 
   if (parentTreeId > 0 && parentTreeNums) {
     dict.set('/ParentTree', `${parentTreeId} 0 R`);
-    dict.set('/ParentTreeNextKey', parentTreeNums.length.toString());
+    // /ParentTreeNextKey = max key used + 1.
+    // Annotation keys (10_000+) may exceed the page count, so use the
+    // max of page count and maxAnnotKey + 1.
+    let nextKey = parentTreeNums.length;
+    if (annotBindings && annotBindings.length > 0) {
+      const maxAnnotKey = Math.max(...annotBindings.map(b => b.structParentKey));
+      nextKey = Math.max(nextKey, maxAnnotKey + 1);
+    }
+    dict.set('/ParentTreeNextKey', nextKey.toString());
   }
 
   return dict;
@@ -201,7 +219,8 @@ function buildStructTreeRootDict(
 
 function buildParentTreeDict(
   parentTreeNums: ParentTreeEntry[][],
-  elementIds: Map<StructureElement, number>
+  elementIds: Map<StructureElement, number>,
+  annotBindings?: AnnotBinding[]
 ): Map<string, string> {
   const parts: string[] = [];
   for (let pageKey = 0; pageKey < parentTreeNums.length; pageKey++) {
@@ -217,6 +236,19 @@ function buildParentTreeDict(
     for (const { mcid, elem } of entries) slots[mcid] = `${elementIds.get(elem)} 0 R`;
     parts.push('[ ' + slots.join(' ') + ' ]');
   }
+
+  // Annotation struct parent entries: each link annotation gets its
+  // own key mapping directly to its containing Link struct element.
+  if (annotBindings) {
+    for (const { structElem, structParentKey } of annotBindings) {
+      const elemId = elementIds.get(structElem);
+      if (elemId !== undefined) {
+        parts.push(structParentKey.toString());
+        parts.push(`${elemId} 0 R`);
+      }
+    }
+  }
+
   return new Map<string, string>([['/Nums', '[ ' + parts.join(' ') + ' ]']]);
 }
 
@@ -225,7 +257,7 @@ function buildKidsAndPg(
   elementIds: Map<StructureElement, number>,
   pageIds: number[] | undefined
 ): { kids: string | null; singlePageObjectId?: number } {
-  if (element.children.length === 0 && element.mcIds.length === 0) {
+  if (element.children.length === 0 && element.mcIds.length === 0 && element.objrAnnotations.length === 0) {
     return { kids: null };
   }
 
@@ -261,6 +293,11 @@ function buildKidsAndPg(
       // Test mode (no page IDs) — bare ints, no /Pg.
       for (const mcid of element.mcIds) parts.push(mcid.toString());
     }
+  }
+
+  // /OBJR children for annotation-backed elements.
+  for (const { annotId, pageObjectId } of element.objrAnnotations) {
+    parts.push(`<< /Type /OBJR /Pg ${pageObjectId} 0 R /Obj ${annotId} 0 R >>`);
   }
 
   return { kids: '[ ' + parts.join(' ') + ' ]', singlePageObjectId };

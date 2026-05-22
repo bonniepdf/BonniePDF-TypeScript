@@ -75,6 +75,16 @@ export class StructureElement {
   public attributes?: string;
 
   /**
+   * `/OBJR` annotation references. Each entry is a pair of
+   * `(annotId, pageObjectId)` for a link annotation whose struct element
+   * is this node. The structure-tree writer emits one `/OBJR` child dict
+   * per entry so the annotation is reachable from the struct tree, and
+   * the parent-tree gets an annotation-key entry so the reverse lookup
+   * works.
+   */
+  public readonly objrAnnotations: Array<{ annotId: number; pageObjectId: number }> = [];
+
+  /**
    * Creates a new structure element with the given role. Parent is
    * assigned by {@link StructureTreeBuilder.begin}; do not set it
    * directly.

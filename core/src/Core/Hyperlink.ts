@@ -9,6 +9,7 @@ import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
+import type { StructureElement } from '../Rendering/Tagging/StructureElement';
 
 /**
  * Represents a hyperlink annotation in a PDF document.
@@ -51,6 +52,14 @@ export class Hyperlink implements IElement, IRoleProvider {
   margin: Thickness = new Thickness(0);
 
   // Internal properties set during rendering
+
+  /**
+   * @internal — the Link struct element opened for this hyperlink during the
+   * render pass. Set by the pipeline so the serializer can write
+   * /StructParent + /OBJR on the annotation.
+   */
+  linkedStructElement?: StructureElement;
+
   /**
    * @internal - Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).
    */

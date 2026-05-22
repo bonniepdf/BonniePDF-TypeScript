@@ -274,6 +274,16 @@ export class PdfCanvas implements ICanvas {
     this.openMarkedContent--;
   }
 
+  /** @inheritdoc */
+  public beginArtifact(): void {
+    PdfOperators.beginArtifact(this.stream);
+  }
+
+  /** @inheritdoc */
+  public endArtifact(): void {
+    PdfOperators.endMarkedContent(this.stream);
+  }
+
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
     // For embedded TrueType fonts, use the actual glyph advance widths.
     // Falling back to the Helvetica AFM table produces wrong line-break

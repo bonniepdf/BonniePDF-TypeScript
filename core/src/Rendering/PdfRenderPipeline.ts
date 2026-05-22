@@ -12,6 +12,7 @@ import { RenderStatus } from '../Elements/RenderStatus';
 import { isRoleProvider } from './Tagging/IRoleProvider';
 import { isAltTextProvider } from './Tagging/IAltTextProvider';
 import { toPdfTag } from './Tagging/SemanticRole';
+import type { Hyperlink } from '../Core/Hyperlink';
 
 export class PdfRenderPipeline {
   public static renderPages(pages: Page[], settings: DocumentSettings): PdfRenderResult {
@@ -87,7 +88,7 @@ export class PdfRenderPipeline {
     const tagThis = tagging != null && isRoleProvider(element);
     if (tagThis) {
       const role = element.semanticRole;
-      tagging!.tree.begin(role);
+      const elem = tagging!.tree.begin(role);
 
       // Surface alt-text on the structure element when the element
       // provides it. PDF/UA requires /Alt on Figure structure elements;
@@ -96,6 +97,10 @@ export class PdfRenderPipeline {
       if (isAltTextProvider(element) && element.altText) {
         tagging!.tree.setAlt(element.altText);
       }
+
+      // wire the struct element back to the hyperlink so the
+      // serializer can write /StructParent + /OBJR in the annot dict.
+      if ('linkedStructElement' in element) (element as unknown as Hyperlink).linkedStructElement = elem;
 
       ctx.canvas.beginMarkedContent(toPdfTag(role));
     }
@@ -253,6 +258,12 @@ export class PdfRenderPipeline {
     PdfOperators.endText(wmOps);
     PdfOperators.restoreState(wmOps);
 
+    // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+    if (ctx.tagging) {
+      wmOps.unshift('/Artifact BMC\n');
+      wmOps.push('EMC\n');
+    }
+
     ctx.pages[pageIndex] = wmOps.join('') + ctx.pages[pageIndex];
   }
 
@@ -279,7 +290,9 @@ export class PdfRenderPipeline {
         if (headerElement) {
           ctx.currentX = startX;
           ctx.currentY = 0;
+          if (ctx.tagging) ctx.canvas.beginArtifact();
           headerElement.render(ctx, contentWidth);
+          if (ctx.tagging) ctx.canvas.endArtifact();
         }
       }
 
@@ -288,7 +301,9 @@ export class PdfRenderPipeline {
         if (footerElement) {
           ctx.currentX = startX;
           ctx.currentY = ctx.pageSize.height - ctx.margin;
+          if (ctx.tagging) ctx.canvas.beginArtifact();
           footerElement.render(ctx, contentWidth);
+          if (ctx.tagging) ctx.canvas.endArtifact();
         }
       }
 

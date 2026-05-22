@@ -60,6 +60,7 @@ export * from './Elements/Layout/IBackgroundColor';
 export * from './Elements/Layout/BorderedElementBase';
 export * from './Elements/Layout/Container';
 export * from './Elements/Layout/HorizontalStack';
+export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';
 
 export * from './Elements/Media/Image';

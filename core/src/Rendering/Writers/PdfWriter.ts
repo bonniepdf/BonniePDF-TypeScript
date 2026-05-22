@@ -243,6 +243,11 @@ export class PdfWriter implements IPdfWriter {
       ['/Subtype', '/Link'],
       ['/Rect', link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
       ['/F', '4'], // Print flag (required for PDF/A-1B)
+      // this feature / PDF/UA rule 7-18: /Contents must mirror the visible link
+      // text. Emitted unconditionally — even untagged docs benefit, and
+      // the field is a no-op for viewers that don't surface annotation
+      // alt-text.
+      ['/Contents', `(${PdfSyntax.escape((link.text ?? '').toString())})`],
     ]);
 
     if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {

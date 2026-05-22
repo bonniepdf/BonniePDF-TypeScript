@@ -7,13 +7,20 @@ import { StandardFonts } from '../Typography/StandardFonts';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
+import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
 
 /**
  * Represents a hyperlink annotation in a PDF document.
  * Hyperlinks are clickable areas that navigate to a URI.
  * This element implements IElement so it can be added like other elements.
  */
-export class Hyperlink implements IElement {
+export class Hyperlink implements IElement, IRoleProvider {
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return SemanticRole.Link;
+  }
+
   /**
    * Gets or sets the URI (URL) that this hyperlink points to
    */

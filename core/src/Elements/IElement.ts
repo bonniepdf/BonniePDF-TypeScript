@@ -12,6 +12,13 @@ export interface RenderContext {
   registerHyperlink(hyperlink: any): void;
   newPage(): void;
   isLastPage: boolean;
+  /**
+   * PDF/UA tagging context, set by the concrete `Rendering/RenderContext`
+   * when accessibility is on. Typed loosely here to avoid cross-module
+   * cycles; elements that need it (currently Table) cast to the concrete
+   * `TaggingContext` shape they actually use.
+   */
+  tagging?: any;
 }
 
 /**

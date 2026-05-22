@@ -66,6 +66,15 @@ export class StructureElement {
   public title?: string;
 
   /**
+   * `/A` — raw structure-element attributes dictionary as PDF syntax
+   * (e.g. `"<< /O /Table /ColSpan 2 >>"`). Used for table cell
+   * column/row spans, list label characteristics, and other
+   * attribute-owner-namespaced metadata per ISO 32000-1 §14.7.5.
+   * Emitted verbatim by the structure-tree writer.
+   */
+  public attributes?: string;
+
+  /**
    * Creates a new structure element with the given role. Parent is
    * assigned by {@link StructureTreeBuilder.begin}; do not set it
    * directly.

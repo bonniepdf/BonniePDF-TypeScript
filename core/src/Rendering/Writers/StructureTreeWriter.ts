@@ -173,6 +173,11 @@ function buildStructElemDict(
   if (element.lang) dict.set('/Lang', `(${PdfSyntax.escape(element.lang)})`);
   if (element.title) dict.set('/T', `(${PdfSyntax.escape(element.title)})`);
 
+  // /A — attributes dictionary (raw PDF syntax provided by caller).
+  // Tables use this for /ColSpan; future stages may use it for
+  // /RowSpan and list characteristics.
+  if (element.attributes) dict.set('/A', element.attributes);
+
   return dict;
 }
 

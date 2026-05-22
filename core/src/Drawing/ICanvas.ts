@@ -57,4 +57,26 @@ export interface ICanvas {
 
   drawImage(image: any, x: number, y: number, width: number, height: number): void;
   drawFormXObject(resourceName: string, x: number, y: number): void;
+
+  // ── Marked content (PDF/UA tagging) ──────────────────────────────
+
+  /**
+   * Begin a marked-content sequence tagged with a PDF structure role
+   * (e.g. `"H1"`, `"P"`, `"Figure"`). On PDF this emits
+   * `/<role> << /MCID n >> BDC`; on SVG it is a no-op (SVG-out doesn't
+   * carry PDF structure). The MCID is auto-allocated and attached to
+   * the currently-open structure element via the tagging context.
+   *
+   * When the canvas has no tagging context (the document is not opted
+   * into PDF/UA), this method is a no-op so renderer code can call it
+   * unconditionally.
+   */
+  beginMarkedContent(role: string): void;
+
+  /**
+   * End the most recent marked-content sequence opened by
+   * {@link beginMarkedContent}. Emits `EMC` on PDF; no-op on SVG and
+   * when tagging is disabled.
+   */
+  endMarkedContent(): void;
 }

@@ -140,4 +140,21 @@ export class PdfOperators {
   public static paintXObject(s: string[], name: string): void {
     s.push(`${name} Do\n`);
   }
+
+  // ── Marked content (PDF Ref 14.6 — tagged PDF / PDF/UA) ──────────
+
+  /**
+   * `/<role> << /MCID n >> BDC` — begin a marked-content sequence with
+   * a PDF structure role and an MCID. Content emitted up to the
+   * matching {@link endMarkedContent} is associated with the structure
+   * element holding this MCID.
+   */
+  public static beginMarkedContentTagged(s: string[], role: string, mcid: number): void {
+    s.push(`/${role} << /MCID ${mcid} >> BDC\n`);
+  }
+
+  /** `EMC` — end the most recent marked-content sequence. */
+  public static endMarkedContent(s: string[]): void {
+    s.push('EMC\n');
+  }
 }

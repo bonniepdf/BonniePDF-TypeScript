@@ -14,6 +14,7 @@ import {
 } from './Writers/PdfWriter';
 import { StructureTreeWriter } from './Writers/StructureTreeWriter';
 import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
+import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 
@@ -48,6 +49,15 @@ export class PdfDocumentSerializer {
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
     ctx.pdfAEnabled = settings.pdfAEnabled;
+
+    // PDF/UA tagging context — shared between the render pipeline
+    // (canvas attaches MCIDs to the builder) and the structure-tree
+    // writer at the end (emits the populated tree).
+    const taggingContext =
+      settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17
+        ? new TaggingContext(new StructureTreeBuilder())
+        : undefined;
+    ctx.tagging = taggingContext;
 
     // Two-pass layout (VisualToc) is out of scope — requiresTwoPassLayout() always false.
 
@@ -168,10 +178,13 @@ export class PdfDocumentSerializer {
     // once the renderer populates the tree. What lands here in this feature
     // is the catalog wiring: a valid empty StructTreeRoot referencing a
     // Document StructElem, plus /MarkInfo and /Lang.
-    if (settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17) {
-      const structureTree = new StructureTreeBuilder();
+    // 11b. Write PDF/UA structure tree. The tree was populated during
+    // the render pass via taggingContext (this feature wire MCIDs and
+    // semantic roles through the canvas). For this feature the tree is still a
+    // Document-only skeleton; this feature adds the renderer-driven population.
+    if (taggingContext) {
       const structureTreeWriter = new StructureTreeWriter(writer);
-      catalogOptions.structTreeRootId = structureTreeWriter.write(structureTree);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree);
       catalogOptions.tagged = true;
       catalogOptions.language = settings.language;
     }

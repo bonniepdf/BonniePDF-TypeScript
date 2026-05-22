@@ -7,6 +7,7 @@ import { Color } from '../Core/Color';
 import { ImageInfo } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
+import type { TaggingContext } from './Tagging/TaggingContext';
 
 export class DeferredXObjectInfo {
   public resourceName!: string;
@@ -31,6 +32,13 @@ export class RenderContext {
   public margin: number;
   public isLastPage: boolean = false;
   public onPageCreated?: (pageNumber: number) => void;
+
+  /**
+   * PDF/UA tagging context. Non-undefined when the document opted into
+   * AccessibilityMode.PdfUa1; undefined otherwise. Held on the context
+   * so each per-page PdfCanvas gets it via updateCanvas.
+   */
+  public tagging?: TaggingContext;
 
   /**
    * @param size            Page size for the first page.
@@ -86,7 +94,7 @@ export class RenderContext {
     if (this.isSvgMode) {
       this.canvas = new SvgCanvas(this.pageSize.width, this.pageSize.height);
     } else {
-      this.canvas = new PdfCanvas(
+      const pdfCanvas = new PdfCanvas(
         this.pageSize.height,
         0,
         0,
@@ -95,6 +103,8 @@ export class RenderContext {
         this.resolveEmbeddedFont.bind(this),
         this.trackGlyphUsage.bind(this)
       );
+      if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
+      this.canvas = pdfCanvas;
     }
   }
 
@@ -102,7 +112,7 @@ export class RenderContext {
     if (this.isSvgMode) {
       return new SvgCanvas(this.pageSize.width, this.pageSize.height);
     }
-    return new PdfCanvas(
+    const pdfCanvas = new PdfCanvas(
       this.pageSize.height,
       x,
       y,
@@ -111,6 +121,8 @@ export class RenderContext {
       this.resolveEmbeddedFont.bind(this),
       this.trackGlyphUsage.bind(this)
     );
+    if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
+    return pdfCanvas;
   }
 
   private resolveImageResource(info: ImageInfo): string {
@@ -144,6 +156,8 @@ export class RenderContext {
     this.currentPageIndex++;
     this.currentX = this.margin;
     this.currentY = this.margin;
+    // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
+    this.tagging?.resetPage();
     this.updateCanvas();
     if (this.onPageCreated) {
       this.onPageCreated(this.currentPageIndex);

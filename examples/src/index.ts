@@ -1,5 +1,6 @@
 import { Document } from '@bonniepdf/core';
 import { generate as simpleDocument } from './basic/simple-document';
+import { generate as simpleDocumentTagged } from './basic/simple-document-tagged';
 import { generate as margins } from './basic/margins';
 import { generate as pageSettings } from './basic/page-settings';
 import { generate as headersFooters } from './layout/headers-footers';
@@ -46,6 +47,8 @@ export interface ExampleDef {
   thumbnails?: boolean;
   /** Corresponding .NET class name in BonniePDF-NET/Examples/. null = TypeScript-only. */
   dotnetClass?: string | null;
+  /** PDF/UA-1 tagged document — validated by VeraPDF in CI. */
+  pdfUa1?: boolean;
 }
 
 export const examples: ExampleDef[] = [
@@ -68,6 +71,17 @@ function basicExamples(): ExampleDef[] {
       filename: 'simple-document.pdf',
       generate: simpleDocument,
       dotnetClass: 'SimpleDocumentExample',
+    },
+    {
+      id: 'simple-document-tagged',
+      name: 'Simple Document (PDF/UA-1)',
+      category: 'Basic',
+      description:
+        'PDF/UA-1 tagged variant of Simple Document — screen-reader friendly with headings, paragraphs, and a Figure with alt-text.',
+      filename: 'simple-document-tagged.pdf',
+      generate: simpleDocumentTagged,
+      dotnetClass: 'SimpleDocumentTaggedExample',
+      pdfUa1: true,
     },
     {
       id: 'margins',

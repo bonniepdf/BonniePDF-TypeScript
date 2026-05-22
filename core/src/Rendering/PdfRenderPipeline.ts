@@ -10,6 +10,7 @@ import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
 import { isRoleProvider } from './Tagging/IRoleProvider';
+import { isAltTextProvider } from './Tagging/IAltTextProvider';
 import { toPdfTag } from './Tagging/SemanticRole';
 
 export class PdfRenderPipeline {
@@ -87,6 +88,15 @@ export class PdfRenderPipeline {
     if (tagThis) {
       const role = element.semanticRole;
       tagging!.tree.begin(role);
+
+      // Surface alt-text on the structure element when the element
+      // provides it. PDF/UA requires /Alt on Figure structure elements;
+      // an Image with no altText degrades to /Artifact so this branch
+      // only fires for the "Figure with alt-text" case.
+      if (isAltTextProvider(element) && element.altText) {
+        tagging!.tree.setAlt(element.altText);
+      }
+
       ctx.canvas.beginMarkedContent(toPdfTag(role));
     }
 

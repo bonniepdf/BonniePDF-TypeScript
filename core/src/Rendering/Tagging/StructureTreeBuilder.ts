@@ -99,6 +99,16 @@ export class StructureTreeBuilder {
   }
 
   /**
+   * Set the raw `/A` (attributes dictionary) PDF syntax on the current
+   * element. Used by tagged tables to emit `/ColSpan` / `/RowSpan` on
+   * cells, and by lists to declare bullet characteristics. The caller
+   * is responsible for valid PDF syntax.
+   */
+  setAttributes(pdfAttributes: string): void {
+    this.current.attributes = pdfAttributes;
+  }
+
+  /**
    * Traverse the entire tree from the root depth-first, invoking
    * `visitor` on each node.
    */

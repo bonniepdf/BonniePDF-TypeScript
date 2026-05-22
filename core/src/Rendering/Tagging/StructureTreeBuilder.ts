@@ -68,11 +68,14 @@ export class StructureTreeBuilder {
 
   /**
    * Attach a marked-content identifier (MCID) to the current structure
-   * element. Called by the canvas when marked-content is emitted in
-   * the content stream.
+   * element, optionally paired with the zero-based page index it was
+   * emitted on. Page index defaults to 0 — the page-aware overload is
+   * what the canvas uses in real rendering; the default is for unit
+   * tests of the structure-tree model in isolation.
    */
-  addMcid(mcid: number): void {
+  addMcid(mcid: number, pageIndex: number = 0): void {
     this.current.mcIds.push(mcid);
+    this.current.mcIdPages.push(pageIndex);
   }
 
   /** Set `/Alt` on the current element. */

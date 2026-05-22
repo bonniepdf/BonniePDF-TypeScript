@@ -171,8 +171,10 @@ export class RenderContext {
     this.currentPageIndex++;
     this.currentX = this.margin;
     this.currentY = this.margin;
-    // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
-    this.tagging?.resetPage();
+    // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4). Pass the
+    // new page index so any subsequent MCID can be paired with its
+    // page for /Pg + /ParentTree emission later.
+    this.tagging?.resetPage(this.currentPageIndex);
     this.updateCanvas();
 
     if (reopenRoles) {

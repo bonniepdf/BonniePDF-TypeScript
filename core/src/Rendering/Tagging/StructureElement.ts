@@ -31,6 +31,15 @@ export class StructureElement {
   public readonly mcIds: number[] = [];
 
   /**
+   * Zero-based page index for each entry in {@link mcIds}, parallel
+   * to that list (`mcIdPages[i]` is the page on which `mcIds[i]` was
+   * emitted). The structure-tree writer uses this to emit `/Pg` on
+   * the StructElem (single-page case) or `/MCR` dicts with explicit
+   * `/Pg` per entry (when MCIDs span pages).
+   */
+  public readonly mcIdPages: number[] = [];
+
+  /**
    * `/Alt` alternate text — read by assistive tech in place of the
    * visible content. Required by PDF/UA on {@link SemanticRole.Figure}
    * elements that aren't {@link SemanticRole.Artifact}.

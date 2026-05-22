@@ -151,6 +151,21 @@ export class RenderContext {
   }
 
   public newPage(): void {
+    // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
+    // cannot cross a page boundary per PDF spec, but structure
+    // elements can. Snapshot any marked-content currently open, emit
+    // EMC on the outgoing page so the marks are balanced, then on the
+    // new page reopen the same roles with fresh MCIDs. All MCIDs
+    // (both pages) attach to the same structure elements because the
+    // StructureTreeBuilder stack is untouched.
+    let reopenRoles: string[] | undefined;
+    if (this.tagging && this.tagging.openMarkedContentCount > 0) {
+      reopenRoles = this.tagging.snapshotOpenRolesBottomUp();
+      for (let i = reopenRoles.length - 1; i >= 0; i--) {
+        this.canvas.endMarkedContent();
+      }
+    }
+
     this.flushCanvasToPage(); // save current page before moving on
     this.pages.push('');
     this.currentPageIndex++;
@@ -159,6 +174,13 @@ export class RenderContext {
     // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4).
     this.tagging?.resetPage();
     this.updateCanvas();
+
+    if (reopenRoles) {
+      for (const role of reopenRoles) {
+        this.canvas.beginMarkedContent(role);
+      }
+    }
+
     if (this.onPageCreated) {
       this.onPageCreated(this.currentPageIndex);
     }

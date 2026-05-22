@@ -2,9 +2,11 @@ import { StructureTreeBuilder } from './StructureTreeBuilder';
 
 /**
  * Carries the per-document tagging state through the render pipeline:
- * the in-memory {@link StructureTreeBuilder} being populated, and a
- * per-page MCID counter that the canvas uses to label each
- * marked-content sequence (this feature / this feature stage 0).
+ * the in-memory {@link StructureTreeBuilder} being populated, a per-page
+ * MCID counter that the canvas uses to label each marked-content
+ * sequence, and a stack of currently-open marked-content roles used by
+ * the page-break handler to keep BDC/EMC balanced per page (this feature /
+ * this feature / this feature stage 0).
  *
  * One instance per Document render; `RenderContext` hands it to each
  * per-page `PdfCanvas`. When tagging is disabled, the context is
@@ -16,6 +18,7 @@ export class TaggingContext {
   public readonly tree: StructureTreeBuilder;
 
   private _nextMcidOnPage = 0;
+  private readonly _openRoles: string[] = [];
 
   constructor(tree: StructureTreeBuilder) {
     this.tree = tree;
@@ -35,5 +38,34 @@ export class TaggingContext {
    */
   resetPage(): void {
     this._nextMcidOnPage = 0;
+  }
+
+  /**
+   * Number of marked-content sequences currently open on the active
+   * page. The page-break handler uses this to know how many BDC/EMC
+   * pairs to close on the outgoing page and reopen on the incoming
+   * page.
+   */
+  get openMarkedContentCount(): number {
+    return this._openRoles.length;
+  }
+
+  /** Push a role onto the open-marked-content stack. */
+  pushOpenRole(role: string): void {
+    this._openRoles.push(role);
+  }
+
+  /** Pop the topmost open-marked-content role. */
+  popOpenRole(): void {
+    if (this._openRoles.length > 0) this._openRoles.pop();
+  }
+
+  /**
+   * Returns the currently-open marked-content roles, bottom-up. Used
+   * by the page-break handler to reopen marked-content scopes on the
+   * new page in the same nesting order they had on the old one.
+   */
+  snapshotOpenRolesBottomUp(): string[] {
+    return this._openRoles.slice();
   }
 }

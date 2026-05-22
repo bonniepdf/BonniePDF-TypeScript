@@ -29,6 +29,7 @@ export * from './Rendering/Tagging/StructureTreeBuilder';
 export * from './Rendering/Tagging/StructureTreeException';
 export * from './Rendering/Tagging/TaggingContext';
 export * from './Rendering/Tagging/IRoleProvider';
+export * from './Rendering/Tagging/IAltTextProvider';
 export * from './Rendering/Writers/StructureTreeWriter';
 export * from './Metadata/XmpConformanceBlock';
 

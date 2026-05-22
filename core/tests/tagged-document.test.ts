@@ -44,6 +44,8 @@ describe('TaggedDocument', () => {
     expect(text).toContain('/Lang (en-GB)');
     expect(text).toContain('/Type /StructElem');
     expect(text).toContain('/S /Document');
+    // XMP carries the PDF/UA-1 conformance claim.
+    expect(text).toContain('pdfuaid:part');
   });
 
   it('PDF/A only still emits MarkInfo for back-compat', () => {

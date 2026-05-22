@@ -142,7 +142,7 @@ export class PdfDocumentSerializer {
     // 9. Write XMP metadata for PDF 1.7
     if (settings.version === PdfVersion.Pdf17) {
       catalogOptions.xmpMetadataId = writer.getNewId();
-      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, settings.pdfAEnabled);
+      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, settings);
     }
 
     // 10. Write bookmarks (outlines) for PDF 1.7

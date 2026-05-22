@@ -261,6 +261,7 @@ export class PdfCanvas implements ICanvas {
     const mcid = this.tagging.allocateMcid();
     this.tagging.tree.addMcid(mcid);
     PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
+    this.tagging.pushOpenRole(role);
     this.openMarkedContent++;
   }
 
@@ -269,6 +270,7 @@ export class PdfCanvas implements ICanvas {
     if (!this.tagging) return;
     if (this.openMarkedContent <= 0) return; // tolerate unbalanced End
     PdfOperators.endMarkedContent(this.stream);
+    this.tagging.popOpenRole();
     this.openMarkedContent--;
   }
 

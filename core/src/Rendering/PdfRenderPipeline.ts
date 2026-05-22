@@ -9,6 +9,8 @@ import { PdfOperators } from './Pdf/PdfOperators';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
+import { isRoleProvider } from './Tagging/IRoleProvider';
+import { toPdfTag } from './Tagging/SemanticRole';
 
 export class PdfRenderPipeline {
   public static renderPages(pages: Page[], settings: DocumentSettings): PdfRenderResult {
@@ -75,6 +77,30 @@ export class PdfRenderPipeline {
   private static readonly maxPageGuard = 500;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
+    // when tagging is on and the element declares a structure
+    // role, push the role onto the in-memory tree and wrap the
+    // element's render in a /role MCID BDC ... EMC pair. No-op when
+    // tagging is off or the element isn't role-providing. See the .NET
+    // mirror in PdfRenderPipeline.cs for the page-break caveat.
+    const tagging = ctx.tagging;
+    const tagThis = tagging != null && isRoleProvider(element);
+    if (tagThis) {
+      const role = element.semanticRole;
+      tagging!.tree.begin(role);
+      ctx.canvas.beginMarkedContent(toPdfTag(role));
+    }
+
+    try {
+      this.renderElementWithOverflowCore(element, ctx, contentWidth);
+    } finally {
+      if (tagThis) {
+        ctx.canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
+  }
+
+  private static renderElementWithOverflowCore(element: IElement, ctx: RenderContext, contentWidth: number): void {
     // Stateful elements (VerticalStack, Table, TextBlock, etc.) implement renderStateful
     // and track their own continuation state so they can resume across page breaks.
     if ('renderStateful' in element && typeof (element as any).renderStateful === 'function') {

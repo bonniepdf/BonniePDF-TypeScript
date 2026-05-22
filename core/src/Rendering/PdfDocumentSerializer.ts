@@ -61,6 +61,18 @@ export class PdfDocumentSerializer {
 
     // Two-pass layout (VisualToc) is out of scope — requiresTwoPassLayout() always false.
 
+    // annotation bindings for /StructParent + /OBJR wiring.
+    // Keys start at 10_000 above page keys so the /ParentTree number tree
+    // has no collision between page keys (0..N-1) and annotation keys.
+    const ANNOT_STRUCT_PARENT_BASE = 10_000;
+    const annotBindings: Array<{
+      structElem: import('./Tagging/StructureElement').StructureElement;
+      annotId: number;
+      pageObjectId: number;
+      structParentKey: number;
+    }> = [];
+    let globalAnnotIndex = 0;
+
     // 3. Stream pages (low-memory path)
     const pageIds: number[] = [];
     let pageIndex = 0;
@@ -97,6 +109,7 @@ export class PdfDocumentSerializer {
       // the same number so MCID→StructElem reverse lookup works.
       if (taggingContext) {
         pageDict.set('/StructParents', String(pageIndex - 1));
+        pageDict.set('/Tabs', '/S'); // follow structure order for tab navigation
       }
 
       // Write link annotations if present
@@ -104,8 +117,21 @@ export class PdfDocumentSerializer {
         const annotIds: number[] = [];
         for (const link of pageOutput.hyperlinks) {
           const annotId = writer.getNewId();
-          writer.writeLinkAnnotation(annotId, link, pageIds);
+          let structParentKey: number | undefined;
+          if (taggingContext) {
+            structParentKey = ANNOT_STRUCT_PARENT_BASE + globalAnnotIndex++;
+          }
+          writer.writeLinkAnnotation(annotId, link, pageIds, structParentKey);
           annotIds.push(annotId);
+          if (taggingContext && link.linkedStructElement != null && structParentKey != null) {
+            link.linkedStructElement.objrAnnotations.push({ annotId, pageObjectId: pageId });
+            annotBindings.push({
+              structElem: link.linkedStructElement,
+              annotId,
+              pageObjectId: pageId,
+              structParentKey,
+            });
+          }
         }
         pageDict.set('/Annots', '[ ' + annotIds.map(id => `${id} 0 R`).join(' ') + ' ]');
       }
@@ -191,7 +217,7 @@ export class PdfDocumentSerializer {
     // Document-only skeleton; this feature adds the renderer-driven population.
     if (taggingContext) {
       const structureTreeWriter = new StructureTreeWriter(writer);
-      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds, annotBindings);
       catalogOptions.tagged = true;
       catalogOptions.language = settings.language;
     }

@@ -157,4 +157,9 @@ export class PdfOperators {
   public static endMarkedContent(s: string[]): void {
     s.push('EMC\n');
   }
+
+  /** `/Artifact BMC` — begin an artifact region (no MCID, not in struct tree). */
+  public static beginArtifact(s: string[]): void {
+    s.push('/Artifact BMC\n');
+  }
 }

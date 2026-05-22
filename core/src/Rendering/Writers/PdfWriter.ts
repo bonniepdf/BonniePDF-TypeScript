@@ -91,7 +91,7 @@ export interface IPdfWriter {
   writeBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
-  writeLinkAnnotation(id: number, link: any, pageIds: number[]): number;
+  writeLinkAnnotation(id: number, link: any, pageIds: number[], structParentKey?: number): number;
   writeEncryptDictionary(id: number): number;
   writeViewerPreferences(id: number, settings: any): number;
   writeCatalog(id: number, pagesId: number, firstPageId: number, settings: any, options: CatalogOptions): void;
@@ -117,7 +117,7 @@ export interface IAsyncPdfWriter {
     length?: number,
     ct?: any
   ): Promise<void>;
-  writeLinkAnnotationAsync(id: number, link: any, pageIds: number[]): Promise<void>;
+  writeLinkAnnotationAsync(id: number, link: any, pageIds: number[], structParentKey?: number): Promise<void>;
   writeViewerPreferencesAsync(id: number, settings: any): Promise<number>;
   writeCatalogAsync(
     id: number,
@@ -237,7 +237,7 @@ export class PdfWriter implements IPdfWriter {
   /**
    * Writes a link annotation object (URI or in-document GoTo).
    */
-  public writeLinkAnnotation(id: number, link: any, pageIds: number[]): number {
+  public writeLinkAnnotation(id: number, link: any, pageIds: number[], structParentKey?: number): number {
     const dict = new Map<string, string>([
       ['/Type', '/Annot'],
       ['/Subtype', '/Link'],
@@ -256,6 +256,10 @@ export class PdfWriter implements IPdfWriter {
     } else {
       dict.set('/A', `<< /S /URI /URI (${PdfSyntax.escape(link.uri ?? '')}) >>`);
     }
+
+    // /StructParent wires this annotation into the parent tree for
+    // the reverse lookup annotation→StructElem.
+    if (structParentKey != null) dict.set('/StructParent', String(structParentKey));
 
     this.writeObject(id, dict);
     return id;
@@ -458,8 +462,13 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     this._inner.writeBinaryObject(id, dict, compressed);
   }
 
-  public async writeLinkAnnotationAsync(id: number, link: any, pageIds: number[]): Promise<void> {
-    this._inner.writeLinkAnnotation(id, link, pageIds);
+  public async writeLinkAnnotationAsync(
+    id: number,
+    link: any,
+    pageIds: number[],
+    structParentKey?: number
+  ): Promise<void> {
+    this._inner.writeLinkAnnotation(id, link, pageIds, structParentKey);
   }
 
   public async writeViewerPreferencesAsync(id: number, settings: any): Promise<number> {

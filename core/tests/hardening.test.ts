@@ -219,16 +219,9 @@ describe('Hardening fixtures', () => {
 
   // ── 8. Header/footer templates (known stage-2 gap) ──────────────
 
-  it('fixture 08 — header/footer templates produce untagged content (known gap)', () => {
-    // KNOWN STAGE-2 GAP: header/footer templates draw text via the
-    // canvas without /Artifact tagging, so VeraPDF will flag the
-    // content as "untagged but not /Artifact" under profile ua1.
-    // this feature fixes this by auto-wrapping headerTemplate/footerTemplate
-    // emission in /Artifact begin/end.
-    //
-    // This test documents the current behaviour: the structure tree
-    // is correct for body content; the header/footer content is
-    // simply drawn outside it.
+  it('fixture 08 — header/footer templates emit /Artifact BMC (this feature fixed)', () => {
+    // this feature fixed this: header/footer template content is now tagged as
+    // /Artifact so screen readers skip it.
     const pdf = generateTagged(d => {
       d.settings.headerTemplate = pageNum => {
         const tb = new TextBlock();
@@ -255,8 +248,8 @@ describe('Hardening fixtures', () => {
     expect(pdf).toContain('/S /H1');
     // Document structure exists.
     expect(pdf).toContain('/S /Document');
-    // (Once this feature lands, swap header/footer text for /Artifact
-    // begin/end wrapping and uncomment a per-page balance assertion.)
+    // this feature fixed: header/footer are now emitted as /Artifact regions.
+    expect(pdf).toContain('/Artifact BMC');
   });
 
   // ── 9. Nested layout: VerticalStack containing Tables ───────────

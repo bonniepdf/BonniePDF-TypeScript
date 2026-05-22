@@ -2,6 +2,9 @@ import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
+import { isRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { isAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
+import { toPdfTag } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
@@ -51,64 +54,85 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     for (let i = startChild; i < this.children.length; i++) {
       const child = this.children[i];
 
-      if ('renderStateful' in child) {
-        const statefulChild = child as IStatefulElement;
+      // Tag children that declare a semantic role. Uses the same try/finally
+      // pattern as PdfRenderPipeline so tagging is closed before
+      // Overflow/WrapRequired propagates upward.
+      const tagging = ctx.tagging;
+      const tagChild = tagging != null && isRoleProvider(child);
+      if (tagChild) {
+        const role = child.semanticRole;
+        const elem = tagging!.tree.begin(role);
+        if (isAltTextProvider(child) && child.altText) tagging!.tree.setAlt(child.altText);
+        // Wire LinkedStructElement for Hyperlink children.
+        if ('linkedStructElement' in child) (child as any).linkedStructElement = elem;
+        ctx.canvas.beginMarkedContent(toPdfTag(role));
+      }
 
-        const childHeight = child.measureHeight(contentWidth);
-        const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
-        const notAtTop = ctx.currentY > ctx.margin;
-        const wouldFitOnFreshPage = childHeight <= ctx.maxY - ctx.margin;
+      try {
+        if ('renderStateful' in child) {
+          const statefulChild = child as IStatefulElement;
 
-        if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
-          ctx.currentX = originalX;
-          return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+          const childHeight = child.measureHeight(contentWidth);
+          const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
+          const notAtTop = ctx.currentY > ctx.margin;
+          const wouldFitOnFreshPage = childHeight <= ctx.maxY - ctx.margin;
+
+          if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
+            ctx.currentX = originalX;
+            return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+          }
+
+          const status = statefulChild.renderStateful(ctx, contentWidth);
+
+          if (status === RenderStatus.Overflow) {
+            this.lastChildRendered = i - 1;
+            ctx.currentX = originalX;
+            return RenderStatus.Overflow;
+          }
+
+          if (status === RenderStatus.WrapRequired) {
+            this.lastChildRendered = i - 1;
+            ctx.currentX = originalX;
+            return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+          }
+
+          this.lastChildRendered = i;
+
+          if (this.spacing > 0 && i < this.children.length - 1) {
+            ctx.currentY += this.spacing;
+          }
+
+          if (i < this.children.length - 1 && ctx.currentY >= ctx.maxY) {
+            ctx.currentX = originalX;
+            return RenderStatus.Overflow;
+          }
+        } else {
+          const childHeight = child.measureHeight(contentWidth);
+          const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
+          const notAtTop = ctx.currentY > ctx.margin;
+
+          if (wouldOverflow && notAtTop) {
+            ctx.currentX = originalX;
+            return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+          }
+
+          const yBefore = ctx.currentY;
+          child.render(ctx, contentWidth);
+
+          if (ctx.currentY === yBefore) {
+            ctx.currentY += childHeight;
+          }
+
+          this.lastChildRendered = i;
+
+          if (this.spacing > 0 && i < this.children.length - 1) {
+            ctx.currentY += this.spacing;
+          }
         }
-
-        const status = statefulChild.renderStateful(ctx, contentWidth);
-
-        if (status === RenderStatus.Overflow) {
-          this.lastChildRendered = i - 1;
-          ctx.currentX = originalX;
-          return RenderStatus.Overflow;
-        }
-
-        if (status === RenderStatus.WrapRequired) {
-          this.lastChildRendered = i - 1;
-          ctx.currentX = originalX;
-          return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-        }
-
-        this.lastChildRendered = i;
-
-        if (this.spacing > 0 && i < this.children.length - 1) {
-          ctx.currentY += this.spacing;
-        }
-
-        if (i < this.children.length - 1 && ctx.currentY >= ctx.maxY) {
-          ctx.currentX = originalX;
-          return RenderStatus.Overflow;
-        }
-      } else {
-        const childHeight = child.measureHeight(contentWidth);
-        const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
-        const notAtTop = ctx.currentY > ctx.margin;
-
-        if (wouldOverflow && notAtTop) {
-          ctx.currentX = originalX;
-          return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-        }
-
-        const yBefore = ctx.currentY;
-        child.render(ctx, contentWidth);
-
-        if (ctx.currentY === yBefore) {
-          ctx.currentY += childHeight;
-        }
-
-        this.lastChildRendered = i;
-
-        if (this.spacing > 0 && i < this.children.length - 1) {
-          ctx.currentY += this.spacing;
+      } finally {
+        if (tagChild) {
+          ctx.canvas.endMarkedContent();
+          tagging!.tree.end();
         }
       }
     }

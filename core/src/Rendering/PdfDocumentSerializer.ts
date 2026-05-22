@@ -176,10 +176,12 @@ export class PdfDocumentSerializer {
 
     const catalogOptions = new CatalogOptions();
 
-    // 8. Write ViewerPreferences if any non-default settings are active
-    if (hasViewerPreferences(settings)) {
+    // 8. Write ViewerPreferences if any non-default settings are active.
+    // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+    if (hasViewerPreferences(settings) || taggingContext != null) {
       catalogOptions.viewerPrefsId = writer.getNewId();
-      writer.writeViewerPreferences(catalogOptions.viewerPrefsId, settings);
+      const vp = taggingContext != null ? { ...settings, displayDocTitle: true } : settings;
+      writer.writeViewerPreferences(catalogOptions.viewerPrefsId, vp);
     }
 
     // 9. Write XMP metadata for PDF 1.7

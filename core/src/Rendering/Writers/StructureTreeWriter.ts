@@ -10,19 +10,15 @@ import { PdfSyntax } from '../Pdf/PdfSyntax';
 
 /**
  * Translates the in-memory {@link StructureTreeBuilder} tree into the
- * PDF object graph: one object per structure element plus a
- * `/StructTreeRoot` dictionary that points to the document element.
+ * PDF object graph: one object per structure element, a `/ParentTree`
+ * number tree for MCID→StructElem reverse lookup, and a
+ * `/StructTreeRoot` dictionary that points to both.
  *
- * Object IDs are allocated via the writer's `getNewId`; emission is
- * post-order (leaf-first) so each parent already knows its children's
- * IDs when its `/K` array is written.
- *
- * this feature scope: emits the tree skeleton (roles, parent/child refs,
- * optional `/Alt /ActualText /Lang /T` metadata, MCID arrays). Per-MCID
- * page references (`/Pg`) and the `/ParentTree` auxiliary structure
- * are deferred — they arrive once the canvas starts emitting
- * marked-content and once annotations participate in tagging
- *.
+ * Each StructElem with MCIDs gets either:
+ * - `/K [int int …]` + `/Pg <page-ref>` when all its MCIDs are on the
+ *   same page (the common case);
+ * - `/K [<</Type /MCR /Pg p1 /MCID m1>> …]` when MCIDs span pages
+ *   (an element that page-broke after the page-break fix runs).
  */
 export class StructureTreeWriter {
   private readonly _writer?: IPdfWriter;
@@ -44,48 +40,86 @@ export class StructureTreeWriter {
 
   /**
    * Emit the structure tree contained in `builder` and return the
-   * object ID of the `/StructTreeRoot`. The caller is responsible for
-   * wiring that ID into `CatalogOptions.structTreeRootId`.
+   * object ID of the `/StructTreeRoot`. Caller wires the ID into
+   * `CatalogOptions.structTreeRootId` and also sets `/StructParents`
+   * on each page dict to its zero-based page index (matches the keys
+   * in `/ParentTree`).
+   *
+   * @param pageIds Page object IDs in document order. Empty/undefined
+   *   when no page-aware output is needed (test fixtures).
    */
-  write(builder: StructureTreeBuilder): number {
+  write(builder: StructureTreeBuilder, pageIds?: number[]): number {
     if (!this._writer) {
       throw new Error('StructureTreeWriter.write: writer is async; call writeAsync().');
     }
     const writer = this._writer;
+    const havePages = pageIds != null && pageIds.length > 0;
     const structTreeRootId = writer.getNewId();
-    const elementIds = new Map<StructureElement, number>();
+    const parentTreeId = havePages ? writer.getNewId() : 0;
 
-    this.writeSubtree(builder.root, structTreeRootId, elementIds);
-    writer.writeObject(structTreeRootId, StructureTreeWriter.buildStructTreeRootDict(builder.root, elementIds));
+    const elementIds = new Map<StructureElement, number>();
+    const parentTreeNums = havePages ? buildEmptyParentTreeNums(pageIds!.length) : undefined;
+
+    this.writeSubtree(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
+
+    if (parentTreeId > 0 && parentTreeNums) {
+      writer.writeObject(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds));
+    }
+
+    writer.writeObject(
+      structTreeRootId,
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums)
+    );
 
     return structTreeRootId;
   }
 
-  private writeSubtree(element: StructureElement, parentId: number, elementIds: Map<StructureElement, number>): void {
+  private writeSubtree(
+    element: StructureElement,
+    parentId: number,
+    elementIds: Map<StructureElement, number>,
+    pageIds: number[] | undefined,
+    parentTreeNums: ParentTreeEntry[][] | undefined
+  ): void {
     const writer = this._writer!;
     const id = writer.getNewId();
     elementIds.set(element, id);
 
-    for (const child of element.children) this.writeSubtree(child, id, elementIds);
+    for (const child of element.children) this.writeSubtree(child, id, elementIds, pageIds, parentTreeNums);
 
-    writer.writeObject(id, StructureTreeWriter.buildStructElemDict(element, parentId, elementIds));
+    if (parentTreeNums) recordParentTreeContributions(element, parentTreeNums);
+
+    writer.writeObject(id, buildStructElemDict(element, parentId, elementIds, pageIds));
   }
 
   // ── Async ───────────────────────────────────────────────────────
 
   /** Async counterpart to {@link write}. */
-  async writeAsync(builder: StructureTreeBuilder, cancellationToken?: AbortSignal): Promise<number> {
+  async writeAsync(
+    builder: StructureTreeBuilder,
+    pageIds?: number[],
+    _cancellationToken?: AbortSignal
+  ): Promise<number> {
     if (!this._asyncWriter) {
       throw new Error('StructureTreeWriter.writeAsync: writer is sync; call write().');
     }
     const writer = this._asyncWriter;
+    const havePages = pageIds != null && pageIds.length > 0;
     const structTreeRootId = writer.getNewId();
-    const elementIds = new Map<StructureElement, number>();
+    const parentTreeId = havePages ? writer.getNewId() : 0;
 
-    await this.writeSubtreeAsync(builder.root, structTreeRootId, elementIds, cancellationToken);
+    const elementIds = new Map<StructureElement, number>();
+    const parentTreeNums = havePages ? buildEmptyParentTreeNums(pageIds!.length) : undefined;
+
+    await this.writeSubtreeAsync(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
+
+    if (parentTreeId > 0 && parentTreeNums) {
+      await writer.writeObjectAsync(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds));
+    }
+
     await writer.writeObjectAsync(
       structTreeRootId,
-      StructureTreeWriter.buildStructTreeRootDict(builder.root, elementIds)
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums)
     );
 
     return structTreeRootId;
@@ -95,70 +129,150 @@ export class StructureTreeWriter {
     element: StructureElement,
     parentId: number,
     elementIds: Map<StructureElement, number>,
-    cancellationToken?: AbortSignal
+    pageIds: number[] | undefined,
+    parentTreeNums: ParentTreeEntry[][] | undefined
   ): Promise<void> {
     const writer = this._asyncWriter!;
     const id = writer.getNewId();
     elementIds.set(element, id);
 
     for (const child of element.children) {
-      await this.writeSubtreeAsync(child, id, elementIds, cancellationToken);
+      await this.writeSubtreeAsync(child, id, elementIds, pageIds, parentTreeNums);
     }
 
-    await writer.writeObjectAsync(id, StructureTreeWriter.buildStructElemDict(element, parentId, elementIds));
+    if (parentTreeNums) recordParentTreeContributions(element, parentTreeNums);
+
+    await writer.writeObjectAsync(id, buildStructElemDict(element, parentId, elementIds, pageIds));
+  }
+}
+
+// ── Shared dict construction ──────────────────────────────────────
+
+interface ParentTreeEntry {
+  mcid: number;
+  elem: StructureElement;
+}
+
+function buildStructElemDict(
+  element: StructureElement,
+  parentObjectId: number,
+  elementIds: Map<StructureElement, number>,
+  pageIds: number[] | undefined
+): Map<string, string> {
+  const dict = new Map<string, string>();
+  dict.set('/Type', '/StructElem');
+  dict.set('/S', '/' + toPdfTag(element.role));
+  dict.set('/P', `${parentObjectId} 0 R`);
+
+  const built = buildKidsAndPg(element, elementIds, pageIds);
+  if (built.kids !== null) dict.set('/K', built.kids);
+  if (built.singlePageObjectId !== undefined) dict.set('/Pg', `${built.singlePageObjectId} 0 R`);
+
+  if (element.alt) dict.set('/Alt', `(${PdfSyntax.escape(element.alt)})`);
+  if (element.actualText) dict.set('/ActualText', `(${PdfSyntax.escape(element.actualText)})`);
+  if (element.lang) dict.set('/Lang', `(${PdfSyntax.escape(element.lang)})`);
+  if (element.title) dict.set('/T', `(${PdfSyntax.escape(element.title)})`);
+
+  return dict;
+}
+
+function buildStructTreeRootDict(
+  documentRoot: StructureElement,
+  elementIds: Map<StructureElement, number>,
+  parentTreeId: number,
+  parentTreeNums: ParentTreeEntry[][] | undefined
+): Map<string, string> {
+  const dict = new Map<string, string>();
+  dict.set('/Type', '/StructTreeRoot');
+  dict.set('/K', `[ ${elementIds.get(documentRoot)} 0 R ]`);
+
+  if (parentTreeId > 0 && parentTreeNums) {
+    dict.set('/ParentTree', `${parentTreeId} 0 R`);
+    dict.set('/ParentTreeNextKey', parentTreeNums.length.toString());
   }
 
-  // ── Shared dict construction ────────────────────────────────────
+  return dict;
+}
 
-  private static buildStructElemDict(
-    element: StructureElement,
-    parentObjectId: number,
-    elementIds: Map<StructureElement, number>
-  ): Map<string, string> {
-    const dict = new Map<string, string>();
-    dict.set('/Type', '/StructElem');
-    dict.set('/S', '/' + toPdfTag(element.role));
-    dict.set('/P', `${parentObjectId} 0 R`);
+function buildParentTreeDict(
+  parentTreeNums: ParentTreeEntry[][],
+  elementIds: Map<StructureElement, number>
+): Map<string, string> {
+  const parts: string[] = [];
+  for (let pageKey = 0; pageKey < parentTreeNums.length; pageKey++) {
+    const entries = parentTreeNums[pageKey];
+    parts.push(pageKey.toString());
+    if (entries.length === 0) {
+      parts.push('[ ]');
+      continue;
+    }
+    let maxMcid = 0;
+    for (const e of entries) if (e.mcid > maxMcid) maxMcid = e.mcid;
+    const slots: string[] = new Array(maxMcid + 1).fill('null');
+    for (const { mcid, elem } of entries) slots[mcid] = `${elementIds.get(elem)} 0 R`;
+    parts.push('[ ' + slots.join(' ') + ' ]');
+  }
+  return new Map<string, string>([['/Nums', '[ ' + parts.join(' ') + ' ]']]);
+}
 
-    const kids = StructureTreeWriter.buildKidsArray(element, elementIds);
-    if (kids !== null) dict.set('/K', kids);
-
-    if (element.alt) dict.set('/Alt', `(${PdfSyntax.escape(element.alt)})`);
-    if (element.actualText) dict.set('/ActualText', `(${PdfSyntax.escape(element.actualText)})`);
-    if (element.lang) dict.set('/Lang', `(${PdfSyntax.escape(element.lang)})`);
-    if (element.title) dict.set('/T', `(${PdfSyntax.escape(element.title)})`);
-
-    return dict;
+function buildKidsAndPg(
+  element: StructureElement,
+  elementIds: Map<StructureElement, number>,
+  pageIds: number[] | undefined
+): { kids: string | null; singlePageObjectId?: number } {
+  if (element.children.length === 0 && element.mcIds.length === 0) {
+    return { kids: null };
   }
 
-  private static buildStructTreeRootDict(
-    documentRoot: StructureElement,
-    elementIds: Map<StructureElement, number>
-  ): Map<string, string> {
-    const dict = new Map<string, string>();
-    dict.set('/Type', '/StructTreeRoot');
-    // /K references the document StructElem (the in-memory root).
-    dict.set('/K', `[ ${elementIds.get(documentRoot)} 0 R ]`);
-    // /ParentTree and /ParentTreeNextKey are deferred until the canvas
-    // wires MCIDs through. Without them VeraPDF still sees
-    // "structure tree present" but can't resolve MCID→StructElem ownership
-    // for content that has MCIDs.
-    return dict;
+  const parts: string[] = [];
+  for (const child of element.children) parts.push(`${elementIds.get(child)} 0 R`);
+
+  let singlePageObjectId: number | undefined;
+
+  if (element.mcIds.length > 0) {
+    let allSamePage = true;
+    const firstPage = element.mcIdPages.length > 0 ? element.mcIdPages[0] : 0;
+    for (let i = 1; i < element.mcIdPages.length; i++) {
+      if (element.mcIdPages[i] !== firstPage) {
+        allSamePage = false;
+        break;
+      }
+    }
+
+    if (allSamePage && pageIds && firstPage < pageIds.length) {
+      singlePageObjectId = pageIds[firstPage];
+      for (const mcid of element.mcIds) parts.push(mcid.toString());
+    } else if (pageIds) {
+      for (let i = 0; i < element.mcIds.length; i++) {
+        const mcid = element.mcIds[i];
+        const pageIndex = i < element.mcIdPages.length ? element.mcIdPages[i] : 0;
+        if (pageIndex < pageIds.length) {
+          parts.push(`<< /Type /MCR /Pg ${pageIds[pageIndex]} 0 R /MCID ${mcid} >>`);
+        } else {
+          parts.push(mcid.toString());
+        }
+      }
+    } else {
+      // Test mode (no page IDs) — bare ints, no /Pg.
+      for (const mcid of element.mcIds) parts.push(mcid.toString());
+    }
   }
 
-  /**
-   * Build the `/K` array string for an element: child structure
-   * element references first, then bare MCIDs. Returns `null` when
-   * the element has neither children nor MCIDs (the spec allows /K to
-   * be absent on a leaf without content).
-   */
-  private static buildKidsArray(element: StructureElement, ids: Map<StructureElement, number>): string | null {
-    if (element.children.length === 0 && element.mcIds.length === 0) return null;
+  return { kids: '[ ' + parts.join(' ') + ' ]', singlePageObjectId };
+}
 
-    const parts: string[] = [];
-    for (const child of element.children) parts.push(`${ids.get(child)} 0 R`);
-    for (const mcid of element.mcIds) parts.push(mcid.toString());
+function buildEmptyParentTreeNums(pageCount: number): ParentTreeEntry[][] {
+  const result: ParentTreeEntry[][] = [];
+  for (let i = 0; i < pageCount; i++) result.push([]);
+  return result;
+}
 
-    return '[ ' + parts.join(' ') + ' ]';
+function recordParentTreeContributions(element: StructureElement, parentTreeNums: ParentTreeEntry[][]): void {
+  for (let i = 0; i < element.mcIds.length; i++) {
+    const mcid = element.mcIds[i];
+    const pageIndex = i < element.mcIdPages.length ? element.mcIdPages[i] : 0;
+    if (pageIndex < parentTreeNums.length) {
+      parentTreeNums[pageIndex].push({ mcid, elem: element });
+    }
   }
 }

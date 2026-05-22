@@ -259,7 +259,7 @@ export class PdfCanvas implements ICanvas {
   public beginMarkedContent(role: string): void {
     if (!this.tagging) return;
     const mcid = this.tagging.allocateMcid();
-    this.tagging.tree.addMcid(mcid);
+    this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
     PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
     this.tagging.pushOpenRole(role);
     this.openMarkedContent++;

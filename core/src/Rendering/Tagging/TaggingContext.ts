@@ -20,6 +20,14 @@ export class TaggingContext {
   private _nextMcidOnPage = 0;
   private readonly _openRoles: string[] = [];
 
+  /**
+   * Zero-based index of the page currently being rendered. Set by
+   * `RenderContext` at construction and on every `newPage`. The canvas
+   * reads this when allocating MCIDs so each MCID can be later paired
+   * with its page for /Pg / ParentTree emission.
+   */
+  public currentPageIndex = 0;
+
   constructor(tree: StructureTreeBuilder) {
     this.tree = tree;
   }
@@ -33,11 +41,14 @@ export class TaggingContext {
   }
 
   /**
-   * Reset the per-page MCID counter to 0. Called by `RenderContext` on
-   * every page transition.
+   * Reset the per-page MCID counter to 0. When `pageIndex` is provided,
+   * also updates {@link currentPageIndex} so subsequent MCIDs get
+   * paired with the new page. Called by `RenderContext` on every page
+   * transition.
    */
-  resetPage(): void {
+  resetPage(pageIndex?: number): void {
     this._nextMcidOnPage = 0;
+    if (pageIndex !== undefined) this.currentPageIndex = pageIndex;
   }
 
   /**

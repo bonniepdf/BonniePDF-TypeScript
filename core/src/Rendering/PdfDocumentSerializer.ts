@@ -92,6 +92,13 @@ export class PdfDocumentSerializer {
         ['/Contents', `${contentId} 0 R`],
       ]);
 
+      // Tagged PDF: each page gets /StructParents = page index. The
+      // /ParentTree emitted at the end by StructureTreeWriter keys off
+      // the same number so MCID→StructElem reverse lookup works.
+      if (taggingContext) {
+        pageDict.set('/StructParents', String(pageIndex - 1));
+      }
+
       // Write link annotations if present
       if (pageOutput.hyperlinks?.length > 0) {
         const annotIds: number[] = [];
@@ -184,7 +191,7 @@ export class PdfDocumentSerializer {
     // Document-only skeleton; this feature adds the renderer-driven population.
     if (taggingContext) {
       const structureTreeWriter = new StructureTreeWriter(writer);
-      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds);
       catalogOptions.tagged = true;
       catalogOptions.language = settings.language;
     }

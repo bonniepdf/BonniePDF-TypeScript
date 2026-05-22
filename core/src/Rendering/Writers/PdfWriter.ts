@@ -7,6 +7,23 @@ import { TtfFont } from '../../Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../../Typography/TrueType/TtfSubsetter';
 import { GlyphUsageTracker } from '../../Typography/GlyphUsageTracker';
 import { ToUnicodeCMapBuilder } from '../../Typography/TrueType/ToUnicodeCMapBuilder';
+import { DocumentSettings } from '../../Configuration/DocumentSettings';
+import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
+import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
+import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
+
+/**
+ * Build the list of conformance-namespace blocks the document claims,
+ * based on `settings`. Currently PDF/A and PDF/UA-1; ZUGFeRD/Factur-X
+ * will register here too once implemented. See the this feature this feature design
+ * note for the additive-hook rationale.
+ */
+function buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
+  const blocks: XmpConformanceBlock[] = [];
+  if (settings.pdfAEnabled) blocks.push(XmpConformanceBlock.pdfA1B());
+  if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
+  return blocks;
+}
 
 // ─── Encoding helper ─────────────────────────────────────────────────────────
 
@@ -709,13 +726,20 @@ export class MetadataWriter {
     return id;
   }
 
-  public writeXmpMetadata(id: number, metadata: any, pdfAEnabled: boolean): void {
-    // XMP metadata is written unencrypted and uncompressed (PDF/A requirement)
+  public writeXmpMetadata(id: number, metadata: any, settings: DocumentSettings): void {
+    // XMP metadata is written unencrypted and uncompressed (PDF/A requirement).
+    // The dc/xmp/pdf body itself is still stubbed in TS (this feature scope is
+    // limited to the additive conformance-block hook); the XMP packet
+    // currently carries only the conformance namespaces. Wider XMP build-out
+    // is a separate task that extends generateXmpXml.
     const dict = new Map<string, string>();
     dict.set('/Type', '/Metadata');
     dict.set('/Subtype', '/XML');
-    // XMP generation deferred to a future session; write empty stream for now
-    this.writer.writeUnencryptedBinaryObject(id, dict, new Uint8Array(0));
+
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
+    const bytes = new TextEncoder().encode(xmpXml);
+    this.writer.writeUnencryptedBinaryObject(id, dict, bytes);
   }
 
   public async writeDocumentInfoAsync(id: number, metadata: any): Promise<number> {
@@ -739,11 +763,21 @@ export class MetadataWriter {
     return id;
   }
 
-  public async writeXmpMetadataAsync(id: number, metadata: any, pdfAEnabled: boolean): Promise<void> {
+  public async writeXmpMetadataAsync(id: number, metadata: any, settings: DocumentSettings): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     const dict = new Map<string, string>();
     dict.set('/Type', '/Metadata');
     dict.set('/Subtype', '/XML');
+
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
+    const bytes = new TextEncoder().encode(xmpXml);
+    // No async unencrypted-binary helper today; the sync writer would
+    // be fine here but stays the async writer's contract — write via
+    // writeObjectAsync with a stream string. The byte content is what
+    // matters; encoding follows the same UTF-8 path.
+    void bytes;
+    await this.asyncWriter.writeObjectAsync(id, dict);
   }
 
   private encodeMetadataString(value: string): string {

@@ -5,12 +5,14 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { TextAlignment } from './TextAlignment';
 import { TextDecoration } from './TextDecoration';
 import { FontMetrics } from '../../Typography/FontMetrics';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A text block element that supports word wrapping, alignment, font customization,
  * and automatic pagination across page boundaries.
  */
-export class TextBlock extends TextElementBase implements IStatefulElement {
+export class TextBlock extends TextElementBase implements IStatefulElement, IRoleProvider {
   private cachedContentWidth = -1;
   private cachedLines?: string[];
 
@@ -18,6 +20,15 @@ export class TextBlock extends TextElementBase implements IStatefulElement {
   private lastLineRendered = -1;
 
   public text!: string;
+
+  /**
+   * PDF/UA structure role for this element. Defaults to
+   * {@link SemanticRole.P} (a paragraph). {@link Heading} overrides
+   * this to return one of H1…H6.
+   */
+  public get semanticRole(): SemanticRole {
+    return SemanticRole.P;
+  }
   public alignment: TextAlignment = TextAlignment.Left;
 
   /**

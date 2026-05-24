@@ -2,18 +2,29 @@ export class PdfSyntax {
   public static encodeMetadataString(input: string): string {
     if (!input) return '()';
 
-    for (const c of input) {
-      if (c.charCodeAt(0) > 0xff) {
-        const utf16be = new TextEncoder().encode(input);
-        let sb = '<FEFF';
-        for (const b of utf16be) {
-          sb += b.toString(16).toUpperCase().padStart(2, '0');
-        }
-        return sb + '>';
+    let needsUtf16 = false;
+    for (let i = 0; i < input.length; i++) {
+      if (input.charCodeAt(i) > 0xff) {
+        needsUtf16 = true;
+        break;
       }
     }
 
-    return `(${this.escape(input)})`;
+    if (!needsUtf16) {
+      return `(${this.escape(input)})`;
+    }
+
+    // UTF-16BE with BOM (FEFF). JS strings are already UTF-16 code
+    // units, so emit each charCodeAt as two big-endian bytes. Lone
+    // surrogates are written as-is; well-formed surrogate pairs round-
+    // trip correctly via this same encoding.
+    let sb = '<FEFF';
+    for (let i = 0; i < input.length; i++) {
+      const code = input.charCodeAt(i);
+      sb += ((code >> 8) & 0xff).toString(16).toUpperCase().padStart(2, '0');
+      sb += (code & 0xff).toString(16).toUpperCase().padStart(2, '0');
+    }
+    return sb + '>';
   }
 
   public static escape(input: string): string {

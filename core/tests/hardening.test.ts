@@ -299,19 +299,40 @@ describe('Hardening fixtures', () => {
 
   // ── 10. Alt-text with special characters that need escaping ─────
 
-  it('fixture 10 — alt-text with special chars is PDF-escaped', () => {
+  it('fixture 10a — alt-text with Latin-1 special chars is PDF-escaped', () => {
+    // Backslashes and parens are PDF string-literal metacharacters and
+    // must be backslash-escaped; the structure-tree writer routes
+    // through encodeMetadataString → PdfSyntax.escape for that.
     const pdf = generateTagged(d => {
       const qr = new QRCode();
       qr.data = 'https://example.com';
       qr.size = 60;
-      qr.altText = 'Chart for fiscal year (2026) — \\ revenue "projection"';
+      qr.altText = 'Chart for FY (2026) \\ revenue "projection"';
       d.add(qr);
     });
 
-    // /Alt string-literal must escape backslashes and parens. The
-    // structure-tree writer routes through PdfSyntax.escape, which
-    // does this. Other chars (em-dash, quotes) pass through.
-    expect(pdf).toContain('/Alt (Chart for fiscal year \\(2026\\) — \\\\ revenue "projection")');
+    expect(pdf).toContain('/Alt (Chart for FY \\(2026\\) \\\\ revenue "projection")');
+  });
+
+  it('fixture 10b — alt-text with non-Latin-1 chars is UTF-16BE hex encoded', () => {
+    // Em-dash (U+2014) doesn't fit in a single-byte PDF string literal
+    // and would otherwise be byte-truncated to 0x14 by the Latin-1
+    // writer. Per the XMP/PDF spec, such strings must become a
+    // <FEFF…> UTF-16BE hex literal — Adobe and VeraPDF both expect
+    // this form.
+    const pdf = generateTagged(d => {
+      const qr = new QRCode();
+      qr.data = 'https://example.com';
+      qr.size = 60;
+      qr.altText = 'Year 2026 — projection';
+      d.add(qr);
+    });
+
+    // BOM (FEFF) then UTF-16BE bytes:
+    //   "Y" 0x0059, "e" 0x0065, …, " " 0x0020, "—" 0x2014, …
+    expect(pdf).toMatch(/\/Alt <FEFF[0-9A-F]+>/);
+    // Spot-check the em-dash codepoint is present in the hex stream.
+    expect(pdf).toMatch(/\/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>/);
   });
 });
 

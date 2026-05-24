@@ -177,10 +177,13 @@ function buildStructElemDict(
   if (built.kids !== null) dict.set('/K', built.kids);
   if (built.singlePageObjectId !== undefined) dict.set('/Pg', `${built.singlePageObjectId} 0 R`);
 
-  if (element.alt) dict.set('/Alt', `(${PdfSyntax.escape(element.alt)})`);
-  if (element.actualText) dict.set('/ActualText', `(${PdfSyntax.escape(element.actualText)})`);
-  if (element.lang) dict.set('/Lang', `(${PdfSyntax.escape(element.lang)})`);
-  if (element.title) dict.set('/T', `(${PdfSyntax.escape(element.title)})`);
+  // PDF text strings: use encodeMetadataString so non-Latin-1 chars
+  // (em-dash, smart quotes, CJK, etc.) become a UTF-16BE hex literal
+  // <FEFF…> rather than getting byte-truncated by the Latin-1 writer.
+  if (element.alt) dict.set('/Alt', PdfSyntax.encodeMetadataString(element.alt));
+  if (element.actualText) dict.set('/ActualText', PdfSyntax.encodeMetadataString(element.actualText));
+  if (element.lang) dict.set('/Lang', PdfSyntax.encodeMetadataString(element.lang));
+  if (element.title) dict.set('/T', PdfSyntax.encodeMetadataString(element.title));
 
   // /A — attributes dictionary (raw PDF syntax provided by caller).
   // Tables use this for /ColSpan; future stages may use it for

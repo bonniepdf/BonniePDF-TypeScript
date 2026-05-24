@@ -92,6 +92,27 @@ export class PdfResourceRegistry {
   }
 
   /**
+   * Reports whether this document will end up emitting any
+   * non-embedded standard-14 Type1 font reference (Helvetica,
+   * Times-*, Courier-*, Symbol, ZapfDingbats). Such references are
+   * **forbidden by PDF/A-1b §6.3.4**, so when this returns `true`
+   * the serializer suppresses the PDF/A conformance claim rather
+   * than emitting an invalid one.
+   *
+   * Mirrors what {@link writeResources} does — anything that won't
+   * be aliased to a TTF and isn't already an embedded-font path will
+   * be written via `writeType1Font` (non-embedded).
+   */
+  public hasNonEmbeddedStandardFont(): boolean {
+    for (const fontIdentifier of this.fontNameMap.keys()) {
+      if (this.fontAliasMap.has(fontIdentifier)) continue;
+      if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) continue;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Loads the actual TtfFont bytes for a previously registered embedded font path.
    * Must be called (and awaited) before rendering begins so that glyph metrics and
    * tracking are available during layout and content-stream generation.

@@ -4,25 +4,30 @@ import { XmpConformanceBlock } from './XmpConformanceBlock';
 /**
  * Generates the XMP metadata packet for PDF documents.
  *
- * this feature scope: the full dc/xmp/pdf metadata emission is still stubbed
- * (the .NET side has it via System.Xml — TS will get a hand-rolled
- * version in a separate task). What's wired here is the additive
- * conformance-block hook per the this feature this feature design: each block claims
- * a namespace and a set of element values that get embedded in the
- * single document-level `rdf:Description`. PDF/A, PDF/UA, and later
- * ZUGFeRD's `fx` namespace all compose through this hook.
+ * The packet body is composed of:
  *
- * dc:title is emitted alongside conformance blocks whenever
- * metadata.title is set — required by PDF/UA-1 Matterhorn clause 6-1.
+ *   1. **Conformance blocks** — pdfaid, pdfuaid, and any future
+ *      additive namespace (ZUGFeRD's fx, etc.) emitted via the
+ *      `conformanceBlocks` hook. These are PDF/A and PDF/UA-1
+ *      requirements.
+ *
+ *   2. **Dublin Core (dc)** — title, creator (author), description
+ *      (subject). Required by Matterhorn Protocol §6 for PDF/UA-1
+ *      and by ISO 19005-1 §6.7.3 for PDF/A — every key in the
+ *      document-info dictionary that has an analogous XMP property
+ *      must be mirrored.
+ *
+ *   3. **PDF schema (pdf)** — Keywords, Producer. Mirrors the
+ *      /Keywords and /Producer entries from the info dict.
+ *
+ *   4. **XMP basic schema (xmp)** — CreatorTool, CreateDate,
+ *      ModifyDate. Mirrors /Creator, /CreationDate, /ModDate.
+ *
+ * Returns an empty string when no conformance blocks are provided —
+ * preserves existing behaviour for the pre-T-14 "no XMP body" code
+ * path used by plain (non-tagged, non-PDF/A) documents.
  */
 export class XmpMetadataWriter {
-  /**
-   * Generate the XMP XML string for a document, optionally including
-   * one or more conformance namespace blocks.
-   *
-   * Returns an empty string when no blocks are provided — preserves
-   * existing behaviour for the pre-T-14 "no XMP body" code path.
-   */
   public static generateXmpXml(
     metadata: DocumentMetadata,
     conformanceBlocks?: ReadonlyArray<XmpConformanceBlock>
@@ -36,7 +41,7 @@ export class XmpMetadataWriter {
     parts.push('<x:xmpmeta xmlns:x="adobe:ns:meta/">\n');
     parts.push('  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n');
 
-    // Conformance namespaces (pdfaid, pdfuaid, …) in one rdf:Description
+    // 1. Conformance namespaces (pdfaid, pdfuaid, …) in one rdf:Description
     parts.push('    <rdf:Description rdf:about=""');
     for (const block of conformanceBlocks) {
       parts.push(` xmlns:${block.prefix}="${block.namespaceUri}"`);
@@ -49,15 +54,78 @@ export class XmpMetadataWriter {
     }
     parts.push('    </rdf:Description>\n');
 
-    // Dublin Core metadata (dc:title) — required by PDF/UA-1 Matterhorn §6-1.
-    // Uses rdf:Alt with an x-default language tag per the XMP spec §8.2.2.4.
-    if (metadata?.title) {
+    // 2. Dublin Core — title, creator (author), subject (keywords),
+    //    description (subject). Naming is unintuitive because PDF and
+    //    Dublin Core overlap: PDF /Subject → dc:description, while
+    //    PDF /Keywords → dc:subject (an unordered Bag of topic words).
+    if (metadata?.title || metadata?.author || metadata?.keywords || metadata?.subject) {
       parts.push('    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n');
-      parts.push('      <dc:title>\n');
-      parts.push('        <rdf:Alt>\n');
-      parts.push(`          <rdf:li xml:lang="x-default">${escapeXmlText(metadata.title)}</rdf:li>\n`);
-      parts.push('        </rdf:Alt>\n');
-      parts.push('      </dc:title>\n');
+      if (metadata.title) {
+        parts.push('      <dc:title>\n');
+        parts.push('        <rdf:Alt>\n');
+        parts.push(`          <rdf:li xml:lang="x-default">${escapeXmlText(metadata.title)}</rdf:li>\n`);
+        parts.push('        </rdf:Alt>\n');
+        parts.push('      </dc:title>\n');
+      }
+      if (metadata.author) {
+        // dc:creator is an ordered Seq of strings per XMP §8.6.
+        parts.push('      <dc:creator>\n');
+        parts.push('        <rdf:Seq>\n');
+        parts.push(`          <rdf:li>${escapeXmlText(metadata.author)}</rdf:li>\n`);
+        parts.push('        </rdf:Seq>\n');
+        parts.push('      </dc:creator>\n');
+      }
+      if (metadata.keywords) {
+        // dc:subject — Bag of individual keywords (comma- or
+        // semicolon-separated in PDF /Keywords). Matches .NET behaviour.
+        const tokens = metadata.keywords
+          .split(/[,;]/)
+          .map(t => t.trim())
+          .filter(t => t.length > 0);
+        parts.push('      <dc:subject>\n');
+        parts.push('        <rdf:Bag>\n');
+        for (const kw of tokens) {
+          parts.push(`          <rdf:li>${escapeXmlText(kw)}</rdf:li>\n`);
+        }
+        parts.push('        </rdf:Bag>\n');
+        parts.push('      </dc:subject>\n');
+      }
+      if (metadata.subject) {
+        // PDF /Subject ↔ dc:description (language alternative).
+        parts.push('      <dc:description>\n');
+        parts.push('        <rdf:Alt>\n');
+        parts.push(`          <rdf:li xml:lang="x-default">${escapeXmlText(metadata.subject)}</rdf:li>\n`);
+        parts.push('        </rdf:Alt>\n');
+        parts.push('      </dc:description>\n');
+      }
+      parts.push('    </rdf:Description>\n');
+    }
+
+    // 3. PDF schema — Keywords, Producer.
+    if (metadata?.keywords || metadata?.producer) {
+      parts.push('    <rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">\n');
+      if (metadata.keywords) {
+        parts.push(`      <pdf:Keywords>${escapeXmlText(metadata.keywords)}</pdf:Keywords>\n`);
+      }
+      if (metadata.producer) {
+        parts.push(`      <pdf:Producer>${escapeXmlText(metadata.producer)}</pdf:Producer>\n`);
+      }
+      parts.push('    </rdf:Description>\n');
+    }
+
+    // 4. XMP basic schema — CreatorTool, CreateDate, ModifyDate.
+    if (metadata?.creator || metadata?.creationDate || metadata?.modifiedDate) {
+      parts.push('    <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">\n');
+      if (metadata.creator) {
+        // PDF /Creator (the tool) ↔ xmp:CreatorTool.
+        parts.push(`      <xmp:CreatorTool>${escapeXmlText(metadata.creator)}</xmp:CreatorTool>\n`);
+      }
+      if (metadata.creationDate) {
+        parts.push(`      <xmp:CreateDate>${toXmpDate(metadata.creationDate)}</xmp:CreateDate>\n`);
+      }
+      if (metadata.modifiedDate) {
+        parts.push(`      <xmp:ModifyDate>${toXmpDate(metadata.modifiedDate)}</xmp:ModifyDate>\n`);
+      }
       parts.push('    </rdf:Description>\n');
     }
 
@@ -70,4 +138,12 @@ export class XmpMetadataWriter {
 
 function escapeXmlText(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Formats a Date as an XMP-compliant ISO 8601 string (e.g. 2026-05-24T07:23:11Z). */
+function toXmpDate(d: Date): string {
+  const iso = d.toISOString(); // 2026-05-24T07:23:11.123Z
+  // Strip milliseconds — XMP allows them but writing whole seconds keeps
+  // generated PDFs byte-stable across CI runs that re-parse the date.
+  return iso.replace(/\.\d{3}Z$/, 'Z');
 }

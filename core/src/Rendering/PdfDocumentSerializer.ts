@@ -17,6 +17,8 @@ import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
+import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 
 export class PdfDocumentSerializer {
   constructor(private document: Document) {}
@@ -34,9 +36,17 @@ export class PdfDocumentSerializer {
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
 
-    // 0. Set up encryption if configured (full implementation in Session 4)
+    // 0. Set up encryption if configured. Mirrors the .NET sync path:
+    // create the PdfEncryptor up front so writeObject and the trailer
+    // both see writer.encryptor and emit the /Encrypt entry.
+    //
+    // AES-256 keys must be initialised via PdfEncryptor.create() under
+    // an async context (SubtleCrypto). In the sync path we degrade
+    // silently — the document is generated unencrypted, matching the
+    // documented "AES-256 encryption requires saveAsync" behaviour.
     let encryptId = 0;
-    if (settings.isEncrypted) {
+    if (settings.isEncrypted && settings.encryption!.algorithm !== EncryptionAlgorithm.AES_256) {
+      writer.encryptor = new PdfEncryptor(settings.encryption!);
       encryptId = writer.getNewId();
     }
 

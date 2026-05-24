@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { Document } from '../src/Document';
 import { Heading } from '../src/Elements/Text/Heading';
 import { TextBlock } from '../src/Elements/Text/TextBlock';
@@ -12,7 +12,10 @@ import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
 import { EncryptionSettings } from '../src/Security/Models/EncryptionSettings';
 import { StandardFonts } from '../src/Typography/StandardFonts';
+import { FontManager } from '../src/Typography/FontManager';
 import { pdfToText } from './helpers/test-base';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * this feature (TS mirror) — 10-fixture hardening pass. Throws representative
@@ -316,6 +319,69 @@ describe('Hardening fixtures', () => {
     });
 
     expect(pdf).toContain('/Alt (Chart for FY \\(2026\\) \\\\ revenue "projection")');
+  });
+
+  // ── 11. this feature Stage 2 — real PDF/A when fonts are registered ────────
+
+  describe('fixture 11 — this feature stage 2: real PDF/A with registered Liberation Sans', () => {
+    const fontsDir = join(__dirname, '../assets/fonts');
+
+    beforeEach(() => {
+      FontManager.clear();
+    });
+
+    afterEach(() => {
+      FontManager.clear();
+    });
+
+    it('pdfaid XMP block emitted when all fonts are embedded via FontManager', () => {
+      // Register Liberation Sans so pdfAEnabled can be backed up.
+      const bytes = readFileSync(join(fontsDir, 'LiberationSans-Regular.ttf'));
+      FontManager.registerFont(new Uint8Array(bytes));
+
+      const pdf = generate(d => {
+        d.settings.version = PdfVersion.Pdf17;
+        d.settings.pdfAEnabled = true;
+        const tb = new TextBlock();
+        tb.text = 'Hello PDF/A';
+        tb.fontName = StandardFonts.Helvetica;
+        tb.fontSize = 12;
+        d.add(tb);
+      });
+
+      // With a registered font, the claim is now valid.
+      expect(pdf).toContain('pdfaid:part');
+      expect(pdf).toContain('/OutputIntents');
+    });
+
+    it('FontManager.getBytesForStandardFont returns bytes for known standard fonts', () => {
+      const bytes = readFileSync(join(fontsDir, 'LiberationSans-Regular.ttf'));
+      FontManager.registerFont(new Uint8Array(bytes));
+
+      expect(FontManager.getBytesForStandardFont('Helvetica')).not.toBeNull();
+      expect(FontManager.getBytesForStandardFont('Helvetica-Bold')).toBeNull(); // not registered
+      expect(FontManager.getBytesForStandardFont('Symbol')).toBeNull(); // not in map
+    });
+
+    it('registerFont parses family name from font binary', () => {
+      const bytes = readFileSync(join(fontsDir, 'LiberationSans-Bold.ttf'));
+      FontManager.registerFont(new Uint8Array(bytes));
+
+      // Family and subfamily inferred from the font name table.
+      const result = FontManager.getBytesForFamily('liberation sans', 'bold');
+      expect(result).not.toBeNull();
+    });
+
+    it('autoRegisterBundledFonts registers all 12 variants from directory', () => {
+      FontManager.autoRegisterBundledFonts(fontsDir);
+
+      // All three standard-font families covered.
+      expect(FontManager.getBytesForStandardFont('Helvetica')).not.toBeNull();
+      expect(FontManager.getBytesForStandardFont('Helvetica-Bold')).not.toBeNull();
+      expect(FontManager.getBytesForStandardFont('Times-Roman')).not.toBeNull();
+      expect(FontManager.getBytesForStandardFont('Courier')).not.toBeNull();
+      expect(FontManager.hasBundledFonts()).toBe(true);
+    });
   });
 
   it('fixture 10b — alt-text with non-Latin-1 chars is UTF-16BE hex encoded', () => {

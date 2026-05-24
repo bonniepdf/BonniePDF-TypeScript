@@ -1,0 +1,183 @@
+import { TtfFont } from './TrueType/TtfFont';
+
+/**
+ * Standard PDF font identifier → Liberation family+weight lookup.
+ * Liberation fonts are metric-compatible substitutes (OFL license) that
+ * satisfy PDF/A-1b §6.3.4 (full embedding required).
+ */
+const STANDARD_FONT_MAP: Record<string, { family: string; weight: string }> = {
+  // Helvetica family → Liberation Sans
+  Helvetica: { family: 'liberation sans', weight: 'regular' },
+  'Helvetica-Bold': { family: 'liberation sans', weight: 'bold' },
+  'Helvetica-Oblique': { family: 'liberation sans', weight: 'italic' },
+  'Helvetica-BoldOblique': { family: 'liberation sans', weight: 'bolditalic' },
+  // Times family → Liberation Serif
+  'Times-Roman': { family: 'liberation serif', weight: 'regular' },
+  'Times-Bold': { family: 'liberation serif', weight: 'bold' },
+  'Times-Italic': { family: 'liberation serif', weight: 'italic' },
+  'Times-BoldItalic': { family: 'liberation serif', weight: 'bolditalic' },
+  // Courier family → Liberation Mono
+  Courier: { family: 'liberation mono', weight: 'regular' },
+  'Courier-Bold': { family: 'liberation mono', weight: 'bold' },
+  'Courier-Oblique': { family: 'liberation mono', weight: 'italic' },
+  'Courier-BoldOblique': { family: 'liberation mono', weight: 'bolditalic' },
+};
+
+/** Normalizes a weight string: "Bold Italic", "BoldItalic", "bold italic" → "bolditalic". */
+function normalizeWeight(raw: string): string {
+  return raw.toLowerCase().replace(/[\s_-]/g, '');
+}
+
+/** Registry entry: either raw bytes already loaded, or a file path to load lazily. */
+type FontEntry = { kind: 'bytes'; bytes: Uint8Array } | { kind: 'file'; path: string; bytes?: Uint8Array };
+
+/**
+ * Global font registry for BonniePDF.
+ *
+ * Fonts registered here are automatically substituted for standard PDF type-1
+ * fonts (Helvetica, Times-Roman, Courier) when `pdfAEnabled: true` is set on
+ * `DocumentSettings`. This allows the library to produce genuinely PDF/A-1b
+ * conformant output without the caller having to supply font paths on every
+ * element.
+ *
+ * **Node.js zero-config**: the `index.node.ts` entry-point calls
+ * `FontManager.autoRegisterBundledFonts()` at startup, which registers the
+ * bundled Liberation Sans / Serif / Mono fonts automatically. No code changes
+ * are needed on the caller side.
+ *
+ * **Browser usage**: call `FontManager.registerFont(bytes)` with the raw TTF
+ * bytes before generating any document. A Vite/webpack import or `fetch()`
+ * from a CDN both work:
+ *
+ * ```typescript
+ * import { FontManager } from '@bonniepdf/core';
+ * import fontBytes from './LiberationSans-Regular.ttf?uint8array';
+ * FontManager.registerFont(fontBytes);
+ * ```
+ */
+export class FontManager {
+  // Keys: `${family.toLowerCase()}:${normalizedWeight}`
+  private static readonly registry = new Map<string, FontEntry>();
+
+  /**
+   * Registers a TrueType font from raw bytes.
+   * The family name is read from the font's name table (ID 1) unless overridden.
+   *
+   * ```typescript
+   * const bytes = await fetch('/fonts/MyFont-Bold.ttf').then(r => r.arrayBuffer());
+   * FontManager.registerFont(new Uint8Array(bytes), { family: 'MyFont', subfamily: 'Bold' });
+   * ```
+   */
+  public static registerFont(bytes: Uint8Array, opts?: { family?: string; subfamily?: string }): void {
+    const font = TtfFont.loadFromBytes(bytes);
+    const family = (opts?.family ?? font.fontFamily).toLowerCase();
+    const weight = normalizeWeight(opts?.subfamily ?? font.fontSubfamily ?? 'Regular');
+    const key = `${family}:${weight}`;
+    this.registry.set(key, { kind: 'bytes', bytes });
+  }
+
+  /**
+   * Registers a TrueType font from a file path (Node.js only).
+   * Loading is deferred until the font is first needed.
+   *
+   * Called automatically by `autoRegisterBundledFonts()`.
+   */
+  public static registerFontFile(path: string, opts?: { family?: string; subfamily?: string }): void {
+    // Read the name table to derive the key without holding the entire parse in memory.
+    const font = TtfFont.fromFileSync(path);
+    const family = (opts?.family ?? font.fontFamily).toLowerCase();
+    const weight = normalizeWeight(opts?.subfamily ?? font.fontSubfamily ?? 'Regular');
+    const key = `${family}:${weight}`;
+    this.registry.set(key, { kind: 'file', path });
+  }
+
+  /**
+   * Auto-registers all 12 bundled Liberation fonts from the given directory.
+   * Called by `index.node.ts` on startup — callers do not need to invoke this.
+   */
+  public static autoRegisterBundledFonts(fontsDir: string): void {
+    const families = [
+      ['LiberationSans-Regular', 'liberation sans', 'regular'],
+      ['LiberationSans-Bold', 'liberation sans', 'bold'],
+      ['LiberationSans-Italic', 'liberation sans', 'italic'],
+      ['LiberationSans-BoldItalic', 'liberation sans', 'bolditalic'],
+      ['LiberationSerif-Regular', 'liberation serif', 'regular'],
+      ['LiberationSerif-Bold', 'liberation serif', 'bold'],
+      ['LiberationSerif-Italic', 'liberation serif', 'italic'],
+      ['LiberationSerif-BoldItalic', 'liberation serif', 'bolditalic'],
+      ['LiberationMono-Regular', 'liberation mono', 'regular'],
+      ['LiberationMono-Bold', 'liberation mono', 'bold'],
+      ['LiberationMono-Italic', 'liberation mono', 'italic'],
+      ['LiberationMono-BoldItalic', 'liberation mono', 'bolditalic'],
+    ] as const;
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const path: typeof import('path') = require('path');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs: typeof import('fs') = require('fs');
+
+    for (const [file, family, weight] of families) {
+      const fullPath = path.join(fontsDir, `${file}.ttf`);
+      if (fs.existsSync(fullPath)) {
+        const key = `${family}:${weight}`;
+        this.registry.set(key, { kind: 'file', path: fullPath });
+      }
+    }
+  }
+
+  /**
+   * Returns raw TTF bytes for the given standard PDF font identifier
+   * (e.g. `"Helvetica"`, `"Times-Bold"`, `"Courier-Oblique"`), or
+   * `null` if no substitution font has been registered.
+   *
+   * Called by `PdfResourceRegistry` when `pdfAEnabled = true` and the
+   * document uses a standard-14 font.
+   */
+  public static getBytesForStandardFont(standardFontName: string): Uint8Array | null {
+    const mapping = STANDARD_FONT_MAP[standardFontName];
+    if (!mapping) return null;
+    return this.getBytesForFamily(mapping.family, mapping.weight);
+  }
+
+  /**
+   * Returns raw TTF bytes for a registered family/weight pair, or `null`.
+   * `family` is case-insensitive; `weight` is normalized (spaces and dashes stripped).
+   */
+  public static getBytesForFamily(family: string, subfamily: string): Uint8Array | null {
+    const key = `${family.toLowerCase()}:${normalizeWeight(subfamily)}`;
+    const entry = this.registry.get(key);
+    if (!entry) return null;
+
+    if (entry.kind === 'bytes') return entry.bytes;
+
+    // Lazy-load from file
+    if (!entry.bytes) {
+      entry.bytes = this.loadFileBytes(entry.path);
+    }
+    return entry.bytes ?? null;
+  }
+
+  /**
+   * Returns `true` if at least one substitution font is registered.
+   * Used by `PdfDocumentSerializer` to decide whether to enforce PDF/A.
+   */
+  public static hasBundledFonts(): boolean {
+    return this.registry.size > 0;
+  }
+
+  /** Removes all registered fonts (primarily for test isolation). */
+  public static clear(): void {
+    this.registry.clear();
+  }
+
+  private static loadFileBytes(filePath: string): Uint8Array | undefined {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const fs: typeof import('fs') = require('fs');
+      const buf = fs.readFileSync(filePath);
+      return Uint8Array.from(buf);
+    } catch {
+      return undefined;
+    }
+  }
+}

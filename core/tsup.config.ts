@@ -13,6 +13,7 @@ export default defineConfig({
   platform: 'neutral',
   target: 'es2022',
   external: [...builtinModules, ...builtinModules.map(m => `node:${m}`)],
+  shims: true,
   dts: true,
   declarationMap: true,
   splitting: true,

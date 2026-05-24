@@ -11,7 +11,8 @@
     "./dist/index.node.cjs"
   ],
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "exports": {
     ".": {

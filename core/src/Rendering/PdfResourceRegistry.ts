@@ -8,6 +8,8 @@ import { ImageWriter } from './Images/ImageWriter';
 import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
+import { FontManager } from '../Typography/FontManager';
+import { FontMetrics } from '../Typography/FontMetrics';
 
 export class PdfResourceRegistry {
   private fontCounter = 0;
@@ -30,11 +32,28 @@ export class PdfResourceRegistry {
     }
 
     if (this.pdfAEnabled) {
+      // 1. Try FontManager (bytes-based — works in all environments)
+      const bytes = FontManager.getBytesForStandardFont(fontIdentifier);
+      if (bytes) {
+        const virtualKey = `virtual:${fontIdentifier}`;
+        const resourceName = this.registerEmbeddedFontFromBytes(bytes, virtualKey);
+        this.fontNameMap.set(fontIdentifier, resourceName);
+        this.fontAliasMap.set(fontIdentifier, virtualKey);
+        // Register the TtfFont instance (not a file path) so FontMetrics can measure accurately.
+        const info = this.embeddedFonts.get(virtualKey);
+        if (info?.font instanceof TtfFont) {
+          FontMetrics.registerFontInstance(fontIdentifier, info.font);
+        }
+        return resourceName;
+      }
+
+      // 2. Legacy: file-path based resolution (Node.js, system fonts)
       const ttfPath = this.resolveStandardFontToTtf(fontIdentifier);
       if (ttfPath) {
         const resourceName = this.registerEmbeddedFont(ttfPath);
         this.fontNameMap.set(fontIdentifier, resourceName);
         this.fontAliasMap.set(fontIdentifier, ttfPath);
+        FontMetrics.registerFontAlias(fontIdentifier, ttfPath);
         return resourceName;
       }
     }
@@ -49,7 +68,8 @@ export class PdfResourceRegistry {
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {
-    return fontIdentifier.toLowerCase().endsWith('.ttf') || fontIdentifier.toLowerCase().endsWith('.otf');
+    const lower = fontIdentifier.toLowerCase();
+    return lower.endsWith('.ttf') || lower.endsWith('.otf') || lower.startsWith('virtual:');
   }
 
   public getEmbeddedFont(filePath: string): EmbeddedFontInfo | null {
@@ -137,8 +157,37 @@ export class PdfResourceRegistry {
     await Promise.all(paths.map(p => this.preloadEmbeddedFont(p)));
   }
 
-  private resolveStandardFontToTtf(fontIdentifier: string): string | null {
-    // Stub: would resolve to system fonts
+  private registerEmbeddedFontFromBytes(bytes: Uint8Array, key: string): string {
+    if (!this.embeddedFonts.has(key)) {
+      let font: TtfFont | null = null;
+      let tracker: GlyphUsageTracker | null = null;
+      try {
+        font = TtfFont.loadFromBytes(bytes);
+        tracker = new GlyphUsageTracker(font);
+      } catch (err) {
+        console.warn(`[BonniePDF] Could not parse font bytes for "${key}": ${(err as Error).message}`);
+      }
+
+      this.fontCounter++;
+      const resourceName = `/F${this.fontCounter}`;
+      const subsetPrefix = this.generateSubsetPrefix();
+
+      const info = new EmbeddedFontInfo();
+      info.font = font;
+      info.tracker = tracker;
+      info.subsetPrefix = subsetPrefix;
+      info.resourceName = resourceName;
+      info.type0ObjectId = 0;
+
+      this.embeddedFonts.set(key, info);
+      this.fontNameMap.set(key, resourceName);
+    }
+
+    return this.fontNameMap.get(key)!;
+  }
+
+  private resolveStandardFontToTtf(_fontIdentifier: string): string | null {
+    // FontManager covers all cases via bytes — this is a fallback for direct file paths.
     return null;
   }
 

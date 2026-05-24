@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -65,6 +66,7 @@ export function generate(): Document {
   metadata.subject = `Year-over-year revenue comparison — ${year - 1} vs ${year} on a shared axis`;
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Multi-Series Line Chart: Year-over-Year Comparison');
   title.fontSize = 24;

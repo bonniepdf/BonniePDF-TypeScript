@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   VerticalStack,
   Container,
@@ -26,6 +27,7 @@ export function generate(): Document {
   metadata.subject = 'Demonstrating margin support for elements';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // Title with bottom margin
   const title = new TextBlock('Margin Example');
@@ -40,9 +42,6 @@ export function generate(): Document {
     'This paragraph has a 10pt margin on all sides. Margins create space around elements, ' +
       'helping to visually separate content and improve readability.'
   );
-  para.fontName = StandardFonts.Helvetica;
-  para.fontSize = 12;
-  para.textColor = Color.slate600;
   para.margin = new Thickness(10);
   doc.add(para);
 
@@ -51,7 +50,6 @@ export function generate(): Document {
     'This container has a 10pt top and bottom margin, plus 15pt padding inside. ' +
       'Notice how the margin creates space outside the border, while padding creates space inside.'
   );
-  infoText.fontName = StandardFonts.Helvetica;
   infoText.fontSize = 11;
   infoText.textColor = Color.blue900;
 
@@ -73,15 +71,12 @@ export function generate(): Document {
   doc.add(imgHeader);
 
   const imgDesc = new TextBlock('Images can also have margins. The image below has a 20pt margin on all sides:');
-  imgDesc.fontName = StandardFonts.Helvetica;
   imgDesc.fontSize = 11;
-  imgDesc.textColor = Color.slate600;
   imgDesc.margin = new Thickness(0, 0, 0, 10);
   doc.add(imgDesc);
 
   // Coloured rectangle as image placeholder
   const placeholderLabel = new TextBlock('Image Placeholder (100x60)');
-  placeholderLabel.fontName = StandardFonts.Helvetica;
   placeholderLabel.fontSize = 10;
   placeholderLabel.textColor = Color.amber900;
   placeholderLabel.alignment = TextAlignment.Center;
@@ -124,10 +119,8 @@ export function generate(): Document {
     ['Margin.Right', 'Space to the right of the element'],
   ] as [string, string][]) {
     const c1 = new TextBlock(label);
-    c1.fontName = StandardFonts.Helvetica;
     c1.fontSize = 10;
     const c2 = new TextBlock(desc);
-    c2.fontName = StandardFonts.Helvetica;
     c2.fontSize = 10;
     table.addRow(c1, c2);
   }
@@ -150,7 +143,6 @@ export function generate(): Document {
     [Color.red100, Color.red800, 'Item 3 in stack (with top margin)', true],
   ] as [Color, Color, string, boolean][]) {
     const t = new TextBlock(text);
-    t.fontName = StandardFonts.Helvetica;
     t.fontSize = 10;
     t.textColor = fg;
 

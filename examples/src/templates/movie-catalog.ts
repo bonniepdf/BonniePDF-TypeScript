@@ -6,6 +6,7 @@ import {
   PageOrientation,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   VerticalStack,
   Table,
@@ -372,6 +373,7 @@ export function generate(): Document {
   metadata.author = 'Classic Cinema Archive';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   // ── Title section ──
   const titleStack = new VerticalStack();

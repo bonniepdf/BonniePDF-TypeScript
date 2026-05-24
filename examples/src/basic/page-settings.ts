@@ -6,6 +6,7 @@ import {
   PdfSize,
   PageOrientation,
   TextBlock,
+  TextStyle,
   VerticalStack,
   Line,
   Color,
@@ -58,6 +59,7 @@ export function generate(): Document {
   metadata.title = 'Standard PDF Page Formats Gallery';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   let isFirstPage = true;
 

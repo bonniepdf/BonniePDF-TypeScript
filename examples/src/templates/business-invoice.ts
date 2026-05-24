@@ -2,10 +2,12 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
+  AccessibilityMode,
   PdfSize,
   PdfVersion,
   TextBlock,
   TextAlignment,
+  Heading,
   VerticalStack,
   Container,
   Table,
@@ -111,10 +113,13 @@ export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 36);
   settings.version = PdfVersion.Pdf17;
   settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-US';
 
   const metadata = new DocumentMetadata();
   metadata.title = `Invoice INV-${year}-001`;
   metadata.author = 'Studio Eleven';
+  metadata.subject = 'Invoice for design and development services.';
 
   const doc = new Document(settings, metadata);
   const mainStack = new VerticalStack();
@@ -140,7 +145,13 @@ export function generate(): Document {
   companyStack.addChild(tb('Phone  (555) 123-4567', StandardFonts.Helvetica, 9, TextMedium));
   companyStack.addChild(tb('Email  hello@studioeleven.co', StandardFonts.Helvetica, 9, TextMedium));
 
-  const invoiceTitle = tb('Invoice', StandardFonts.HelveticaBold, 28, AccentGreen);
+  // H1 heading — visually identical to a styled TextBlock but carries
+  // the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
+  const invoiceTitle = new Heading('Invoice');
+  invoiceTitle.level = 1;
+  invoiceTitle.fontName = StandardFonts.HelveticaBold;
+  invoiceTitle.fontSize = 28;
+  invoiceTitle.textColor = AccentGreen;
   invoiceTitle.alignment = TextAlignment.Right;
 
   const titleStack = new VerticalStack();

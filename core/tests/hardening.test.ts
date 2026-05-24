@@ -74,7 +74,12 @@ describe('Hardening fixtures', () => {
 
   // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
-  it('fixture 02 — PDF/A + PDF/UA emits both conformance claims in XMP', () => {
+  it('fixture 02 — PDF/A claim is suppressed when standard fonts are used (this feature contract)', () => {
+    // PDF/A-1b §6.3.4 forbids non-embedded fonts. When the caller
+    // asks for PDF/A but uses any of the standard 14 (Helvetica
+    // here), the serializer drops the PDF/A claim rather than
+    // emitting an invalid one. PDF/UA-1 still ships because it has
+    // no font-embedding requirement.
     const pdf = generate(d => {
       d.settings.version = PdfVersion.Pdf17;
       d.settings.pdfAEnabled = true;
@@ -87,12 +92,11 @@ describe('Hardening fixtures', () => {
       d.add(h);
     });
 
-    // XMP packet declares both conformance levels via the additive
-    // hook from this feature.
-    expect(pdf).toContain('pdfaid:part');
+    // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
+    expect(pdf).not.toContain('pdfaid:part');
+    expect(pdf).not.toContain('/OutputIntents');
+    // PDF/UA-1 plumbing is unaffected.
     expect(pdf).toContain('pdfuaid:part');
-    // Catalog has both PDF/A output intent ref AND struct-tree wiring.
-    expect(pdf).toContain('/OutputIntents');
     expect(pdf).toContain('/StructTreeRoot');
     expect(pdf).toContain('/MarkInfo << /Marked true >>');
   });

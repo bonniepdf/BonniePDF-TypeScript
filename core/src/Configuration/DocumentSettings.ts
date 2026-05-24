@@ -84,7 +84,18 @@ export class DocumentSettings {
   public version: PdfVersion;
   /**
    * Gets or sets whether PDF/A-1b archival mode is enabled.
-   * Requires Version == Pdf17. Cannot be used with encryption.
+   * Requires `version == Pdf17`. Cannot be used with encryption.
+   *
+   * **Honest-claim behaviour:** setting this to `true` is a
+   * request, not a guarantee. The serializer suppresses the
+   * `pdfaid:part` XMP block and `/OutputIntents` entry whenever the
+   * document references any of the standard 14 fonts (Helvetica,
+   * Times-*, Courier-*, Symbol, ZapfDingbats), because PDF/A-1b §6.3.4
+   * requires every font to be embedded and BonniePDF does not bundle
+   * subset versions of those faces. To actually produce a
+   * PDF/A-conformant file, register a real TTF via
+   * `TtfFont.fromFile()` / `FontMetrics.registerFontAlias()` and use
+   * that for every text element.
    */
   public pdfAEnabled: boolean;
   /**

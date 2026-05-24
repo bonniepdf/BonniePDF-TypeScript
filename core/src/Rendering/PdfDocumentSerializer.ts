@@ -152,6 +152,19 @@ export class PdfDocumentSerializer {
     // 4. Write global resource dictionary (fonts, images)
     let globalResources: string = (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
 
+    // ── Honest PDF/A claim ──────────────────────────────────────
+    // settings.pdfAEnabled is an opt-IN, but PDF/A-1b §6.3.4 forbids
+    // non-embedded fonts. If the user asked for PDF/A but used any of
+    // the standard 14 fonts (which we don't embed), we silently drop
+    // the claim: no pdfaid block in XMP, no OutputIntent, no
+    // /MarkInfo-via-pdfA path. The document is still a valid PDF —
+    // it just doesn't lie about being PDF/A-1b.
+    //
+    // To actually deliver PDF/A-1b the caller must register a real
+    // TTF (TtfFont.fromFile / FontMetrics.registerFontAlias).
+    const registry: PdfResourceRegistry | undefined = (ctx as any).resources;
+    const effectivePdfA = settings.pdfAEnabled && (registry == null || !registry.hasNonEmbeddedStandardFont());
+
     // 5. Write ExtGState for watermark opacity if configured
     if (settings.watermark != null) {
       const gsId = writer.getNewId();
@@ -194,10 +207,18 @@ export class PdfDocumentSerializer {
       writer.writeViewerPreferences(catalogOptions.viewerPrefsId, vp);
     }
 
-    // 9. Write XMP metadata for PDF 1.7
+    // 9. Write XMP metadata for PDF 1.7. Pass the effective PDF/A
+    // flag (not the raw settings flag) so we don't emit a pdfaid
+    // claim we can't honour.
     if (settings.version === PdfVersion.Pdf17) {
       catalogOptions.xmpMetadataId = writer.getNewId();
-      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, settings);
+      // Object.create preserves the DocumentSettings prototype (getters,
+      // methods) — plain object spread would drop hasBookmarks/isEncrypted.
+      const xmpSettings =
+        effectivePdfA === settings.pdfAEnabled
+          ? settings
+          : Object.assign(Object.create(Object.getPrototypeOf(settings)), settings, { pdfAEnabled: effectivePdfA });
+      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, xmpSettings);
     }
 
     // 10. Write bookmarks (outlines) for PDF 1.7
@@ -207,8 +228,10 @@ export class PdfDocumentSerializer {
       catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
     }
 
-    // 11. Write PDF/A output intents for PDF 1.7 + pdfA
-    if (settings.pdfAEnabled && settings.version === PdfVersion.Pdf17) {
+    // 11. Write PDF/A output intents for PDF 1.7 + pdfA. Uses the
+    // effective flag (see step 0 comment) so a half-baked PDF/A
+    // attempt doesn't ship an OutputIntent it can't back up.
+    if (effectivePdfA && settings.version === PdfVersion.Pdf17) {
       const complianceWriter = new ComplianceWriter(writer);
       catalogOptions.pdfAEnabled = true;
       const iccProfileId = writer.getNewId();

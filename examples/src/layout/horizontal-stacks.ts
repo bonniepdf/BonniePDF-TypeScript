@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   HorizontalStack,
   Container,
   Color,
@@ -23,6 +24,7 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Title ──
   const title = new TextBlock('Horizontal Stack Examples');
@@ -45,8 +47,6 @@ export function generate(): Document {
   equalStack.widthDistribution = WidthDistribution.Equal;
   for (const label of ['Item 1', 'Item 2', 'Item 3']) {
     const t = new TextBlock(label);
-    t.fontName = StandardFonts.Helvetica;
-    t.fontSize = 12;
     t.textColor = Color.white;
     equalStack.addChild(t);
   }
@@ -73,8 +73,6 @@ export function generate(): Document {
     ['75%', 3],
   ] as [string, number][]) {
     const t = new TextBlock(label);
-    t.fontName = StandardFonts.Helvetica;
-    t.fontSize = 12;
     t.textColor = Color.white;
     weightedStack.addChild(t, weight);
   }
@@ -103,7 +101,6 @@ export function generate(): Document {
     ['Large\n(3 lines)\nof text', 14],
   ] as [string, number][]) {
     const t = new TextBlock(text);
-    t.fontName = StandardFonts.Helvetica;
     t.fontSize = size;
     centerStack.addChild(t);
   }
@@ -163,11 +160,7 @@ export function generate(): Document {
     if (topMargin) kv.margin = new Thickness(0, 8, 0, 0);
     const k = new TextBlock(key);
     k.fontName = StandardFonts.HelveticaBold;
-    k.fontSize = 12;
-    k.textColor = Color.slate600;
     const v = new TextBlock(value);
-    v.fontName = StandardFonts.Helvetica;
-    v.fontSize = 12;
     v.textColor = Color.slate800;
     kv.addChild(k, 1);
     kv.addChild(v, 3);
@@ -188,7 +181,6 @@ export function generate(): Document {
 
   const filledText = new TextBlock('75%');
   filledText.fontName = StandardFonts.HelveticaBold;
-  filledText.fontSize = 12;
   filledText.textColor = Color.white;
   const filled = new Container();
   filled.child = filledText;
@@ -217,9 +209,6 @@ export function generate(): Document {
   badgeStack.alignment = HorizontalAlignment.Center;
 
   const statusText = new TextBlock('Status:');
-  statusText.fontName = StandardFonts.Helvetica;
-  statusText.fontSize = 12;
-  statusText.textColor = Color.slate600;
   badgeStack.addChild(statusText);
 
   for (const [label, bg] of [

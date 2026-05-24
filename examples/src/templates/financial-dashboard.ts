@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextAlignment,
   VerticalStack,
   Container,
@@ -102,6 +103,7 @@ export function generate(): Document {
   metadata.subject = `${DateHelper.quarterLabel(quarter, year)} financial dashboard — KPIs, monthly revenue chart, and product breakdown`;
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   // ════════════════════════════════════════════════════════════════════════════
   // 1.  Header bar

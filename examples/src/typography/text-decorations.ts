@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   TextDecoration,
   VerticalStack,
@@ -40,6 +41,7 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Text Decorations');
   title.fontName = StandardFonts.HelveticaBold;

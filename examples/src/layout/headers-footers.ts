@@ -6,6 +6,7 @@ import {
   PdfVersion,
   ZoomLevel,
   TextBlock,
+  TextStyle,
   TextAlignment,
   Color,
   Thickness,
@@ -52,6 +53,7 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   // Chapter heading
   const heading = new TextBlock('Chapter 1: Introduction');
@@ -73,9 +75,6 @@ export function generate(): Document {
     const para = sectionTexts[section] ?? 'Additional content section.';
     for (let p = 0; p < 3; p++) {
       const b = new TextBlock(para + ' ' + para);
-      b.fontName = StandardFonts.Helvetica;
-      b.fontSize = 11;
-      b.textColor = Color.slate600;
       b.margin = new Thickness(0, 0, 0, 12);
       doc.add(b);
     }

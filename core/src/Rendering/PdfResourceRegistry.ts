@@ -218,6 +218,12 @@ export class PdfResourceRegistry {
       return fontInfo?.font;
     }
 
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      return this.embeddedFonts.get(virtualKey)!.font;
+    }
+
     if (this.fontAliasMap.has(fontIdentifier)) {
       const ttfPath = this.fontAliasMap.get(fontIdentifier)!;
       const fontInfo = this.getEmbeddedFont(ttfPath);
@@ -231,6 +237,13 @@ export class PdfResourceRegistry {
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       const fontInfo = this.getEmbeddedFont(fontIdentifier);
       fontInfo?.tracker?.markUsedText?.(text);
+      return;
+    }
+
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      this.embeddedFonts.get(virtualKey)!.tracker?.markUsedText?.(text);
       return;
     }
 
@@ -325,6 +338,9 @@ export class PdfResourceRegistry {
       // Skip aliased entries (they're written under their canonical TTF path)
       if (this.fontAliasMap.has(fontIdentifier)) continue;
 
+      // Skip logical names that have a virtual (bytes-based) entry registered under virtual:<name>
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
+
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
         const fontInfo = this.embeddedFonts.get(fontIdentifier);
         if (fontInfo && fontInfo.font) {
@@ -394,6 +410,8 @@ export class PdfResourceRegistry {
     const fontRefs: string[] = [];
     for (const [fontIdentifier, resourceName] of this.fontNameMap) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;
+      // Skip logical names that have a virtual (bytes-based) entry
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
       const objectId = this.fontIdMap.get(fontIdentifier);
       if (objectId) fontRefs.push(`${resourceName} ${objectId} 0 R`);
     }

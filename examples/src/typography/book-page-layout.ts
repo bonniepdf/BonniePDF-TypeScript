@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   VerticalStack,
   Container,
@@ -34,6 +35,7 @@ export function generate(): Document {
   metadata.author = 'Professor Halloway';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate800);
 
   // ── Header ──────────────────────────────────────────────────────────────────
   const header = new VerticalStack();

@@ -121,6 +121,7 @@ export * from './Document';
 export * from './Typography/StandardFonts';
 export * from './Typography/FontWeight';
 export * from './Typography/FontMetrics';
+export * from './Typography/FontManager';
 export * from './Typography/EmbeddedFontInfo';
 export * from './Typography/FontFamilyResolver';
 export * from './Typography/GlyphUsageTracker';

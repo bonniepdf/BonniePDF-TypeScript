@@ -414,11 +414,13 @@ function templatesExamples(): ExampleDef[] {
       id: 'business-invoice',
       name: 'Business Invoice',
       category: 'Templates',
-      description: 'Professional invoice with company branding, line-items table, totals, and payment details.',
+      description:
+        'Professional PDF/UA-1 tagged invoice with company branding, line-items table, totals, and payment details.',
       filename: 'business-invoice.pdf',
       generate: businessInvoice,
       dotnetClass: 'BusinessInvoiceExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'user-directory',

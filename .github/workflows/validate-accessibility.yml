@@ -43,7 +43,8 @@ jobs:
             ghcr.io/verapdf/cli:latest \
             --flavour ua1 \
             --format text \
-            /data/simple-document-tagged.pdf
+            /data/simple-document-tagged.pdf \
+            /data/business-invoice.pdf
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4

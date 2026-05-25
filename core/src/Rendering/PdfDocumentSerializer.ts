@@ -228,11 +228,15 @@ export class PdfDocumentSerializer {
       catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
     }
 
-    // 11. Write PDF/A output intents — only if no unembedded standard-14 fonts (this feature §6.3.4)
+    // 11. Write PDF/A output intents.
+    // this feature guard (§6.3.4): for PDF/A, suppress the OutputIntent (and the pdfaid XMP claim)
+    // when standard-14 fonts are not embedded — the claim would be dishonest.
+    // For PDF/UA-1 the OutputIntent is needed for colour management regardless of font
+    // embedding status (font embedding is a separate §6.3.4 violation on its own).
     const needsOutputIntent =
-      (settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1) &&
       settings.version === PdfVersion.Pdf17 &&
-      !ctx.resources.hasNonEmbeddedStandardFont();
+      ((settings.pdfAEnabled && !ctx.resources.hasNonEmbeddedStandardFont()) ||
+        (settings.accessibility === AccessibilityMode.PdfUa1 && !settings.pdfAEnabled));
     if (needsOutputIntent) {
       const complianceWriter = new ComplianceWriter(writer);
       catalogOptions.pdfAEnabled = true;

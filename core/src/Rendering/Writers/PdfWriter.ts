@@ -11,6 +11,7 @@ import { DocumentSettings } from '../../Configuration/DocumentSettings';
 import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
 import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
 import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
+import { SRgbIccProfile } from '../../Metadata/SRgbIccProfile';
 
 /**
  * Build the list of conformance-namespace blocks the document claims,
@@ -913,12 +914,9 @@ export class ComplianceWriter {
   ) {}
 
   public writeIccProfile(id: number): void {
-    // sRGB ICC profile generation deferred to Session 4
-    const dict = new Map<string, string>([
-      ['/N', '3'],
-      ['/Filter', '/FlateDecode'],
-    ]);
-    this.writer.writeBinaryObject(id, dict, new Uint8Array(0));
+    const iccData = SRgbIccProfile.generate();
+    const dict = new Map<string, string>([['/N', '3']]);
+    this.writer.writeBinaryObject(id, dict, iccData);
   }
 
   public writeOutputIntent(id: number, iccProfileId: number): void {
@@ -935,7 +933,9 @@ export class ComplianceWriter {
   }
 
   public async writeIccProfileAsync(id: number): Promise<void> {
-    this.writeIccProfile(id);
+    const iccData = SRgbIccProfile.generate();
+    const dict = new Map<string, string>([['/N', '3']]);
+    await this.asyncWriter!.writeBinaryObjectAsync(id, dict, iccData, iccData.length);
   }
 
   public async writeOutputIntentAsync(id: number, iccProfileId: number): Promise<void> {

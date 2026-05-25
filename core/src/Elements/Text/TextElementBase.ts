@@ -23,37 +23,71 @@ export abstract class TextElementBase extends ElementBase {
    */
   public static readonly CurrentPageToken = '{{CurrentPage}}';
 
+  // ── Font properties (backing fields + explicit-set tracking) ─────────────
+
   public fontFamily?: string;
   public weight: FontWeight = FontWeight.Normal;
   public isItalic = false;
   public fontName: string = StandardFonts.Helvetica;
 
+  /** True once user code explicitly sets any font-related property. */
+  private _fontExplicit = false;
+
   constructor() {
     super();
-    // Apply default style if set in the ambient context
-    // TypeScript doesn't have AsyncLocal, so this would need to be handled differently
   }
 
-  protected applyDefaultStyle(style: TextStyle): void {
-    if (style.fontFamily !== undefined) {
-      this.fontFamily = style.fontFamily;
-    }
-    if (style.weight !== FontWeight.Normal) {
-      this.weight = style.weight;
-    }
-    if (style.italic) {
-      this.isItalic = true;
-    }
-    if (style.fontSize !== undefined) {
-      this.fontSize = style.fontSize;
-    }
-    if (style.color !== undefined) {
-      this.textColor = style.color;
-    }
-    if (style.decoration !== TextDecoration.None) {
-      this.textDecoration = style.decoration;
-    }
+  // ── Nullable backing fields for cascade-aware properties ─────────────────
+
+  private _fontSize?: number;
+  private _textColor?: Color;
+  private _lineHeightMultiplier?: number;
+  private _textDecoration?: TextDecoration;
+
+  /**
+   * Font size for text rendering. Defaults to 12 if not set.
+   * Setting this marks the property as explicitly set, preventing cascade override.
+   */
+  public get fontSize(): number {
+    return this._fontSize ?? 12;
   }
+  public set fontSize(value: number) {
+    this._fontSize = value;
+  }
+
+  /**
+   * Text color for rendering. Defaults to black if not set.
+   * Setting this marks the property as explicitly set, preventing cascade override.
+   */
+  public get textColor(): Color {
+    return this._textColor ?? Color.black;
+  }
+  public set textColor(value: Color) {
+    this._textColor = value;
+  }
+
+  /**
+   * Text decoration (underline, strikethrough, or both). Defaults to None if not set.
+   */
+  public get textDecoration(): TextDecoration {
+    return this._textDecoration ?? TextDecoration.None;
+  }
+  public set textDecoration(value: TextDecoration) {
+    this._textDecoration = value;
+  }
+
+  /**
+   * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
+   * Setting this marks the property as explicitly set, preventing cascade override.
+   */
+  public get lineHeightMultiplier(): number {
+    return this._lineHeightMultiplier ?? 1.2;
+  }
+  public set lineHeightMultiplier(value: number) {
+    this._lineHeightMultiplier = value;
+  }
+
+  // ── Smart font getters/setters (mark _fontExplicit on assignment) ─────────
 
   /**
    * Font family name (e.g. "Helvetica", "Times", "Arial") for weight/italic resolution.
@@ -66,6 +100,7 @@ export abstract class TextElementBase extends ElementBase {
 
   public set FontFamily(value: string | undefined) {
     this.fontFamily = value;
+    this._fontExplicit = true;
     if (value !== undefined) {
       this.resolveFontName();
     }
@@ -82,6 +117,7 @@ export abstract class TextElementBase extends ElementBase {
 
   public set Weight(value: FontWeight) {
     this.weight = value;
+    this._fontExplicit = true;
     this.resolveFontName();
   }
 
@@ -96,6 +132,7 @@ export abstract class TextElementBase extends ElementBase {
 
   public set IsItalic(value: boolean) {
     this.isItalic = value;
+    this._fontExplicit = true;
     this.resolveFontName();
   }
 
@@ -111,23 +148,71 @@ export abstract class TextElementBase extends ElementBase {
 
   public set FontName(value: string) {
     this.fontName = value;
-    this.fontFamily = undefined; // Direct font name bypasses family resolution
+    this.fontFamily = undefined;
+    this._fontExplicit = true;
+  }
+
+  // ── Cascade application ───────────────────────────────────────────────────
+
+  /**
+   * Applies style properties from `style` only for properties that have not
+   * been explicitly set by user code. Called by Document.generateBytes() when
+   * DocumentSettings.defaultTextStyle is set.
+   *
+   * Writes directly to backing fields so it does NOT mark properties as
+   * "explicitly set" — a second call (e.g. after updating defaultTextStyle)
+   * can still override cascade values.
+   */
+  public applyDefaultStyleIfNotSet(style: TextStyle): void {
+    // Font: only apply if user hasn't touched any font property
+    if (!this._fontExplicit) {
+      if (style.fontFamily !== undefined) {
+        this.fontFamily = style.fontFamily;
+        if (style.weight !== FontWeight.Normal) this.weight = style.weight;
+        if (style.italic) this.isItalic = true;
+        this.resolveFontName();
+      }
+    }
+    if (this._fontSize === undefined && style.fontSize !== undefined) {
+      this._fontSize = style.fontSize;
+    }
+    if (this._textColor === undefined && style.color !== undefined) {
+      this._textColor = style.color;
+    }
+    if (this._lineHeightMultiplier === undefined && style.lineHeightMultiplier !== undefined) {
+      this._lineHeightMultiplier = style.lineHeightMultiplier;
+    }
+    if (this._textDecoration === undefined && style.decoration !== TextDecoration.None) {
+      this._textDecoration = style.decoration;
+    }
   }
 
   /**
-   * Font size for text rendering
+   * (Legacy path used by subclasses.) Unconditionally applies a default style —
+   * marks all set properties as explicit so cascade won't re-override them.
    */
-  public fontSize: number = 12;
+  protected applyDefaultStyle(style: TextStyle): void {
+    if (style.fontFamily !== undefined) {
+      this.FontFamily = style.fontFamily; // goes through setter → _fontExplicit = true
+    }
+    if (style.weight !== FontWeight.Normal) {
+      this.Weight = style.weight;
+    }
+    if (style.italic) {
+      this.IsItalic = true;
+    }
+    if (style.fontSize !== undefined) {
+      this.fontSize = style.fontSize;
+    }
+    if (style.color !== undefined) {
+      this.textColor = style.color;
+    }
+    if (style.decoration !== TextDecoration.None) {
+      this.textDecoration = style.decoration;
+    }
+  }
 
-  /**
-   * TextBlock color for rendering
-   */
-  public textColor: Color = Color.black;
-
-  /**
-   * Text decoration (underline, strikethrough, or both)
-   */
-  public textDecoration: TextDecoration = TextDecoration.None;
+  // ── Font resolution ───────────────────────────────────────────────────────
 
   /**
    * Resolves FontName from FontFamily + Weight + IsItalic via FontFamilyResolver.
@@ -139,18 +224,16 @@ export abstract class TextElementBase extends ElementBase {
     this.fontName = FontFamilyResolver.resolve(family, this.weight, this.isItalic);
   }
 
-  /**
-   * Multiplier applied to font size to compute line height. Default is 1.2.
-   * Set to a value like 1.5 for looser leading or 1.0 for tight leading.
-   */
-  public lineHeightMultiplier: number = 1.2;
+  // ── Line height ───────────────────────────────────────────────────────────
 
   /**
-   * Line height calculated from font size and LineHeightMultiplier
+   * Line height calculated from font size and lineHeightMultiplier
    */
   protected get lineHeight(): number {
     return this.fontSize * this.lineHeightMultiplier;
   }
+
+  // ── Text measurement and wrapping ─────────────────────────────────────────
 
   /**
    * Computes wrapped lines for text that exceeds the maximum width.

@@ -38,6 +38,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   Color,
   Thickness,
   StandardFonts,
@@ -89,6 +90,7 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('TrueType Font Embedding Demo');
   title.fontName = FONT;

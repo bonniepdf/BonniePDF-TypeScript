@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -50,6 +51,7 @@ export function generate(): Document {
   metadata.subject = 'Lollipop chart example — stems with circular heads, a clear minimal bar alternative';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
   title.fontSize = 24;

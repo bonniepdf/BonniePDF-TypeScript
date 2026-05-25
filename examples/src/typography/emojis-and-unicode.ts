@@ -98,6 +98,7 @@ export function generate(): Document {
   metadata.subject = 'Full Unicode range including supplementary planes';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // Title
   const title = new TextBlock('Emoji & Supplementary Unicode Support');

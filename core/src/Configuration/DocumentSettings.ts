@@ -6,6 +6,7 @@ import { PdfVersion } from './PdfVersion';
 import { BookmarkItem } from './BookmarkItem';
 import { WatermarkSettings } from './WatermarkSettings';
 import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
+import type { TextStyle } from '../Elements/Text/TextStyle';
 
 interface _LocalIElement {
   getPreferredWidth(): number;
@@ -105,6 +106,19 @@ export class DocumentSettings {
    * When null, no watermark is rendered.
    */
   public watermark?: WatermarkSettings;
+  /**
+   * Default text style applied to all text elements that have not had their style
+   * properties explicitly set. Use this to define a document-wide font/size/color
+   * baseline and avoid repeating style assignments on every element.
+   *
+   * ```typescript
+   * doc.settings.defaultTextStyle = new TextStyle()
+   *   .withFamily('Helvetica')
+   *   .withSize(11)
+   *   .withColor(Color.slate600);
+   * ```
+   */
+  public defaultTextStyle?: TextStyle;
   /**
    * Gets or sets the encryption settings for the document.
    * When null, the document is not encrypted.

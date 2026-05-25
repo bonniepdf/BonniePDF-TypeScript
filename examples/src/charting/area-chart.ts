@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -51,6 +52,7 @@ export function generate(): Document {
   metadata.subject = 'Area chart example — filled area under the line with configurable opacity';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Area Chart: Monthly Sales Performance');
   title.fontSize = 24;

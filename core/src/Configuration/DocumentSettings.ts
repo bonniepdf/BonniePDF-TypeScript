@@ -7,6 +7,7 @@ import { BookmarkItem } from './BookmarkItem';
 import { WatermarkSettings } from './WatermarkSettings';
 import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
 import type { TextStyle } from '../Elements/Text/TextStyle';
+import { AccessibilityMode } from './AccessibilityMode';
 
 interface _LocalIElement {
   getPreferredWidth(): number;

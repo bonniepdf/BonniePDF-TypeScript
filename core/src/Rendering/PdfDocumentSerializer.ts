@@ -58,7 +58,7 @@ export class PdfDocumentSerializer {
     // 2. Initialize render context (inject pre-loaded resources when available)
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
-    ctx.pdfAEnabled = settings.pdfAEnabled;
+    ctx.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
 
     // PDF/UA tagging context — shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
@@ -229,7 +229,11 @@ export class PdfDocumentSerializer {
     }
 
     // 11. Write PDF/A output intents — only if no unembedded standard-14 fonts (this feature §6.3.4)
-    if (settings.pdfAEnabled && settings.version === PdfVersion.Pdf17 && !ctx.resources.hasNonEmbeddedStandardFont()) {
+    const needsOutputIntent =
+      (settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1) &&
+      settings.version === PdfVersion.Pdf17 &&
+      !ctx.resources.hasNonEmbeddedStandardFont();
+    if (needsOutputIntent) {
       const complianceWriter = new ComplianceWriter(writer);
       catalogOptions.pdfAEnabled = true;
       const iccProfileId = writer.getNewId();
@@ -328,7 +332,7 @@ export class PdfDocumentSerializer {
 
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
-    preRegistry.pdfAEnabled = settings.pdfAEnabled;
+    preRegistry.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
     for (const path of embeddedPaths) {
       preRegistry.registerFont(path); // registers with font=null initially
     }

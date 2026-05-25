@@ -5,6 +5,7 @@ import {
   PdfSize,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   VerticalStack,
   Container,
@@ -117,6 +118,7 @@ export function generate(): Document {
   metadata.author = 'Studio Eleven';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(TextMedium);
   const mainStack = new VerticalStack();
 
   // ── Green accent bar ──────────────────────────────────────────────────────

@@ -6,6 +6,7 @@ import {
   PdfVersion,
   WatermarkSettings,
   TextBlock,
+  TextStyle,
   TextAlignment,
   Color,
   Thickness,
@@ -23,6 +24,7 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Page 1: Title page ──
   const title = new TextBlock('Project Proposal');

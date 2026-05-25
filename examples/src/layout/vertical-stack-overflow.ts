@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   VerticalStack,
   Color,
   Thickness,
@@ -21,6 +22,7 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates VerticalStack flowing across page boundaries';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
   const title = new TextBlock('Item Catalog');
   title.fontName = StandardFonts.HelveticaBold;
@@ -30,7 +32,6 @@ export function generate(): Document {
   doc.add(title);
 
   const sub = new TextBlock('A collection of items demonstrating automatic pagination');
-  sub.fontName = StandardFonts.Helvetica;
   sub.fontSize = 12;
   sub.textColor = Color.slate500;
   sub.margin = new Thickness(0, 0, 0, 20);
@@ -53,9 +54,6 @@ export function generate(): Document {
     const itemDesc = new TextBlock(
       `This is the description for item ${i}. It contains some details about what this item represents and why it's important.`
     );
-    itemDesc.fontName = StandardFonts.Helvetica;
-    itemDesc.fontSize = 10;
-    itemDesc.textColor = Color.slate600;
     itemStack.addChild(itemDesc);
 
     stack.addChild(itemStack);

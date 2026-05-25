@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -66,6 +67,7 @@ export function generate(): Document {
   metadata.subject = 'Pie / donut chart example — monthly sales breakdown with legend and centre total';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock(`Pie Chart: Monthly Sales ${year}`);
   title.fontSize = 24;

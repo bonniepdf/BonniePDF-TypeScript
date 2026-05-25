@@ -15,6 +15,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   Heading,
   VisualToc,
@@ -238,6 +239,7 @@ export function generate(): Document {
   metadata.subject = 'Project Gutenberg eBook #98 — A public domain classic.';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   // ── Title page ─────────────────────────────────────────────────────────
   addTitlePage(doc);

@@ -5,6 +5,7 @@ import {
   PdfVersion,
   ZoomLevel,
   TextBlock,
+  TextStyle,
   Hyperlink,
   Color,
   Thickness,
@@ -24,6 +25,7 @@ export function generate(): Document {
   metadata.subject = 'Demonstrating hyperlink support in PDFs';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
 
   // ── Title ──
   const title = new TextBlock('Hyperlink Support Demo');

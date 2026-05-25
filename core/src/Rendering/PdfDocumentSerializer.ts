@@ -149,8 +149,8 @@ export class PdfDocumentSerializer {
       catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
     }
 
-    // 11. Write PDF/A output intents for PDF 1.7 + pdfA
-    if (settings.pdfAEnabled && settings.version === PdfVersion.Pdf17) {
+    // 11. Write PDF/A output intents — only if no unembedded standard-14 fonts (this feature §6.3.4)
+    if (settings.pdfAEnabled && settings.version === PdfVersion.Pdf17 && !ctx.resources.hasNonEmbeddedStandardFont()) {
       const complianceWriter = new ComplianceWriter(writer);
       catalogOptions.pdfAEnabled = true;
       const iccProfileId = writer.getNewId();

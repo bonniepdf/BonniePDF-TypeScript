@@ -8,6 +8,8 @@ import { ImageWriter } from './Images/ImageWriter';
 import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
+import { FontManager } from '../Typography/FontManager';
+import { FontMetrics } from '../Typography/FontMetrics';
 
 export class PdfResourceRegistry {
   private fontCounter = 0;
@@ -25,11 +27,31 @@ export class PdfResourceRegistry {
   public deferredXObjects: Map<string, DeferredXObjectInfo> = new Map();
 
   public registerFont(fontIdentifier: string): string {
+    // (A) Direct TTF/OTF path
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       return this.registerEmbeddedFont(fontIdentifier);
     }
 
+    // (B) Already registered as a virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      return this.embeddedFonts.get(virtualKey)!.resourceName;
+    }
+
     if (this.pdfAEnabled) {
+      // (C1) Try FontManager bytes
+      const bytes = FontManager.getBytesForStandardFont(fontIdentifier);
+      if (bytes) {
+        const resourceName = this.registerEmbeddedFontFromBytes(bytes, virtualKey);
+        this.fontNameMap.set(fontIdentifier, resourceName);
+        // Register font instance for accurate measurement
+        const info = this.embeddedFonts.get(virtualKey);
+        if (info?.font) {
+          FontMetrics.registerFontInstance(fontIdentifier, info.font as TtfFont);
+        }
+        return resourceName;
+      }
+      // (C2) File-based TTF resolution (existing logic)
       const ttfPath = this.resolveStandardFontToTtf(fontIdentifier);
       if (ttfPath) {
         const resourceName = this.registerEmbeddedFont(ttfPath);
@@ -39,6 +61,7 @@ export class PdfResourceRegistry {
       }
     }
 
+    // (D) Standard type-1 font (not embedded)
     if (!this.fontNameMap.has(fontIdentifier)) {
       this.fontCounter++;
       const value = `/F${this.fontCounter}`;
@@ -49,7 +72,11 @@ export class PdfResourceRegistry {
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {
-    return fontIdentifier.toLowerCase().endsWith('.ttf') || fontIdentifier.toLowerCase().endsWith('.otf');
+    return (
+      fontIdentifier.toLowerCase().endsWith('.ttf') ||
+      fontIdentifier.toLowerCase().endsWith('.otf') ||
+      fontIdentifier.startsWith('virtual:')
+    );
   }
 
   public getEmbeddedFont(filePath: string): EmbeddedFontInfo | null {
@@ -116,6 +143,61 @@ export class PdfResourceRegistry {
     await Promise.all(paths.map(p => this.preloadEmbeddedFont(p)));
   }
 
+  private registerEmbeddedFontFromBytes(bytes: Uint8Array, key: string): string {
+    if (!this.embeddedFonts.has(key)) {
+      let font: TtfFont | null = null;
+      let tracker: GlyphUsageTracker | null = null;
+      try {
+        font = TtfFont.loadFromBytes(bytes);
+        tracker = new GlyphUsageTracker(font);
+      } catch (err) {
+        console.warn(`[BonniePDF] Could not load font from bytes for key "${key}": ${(err as Error).message}`);
+      }
+      this.fontCounter++;
+      const resourceName = `/F${this.fontCounter}`;
+      const subsetPrefix = this.generateSubsetPrefix();
+      const info = new EmbeddedFontInfo();
+      info.font = font;
+      info.tracker = tracker;
+      info.subsetPrefix = subsetPrefix;
+      info.resourceName = resourceName;
+      info.type0ObjectId = 0;
+      this.embeddedFonts.set(key, info);
+      this.fontNameMap.set(key, resourceName);
+    }
+    return this.embeddedFonts.get(key)!.resourceName;
+  }
+
+  private static readonly STANDARD_FONT_NAMES = new Set([
+    'Helvetica',
+    'Helvetica-Bold',
+    'Helvetica-Oblique',
+    'Helvetica-BoldOblique',
+    'Times-Roman',
+    'Times-Bold',
+    'Times-Italic',
+    'Times-BoldItalic',
+    'Courier',
+    'Courier-Bold',
+    'Courier-Oblique',
+    'Courier-BoldOblique',
+    'Symbol',
+    'ZapfDingbats',
+  ]);
+
+  public hasNonEmbeddedStandardFont(): boolean {
+    for (const [name] of this.fontNameMap) {
+      if (
+        PdfResourceRegistry.STANDARD_FONT_NAMES.has(name) &&
+        !this.embeddedFonts.has(name) &&
+        !this.embeddedFonts.has(`virtual:${name}`)
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private resolveStandardFontToTtf(fontIdentifier: string): string | null {
     // Stub: would resolve to system fonts
     return null;
@@ -136,6 +218,12 @@ export class PdfResourceRegistry {
       return fontInfo?.font;
     }
 
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      return this.embeddedFonts.get(virtualKey)!.font;
+    }
+
     if (this.fontAliasMap.has(fontIdentifier)) {
       const ttfPath = this.fontAliasMap.get(fontIdentifier)!;
       const fontInfo = this.getEmbeddedFont(ttfPath);
@@ -149,6 +237,13 @@ export class PdfResourceRegistry {
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       const fontInfo = this.getEmbeddedFont(fontIdentifier);
       fontInfo?.tracker?.markUsedText?.(text);
+      return;
+    }
+
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      this.embeddedFonts.get(virtualKey)!.tracker?.markUsedText?.(text);
       return;
     }
 
@@ -243,6 +338,9 @@ export class PdfResourceRegistry {
       // Skip aliased entries (they're written under their canonical TTF path)
       if (this.fontAliasMap.has(fontIdentifier)) continue;
 
+      // Skip logical names that have a virtual (bytes-based) entry registered under virtual:<name>
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
+
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
         const fontInfo = this.embeddedFonts.get(fontIdentifier);
         if (fontInfo && fontInfo.font) {
@@ -312,6 +410,8 @@ export class PdfResourceRegistry {
     const fontRefs: string[] = [];
     for (const [fontIdentifier, resourceName] of this.fontNameMap) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;
+      // Skip logical names that have a virtual (bytes-based) entry
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
       const objectId = this.fontIdMap.get(fontIdentifier);
       if (objectId) fontRefs.push(`${resourceName} ${objectId} 0 R`);
     }

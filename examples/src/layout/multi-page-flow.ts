@@ -6,6 +6,7 @@ import {
   PdfSize,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextAlignment,
   Table,
   TableRow,
@@ -138,6 +139,7 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates tables with repeating headers and text overflow';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   // === Section 1: Title ===
   const mainTitle = new TextBlock('Employee Directory & Company Overview');
@@ -167,9 +169,6 @@ export function generate(): Document {
   const tableIntro = new TextBlock(
     'The following table lists all employees across all departments. Headers repeat on each page for easy reference.'
   );
-  tableIntro.fontName = StandardFonts.Helvetica;
-  tableIntro.fontSize = 11;
-  tableIntro.textColor = Color.slate600;
   tableIntro.margin = new Thickness(0, 0, 0, 15);
   doc.add(tableIntro);
 
@@ -238,9 +237,6 @@ export function generate(): Document {
     doc.add(h);
 
     const p = new TextBlock(content);
-    p.fontName = StandardFonts.Helvetica;
-    p.fontSize = 11;
-    p.textColor = Color.slate600;
     p.margin = new Thickness(0, 0, 0, 8);
     doc.add(p);
 
@@ -250,9 +246,6 @@ export function generate(): Document {
         'Through regular assessments and stakeholder engagement, we ensure that our strategies ' +
         'remain relevant and effective in an ever-changing business environment.'
     );
-    detail.fontName = StandardFonts.Helvetica;
-    detail.fontSize = 11;
-    detail.textColor = Color.slate600;
     detail.margin = new Thickness(0, 0, 0, 12);
     doc.add(detail);
   }
@@ -274,9 +267,6 @@ export function generate(): Document {
       'The text sections that follow flow naturally across page boundaries, maintaining readability ' +
       'and professional formatting throughout.'
   );
-  closing.fontName = StandardFonts.Helvetica;
-  closing.fontSize = 11;
-  closing.textColor = Color.slate600;
   closing.margin = new Thickness(0, 0, 0, 20);
   doc.add(closing);
 

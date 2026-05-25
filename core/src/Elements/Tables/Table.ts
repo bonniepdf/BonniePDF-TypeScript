@@ -149,6 +149,11 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     this.rows.push(row);
   }
 
+  /** Returns all rows (headers + data rows + footers) for tree-walking. */
+  public getAllRows(): ReadonlyArray<TableRow> {
+    return [...this.headers, ...this.rows, ...this.footers];
+  }
+
   /**
    * Renders this table with state tracking for pagination.
    * Rows that don't fit on the current page will be continued on the next page.

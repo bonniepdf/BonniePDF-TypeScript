@@ -30,6 +30,12 @@ export class TextStyle {
   public decoration: TextDecoration = TextDecoration.None;
 
   /**
+   * Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).
+   * Set to 1.5 for looser leading or 1.0 for tight leading.
+   */
+  public lineHeightMultiplier?: number;
+
+  /**
    * Resolves the actual PDF font name by combining FontFamily + Weight + Italic
    * through the FontFamilyResolver.
    */
@@ -55,6 +61,7 @@ export class TextStyle {
     merged.color = this.color ?? baseStyle.color;
     merged.backgroundColor = this.backgroundColor ?? baseStyle.backgroundColor;
     merged.decoration = this.decoration !== TextDecoration.None ? this.decoration : baseStyle.decoration;
+    merged.lineHeightMultiplier = this.lineHeightMultiplier ?? baseStyle.lineHeightMultiplier;
 
     return merged;
   }
@@ -135,6 +142,12 @@ export class TextStyle {
   /** Sets the font family */
   public withFamily(family: string): TextStyle {
     this.fontFamily = family;
+    return this;
+  }
+
+  /** Sets the line-height multiplier (e.g. 1.5 for looser leading) */
+  public withLineHeight(multiplier: number): TextStyle {
+    this.lineHeightMultiplier = multiplier;
     return this;
   }
 

@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -51,6 +52,7 @@ export function generate(): Document {
   metadata.subject = 'Bar chart example — monthly sales with vertical bars, grid lines, and value labels';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Bar Chart: Monthly Sales Report');
   title.fontSize = 24;

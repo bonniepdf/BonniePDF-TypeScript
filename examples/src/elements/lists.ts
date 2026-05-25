@@ -3,6 +3,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   OrderedList,
   ListNumberFormat,
   UnorderedList,
@@ -43,6 +44,7 @@ export function generate(): Document {
   const doc = new Document();
   doc.settings.version = PdfVersion.Pdf17;
   doc.settings.pdfAEnabled = true;
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
   doc.metadata.title = metadata.title;
   doc.metadata.author = metadata.author;
 

@@ -9,6 +9,7 @@ import { EncryptionAlgorithm } from './Security/Models/EncryptionAlgorithm';
 import { PdfWriter } from './Rendering/Writers/PdfWriter';
 import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
+import { TextElementBase } from './Elements/Text/TextElementBase';
 
 /**
  * High-level entry point for creating PDF documents.
@@ -130,6 +131,7 @@ export class Document {
    * (AES-256 encryption requires saveAsync).
    */
   public generateBytes(): Uint8Array {
+    this.applyDefaultStyleToTree();
     this.validateSettings();
     const writer = new PdfWriter(this.settings.version);
     const serializer = new PdfDocumentSerializer(this);
@@ -152,6 +154,7 @@ export class Document {
    * browser context.
    */
   public async generateBytesAsync(): Promise<Uint8Array> {
+    this.applyDefaultStyleToTree();
     this.validateSettings();
     const writer = new PdfWriter(this.settings.version);
     const serializer = new PdfDocumentSerializer(this);
@@ -196,6 +199,46 @@ export class Document {
     if (!path) throw new Error('path cannot be null or empty.');
     const bytes = this.generateBytes();
     await getPlatformIO().writeFile(path, bytes);
+  }
+
+  // ─── Default style cascade ────────────────────────────────────────────────────
+
+  private applyDefaultStyleToTree(): void {
+    const style = this.settings.defaultTextStyle;
+    if (!style) return;
+    for (const page of this._pages) {
+      for (const el of page.getElements()) {
+        Document.applyStyleToElement(el, style);
+      }
+    }
+  }
+
+  private static applyStyleToElement(el: any, style: any): void {
+    if (el instanceof TextElementBase) {
+      el.applyDefaultStyleIfNotSet(style);
+    }
+    // Walk VerticalStack / HorizontalStack children (exposed as .Children)
+    if (Array.isArray(el.Children)) {
+      for (const child of el.Children) {
+        Document.applyStyleToElement(child, style);
+      }
+    }
+    // Walk Container.child (singular)
+    if (el.child && typeof el.child.render === 'function') {
+      Document.applyStyleToElement(el.child, style);
+    }
+    // Walk Table rows via getAllRows()
+    if (typeof el.getAllRows === 'function') {
+      for (const row of el.getAllRows()) {
+        if (Array.isArray(row.cells)) {
+          for (const cell of row.cells) {
+            if (cell?.content && typeof cell.content.render === 'function') {
+              Document.applyStyleToElement(cell.content, style);
+            }
+          }
+        }
+      }
+    }
   }
 
   // ─── Validation ──────────────────────────────────────────────────────────────

@@ -9,6 +9,9 @@ export class FontMetrics {
   private static readonly FontPathAliases: Map<string, string> = new Map();
   private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
 
+  /** Bytes-based font instances registered when FontManager provides bytes (no file path available). */
+  private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
+
   /**
    * Registers a logical font name alias pointing to a specific TTF file path.
    * Should be called by PdfResourceRegistry when PDF/A mode maps a standard font to an embedded TTF.

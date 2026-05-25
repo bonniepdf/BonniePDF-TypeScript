@@ -27,8 +27,15 @@ export class PdfResourceRegistry {
   public deferredXObjects: Map<string, DeferredXObjectInfo> = new Map();
 
   public registerFont(fontIdentifier: string): string {
+    // (A) Direct TTF/OTF path
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       return this.registerEmbeddedFont(fontIdentifier);
+    }
+
+    // (B) Already registered as a virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      return this.embeddedFonts.get(virtualKey)!.resourceName;
     }
 
     if (this.pdfAEnabled) {
@@ -58,6 +65,7 @@ export class PdfResourceRegistry {
       }
     }
 
+    // (D) Standard type-1 font (not embedded)
     if (!this.fontNameMap.has(fontIdentifier)) {
       this.fontCounter++;
       const value = `/F${this.fontCounter}`;
@@ -178,7 +186,6 @@ export class PdfResourceRegistry {
       info.subsetPrefix = subsetPrefix;
       info.resourceName = resourceName;
       info.type0ObjectId = 0;
-
       this.embeddedFonts.set(key, info);
       this.fontNameMap.set(key, resourceName);
     }
@@ -206,6 +213,12 @@ export class PdfResourceRegistry {
       return fontInfo?.font;
     }
 
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      return this.embeddedFonts.get(virtualKey)!.font;
+    }
+
     if (this.fontAliasMap.has(fontIdentifier)) {
       const ttfPath = this.fontAliasMap.get(fontIdentifier)!;
       const fontInfo = this.getEmbeddedFont(ttfPath);
@@ -219,6 +232,13 @@ export class PdfResourceRegistry {
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       const fontInfo = this.getEmbeddedFont(fontIdentifier);
       fontInfo?.tracker?.markUsedText?.(text);
+      return;
+    }
+
+    // Check for virtual (bytes-based) font
+    const virtualKey = `virtual:${fontIdentifier}`;
+    if (this.embeddedFonts.has(virtualKey)) {
+      this.embeddedFonts.get(virtualKey)!.tracker?.markUsedText?.(text);
       return;
     }
 
@@ -313,6 +333,9 @@ export class PdfResourceRegistry {
       // Skip aliased entries (they're written under their canonical TTF path)
       if (this.fontAliasMap.has(fontIdentifier)) continue;
 
+      // Skip logical names that have a virtual (bytes-based) entry registered under virtual:<name>
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
+
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
         const fontInfo = this.embeddedFonts.get(fontIdentifier);
         if (fontInfo && fontInfo.font) {
@@ -382,6 +405,8 @@ export class PdfResourceRegistry {
     const fontRefs: string[] = [];
     for (const [fontIdentifier, resourceName] of this.fontNameMap) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;
+      // Skip logical names that have a virtual (bytes-based) entry
+      if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
       const objectId = this.fontIdMap.get(fontIdentifier);
       if (objectId) fontRefs.push(`${resourceName} ${objectId} 0 R`);
     }

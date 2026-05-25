@@ -29,15 +29,14 @@ export class ComplianceWriter {
     if (!this.writer) throw new Error('Sync writer not available');
     const iccData = SRgbIccProfile.generate();
 
-    // Compress the ICC profile
-    const compressed = this.compressData(iccData);
-
+    // Emit uncompressed. .NET uses FlateDecode (ZLibStream) but TS has
+    // no portable zlib in the browser bundle; the spec allows raw
+    // streams here, and the profile is ~500 bytes so compression
+    // would save very little anyway.
     const dict = new Map<string, string>();
     dict.set('/N', '3');
-    dict.set('/Filter', '/FlateDecode');
-    dict.set('/Length1', iccData.length.toString());
 
-    this.writer.writeBinaryObject(id, dict, compressed);
+    this.writer.writeBinaryObject(id, dict, iccData);
   }
 
   /**
@@ -49,14 +48,11 @@ export class ComplianceWriter {
   async writeIccProfileAsync(id: number, cancellationToken?: AbortSignal): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not available');
     const iccData = SRgbIccProfile.generate();
-    const compressed = this.compressData(iccData);
 
     const dict = new Map<string, string>();
     dict.set('/N', '3');
-    dict.set('/Filter', '/FlateDecode');
-    dict.set('/Length1', iccData.length.toString());
 
-    await this.asyncWriter.writeBinaryObjectAsync(id, dict, compressed, compressed.length, cancellationToken);
+    await this.asyncWriter.writeBinaryObjectAsync(id, dict, iccData, iccData.length, cancellationToken);
   }
 
   /**
@@ -96,11 +92,7 @@ export class ComplianceWriter {
     await this.asyncWriter.writeObjectAsync(id, dict, undefined, cancellationToken);
   }
 
-  private compressData(data: Uint8Array): Uint8Array {
-    // Use zlib compression if available, otherwise return uncompressed
-    // This is a stub - real implementation would use zlib/pako
-    return data;
-  }
+  // (compressData removed — we emit ICC streams uncompressed.)
 }
 
 // Constructor overloads

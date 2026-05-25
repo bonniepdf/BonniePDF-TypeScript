@@ -39,24 +39,28 @@ export class PdfResourceRegistry {
     }
 
     if (this.pdfAEnabled) {
-      // (C1) Try FontManager bytes
+      // 1. Try FontManager (bytes-based — works in all environments)
       const bytes = FontManager.getBytesForStandardFont(fontIdentifier);
       if (bytes) {
+        const virtualKey = `virtual:${fontIdentifier}`;
         const resourceName = this.registerEmbeddedFontFromBytes(bytes, virtualKey);
         this.fontNameMap.set(fontIdentifier, resourceName);
-        // Register font instance for accurate measurement
+        this.fontAliasMap.set(fontIdentifier, virtualKey);
+        // Register the TtfFont instance (not a file path) so FontMetrics can measure accurately.
         const info = this.embeddedFonts.get(virtualKey);
-        if (info?.font) {
-          FontMetrics.registerFontInstance(fontIdentifier, info.font as TtfFont);
+        if (info?.font instanceof TtfFont) {
+          FontMetrics.registerFontInstance(fontIdentifier, info.font);
         }
         return resourceName;
       }
-      // (C2) File-based TTF resolution (existing logic)
+
+      // 2. Legacy: file-path based resolution (Node.js, system fonts)
       const ttfPath = this.resolveStandardFontToTtf(fontIdentifier);
       if (ttfPath) {
         const resourceName = this.registerEmbeddedFont(ttfPath);
         this.fontNameMap.set(fontIdentifier, resourceName);
         this.fontAliasMap.set(fontIdentifier, ttfPath);
+        FontMetrics.registerFontAlias(fontIdentifier, ttfPath);
         return resourceName;
       }
     }
@@ -72,11 +76,8 @@ export class PdfResourceRegistry {
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {
-    return (
-      fontIdentifier.toLowerCase().endsWith('.ttf') ||
-      fontIdentifier.toLowerCase().endsWith('.otf') ||
-      fontIdentifier.startsWith('virtual:')
-    );
+    const lower = fontIdentifier.toLowerCase();
+    return lower.endsWith('.ttf') || lower.endsWith('.otf') || lower.startsWith('virtual:');
   }
 
   public getEmbeddedFont(filePath: string): EmbeddedFontInfo | null {
@@ -119,6 +120,27 @@ export class PdfResourceRegistry {
   }
 
   /**
+   * Reports whether this document will end up emitting any
+   * non-embedded standard-14 Type1 font reference (Helvetica,
+   * Times-*, Courier-*, Symbol, ZapfDingbats). Such references are
+   * **forbidden by PDF/A-1b §6.3.4**, so when this returns `true`
+   * the serializer suppresses the PDF/A conformance claim rather
+   * than emitting an invalid one.
+   *
+   * Mirrors what {@link writeResources} does — anything that won't
+   * be aliased to a TTF and isn't already an embedded-font path will
+   * be written via `writeType1Font` (non-embedded).
+   */
+  public hasNonEmbeddedStandardFont(): boolean {
+    for (const fontIdentifier of this.fontNameMap.keys()) {
+      if (this.fontAliasMap.has(fontIdentifier)) continue;
+      if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) continue;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Loads the actual TtfFont bytes for a previously registered embedded font path.
    * Must be called (and awaited) before rendering begins so that glyph metrics and
    * tracking are available during layout and content-stream generation.
@@ -151,11 +173,13 @@ export class PdfResourceRegistry {
         font = TtfFont.loadFromBytes(bytes);
         tracker = new GlyphUsageTracker(font);
       } catch (err) {
-        console.warn(`[BonniePDF] Could not load font from bytes for key "${key}": ${(err as Error).message}`);
+        console.warn(`[BonniePDF] Could not parse font bytes for "${key}": ${(err as Error).message}`);
       }
+
       this.fontCounter++;
       const resourceName = `/F${this.fontCounter}`;
       const subsetPrefix = this.generateSubsetPrefix();
+
       const info = new EmbeddedFontInfo();
       info.font = font;
       info.tracker = tracker;
@@ -165,41 +189,12 @@ export class PdfResourceRegistry {
       this.embeddedFonts.set(key, info);
       this.fontNameMap.set(key, resourceName);
     }
-    return this.embeddedFonts.get(key)!.resourceName;
+
+    return this.fontNameMap.get(key)!;
   }
 
-  private static readonly STANDARD_FONT_NAMES = new Set([
-    'Helvetica',
-    'Helvetica-Bold',
-    'Helvetica-Oblique',
-    'Helvetica-BoldOblique',
-    'Times-Roman',
-    'Times-Bold',
-    'Times-Italic',
-    'Times-BoldItalic',
-    'Courier',
-    'Courier-Bold',
-    'Courier-Oblique',
-    'Courier-BoldOblique',
-    'Symbol',
-    'ZapfDingbats',
-  ]);
-
-  public hasNonEmbeddedStandardFont(): boolean {
-    for (const [name] of this.fontNameMap) {
-      if (
-        PdfResourceRegistry.STANDARD_FONT_NAMES.has(name) &&
-        !this.embeddedFonts.has(name) &&
-        !this.embeddedFonts.has(`virtual:${name}`)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private resolveStandardFontToTtf(fontIdentifier: string): string | null {
-    // Stub: would resolve to system fonts
+  private resolveStandardFontToTtf(_fontIdentifier: string): string | null {
+    // FontManager covers all cases via bytes — this is a fallback for direct file paths.
     return null;
   }
 

@@ -3,11 +3,14 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { ImageInfo } from '../../Rendering/Images/ImageInfo';
 import { ImageLoader } from '../../Rendering/Images/ImageLoader';
 import { ImageFitMode } from './ImageFitMode';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * An image element that displays JPEG or PNG images in the PDF
  */
-export class Image extends ElementBase {
+export class Image extends ElementBase implements IRoleProvider, IAltTextProvider {
   private cachedInfo: ImageInfo | undefined;
 
   /**
@@ -19,6 +22,26 @@ export class Image extends ElementBase {
    * Raw image data (mutually exclusive with filePath)
    */
   imageData: Uint8Array = new Uint8Array(0);
+
+  /**
+   * Alternate text description for accessibility. When the document opts
+   * into `AccessibilityMode.PdfUa1`, this populates the `/Alt` entry on
+   * the structure element wrapping the image. Required by PDF/UA for
+   * non-decorative figures.
+   */
+  altText: string = '';
+
+  /**
+   * When `true`, the image is purely decorative and is tagged as
+   * `/Artifact` with no alt-text warning. Set explicitly for decorative
+   * borders, dividers, and background imagery.
+   */
+  isDecorative: boolean = false;
+
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
+  }
 
   /**
    * Desired display width in points (null = auto)

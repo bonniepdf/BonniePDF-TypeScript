@@ -6,6 +6,8 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * Renders a visual Table of Contents with dotted leaders and right-aligned page numbers,
@@ -13,7 +15,12 @@ import { Color } from '../../Core/Color';
  * Supports multi-page overflow via IStatefulElement so that very long
  * tables of contents flow naturally across page boundaries.
  */
-export class VisualToc extends ElementBase implements IStatefulElement {
+export class VisualToc extends ElementBase implements IStatefulElement, IRoleProvider {
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return SemanticRole.TOC;
+  }
+
   /**
    * Gets or sets the ordered list of TOC identifiers to render.
    * Each identifier must match the Heading.TocIdentifier of a rendered heading.
@@ -60,7 +67,7 @@ export class VisualToc extends ElementBase implements IStatefulElement {
     const lineHeight = this.fontSize * 1.2;
 
     for (let i = 0; i < this.headingIdentifiers.length; i++) {
-      this.drawTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
+      this.drawTaggedTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
       y += lineHeight;
     }
 
@@ -102,7 +109,7 @@ export class VisualToc extends ElementBase implements IStatefulElement {
     const endIndex = startIndex + itemsThatFit;
     let y = startY;
     for (let i = startIndex; i < endIndex; i++) {
-      this.drawTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
+      this.drawTaggedTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
       y += lineHeight;
     }
 
@@ -122,6 +129,31 @@ export class VisualToc extends ElementBase implements IStatefulElement {
    * and the resolved page number on the right. Also registers a clickable hyperlink annotation
    * spanning the full line width so the user can navigate directly to the heading.
    */
+  /**
+   * wraps drawTocEntry in a /TOCI struct element + marked-content
+   * scope so each entry is its own addressable item in the PDF/UA
+   * structure tree. The outer /TOC wrap comes from the pipeline's
+   * IRoleProvider hook using {@link semanticRole}. No-op when tagging
+   * is off.
+   */
+  private drawTaggedTocEntry(ctx: RenderContext, identifier: string, contentWidth: number, y: number): void {
+    const tagging = ctx.tagging;
+    const tagThisEntry = tagging != null;
+    if (tagThisEntry) {
+      tagging!.tree.begin(SemanticRole.TOCI);
+      ctx.canvas.beginMarkedContent('TOCI');
+    }
+
+    try {
+      this.drawTocEntry(ctx, identifier, contentWidth, y);
+    } finally {
+      if (tagThisEntry) {
+        ctx.canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
+  }
+
   private drawTocEntry(ctx: RenderContext, identifier: string, contentWidth: number, y: number): void {
     let pageNumStr = 'XX';
     if (ctx.tocEntries.has(identifier)) {

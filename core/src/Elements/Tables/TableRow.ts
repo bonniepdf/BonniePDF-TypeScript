@@ -2,11 +2,18 @@ import { IElement } from '../IElement';
 import { IBackgroundColor } from '../Layout/IBackgroundColor';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A table row with support for custom styling and background color
  */
-export class TableRow implements IElement, IBackgroundColor {
+export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return SemanticRole.TR;
+  }
+
   /** The cells in this row */
   public cells!: TableCell[];
 

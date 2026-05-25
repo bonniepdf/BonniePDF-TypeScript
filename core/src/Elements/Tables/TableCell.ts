@@ -5,11 +5,13 @@ import { Thickness } from '../../Core/Thickness';
 import { Border } from '../../Core/Border';
 import { BorderColors } from '../../Core/BorderColors';
 import { Color } from '../../Core/Color';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A table cell with support for custom styling, background color, and padding overrides
  */
-export class TableCell extends BorderedElementBase {
+export class TableCell extends BorderedElementBase implements IRoleProvider {
   /** The content element to display in this cell */
   public content!: IElement;
 
@@ -21,6 +23,21 @@ export class TableCell extends BorderedElementBase {
 
   /** Number of columns this cell spans (default: 1) */
   public columnSpan = 1;
+
+  /**
+   * Whether this cell is a header cell (renders as `/TH` in PDF/UA
+   * tagged output instead of `/TD`). Set automatically by
+   * `Table.addHeader*` on each cell in a header row, and at render
+   * time from the owning row's `isHeader` flag for cells added
+   * directly to a row. Can also be set explicitly for individual
+   * cells acting as headers (e.g. first-column row labels).
+   */
+  public isHeader = false;
+
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return this.isHeader ? SemanticRole.TH : SemanticRole.TD;
+  }
 
   protected override measureContentHeight(contentWidth: number): number {
     const pad = this.padding ?? new Thickness(5);

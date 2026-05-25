@@ -33,4 +33,6 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# CI-generated PDFs (output of scripts/generate-tagged-pdfs.ts)
 generated-pdfs/

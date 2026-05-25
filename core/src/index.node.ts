@@ -5,7 +5,8 @@ import * as path from 'path';
 
 configurePlatform(new NodePlatformIO());
 
-// Auto-register bundled Liberation fonts for zero-config PDF/A on Node.js
+// Auto-register bundled Liberation fonts so pdfAEnabled: true works
+// without the caller having to supply font files.
 const bundledFontsDir = path.join(__dirname, '../assets/fonts');
 FontManager.autoRegisterBundledFonts(bundledFontsDir);
 

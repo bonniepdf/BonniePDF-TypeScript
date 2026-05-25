@@ -35,4 +35,24 @@ export class CatalogOptions {
    * The named destinations dictionary object ID (0 if none).
    */
   destsId: number = 0;
+
+  /**
+   * The structure tree root object ID (0 if none). Set when the document
+   * opts into PDF/UA tagging.
+   */
+  structTreeRootId: number = 0;
+
+  /**
+   * Whether the document carries a structure tree and should claim to be
+   * tagged in the catalog. When true the catalog emits
+   * `/MarkInfo <</Marked true>>` regardless of {@link pdfAEnabled}
+   * (the two flags are orthogonal).
+   */
+  tagged: boolean = false;
+
+  /**
+   * BCP-47 language tag for the document (e.g. `"en-GB"`). When non-empty,
+   * emitted as `/Lang` on the catalog. Required by PDF/UA-1.
+   */
+  language?: string;
 }

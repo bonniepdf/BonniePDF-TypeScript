@@ -7,6 +7,7 @@ import { TtfFont } from './TrueType/TtfFont';
 export class FontMetrics {
   private static readonly TtfCache: Map<string, number[]> = new Map();
   private static readonly FontPathAliases: Map<string, string> = new Map();
+  private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
 
   /** Bytes-based font instances registered when FontManager provides bytes (no file path available). */
   private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
@@ -24,8 +25,9 @@ export class FontMetrics {
   }
 
   /**
-   * Registers a TtfFont instance for accurate width measurement.
-   * Used when a font is loaded from bytes (FontManager) rather than a file path.
+   * Registers a logical font name alias pointing to an already-parsed TtfFont.
+   * Used when the font was loaded from bytes (e.g., bundled Liberation Sans) rather
+   * than a file path, so file-based caching is bypassed entirely.
    */
   public static registerFontInstance(logicalName: string, font: TtfFont): void {
     this.FontInstanceAliases.set(logicalName, font);
@@ -62,13 +64,13 @@ export class FontMetrics {
       return this.getTtfWidth(text, fontIdentifier, fontSize);
     }
 
-    // B1. IS IT A REGISTERED FONT INSTANCE (bytes-loaded)?
-    const instanceFont = this.FontInstanceAliases.get(fontIdentifier);
-    if (instanceFont) {
-      return this.getKernedStringWidth(text, instanceFont, fontSize);
+    // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
+    const fontInstance = this.FontInstanceAliases.get(fontIdentifier);
+    if (fontInstance) {
+      return this.getKernedStringWidth(text, fontInstance, fontSize);
     }
 
-    // B. IS IT A REGISTERED ALIAS TO A TTF FILE?
+    // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
     // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
     // measure using the actual TTF metrics so layout matches rendering.
     const ttfPath = this.FontPathAliases.get(fontIdentifier);

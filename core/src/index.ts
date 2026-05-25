@@ -19,7 +19,19 @@ export * from './Configuration/BookmarkItem';
 export * from './Configuration/WatermarkSettings';
 export * from './Configuration/DocumentMetadata';
 export * from './Configuration/DocumentSettings';
+export * from './Configuration/AccessibilityMode';
 export * from './Configuration/InternalConfiguration';
+
+export * from './Rendering/Tagging/SemanticRole';
+export * from './Rendering/Tagging/StructureElement';
+export * from './Rendering/Tagging/IStructureVisitor';
+export * from './Rendering/Tagging/StructureTreeBuilder';
+export * from './Rendering/Tagging/StructureTreeException';
+export * from './Rendering/Tagging/TaggingContext';
+export * from './Rendering/Tagging/IRoleProvider';
+export * from './Rendering/Tagging/IAltTextProvider';
+export * from './Rendering/Writers/StructureTreeWriter';
+export * from './Metadata/XmpConformanceBlock';
 
 export * from './Security/Models/EncryptionAlgorithm';
 export * from './Security/Models/EncryptionSettings';
@@ -48,6 +60,7 @@ export * from './Elements/Layout/IBackgroundColor';
 export * from './Elements/Layout/BorderedElementBase';
 export * from './Elements/Layout/Container';
 export * from './Elements/Layout/HorizontalStack';
+export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';
 
 export * from './Elements/Media/Image';

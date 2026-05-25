@@ -7,6 +7,7 @@ import { StandardFonts } from '../Typography/StandardFonts';
 import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfDrawing } from '../Rendering/Pdf/PdfDrawing';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
+import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
 
 export class PdfCanvas implements ICanvas {
   public readonly width: number = 0;
@@ -16,6 +17,8 @@ export class PdfCanvas implements ICanvas {
   private readonly xOffset: number;
   private readonly yOffset: number;
   private stateDepth: number = 0;
+  private tagging: TaggingContext | undefined;
+  private openMarkedContent = 0;
 
   private readonly _fontResolver: (fontFamily: string) => string;
   private readonly _imageResolver: (image: any) => string;
@@ -239,6 +242,46 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.translate(this.stream, pdfX, pdfY);
     PdfOperators.paintXObject(this.stream, resourceName);
     PdfOperators.restoreState(this.stream);
+  }
+
+  /**
+   * Sets the tagging context that governs marked-content emission.
+   * When non-undefined, {@link beginMarkedContent} /
+   * {@link endMarkedContent} emit PDF marked-content operators and
+   * register MCIDs with the structure tree; when undefined, both are
+   * no-ops and the canvas behaves exactly as it did pre-G-1.
+   */
+  public setTaggingContext(tagging: TaggingContext | undefined): void {
+    this.tagging = tagging;
+  }
+
+  /** @inheritdoc */
+  public beginMarkedContent(role: string): void {
+    if (!this.tagging) return;
+    const mcid = this.tagging.allocateMcid();
+    this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
+    PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
+    this.tagging.pushOpenRole(role);
+    this.openMarkedContent++;
+  }
+
+  /** @inheritdoc */
+  public endMarkedContent(): void {
+    if (!this.tagging) return;
+    if (this.openMarkedContent <= 0) return; // tolerate unbalanced End
+    PdfOperators.endMarkedContent(this.stream);
+    this.tagging.popOpenRole();
+    this.openMarkedContent--;
+  }
+
+  /** @inheritdoc */
+  public beginArtifact(): void {
+    PdfOperators.beginArtifact(this.stream);
+  }
+
+  /** @inheritdoc */
+  public endArtifact(): void {
+    PdfOperators.endMarkedContent(this.stream);
   }
 
   public measureText(text: string, fontSize: number, fontFamily: string): Size {

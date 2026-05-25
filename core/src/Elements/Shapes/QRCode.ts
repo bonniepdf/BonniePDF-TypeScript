@@ -4,6 +4,9 @@ import { QrSegment } from './QrSegment';
 import { ElementBase } from '../ElementBase';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A native, vector-based QR Code element.
@@ -14,9 +17,27 @@ import { Color } from '../../Core/Color';
  * https://www.nayuki.io/page/qr-code-generator-library
  * Ported to TypeScript for BonniePDF.
  */
-export class QRCode extends ElementBase {
+export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The data/text to encode in the QR Code. */
   public data = '';
+
+  /**
+   * Alternate text description for accessibility (e.g. "QR code to
+   * https://example.com"). Populates the `/Alt` entry on the structure
+   * element when the document opts into PDF/UA-1.
+   */
+  public altText = '';
+
+  /**
+   * When `true`, the QR code is purely decorative and is tagged as
+   * `/Artifact` with no alt-text warning.
+   */
+  public isDecorative = false;
+
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
+  }
 
   /** The display size of the QR code (QR codes are always square). */
   public size = 100;

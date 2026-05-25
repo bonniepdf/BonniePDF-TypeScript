@@ -92,37 +92,11 @@ export class FontManager {
   }
 
   /**
-   * Auto-registers all 12 bundled Liberation fonts from the given directory.
-   * Called by `index.node.ts` on startup — callers do not need to invoke this.
+   * Registers a font file path directly by key (Node.js only).
+   * Called by `index.node.ts` after it resolves paths with `fs`/`path`.
    */
-  public static autoRegisterBundledFonts(fontsDir: string): void {
-    const families = [
-      ['LiberationSans-Regular', 'liberation sans', 'regular'],
-      ['LiberationSans-Bold', 'liberation sans', 'bold'],
-      ['LiberationSans-Italic', 'liberation sans', 'italic'],
-      ['LiberationSans-BoldItalic', 'liberation sans', 'bolditalic'],
-      ['LiberationSerif-Regular', 'liberation serif', 'regular'],
-      ['LiberationSerif-Bold', 'liberation serif', 'bold'],
-      ['LiberationSerif-Italic', 'liberation serif', 'italic'],
-      ['LiberationSerif-BoldItalic', 'liberation serif', 'bolditalic'],
-      ['LiberationMono-Regular', 'liberation mono', 'regular'],
-      ['LiberationMono-Bold', 'liberation mono', 'bold'],
-      ['LiberationMono-Italic', 'liberation mono', 'italic'],
-      ['LiberationMono-BoldItalic', 'liberation mono', 'bolditalic'],
-    ] as const;
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const path: typeof import('path') = require('path');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs: typeof import('fs') = require('fs');
-
-    for (const [file, family, weight] of families) {
-      const fullPath = path.join(fontsDir, `${file}.ttf`);
-      if (fs.existsSync(fullPath)) {
-        const key = `${family}:${weight}`;
-        this.registry.set(key, { kind: 'file', path: fullPath });
-      }
-    }
+  public static registerFontFilePath(key: string, filePath: string): void {
+    this.registry.set(key, { kind: 'file', path: filePath });
   }
 
   /**

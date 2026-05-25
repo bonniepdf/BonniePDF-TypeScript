@@ -7,8 +7,6 @@ import { TtfFont } from './TrueType/TtfFont';
 export class FontMetrics {
   private static readonly TtfCache: Map<string, number[]> = new Map();
   private static readonly FontPathAliases: Map<string, string> = new Map();
-  private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
-
   /** Bytes-based font instances registered when FontManager provides bytes (no file path available). */
   private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
 

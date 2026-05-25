@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   Color,
@@ -38,6 +39,7 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates text flowing across page boundaries';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const title = new TextBlock('Long Text Document');
   title.fontName = StandardFonts.HelveticaBold;
@@ -53,9 +55,6 @@ export function generate(): Document {
   });
 
   const body = new TextBlock(sections.join('\n\n'));
-  body.fontName = StandardFonts.Helvetica;
-  body.fontSize = 11;
-  body.textColor = Color.slate700;
   doc.add(body);
 
   return doc;

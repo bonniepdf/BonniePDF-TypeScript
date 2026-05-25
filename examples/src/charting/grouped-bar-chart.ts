@@ -6,6 +6,7 @@ import {
   PdfVersion,
   PageOrientation,
   TextBlock,
+  TextStyle,
   TextElementBase,
   TextAlignment,
   HorizontalStack,
@@ -63,6 +64,7 @@ export function generate(): Document {
   metadata.subject = 'Grouped bar chart example — three product lines compared across 12 months';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Grouped Bar Chart: Quarterly Revenue by Product Line');
   title.fontSize = 24;

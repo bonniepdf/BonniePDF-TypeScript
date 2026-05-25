@@ -6,6 +6,7 @@ import {
   PdfSize,
   PdfVersion,
   TextBlock,
+  TextStyle,
   TextAlignment,
   Heading,
   VerticalStack,
@@ -122,6 +123,7 @@ export function generate(): Document {
   metadata.subject = 'Invoice for design and development services.';
 
   const doc = new Document(settings, metadata);
+  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(TextMedium);
   const mainStack = new VerticalStack();
 
   // ── Green accent bar ──────────────────────────────────────────────────────

@@ -7,11 +7,18 @@ import { Thickness } from '../../Core/Thickness';
 import { Border } from '../../Core/Border';
 import { BorderColors } from '../../Core/BorderColors';
 import { TextBlock } from '../Text/TextBlock';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A table element with support for column weights, cell padding, borders, headers, and footers
  */
-export class Table extends BorderedElementBase {
+export class Table extends BorderedElementBase implements IRoleProvider {
+  /** @inheritdoc */
+  get semanticRole(): SemanticRole {
+    return SemanticRole.Table;
+  }
+
   private readonly columnWeights: number[];
   private readonly footers: TableRow[] = [];
   private readonly headers: TableRow[] = [];
@@ -70,6 +77,7 @@ export class Table extends BorderedElementBase {
   public addHeader(...cells: IElement[]): void {
     const row = TableRow.fromElements(...cells);
     row.asHeader();
+    for (const c of row.cells) c.isHeader = true;
     this.headers.push(row);
   }
 
@@ -78,6 +86,7 @@ export class Table extends BorderedElementBase {
    * @param cells - The table cells for the header row
    */
   public addHeaderFromCells(...cells: TableCell[]): void {
+    for (const c of cells) c.isHeader = true;
     const row = TableRow.fromCells(...cells);
     row.asHeader();
     this.headers.push(row);
@@ -89,6 +98,8 @@ export class Table extends BorderedElementBase {
    */
   public addHeaderRow(row: TableRow): void {
     row.isHeader = true;
+    // Propagate to cells so each cell's PDF/UA role resolves to TH.
+    for (const c of row.cells) c.isHeader = true;
     this.headers.push(row);
   }
 
@@ -291,29 +302,68 @@ export class Table extends BorderedElementBase {
       ctx.newPage();
     }
 
-    const startX = ctx.currentX;
-    let currentX = startX;
-
-    for (let i = 0; i < row.cells.length; i++) {
-      const cell = row.cells[i];
-      let colWidth = widths[i];
-
-      // Apply column span
-      if (cell.columnSpan > 1) {
-        for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
-          colWidth += widths[i + j];
-        }
-      }
-
-      // Render cell with proper background
-      this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-
-      currentX += widths[i]; // Move by original column width (not spanned width)
+    // this feature tagging: push /TR around the row and /TH or /TD around each
+    // cell so the structure tree mirrors the visible table. ColumnSpan
+    // surfaces as /Attributes /ColSpan on the cell's StructElem.
+    // Header-ness inherited from the row when the cell doesn't already
+    // declare it. No-op when tagging is off.
+    const tagging = ctx.tagging;
+    const tagThisRow = tagging != null;
+    if (tagThisRow) {
+      tagging!.tree.begin(SemanticRole.TR);
+      ctx.canvas.beginMarkedContent('TR');
     }
 
-    // Move down by row height
-    ctx.currentX = startX;
-    ctx.currentY += rowHeight;
+    try {
+      const startX = ctx.currentX;
+      let currentX = startX;
+
+      for (let i = 0; i < row.cells.length; i++) {
+        const cell = row.cells[i];
+
+        // Defensive: cells added via fromElements() don't know their
+        // row's header-ness. Propagate at render time so the structure
+        // role resolves to TH instead of TD.
+        if (row.isHeader && !cell.isHeader) cell.isHeader = true;
+
+        let colWidth = widths[i];
+        if (cell.columnSpan > 1) {
+          for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
+            colWidth += widths[i + j];
+          }
+        }
+
+        const cellRole = cell.semanticRole;
+        const tagThisCell = tagThisRow;
+        if (tagThisCell) {
+          tagging!.tree.begin(cellRole);
+          if (cell.columnSpan > 1) {
+            tagging!.tree.setAttributes(`<< /O /Table /ColSpan ${cell.columnSpan} >>`);
+          }
+          ctx.canvas.beginMarkedContent(toPdfTag(cellRole));
+        }
+
+        try {
+          this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+        } finally {
+          if (tagThisCell) {
+            ctx.canvas.endMarkedContent();
+            tagging!.tree.end();
+          }
+        }
+
+        currentX += widths[i]; // Move by original column width (not spanned width)
+      }
+
+      // Move down by row height
+      ctx.currentX = startX;
+      ctx.currentY += rowHeight;
+    } finally {
+      if (tagThisRow) {
+        ctx.canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
   }
 
   private renderCell(
@@ -397,26 +447,62 @@ export class Table extends BorderedElementBase {
   private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[]): void {
     const rowHeight = this.measureRowHeight(row, widths);
 
-    const startX = ctx.currentX;
-    let currentX = startX;
-
-    for (let i = 0; i < row.cells.length; i++) {
-      const cell = row.cells[i];
-      let colWidth = widths[i];
-
-      // Apply column span
-      if (cell.columnSpan > 1) {
-        for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
-          colWidth += widths[i + j];
-        }
-      }
-
-      this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-      currentX += widths[i];
+    // this feature tagging: pushes /TR around the row and /TH or /TD around each
+    // cell when the document opts into PDF/UA. Mirror of the same wrap
+    // in renderRow (the non-stateful twin). No-op when tagging is off.
+    const tagging = ctx.tagging;
+    const tagThisRow = tagging != null;
+    if (tagThisRow) {
+      tagging!.tree.begin(SemanticRole.TR);
+      ctx.canvas.beginMarkedContent('TR');
     }
 
-    ctx.currentX = startX;
-    ctx.currentY += rowHeight;
+    try {
+      const startX = ctx.currentX;
+      let currentX = startX;
+
+      for (let i = 0; i < row.cells.length; i++) {
+        const cell = row.cells[i];
+
+        if (row.isHeader && !cell.isHeader) cell.isHeader = true;
+
+        let colWidth = widths[i];
+        if (cell.columnSpan > 1) {
+          for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
+            colWidth += widths[i + j];
+          }
+        }
+
+        const cellRole = cell.semanticRole;
+        const tagThisCell = tagThisRow;
+        if (tagThisCell) {
+          tagging!.tree.begin(cellRole);
+          if (cell.columnSpan > 1) {
+            tagging!.tree.setAttributes(`<< /O /Table /ColSpan ${cell.columnSpan} >>`);
+          }
+          ctx.canvas.beginMarkedContent(toPdfTag(cellRole));
+        }
+
+        try {
+          this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+        } finally {
+          if (tagThisCell) {
+            ctx.canvas.endMarkedContent();
+            tagging!.tree.end();
+          }
+        }
+
+        currentX += widths[i];
+      }
+
+      ctx.currentX = startX;
+      ctx.currentY += rowHeight;
+    } finally {
+      if (tagThisRow) {
+        ctx.canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
   }
 
   private calculateColumnWidths(totalWidth: number): number[] {

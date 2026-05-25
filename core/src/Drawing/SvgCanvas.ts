@@ -132,6 +132,23 @@ export class SvgCanvas implements ICanvas {
     // Not applicable for SVG
   }
 
+  /** @inheritdoc */
+  public beginMarkedContent(_role: string): void {
+    // SVG output doesn't carry PDF structure tags. Tagging is a no-op
+    // on this canvas; tagged-PDF emission is PdfCanvas-only.
+  }
+
+  /** @inheritdoc */
+  public endMarkedContent(): void {
+    // See beginMarkedContent — no-op for SVG output.
+  }
+
+  /** @inheritdoc */
+  public beginArtifact(): void {} // no-op for SVG output
+
+  /** @inheritdoc */
+  public endArtifact(): void {} // no-op for SVG output
+
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.width}" height="${this.height}">${this.svgElements.join('')}</svg>`;
   }

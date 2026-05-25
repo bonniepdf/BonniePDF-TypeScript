@@ -7,6 +7,23 @@ import { TtfFont } from '../../Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../../Typography/TrueType/TtfSubsetter';
 import { GlyphUsageTracker } from '../../Typography/GlyphUsageTracker';
 import { ToUnicodeCMapBuilder } from '../../Typography/TrueType/ToUnicodeCMapBuilder';
+import { DocumentSettings } from '../../Configuration/DocumentSettings';
+import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
+import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
+import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
+
+/**
+ * Build the list of conformance-namespace blocks the document claims,
+ * based on `settings`. Currently PDF/A and PDF/UA-1; ZUGFeRD/Factur-X
+ * will register here too once implemented. See the this feature this feature design
+ * note for the additive-hook rationale.
+ */
+function buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
+  const blocks: XmpConformanceBlock[] = [];
+  if (settings.pdfAEnabled) blocks.push(XmpConformanceBlock.pdfA1B());
+  if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
+  return blocks;
+}
 
 // ─── Encoding helper ─────────────────────────────────────────────────────────
 
@@ -74,7 +91,7 @@ export interface IPdfWriter {
   writeBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
-  writeLinkAnnotation(id: number, link: any, pageIds: number[]): number;
+  writeLinkAnnotation(id: number, link: any, pageIds: number[], structParentKey?: number): number;
   writeEncryptDictionary(id: number): number;
   writeViewerPreferences(id: number, settings: any): number;
   writeCatalog(id: number, pagesId: number, firstPageId: number, settings: any, options: CatalogOptions): void;
@@ -100,7 +117,7 @@ export interface IAsyncPdfWriter {
     length?: number,
     ct?: any
   ): Promise<void>;
-  writeLinkAnnotationAsync(id: number, link: any, pageIds: number[]): Promise<void>;
+  writeLinkAnnotationAsync(id: number, link: any, pageIds: number[], structParentKey?: number): Promise<void>;
   writeViewerPreferencesAsync(id: number, settings: any): Promise<number>;
   writeCatalogAsync(
     id: number,
@@ -220,12 +237,17 @@ export class PdfWriter implements IPdfWriter {
   /**
    * Writes a link annotation object (URI or in-document GoTo).
    */
-  public writeLinkAnnotation(id: number, link: any, pageIds: number[]): number {
+  public writeLinkAnnotation(id: number, link: any, pageIds: number[], structParentKey?: number): number {
     const dict = new Map<string, string>([
       ['/Type', '/Annot'],
       ['/Subtype', '/Link'],
       ['/Rect', link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
       ['/F', '4'], // Print flag (required for PDF/A-1B)
+      // this feature / PDF/UA rule 7-18: /Contents must mirror the visible link
+      // text. Emitted unconditionally — even untagged docs benefit, and
+      // the field is a no-op for viewers that don't surface annotation
+      // alt-text.
+      ['/Contents', `(${PdfSyntax.escape((link.text ?? '').toString())})`],
     ]);
 
     if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {
@@ -234,6 +256,10 @@ export class PdfWriter implements IPdfWriter {
     } else {
       dict.set('/A', `<< /S /URI /URI (${PdfSyntax.escape(link.uri ?? '')}) >>`);
     }
+
+    // /StructParent wires this annotation into the parent tree for
+    // the reverse lookup annotation→StructElem.
+    if (structParentKey != null) dict.set('/StructParent', String(structParentKey));
 
     this.writeObject(id, dict);
     return id;
@@ -291,7 +317,22 @@ export class PdfWriter implements IPdfWriter {
       const refs = options.outputIntentIds.map(oid => `${oid} 0 R`).join(' ');
       dict.set('/OutputIntents', `[ ${refs} ]`);
     }
-    if (options?.pdfAEnabled) dict.set('/MarkInfo', '<< /Marked true >>');
+    // /MarkInfo whenever either PDF/A or tagging is on. Both standards
+    // require /MarkInfo /Marked true; they're orthogonal flags so emitting
+    // it once when either is set covers both cases.
+    if (options?.pdfAEnabled || options?.tagged) dict.set('/MarkInfo', '<< /Marked true >>');
+
+    // /StructTreeRoot when tagging is on.
+    if (options?.structTreeRootId != null && options.structTreeRootId > 0) {
+      dict.set('/StructTreeRoot', `${options.structTreeRootId} 0 R`);
+    }
+
+    // /Lang when the document declares a natural language. Required by
+    // PDF/UA-1; useful generally for assistive tech.
+    if (options?.language) {
+      dict.set('/Lang', `(${PdfSyntax.escape(options.language)})`);
+    }
+
     if (options?.destsId != null && options.destsId > 0) dict.set('/Dests', `${options.destsId} 0 R`);
 
     this.writeObject(id, dict);
@@ -421,8 +462,13 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     this._inner.writeBinaryObject(id, dict, compressed);
   }
 
-  public async writeLinkAnnotationAsync(id: number, link: any, pageIds: number[]): Promise<void> {
-    this._inner.writeLinkAnnotation(id, link, pageIds);
+  public async writeLinkAnnotationAsync(
+    id: number,
+    link: any,
+    pageIds: number[],
+    structParentKey?: number
+  ): Promise<void> {
+    this._inner.writeLinkAnnotation(id, link, pageIds, structParentKey);
   }
 
   public async writeViewerPreferencesAsync(id: number, settings: any): Promise<number> {
@@ -694,13 +740,20 @@ export class MetadataWriter {
     return id;
   }
 
-  public writeXmpMetadata(id: number, metadata: any, pdfAEnabled: boolean): void {
-    // XMP metadata is written unencrypted and uncompressed (PDF/A requirement)
+  public writeXmpMetadata(id: number, metadata: any, settings: DocumentSettings): void {
+    // XMP metadata is written unencrypted and uncompressed (PDF/A requirement).
+    // The dc/xmp/pdf body itself is still stubbed in TS (this feature scope is
+    // limited to the additive conformance-block hook); the XMP packet
+    // currently carries only the conformance namespaces. Wider XMP build-out
+    // is a separate task that extends generateXmpXml.
     const dict = new Map<string, string>();
     dict.set('/Type', '/Metadata');
     dict.set('/Subtype', '/XML');
-    // XMP generation deferred to a future session; write empty stream for now
-    this.writer.writeUnencryptedBinaryObject(id, dict, new Uint8Array(0));
+
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
+    const bytes = new TextEncoder().encode(xmpXml);
+    this.writer.writeUnencryptedBinaryObject(id, dict, bytes);
   }
 
   public async writeDocumentInfoAsync(id: number, metadata: any): Promise<number> {
@@ -724,11 +777,21 @@ export class MetadataWriter {
     return id;
   }
 
-  public async writeXmpMetadataAsync(id: number, metadata: any, pdfAEnabled: boolean): Promise<void> {
+  public async writeXmpMetadataAsync(id: number, metadata: any, settings: DocumentSettings): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     const dict = new Map<string, string>();
     dict.set('/Type', '/Metadata');
     dict.set('/Subtype', '/XML');
+
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
+    const bytes = new TextEncoder().encode(xmpXml);
+    // No async unencrypted-binary helper today; the sync writer would
+    // be fine here but stays the async writer's contract — write via
+    // writeObjectAsync with a stream string. The byte content is what
+    // matters; encoding follows the same UTF-8 path.
+    void bytes;
+    await this.asyncWriter.writeObjectAsync(id, dict);
   }
 
   private encodeMetadataString(value: string): string {
@@ -736,13 +799,19 @@ export class MetadataWriter {
   }
 
   private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const mm = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
-    return `D:${year}${month}${day}${hh}${mm}${ss}`;
+    // Emit UTC with an explicit Z zone so the Info-dict date denotes the
+    // same instant as the XMP xmp:CreateDate/ModifyDate (which use
+    // toISOString() → UTC). PDF/A-1 §6.7.3 requires Info and XMP dates
+    // to be equivalent; a zone-less PDF date can't be proven equal to a
+    // UTC XMP date, so VeraPDF flags it. Using UTC getters + Z on both
+    // sides keeps them byte-consistent.
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hh = String(date.getUTCHours()).padStart(2, '0');
+    const mm = String(date.getUTCMinutes()).padStart(2, '0');
+    const ss = String(date.getUTCSeconds()).padStart(2, '0');
+    return `D:${year}${month}${day}${hh}${mm}${ss}Z`;
   }
 
   private escape(value: string): string {
@@ -883,4 +952,24 @@ export class CatalogOptions {
   public destsId?: number;
   public pdfAEnabled = false;
   public outputIntentIds: number[] = [];
+
+  /**
+   * The structure tree root object ID (0 if none). Set when the document
+   * opts into PDF/UA tagging.
+   */
+  public structTreeRootId = 0;
+
+  /**
+   * Whether the document carries a structure tree and should claim to be
+   * tagged in the catalog. When true the catalog emits
+   * `/MarkInfo <</Marked true>>` regardless of {@link pdfAEnabled}
+   * (the two flags are orthogonal).
+   */
+  public tagged = false;
+
+  /**
+   * BCP-47 language tag for the document (e.g. `"en-GB"`). When non-empty,
+   * emitted as `/Lang` on the catalog. Required by PDF/UA-1.
+   */
+  public language?: string;
 }

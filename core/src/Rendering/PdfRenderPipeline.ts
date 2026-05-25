@@ -9,6 +9,10 @@ import { PdfOperators } from './Pdf/PdfOperators';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
+import { isRoleProvider } from './Tagging/IRoleProvider';
+import { isAltTextProvider } from './Tagging/IAltTextProvider';
+import { toPdfTag } from './Tagging/SemanticRole';
+import type { Hyperlink } from '../Core/Hyperlink';
 
 export class PdfRenderPipeline {
   public static renderPages(pages: Page[], settings: DocumentSettings): PdfRenderResult {
@@ -75,6 +79,43 @@ export class PdfRenderPipeline {
   private static readonly maxPageGuard = 500;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
+    // when tagging is on and the element declares a structure
+    // role, push the role onto the in-memory tree and wrap the
+    // element's render in a /role MCID BDC ... EMC pair. No-op when
+    // tagging is off or the element isn't role-providing. See the .NET
+    // mirror in PdfRenderPipeline.cs for the page-break caveat.
+    const tagging = ctx.tagging;
+    const tagThis = tagging != null && isRoleProvider(element);
+    if (tagThis) {
+      const role = element.semanticRole;
+      const elem = tagging!.tree.begin(role);
+
+      // Surface alt-text on the structure element when the element
+      // provides it. PDF/UA requires /Alt on Figure structure elements;
+      // an Image with no altText degrades to /Artifact so this branch
+      // only fires for the "Figure with alt-text" case.
+      if (isAltTextProvider(element) && element.altText) {
+        tagging!.tree.setAlt(element.altText);
+      }
+
+      // wire the struct element back to the hyperlink so the
+      // serializer can write /StructParent + /OBJR in the annot dict.
+      if ('linkedStructElement' in element) (element as unknown as Hyperlink).linkedStructElement = elem;
+
+      ctx.canvas.beginMarkedContent(toPdfTag(role));
+    }
+
+    try {
+      this.renderElementWithOverflowCore(element, ctx, contentWidth);
+    } finally {
+      if (tagThis) {
+        ctx.canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
+  }
+
+  private static renderElementWithOverflowCore(element: IElement, ctx: RenderContext, contentWidth: number): void {
     // Stateful elements (VerticalStack, Table, TextBlock, etc.) implement renderStateful
     // and track their own continuation state so they can resume across page breaks.
     if ('renderStateful' in element && typeof (element as any).renderStateful === 'function') {
@@ -217,6 +258,12 @@ export class PdfRenderPipeline {
     PdfOperators.endText(wmOps);
     PdfOperators.restoreState(wmOps);
 
+    // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+    if (ctx.tagging) {
+      wmOps.unshift('/Artifact BMC\n');
+      wmOps.push('EMC\n');
+    }
+
     ctx.pages[pageIndex] = wmOps.join('') + ctx.pages[pageIndex];
   }
 
@@ -243,7 +290,9 @@ export class PdfRenderPipeline {
         if (headerElement) {
           ctx.currentX = startX;
           ctx.currentY = 0;
+          if (ctx.tagging) ctx.canvas.beginArtifact();
           headerElement.render(ctx, contentWidth);
+          if (ctx.tagging) ctx.canvas.endArtifact();
         }
       }
 
@@ -252,7 +301,9 @@ export class PdfRenderPipeline {
         if (footerElement) {
           ctx.currentX = startX;
           ctx.currentY = ctx.pageSize.height - ctx.margin;
+          if (ctx.tagging) ctx.canvas.beginArtifact();
           footerElement.render(ctx, contentWidth);
+          if (ctx.tagging) ctx.canvas.endArtifact();
         }
       }
 

@@ -1,0 +1,55 @@
+name: PDF/UA Accessibility Validation
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-accessibility:
+    name: Generate & validate PDF/UA-1
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm turbo build
+
+      - name: Generate PDF/UA-1 examples
+        run: node --experimental-strip-types scripts/generate-tagged-pdfs.ts
+
+      - name: Validate with VeraPDF (PDF/UA-1)
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/generated-pdfs:/data" \
+            ghcr.io/verapdf/cli:latest \
+            --flavour ua1 \
+            --format text \
+            /data/simple-document-tagged.pdf \
+            /data/business-invoice.pdf
+
+      - name: Upload generated PDFs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generated-pdfs
+          path: generated-pdfs/
+          retention-days: 14

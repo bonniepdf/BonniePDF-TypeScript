@@ -84,9 +84,41 @@ export class DocumentSettings {
   public version: PdfVersion;
   /**
    * Gets or sets whether PDF/A-1b archival mode is enabled.
-   * Requires Version == Pdf17. Cannot be used with encryption.
+   * Requires `version == Pdf17`. Cannot be used with encryption.
+   *
+   * **Honest-claim behaviour:** setting this to `true` is a
+   * request, not a guarantee. The serializer suppresses the
+   * `pdfaid:part` XMP block and `/OutputIntents` entry whenever the
+   * document references any of the standard 14 fonts (Helvetica,
+   * Times-*, Courier-*, Symbol, ZapfDingbats), because PDF/A-1b §6.3.4
+   * requires every font to be embedded and BonniePDF does not bundle
+   * subset versions of those faces. To actually produce a
+   * PDF/A-conformant file, register a real TTF via
+   * `TtfFont.fromFile()` / `FontMetrics.registerFontAlias()` and use
+   * that for every text element.
    */
   public pdfAEnabled: boolean;
+  /**
+   * Gets or sets the accessibility / tagged-PDF conformance mode.
+   * Default {@link AccessibilityMode.None} — the writer produces an
+   * untagged PDF and ignores all tagging machinery. Set to
+   * {@link AccessibilityMode.PdfUa1} to opt the document into PDF/UA-1
+   * emission (structure tree, MCIDs, XMP conformance claim, `/Lang`,
+   * `/MarkInfo`).
+   *
+   * Orthogonal to {@link pdfAEnabled}: a document can be PDF/A, PDF/UA,
+   * both, or neither. See
+   * `the specification`.
+   */
+  public accessibility: AccessibilityMode;
+  /**
+   * Document natural language as a BCP-47 tag (e.g. `"en-GB"`,
+   * `"de-DE"`, `"fr"`). Written to the catalog as `/Lang` when set;
+   * required for PDF/UA-1 conformance, where it tells assistive tech
+   * the language of unmarked content.
+   * Default `undefined` (no language declared).
+   */
+  public language?: string;
   /**
    * Gets or sets the bookmark items for the document outline tree.
    */
@@ -150,6 +182,7 @@ export class DocumentSettings {
     this.displayDocTitle = false;
     this.version = PdfVersion.Pdf14;
     this.pdfAEnabled = false;
+    this.accessibility = AccessibilityMode.None;
     this.bookmarks = [];
     this.namedDestinations = new Map();
 

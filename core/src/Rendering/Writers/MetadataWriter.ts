@@ -1,8 +1,18 @@
 import { IPdfWriter } from './IPdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
 import { DocumentMetadata } from '../../Configuration/DocumentMetadata';
+import { DocumentSettings } from '../../Configuration/DocumentSettings';
+import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
 import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
+import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
+
+function buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
+  const blocks: XmpConformanceBlock[] = [];
+  if (settings.pdfAEnabled) blocks.push(XmpConformanceBlock.pdfA1B());
+  if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
+  return blocks;
+}
 
 /**
  * Writes metadata objects (DocumentInfo and XMP) to PDF.
@@ -128,16 +138,13 @@ export class MetadataWriter {
   }
 
   /**
-   * Writes XMP metadata to the PDF document.
-   * XMP (Extensible Metadata Platform) provides standardized metadata
-   * that is required for PDF/A compliance and optional for PDF 1.7.
-   * @param id The object ID for the XMP metadata dictionary.
-   * @param metadata The document metadata.
-   * @param pdfAEnabled Indicates whether PDF/A compliance is enabled.
+   * Writes XMP metadata to the PDF document, including any conformance
+   * claims derived from `settings` (PDF/A, PDF/UA, …).
    */
-  writeXmpMetadata(id: number, metadata: DocumentMetadata, pdfAEnabled: boolean): void {
+  writeXmpMetadata(id: number, metadata: DocumentMetadata, settings: DocumentSettings): void {
     if (!this.writer) throw new Error('Sync writer not available');
-    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, pdfAEnabled);
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
     const xmpBytes = new TextEncoder().encode(xmpXml);
 
     const dict = new Map<string, string>();
@@ -150,21 +157,16 @@ export class MetadataWriter {
 
   /**
    * Writes XMP metadata to the PDF document asynchronously.
-   * XMP (Extensible Metadata Platform) provides standardized metadata
-   * that is required for PDF/A compliance and optional for PDF 1.7.
-   * @param id The object ID for the XMP metadata dictionary.
-   * @param metadata The document metadata.
-   * @param pdfAEnabled Indicates whether PDF/A compliance is enabled.
-   * @param cancellationToken Cancellation token.
    */
   async writeXmpMetadataAsync(
     id: number,
     metadata: DocumentMetadata,
-    pdfAEnabled: boolean,
+    settings: DocumentSettings,
     cancellationToken?: AbortSignal
   ): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not available');
-    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, pdfAEnabled);
+    const blocks = buildConformanceBlocks(settings);
+    const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
     const xmpBytes = new TextEncoder().encode(xmpXml);
 
     const dict = new Map<string, string>();

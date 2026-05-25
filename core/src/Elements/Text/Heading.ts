@@ -2,6 +2,7 @@ import { TextBlock } from './TextBlock';
 import { IStatefulElement } from './IStatefulElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A text block that registers itself as a heading in the Table of Contents when rendered.
@@ -16,7 +17,30 @@ export class Heading extends TextBlock implements IStatefulElement {
    */
   public tocIdentifier!: string;
 
+  /**
+   * Heading level (1–6). Maps to PDF/UA structure roles `H1`…`H6` when
+   * the document opts into tagging via `DocumentSettings.accessibility`.
+   * Default `1`. Values outside 1–6 are clamped.
+   */
+  public level = 1;
+
   private tocRegistered = false;
+
+  /** @inheritdoc */
+  public override get semanticRole(): SemanticRole {
+    switch (this.level) {
+      case 2:
+        return SemanticRole.H2;
+      case 3:
+        return SemanticRole.H3;
+      case 4:
+        return SemanticRole.H4;
+      case 5:
+        return SemanticRole.H5;
+      default:
+        return this.level <= 1 ? SemanticRole.H1 : SemanticRole.H6;
+    }
+  }
 
   constructor();
 

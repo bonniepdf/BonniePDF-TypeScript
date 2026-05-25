@@ -12,7 +12,13 @@ import {
   IPdfWriter,
   IAsyncPdfWriter,
 } from './Writers/PdfWriter';
+import { StructureTreeWriter } from './Writers/StructureTreeWriter';
+import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
+import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
+import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
+import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 
 export class PdfDocumentSerializer {
   constructor(private document: Document) {}
@@ -30,9 +36,17 @@ export class PdfDocumentSerializer {
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
 
-    // 0. Set up encryption if configured (full implementation in Session 4)
+    // 0. Set up encryption if configured. Mirrors the .NET sync path:
+    // create the PdfEncryptor up front so writeObject and the trailer
+    // both see writer.encryptor and emit the /Encrypt entry.
+    //
+    // AES-256 keys must be initialised via PdfEncryptor.create() under
+    // an async context (SubtleCrypto). In the sync path we degrade
+    // silently — the document is generated unencrypted, matching the
+    // documented "AES-256 encryption requires saveAsync" behaviour.
     let encryptId = 0;
-    if (settings.isEncrypted) {
+    if (settings.isEncrypted && settings.encryption!.algorithm !== EncryptionAlgorithm.AES_256) {
+      writer.encryptor = new PdfEncryptor(settings.encryption!);
       encryptId = writer.getNewId();
     }
 
@@ -46,7 +60,28 @@ export class PdfDocumentSerializer {
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
     ctx.pdfAEnabled = settings.pdfAEnabled;
 
+    // PDF/UA tagging context — shared between the render pipeline
+    // (canvas attaches MCIDs to the builder) and the structure-tree
+    // writer at the end (emits the populated tree).
+    const taggingContext =
+      settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17
+        ? new TaggingContext(new StructureTreeBuilder())
+        : undefined;
+    ctx.tagging = taggingContext;
+
     // Two-pass layout (VisualToc) is out of scope — requiresTwoPassLayout() always false.
+
+    // annotation bindings for /StructParent + /OBJR wiring.
+    // Keys start at 10_000 above page keys so the /ParentTree number tree
+    // has no collision between page keys (0..N-1) and annotation keys.
+    const ANNOT_STRUCT_PARENT_BASE = 10_000;
+    const annotBindings: Array<{
+      structElem: import('./Tagging/StructureElement').StructureElement;
+      annotId: number;
+      pageObjectId: number;
+      structParentKey: number;
+    }> = [];
+    let globalAnnotIndex = 0;
 
     // 3. Stream pages (low-memory path)
     const pageIds: number[] = [];
@@ -79,13 +114,34 @@ export class PdfDocumentSerializer {
         ['/Contents', `${contentId} 0 R`],
       ]);
 
+      // Tagged PDF: each page gets /StructParents = page index. The
+      // /ParentTree emitted at the end by StructureTreeWriter keys off
+      // the same number so MCID→StructElem reverse lookup works.
+      if (taggingContext) {
+        pageDict.set('/StructParents', String(pageIndex - 1));
+        pageDict.set('/Tabs', '/S'); // follow structure order for tab navigation
+      }
+
       // Write link annotations if present
       if (pageOutput.hyperlinks?.length > 0) {
         const annotIds: number[] = [];
         for (const link of pageOutput.hyperlinks) {
           const annotId = writer.getNewId();
-          writer.writeLinkAnnotation(annotId, link, pageIds);
+          let structParentKey: number | undefined;
+          if (taggingContext) {
+            structParentKey = ANNOT_STRUCT_PARENT_BASE + globalAnnotIndex++;
+          }
+          writer.writeLinkAnnotation(annotId, link, pageIds, structParentKey);
           annotIds.push(annotId);
+          if (taggingContext && link.linkedStructElement != null && structParentKey != null) {
+            link.linkedStructElement.objrAnnotations.push({ annotId, pageObjectId: pageId });
+            annotBindings.push({
+              structElem: link.linkedStructElement,
+              annotId,
+              pageObjectId: pageId,
+              structParentKey,
+            });
+          }
         }
         pageDict.set('/Annots', '[ ' + annotIds.map(id => `${id} 0 R`).join(' ') + ' ]');
       }
@@ -95,6 +151,19 @@ export class PdfDocumentSerializer {
 
     // 4. Write global resource dictionary (fonts, images)
     let globalResources: string = (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
+
+    // ── Honest PDF/A claim ──────────────────────────────────────
+    // settings.pdfAEnabled is an opt-IN, but PDF/A-1b §6.3.4 forbids
+    // non-embedded fonts. If the user asked for PDF/A but used any of
+    // the standard 14 fonts (which we don't embed), we silently drop
+    // the claim: no pdfaid block in XMP, no OutputIntent, no
+    // /MarkInfo-via-pdfA path. The document is still a valid PDF —
+    // it just doesn't lie about being PDF/A-1b.
+    //
+    // To actually deliver PDF/A-1b the caller must register a real
+    // TTF (TtfFont.fromFile / FontMetrics.registerFontAlias).
+    const registry: PdfResourceRegistry | undefined = (ctx as any).resources;
+    const effectivePdfA = settings.pdfAEnabled && (registry == null || !registry.hasNonEmbeddedStandardFont());
 
     // 5. Write ExtGState for watermark opacity if configured
     if (settings.watermark != null) {
@@ -130,16 +199,26 @@ export class PdfDocumentSerializer {
 
     const catalogOptions = new CatalogOptions();
 
-    // 8. Write ViewerPreferences if any non-default settings are active
-    if (hasViewerPreferences(settings)) {
+    // 8. Write ViewerPreferences if any non-default settings are active.
+    // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
+    if (hasViewerPreferences(settings) || taggingContext != null) {
       catalogOptions.viewerPrefsId = writer.getNewId();
-      writer.writeViewerPreferences(catalogOptions.viewerPrefsId, settings);
+      const vp = taggingContext != null ? { ...settings, displayDocTitle: true } : settings;
+      writer.writeViewerPreferences(catalogOptions.viewerPrefsId, vp);
     }
 
-    // 9. Write XMP metadata for PDF 1.7
+    // 9. Write XMP metadata for PDF 1.7. Pass the effective PDF/A
+    // flag (not the raw settings flag) so we don't emit a pdfaid
+    // claim we can't honour.
     if (settings.version === PdfVersion.Pdf17) {
       catalogOptions.xmpMetadataId = writer.getNewId();
-      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, settings.pdfAEnabled);
+      // Object.create preserves the DocumentSettings prototype (getters,
+      // methods) — plain object spread would drop hasBookmarks/isEncrypted.
+      const xmpSettings =
+        effectivePdfA === settings.pdfAEnabled
+          ? settings
+          : Object.assign(Object.create(Object.getPrototypeOf(settings)), settings, { pdfAEnabled: effectivePdfA });
+      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, xmpSettings);
     }
 
     // 10. Write bookmarks (outlines) for PDF 1.7
@@ -158,6 +237,22 @@ export class PdfDocumentSerializer {
       const outputIntentId = writer.getNewId();
       complianceWriter.writeOutputIntent(outputIntentId, iccProfileId);
       catalogOptions.outputIntentIds = [outputIntentId];
+    }
+
+    // 11b. Write PDF/UA structure tree. The in-memory tree currently only
+    // contains the implicit Document root — actual semantic tagging arrives
+    // once the renderer populates the tree. What lands here in this feature
+    // is the catalog wiring: a valid empty StructTreeRoot referencing a
+    // Document StructElem, plus /MarkInfo and /Lang.
+    // 11b. Write PDF/UA structure tree. The tree was populated during
+    // the render pass via taggingContext (this feature wire MCIDs and
+    // semantic roles through the canvas). For this feature the tree is still a
+    // Document-only skeleton; this feature adds the renderer-driven population.
+    if (taggingContext) {
+      const structureTreeWriter = new StructureTreeWriter(writer);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds, annotBindings);
+      catalogOptions.tagged = true;
+      catalogOptions.language = settings.language;
     }
 
     // 12. Write /Catalog

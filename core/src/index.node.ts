@@ -30,7 +30,15 @@ const BUNDLED_FONTS: Array<[string, string, string]> = [
 for (const [file, family, weight] of BUNDLED_FONTS) {
   const fullPath = path.join(bundledFontsDir, `${file}.ttf`);
   if (fs.existsSync(fullPath)) {
-    FontManager.registerFontFilePath(`${family}:${weight}`, fullPath);
+    try {
+      // Read bytes eagerly — registerFontFilePath stores a path for lazy loading,
+      // but lazy loading via require('fs') fails in Node.js ESM (dynamic require shim
+      // throws in strict ESM). Reading here via the static fs import is reliable.
+      const bytes = Uint8Array.from(fs.readFileSync(fullPath));
+      FontManager.registerFont(bytes, { family, subfamily: weight });
+    } catch {
+      // File unreadable — skip silently.
+    }
   }
 }
 

@@ -1,9 +1,6 @@
 import { PdfOperators } from './PdfOperators';
-import { PdfSyntax } from './PdfSyntax';
 import { Color } from '../../Core/Color';
 import { Point } from '../../Core/Point';
-import { Border } from '../../Core/Border';
-import { BorderColors } from '../../Core/BorderColors';
 
 export class PdfDrawing {
   public static fillRect(stream: string[], x: number, y: number, width: number, height: number, color: Color): void {

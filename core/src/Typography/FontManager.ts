@@ -31,6 +31,21 @@ function normalizeWeight(raw: string): string {
 /** Registry entry: either raw bytes already loaded, or a file path to load lazily. */
 type FontEntry = { kind: 'bytes'; bytes: Uint8Array } | { kind: 'file'; path: string; bytes?: Uint8Array };
 
+const BUNDLED_FONTS: ReadonlyArray<readonly [string, string, string]> = [
+  ['LiberationSans-Regular', 'liberation sans', 'regular'],
+  ['LiberationSans-Bold', 'liberation sans', 'bold'],
+  ['LiberationSans-Italic', 'liberation sans', 'italic'],
+  ['LiberationSans-BoldItalic', 'liberation sans', 'bolditalic'],
+  ['LiberationSerif-Regular', 'liberation serif', 'regular'],
+  ['LiberationSerif-Bold', 'liberation serif', 'bold'],
+  ['LiberationSerif-Italic', 'liberation serif', 'italic'],
+  ['LiberationSerif-BoldItalic', 'liberation serif', 'bolditalic'],
+  ['LiberationMono-Regular', 'liberation mono', 'regular'],
+  ['LiberationMono-Bold', 'liberation mono', 'bold'],
+  ['LiberationMono-Italic', 'liberation mono', 'italic'],
+  ['LiberationMono-BoldItalic', 'liberation mono', 'bolditalic'],
+];
+
 /**
  * Global font registry for BonniePDF.
  *
@@ -142,6 +157,28 @@ export class FontManager {
   /** Removes all registered fonts (primarily for test isolation). */
   public static clear(): void {
     this.registry.clear();
+  }
+
+  /**
+   * Registers all 12 bundled Liberation font variants from the given directory
+   * (Node.js only). Files are expected to be named `LiberationSans-Regular.ttf`,
+   * `LiberationSerif-Bold.ttf`, etc. Missing or unreadable files are skipped silently.
+   */
+  public static autoRegisterBundledFonts(fontsDir: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs: typeof import('fs') = require('fs');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const path: typeof import('path') = require('path');
+    for (const [file, family, weight] of BUNDLED_FONTS) {
+      const fullPath = path.join(fontsDir, `${file}.ttf`);
+      if (!fs.existsSync(fullPath)) continue;
+      try {
+        const bytes = Uint8Array.from(fs.readFileSync(fullPath));
+        this.registerFont(bytes, { family, subfamily: weight });
+      } catch {
+        // skip
+      }
+    }
   }
 
   private static loadFileBytes(filePath: string): Uint8Array | undefined {

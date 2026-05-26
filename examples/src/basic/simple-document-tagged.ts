@@ -33,6 +33,7 @@ export function generate(): Document {
 
   doc.settings = new DocumentSettings();
   doc.settings.version = PdfVersion.Pdf17;
+  doc.settings.pdfAEnabled = true;
   doc.settings.accessibility = AccessibilityMode.PdfUa1;
   doc.settings.language = 'en-GB';
 

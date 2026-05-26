@@ -129,6 +129,40 @@ export class XmpMetadataWriter {
       parts.push('    </rdf:Description>\n');
     }
 
+    // 5. PDF/A extension schema declarations (§6.7.9).
+    // PDF/A-1b requires every non-predefined XMP namespace to be declared via
+    // pdfaExtension:schemas. The pdfuaid namespace is non-predefined, so declare
+    // it whenever a pdfuaid conformance block is present.
+    const hasPdfUaId = conformanceBlocks.some(b => b.prefix === 'pdfuaid');
+    if (hasPdfUaId) {
+      parts.push('    <rdf:Description rdf:about=""\n');
+      parts.push('        xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"\n');
+      parts.push('        xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"\n');
+      parts.push('        xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">\n');
+      parts.push('      <pdfaExtension:schemas>\n');
+      parts.push('        <rdf:Bag>\n');
+      parts.push('          <rdf:li rdf:parseType="Resource">\n');
+      parts.push('            <pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI>\n');
+      parts.push('            <pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix>\n');
+      parts.push('            <pdfaSchema:schema>PDF/UA ID Schema</pdfaSchema:schema>\n');
+      parts.push('            <pdfaSchema:property>\n');
+      parts.push('              <rdf:Seq>\n');
+      parts.push('                <rdf:li rdf:parseType="Resource">\n');
+      parts.push('                  <pdfaProperty:name>part</pdfaProperty:name>\n');
+      parts.push('                  <pdfaProperty:valueType>Integer</pdfaProperty:valueType>\n');
+      parts.push('                  <pdfaProperty:category>internal</pdfaProperty:category>\n');
+      parts.push(
+        '                  <pdfaProperty:description>Indicates which part of ISO 14289 is followed</pdfaProperty:description>\n'
+      );
+      parts.push('                </rdf:li>\n');
+      parts.push('              </rdf:Seq>\n');
+      parts.push('            </pdfaSchema:property>\n');
+      parts.push('          </rdf:li>\n');
+      parts.push('        </rdf:Bag>\n');
+      parts.push('      </pdfaExtension:schemas>\n');
+      parts.push('    </rdf:Description>\n');
+    }
+
     parts.push('  </rdf:RDF>\n');
     parts.push('</x:xmpmeta>\n');
     parts.push('<?xpacket end="w"?>');

@@ -1,21 +1,24 @@
-name: PDF/UA Accessibility Validation
+name: PDF/UA + PDF/A Validation
+
+# Compliance gate: builds the library, generates the tagged example PDFs, and
+# validates every one against PDF/UA-1 and PDF/A-1b with veraPDF. The job fails
+# if any PDF is non-compliant (tools/verapdf/validate.sh exits non-zero), so a
+# regression cannot reach master. See docs/ci/pdf-validation.md.
 
 on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
+  workflow_dispatch:
 
 concurrency:
   group: a11y-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate-accessibility:
-    name: Generate & validate PDF/UA-1
+  validate:
+    name: Generate & validate (UA-1 + A-1b)
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
@@ -27,24 +30,24 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # JDK + Maven power the veraPDF gate (tools/verapdf).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm turbo build
 
-      - name: Generate PDF/UA-1 examples
+      - name: Generate tagged example PDFs
         run: node --experimental-strip-types scripts/generate-tagged-pdfs.ts
 
-      - name: Validate with VeraPDF (PDF/UA-1)
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}/generated-pdfs:/data" \
-            ghcr.io/verapdf/cli:latest \
-            --flavour ua1 \
-            --format text \
-            /data/simple-document-tagged.pdf \
-            /data/business-invoice.pdf
+      - name: Validate with veraPDF (PDF/UA-1 + PDF/A-1b)
+        run: tools/verapdf/validate.sh generated-pdfs ua1,1b
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4

@@ -74,9 +74,19 @@ export interface ICanvas {
   beginMarkedContent(role: string): void;
 
   /**
+   * Begin a grouping/container marked-content sequence without allocating
+   * an MCID. Emits `/<role> BMC` on PDF. Use for structure-tree container
+   * roles (Table, TR, THead, TBody, TFoot, Sect, …) whose content is
+   * referenced by child structure elements rather than directly by an MCID.
+   * Prevents "Nested MCID" warnings when container BDC blocks would
+   * otherwise enclose leaf BDC blocks.
+   */
+  beginContainerContent(role: string): void;
+
+  /**
    * End the most recent marked-content sequence opened by
-   * {@link beginMarkedContent}. Emits `EMC` on PDF; no-op on SVG and
-   * when tagging is disabled.
+   * {@link beginMarkedContent} or {@link beginContainerContent}.
+   * Emits `EMC` on PDF; no-op on SVG and when tagging is disabled.
    */
   endMarkedContent(): void;
 

@@ -9,6 +9,22 @@ import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import type { TaggingContext } from './Tagging/TaggingContext';
 
+/** Container roles that use BMC (no MCID) in the content stream. */
+const CONTAINER_ROLE_TAGS = new Set([
+  'Table',
+  'TR',
+  'THead',
+  'TBody',
+  'TFoot',
+  'Document',
+  'Sect',
+  'Art',
+  'Div',
+  'TOC',
+  'L',
+  'LI',
+]);
+
 export class DeferredXObjectInfo {
   public resourceName!: string;
   public fontIdentifier!: string;
@@ -179,7 +195,13 @@ export class RenderContext {
 
     if (reopenRoles) {
       for (const role of reopenRoles) {
-        this.canvas.beginMarkedContent(role);
+        // Container roles (Table, TR, …) use BMC on the new page; leaf
+        // roles use BDC with a fresh MCID, as on the original page.
+        if (CONTAINER_ROLE_TAGS.has(role)) {
+          this.canvas.beginContainerContent(role);
+        } else {
+          this.canvas.beginMarkedContent(role);
+        }
       }
     }
 

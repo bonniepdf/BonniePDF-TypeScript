@@ -4,7 +4,7 @@ import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
 import { isRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { isAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
-import { toPdfTag } from '../../Rendering/Tagging/SemanticRole';
+import { toPdfTag, SemanticRole, isContainerRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
@@ -58,14 +58,23 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
       // pattern as PdfRenderPipeline so tagging is closed before
       // Overflow/WrapRequired propagates upward.
       const tagging = ctx.tagging;
-      const tagChild = tagging != null && isRoleProvider(child);
-      if (tagChild) {
-        const role = child.semanticRole;
-        const elem = tagging!.tree.begin(role);
+      const childRole = tagging != null && isRoleProvider(child) ? child.semanticRole : null;
+      // Artifact is a marked-content type, not a structure type — a decorative
+      // child is wrapped in /Artifact and kept out of the structure tree.
+      const isArtifact = childRole === SemanticRole.Artifact;
+      const tagChild = childRole != null && !isArtifact;
+      if (isArtifact) {
+        ctx.canvas.beginArtifact();
+      } else if (tagChild) {
+        const elem = tagging!.tree.begin(childRole!);
         if (isAltTextProvider(child) && child.altText) tagging!.tree.setAlt(child.altText);
         // Wire LinkedStructElement for Hyperlink children.
         if ('linkedStructElement' in child) (child as any).linkedStructElement = elem;
-        ctx.canvas.beginMarkedContent(toPdfTag(role));
+        if (isContainerRole(childRole!)) {
+          ctx.canvas.beginContainerContent(toPdfTag(childRole!));
+        } else {
+          ctx.canvas.beginMarkedContent(toPdfTag(childRole!));
+        }
       }
 
       try {
@@ -130,7 +139,9 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
           }
         }
       } finally {
-        if (tagChild) {
+        if (isArtifact) {
+          ctx.canvas.endArtifact();
+        } else if (tagChild) {
           ctx.canvas.endMarkedContent();
           tagging!.tree.end();
         }

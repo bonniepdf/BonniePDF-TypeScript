@@ -139,6 +139,9 @@ export class SvgCanvas implements ICanvas {
   }
 
   /** @inheritdoc */
+  public beginContainerContent(_role: string): void {} // no-op for SVG output
+
+  /** @inheritdoc */
   public endMarkedContent(): void {
     // See beginMarkedContent — no-op for SVG output.
   }

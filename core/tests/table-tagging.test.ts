@@ -98,10 +98,14 @@ describe('Table tagging', () => {
       t => t.addHeaderFromCells(textCell('A', true), textCell('B', true), textCell('C', true))
     );
 
-    expect(countSubstring(text, '/S /TH')).toBe(3);
-    expect(countSubstring(text, '/S /TD')).toBe(3);
-    expect(countSubstring(text, '/S /Table')).toBe(1);
-    expect(countSubstring(text, '/S /TR')).toBe(2);
+    // Match the trailing newline so '/S /TH' doesn't also count '/S /THead'.
+    expect(countSubstring(text, '/S /TH\n')).toBe(3);
+    expect(countSubstring(text, '/S /TD\n')).toBe(3);
+    expect(countSubstring(text, '/S /Table\n')).toBe(1);
+    expect(countSubstring(text, '/S /TR\n')).toBe(2);
+    // PDF/UA 7.2: rows are grouped under THead/TBody.
+    expect(countSubstring(text, '/S /THead\n')).toBe(1);
+    expect(countSubstring(text, '/S /TBody\n')).toBe(1);
   });
 
   it('ColumnSpan surfaces as /A << /O /Table /ColSpan n >>', () => {

@@ -185,6 +185,9 @@ describe('Cross-language structure-tree equivalence', () => {
     'Lbl',
     'LBody',
     'Table',
+    'THead',
+    'TBody',
+    'TFoot',
     'TR',
     'TH',
     'TD',
@@ -230,6 +233,8 @@ describe('Cross-language structure-tree equivalence', () => {
       H1: 1,
       P: 1,
       Table: 1,
+      THead: 1, // header row group (PDF/UA 7.2)
+      TBody: 1, // body row group
       TR: 4, // 1 header + 3 body
       TH: 4, // 4 header cells
       TD: 12, // 3 body rows × 4 cells
@@ -256,7 +261,7 @@ describe('Cross-language structure-tree equivalence', () => {
     const fp = fingerprint(generate(buildMultiPageFlowDocument()));
     const roleSet = Object.keys(fp).sort();
 
-    expect(roleSet).toEqual(['Document', 'TD', 'TH', 'TR', 'Table']);
+    expect(roleSet).toEqual(['Document', 'TBody', 'TD', 'TH', 'THead', 'TR', 'Table']);
     expect(fp.TD).toBe(240);
     expect(fp.Document).toBe(1);
     expect(fp.Table).toBe(1);

@@ -94,7 +94,12 @@ describe('Media — alt-text and Figure tagging', () => {
     doc.add(qr);
 
     const text = pdfToText(doc.generateBytes());
-    expect(text).toContain('/S /Artifact');
+    // A decorative element is an /Artifact marked-content region, NOT a
+    // structure element. Emitting /S /Artifact (a StructElem) is invalid —
+    // Artifact is a marked-content type, not a structure type (VeraPDF 7.1-5).
+    expect(text).toContain('/Artifact BMC');
+    expect(text).not.toContain('/S /Artifact');
+    expect(text).not.toContain('/S /Figure');
     expect(text).not.toContain('/Alt (');
   });
 

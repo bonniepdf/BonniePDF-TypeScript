@@ -44,10 +44,17 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
     height: number,
     color: Color
   ): void {
-    if (this.cornerRadius > 0) {
-      ctx.canvas.fillRoundedRect(x, y, width, height, this.cornerRadius, color);
-    } else {
-      ctx.canvas.fillRect(x, y, width, height, color);
+    // Decorative fill — tag as an artifact so tagged (PDF/UA) output does not
+    // leave it as untagged content. No-op wrapper for non-tagged documents.
+    ctx.canvas.beginArtifact();
+    try {
+      if (this.cornerRadius > 0) {
+        ctx.canvas.fillRoundedRect(x, y, width, height, this.cornerRadius, color);
+      } else {
+        ctx.canvas.fillRect(x, y, width, height, color);
+      }
+    } finally {
+      ctx.canvas.endArtifact();
     }
   }
 
@@ -59,6 +66,16 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   protected drawBorder(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
     if (!this.border.hasAnyBorder) return;
 
+    // Decorative strokes — tag as an artifact (no-op for non-tagged output).
+    ctx.canvas.beginArtifact();
+    try {
+      this.drawBorderStrokes(ctx, x, y, width, height);
+    } finally {
+      ctx.canvas.endArtifact();
+    }
+  }
+
+  private drawBorderStrokes(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
     if (this.cornerRadius > 0) {
       // Rounded rectangle — use the first available colour and the max side width
       const strokeColor =
@@ -102,13 +119,6 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
         this.border.right
       );
     }
-  }
-
-  /**
-   * Checks if this element has any border to draw.
-   */
-  protected hasAnyBorder(): boolean {
-    return this.border.left > 0 || this.border.right > 0 || this.border.top > 0 || this.border.bottom > 0;
   }
 
   /**

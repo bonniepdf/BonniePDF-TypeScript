@@ -11,7 +11,7 @@ import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
 import { isRoleProvider } from './Tagging/IRoleProvider';
 import { isAltTextProvider } from './Tagging/IAltTextProvider';
-import { toPdfTag } from './Tagging/SemanticRole';
+import { toPdfTag, SemanticRole, isContainerRole } from './Tagging/SemanticRole';
 import type { Hyperlink } from '../Core/Hyperlink';
 
 export class PdfRenderPipeline {
@@ -85,15 +85,21 @@ export class PdfRenderPipeline {
     // tagging is off or the element isn't role-providing. See the .NET
     // mirror in PdfRenderPipeline.cs for the page-break caveat.
     const tagging = ctx.tagging;
-    const tagThis = tagging != null && isRoleProvider(element);
-    if (tagThis) {
-      const role = element.semanticRole;
-      const elem = tagging!.tree.begin(role);
+    const role = tagging != null && isRoleProvider(element) ? element.semanticRole : null;
+    // Artifact is a marked-content type, NOT a structure type: a decorative
+    // element (e.g. an Image with no alt text) must be wrapped in /Artifact
+    // marked content and kept OUT of the structure tree. Emitting it as a
+    // StructElem with /S /Artifact is invalid (VeraPDF 7.1-5 / 7.1-1).
+    const isArtifact = role === SemanticRole.Artifact;
+    const tagThis = role != null && !isArtifact;
 
-      // Surface alt-text on the structure element when the element
-      // provides it. PDF/UA requires /Alt on Figure structure elements;
-      // an Image with no altText degrades to /Artifact so this branch
-      // only fires for the "Figure with alt-text" case.
+    if (isArtifact) {
+      ctx.canvas.beginArtifact();
+    } else if (tagThis) {
+      const elem = tagging!.tree.begin(role!);
+
+      // Surface alt-text on the structure element when the element provides
+      // it. PDF/UA requires /Alt on Figure structure elements.
       if (isAltTextProvider(element) && element.altText) {
         tagging!.tree.setAlt(element.altText);
       }
@@ -102,13 +108,19 @@ export class PdfRenderPipeline {
       // serializer can write /StructParent + /OBJR in the annot dict.
       if ('linkedStructElement' in element) (element as unknown as Hyperlink).linkedStructElement = elem;
 
-      ctx.canvas.beginMarkedContent(toPdfTag(role));
+      if (isContainerRole(role!)) {
+        ctx.canvas.beginContainerContent(toPdfTag(role!));
+      } else {
+        ctx.canvas.beginMarkedContent(toPdfTag(role!));
+      }
     }
 
     try {
       this.renderElementWithOverflowCore(element, ctx, contentWidth);
     } finally {
-      if (tagThis) {
+      if (isArtifact) {
+        ctx.canvas.endArtifact();
+      } else if (tagThis) {
         ctx.canvas.endMarkedContent();
         tagging!.tree.end();
       }

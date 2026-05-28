@@ -19,6 +19,12 @@ export class PdfCanvas implements ICanvas {
   private stateDepth: number = 0;
   private tagging: TaggingContext | undefined;
   private openMarkedContent = 0;
+  /** Counts how many currently-open BDC (MCID-bearing) sequences are on the stack. */
+  private openTaggedCount = 0;
+  /** Stack entry: true = this level used BDC (tagged), false = BMC (untagged). */
+  private readonly markedContentTagged: boolean[] = [];
+  /** Per-beginArtifact record of whether an /Artifact wrapper was actually emitted. */
+  private artifactEmitStack: boolean[] = [];
 
   private readonly _fontResolver: (fontFamily: string) => string;
   private readonly _imageResolver: (image: any) => string;
@@ -258,9 +264,31 @@ export class PdfCanvas implements ICanvas {
   /** @inheritdoc */
   public beginMarkedContent(role: string): void {
     if (!this.tagging) return;
-    const mcid = this.tagging.allocateMcid();
-    this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
-    PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
+    let tagged = false;
+    if (this.openTaggedCount === 0) {
+      // No outer BDC is open — this sequence can carry its own MCID.
+      const mcid = this.tagging.allocateMcid();
+      this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
+      PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
+      this.openTaggedCount++;
+      tagged = true;
+    } else {
+      // Already inside a BDC — emit BMC to prevent nested MCIDs.
+      // The content is covered by the ancestor BDC's MCID.
+      PdfOperators.beginMarkedContentBmc(this.stream, role);
+    }
+    this.markedContentTagged.push(tagged);
+    this.tagging.pushOpenRole(role);
+    this.openMarkedContent++;
+  }
+
+  /** @inheritdoc */
+  public beginContainerContent(role: string): void {
+    if (!this.tagging) return;
+    // BMC — no MCID. Container StructElems (Table, TR, …) reference content
+    // via child StructElems, not directly. Never increments openTaggedCount.
+    PdfOperators.beginMarkedContentBmc(this.stream, role);
+    this.markedContentTagged.push(false);
     this.tagging.pushOpenRole(role);
     this.openMarkedContent++;
   }
@@ -270,18 +298,27 @@ export class PdfCanvas implements ICanvas {
     if (!this.tagging) return;
     if (this.openMarkedContent <= 0) return; // tolerate unbalanced End
     PdfOperators.endMarkedContent(this.stream);
+    if (this.markedContentTagged.pop()) this.openTaggedCount--;
     this.tagging.popOpenRole();
     this.openMarkedContent--;
   }
 
   /** @inheritdoc */
   public beginArtifact(): void {
-    PdfOperators.beginArtifact(this.stream);
+    // Emit an /Artifact wrapper only for tagged documents and only when not
+    // already inside a tagged marked-content sequence. Content drawn inside a
+    // structure element (e.g. a table cell's /TD) is already enclosed real
+    // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag is
+    // invalid. The emit decision is recorded so endArtifact() stays balanced.
+    const emit = this.tagging != null && this.openMarkedContent === 0;
+    if (emit) PdfOperators.beginArtifact(this.stream);
+    this.artifactEmitStack.push(emit);
   }
 
   /** @inheritdoc */
   public endArtifact(): void {
-    PdfOperators.endMarkedContent(this.stream);
+    const emit = this.artifactEmitStack.pop() ?? false;
+    if (emit) PdfOperators.endMarkedContent(this.stream);
   }
 
   public measureText(text: string, fontSize: number, fontFamily: string): Size {

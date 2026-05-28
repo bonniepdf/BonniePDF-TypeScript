@@ -123,3 +123,32 @@ export function toPdfTag(role: SemanticRole): string {
   // method and gives one place to land future spec aliases.
   return role;
 }
+
+/**
+ * Returns true for grouping/container roles whose content-stream marker
+ * should be a plain `BMC` (no MCID), as their structure-tree children —
+ * not direct MCIDs — carry the content references.
+ *
+ * ISO 32000-1 §14.7.2: a structure element may contain other structure
+ * elements without any MCID of its own. Emitting nested BDC/MCID pairs
+ * for containers causes "Nested MCID" warnings in veraPDF.
+ */
+export function isContainerRole(role: SemanticRole): boolean {
+  switch (role) {
+    case SemanticRole.Table:
+    case SemanticRole.TR:
+    case SemanticRole.THead:
+    case SemanticRole.TBody:
+    case SemanticRole.TFoot:
+    case SemanticRole.Document:
+    case SemanticRole.Sect:
+    case SemanticRole.Art:
+    case SemanticRole.Div:
+    case SemanticRole.TOC:
+    case SemanticRole.L:
+    case SemanticRole.LI:
+      return true;
+    default:
+      return false;
+  }
+}

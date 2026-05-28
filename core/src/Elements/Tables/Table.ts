@@ -9,6 +9,7 @@ import { BorderColors } from '../../Core/BorderColors';
 import { TextBlock } from '../Text/TextBlock';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
+import { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
 
 /**
  * A table element with support for column weights, cell padding, borders, headers, and footers
@@ -165,21 +166,49 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       ctx.currentY += this.margin.top;
     }
 
+    const tagging = ctx.tagging;
+    // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
+    // the Table for the first fragment, but a continuation fragment after a
+    // page break re-enters with only the page/Document open — so open a Table
+    // here when one isn't already current (PDF/UA 7.2). Guard avoids
+    // double-wrapping the common (already-wrapped) case. A paginated table can
+    // yield one Table per page fragment, which is structurally valid.
+    const ownTable = tagging != null && tagging.tree.current.role !== SemanticRole.Table;
+    if (ownTable) tagging!.tree.begin(SemanticRole.Table);
+    try {
+      return this.renderStatefulRows(ctx, width, tagging);
+    } finally {
+      if (ownTable) tagging!.tree.end();
+    }
+  }
+
+  private renderStatefulRows(ctx: RenderContext, width: number, tagging: TaggingContext | undefined): RenderStatus {
     const contentWidth = this.getContentWidth(width);
     const widths = this.calculateColumnWidths(contentWidth);
+    // PDF/UA 7.2: rows must sit inside a THead/TBody/TFoot row-group. Groups are
+    // opened lazily (only once a row actually renders, so no empty groups) and
+    // closed before every return so the structure tree stays balanced across
+    // pagination.
 
     // Render headers if pending
     if (this.headersPending) {
+      let theadOpen = false;
       for (const headerRow of this.headers) {
         const headerHeight = this.measureRowHeight(headerRow, widths);
 
         if (ctx.currentY + headerHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+          if (theadOpen && tagging) tagging.tree.end();
           return this.lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
         }
 
+        if (!theadOpen && tagging) {
+          tagging.tree.begin(SemanticRole.THead);
+          theadOpen = true;
+        }
         this.renderRowDirect(ctx, headerRow, widths);
       }
 
+      if (theadOpen && tagging) tagging.tree.end();
       this.headersPending = false;
     }
 
@@ -187,39 +216,48 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     const startRow = this.lastRowRendered + 1;
 
     if (startRow >= this.rows.length) {
-      // All data rows rendered - render footers
-      for (const footerRow of this.footers) {
-        this.renderRowDirect(ctx, footerRow, widths);
-      }
-
+      this.renderFootersGrouped(ctx, widths, tagging);
       ctx.currentY += this.margin.bottom;
       return RenderStatus.Complete;
     }
 
     // Render data rows
+    let tbodyOpen = false;
     for (let i = startRow; i < this.rows.length; i++) {
       const row = this.rows[i];
       const rowHeight = this.measureRowHeight(row, widths);
 
       // Pagination check
       if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+        if (tbodyOpen && tagging) tagging.tree.end();
         this.lastRowRendered = i - 1;
         this.headersPending = this.repeatHeadersOnNewPage && this.headers.length > 0;
         return i === startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
       }
 
+      if (!tbodyOpen && tagging) {
+        tagging.tree.begin(SemanticRole.TBody);
+        tbodyOpen = true;
+      }
       this.renderRowDirect(ctx, row, widths);
       this.lastRowRendered = i;
     }
+    if (tbodyOpen && tagging) tagging.tree.end();
 
-    // All data rows rendered - render footers
-    for (const footerRow of this.footers) {
-      this.renderRowDirect(ctx, footerRow, widths);
-    }
-
+    this.renderFootersGrouped(ctx, widths, tagging);
     ctx.currentY += this.margin.bottom;
     this.lastRowRendered = this.rows.length - 1;
     return RenderStatus.Complete;
+  }
+
+  /** Renders footer rows wrapped in a TFoot row-group (PDF/UA 7.2). */
+  private renderFootersGrouped(ctx: RenderContext, widths: number[], tagging: TaggingContext | undefined): void {
+    if (this.footers.length === 0) return;
+    if (tagging) tagging.tree.begin(SemanticRole.TFoot);
+    for (const footerRow of this.footers) {
+      this.renderRowDirect(ctx, footerRow, widths);
+    }
+    if (tagging) tagging.tree.end();
   }
 
   /**
@@ -253,39 +291,77 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   }
 
   protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+    const tagging = ctx.tagging;
+    // Nested tables (rendered inside a container/cell) don't pass through the
+    // pipeline's role wrapper, so they get no Table structure element. Open one
+    // here so the THead/TBody/TFoot groups have a Table parent (PDF/UA 7.2).
+    // Top-level tables use renderStateful instead and are wrapped by the
+    // pipeline, so this path only ever runs for nested tables.
+    if (tagging) tagging.tree.begin(SemanticRole.Table);
+    try {
+      this.renderContentRows(ctx, contentWidth);
+    } finally {
+      if (tagging) tagging.tree.end();
+    }
+  }
+
+  private renderContentRows(ctx: RenderContext, contentWidth: number): void {
     const widths = this.calculateColumnWidths(contentWidth);
     let isFirstPage = true;
     let headersAddedOnNewPage = false;
+    const tagging = ctx.tagging;
 
-    // Render headers
-    for (const row of this.headers) {
-      this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
-    }
-
-    // Render data rows
-    for (const row of this.rows) {
-      const rowHeight = this.measureRowHeight(row, widths);
-
-      // Pagination check
-      if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
-        ctx.newPage();
-        isFirstPage = false;
-
-        // Repeat headers on new page if enabled
-        if (this.repeatHeadersOnNewPage && this.headers.length > 0) {
-          headersAddedOnNewPage = true;
-          for (const headerRow of this.headers) {
-            this.renderRow(ctx, headerRow, widths, false);
-          }
+    // Render headers — grouped under a THead structure element so the rows
+    // satisfy PDF/UA 7.2 (TR must live in Table/THead/TBody/TFoot).
+    if (this.headers.length > 0) {
+      if (tagging) tagging.tree.begin(SemanticRole.THead);
+      try {
+        for (const row of this.headers) {
+          this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
         }
+      } finally {
+        if (tagging) tagging.tree.end();
       }
-
-      this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
     }
 
-    // Render footers
-    for (const row of this.footers) {
-      this.renderRow(ctx, row, widths, isFirstPage);
+    // Render data rows — grouped under TBody.
+    if (this.rows.length > 0) {
+      if (tagging) tagging.tree.begin(SemanticRole.TBody);
+      try {
+        for (const row of this.rows) {
+          const rowHeight = this.measureRowHeight(row, widths);
+
+          // Pagination check
+          if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+            ctx.newPage();
+            isFirstPage = false;
+
+            // Repeat headers on new page if enabled
+            if (this.repeatHeadersOnNewPage && this.headers.length > 0) {
+              headersAddedOnNewPage = true;
+              for (const headerRow of this.headers) {
+                this.renderRow(ctx, headerRow, widths, false);
+              }
+            }
+          }
+
+          this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
+        }
+      } finally {
+        if (tagging) tagging.tree.end();
+      }
+    }
+
+    // Render footers — grouped under TFoot.
+    if (this.footers.length > 0) {
+      if (tagging) tagging.tree.begin(SemanticRole.TFoot);
+      try {
+        for (const row of this.footers) {
+          this.renderRow(ctx, row, widths, isFirstPage);
+        }
+      } finally {
+        if (tagging) tagging.tree.end();
+      }
     }
   }
 
@@ -311,7 +387,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     const tagThisRow = tagging != null;
     if (tagThisRow) {
       tagging!.tree.begin(SemanticRole.TR);
-      ctx.canvas.beginMarkedContent('TR');
+      ctx.canvas.beginContainerContent('TR');
     }
 
     try {
@@ -337,8 +413,13 @@ export class Table extends BorderedElementBase implements IRoleProvider {
         const tagThisCell = tagThisRow;
         if (tagThisCell) {
           tagging!.tree.begin(cellRole);
-          if (cell.columnSpan > 1) {
-            tagging!.tree.setAttributes(`<< /O /Table /ColSpan ${cell.columnSpan} >>`);
+          const cellAttrs: string[] = [];
+          if (cell.columnSpan > 1) cellAttrs.push(`/ColSpan ${cell.columnSpan}`);
+          // PDF/UA 7.5: TH cells need a Scope when the table isn't navigable via
+          // Headers/IDs. Our header rows are column headers → /Scope /Column.
+          if (cellRole === SemanticRole.TH) cellAttrs.push('/Scope /Column');
+          if (cellAttrs.length > 0) {
+            tagging!.tree.setAttributes(`<< /O /Table ${cellAttrs.join(' ')} >>`);
           }
           ctx.canvas.beginMarkedContent(toPdfTag(cellRole));
         }
@@ -454,7 +535,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     const tagThisRow = tagging != null;
     if (tagThisRow) {
       tagging!.tree.begin(SemanticRole.TR);
-      ctx.canvas.beginMarkedContent('TR');
+      ctx.canvas.beginContainerContent('TR');
     }
 
     try {
@@ -477,8 +558,13 @@ export class Table extends BorderedElementBase implements IRoleProvider {
         const tagThisCell = tagThisRow;
         if (tagThisCell) {
           tagging!.tree.begin(cellRole);
-          if (cell.columnSpan > 1) {
-            tagging!.tree.setAttributes(`<< /O /Table /ColSpan ${cell.columnSpan} >>`);
+          const cellAttrs: string[] = [];
+          if (cell.columnSpan > 1) cellAttrs.push(`/ColSpan ${cell.columnSpan}`);
+          // PDF/UA 7.5: TH cells need a Scope when the table isn't navigable via
+          // Headers/IDs. Our header rows are column headers → /Scope /Column.
+          if (cellRole === SemanticRole.TH) cellAttrs.push('/Scope /Column');
+          if (cellAttrs.length > 0) {
+            tagging!.tree.setAttributes(`<< /O /Table ${cellAttrs.join(' ')} >>`);
           }
           ctx.canvas.beginMarkedContent(toPdfTag(cellRole));
         }

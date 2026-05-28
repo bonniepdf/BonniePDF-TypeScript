@@ -153,6 +153,11 @@ export class PdfOperators {
     s.push(`/${role} << /MCID ${mcid} >> BDC\n`);
   }
 
+  /** `/<role> BMC` — begin a container marked-content sequence without an MCID. */
+  public static beginMarkedContentBmc(s: string[], role: string): void {
+    s.push(`/${role} BMC\n`);
+  }
+
   /** `EMC` — end the most recent marked-content sequence. */
   public static endMarkedContent(s: string[]): void {
     s.push('EMC\n');

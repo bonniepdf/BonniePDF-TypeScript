@@ -549,11 +549,12 @@ export class FontWriter {
     }
     this.writeFontFile2(fontFile2Id, fontData);
 
-    // 2. CIDSet (PDF/A-1b)
+    // 2. CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap domain
+    //    (0..maxOriginalGid) — see buildCIDSetData.
     let cidSetId = 0;
-    if (enableSubsetting) {
+    if (enableSubsetting && subsetter) {
       cidSetId = this.writer.getNewId();
-      this.writeCIDSet(cidSetId, tracker.getUsedGlyphIds());
+      this.writeCIDSet(cidSetId, subsetter.maxOriginalGid);
     }
 
     // 3. FontDescriptor
@@ -600,17 +601,26 @@ export class FontWriter {
     this.writer.writeCompressedBinaryObject(id, new Map([['/Length1', fontData.length.toString()]]), fontData);
   }
 
-  private writeCIDSet(id: number, usedGlyphIds: ReadonlySet<number>): void {
-    this.writer.writeCompressedBinaryObject(id, new Map(), this.buildCIDSetData(usedGlyphIds));
+  private writeCIDSet(id: number, maxCid: number): void {
+    this.writer.writeCompressedBinaryObject(id, new Map(), this.buildCIDSetData(maxCid));
   }
 
-  private buildCIDSetData(usedGlyphIds: ReadonlySet<number>): Uint8Array {
-    let maxCid = 0;
-    for (const gid of usedGlyphIds) if (gid > maxCid) maxCid = gid;
+  /**
+   * Builds the CIDSet bit-field for a CIDFontType2 subset.
+   *
+   * The CIDSet must mirror the CIDToGIDMap's domain (CIDs 0..maxCid). VeraPDF
+   * (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" — an
+   * unmapped CIDToGIDMap entry points at GID 0, which is < numGlyphs — and
+   * requires the CIDSet to mark all of them, so set every bit 0..maxCid.
+   */
+  private buildCIDSetData(maxCid: number): Uint8Array {
+    if (maxCid < 0) return new Uint8Array(0);
     const byteCount = Math.floor(maxCid / 8) + 1;
-    const data = new Uint8Array(byteCount);
-    for (const cid of usedGlyphIds) {
-      data[Math.floor(cid / 8)] |= 1 << (7 - (cid % 8));
+    const data = new Uint8Array(byteCount).fill(0xff);
+    // Zero bits past maxCid in the final byte so the bitset length is maxCid+1.
+    const bitsInLastByte = (maxCid % 8) + 1;
+    if (bitsInLastByte < 8) {
+      data[byteCount - 1] = (0xff << (8 - bitsInLastByte)) & 0xff;
     }
     return data;
   }

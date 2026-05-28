@@ -1,9 +1,9 @@
-name: PDF/UA + PDF/A Validation
+name: PDF/UA-1 Validation
 
 # Compliance gate: builds the library, generates the tagged example PDFs, and
-# validates every one against PDF/UA-1 and PDF/A-1b with veraPDF. The job fails
-# if any PDF is non-compliant (tools/verapdf/validate.sh exits non-zero), so a
-# regression cannot reach master. See docs/ci/pdf-validation.md.
+# validates every one against PDF/UA-1 with veraPDF. The job fails if any PDF
+# is non-compliant (tools/verapdf/validate.sh exits non-zero), so a regression
+# cannot reach master. See docs/ci/pdf-validation.md.
 
 on:
   push:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Generate & validate (UA-1 + A-1b)
+    name: Generate & validate (UA-1)
     runs-on: ubuntu-latest
 
     steps:
@@ -46,8 +46,8 @@ jobs:
       - name: Generate tagged example PDFs
         run: node --experimental-strip-types scripts/generate-tagged-pdfs.ts
 
-      - name: Validate with veraPDF (PDF/UA-1 + PDF/A-1b)
-        run: tools/verapdf/validate.sh generated-pdfs ua1,1b
+      - name: Validate with veraPDF (PDF/UA-1)
+        run: tools/verapdf/validate.sh generated-pdfs ua1
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4

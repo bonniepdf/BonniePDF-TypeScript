@@ -113,7 +113,6 @@ export function generate(): Document {
 
   const settings = new DocumentSettings(PdfSize.a4, 36);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-US';
 

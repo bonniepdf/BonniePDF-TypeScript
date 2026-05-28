@@ -4,6 +4,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { generate as simpleDocumentTagged } from '../examples/src/basic/simple-document-tagged.ts';
 import { generate as businessInvoice } from '../examples/src/templates/business-invoice.ts';
+import { generate as imagesTagged } from '../examples/src/elements/images-tagged.ts';
 
 const outDir = resolve(import.meta.dirname, '..', 'generated-pdfs');
 mkdirSync(outDir, { recursive: true });
@@ -11,6 +12,7 @@ mkdirSync(outDir, { recursive: true });
 const taggedExamples = [
   { filename: 'simple-document-tagged.pdf', generate: simpleDocumentTagged },
   { filename: 'business-invoice.pdf', generate: businessInvoice },
+  { filename: 'images-tagged.pdf', generate: imagesTagged },
 ];
 
 console.log(`Generating PDF/UA-1 examples to ${outDir}`);

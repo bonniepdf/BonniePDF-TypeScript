@@ -51,7 +51,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
       this.drawBackground(ctx, ctx.currentX, ctx.currentY, contentWidth, totalHeight, this.backgroundColor);
     }
 
-    if (this.hasAnyBorder()) {
+    if (this.border.hasAnyBorder) {
       const totalHeight = this.measureContentHeight(contentWidth);
       this.drawBorder(ctx, ctx.currentX, ctx.currentY, contentWidth, totalHeight);
     }

@@ -12,6 +12,7 @@ import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
 import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
 import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
 import { SRgbIccProfile } from '../../Metadata/SRgbIccProfile';
+import { DiagnosticsCollector } from '../../Core/Diagnostics';
 
 /**
  * Build the list of conformance-namespace blocks the document claims,
@@ -502,7 +503,10 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
  * Matches the C# FontWriter class (sync path only; async path delegates to this).
  */
 export class FontWriter {
-  constructor(private readonly writer: IPdfWriter) {
+  constructor(
+    private readonly writer: IPdfWriter,
+    private readonly diagnostics: DiagnosticsCollector = new DiagnosticsCollector()
+  ) {
     if (!writer) throw new Error('FontWriter: writer cannot be null');
   }
 
@@ -541,9 +545,23 @@ export class FontWriter {
     let fontData: Uint8Array;
     let subsetter: TtfSubsetter | null = null;
     if (enableSubsetting) {
-      subsetter = new TtfSubsetter(font);
-      const usedGlyphIds = new Set<number>(tracker.getUsedGlyphIds() as ReadonlySet<number>);
-      fontData = subsetter.createSubset(usedGlyphIds, tracker.getUsedCharToGlyphMap());
+      try {
+        subsetter = new TtfSubsetter(font);
+        const usedGlyphIds = new Set<number>(tracker.getUsedGlyphIds() as ReadonlySet<number>);
+        fontData = subsetter.createSubset(usedGlyphIds, tracker.getUsedCharToGlyphMap());
+      } catch (err) {
+        // Subsetting failed — fall back to embedding the full font with an
+        // Identity CIDToGIDMap so original GIDs from the content stream map
+        // directly to glyphs in the (un-subsetted) font file.
+        this.diagnostics.addWarning(
+          'font-subset',
+          `Font subsetting failed, embedding full font: ${(err as Error).message}`,
+          font.filePath,
+          err
+        );
+        subsetter = null;
+        fontData = font.getRawFontData();
+      }
     } else {
       fontData = font.getRawFontData();
     }

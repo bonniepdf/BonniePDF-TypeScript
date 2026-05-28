@@ -122,6 +122,13 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   }
 
   /**
+   * Are any borders applied
+   */
+  protected hasAnyBorder(): boolean {
+    return this.border.top > 0 || this.border.bottom > 0 || this.border.left > 0 || this.border.right > 0;
+  }
+
+  /**
    * Calculates the total width occupied by horizontal borders (left + right).
    */
   protected getHorizontalBorderWidth(): number {

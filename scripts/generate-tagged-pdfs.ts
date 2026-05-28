@@ -20,5 +20,6 @@ for (const { filename, generate } of taggedExamples) {
   const doc = generate();
   const outPath = resolve(outDir, filename);
   writeFileSync(outPath, doc.generateBytes());
+  if (doc.diagnostics.length > 0) doc.printDiagnostics();
   console.log(`  ✓ ${filename}`);
 }

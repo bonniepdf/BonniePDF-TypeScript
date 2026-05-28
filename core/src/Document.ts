@@ -10,6 +10,7 @@ import { PdfWriter } from './Rendering/Writers/PdfWriter';
 import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
 import { TextElementBase } from './Elements/Text/TextElementBase';
+import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 
 /**
  * High-level entry point for creating PDF documents.
@@ -18,9 +19,30 @@ import { TextElementBase } from './Elements/Text/TextElementBase';
 export class Document {
   private readonly _pages: Page[] = [];
   private _disposed = false;
+  private readonly _diagnostics: DiagnosticsCollector = new DiagnosticsCollector();
 
   public settings: DocumentSettings;
   public metadata: DocumentMetadata;
+
+  /**
+   * Recoverable issues collected during the most recent `generateBytes` /
+   * `generateBytesAsync` call — typically font load failures or subset
+   * fallbacks. Empty before generation. Call {@link printDiagnostics} to
+   * surface them via console, or inspect directly to feed into custom UI
+   * / telemetry.
+   */
+  public get diagnostics(): readonly IDiagnostic[] {
+    return this._diagnostics.all;
+  }
+
+  /**
+   * Convenience: writes each diagnostic to `console.error` / `console.warn`
+   * / `console.info` according to its severity. Library code never calls
+   * this implicitly — callers opt in.
+   */
+  public printDiagnostics(): void {
+    this._diagnostics.print();
+  }
 
   /** Creates a new document with default settings and an empty first page. */
   constructor();
@@ -131,10 +153,11 @@ export class Document {
    * (AES-256 encryption requires saveAsync).
    */
   public generateBytes(): Uint8Array {
+    this._diagnostics.clear();
     this.applyDefaultStyleToTree();
     this.validateSettings();
     const writer = new PdfWriter(this.settings.version);
-    const serializer = new PdfDocumentSerializer(this);
+    const serializer = new PdfDocumentSerializer(this, this._diagnostics);
     serializer.serialize(writer);
     return writer.toUint8Array();
   }
@@ -154,10 +177,11 @@ export class Document {
    * browser context.
    */
   public async generateBytesAsync(): Promise<Uint8Array> {
+    this._diagnostics.clear();
     this.applyDefaultStyleToTree();
     this.validateSettings();
     const writer = new PdfWriter(this.settings.version);
-    const serializer = new PdfDocumentSerializer(this);
+    const serializer = new PdfDocumentSerializer(this, this._diagnostics);
     await serializer.serializeAsync(writer);
     return writer.toUint8Array();
   }

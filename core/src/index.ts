@@ -3,6 +3,7 @@ export * from './Core/Units';
 export * from './Core/Size';
 export * from './Core/Point';
 export * from './Core/Color';
+export * from './Core/Diagnostics';
 export * from './Core/Border';
 export * from './Core/BorderStyle';
 export * from './Core/BorderColors';

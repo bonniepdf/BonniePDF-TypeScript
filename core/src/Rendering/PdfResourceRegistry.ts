@@ -10,11 +10,19 @@ import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { FontManager } from '../Typography/FontManager';
 import { FontMetrics } from '../Typography/FontMetrics';
+import { DiagnosticsCollector } from '../Core/Diagnostics';
 
 export class PdfResourceRegistry {
   private fontCounter = 0;
   private imageCounter = 0;
   public pdfAEnabled = false;
+
+  /**
+   * Collector that receives recoverable failures encountered while loading
+   * or embedding resources. Wired by Document; defaults to a private
+   * collector so non-Document callers still get a usable instance.
+   */
+  public diagnostics: DiagnosticsCollector = new DiagnosticsCollector();
 
   public fontAliasMap: Map<string, string> = new Map();
   public fontNameMap: Map<string, string> = new Map();
@@ -98,7 +106,12 @@ export class PdfResourceRegistry {
       } catch (err) {
         // Not loadable synchronously (file missing, parse error, browser env, etc.).
         // The document will still render; the font falls back to a standard Type1.
-        console.warn(`[BonniePDF] Could not load embedded font "${filePath}": ${(err as Error).message}`);
+        // In the browser the async preload path (preloadEmbeddedFont) retries via fetch,
+        // so suppress this diagnostic when the failure is the expected "Node-only" path.
+        const msg = (err as Error).message;
+        if (!msg.includes('only available in Node.js')) {
+          this.diagnostics.addWarning('font', `Could not load embedded font: ${msg}`, filePath, err);
+        }
       }
 
       this.fontCounter++;
@@ -150,9 +163,16 @@ export class PdfResourceRegistry {
     if (!info) return; // not registered — nothing to do
     if (info.font instanceof TtfFont) return; // already loaded
 
-    const font = await TtfFont.fromFile(filePath);
-    info.font = font;
-    info.tracker = new GlyphUsageTracker(font);
+    try {
+      const font = await TtfFont.fromFile(filePath);
+      info.font = font;
+      info.tracker = new GlyphUsageTracker(font);
+    } catch (err) {
+      // Don't reject the whole render — record the failure so the caller can
+      // surface it via `Document.diagnostics`, and leave the font with no
+      // tracker so the renderer falls back to the nearest standard Type1.
+      this.diagnostics.addError('font', `Failed to preload embedded font: ${(err as Error).message}`, filePath, err);
+    }
   }
 
   /**
@@ -173,7 +193,7 @@ export class PdfResourceRegistry {
         font = TtfFont.loadFromBytes(bytes);
         tracker = new GlyphUsageTracker(font);
       } catch (err) {
-        console.warn(`[BonniePDF] Could not parse font bytes for "${key}": ${(err as Error).message}`);
+        this.diagnostics.addWarning('font', `Could not parse font bytes: ${(err as Error).message}`, key, err);
       }
 
       this.fontCounter++;
@@ -324,7 +344,7 @@ export class PdfResourceRegistry {
    * and returns the /Resources dictionary string for embedding in page dictionaries.
    */
   public writeResources(writer: IPdfWriter, totalPages: number): string {
-    const fontWriter = new FontWriter(writer);
+    const fontWriter = new FontWriter(writer, this.diagnostics);
     const imageWriter = new ImageWriter(writer);
     imageWriter.pdfAEnabled = this.pdfAEnabled;
 

@@ -4,9 +4,13 @@ import { TtfFont } from '../../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../../Typography/GlyphUsageTracker';
 import { TtfSubsetter } from '../../Typography/TrueType/TtfSubsetter';
 import { ToUnicodeCMapBuilder } from '../../Typography/TrueType/ToUnicodeCMapBuilder';
+import { DiagnosticsCollector } from '../../Core/Diagnostics';
 
 export class FontWriter {
-  constructor(private writer: IPdfWriter | IAsyncPdfWriter) {}
+  constructor(
+    private writer: IPdfWriter | IAsyncPdfWriter,
+    private diagnostics: DiagnosticsCollector = new DiagnosticsCollector()
+  ) {}
 
   public writeType1Font(id: number, fontName: string): void {
     if ('writeObject' in this.writer) {
@@ -79,7 +83,12 @@ export class FontWriter {
         // Subsetting failed — fall back to embedding the full font with an
         // Identity CIDToGIDMap so original GIDs from the content stream map
         // directly to glyphs in the (un-subsetted) font file.
-        console.warn('[BonniePDF] Font subsetting failed, embedding full font:', (err as Error).message);
+        this.diagnostics.addWarning(
+          'font-subset',
+          `Font subsetting failed, embedding full font: ${(err as Error).message}`,
+          font.filePath,
+          err
+        );
         fontData = font.getRawFontData();
         cidToGidMapRef = '/Identity';
       }
@@ -165,7 +174,12 @@ export class FontWriter {
         cidToGidMapMaxCid = subsetter.maxOriginalGid;
         cidToGidMapRef = `${cidToGidMapId} 0 R`;
       } catch (err) {
-        console.warn('[BonniePDF] Font subsetting failed, embedding full font:', (err as Error).message);
+        this.diagnostics.addWarning(
+          'font-subset',
+          `Font subsetting failed, embedding full font: ${(err as Error).message}`,
+          font.filePath,
+          err
+        );
         fontData = font.getRawFontData();
         cidToGidMapRef = '/Identity';
       }

@@ -2,8 +2,8 @@ import { Document } from '../Document';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { PdfResourceRegistry } from './PdfResourceRegistry';
+import { DiagnosticsCollector } from '../Core/Diagnostics';
 import {
-  PdfWriter,
   AsyncPdfWriter,
   MetadataWriter,
   NavigationWriter,
@@ -21,7 +21,10 @@ import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 
 export class PdfDocumentSerializer {
-  constructor(private document: Document) {}
+  constructor(
+    private document: Document,
+    private diagnostics: DiagnosticsCollector = new DiagnosticsCollector()
+  ) {}
 
   /**
    * Serializes the document synchronously to the provided writer.
@@ -58,6 +61,7 @@ export class PdfDocumentSerializer {
     // 2. Initialize render context (inject pre-loaded resources when available)
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
+    ctx.resources.diagnostics = this.diagnostics;
     ctx.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
 
     // PDF/UA tagging context — shared between the render pipeline
@@ -336,6 +340,7 @@ export class PdfDocumentSerializer {
 
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
+    preRegistry.diagnostics = this.diagnostics;
     preRegistry.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
     for (const path of embeddedPaths) {
       preRegistry.registerFont(path); // registers with font=null initially

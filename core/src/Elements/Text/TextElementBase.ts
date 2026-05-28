@@ -28,7 +28,22 @@ export abstract class TextElementBase extends ElementBase {
   public fontFamily?: string;
   public weight: FontWeight = FontWeight.Normal;
   public isItalic = false;
-  public fontName: string = StandardFonts.Helvetica;
+
+  private _fontName: string = StandardFonts.Helvetica;
+
+  /**
+   * The TTF/OTF path or PDF standard font name for rendering.
+   * Assigning marks the font as explicitly set, so the document-level
+   * defaultTextStyle cascade will not override it.
+   */
+  public get fontName(): string {
+    return this._fontName;
+  }
+  public set fontName(value: string) {
+    this._fontName = value;
+    this.fontFamily = undefined;
+    this._fontExplicit = true;
+  }
 
   /** True once user code explicitly sets any font-related property. */
   private _fontExplicit = false;
@@ -143,11 +158,11 @@ export abstract class TextElementBase extends ElementBase {
    * Setting this directly clears FontFamily.
    */
   public get FontName(): string {
-    return this.fontName;
+    return this._fontName;
   }
 
   public set FontName(value: string) {
-    this.fontName = value;
+    this._fontName = value;
     this.fontFamily = undefined;
     this._fontExplicit = true;
   }
@@ -220,8 +235,11 @@ export abstract class TextElementBase extends ElementBase {
    * enabling .Bold() and .Italic() to work without an explicit .Font() call.
    */
   private resolveFontName(): void {
-    const family = this.fontFamily ?? this.fontName;
-    this.fontName = FontFamilyResolver.resolve(family, this.weight, this.isItalic);
+    const family = this.fontFamily ?? this._fontName;
+    // Write to the backing field directly so the default-style cascade
+    // (which calls resolveFontName via applyDefaultStyleIfNotSet) does not
+    // mark the font as explicitly set.
+    this._fontName = FontFamilyResolver.resolve(family, this.weight, this.isItalic);
   }
 
   // ── Line height ───────────────────────────────────────────────────────────

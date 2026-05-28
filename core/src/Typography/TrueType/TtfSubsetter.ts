@@ -78,7 +78,7 @@ export class TtfSubsetter {
     this.copyTableIfPresent(newTables, 'cvt ');
     this.copyTableIfPresent(newTables, 'fpgm');
     this.copyTableIfPresent(newTables, 'prep');
-    this.copyTableIfPresent(newTables, 'post');
+    this.buildPostTableIfPresent(newTables);
     this.copyTableIfPresent(newTables, 'name');
     this.copyTableIfPresent(newTables, 'OS/2');
 
@@ -706,6 +706,31 @@ export class TtfSubsetter {
     } while ((flags & MORE_COMPONENTS) !== 0);
 
     return result;
+  }
+
+  /**
+   * Emits a format 3.0 'post' table (32-byte header, no glyph-name array).
+   *
+   * A format 2.0 'post' table carries its own numberOfGlyphs field reflecting
+   * the original glyph count, which no longer matches the subset's rewritten
+   * 'maxp' numGlyphs — veraPDF flags that mismatch. Glyph names are not used
+   * for embedded PDF fonts (text extraction relies on the ToUnicode CMap), so
+   * downgrading to format 3.0 drops the names and resolves the discrepancy.
+   */
+  private buildPostTableIfPresent(newTables: Map<string, Uint8Array>): void {
+    const info = this.tables.get('post');
+    if (!info || info.length < 32) return;
+
+    const data = new Uint8Array(32);
+    data.set(this.originalData.subarray(info.offset, info.offset + 32));
+
+    // version = 3.0 (0x00030000)
+    data[0] = 0x00;
+    data[1] = 0x03;
+    data[2] = 0x00;
+    data[3] = 0x00;
+
+    newTables.set('post', data);
   }
 
   private copyTableIfPresent(newTables: Map<string, Uint8Array>, tag: string): void {

@@ -22,7 +22,16 @@
  * Without the fonts at those paths the example falls back to a console
  * warning and renders .notdef boxes for missing glyphs.
  */
-import { Document, DocumentSettings, DocumentMetadata, PdfVersion, TextBlock, Color, Thickness } from '@bonniepdf/core';
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfVersion,
+  TextBlock,
+  Color,
+  Thickness,
+  TextStyle,
+} from '@bonniepdf/core';
 
 // Fonts served as static assets from public/fonts/
 const TEXT_FONT = '/fonts/NotoSans-Regular.ttf'; // Latin, Greek, Cyrillic, currency

@@ -151,8 +151,9 @@ describe('Table tagging', () => {
     expect(streams.length).toBeGreaterThanOrEqual(1);
     for (const s of streams) {
       const bdc = countSubstring(s, 'BDC');
+      const bmc = countSubstring(s, 'BMC');
       const emc = countSubstring(s, 'EMC');
-      expect(bdc).toBe(emc);
+      expect(bdc + bmc).toBe(emc);
     }
   });
 });

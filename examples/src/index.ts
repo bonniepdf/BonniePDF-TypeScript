@@ -4,16 +4,27 @@ import { generate as simpleDocumentTagged } from './basic/simple-document-tagged
 import { generate as margins } from './basic/margins';
 import { generate as pageSettings } from './basic/page-settings';
 import { generate as headersFooters } from './layout/headers-footers';
+import { generate as headersFootersTagged } from './layout/headers-footers-tagged';
 import { generate as horizontalStacks } from './layout/horizontal-stacks';
+import { generate as horizontalStacksTagged } from './layout/horizontal-stacks-tagged';
 import { generate as textBlockOverflow } from './layout/text-block-overflow';
+import { generate as textBlockOverflowTagged } from './layout/text-block-overflow-tagged';
 import { generate as verticalStackOverflow } from './layout/vertical-stack-overflow';
+import { generate as verticalStackOverflowTagged } from './layout/vertical-stack-overflow-tagged';
 import { generate as multiPageFlow } from './layout/multi-page-flow';
+import { generate as multiPageFlowTagged } from './layout/multi-page-flow-tagged';
 import { generate as textAlignment } from './typography/text-alignment';
+import { generate as textAlignmentTagged } from './typography/text-alignment-tagged';
 import { generate as bookPageLayout } from './typography/book-page-layout';
+import { generate as bookPageLayoutTagged } from './typography/book-page-layout-tagged';
 import { generate as richTextStyles } from './typography/rich-text-styles';
+import { generate as richTextStylesTagged } from './typography/rich-text-styles-tagged';
 import { generate as textDecorations } from './typography/text-decorations';
+import { generate as textDecorationsTagged } from './typography/text-decorations-tagged';
 import { generate as customFonts } from './typography/custom-fonts';
+import { generate as customFontsTagged } from './typography/custom-fonts-tagged';
 import { generate as emojisAndUnicode } from './typography/emojis-and-unicode';
+import { generate as emojisAndUnicodeTagged } from './typography/emojis-and-unicode-tagged';
 import { generate as dickensNovel } from './typography/dickens-novel';
 import { generate as lists } from './elements/lists';
 import { generate as listsTagged } from './elements/lists-tagged';
@@ -118,6 +129,17 @@ function layoutExamples(): ExampleDef[] {
       dotnetClass: 'HeadersFootersExample',
     },
     {
+      id: 'headers-footers-tagged',
+      name: 'Headers & Footers (PDF/UA-1)',
+      category: 'Layout',
+      description:
+        'PDF/UA-1 tagged variant — running header and footer are Artifacts; body sections use /H2 headings and /P paragraphs.',
+      filename: 'headers-footers-tagged.pdf',
+      generate: headersFootersTagged,
+      dotnetClass: 'HeadersFootersTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'horizontal-stacks',
       name: 'Horizontal Stacks',
       category: 'Layout',
@@ -126,6 +148,18 @@ function layoutExamples(): ExampleDef[] {
       generate: horizontalStacks,
       thumbnails: false,
       dotnetClass: 'HorizontalStacksExample',
+    },
+    {
+      id: 'horizontal-stacks-tagged',
+      name: 'Horizontal Stacks (PDF/UA-1)',
+      category: 'Layout',
+      description:
+        'PDF/UA-1 tagged variant — equal-width, weighted, key-value pair, and two-column stack layouts, all with /H2 section headings.',
+      filename: 'horizontal-stacks-tagged.pdf',
+      generate: horizontalStacksTagged,
+      thumbnails: false,
+      dotnetClass: 'HorizontalStacksTaggedExample',
+      pdfUa1: true,
     },
     {
       id: 'text-block-overflow',
@@ -137,6 +171,17 @@ function layoutExamples(): ExampleDef[] {
       dotnetClass: 'TextBlockOverflowExample',
     },
     {
+      id: 'text-block-overflow-tagged',
+      name: 'TextBlock Overflow (PDF/UA-1)',
+      category: 'Layout',
+      description:
+        'PDF/UA-1 tagged variant — twenty /H2-headed sections of body text flowing across pages with an Artifact page-number footer.',
+      filename: 'text-block-overflow-tagged.pdf',
+      generate: textBlockOverflowTagged,
+      dotnetClass: 'TextBlockOverflowTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'vertical-stack-overflow',
       name: 'VerticalStack Overflow',
       category: 'Layout',
@@ -146,13 +191,37 @@ function layoutExamples(): ExampleDef[] {
       dotnetClass: 'VerticalStackOverflowExample',
     },
     {
+      id: 'vertical-stack-overflow-tagged',
+      name: 'VerticalStack Overflow (PDF/UA-1)',
+      category: 'Layout',
+      description:
+        'PDF/UA-1 tagged variant — 75-item catalogue, each item with a /H3 heading and /P description inside a paginating VerticalStack.',
+      filename: 'vertical-stack-overflow-tagged.pdf',
+      generate: verticalStackOverflowTagged,
+      dotnetClass: 'VerticalStackOverflowTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'multi-page-flow',
       name: 'Multi-Page Flow',
       category: 'Layout',
-      description: 'Landscape document combining a 150-row table with repeating headers and multi-page text sections.',
+      description:
+        'PDF/UA-1 tagged landscape document combining a 150-row table with repeating headers and multi-page text sections.',
       filename: 'multi-page-flow.pdf',
       generate: multiPageFlow,
       dotnetClass: 'MultiPageFlowExample',
+      pdfUa1: true,
+    },
+    {
+      id: 'multi-page-flow-tagged',
+      name: 'Multi-Page Flow (PDF/UA-1)',
+      category: 'Layout',
+      description:
+        'PDF/UA-1 tagged document with a 30-row employee table (repeating /TH headers) followed by /H2-headed company overview sections.',
+      filename: 'multi-page-flow-tagged.pdf',
+      generate: multiPageFlowTagged,
+      dotnetClass: 'MultiPageFlowTaggedExample',
+      pdfUa1: true,
     },
   ];
 }
@@ -170,6 +239,18 @@ function typographyExamples(): ExampleDef[] {
       dotnetClass: null,
     },
     {
+      id: 'text-alignment-tagged',
+      name: 'Text Alignment (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — all four alignments demonstrated with /H2 section headings and /P paragraphs.',
+      filename: 'text-alignment-tagged.pdf',
+      generate: textAlignmentTagged,
+      thumbnails: false,
+      dotnetClass: 'TextAlignmentTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'book-page-layout',
       name: 'Book Page Layout',
       category: 'Typography',
@@ -180,6 +261,18 @@ function typographyExamples(): ExampleDef[] {
       dotnetClass: 'BookPageLayoutExample',
     },
     {
+      id: 'book-page-layout-tagged',
+      name: 'Book Page Layout (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — chapter title as /H1, body paragraphs as /P, and a pull-quote block with bordered container.',
+      filename: 'book-page-layout-tagged.pdf',
+      generate: bookPageLayoutTagged,
+      thumbnails: false,
+      dotnetClass: 'BookPageLayoutTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'rich-text-styles',
       name: 'Rich Text Styles',
       category: 'Typography',
@@ -188,6 +281,17 @@ function typographyExamples(): ExampleDef[] {
       filename: 'rich-text-styles.pdf',
       generate: richTextStyles,
       dotnetClass: 'RichTextExample',
+    },
+    {
+      id: 'rich-text-styles-tagged',
+      name: 'Rich Text Styles (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — bold, italic, coloured, underlined, and strikethrough spans with /H2 section headings.',
+      filename: 'rich-text-styles-tagged.pdf',
+      generate: richTextStylesTagged,
+      dotnetClass: 'RichTextTaggedExample',
+      pdfUa1: true,
     },
     {
       id: 'text-decorations',
@@ -201,6 +305,18 @@ function typographyExamples(): ExampleDef[] {
       dotnetClass: 'TextDecorationExample',
     },
     {
+      id: 'text-decorations-tagged',
+      name: 'Text Decorations (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — underline, strikethrough, and combined decorations with /H2 section headings and /P paragraphs.',
+      filename: 'text-decorations-tagged.pdf',
+      generate: textDecorationsTagged,
+      thumbnails: false,
+      dotnetClass: 'TextDecorationTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'custom-fonts',
       name: 'Custom Fonts',
       category: 'Typography',
@@ -210,6 +326,18 @@ function typographyExamples(): ExampleDef[] {
       generate: customFonts,
       thumbnails: false,
       dotnetClass: 'CustomFontExample',
+    },
+    {
+      id: 'custom-fonts-tagged',
+      name: 'Custom Fonts (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — TrueType Unicode coverage (symbols, currency, math, Greek) with /H2 section headings.',
+      filename: 'custom-fonts-tagged.pdf',
+      generate: customFontsTagged,
+      thumbnails: false,
+      dotnetClass: 'CustomFontTaggedExample',
+      pdfUa1: true,
     },
     {
       id: 'emojis-and-unicode',
@@ -222,14 +350,27 @@ function typographyExamples(): ExampleDef[] {
       dotnetClass: 'EmojiExample',
     },
     {
+      id: 'emojis-and-unicode-tagged',
+      name: 'Emojis & Unicode (PDF/UA-1)',
+      category: 'Typography',
+      description:
+        'PDF/UA-1 tagged variant — emoji and supplementary Unicode sections with /H2 headings. PDF/A disabled; PDF/UA-1 enabled.',
+      filename: 'emojis-and-unicode-tagged.pdf',
+      generate: emojisAndUnicodeTagged,
+      thumbnails: false,
+      dotnetClass: 'EmojiTaggedExample',
+      pdfUa1: true,
+    },
+    {
       id: 'dickens-novel',
       name: 'Dickens: A Tale of Two Cities',
       category: 'Typography',
       description:
-        'Multi-hundred-page book layout with VisualToc, alternating running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
+        'PDF/UA-1 tagged book layout with VisualToc, artifacted running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
       filename: 'dickens-novel.pdf',
       generate: dickensNovel,
       dotnetClass: 'DickensNovelExample',
+      pdfUa1: true,
     },
   ];
 }
@@ -317,10 +458,11 @@ function chartingExamples(): ExampleDef[] {
       name: 'Chart Showcase',
       category: 'Charting',
       description:
-        'Eight-page landscape showcase of all chart types: bar, grouped bar, line, area, lollipop, dot plot, pie, and multi-series line.',
+        'PDF/UA-1 tagged eight-page landscape showcase of all chart types, each tagged as a Figure with alt text.',
       filename: 'chart-showcase.pdf',
       generate: chartShowcase,
       dotnetClass: 'ChartShowcaseExample',
+      pdfUa1: true,
     },
     {
       id: 'bar-chart',
@@ -331,6 +473,7 @@ function chartingExamples(): ExampleDef[] {
       generate: barChart,
       dotnetClass: 'BarChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'grouped-bar-chart',
@@ -341,6 +484,7 @@ function chartingExamples(): ExampleDef[] {
       generate: groupedBarChart,
       dotnetClass: 'GroupedBarChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'line-chart',
@@ -351,6 +495,7 @@ function chartingExamples(): ExampleDef[] {
       generate: lineChart,
       dotnetClass: 'LineChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'area-chart',
@@ -361,6 +506,7 @@ function chartingExamples(): ExampleDef[] {
       generate: areaChart,
       dotnetClass: 'AreaChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'lollipop-chart',
@@ -371,6 +517,7 @@ function chartingExamples(): ExampleDef[] {
       generate: lollipopChart,
       dotnetClass: 'LollipopChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'dot-plot-chart',
@@ -381,6 +528,7 @@ function chartingExamples(): ExampleDef[] {
       generate: dotPlotChart,
       dotnetClass: 'DotPlotChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'pie-chart',
@@ -391,6 +539,7 @@ function chartingExamples(): ExampleDef[] {
       generate: pieChart,
       dotnetClass: 'PieChartExample',
       thumbnails: false,
+      pdfUa1: true,
     },
     {
       id: 'multi-series-line-chart',
@@ -402,6 +551,7 @@ function chartingExamples(): ExampleDef[] {
       // .NET implements this as a private method inside ChartShowcaseExample
       dotnetClass: null,
       thumbnails: false,
+      pdfUa1: true,
     },
   ];
 }
@@ -477,6 +627,7 @@ function templatesExamples(): ExampleDef[] {
       generate: financialDashboard,
       dotnetClass: null,
       thumbnails: false,
+      pdfUa1: true,
     },
   ];
 }

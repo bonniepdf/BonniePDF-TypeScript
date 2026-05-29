@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -155,11 +156,17 @@ function addBarChart(doc: Document): void {
   chart.height = 400;
   chart.stretchToFit = true;
   chart.barColor = Color.fromHex(C_INDIGO);
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
+    )
+  );
 }
 
 function addGroupedBarChart(doc: Document): void {
@@ -209,10 +216,16 @@ function addGroupedBarChart(doc: Document): void {
   chart.height = 400;
   chart.stretchToFit = true;
   chart.showValueLabels = true;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new GroupedBarChartElement(chart, data));
+  doc.add(
+    new GroupedBarChartElement(
+      chart,
+      data,
+      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.'
+    )
+  );
 }
 
 function addLineChart(doc: Document): void {
@@ -230,13 +243,15 @@ function addLineChart(doc: Document): void {
   chart.stretchToFit = true;
   chart.lineColor = Color.fromHex(C_VIOLET);
   chart.lineWidth = 2.5;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(chart, data, 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.')
+  );
 }
 
 function addAreaChart(doc: Document): void {
@@ -255,12 +270,18 @@ function addAreaChart(doc: Document): void {
   chart.areaColor = Color.fromHex(C_PURPLE);
   chart.fillOpacity = 0.3;
   chart.lineWidth = 2.5;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
+    )
+  );
 }
 
 function addLollipopChart(doc: Document): void {
@@ -279,12 +300,18 @@ function addLollipopChart(doc: Document): void {
   chart.lollipopColor = Color.fromHex(C_PINK);
   chart.stemWidth = 2.5;
   chart.headRadius = 10;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
+    )
+  );
 }
 
 function addDotPlotChart(doc: Document): void {
@@ -302,12 +329,14 @@ function addDotPlotChart(doc: Document): void {
   chart.stretchToFit = true;
   chart.dotColor = Color.fromHex(C_TEAL);
   chart.dotRadius = 12;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')
+  );
 }
 
 function addPieChart(doc: Document): void {
@@ -328,7 +357,13 @@ function addPieChart(doc: Document): void {
   chart.colors = ALL_COLORS;
   chart.backgroundColor = Color.white;
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
+    )
+  );
 }
 
 function addMultiSeriesLineChart(doc: Document): void {
@@ -367,13 +402,15 @@ function addMultiSeriesLineChart(doc: Document): void {
   const chart = new LineChart();
   chart.height = 400;
   chart.stretchToFit = true;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex(CHART_BG);
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(chart, data, `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`)
+  );
 }
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -381,7 +418,8 @@ function addMultiSeriesLineChart(doc: Document): void {
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();

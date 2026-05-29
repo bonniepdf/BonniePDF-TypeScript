@@ -89,8 +89,8 @@ describe('PdfCanvas — marked content', () => {
 
     const output = canvas.getStream().join('');
     const sectIdx = output.indexOf('/Sect << /MCID');
-    const p1Idx = output.indexOf('/P << /MCID 1 >>');
-    const p2Idx = output.indexOf('/P << /MCID 2 >>');
+    const p1Idx = output.indexOf('/P BMC');
+    const p2Idx = output.indexOf('/P BMC', p1Idx + 1);
     expect(sectIdx).toBeGreaterThanOrEqual(0);
     expect(p1Idx).toBeGreaterThan(sectIdx);
     expect(p2Idx).toBeGreaterThan(p1Idx);

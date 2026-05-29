@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -27,7 +28,8 @@ const C_INDIGO = '#4f46e5';
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -91,11 +93,17 @@ export function generate(): Document {
   chart.height = 380;
   chart.stretchToFit = true;
   chart.barColor = Color.fromHex(C_INDIGO);
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
+    )
+  );
 
   return doc;
 }

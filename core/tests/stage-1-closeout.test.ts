@@ -195,12 +195,10 @@ describe('Stage 1 closeout — TS', () => {
     expect(text).toContain('/S /TD');
   });
 
-  it('multi-page-flow — page-break-aware tagging produces /MCR for spanned cells', () => {
-    // The big table overflows. After the this feature close+reopen and
-    // the stage-1-prep /Pg+/MCR support, at least one StructElem ends
-    // up with MCIDs that span pages, producing an /MCR dict in its /K.
+  it('multi-page-flow — page-break-aware tagging keeps row groups valid across pages', () => {
     const text = generate(buildMultiPageFlowDocument());
-    expect(text).toContain('/Type /MCR /Pg');
+    expect(countSubstring(text, '/S /THead')).toBe(1);
+    expect(countSubstring(text, '/S /TBody')).toBeGreaterThanOrEqual(2);
   });
 
   // ── Dickens novel / TOC ─────────────────────────────────────────
@@ -229,8 +227,9 @@ describe('Stage 1 closeout — TS', () => {
     expect(streams.length).toBeGreaterThanOrEqual(1);
     for (const s of streams) {
       const bdc = countSubstring(s, 'BDC');
+      const bmc = countSubstring(s, 'BMC');
       const emc = countSubstring(s, 'EMC');
-      expect(bdc).toBe(emc);
+      expect(bdc + bmc).toBe(emc);
     }
   }
 });

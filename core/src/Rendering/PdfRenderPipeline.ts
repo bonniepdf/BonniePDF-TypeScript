@@ -40,6 +40,7 @@ export class PdfRenderPipeline {
       ctx.margin = pageMargin;
 
       ctx.switchToPage(currentOutputIndex);
+      ctx.tagging?.resetPage(currentOutputIndex);
       ctx.currentX = pageMargin;
       ctx.currentY = pageMargin;
 
@@ -179,6 +180,7 @@ export class PdfRenderPipeline {
       ctx.margin = page.margin;
 
       ctx.switchToPage(currentOutputIndex);
+      ctx.tagging?.resetPage(currentOutputIndex);
       ctx.currentX = page.margin;
       ctx.currentY = page.margin;
 

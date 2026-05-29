@@ -3,6 +3,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfVersion,
+  AccessibilityMode,
   PdfSize,
   PageOrientation,
   TextBlock,
@@ -131,7 +132,8 @@ const SECTIONS: [string, string][] = [
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 50);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-US';
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Flow Architecture Demo';

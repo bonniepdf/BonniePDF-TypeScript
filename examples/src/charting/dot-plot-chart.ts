@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -26,7 +27,8 @@ const C_TEAL = '#14b8a6';
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -92,12 +94,14 @@ export function generate(): Document {
   chart.stretchToFit = true;
   chart.dotColor = Color.fromHex(C_TEAL);
   chart.dotRadius = 12;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')
+  );
 
   return doc;
 }

@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -23,6 +24,7 @@ import {
   ChartElement,
   BarChart,
 } from '@bonniepdf/core';
+
 import { DateHelper } from './date-helpers';
 
 // ── Brand colours — drawn from the BonniePDF logo palette ────────────────────
@@ -91,7 +93,8 @@ export function generate(): Document {
   // Landscape, zero margin — layout elements carry their own padding
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 0);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   const { quarter, year } = DateHelper.previousQuarter();
   const title = DateHelper.reportTitle(quarter, year);
@@ -193,12 +196,18 @@ export function generate(): Document {
   barChart.height = 200;
   barChart.stretchToFit = true;
   barChart.barColor = Terra;
-  barChart.fontFamily = 'Arial, sans-serif';
+  barChart.fontFamily = StandardFonts.Helvetica;
   barChart.labelFontSize = 8;
   barChart.backgroundColor = Cream;
 
   // Direct doc.add — the only way ChartElement resolves its available width
-  doc.add(new ChartElement(barChart, chartData));
+  doc.add(
+    new ChartElement(
+      barChart,
+      chartData,
+      'Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.'
+    )
+  );
 
   // ════════════════════════════════════════════════════════════════════════════
   // 4.  Top products table

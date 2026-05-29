@@ -41,7 +41,7 @@ export class OrderedList extends ListElementBase {
     return totalHeight;
   }
 
-  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+  protected override renderItems(ctx: RenderContext, contentWidth: number): void {
     const itemWidth = contentWidth - this.indent;
 
     let currentItemNumber = this.startNumber;

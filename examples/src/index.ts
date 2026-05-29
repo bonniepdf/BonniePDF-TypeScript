@@ -16,6 +16,8 @@ import { generate as customFonts } from './typography/custom-fonts';
 import { generate as emojisAndUnicode } from './typography/emojis-and-unicode';
 import { generate as dickensNovel } from './typography/dickens-novel';
 import { generate as lists } from './elements/lists';
+import { generate as listsTagged } from './elements/lists-tagged';
+import { generate as imagesTagged } from './elements/images-tagged';
 import { generate as hyperlinks } from './elements/hyperlinks';
 import { generate as shapesAndBorders } from './elements/shapes-and-borders';
 import { generate as qrCodes } from './elements/qr-codes';
@@ -245,6 +247,17 @@ function elementsExamples(): ExampleDef[] {
       dotnetClass: 'ListsExample',
     },
     {
+      id: 'lists-tagged',
+      name: 'Lists (PDF/UA-1)',
+      category: 'Elements',
+      description:
+        'PDF/UA-1 tagged ordered and unordered lists — each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
+      filename: 'lists-tagged.pdf',
+      generate: listsTagged,
+      dotnetClass: null,
+      pdfUa1: true,
+    },
+    {
       id: 'hyperlinks',
       name: 'Hyperlinks',
       category: 'Elements',
@@ -282,6 +295,17 @@ function elementsExamples(): ExampleDef[] {
       filename: 'images.pdf',
       generate: images,
       dotnetClass: 'ImagesExample',
+    },
+    {
+      id: 'images-tagged',
+      name: 'Images (PDF/UA-1)',
+      category: 'Elements',
+      description:
+        'PDF/UA-1 tagged image example — an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
+      filename: 'images-tagged.pdf',
+      generate: imagesTagged,
+      dotnetClass: null,
+      pdfUa1: true,
     },
   ];
 }

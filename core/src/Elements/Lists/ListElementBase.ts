@@ -1,5 +1,6 @@
 import { TextElementBase } from '../Text/TextElementBase';
 import { RenderContext } from '../../Rendering/RenderContext';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * Base class for list elements (ordered and unordered) that provides common functionality
@@ -11,6 +12,34 @@ export abstract class ListElementBase extends TextElementBase {
 
   /** Spacing between list items (in points) */
   public itemSpacing = 5;
+
+  /**
+   * Wraps the subclass item rendering in an `L` structure element when tagging is
+   * active, so the outer container is present in the structure tree for both
+   * top-level and nested lists. Delegates actual content to {@link renderItems}.
+   */
+  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+    const tagging = ctx.tagging;
+    if (tagging) {
+      tagging.tree.begin(SemanticRole.L);
+      ctx.canvas.beginContainerContent('L');
+    }
+    try {
+      this.renderItems(ctx, contentWidth);
+    } finally {
+      if (tagging) {
+        ctx.canvas.endMarkedContent();
+        tagging.tree.end();
+      }
+    }
+  }
+
+  /**
+   * Renders the list items. Implemented by {@link OrderedList} and
+   * {@link UnorderedList}; called from {@link renderContent} which
+   * handles the outer `L` structure-element wrapper.
+   */
+  protected abstract renderItems(ctx: RenderContext, contentWidth: number): void;
 
   /**
    * Measures the height of list items, accounting for item spacing.
@@ -41,7 +70,12 @@ export abstract class ListElementBase extends TextElementBase {
   }
 
   /**
-   * Renders a list item with proper pagination handling.
+   * Renders one list item with tagged `LI > Lbl + LBody` structure when
+   * tagging is active, or the original untagged layout otherwise.
+   *
+   * Tagged path emits the marker only on the first wrapped line (inside
+   * `Lbl`); continuation lines are text-only inside separate `LBody`
+   * marked-content sequences that all share a single `LBody` StructElem.
    */
   protected renderListItem(
     ctx: RenderContext,
@@ -49,26 +83,65 @@ export abstract class ListElementBase extends TextElementBase {
     renderMarker: (x: number, y: number) => void,
     markerWidth: number
   ): void {
-    let y = ctx.currentY;
+    if (lines.length === 0) return;
 
-    for (const line of lines) {
-      // Check if we need a new page
-      ListElementBase.checkPageBreak(ctx, this.lineHeight);
-      y = ctx.currentY;
+    const tagging = ctx.tagging;
 
-      // Render marker at the left edge
-      const markerX = ctx.currentX + this.margin.left;
-      renderMarker(markerX, y);
-
-      // Render text after the marker
-      const textX = ctx.currentX + this.margin.left + markerWidth + 5;
-      ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0); // TextAlignment.Left
-
-      y += this.lineHeight;
-      ctx.currentY = y;
+    // Open LI container around the whole item when tagging
+    if (tagging) {
+      tagging.tree.begin(SemanticRole.LI);
+      ctx.canvas.beginContainerContent('LI');
     }
 
-    // Add spacing after the item
+    try {
+      let y = ctx.currentY;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        ListElementBase.checkPageBreak(ctx, this.lineHeight);
+        y = ctx.currentY;
+
+        const markerX = ctx.currentX + this.margin.left;
+        const textX = ctx.currentX + this.margin.left + markerWidth + 5;
+
+        if (!tagging) {
+          // Non-tagged: original behavior — marker drawn on every wrapped line
+          renderMarker(markerX, y);
+          ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0);
+        } else {
+          if (i === 0) {
+            // Lbl — list item label (drawn once, on the first line only)
+            tagging.tree.begin(SemanticRole.Lbl);
+            ctx.canvas.beginMarkedContent('Lbl');
+            renderMarker(markerX, y);
+            ctx.canvas.endMarkedContent();
+            tagging.tree.end();
+
+            // Open the LBody StructElem; individual marked-content sequences
+            // below will each add their own MCID to this single StructElem.
+            tagging.tree.begin(SemanticRole.LBody);
+          }
+          // Each wrapped line gets its own MCID, all recorded under LBody
+          ctx.canvas.beginMarkedContent('LBody');
+          ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0);
+          ctx.canvas.endMarkedContent();
+        }
+
+        y += this.lineHeight;
+        ctx.currentY = y;
+      }
+
+      if (tagging) {
+        tagging.tree.end(); // end LBody
+      }
+    } finally {
+      if (tagging) {
+        ctx.canvas.endMarkedContent(); // end LI BMC
+        tagging.tree.end(); // end LI StructElem
+      }
+    }
+
     ctx.currentY += this.itemSpacing;
   }
 }

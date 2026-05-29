@@ -21,6 +21,7 @@ export * from './Configuration/WatermarkSettings';
 export * from './Configuration/DocumentMetadata';
 export * from './Configuration/DocumentSettings';
 export * from './Configuration/AccessibilityMode';
+export * from './Configuration/PdfAConformance';
 export * from './Configuration/InternalConfiguration';
 
 export * from './Rendering/Tagging/SemanticRole';

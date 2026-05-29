@@ -28,6 +28,12 @@ export interface IAsyncPdfWriter {
   ): Promise<void>;
 
   /**
+   * Writes a PDF object whose body is already a pre-formatted PDF
+   * fragment. See {@link IPdfWriter.writeRawObject}.
+   */
+  writeRawObjectAsync(id: number, body: string, cancellationToken?: AbortSignal): Promise<void>;
+
+  /**
    * Compresses and writes a PDF object
    */
   writeCompressedObjectAsync(

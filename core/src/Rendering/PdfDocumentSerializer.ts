@@ -17,6 +17,7 @@ import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 
@@ -57,6 +58,11 @@ export class PdfDocumentSerializer {
     const catalogId = writer.getNewId();
     const infoId = writer.getNewId();
     const pagesId = writer.getNewId(); // /Pages parent — written after all page objects
+    // Resources are written as a single indirect object that every page
+    // references explicitly (PDF/A-2b clause 6.2.2.2 / ISO 32000-1
+    // §7.8.3). veraPDF profile `2b` rejects /Pages-inheritance even
+    // though §7.7.3.4 allows it.
+    const resourcesId = writer.getNewId();
 
     // 2. Initialize render context (inject pre-loaded resources when available)
     const orientedPageSize = settings.getOrientedPageSize();
@@ -110,12 +116,15 @@ export class PdfDocumentSerializer {
       // Write the page content stream immediately (flush memory)
       writer.writeCompressedObject(contentId, new Map(), pageOutput.contentStream);
 
-      // Build page dictionary — /Resources goes on the parent /Pages object
+      // Build page dictionary — /Resources is an indirect reference
+      // (see resourcesId comment above) so each page satisfies PDF/A-2b
+      // clause 6.2.2.2 without duplicating the resources dict per page.
       const pageDict = new Map<string, string>([
         ['/Type', '/Page'],
         ['/Parent', `${pagesId} 0 R`],
         ['/MediaBox', `[0 0 ${pageOutput.size.width} ${pageOutput.size.height}]`],
         ['/Contents', `${contentId} 0 R`],
+        ['/Resources', `${resourcesId} 0 R`],
       ]);
 
       // Tagged PDF: each page gets /StructParents = page index. The
@@ -186,14 +195,18 @@ export class PdfDocumentSerializer {
       globalResources = mergeDicts(globalResources, extGStateRes);
     }
 
-    // 6. Write the /Pages parent object
+    // 6a. Write the global Resources object every page references.
+    // PDF/A-2b clause 6.2.2.2 — see page-dict comment above.
+    writer.writeRawObject(resourcesId, globalResources);
+
+    // 6b. Write the /Pages parent object. /Resources is intentionally
+    // omitted — the per-page indirect references are authoritative.
     writer.writeObject(
       pagesId,
       new Map<string, string>([
         ['/Type', '/Pages'],
         ['/Kids', '[ ' + pageIds.map(id => `${id} 0 R`).join(' ') + ' ]'],
         ['/Count', pageIds.length.toString()],
-        ['/Resources', globalResources],
       ])
     );
 
@@ -218,10 +231,15 @@ export class PdfDocumentSerializer {
       catalogOptions.xmpMetadataId = writer.getNewId();
       // Object.create preserves the DocumentSettings prototype (getters,
       // methods) — plain object spread would drop hasBookmarks/isEncrypted.
+      // When the honest-claim guard suppresses the PDF/A claim, reset
+      // `conformance` to None on the clone — that's the source of truth
+      // for buildConformanceBlocks; `pdfAEnabled` is a derived getter.
       const xmpSettings =
         effectivePdfA === settings.pdfAEnabled
           ? settings
-          : Object.assign(Object.create(Object.getPrototypeOf(settings)), settings, { pdfAEnabled: effectivePdfA });
+          : Object.assign(Object.create(Object.getPrototypeOf(settings)), settings, {
+              conformance: effectivePdfA ? settings.conformance : PdfAConformance.None,
+            });
       metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, xmpSettings);
     }
 

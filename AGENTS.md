@@ -29,7 +29,7 @@ These differ on purpose. If you spot what looks like a bug in matching the .NET 
 These have public-API shape but the serializer is incomplete. Tests assert what _is_ written, not what would be in a finished implementation:
 
 - **Encryption serialization** — `/Encrypt` dictionary is **not** written to PDF output yet (Session 4 in the porting plan). The encryption API accepts settings, but the output is not actually encrypted.
-- **XMP `pdfaid` namespace content** — only the `/Metadata /Subtype /XML` object is written; the inner pdfaid claims are stubbed.
+- ~~**XMP `pdfaid` namespace content** — only the `/Metadata /Subtype /XML` object is written; the inner pdfaid claims are stubbed.~~ Shipped — `XmpConformanceBlock.forPdfA(settings.conformance)` emits the right `pdfaid:part` / `pdfaid:conformance` pair for every level.
 
 If a task involves either, confirm scope before implementing — the user may want the stub completed, or may want behaviour around the existing stub.
 
@@ -40,17 +40,20 @@ If a task involves either, confirm scope before implementing — the user may wa
 - **ESM `require('fs')` is broken in tsup output.** `tsup` compiles dynamic `require()` to a shim that throws _"Dynamic require of 'fs' is not supported"_ in Node ESM. A try/catch will silently swallow it and the call site will appear to no-op. **Use static `import * as fs from 'fs'`** in Node-only entry points (`index.node.ts`). The browser bundle must not import `fs` at all.
 - **Browser bundle vs Node bundle are distinct entry points.** Don't import Node built-ins from any module that ends up in the browser graph.
 
-### PDF/A-1b + PDF/UA-1 compliance
+### PDF/A + PDF/UA-1 compliance
 
 This is the most accident-prone area. Some hard rules:
 
+- **`settings.conformance` is the source of truth.** `PdfAConformance` enum: `None`, `PdfA1b`, `PdfA1a`, `PdfA2b`, `PdfA2a`, `PdfA3b`, `PdfA3a`. The legacy boolean `settings.pdfAEnabled` is now a getter/setter shim — reading returns `conformance !== None`, writing `true` selects `PdfA2b`. All XMP emission paths read `conformance`, not the boolean.
+- **"a" levels require tagged output.** `PdfA1a` / `PdfA2a` / `PdfA3a` need `settings.accessibility = AccessibilityMode.PdfUa1`. The serializer enforces this.
 - **`FontManager` keys are `family:weight` lowercase.** Mismatched casing means lookup miss → fallback to standard-14 → PDF/A failure.
 - **`STANDARD_FONT_MAP`** maps standard-14 names (Helvetica, Times-Roman, Courier) to Liberation family/weight. PDF/A output substitutes Liberation for the standard-14 references so glyphs are actually embedded.
-- **`effectivePdfA = settings.pdfAEnabled && !registry.hasNonEmbeddedStandardFont()`.** If any standard-14 font slipped through without embedding, the pdfaid XMP claim is suppressed — that's the this feature guard, not a bug to remove.
+- **Honest-claim guard:** when standard-14 fonts slip through unembedded, the serializer clones `settings` with `conformance` reset to `None` and uses that clone for XMP / OutputIntent emission. The this feature guard suppresses the claim rather than emitting a dishonest one. Don't remove it; don't set `pdfAEnabled = false` on the clone (it's now a derived getter — the override won't take).
 - **`OutputIntent` is written conditionally:**
   - PDF/A enabled → only when no non-embedded standard fonts are present (matches the this feature guard).
   - PDF/UA-1 only (no PDF/A) → always written, for colour management.
-- **XMP extension schema is required** for any non-predefined namespace (e.g. `pdfuaid`) per ISO 19005-1 §6.7.9. `XmpMetadataWriter` emits a `pdfaExtension:schemas` block when `pdfuaid` is in use. Don't strip it.
+- **XMP extension schema is required** for any non-predefined namespace (e.g. `pdfuaid`) per ISO 19005-2/3 §6.6.2.3. The descriptor hangs off `XmpConformanceBlock.extensionSchema` (set by the `pdfUa1()` factory). `XmpMetadataWriter` emits a `pdfaExtension:schemas` bag whenever a PDF/A claim coexists with at least one schema-carrying block. Don't strip it — veraPDF profile `2a` and above will fail without it.
+- **Resources live on the page, not the parent.** Each `/Page` carries its own `/Resources` indirect reference to a single object written via `IPdfWriter.writeRawObject` (PDF/A-2b clause 6.2.2.2). The `/Pages` parent does not carry `/Resources`. Don't "fix" this back to inheritance.
 - **`ComplianceWriter`:** the one re-exported from the `PdfWriter.ts` barrel is the live implementation. The standalone `ComplianceWriter.ts` file is dead code — don't edit it expecting changes to take effect.
 - **Browser font registration:** in the website, `LocalExampleSource.ensureFontsLoaded()` fetches Liberation TTFs from `public/fonts/liberation/` and registers them via `FontManager.registerFont(bytes, { family, subfamily })` **before** generating each PDF. The `registerFontFilePath` path is for Node only and is currently broken under ESM (see above).
 

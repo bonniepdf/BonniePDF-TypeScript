@@ -137,6 +137,7 @@ export * from './Typography/StandardFonts';
 export * from './Typography/FontWeight';
 export * from './Typography/FontMetrics';
 export * from './Typography/FontManager';
+export * from './Typography/loadFontFromUrl';
 export * from './Typography/EmbeddedFontInfo';
 export * from './Typography/FontFamilyResolver';
 export * from './Typography/GlyphUsageTracker';
@@ -164,7 +165,6 @@ export * from './Extensions/VerticalStackExtensions';
 
 export * from './Rendering/RenderContext';
 export * from './Rendering/PageDimensions';
-export * from './Rendering/TemplateRenderer';
 export * from './Rendering/PdfRenderPipeline';
 export * from './Rendering/PdfDocumentSerializer';
 export * from './Rendering/PdfResourceRegistry';

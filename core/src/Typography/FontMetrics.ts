@@ -58,7 +58,15 @@ export class FontMetrics {
     if (!text) return 0;
 
     // A. IS IT A CUSTOM TTF FILE (direct path)?
+    // Prefer a pre-loaded TtfFont instance registered under this exact path —
+    // populated by PdfResourceRegistry after async font preloading, or
+    // explicitly by `loadFontFromUrl(url)`. Falling through to `getTtfWidth`
+    // uses a stub width table that under-measures supplementary-plane glyphs.
     if (fontIdentifier.toLowerCase().endsWith('.ttf')) {
+      const pathInstance = this.FontInstanceAliases.get(fontIdentifier);
+      if (pathInstance) {
+        return this.getKernedStringWidth(text, pathInstance, fontSize);
+      }
       return this.getTtfWidth(text, fontIdentifier, fontSize);
     }
 
@@ -99,7 +107,14 @@ export class FontMetrics {
     let hasPrev = false;
 
     for (const rune of text) {
-      const code = rune.charCodeAt(0);
+      // `for...of` yields one Unicode code point per iteration (so `rune` is a
+      // string of length 1 for BMP chars, 2 for surrogate-pair supplementary
+      // chars). `charCodeAt(0)` only sees the high surrogate of supplementary
+      // chars (e.g. 0xD83D for U+1F600), causing emoji to miss their glyph and
+      // fall through to a 500-unit fallback — which under-measures wide emoji
+      // glyphs and prevents word-wrap from triggering. Use codePointAt to get
+      // the full code point so the cmap lookup succeeds.
+      const code = rune.codePointAt(0) ?? 0;
       if (code < 32) continue; // Skip control chars
 
       const gid = font.getGlyphId(code);

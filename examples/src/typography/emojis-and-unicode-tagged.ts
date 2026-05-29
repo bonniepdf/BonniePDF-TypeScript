@@ -18,11 +18,16 @@ const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
 const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
 
-function sectionHeading(text: string, tocId: string, font: string): Heading {
+// Section headings always use TEXT_FONT (NotoSans) for the Latin label —
+// the section's body content uses the relevant symbol / emoji font, but the
+// heading itself ("Emoji Faces", "Mathematical Operators", …) is plain Latin
+// text and must be rendered with a Latin-capable font, otherwise glyphs come
+// out as .notdef boxes.
+function sectionHeading(text: string, tocId: string): Heading {
   const h = new Heading(text);
   h.tocIdentifier = tocId;
   h.level = 2;
-  h.fontName = font;
+  h.fontName = TEXT_FONT;
   h.fontSize = 13;
   h.textColor = Color.slate700;
   h.margin = new Thickness(0, 14, 0, 4);
@@ -102,48 +107,48 @@ export function generate(): Document {
   doc.add(intro);
 
   // ── Arrows ────────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Arrows (U+2190 – U+21FF)', 's-arrows', MATH_FONT));
+  doc.add(sectionHeading('Arrows (U+2190 – U+21FF)', 's-arrows'));
   doc.add(mathLine('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪  ↖ ↗ ↘ ↙', 4));
 
   // ── Math operators ────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Mathematical Operators (U+2200 – U+22FF)', 's-math', MATH_FONT));
+  doc.add(sectionHeading('Mathematical Operators (U+2200 – U+22FF)', 's-math'));
   doc.add(mathLine('∀ ∃ ∈ ∉ ∋  ∑ ∏ ∫ √ ∞  ≈ ≠ ≡ ≤ ≥  ⊕ ⊗ ⊂ ⊃', 4));
 
   // ── Currency ──────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Currency Symbols', 's-currency', TEXT_FONT));
+  doc.add(sectionHeading('Currency Symbols', 's-currency'));
   doc.add(uniLine('€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽', 4));
 
   // ── Greek ─────────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Greek Alphabet', 's-greek', TEXT_FONT));
+  doc.add(sectionHeading('Greek Alphabet', 's-greek'));
   doc.add(uniLine('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω', 2));
   doc.add(uniLine('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω', 4));
 
   // ── Cyrillic ──────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Cyrillic', 's-cyrillic', TEXT_FONT));
+  doc.add(sectionHeading('Cyrillic', 's-cyrillic'));
   doc.add(uniLine('А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я', 4));
 
   // ── Misc symbols ──────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Miscellaneous Symbols (U+2600 – U+26FF)', 's-misc', SYMBOLS_FONT));
+  doc.add(sectionHeading('Miscellaneous Symbols (U+2600 – U+26FF)', 's-misc'));
   doc.add(symLine('☀ ☁ ☂ ☃ ☄ ★ ☆ ♠ ♣ ♥ ♦ ☺ ☻ ♻ ⚡ ⚽ ⚾ ⛄ ⛅ ⛪ ⛽', 4));
 
   // ── Dingbats ──────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Dingbats (U+2700 – U+27BF)', 's-dingbats', SYMBOLS_FONT));
+  doc.add(sectionHeading('Dingbats (U+2700 – U+27BF)', 's-dingbats'));
   doc.add(symLine('✀ ✁ ✂ ✃ ✄ ✆ ✇ ✈ ✉ ✊ ✋ ✌ ✍ ✎ ✏ ✐ ✑ ✒ ✓ ✗ ✘', 12));
 
   // ── Emoji faces ───────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Emoji Faces (U+1F600 – U+1F64F)', 's-faces', EMOJI_FONT));
+  doc.add(sectionHeading('Emoji Faces (U+1F600 – U+1F64F)', 's-faces'));
   doc.add(emojiLine('😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 😍 😎 🤩'));
 
   // ── Hand gestures ─────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Hand Gestures', 's-hands', EMOJI_FONT));
+  doc.add(sectionHeading('Hand Gestures', 's-hands'));
   doc.add(emojiLine('👍 👎 👋 🤚 ✋ 🖐 👌 ✌ 🤞 👈 👉 👆 👇 👏'));
 
   // ── Animals ───────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Animals & Nature', 's-animals', EMOJI_FONT));
+  doc.add(sectionHeading('Animals & Nature', 's-animals'));
   doc.add(emojiLine('🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸'));
 
   // ── Objects ───────────────────────────────────────────────────────────────
-  doc.add(sectionHeading('Objects & Symbols', 's-objects', EMOJI_FONT));
+  doc.add(sectionHeading('Objects & Symbols', 's-objects'));
   doc.add(emojiLine('🚀 🌈 🎉 🎵 💡 🔥 ⭐ 💯 🏆 🎯 📱 💻'));
 
   return doc;

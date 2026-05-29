@@ -24,6 +24,8 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  HorizontalStack,
+  WidthDistribution,
 } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
@@ -215,13 +217,26 @@ export function generate(): Document {
 
   settings.headerTemplate = (pageNum: number) => {
     if (pageNum <= 1) return undefined;
-    const b = new TextBlock(pageNum % 2 === 0 ? 'A Tale of Two Cities' : 'Charles Dickens');
-    b.fontName = StandardFonts.TimesItalic;
-    b.fontSize = 9;
-    b.textColor = Color.slate500;
-    b.alignment = pageNum % 2 === 0 ? TextAlignment.Left : TextAlignment.Right;
-    b.margin = new Thickness(0, 0, 0, 2);
-    return b;
+
+    const stack = new HorizontalStack();
+    stack.widthDistribution = WidthDistribution.Weighted;
+    stack.spacing = 0;
+
+    const left = new TextBlock('A Tale of Two Cities');
+    left.fontName = StandardFonts.TimesItalic;
+    left.fontSize = 9;
+    left.textColor = Color.slate500;
+    left.alignment = TextAlignment.Left;
+    stack.addChild(left, 1);
+
+    const right = new TextBlock('Charles Dickens');
+    right.fontName = StandardFonts.TimesItalic;
+    right.fontSize = 9;
+    right.textColor = Color.slate500;
+    right.alignment = TextAlignment.Right;
+    stack.addChild(right, 1);
+
+    return stack;
   };
 
   settings.footerTemplate = (pageNum: number) => {

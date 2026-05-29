@@ -14,6 +14,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfVersion,
+  AccessibilityMode,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -207,7 +208,8 @@ export function generate(): Document {
 
   const settings = new DocumentSettings();
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
   settings.margin = 72;
   settings.displayDocTitle = true;
 

@@ -2,6 +2,7 @@ import { ICanvas } from '../Drawing/ICanvas';
 import { ChartData } from './Models/ChartData';
 import { Color } from '../Core/Color';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
+import { StandardFonts } from '../Typography/StandardFonts';
 
 /**
  * Base class for all charts that provides common functionality for drawing charts
@@ -12,7 +13,7 @@ export abstract class ChartBase {
   // Title styling constants (matching SVG chart implementation)
   private static readonly TITLE_FONT_SIZE = 20;
   private static readonly TITLE_Y = 35;
-  private static readonly TITLE_FONT_FAMILY = 'Arial, sans-serif';
+  private static readonly TITLE_FONT_FAMILY = StandardFonts.Helvetica;
   private static readonly TITLE_COLOR = Color.fromHex('#333333');
 
   /**

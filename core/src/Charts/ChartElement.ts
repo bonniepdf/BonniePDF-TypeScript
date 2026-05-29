@@ -1,8 +1,8 @@
 import { ChartData } from './Models/ChartData';
 import { ChartBase } from './ChartBase';
-import { ICanvas } from '../Drawing/ICanvas';
 import { ElementBase } from '../Elements/ElementBase';
 import { RenderContext } from '../Rendering/RenderContext';
+import { renderTaggedChart } from './ChartTagging';
 
 /**
  * Custom element that renders a chart using ICanvas to PDF.
@@ -11,10 +11,21 @@ export class ChartElement extends ElementBase {
   private readonly chart: ChartBase;
   private readonly data: ChartData;
 
-  constructor(chart: ChartBase, data: ChartData) {
+  /**
+   * Alternate text used when the document is generated as PDF/UA-1.
+   * A chart with alt text is tagged as a Figure; without alt text it is
+   * treated as decorative artifact content.
+   */
+  public altText: string;
+
+  /** Marks the chart as decorative even when altText is set. */
+  public isDecorative = false;
+
+  constructor(chart: ChartBase, data: ChartData, altText = '') {
     super();
     this.chart = chart;
     this.data = data;
+    this.altText = altText;
   }
 
   protected override getPreferredContentWidth(): number {
@@ -31,7 +42,7 @@ export class ChartElement extends ElementBase {
     if (this.chart.stretchToFit) this.chart.width = contentWidth;
 
     const canvas = ctx.getCanvas(ctx.currentX, ctx.currentY);
-    this.chart.draw(canvas, this.data);
+    renderTaggedChart(ctx, canvas, this.altText, this.isDecorative, () => this.chart.draw(canvas, this.data));
     ctx.flushExternalCanvas(canvas);
 
     ctx.currentY += this.chart.height;

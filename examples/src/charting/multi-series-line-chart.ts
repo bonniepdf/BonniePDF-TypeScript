@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -41,7 +42,8 @@ export function generate(): Document {
 
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -105,13 +107,15 @@ export function generate(): Document {
   const chart = new LineChart();
   chart.height = 380;
   chart.stretchToFit = true;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(chart, data, `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`)
+  );
 
   return doc;
 }

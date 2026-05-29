@@ -7,6 +7,7 @@ import { ChartBase } from './ChartBase';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
+import { StandardFonts } from '../Typography/StandardFonts';
 
 /**
  * Base class for Cartesian charts (charts with X and Y axes).
@@ -31,7 +32,7 @@ export abstract class CartesianChartBase extends ChartBase {
   /**
    * Font family for labels
    */
-  fontFamily: string = 'Arial, sans-serif';
+  fontFamily: string = StandardFonts.Helvetica;
 
   /**
    * Whether to show value labels above each data point

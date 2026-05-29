@@ -52,6 +52,23 @@ describe('Page-break-aware tagging', () => {
     }
   });
 
+  it('explicit document pages reset MCIDs per page', () => {
+    doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+
+    doc.add(new TextBlock('First page paragraph.'));
+    doc.addPage();
+    doc.add(new TextBlock('Second page paragraph.'));
+
+    const text = pdfToText(doc.generateBytes());
+    const streams = splitPageContentStreams(text);
+    expect(streams.length).toBeGreaterThanOrEqual(2);
+    expect(streams[0]).toContain('/MCID 0');
+    expect(streams[1]).toContain('/MCID 0');
+  });
+
   it('no open marked content => page break does nothing', () => {
     doc = new Document();
     doc.settings.version = PdfVersion.Pdf17;

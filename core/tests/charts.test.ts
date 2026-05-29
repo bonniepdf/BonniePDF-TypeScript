@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MockCanvas } from './helpers/mock-canvas';
+import { Document } from '../src/Document';
 import { BarChart } from '../src/Charts/BarChart';
 import { LineChart } from '../src/Charts/LineChart';
 import { AreaChart } from '../src/Charts/AreaChart';
@@ -7,10 +8,14 @@ import { PieChart } from '../src/Charts/PieChart';
 import { DotPlotChart } from '../src/Charts/DotPlotChart';
 import { LollipopChart } from '../src/Charts/LollipopChart';
 import { GroupedBarChart } from '../src/Charts/GroupedBarChart';
+import { ChartElement } from '../src/Charts/ChartElement';
 import { ChartData } from '../src/Charts/Models/ChartData';
 import { ChartSeries } from '../src/Charts/Models/ChartSeries';
 import { ChartDataPoint } from '../src/Charts/Models/ChartDataPoint';
 import { Color } from '../src/Core/Color';
+import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
+import { PdfVersion } from '../src/Configuration/PdfVersion';
+import { pdfToText } from './helpers/test-base';
 
 function createSampleData(points = 5): ChartData {
   const series = new ChartSeries();
@@ -165,5 +170,43 @@ describe('GroupedBarChart', () => {
     chart.draw(canvas, data);
     const rectOps = canvas.operations.filter(op => op.startsWith('FillRect'));
     expect(rectOps.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('ChartElement PDF/UA tagging', () => {
+  it('chart with altText is emitted as a Figure with /Alt', () => {
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+
+    const chart = new BarChart();
+    chart.height = 180;
+    chart.stretchToFit = true;
+
+    doc.add(new ChartElement(chart, createSampleData(3), 'Bar chart comparing three test values.'));
+
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/S /Figure');
+    expect(pdf).toContain('/Alt (Bar chart comparing three test values.)');
+    expect(pdf).toContain('/Figure << /MCID');
+  });
+
+  it('chart without altText is emitted as an artifact', () => {
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+
+    const chart = new BarChart();
+    chart.height = 180;
+    chart.stretchToFit = true;
+
+    doc.add(new ChartElement(chart, createSampleData(3)));
+
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/Artifact BMC');
+    expect(pdf).not.toContain('/S /Figure');
+    expect(pdf).not.toContain('/Alt (');
   });
 });

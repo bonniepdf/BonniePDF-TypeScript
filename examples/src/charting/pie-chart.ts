@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -42,7 +43,8 @@ export function generate(): Document {
 
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -106,7 +108,13 @@ export function generate(): Document {
   chart.colors = ALL_COLORS;
   chart.backgroundColor = Color.white;
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
+    )
+  );
 
   return doc;
 }

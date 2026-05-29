@@ -28,6 +28,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   // State tracking for multipage rendering
   private lastRowRendered = -1;
   private headersPending = true;
+  private taggedHeaderEmitted = false;
 
   constructor(...columnWeights: number[]) {
     super();
@@ -192,23 +193,25 @@ export class Table extends BorderedElementBase implements IRoleProvider {
 
     // Render headers if pending
     if (this.headersPending) {
-      let theadOpen = false;
+      let rowGroupOpen = false;
+      const headerGroupRole = this.taggedHeaderEmitted ? SemanticRole.TBody : SemanticRole.THead;
       for (const headerRow of this.headers) {
         const headerHeight = this.measureRowHeight(headerRow, widths);
 
         if (ctx.currentY + headerHeight > ctx.maxY && ctx.currentY > ctx.margin) {
-          if (theadOpen && tagging) tagging.tree.end();
+          if (rowGroupOpen && tagging) tagging.tree.end();
           return this.lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
         }
 
-        if (!theadOpen && tagging) {
-          tagging.tree.begin(SemanticRole.THead);
-          theadOpen = true;
+        if (!rowGroupOpen && tagging) {
+          tagging.tree.begin(headerGroupRole);
+          rowGroupOpen = true;
         }
         this.renderRowDirect(ctx, headerRow, widths);
       }
 
-      if (theadOpen && tagging) tagging.tree.end();
+      if (rowGroupOpen && tagging) tagging.tree.end();
+      if (tagging && !this.taggedHeaderEmitted) this.taggedHeaderEmitted = true;
       this.headersPending = false;
     }
 
@@ -266,6 +269,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   public resetState(): void {
     this.lastRowRendered = -1;
     this.headersPending = true;
+    this.taggedHeaderEmitted = false;
   }
 
   protected override measureContentHeight(contentWidth: number): number {

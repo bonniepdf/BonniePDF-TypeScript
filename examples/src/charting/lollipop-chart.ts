@@ -4,6 +4,7 @@ import {
   DocumentMetadata,
   PdfSize,
   PdfVersion,
+  AccessibilityMode,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -26,7 +27,8 @@ const C_PINK = '#ec4899';
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -93,12 +95,18 @@ export function generate(): Document {
   chart.lollipopColor = Color.fromHex(C_PINK);
   chart.stemWidth = 2.5;
   chart.headRadius = 10;
-  chart.fontFamily = 'Arial, sans-serif';
+  chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(new ChartElement(chart, data));
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
+    )
+  );
 
   return doc;
 }

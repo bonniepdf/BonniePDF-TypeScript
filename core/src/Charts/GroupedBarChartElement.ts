@@ -1,8 +1,8 @@
 import { ChartData } from './Models/ChartData';
 import { GroupedBarChart } from './GroupedBarChart';
-import { ICanvas } from '../Drawing/ICanvas';
 import { ElementBase } from '../Elements/ElementBase';
 import { RenderContext } from '../Rendering/RenderContext';
+import { renderTaggedChart } from './ChartTagging';
 
 /**
  * Element that renders a GroupedBarChart to the document.
@@ -16,10 +16,21 @@ export class GroupedBarChartElement extends ElementBase {
    * @param chart The grouped bar chart to render
    * @param data The chart data containing series, axis options, and title
    */
-  constructor(chart: GroupedBarChart, data: ChartData) {
+  /**
+   * Alternate text used when the document is generated as PDF/UA-1.
+   * A chart with alt text is tagged as a Figure; without alt text it is
+   * treated as decorative artifact content.
+   */
+  public altText: string;
+
+  /** Marks the chart as decorative even when altText is set. */
+  public isDecorative = false;
+
+  constructor(chart: GroupedBarChart, data: ChartData, altText = '') {
     super();
     this.chart = chart;
     this.data = data;
+    this.altText = altText;
   }
 
   /**
@@ -36,7 +47,7 @@ export class GroupedBarChartElement extends ElementBase {
     if (this.chart.stretchToFit) this.chart.width = contentWidth;
 
     const canvas = ctx.getCanvas(ctx.currentX, ctx.currentY);
-    this.chart.draw(canvas, this.data);
+    renderTaggedChart(ctx, canvas, this.altText, this.isDecorative, () => this.chart.draw(canvas, this.data));
     ctx.flushExternalCanvas(canvas);
 
     ctx.currentY += this.chart.height;

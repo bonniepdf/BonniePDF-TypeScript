@@ -5,6 +5,7 @@ import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
+import { StandardFonts } from '../Typography/StandardFonts';
 
 /**
  * Pie chart that renders pie slices with a legend on the right side.
@@ -31,7 +32,7 @@ export class PieChart extends ChartBase {
   // Donut hole proportions
   private static readonly DONUT_HOLE_RATIO = 0.33;
 
-  private static readonly FONT_FAMILY = 'Arial, sans-serif';
+  private static readonly FONT_FAMILY = StandardFonts.Helvetica;
 
   // Styling constants
   private static readonly LEGEND_TEXT_COLOR = Color.fromHex('#333333');

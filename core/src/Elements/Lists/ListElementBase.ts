@@ -13,6 +13,11 @@ export abstract class ListElementBase extends TextElementBase {
   /** Spacing between list items (in points) */
   public itemSpacing = 5;
 
+  /** Child lists rendered as nested list content. */
+  public getNestedLists(): readonly ListElementBase[] {
+    return [];
+  }
+
   /**
    * Wraps the subclass item rendering in an `L` structure element when tagging is
    * active, so the outer container is present in the structure tree for both

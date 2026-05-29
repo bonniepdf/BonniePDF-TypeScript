@@ -5,6 +5,8 @@ import { UnorderedList } from '../src/Elements/Lists/UnorderedList';
 import { BulletStyle } from '../src/Elements/Lists/BulletStyle';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
+import { TextStyle } from '../src/Elements/Text/TextStyle';
+import { Color } from '../src/Core/Color';
 import { pdfToText } from './helpers/test-base';
 
 /**
@@ -132,6 +134,43 @@ describe('List tagging', () => {
   });
 
   // ── BDC/EMC balance ──────────────────────────────────────────────────────
+
+  it('default text style cascades into nested ordered and unordered lists', () => {
+    doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withColor(Color.slate700);
+
+    const orderedOuter = makeOrdered('Parent');
+    const orderedInner = makeOrdered('Child');
+    orderedOuter.addNestedList(orderedInner);
+    doc.add(orderedOuter);
+
+    const unorderedOuter = makeUnordered('Parent');
+    const unorderedInner = makeUnordered('Child');
+    unorderedOuter.addNestedList(unorderedInner);
+    doc.add(unorderedOuter);
+
+    doc.generateBytes();
+
+    expect(orderedInner.textColor).toBe(Color.slate700);
+    expect(unorderedInner.textColor).toBe(Color.slate700);
+    expect(unorderedInner.bulletColor).toBe(Color.slate700);
+  });
+
+  it('explicit unordered bullet color is preserved when text style cascades', () => {
+    doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withColor(Color.slate700);
+
+    const outer = makeUnordered('Parent');
+    const inner = makeUnordered('Child');
+    inner.bulletColor = Color.red;
+    outer.addNestedList(inner);
+    doc.add(outer);
+
+    doc.generateBytes();
+
+    expect(inner.textColor).toBe(Color.slate700);
+    expect(inner.bulletColor).toBe(Color.red);
+  });
 
   it('every page stream is marked-content-balanced (ordered list)', () => {
     // 20 items fits comfortably on one page; avoids cross-page close complexity

@@ -251,6 +251,12 @@ export class Document {
     if (el.child && typeof el.child.render === 'function') {
       Document.applyStyleToElement(el.child, style);
     }
+    // Walk nested OrderedList / UnorderedList children.
+    if (typeof el.getNestedLists === 'function') {
+      for (const child of el.getNestedLists()) {
+        Document.applyStyleToElement(child, style);
+      }
+    }
     // Walk Table rows via getAllRows()
     if (typeof el.getAllRows === 'function') {
       for (const row of el.getAllRows()) {

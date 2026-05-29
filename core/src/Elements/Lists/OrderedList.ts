@@ -29,6 +29,10 @@ export class OrderedList extends ListElementBase {
     this.nestedLists.push(nestedList);
   }
 
+  public override getNestedLists(): readonly OrderedList[] {
+    return this.nestedLists;
+  }
+
   protected override measureContentHeight(contentWidth: number): number {
     const itemWidth = contentWidth - this.indent;
     let totalHeight = this.measureItemsHeight(this.items, itemWidth);

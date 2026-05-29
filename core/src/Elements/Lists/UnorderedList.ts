@@ -9,6 +9,7 @@ import { RenderContext } from '../../Rendering/RenderContext';
 export class UnorderedList extends ListElementBase {
   private readonly items: string[] = [];
   private readonly nestedLists: UnorderedList[] = [];
+  private _bulletColor?: Color;
 
   /** Bullet style for the list (Disc, Circle, Square, Dash, Custom) */
   public bulletStyle: BulletStyle = BulletStyle.Disc;
@@ -17,7 +18,12 @@ export class UnorderedList extends ListElementBase {
   public customBullet = '•';
 
   /** Color for the bullet character */
-  public bulletColor: Color = Color.black;
+  public get bulletColor(): Color {
+    return this._bulletColor ?? this.textColor;
+  }
+  public set bulletColor(value: Color) {
+    this._bulletColor = value;
+  }
 
   private get bulletChar(): string {
     return this.getBulletCharacter();
@@ -36,6 +42,10 @@ export class UnorderedList extends ListElementBase {
   public addNestedList(nestedList: UnorderedList): void {
     nestedList.indent = this.indent;
     this.nestedLists.push(nestedList);
+  }
+
+  public override getNestedLists(): readonly UnorderedList[] {
+    return this.nestedLists;
   }
 
   protected override measureContentHeight(contentWidth: number): number {
@@ -65,7 +75,7 @@ export class UnorderedList extends ListElementBase {
         lines,
         (x, y) => {
           // Draw bullet
-          ctx.canvas.drawText(x, y, this.bulletChar, this.textColor, this.fontSize, this.fontName, 0); // TextAlignment.Left
+          ctx.canvas.drawText(x, y, this.bulletChar, this.bulletColor, this.fontSize, this.fontName, 0); // TextAlignment.Left
         },
         bulletWidth
       );

@@ -302,8 +302,9 @@ export class PdfRenderPipeline {
       if (hasHeader) {
         const headerElement = settings.headerTemplate!(pageNumber);
         if (headerElement) {
+          const headerHeight = headerElement.measureHeight(contentWidth);
           ctx.currentX = startX;
-          ctx.currentY = 0;
+          ctx.currentY = Math.max(0, (ctx.margin - headerHeight) / 2);
           if (ctx.tagging) ctx.canvas.beginArtifact();
           headerElement.render(ctx, contentWidth);
           if (ctx.tagging) ctx.canvas.endArtifact();
@@ -313,8 +314,10 @@ export class PdfRenderPipeline {
       if (hasFooter) {
         const footerElement = settings.footerTemplate!(pageNumber);
         if (footerElement) {
+          const footerHeight = footerElement.measureHeight(contentWidth);
+          const bandTop = ctx.pageSize.height - ctx.margin;
           ctx.currentX = startX;
-          ctx.currentY = ctx.pageSize.height - ctx.margin;
+          ctx.currentY = bandTop + Math.max(0, (ctx.margin - footerHeight) / 2);
           if (ctx.tagging) ctx.canvas.beginArtifact();
           footerElement.render(ctx, contentWidth);
           if (ctx.tagging) ctx.canvas.endArtifact();

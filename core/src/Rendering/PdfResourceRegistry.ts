@@ -103,6 +103,12 @@ export class PdfResourceRegistry {
       try {
         font = TtfFont.fromFileSync(filePath);
         tracker = new GlyphUsageTracker(font);
+        // Make the parsed font available to the synchronous measurement path
+        // (FontMetrics) keyed by the same identifier the element uses for
+        // `fontName`. Without this, layout falls back to the ASCII-only width
+        // stub and under-measures supplementary-plane glyphs (e.g. emoji),
+        // preventing word-wrap from triggering.
+        FontMetrics.registerFontInstance(filePath, font);
       } catch (err) {
         // Not loadable synchronously (file missing, parse error, browser env, etc.).
         // The document will still render; the font falls back to a standard Type1.
@@ -167,6 +173,10 @@ export class PdfResourceRegistry {
       const font = await TtfFont.fromFile(filePath);
       info.font = font;
       info.tracker = new GlyphUsageTracker(font);
+      // Mirror the sync path: make the parsed font visible to FontMetrics
+      // under the same key so the synchronous measurement path uses real
+      // per-glyph advances during the subsequent render pass.
+      FontMetrics.registerFontInstance(filePath, font);
     } catch (err) {
       // Don't reject the whole render — record the failure so the caller can
       // surface it via `Document.diagnostics`, and leave the font with no

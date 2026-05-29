@@ -1,6 +1,7 @@
 import { Document } from '@bonniepdf/core';
 import { generate as simpleDocument } from './basic/simple-document';
 import { generate as simpleDocumentTagged } from './basic/simple-document-tagged';
+import { generate as pdfa2aCompliant } from './basic/pdfa2a-compliant';
 import { generate as margins } from './basic/margins';
 import { generate as pageSettings } from './basic/page-settings';
 import { generate as headersFooters } from './layout/headers-footers';
@@ -94,6 +95,17 @@ function basicExamples(): ExampleDef[] {
       filename: 'simple-document-tagged.pdf',
       generate: simpleDocumentTagged,
       dotnetClass: 'SimpleDocumentTaggedExample',
+      pdfUa1: true,
+    },
+    {
+      id: 'pdfa2a-compliant',
+      name: 'PDF/A-2a + PDF/UA-1',
+      category: 'Basic',
+      description:
+        'The modern archival + accessible baseline. Sets settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 — validated by veraPDF against profile 2a.',
+      filename: 'pdfa2a-compliant.pdf',
+      generate: pdfa2aCompliant,
+      dotnetClass: 'PdfA2aCompliantExample',
       pdfUa1: true,
     },
     {

@@ -5,6 +5,8 @@ import { Page } from './Elements/Layout/Page';
 import { PdfSize } from './Configuration/PdfSize';
 import { PageOrientation } from './Core/PageOrientation';
 import { PdfVersion } from './Configuration/PdfVersion';
+import { PdfAConformance } from './Configuration/PdfAConformance';
+import { AccessibilityMode } from './Configuration/AccessibilityMode';
 import { EncryptionAlgorithm } from './Security/Models/EncryptionAlgorithm';
 import { PdfWriter } from './Rendering/Writers/PdfWriter';
 import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
@@ -280,12 +282,21 @@ export class Document {
       throw new Error('AES-256 encryption requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
     }
 
-    if (s.pdfAEnabled && s.version !== PdfVersion.Pdf17) {
-      throw new Error('PDF/A-1b mode requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
+    // PDF/A requires PDF 1.7. Silently upgrade rather than throw —
+    // the caller asked for archival output, so honour that intent.
+    if (s.conformance !== PdfAConformance.None && s.version !== PdfVersion.Pdf17) {
+      s.version = PdfVersion.Pdf17;
     }
 
-    if (s.pdfAEnabled && s.isEncrypted) {
-      throw new Error('PDF/A-1b mode cannot be combined with encryption.');
+    if (s.conformance !== PdfAConformance.None && s.isEncrypted) {
+      throw new Error('PDF/A mode cannot be combined with encryption.');
+    }
+
+    // "a" levels require tagged output (PDF/UA-1).
+    if (requiresTagging(s.conformance) && s.accessibility !== AccessibilityMode.PdfUa1) {
+      throw new Error(
+        `${s.conformance} requires tagged output. Set settings.accessibility = AccessibilityMode.PdfUa1.`
+      );
     }
 
     if (s.hasBookmarks && s.version !== PdfVersion.Pdf17) {
@@ -300,4 +311,16 @@ export class Document {
     this._pages.length = 0;
     this._disposed = true;
   }
+}
+
+/**
+ * True for PDF/A "a" (accessible) conformance levels, which mandate
+ * tagged structure on top of the underlying "b" requirements.
+ */
+function requiresTagging(conformance: PdfAConformance): boolean {
+  return (
+    conformance === PdfAConformance.PdfA1a ||
+    conformance === PdfAConformance.PdfA2a ||
+    conformance === PdfAConformance.PdfA3a
+  );
 }

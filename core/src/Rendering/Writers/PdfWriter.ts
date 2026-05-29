@@ -22,7 +22,8 @@ import { DiagnosticsCollector } from '../../Core/Diagnostics';
  */
 function buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
   const blocks: XmpConformanceBlock[] = [];
-  if (settings.pdfAEnabled) blocks.push(XmpConformanceBlock.pdfA1B());
+  const pdfA = XmpConformanceBlock.forPdfA(settings.conformance);
+  if (pdfA) blocks.push(pdfA);
   if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
   return blocks;
 }
@@ -89,6 +90,8 @@ export interface IPdfWriter {
   encryptor?: any;
   getNewId(): number;
   writeObject(id: number, dictionary: Map<string, string>, stream?: string): void;
+  /** See {@link ./IPdfWriter.IPdfWriter#writeRawObject}. */
+  writeRawObject(id: number, body: string): void;
   writeCompressedObject(id: number, dictionary: Map<string, string>, stream: string): void;
   writeBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
@@ -104,6 +107,7 @@ export interface IAsyncPdfWriter {
   encryptor?: any;
   getNewId(): number;
   writeObjectAsync(id: number, dictionary: Map<string, string>, stream?: string): Promise<void>;
+  writeRawObjectAsync(id: number, body: string): Promise<void>;
   writeCompressedObjectAsync(id: number, dictionary: Map<string, string>, stream: string): Promise<void>;
   writeBinaryObjectAsync(
     id: number,
@@ -186,6 +190,16 @@ export class PdfWriter implements IPdfWriter {
     }
 
     this._output.writeString('endobj\n');
+  }
+
+  /**
+   * Writes a PDF object whose body is already a pre-formatted PDF
+   * fragment (e.g. the global Resources dict composed by
+   * `PdfResourceRegistry.writeResources`).
+   */
+  public writeRawObject(id: number, body: string): void {
+    this._offsets.set(id, this._output.bytePosition);
+    this._output.writeString(`${id} 0 obj\n${body}\nendobj\n`);
   }
 
   /**
@@ -423,6 +437,10 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
 
   public async writeObjectAsync(id: number, dictionary: Map<string, string>, stream?: string): Promise<void> {
     this._inner.writeObject(id, dictionary, stream);
+  }
+
+  public async writeRawObjectAsync(id: number, body: string): Promise<void> {
+    this._inner.writeRawObject(id, body);
   }
 
   public async writeCompressedObjectAsync(id: number, dictionary: Map<string, string>, stream: string): Promise<void> {

@@ -67,6 +67,14 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
   }
 
   /**
+   * Writes a PDF object whose body is already a pre-formatted PDF
+   * fragment. STUB.
+   */
+  async writeRawObjectAsync(_id: number, _body: string, _cancellationToken?: AbortSignal): Promise<void> {
+    throw new Error('AsyncPdfWriter.writeRawObjectAsync: Not implemented');
+  }
+
+  /**
    * Compresses and writes a PDF object
    */
   async writeCompressedObjectAsync(

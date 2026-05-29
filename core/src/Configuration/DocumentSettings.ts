@@ -8,6 +8,7 @@ import { WatermarkSettings } from './WatermarkSettings';
 import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
 import type { TextStyle } from '../Elements/Text/TextStyle';
 import { AccessibilityMode } from './AccessibilityMode';
+import { PdfAConformance } from './PdfAConformance';
 
 interface _LocalIElement {
   getPreferredWidth(): number;
@@ -84,21 +85,44 @@ export class DocumentSettings {
    */
   public version: PdfVersion;
   /**
-   * Gets or sets whether PDF/A-1b archival mode is enabled.
-   * Requires `version == Pdf17`. Cannot be used with encryption.
+   * Gets or sets the PDF/A archival conformance level. Default
+   * {@link PdfAConformance.None} — the document is a normal PDF.
    *
-   * **Honest-claim behaviour:** setting this to `true` is a
-   * request, not a guarantee. The serializer suppresses the
-   * `pdfaid:part` XMP block and `/OutputIntents` entry whenever the
-   * document references any of the standard 14 fonts (Helvetica,
-   * Times-*, Courier-*, Symbol, ZapfDingbats), because PDF/A-1b §6.3.4
-   * requires every font to be embedded and BonniePDF does not bundle
-   * subset versions of those faces. To actually produce a
-   * PDF/A-conformant file, register a real TTF via
-   * `TtfFont.fromFile()` / `FontMetrics.registerFontAlias()` and use
-   * that for every text element.
+   * When set to any non-`None` value the serializer auto-upgrades
+   * {@link version} to PDF 1.7, embeds the sRGB ICC profile, emits the
+   * matching `/OutputIntents`, and writes a `pdfaid:part` /
+   * `pdfaid:conformance` XMP block.
+   *
+   * "a" levels ({@link PdfAConformance.PdfA1a}, {@link PdfAConformance.PdfA2a},
+   * {@link PdfAConformance.PdfA3a}) require
+   * {@link accessibility} = {@link AccessibilityMode.PdfUa1}.
+   *
+   * **Honest-claim behaviour:** setting this is a request, not a
+   * guarantee. The serializer suppresses the `pdfaid` XMP block and
+   * `/OutputIntents` entry whenever the document references any of the
+   * standard 14 fonts (Helvetica, Times-*, Courier-*, Symbol,
+   * ZapfDingbats), because PDF/A §6.3.4 requires every font to be
+   * embedded and BonniePDF does not bundle subset versions of those
+   * faces. To actually produce a PDF/A-conformant file, register a
+   * real TTF via `TtfFont.fromFile()` / `FontMetrics.registerFontAlias()`
+   * (or rely on the bundled Liberation faces) and use that for every
+   * text element.
    */
-  public pdfAEnabled: boolean;
+  public conformance: PdfAConformance;
+
+  /**
+   * Legacy boolean PDF/A switch. Maps onto {@link conformance}:
+   * reading returns `true` whenever any PDF/A level is selected;
+   * writing `true` selects {@link PdfAConformance.PdfA2b} (the modern
+   * visual-reproducibility baseline) and writing `false` selects
+   * {@link PdfAConformance.None}.
+   */
+  public get pdfAEnabled(): boolean {
+    return this.conformance !== PdfAConformance.None;
+  }
+  public set pdfAEnabled(value: boolean) {
+    this.conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+  }
   /**
    * Gets or sets the accessibility / tagged-PDF conformance mode.
    * Default {@link AccessibilityMode.None} — the writer produces an
@@ -182,7 +206,7 @@ export class DocumentSettings {
     this.centerWindow = false;
     this.displayDocTitle = false;
     this.version = PdfVersion.Pdf14;
-    this.pdfAEnabled = false;
+    this.conformance = PdfAConformance.None;
     this.accessibility = AccessibilityMode.None;
     this.bookmarks = [];
     this.namedDestinations = new Map();

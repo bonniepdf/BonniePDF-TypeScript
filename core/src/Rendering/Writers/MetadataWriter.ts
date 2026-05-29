@@ -9,7 +9,8 @@ import { PdfSyntax } from '../Pdf/PdfSyntax';
 
 function buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
   const blocks: XmpConformanceBlock[] = [];
-  if (settings.pdfAEnabled) blocks.push(XmpConformanceBlock.pdfA1B());
+  const pdfA = XmpConformanceBlock.forPdfA(settings.conformance);
+  if (pdfA) blocks.push(pdfA);
   if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
   return blocks;
 }

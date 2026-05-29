@@ -23,6 +23,15 @@ export interface IPdfWriter {
   writeObject(id: number, dict: Map<string, string>, streamContent?: string): void;
 
   /**
+   * Writes a PDF object whose body is already a pre-formatted PDF
+   * fragment (e.g. `<< /Font << … >> >>`). Used for the global
+   * Resources dictionary, which `PdfResourceRegistry.writeResources`
+   * returns as a string. The body is written verbatim between
+   * `id 0 obj` and `endobj` with no encryption or compression.
+   */
+  writeRawObject(id: number, body: string): void;
+
+  /**
    * Compresses and writes a PDF object
    */
   writeCompressedObject(id: number, dict: Map<string, string>, content: string): void;

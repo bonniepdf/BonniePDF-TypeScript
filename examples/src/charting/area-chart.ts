@@ -94,7 +94,6 @@ export function generate(): Document {
   chart.stretchToFit = true;
   chart.areaColor = Color.fromHex(C_PURPLE);
   chart.fillOpacity = 0.3;
-  //chart.lineWidth = 2.5;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;

@@ -155,6 +155,11 @@ export class Hyperlink implements IElement, IRoleProvider {
     let localY = ctx.currentY;
 
     const ops: string[] = [];
+    if (this.textColor.scA < 1) {
+      PdfOperators.saveState(ops);
+      PdfOperators.setGraphicsState(ops, ctx.registerAlphaGraphicsState(this.textColor.scA));
+    }
+
     PdfOperators.beginText(ops);
     PdfOperators.setFont(ops, fontResourceName, this.fontSize);
     PdfOperators.setFillColor(ops, this.textColor);
@@ -180,6 +185,9 @@ export class Hyperlink implements IElement, IRoleProvider {
     }
 
     PdfOperators.endText(ops);
+    if (this.textColor.scA < 1) {
+      PdfOperators.restoreState(ops);
+    }
     ctx.pages[ctx.currentPageIndex] += ops.join('');
 
     // Calculate total content height

@@ -30,6 +30,7 @@ export class PdfCanvas implements ICanvas {
   private readonly _imageResolver: (image: any) => string;
   private readonly _embeddedFontResolver: (fontFamily: string) => any;
   private readonly _glyphTracker: (fontIdentifier: string, text: string) => void;
+  private readonly _alphaGraphicsStateResolver: (alpha: number) => string;
 
   constructor(
     pageHeight: number,
@@ -38,7 +39,8 @@ export class PdfCanvas implements ICanvas {
     fontResolver?: (fontFamily: string) => string,
     imageResolver?: (image: any) => string,
     embeddedFontResolver?: (fontFamily: string) => any,
-    glyphTracker?: (fontIdentifier: string, text: string) => void
+    glyphTracker?: (fontIdentifier: string, text: string) => void,
+    alphaGraphicsStateResolver?: (alpha: number) => string
   ) {
     this.height = pageHeight;
     this.xOffset = xOffset;
@@ -51,6 +53,7 @@ export class PdfCanvas implements ICanvas {
       });
     this._embeddedFontResolver = embeddedFontResolver ?? (_f => null);
     this._glyphTracker = glyphTracker ?? ((_id, _t) => {});
+    this._alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
   }
 
   public getStream(): string[] {
@@ -72,19 +75,19 @@ export class PdfCanvas implements ICanvas {
   public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    PdfDrawing.fillRect(this.stream, pdfX, pdfY, width, height, color);
+    this.drawWithColorAlpha(color, () => PdfDrawing.fillRect(this.stream, pdfX, pdfY, width, height, color));
   }
 
   public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    PdfDrawing.strokeRect(this.stream, pdfX, pdfY, width, height, color, strokeWidth);
+    this.drawWithColorAlpha(color, () => PdfDrawing.strokeRect(this.stream, pdfX, pdfY, width, height, color, strokeWidth));
   }
 
   public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    PdfDrawing.fillRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color);
+    this.drawWithColorAlpha(color, () => PdfDrawing.fillRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color));
   }
 
   public strokeRoundedRect(
@@ -98,7 +101,9 @@ export class PdfCanvas implements ICanvas {
   ): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    PdfDrawing.strokeRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color, strokeWidth);
+    this.drawWithColorAlpha(color, () =>
+      PdfDrawing.strokeRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color, strokeWidth)
+    );
   }
 
   public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
@@ -106,21 +111,23 @@ export class PdfCanvas implements ICanvas {
     const pdfX2 = x2 + this.xOffset;
     const pdfY1 = this.height - (y1 + this.yOffset);
     const pdfY2 = this.height - (y2 + this.yOffset);
-    PdfOperators.setStrokeColor(this.stream, color);
-    PdfOperators.setLineWidth(this.stream, lineWidth);
-    PdfOperators.strokeLine(this.stream, pdfX1, pdfY1, pdfX2, pdfY2);
+    this.drawWithColorAlpha(color, () => {
+      PdfOperators.setStrokeColor(this.stream, color);
+      PdfOperators.setLineWidth(this.stream, lineWidth);
+      PdfOperators.strokeLine(this.stream, pdfX1, pdfY1, pdfX2, pdfY2);
+    });
   }
 
   public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
     const pdfCx = cx + this.xOffset;
     const pdfCy = this.height - (cy + this.yOffset);
-    PdfDrawing.fillCircle(this.stream, pdfCx, pdfCy, radius, color);
+    this.drawWithColorAlpha(color, () => PdfDrawing.fillCircle(this.stream, pdfCx, pdfCy, radius, color));
   }
 
   public fillPath(points: Point[], color: Color): void {
     if (!points || points.length < 3) return;
     const pdfPoints = points.map(p => new Point(p.x + this.xOffset, this.height - (p.y + this.yOffset)));
-    PdfDrawing.fillPath(this.stream, pdfPoints, color);
+    this.drawWithColorAlpha(color, () => PdfDrawing.fillPath(this.stream, pdfPoints, color));
   }
 
   public drawText(
@@ -134,6 +141,7 @@ export class PdfCanvas implements ICanvas {
   ): void {
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
+    this.beginColorAlpha(color);
     PdfOperators.beginText(this.stream);
 
     // Font must be registered before glyph tracking so the GlyphUsageTracker exists for embedded fonts
@@ -156,6 +164,7 @@ export class PdfCanvas implements ICanvas {
     else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
 
     PdfOperators.endText(this.stream);
+    this.endColorAlpha(color);
   }
 
   public drawTextRotated(
@@ -173,6 +182,7 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.saveState(this.stream);
     PdfOperators.translate(this.stream, pdfX, pdfY);
     PdfOperators.rotate(this.stream, angleDegrees);
+    this.applyColorAlpha(color);
 
     PdfOperators.beginText(this.stream);
     const fontResourceName = this._fontResolver(fontFamily);
@@ -212,6 +222,7 @@ export class PdfCanvas implements ICanvas {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
+    this.beginColorAlpha(color);
     PdfOperators.beginText(this.stream);
     const fontResourceName = this._fontResolver(fontFamily);
     this._glyphTracker(fontFamily, text);
@@ -226,6 +237,7 @@ export class PdfCanvas implements ICanvas {
 
     PdfOperators.setWordSpacing(this.stream, 0);
     PdfOperators.endText(this.stream);
+    this.endColorAlpha(color);
   }
 
   public drawImage(image: any, x: number, y: number, width: number, height: number): void {
@@ -356,5 +368,27 @@ export class PdfCanvas implements ICanvas {
     if (lower.includes('times')) return StandardFonts.TimesRoman;
     if (lower.includes('courier') || lower.includes('mono')) return StandardFonts.Courier;
     return StandardFonts.Helvetica;
+  }
+
+  private drawWithColorAlpha(color: Color, draw: () => void): void {
+    this.beginColorAlpha(color);
+    draw();
+    this.endColorAlpha(color);
+  }
+
+  private beginColorAlpha(color: Color): void {
+    if (color.scA >= 1) return;
+    PdfOperators.saveState(this.stream);
+    this.applyColorAlpha(color);
+  }
+
+  private endColorAlpha(color: Color): void {
+    if (color.scA >= 1) return;
+    PdfOperators.restoreState(this.stream);
+  }
+
+  private applyColorAlpha(color: Color): void {
+    if (color.scA >= 1) return;
+    PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(color.scA));
   }
 }

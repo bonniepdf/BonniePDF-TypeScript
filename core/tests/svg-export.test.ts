@@ -6,9 +6,13 @@ import { AreaChart } from '../src/Charts/AreaChart';
 import { PieChart } from '../src/Charts/PieChart';
 import { DotPlotChart } from '../src/Charts/DotPlotChart';
 import { LollipopChart } from '../src/Charts/LollipopChart';
+import { GroupedBarChart } from '../src/Charts/GroupedBarChart';
 import { ChartData } from '../src/Charts/Models/ChartData';
 import { ChartSeries } from '../src/Charts/Models/ChartSeries';
 import { ChartDataPoint } from '../src/Charts/Models/ChartDataPoint';
+import { SvgCanvas } from '../src/Drawing/SvgCanvas';
+import { Color } from '../src/Core/Color';
+import { TextAlignment } from '../src/Elements/Text/TextAlignment';
 
 function createSampleData(title = 'My Chart', points = 4): ChartData {
   const series = new ChartSeries();
@@ -25,6 +29,14 @@ function createSampleData(title = 'My Chart', points = 4): ChartData {
 }
 
 describe('SvgExport', () => {
+  it('SvgCanvas_DrawText_UsesTopCoordinateForY', () => {
+    const canvas = new SvgCanvas(100, 50);
+
+    canvas.drawText(10, 20, 'Legend', Color.fromHex('#000000'), 10, 'Helvetica', TextAlignment.Left);
+
+    expect(canvas.getSvg()).toContain('y="28"');
+  });
+
   it('BarChart_ToSvg_ContainsSvgTags', () => {
     const chart = new BarChart();
     chart.width = 600;
@@ -85,6 +97,44 @@ describe('SvgExport', () => {
     const svg = chartToSvg(chart, createSampleData());
     expect(svg).toContain('<line');
     expect(svg).toContain('<circle');
+  });
+
+  it('GroupedBarChart_ToSvg_CentersLegendLabelsWithColorBoxes', () => {
+    const chart = new GroupedBarChart();
+    chart.width = 540;
+    chart.height = 320;
+
+    const data = new ChartData();
+    data.yAxis.maxValue = 30;
+    const first = new ChartSeries();
+    first.name = 'A';
+    first.dataPoints = [Object.assign(new ChartDataPoint(), { label: 'Q1', value: 10 })];
+    const second = new ChartSeries();
+    second.name = 'B';
+    second.dataPoints = [Object.assign(new ChartDataPoint(), { label: 'Q1', value: 20 })];
+    data.series = [first, second];
+
+    const svg = chartToSvg(chart, data);
+
+    expect(svg).toContain('<rect x="80" y="280" width="12" height="12"');
+    expect(svg).toContain('<text x="97" y="289.3"');
+  });
+
+  it('PieChart_ToSvg_CentersLegendLabelsWithColorBoxes', () => {
+    const chart = new PieChart();
+    chart.width = 540;
+    chart.height = 320;
+
+    const series = new ChartSeries();
+    series.dataPoints = [Object.assign(new ChartDataPoint(), { label: '.NET', value: 48 })];
+    const data = new ChartData();
+    data.series = [series];
+
+    const svg = chartToSvg(chart, data);
+    const rectY = Number(svg.match(/<rect x="[^"]+" y="([^"]+)" width="14" height="14" fill="#4f46e5"\/>/)?.[1]);
+    const textY = Number(svg.match(/<text x="[^"]+" y="([^"]+)"[^>]*>\.NET - 48<\/text>/)?.[1]);
+
+    expect(textY - rectY).toBeCloseTo(10.3, 5);
   });
 
   it('BarChart_ToSvg_ContainsDataLabels', () => {

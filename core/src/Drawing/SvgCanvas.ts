@@ -84,8 +84,9 @@ export class SvgCanvas implements ICanvas {
   ): void {
     const hex = color.toHexString();
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
+    const baselineY = this.calculateBaselineY(y, fontSize);
     this.svgElements.push(
-      `<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`
+      `<text x="${x}" y="${baselineY}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`
     );
   }
 
@@ -99,8 +100,9 @@ export class SvgCanvas implements ICanvas {
     angleDegrees: number
   ): void {
     const hex = color.toHexString();
+    const baselineY = this.calculateBaselineY(y, fontSize);
     this.svgElements.push(
-      `<text x="${x}" y="${y}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${y})">${this.escapeXml(text)}</text>`
+      `<text x="${x}" y="${baselineY}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${baselineY})">${this.escapeXml(text)}</text>`
     );
   }
 
@@ -163,6 +165,10 @@ export class SvgCanvas implements ICanvas {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&apos;');
+  }
+
+  private calculateBaselineY(y: number, fontSize: number): number {
+    return y + fontSize * 0.8;
   }
 
   public getSvg(): string {

@@ -117,7 +117,8 @@ export class RenderContext {
         this.registerFont.bind(this),
         this.resolveImageResource.bind(this),
         this.resolveEmbeddedFont.bind(this),
-        this.trackGlyphUsage.bind(this)
+        this.trackGlyphUsage.bind(this),
+        this.registerAlphaGraphicsState.bind(this)
       );
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
@@ -135,7 +136,8 @@ export class RenderContext {
       this.registerFont.bind(this),
       this.resolveImageResource.bind(this),
       this.resolveEmbeddedFont.bind(this),
-      this.trackGlyphUsage.bind(this)
+      this.trackGlyphUsage.bind(this),
+      this.registerAlphaGraphicsState.bind(this)
     );
     if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
     return pdfCanvas;
@@ -156,6 +158,10 @@ export class RenderContext {
 
   public registerFont(fontIdentifier: string): string {
     return this.resources.registerFont(fontIdentifier);
+  }
+
+  public registerAlphaGraphicsState(alpha: number): string {
+    return this.resources.registerAlphaGraphicsState(alpha);
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {

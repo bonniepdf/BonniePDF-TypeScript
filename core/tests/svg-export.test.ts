@@ -74,10 +74,12 @@ describe('SvgExport', () => {
     expect(svg).toContain('<line');
   });
 
-  it('AreaChart_ToSvg_ContainsRectOrPath', () => {
+  it('AreaChart_ToSvg_RendersAreaFillAsSingleTransparentPath', () => {
     const chart = new AreaChart();
     const svg = chartToSvg(chart, createSampleData());
-    expect(svg).toMatch(/<rect|<path/);
+    expect(svg).toContain('<path');
+    expect(svg).toContain('fill-opacity="0.3"');
+    expect(svg).not.toContain('<rect');
   });
 
   it('PieChart_ToSvg_ContainsPathElement', () => {

@@ -46,6 +46,20 @@ describe('Color', () => {
     const color = Color.fromHex('#FF5733');
     expect(color).toBeDefined();
   });
+
+  it('fromHex parses trailing alpha', () => {
+    const long = Color.fromHex('#FF573380');
+    expect(long.R).toBe(255);
+    expect(long.G).toBe(87);
+    expect(long.B).toBe(51);
+    expect(long.A).toBe(128);
+
+    const shorthand = Color.fromHex('#F538');
+    expect(shorthand.R).toBe(255);
+    expect(shorthand.G).toBe(85);
+    expect(shorthand.B).toBe(51);
+    expect(shorthand.A).toBe(136);
+  });
 });
 
 describe('BarChart', () => {
@@ -103,13 +117,45 @@ describe('LineChart', () => {
 });
 
 describe('AreaChart', () => {
-  it('draw produces FillRect or FillPath operations', () => {
+  it('draw produces a single FillPath operation for the area fill', () => {
     const chart = new AreaChart();
     const canvas = new MockCanvas();
     const data = createSampleData();
     chart.draw(canvas, data);
-    const ops = canvas.operations.filter(op => op.startsWith('FillRect') || op.startsWith('FillPath'));
-    expect(ops.length).toBeGreaterThan(0);
+    const pathOps = canvas.operations.filter(op => op.startsWith('FillPath'));
+    const rectOps = canvas.operations.filter(op => op.startsWith('FillRect'));
+    expect(pathOps).toHaveLength(1);
+    expect(rectOps).toHaveLength(0);
+  });
+
+  it('PDF output registers an alpha graphics state for fillOpacity', () => {
+    const doc = new Document();
+    const chart = new AreaChart();
+    chart.fillOpacity = 0.42;
+
+    doc.add(new ChartElement(chart, createSampleData(3)));
+
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/ExtGState');
+    expect(pdf).toContain('/ca 0.4200');
+    expect(pdf).toContain('/CA 0.4200');
+  });
+
+  it('PDF/UA output preserves fillOpacity for area fills', () => {
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+
+    const chart = new AreaChart();
+    chart.fillOpacity = 0.42;
+
+    doc.add(new ChartElement(chart, createSampleData(3), 'Sample area chart'));
+
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/ExtGState');
+    expect(pdf).toContain('/ca 0.4200');
+    expect(pdf).toContain('/CA 0.4200');
   });
 });
 

@@ -54,9 +54,17 @@ export class AreaChart extends CartesianChartBase {
     _topY: number
   ): void {
     const fillOpacity =
-      series.style?.fillOpacity && series.style.fillOpacity > 0 ? series.style.fillOpacity : this.defaultFillOpacity;
+      series.style?.fillOpacity && series.style.fillOpacity > 0 && series.style.fillOpacity !== this.defaultFillOpacity
+        ? series.style.fillOpacity
+        : _data.series.length === 1
+          ? this.fillOpacity
+          : this.defaultFillOpacity;
     const lineWidth =
-      series.style?.lineWidth && series.style.lineWidth > 0 ? series.style.lineWidth : this.defaultLineWidth;
+      series.style?.lineWidth && series.style.lineWidth > 0 && series.style.lineWidth !== this.defaultLineWidth
+        ? series.style.lineWidth
+        : _data.series.length === 1
+          ? this.lineWidth
+          : this.defaultLineWidth;
 
     this.drawAreaFill(canvas, coordinates, baselineY, series.color, fillOpacity);
     this.drawConnectingLine(canvas, coordinates, series.color, lineWidth);
@@ -70,94 +78,23 @@ export class AreaChart extends CartesianChartBase {
   }
 
   /**
-   * Draws the area fill using thin rectangles spanning from the axis baseline to the line.
-   * In vertical mode: thin vertical rectangles from baselineY up to the line.
-   * In horizontal mode: thin horizontal rectangles from LeftPadding right to the line.
+   * Draws the area fill as a single closed polygon spanning from the axis baseline to the line.
    */
   private drawAreaFill(canvas: ICanvas, coordinates: Point[], baselineY: number, color: Color, opacity: number): void {
     if (coordinates.length < 2) return;
 
     const fillColor = color.withAlpha(opacity);
-    const stepSize = 2;
+    const first = coordinates[0];
+    const last = coordinates[coordinates.length - 1];
 
     if (this.orientation === ChartOrientation.Horizontal) {
-      const minY = coordinates[0].y;
-      const maxY = coordinates[coordinates.length - 1].y;
-
-      for (let y = minY; y < maxY; y += stepSize) {
-        const x = this.interpolateX(coordinates, y);
-        const rectWidth = x - CartesianChartBase.LEFT_PADDING;
-        canvas.fillRect(CartesianChartBase.LEFT_PADDING, y, rectWidth, stepSize, fillColor);
-      }
-
-      const lastY = maxY - ((maxY - minY) % stepSize);
-      if (lastY < maxY) {
-        const x = this.interpolateX(coordinates, maxY);
-        canvas.fillRect(
-          CartesianChartBase.LEFT_PADDING,
-          lastY,
-          x - CartesianChartBase.LEFT_PADDING,
-          maxY - lastY,
-          fillColor
-        );
-      }
+      canvas.fillPath(
+        [new Point(CartesianChartBase.LEFT_PADDING, first.y), ...coordinates, new Point(CartesianChartBase.LEFT_PADDING, last.y)],
+        fillColor
+      );
     } else {
-      const minX = coordinates[0].x;
-      const maxX = coordinates[coordinates.length - 1].x;
-
-      for (let x = minX; x < maxX; x += stepSize) {
-        const y = this.interpolateY(coordinates, x);
-        const rectHeight = baselineY - y;
-        canvas.fillRect(x, y, stepSize, rectHeight, fillColor);
-      }
-
-      const lastX = maxX - ((maxX - minX) % stepSize);
-      if (lastX < maxX) {
-        const y = this.interpolateY(coordinates, maxX);
-        const rectHeight = baselineY - y;
-        canvas.fillRect(lastX, y, maxX - lastX, rectHeight, fillColor);
-      }
+      canvas.fillPath([new Point(first.x, baselineY), ...coordinates, new Point(last.x, baselineY)], fillColor);
     }
-  }
-
-  /**
-   * Interpolates the X value on the line connecting data points for a given Y position.
-   * Used in horizontal mode to find how far right the line is at a given vertical position.
-   */
-  private interpolateX(coordinates: Point[], y: number): number {
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const p1 = coordinates[i];
-      const p2 = coordinates[i + 1];
-
-      if (y >= p1.y && y <= p2.y) {
-        const t = p2.y - p1.y === 0 ? 0 : (y - p1.y) / (p2.y - p1.y);
-        return p1.x + t * (p2.x - p1.x);
-      }
-    }
-
-    if (y < coordinates[0].y) return coordinates[0].x;
-    return coordinates[coordinates.length - 1].x;
-  }
-
-  /**
-   * Interpolates the y value for a given x position on the line connecting data points.
-   */
-  private interpolateY(coordinates: Point[], x: number): number {
-    // Find the two data points that x lies between
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const p1 = coordinates[i];
-      const p2 = coordinates[i + 1];
-
-      if (x >= p1.x && x <= p2.x) {
-        // Linear interpolation
-        const t = (x - p1.x) / (p2.x - p1.x);
-        return p1.y + t * (p2.y - p1.y);
-      }
-    }
-
-    // If x is outside the range, return the closest point's y
-    if (x < coordinates[0].x) return coordinates[0].y;
-    return coordinates[coordinates.length - 1].y;
   }
 
   /**

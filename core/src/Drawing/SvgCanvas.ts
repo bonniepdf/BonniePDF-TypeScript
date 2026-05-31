@@ -23,39 +23,35 @@ export class SvgCanvas implements ICanvas {
   }
 
   public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
-    const hex = color.toHexString();
-    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${hex}"/>`);
+    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" ${this.getFillAttributes(color)}/>`);
   }
 
   public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
-    const hex = color.toHexString();
     this.svgElements.push(
-      `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" ${this.getStrokeAttributes(color)} stroke-width="${strokeWidth}"/>`
     );
   }
 
   public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
-    const hex = color.toHexString();
     this.svgElements.push(
-      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${hex}" stroke-width="${lineWidth}"/>`
+      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${this.getStrokeAttributes(color)} stroke-width="${lineWidth}"/>`
     );
   }
 
   public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
-    const hex = color.toHexString();
-    this.svgElements.push(`<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${hex}"/>`);
+    this.svgElements.push(`<circle cx="${cx}" cy="${cy}" r="${radius}" ${this.getFillAttributes(color)}/>`);
   }
 
   public fillPath(points: Point[], color: Color): void {
     if (points.length < 3) return;
-    const hex = color.toHexString();
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
-    this.svgElements.push(`<path d="${pathData}" fill="${hex}"/>`);
+    this.svgElements.push(`<path d="${pathData}" ${this.getFillAttributes(color)}/>`);
   }
 
   public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
-    const hex = color.toHexString();
-    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="${hex}"/>`);
+    this.svgElements.push(
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ${this.getFillAttributes(color)}/>`
+    );
   }
 
   public strokeRoundedRect(
@@ -67,9 +63,8 @@ export class SvgCanvas implements ICanvas {
     color: Color,
     strokeWidth: number
   ): void {
-    const hex = color.toHexString();
     this.svgElements.push(
-      `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="none" stroke="${hex}" stroke-width="${strokeWidth}"/>`
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" fill="none" ${this.getStrokeAttributes(color)} stroke-width="${strokeWidth}"/>`
     );
   }
 
@@ -169,6 +164,20 @@ export class SvgCanvas implements ICanvas {
 
   private calculateBaselineY(y: number, fontSize: number): number {
     return y + fontSize * 0.8;
+  }
+
+  private getFillAttributes(color: Color): string {
+    const opacity = this.formatOpacity(color.scA);
+    return opacity < 1 ? `fill="${color.toHexString()}" fill-opacity="${opacity}"` : `fill="${color.toHexString()}"`;
+  }
+
+  private getStrokeAttributes(color: Color): string {
+    const opacity = this.formatOpacity(color.scA);
+    return opacity < 1 ? `stroke="${color.toHexString()}" stroke-opacity="${opacity}"` : `stroke="${color.toHexString()}"`;
+  }
+
+  private formatOpacity(opacity: number): number {
+    return Number(opacity.toFixed(4));
   }
 
   public getSvg(): string {

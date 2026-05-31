@@ -15,6 +15,7 @@ import { DiagnosticsCollector } from '../Core/Diagnostics';
 export class PdfResourceRegistry {
   private fontCounter = 0;
   private imageCounter = 0;
+  private graphicsStateCounter = 0;
   public pdfAEnabled = false;
 
   /**
@@ -33,6 +34,7 @@ export class PdfResourceRegistry {
   public imageResourceNames: Map<number, string> = new Map();
   private imagePdfObjectIds: Map<string, number> = new Map();
   public deferredXObjects: Map<string, DeferredXObjectInfo> = new Map();
+  private alphaGraphicsStates: Map<string, { resourceName: string; alpha: number }> = new Map();
 
   public registerFont(fontIdentifier: string): string {
     // (A) Direct TTF/OTF path
@@ -333,6 +335,22 @@ export class PdfResourceRegistry {
     return this.deferredXObjects.get(signature)!.resourceName;
   }
 
+  public registerAlphaGraphicsState(alpha: number): string {
+    const clamped = Math.max(0, Math.min(1, alpha));
+    const effectiveAlpha = this.pdfAEnabled ? 1 : clamped;
+    const key = effectiveAlpha.toFixed(4);
+
+    if (!this.alphaGraphicsStates.has(key)) {
+      this.graphicsStateCounter++;
+      this.alphaGraphicsStates.set(key, {
+        resourceName: `/GS_ALPHA_${this.graphicsStateCounter}`,
+        alpha: effectiveAlpha,
+      });
+    }
+
+    return this.alphaGraphicsStates.get(key)!.resourceName;
+  }
+
   private mapToStandardFontName(fontIdentifier: string): string {
     const lower = fontIdentifier.toLowerCase();
     if (lower.includes('arial') || lower.includes('helvetica')) return StandardFonts.Helvetica;
@@ -458,20 +476,39 @@ export class PdfResourceRegistry {
 
     const imageResources = xobjRefs.length > 0 ? `<< /XObject << ${xobjRefs.join(' ')} >> >>` : '';
 
-    return this.combineResources(fontResources, imageResources);
+    const graphicsStateRefs: string[] = [];
+    for (const { resourceName, alpha } of this.alphaGraphicsStates.values()) {
+      const objectId = writer.getNewId();
+      writer.writeObject(
+        objectId,
+        new Map<string, string>([
+          ['/Type', '/ExtGState'],
+          ['/ca', alpha.toFixed(4)],
+          ['/CA', alpha.toFixed(4)],
+        ])
+      );
+      graphicsStateRefs.push(`${resourceName} ${objectId} 0 R`);
+    }
+    const graphicsStateResources =
+      graphicsStateRefs.length > 0 ? `<< /ExtGState << ${graphicsStateRefs.join(' ')} >> >>` : '';
+
+    return this.combineResources(fontResources, imageResources, graphicsStateResources);
   }
 
-  private combineResources(fontResources: string, imageResources: string): string {
-    if (!imageResources) return fontResources;
+  private combineResources(...resources: string[]): string {
+    const nonEmptyResources = resources.filter(r => r && r.trim() !== '');
+    if (nonEmptyResources.length === 0) return '<< >>';
 
-    // Strip outer << >> from imageResources and merge into fontResources
-    let imgContent = imageResources;
-    if (imgContent.startsWith('<< ')) imgContent = imgContent.slice(3);
-    if (imgContent.endsWith(' >>')) imgContent = imgContent.slice(0, -3);
+    const content = nonEmptyResources
+      .map(resource => {
+        let inner = resource.trim();
+        if (inner.startsWith('<<')) inner = inner.slice(2).trimStart();
+        if (inner.endsWith('>>')) inner = inner.slice(0, -2).trimEnd();
+        return inner;
+      })
+      .filter(Boolean)
+      .join(' ');
 
-    let fontBase = fontResources;
-    if (fontBase.endsWith(' >>')) fontBase = fontBase.slice(0, -3);
-
-    return `${fontBase} ${imgContent} >>`;
+    return `<< ${content} >>`;
   }
 }

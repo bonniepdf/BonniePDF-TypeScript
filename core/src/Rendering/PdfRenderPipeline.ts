@@ -255,7 +255,7 @@ export class PdfRenderPipeline {
 
     const wmOps: string[] = [];
     PdfOperators.saveState(wmOps);
-    PdfOperators.setGraphicsState(wmOps, '/GS_WM');
+    PdfOperators.setGraphicsState(wmOps, ctx.registerAlphaGraphicsState(wm.opacity));
     PdfOperators.concatMatrix(wmOps, cos, sin, -sin, cos, cx, cy);
     PdfOperators.beginText(wmOps);
     PdfOperators.setFont(wmOps, fontResourceName, wm.fontSize);

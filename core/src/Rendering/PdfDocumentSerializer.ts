@@ -68,7 +68,7 @@ export class PdfDocumentSerializer {
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
     ctx.resources.diagnostics = this.diagnostics;
-    ctx.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
+    ctx.pdfAEnabled = settings.pdfAEnabled;
 
     // PDF/UA tagging context — shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
@@ -177,23 +177,6 @@ export class PdfDocumentSerializer {
     // TTF (TtfFont.fromFile / FontMetrics.registerFontAlias).
     const registry: PdfResourceRegistry | undefined = (ctx as any).resources;
     const effectivePdfA = settings.pdfAEnabled && (registry == null || !registry.hasNonEmbeddedStandardFont());
-
-    // 5. Write ExtGState for watermark opacity if configured
-    if (settings.watermark != null) {
-      const gsId = writer.getNewId();
-      // PDF/A-1B forbids CA/ca < 1.0 — use full opacity for compliant docs
-      const opacity = settings.pdfAEnabled ? 1.0 : (settings.watermark.opacity ?? 1.0);
-      writer.writeObject(
-        gsId,
-        new Map<string, string>([
-          ['/Type', '/ExtGState'],
-          ['/ca', opacity.toFixed(4)],
-          ['/CA', opacity.toFixed(4)],
-        ])
-      );
-      const extGStateRes = `<< /ExtGState << /GS_WM ${gsId} 0 R >> >>`;
-      globalResources = mergeDicts(globalResources, extGStateRes);
-    }
 
     // 6a. Write the global Resources object every page references.
     // PDF/A-2b clause 6.2.2.2 — see page-dict comment above.
@@ -359,7 +342,7 @@ export class PdfDocumentSerializer {
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
     preRegistry.diagnostics = this.diagnostics;
-    preRegistry.pdfAEnabled = settings.pdfAEnabled || settings.accessibility === AccessibilityMode.PdfUa1;
+    preRegistry.pdfAEnabled = settings.pdfAEnabled;
     for (const path of embeddedPaths) {
       preRegistry.registerFont(path); // registers with font=null initially
     }
@@ -395,19 +378,6 @@ function hasViewerPreferences(settings: any): boolean {
     settings.centerWindow ||
     settings.displayDocTitle
   );
-}
-
-/**
- * Merges two PDF dictionary strings by concatenating their inner entries.
- * e.g. "<< /Font << /F1 1 0 R >> >>" + "<< /ExtGState << /GS1 2 0 R >> >>"
- * → "<< /Font << /F1 1 0 R >> /ExtGState << /GS1 2 0 R >> >>"
- */
-function mergeDicts(d1: string, d2: string): string {
-  if (!d2) return d1;
-  let t2 = d2.startsWith('<< ') ? d2.substring(3) : d2;
-  t2 = t2.endsWith(' >>') ? t2.substring(0, t2.length - 3) : t2;
-  const t1 = d1.endsWith(' >>') ? d1.substring(0, d1.length - 3) : d1;
-  return t1 + ' ' + t2 + ' >>';
 }
 
 /**

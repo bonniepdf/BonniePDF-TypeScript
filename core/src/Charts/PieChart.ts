@@ -310,9 +310,10 @@ export class PieChart extends ChartBase {
       // Draw label text (vertically centered with the color box)
       const labelText = `${dataPoint.label} - ${dataPoint.formattedValue}`;
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
+      const textY = y + PieChart.LEGEND_BOX_SIZE / 2 - PieChart.LEGEND_FONT_SIZE / 2;
       canvas.drawText(
         textX,
-        y,
+        textY,
         labelText,
         PieChart.LEGEND_TEXT_COLOR,
         PieChart.LEGEND_FONT_SIZE,

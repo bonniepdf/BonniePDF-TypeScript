@@ -6,13 +6,20 @@ export abstract class StatefulElementBase extends ElementBase {
 
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
     (this as any).startingY = ctx.currentY;
+    const originalX = ctx.currentX;
 
     if (!this.hasPendingContent) {
       ctx.currentY += this.margin.top;
     }
+    ctx.currentX += this.margin.left;
 
     const contentWidth = this.getContentWidth(width);
-    const status = this.renderContentStateful(ctx, contentWidth);
+    let status: RenderStatus;
+    try {
+      status = this.renderContentStateful(ctx, contentWidth);
+    } finally {
+      ctx.currentX = originalX;
+    }
 
     if (status === RenderStatus.Complete) {
       ctx.currentY += this.margin.bottom;

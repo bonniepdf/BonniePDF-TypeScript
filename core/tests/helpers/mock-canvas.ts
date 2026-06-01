@@ -104,4 +104,24 @@ export class MockCanvas implements ICanvas {
   ): void {
     this.operations.push(`StrokeRoundedRect(${x},${y},${width},${height},${radius},${strokeWidth})`);
   }
+
+  beginMarkedContent(role: string): void {
+    this.operations.push(`BeginMarkedContent(${role})`);
+  }
+
+  beginContainerContent(role: string): void {
+    this.operations.push(`BeginContainerContent(${role})`);
+  }
+
+  endMarkedContent(): void {
+    this.operations.push('EndMarkedContent()');
+  }
+
+  beginArtifact(): void {
+    this.operations.push('BeginArtifact()');
+  }
+
+  endArtifact(): void {
+    this.operations.push('EndArtifact()');
+  }
 }

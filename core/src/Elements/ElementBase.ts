@@ -57,15 +57,21 @@ export abstract class ElementBase implements IElement, IMargin {
   public render(ctx: RenderContext, width: number): void {
     // Save starting Y position for Y-position tracking
     this.startingY = ctx.currentY;
+    const originalX = ctx.currentX;
 
     // Apply top margin
     ctx.currentY += this.margin.top;
+    ctx.currentX += this.margin.left;
 
     // Get content width after margins
     const contentWidth = this.getContentWidth(width);
 
-    // Render the content
-    this.renderContent(ctx, contentWidth);
+    try {
+      // Render the content
+      this.renderContent(ctx, contentWidth);
+    } finally {
+      ctx.currentX = originalX;
+    }
 
     // Apply bottom margin
     ctx.currentY += this.margin.bottom;

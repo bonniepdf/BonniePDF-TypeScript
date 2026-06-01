@@ -61,7 +61,7 @@ export class TableCell extends BorderedElementBase implements IRoleProvider {
     this.content.render(ctx, contentWidth - pad.left - pad.right);
 
     ctx.currentX = originalX;
-    ctx.currentY = originalY;
+    ctx.currentY = originalY + totalHeight;
   }
 
   /**

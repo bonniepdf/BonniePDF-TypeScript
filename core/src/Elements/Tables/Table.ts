@@ -166,6 +166,8 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     if (this.lastRowRendered < 0 && this.headersPending) {
       ctx.currentY += this.margin.top;
     }
+    const originalX = ctx.currentX;
+    ctx.currentX += this.margin.left;
 
     const tagging = ctx.tagging;
     // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
@@ -179,6 +181,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     try {
       return this.renderStatefulRows(ctx, width, tagging);
     } finally {
+      ctx.currentX = originalX;
       if (ownTable) tagging!.tree.end();
     }
   }

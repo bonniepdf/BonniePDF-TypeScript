@@ -107,8 +107,8 @@ export abstract class ListElementBase extends TextElementBase {
         ListElementBase.checkPageBreak(ctx, this.lineHeight);
         y = ctx.currentY;
 
-        const markerX = ctx.currentX + this.margin.left;
-        const textX = ctx.currentX + this.margin.left + markerWidth + 5;
+        const markerX = ctx.currentX;
+        const textX = ctx.currentX + markerWidth + 5;
 
         if (!tagging) {
           // Non-tagged: original behavior — marker drawn on every wrapped line

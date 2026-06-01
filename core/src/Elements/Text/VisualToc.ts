@@ -84,44 +84,50 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     }
 
     const contentWidth = this.getContentWidth(width);
+    const originalX = ctx.currentX;
+    ctx.currentX += this.margin.left;
     const lineHeight = this.fontSize * 1.2;
     const startIndex = this.lastRenderedIndex + 1;
 
-    if (startIndex >= this.headingIdentifiers.length) {
-      ctx.currentY += this.margin.bottom;
-      return RenderStatus.Complete;
+    try {
+      if (startIndex >= this.headingIdentifiers.length) {
+        ctx.currentY += this.margin.bottom;
+        return RenderStatus.Complete;
+      }
+
+      const startY = ctx.currentY;
+      let itemsThatFit = 0;
+      let testY = startY;
+
+      for (let i = startIndex; i < this.headingIdentifiers.length; i++) {
+        if (testY + lineHeight > ctx.maxY) break;
+        itemsThatFit++;
+        testY += lineHeight;
+      }
+
+      if (itemsThatFit === 0) {
+        return startIndex === 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+      }
+
+      const endIndex = startIndex + itemsThatFit;
+      let y = startY;
+      for (let i = startIndex; i < endIndex; i++) {
+        this.drawTaggedTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
+        y += lineHeight;
+      }
+
+      this.lastRenderedIndex = endIndex - 1;
+      ctx.currentY = y;
+
+      if (endIndex >= this.headingIdentifiers.length) {
+        ctx.currentY += this.margin.bottom;
+        return RenderStatus.Complete;
+      }
+
+      return RenderStatus.Overflow;
+    } finally {
+      ctx.currentX = originalX;
     }
-
-    const startY = ctx.currentY;
-    let itemsThatFit = 0;
-    let testY = startY;
-
-    for (let i = startIndex; i < this.headingIdentifiers.length; i++) {
-      if (testY + lineHeight > ctx.maxY) break;
-      itemsThatFit++;
-      testY += lineHeight;
-    }
-
-    if (itemsThatFit === 0) {
-      return startIndex === 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
-    }
-
-    const endIndex = startIndex + itemsThatFit;
-    let y = startY;
-    for (let i = startIndex; i < endIndex; i++) {
-      this.drawTaggedTocEntry(ctx, this.headingIdentifiers[i], contentWidth, y);
-      y += lineHeight;
-    }
-
-    this.lastRenderedIndex = endIndex - 1;
-    ctx.currentY = y;
-
-    if (endIndex >= this.headingIdentifiers.length) {
-      ctx.currentY += this.margin.bottom;
-      return RenderStatus.Complete;
-    }
-
-    return RenderStatus.Overflow;
   }
 
   /**

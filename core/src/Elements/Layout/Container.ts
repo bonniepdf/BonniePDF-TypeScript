@@ -46,8 +46,6 @@ export class Container extends BorderedElementBase implements IContentContainer 
   }
 
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
-    if (!this.child) return;
-
     // Draw background (drawBackground is currently a stub in BorderedElementBase)
     if (this.backgroundColor) {
       const totalHeight = this.measureContentHeight(contentWidth);
@@ -57,6 +55,11 @@ export class Container extends BorderedElementBase implements IContentContainer 
     if (this.border.hasAnyBorder) {
       const totalHeight = this.measureContentHeight(contentWidth);
       this.drawBorder(ctx, ctx.currentX, ctx.currentY, contentWidth, totalHeight);
+    }
+
+    if (!this.child) {
+      ctx.currentY += this.padding.top + this.padding.bottom;
+      return;
     }
 
     const originalX = ctx.currentX;

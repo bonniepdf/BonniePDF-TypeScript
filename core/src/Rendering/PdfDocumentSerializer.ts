@@ -20,6 +20,7 @@ import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
+import { Image } from '../Elements/Media/Image';
 
 export class PdfDocumentSerializer {
   constructor(
@@ -68,7 +69,7 @@ export class PdfDocumentSerializer {
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
     ctx.resources.diagnostics = this.diagnostics;
-    ctx.pdfAEnabled = settings.pdfAEnabled;
+    ctx.resources.conformance = settings.conformance;
 
     // PDF/UA tagging context — shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
@@ -342,11 +343,38 @@ export class PdfDocumentSerializer {
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
     preRegistry.diagnostics = this.diagnostics;
-    preRegistry.pdfAEnabled = settings.pdfAEnabled;
+    preRegistry.conformance = settings.conformance;
     for (const path of embeddedPaths) {
       preRegistry.registerFont(path); // registers with font=null initially
     }
     await preRegistry.preloadAllFontsAsync();
+
+    // ── Phase 2b: Async-decode any PNG images that need it ──────────────────
+    // Real-world PNGs use Huffman-compressed deflate, which the sync inflater
+    // cannot decode.  Walk the element tree, gather every Image whose bytes
+    // need async decode, then prepare them all in parallel via
+    // `DecompressionStream`.  After this completes, the sync render pass can
+    // read the cached ImageInfo on each Image directly.
+    const imagesToDecode: Image[] = [];
+    for (const page of pages) {
+      const elements: any[] = typeof page.getElements === 'function' ? page.getElements() : (page.elements ?? []);
+      for (const el of elements) {
+        collectImagesNeedingDecode(el, imagesToDecode);
+      }
+    }
+    for (const pageNum of [1, 2]) {
+      if (settings.headerTemplate) {
+        const el = settings.headerTemplate(pageNum);
+        if (el) collectImagesNeedingDecode(el, imagesToDecode);
+      }
+      if (settings.footerTemplate) {
+        const el = settings.footerTemplate(pageNum);
+        if (el) collectImagesNeedingDecode(el, imagesToDecode);
+      }
+    }
+    if (imagesToDecode.length > 0) {
+      await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
+    }
 
     // ── Phase 3: Real serialization with the pre-loaded registry ────────────
     // Only pass the registry when there are actually embedded fonts to inject —
@@ -398,6 +426,59 @@ function hasViewerPreferences(settings: any): boolean {
  *   • `.defaultStyle?.fontName` (RichText default style)
  *   • `.style?.fontName` (TextSpan)
  */
+/**
+ * Walk the element tree and collect every `Image` whose raw bytes still need
+ * an async decode step (i.e. a PNG that hasn't been prepared yet).  Uses the
+ * same child-resolution rules as {@link collectEmbeddedFonts}.
+ */
+function collectImagesNeedingDecode(element: any, out: Image[]): void {
+  if (!element || typeof element !== 'object') return;
+
+  if (element instanceof Image && element.needsAsyncDecode()) {
+    out.push(element);
+  }
+
+  forEachChild(element, child => collectImagesNeedingDecode(child, out));
+}
+
+function forEachChild(element: any, visit: (child: any) => void): void {
+  if (Array.isArray(element.children)) for (const c of element.children) visit(c);
+  if (Array.isArray(element.Children)) for (const c of element.Children) visit(c);
+  if (typeof element.getChildren === 'function') {
+    const c = element.getChildren();
+    if (Array.isArray(c)) for (const ch of c) visit(ch);
+  }
+  if (Array.isArray(element.content)) for (const c of element.content) visit(c);
+  if (typeof element.getElements === 'function') {
+    const e = element.getElements();
+    if (Array.isArray(e)) for (const el of e) visit(el);
+  }
+  if (Array.isArray(element.spans)) for (const s of element.spans) visit(s);
+  if (typeof element.getSpans === 'function') {
+    const s = element.getSpans();
+    if (Array.isArray(s)) for (const sp of s) visit(sp);
+  }
+  const rows: any[] = Array.isArray(element.rows)
+    ? element.rows
+    : typeof element.getRows === 'function'
+      ? (element.getRows() ?? [])
+      : [];
+  for (const row of rows) {
+    if (!row) continue;
+    const cells: any[] = Array.isArray(row.cells)
+      ? row.cells
+      : typeof row.getCells === 'function'
+        ? (row.getCells() ?? [])
+        : [];
+    for (const cell of cells) {
+      if (!cell) continue;
+      if (Array.isArray(cell.content)) for (const el of cell.content) visit(el);
+      else visit(cell.content);
+      visit(cell);
+    }
+  }
+}
+
 function collectEmbeddedFonts(element: any, paths: Set<string>): void {
   if (!element || typeof element !== 'object') return;
 

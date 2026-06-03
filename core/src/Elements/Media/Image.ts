@@ -65,8 +65,8 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
 
   protected override getPreferredContentWidth(): number {
     const info = this.getImageInfo();
-    const nativeWidth = info.width;
-    const nativeHeight = info.height;
+    const nativeWidth = info.displayWidth;
+    const nativeHeight = info.displayHeight;
     const aspectRatio = nativeWidth / nativeHeight;
 
     if (this.width !== undefined) return this.width;
@@ -102,6 +102,40 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   }
 
   /**
+   * Asynchronously decode the image and cache its `ImageInfo`.  Required for
+   * real-world (Huffman-compressed) PNGs, because the sync loader only
+   * handles stored-block PNGs.  `Document.generateBytesAsync()` calls this
+   * automatically during its preload phase; you only need to invoke it
+   * yourself if you intend to call `generateBytes()` (sync) on a document
+   * containing PNG images decoded from arbitrary sources.
+   *
+   * No-ops if the image is already prepared, or if `imageData` is a JPEG
+   * (JPEGs need no decompression — their bytes pass straight into
+   * `/DCTDecode`).
+   */
+  public async prepareAsync(): Promise<void> {
+    if (this.cachedInfo !== undefined) return;
+    if (this.imageData.length === 0) return; // filePath path is not async-decoded here
+    this.cachedInfo = await ImageLoader.loadFromBytesAsync(this.imageData);
+  }
+
+  /**
+   * True when this image carries raw PNG bytes that have not yet been
+   * decoded.  Used by the document async-preload phase to discover which
+   * images need a `prepareAsync()` call before the sync render pass runs.
+   */
+  public needsAsyncDecode(): boolean {
+    if (this.cachedInfo !== undefined) return false;
+    if (this.imageData.length < 8) return false;
+    return (
+      this.imageData[0] === 0x89 &&
+      this.imageData[1] === 0x50 &&
+      this.imageData[2] === 0x4e &&
+      this.imageData[3] === 0x47
+    );
+  }
+
+  /**
    * Get or load image information (auto-detects JPEG or PNG)
    */
   private getImageInfo(): ImageInfo {
@@ -130,8 +164,10 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   ): void {
     const info = this.getImageInfo();
 
-    const nativeWidth = info.width;
-    const nativeHeight = info.height;
+    // Use displayWidth/Height so EXIF-rotated JPEGs (orientation 5–8) lay
+    // out in their visual orientation, not their stored sensor orientation.
+    const nativeWidth = info.displayWidth;
+    const nativeHeight = info.displayHeight;
     const aspectRatio = nativeWidth / nativeHeight;
 
     // Use specified width or available width

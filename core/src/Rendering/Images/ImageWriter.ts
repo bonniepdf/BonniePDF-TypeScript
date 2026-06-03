@@ -1,5 +1,6 @@
 import { IPdfWriter, IAsyncPdfWriter } from '../Writers/PdfWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
+import { PdfAConformance } from '../../Configuration/PdfAConformance';
 
 function _toHex(bytes: Uint8Array): string {
   return Array.from(bytes)
@@ -14,11 +15,28 @@ function _toHex(bytes: Uint8Array): string {
 export class ImageWriter {
   private readonly asyncWriter?: IAsyncPdfWriter;
   private readonly writer: IPdfWriter;
+  private _conformance = PdfAConformance.None;
 
   /**
-   * When true, PDF/A-1B constraints are enforced (e.g. alpha channels are flattened).
+   * Legacy PDF/A switch. Mirrors DocumentSettings: true selects PDF/A-2b.
    */
-  public pdfAEnabled = false;
+  public get pdfAEnabled(): boolean {
+    return this._conformance !== PdfAConformance.None;
+  }
+  public set pdfAEnabled(value: boolean) {
+    this._conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+  }
+
+  /**
+   * PDF/A conformance level used for image feature decisions. PDF/A-1 forbids
+   * transparency, while PDF/A-2 and newer allow soft masks.
+   */
+  public get conformance(): PdfAConformance {
+    return this._conformance;
+  }
+  public set conformance(value: PdfAConformance) {
+    this._conformance = value ?? PdfAConformance.None;
+  }
 
   /**
    * Creates an ImageWriter for synchronous operations
@@ -62,9 +80,14 @@ export class ImageWriter {
     dict.set('/Subtype', '/Image');
     dict.set('/Width', image.width.toString());
     dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', this.getColorSpaceString(image.colorSpace, image.palette));
+    dict.set('/ColorSpace', this.resolveColorSpace(image));
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/DCTDecode'); // JPEG compression filter
+    if (image.invertCmykColors && image.colorSpace === ImageColorSpace.DeviceCMYK) {
+      // Photoshop-exported CMYK JPEGs store inverted ink values; tell PDF to
+      // invert each component back during decoding.
+      dict.set('/Decode', '[1 0 1 0 1 0 1 0]');
+    }
 
     this.writer.writeBinaryObject(id, dict, image.data);
     return id;
@@ -74,11 +97,11 @@ export class ImageWriter {
    * Writes a PNG image as an XObject (using FlateDecode)
    */
   public writePngImage(id: number, image: ImageInfo, resourceName: string): number {
-    // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+    // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
     let pixelData = image.data;
     let writeSmask = image.hasAlpha && image.alphaData.length > 0;
 
-    if (writeSmask && this.pdfAEnabled) {
+    if (writeSmask && this.requiresPdfA1TransparencyFallback()) {
       pixelData = this.flattenAlpha(image.data, image.alphaData, image.components, image.bitsPerComponent);
       writeSmask = false;
     }
@@ -94,15 +117,8 @@ export class ImageWriter {
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/FlateDecode');
 
-    // Handle color space
-    if (image.colorSpace === ImageColorSpace.Indexed && image.palette.length > 0) {
-      // Indexed color: [/Indexed /DeviceRGB maxIndex paletteHexString]
-      const maxIndex = image.palette.length / 3 - 1;
-      const paletteHex = '<' + _toHex(image.palette) + '>';
-      dict.set('/ColorSpace', `[/Indexed /DeviceRGB ${maxIndex} ${paletteHex}]`);
-    } else {
-      dict.set('/ColorSpace', this.getColorSpaceString(image.colorSpace, image.palette));
-    }
+    // Handle color space — ICC profile (when present) overrides device space.
+    dict.set('/ColorSpace', this.resolveColorSpace(image));
 
     // Handle alpha channel (soft mask)
     if (writeSmask) {
@@ -113,6 +129,69 @@ export class ImageWriter {
 
     this.writer.writeBinaryObject(id, dict, compressedData);
     return id;
+  }
+
+  /**
+   * Returns the value for the image XObject's `/ColorSpace` entry.  When the
+   * image carries an embedded ICC profile we write the profile as its own
+   * stream object and reference it with `[/ICCBased <id> 0 R]`; that gives
+   * the consuming reader the captured colour transform instead of falling
+   * back to the device space.  Without a profile we fall through to the
+   * previous behaviour (indexed palette for paletted PNGs, device space
+   * otherwise).
+   */
+  private resolveColorSpace(image: ImageInfo): string {
+    const baseDevice = this.getColorSpaceString(image.colorSpace, image.palette);
+
+    if (image.iccProfile.length > 0 && image.colorSpace !== ImageColorSpace.Indexed) {
+      const components = this.iccComponentCount(image);
+      if (components > 0) {
+        const iccId = this.writer.getNewId();
+        this.writeIccProfile(iccId, image.iccProfile, components, baseDevice);
+        return `[/ICCBased ${iccId} 0 R]`;
+      }
+    }
+
+    if (image.colorSpace === ImageColorSpace.Indexed && image.palette.length > 0) {
+      const maxIndex = image.palette.length / 3 - 1;
+      const paletteHex = '<' + _toHex(image.palette) + '>';
+      return `[/Indexed /DeviceRGB ${maxIndex} ${paletteHex}]`;
+    }
+
+    return baseDevice;
+  }
+
+  /**
+   * Pick the N value (component count) for the ICC profile stream — must
+   * match the number of channels in the decoded image data, not the
+   * stored-bitstream layout.  PNG RGBA splits alpha out before the PDF
+   * pixel stream is written, so the colour channel count is `components`
+   * (or `components - 1` when `hasAlpha` is true and components includes
+   * the alpha channel).
+   */
+  private iccComponentCount(image: ImageInfo): number {
+    if (image.format === ImageFormat.Jpeg) {
+      return image.components; // JPEG: 1, 3, or 4
+    }
+    // PNG: parser already decremented `components` when hasAlpha was set,
+    // so it now reflects the colour-only count (1 for gray, 3 for RGB).
+    return image.components;
+  }
+
+  /**
+   * Writes a standalone ICC-profile stream object that an `/ICCBased`
+   * colour space can point at.  The profile bytes are FlateDecode-compressed
+   * using the existing image-side compressor so no extra dependency is
+   * needed.  `/Alternate` is set to the matching device colour space so
+   * PDF readers without ICC support fall back gracefully.
+   */
+  private writeIccProfile(id: number, profile: Uint8Array, components: number, alternate: string): void {
+    const compressed = this.compressData(profile);
+    const dict = new Map<string, string>();
+    dict.set('/N', components.toString());
+    dict.set('/Alternate', alternate);
+    dict.set('/Filter', '/FlateDecode');
+    this.writer.writeBinaryObject(id, dict, compressed);
   }
 
   /**
@@ -256,7 +335,7 @@ export class ImageWriter {
     dict.set('/Subtype', '/Image');
     dict.set('/Width', image.width.toString());
     dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', this.getColorSpaceString(image.colorSpace, image.palette));
+    dict.set('/ColorSpace', this.resolveColorSpace(image));
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/DCTDecode');
 
@@ -278,11 +357,11 @@ export class ImageWriter {
       throw new Error('Async writer not configured');
     }
 
-    // PDF/A-1B forbids SMask — flatten alpha by compositing against white
+    // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
     let pixelData = image.data;
     let writeSmask = image.hasAlpha && image.alphaData.length > 0;
 
-    if (writeSmask && this.pdfAEnabled) {
+    if (writeSmask && this.requiresPdfA1TransparencyFallback()) {
       pixelData = this.flattenAlpha(image.data, image.alphaData, image.components, image.bitsPerComponent);
       writeSmask = false;
     }
@@ -298,14 +377,8 @@ export class ImageWriter {
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/FlateDecode');
 
-    // Handle color space
-    if (image.colorSpace === ImageColorSpace.Indexed && image.palette.length > 0) {
-      const maxIndex = image.palette.length / 3 - 1;
-      const paletteHex = '<' + _toHex(image.palette) + '>';
-      dict.set('/ColorSpace', `[/Indexed /DeviceRGB ${maxIndex} ${paletteHex}]`);
-    } else {
-      dict.set('/ColorSpace', this.getColorSpaceString(image.colorSpace, image.palette));
-    }
+    // Handle color space — ICC profile (when present) overrides device space.
+    dict.set('/ColorSpace', this.resolveColorSpace(image));
 
     // Handle alpha channel (soft mask)
     if (writeSmask) {
@@ -393,5 +466,9 @@ export class ImageWriter {
     }
 
     return result;
+  }
+
+  private requiresPdfA1TransparencyFallback(): boolean {
+    return this._conformance === PdfAConformance.PdfA1b || this._conformance === PdfAConformance.PdfA1a;
   }
 }

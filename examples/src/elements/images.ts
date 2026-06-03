@@ -3,6 +3,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfVersion,
+  PdfAConformance,
   TextBlock,
   TextStyle,
   Container,
@@ -154,7 +155,7 @@ export function generate(): Document {
 
   const settings = new DocumentSettings();
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2b;
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Image Support Demo';

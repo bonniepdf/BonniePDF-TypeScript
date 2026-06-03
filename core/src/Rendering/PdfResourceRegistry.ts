@@ -11,12 +11,29 @@ import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { FontManager } from '../Typography/FontManager';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
+import { PdfAConformance } from '../Configuration/PdfAConformance';
 
 export class PdfResourceRegistry {
   private fontCounter = 0;
   private imageCounter = 0;
   private graphicsStateCounter = 0;
-  public pdfAEnabled = false;
+  private _conformance = PdfAConformance.None;
+
+  public get conformance(): PdfAConformance {
+    return this._conformance;
+  }
+
+  public set conformance(value: PdfAConformance) {
+    this._conformance = value ?? PdfAConformance.None;
+  }
+
+  public get pdfAEnabled(): boolean {
+    return this._conformance !== PdfAConformance.None;
+  }
+
+  public set pdfAEnabled(value: boolean) {
+    this._conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
+  }
 
   /**
    * Collector that receives recoverable failures encountered while loading
@@ -300,11 +317,18 @@ export class PdfResourceRegistry {
   }
 
   private computeHash(data: Uint8Array): string {
-    // Stub: would use SHA256
-    return Array.from(data)
-      .slice(0, 16)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    let h1 = 0x811c9dc5;
+    let h2 = 0x9e3779b9;
+
+    for (const b of data) {
+      h1 ^= b;
+      h1 = Math.imul(h1, 0x01000193) >>> 0;
+
+      h2 ^= b + 0x9e3779b9 + ((h2 << 6) >>> 0) + (h2 >>> 2);
+      h2 = Math.imul(h2, 0x85ebca6b) >>> 0;
+    }
+
+    return `${data.length.toString(16)}_${h1.toString(16).padStart(8, '0')}_${h2.toString(16).padStart(8, '0')}`;
   }
 
   public getImageResourceName(imageId: number): string {
@@ -337,7 +361,7 @@ export class PdfResourceRegistry {
 
   public registerAlphaGraphicsState(alpha: number): string {
     const clamped = Math.max(0, Math.min(1, alpha));
-    const effectiveAlpha = this.pdfAEnabled ? 1 : clamped;
+    const effectiveAlpha = this.requiresPdfA1TransparencyFallback() ? 1 : clamped;
     const key = effectiveAlpha.toFixed(4);
 
     if (!this.alphaGraphicsStates.has(key)) {
@@ -349,6 +373,10 @@ export class PdfResourceRegistry {
     }
 
     return this.alphaGraphicsStates.get(key)!.resourceName;
+  }
+
+  private requiresPdfA1TransparencyFallback(): boolean {
+    return this._conformance === PdfAConformance.PdfA1b || this._conformance === PdfAConformance.PdfA1a;
   }
 
   private mapToStandardFontName(fontIdentifier: string): string {
@@ -374,7 +402,7 @@ export class PdfResourceRegistry {
   public writeResources(writer: IPdfWriter, totalPages: number): string {
     const fontWriter = new FontWriter(writer, this.diagnostics);
     const imageWriter = new ImageWriter(writer);
-    imageWriter.pdfAEnabled = this.pdfAEnabled;
+    imageWriter.conformance = this._conformance;
 
     // 1. Write fonts
     for (const [fontIdentifier, resourceName] of this.fontNameMap) {

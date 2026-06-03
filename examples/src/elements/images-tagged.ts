@@ -3,6 +3,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfVersion,
+  PdfAConformance,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -49,18 +50,24 @@ function pngChunk(type: string, data: number[]): number[] {
   return [...u32be(data.length), ...typeBytes, ...data, ...u32be(crc32(forCrc))];
 }
 
-/** Builds a minimal valid RGB PNG from a per-pixel colour function. */
-function buildRgbPng(size: number, pixel: (x: number, y: number) => [number, number, number]): Uint8Array {
-  const stride = 1 + size * 3;
+/** Builds a minimal valid PNG from a per-pixel colour function. */
+function buildPng(
+  size: number,
+  rgba: boolean,
+  pixel: (x: number, y: number) => [number, number, number, number?]
+): Uint8Array {
+  const bpp = rgba ? 4 : 3;
+  const stride = 1 + size * bpp;
   const raw = new Uint8Array(stride * size);
   for (let y = 0; y < size; y++) {
     raw[y * stride] = 0; // filter = None
     for (let x = 0; x < size; x++) {
-      const [r, g, b] = pixel(x, y);
-      const off = y * stride + 1 + x * 3;
+      const [r, g, b, a = 255] = pixel(x, y);
+      const off = y * stride + 1 + x * bpp;
       raw[off] = r;
       raw[off + 1] = g;
       raw[off + 2] = b;
+      if (rgba) raw[off + 3] = a;
     }
   }
   const nlen = (raw.length ^ 0xffff) & 0xffff;
@@ -75,7 +82,7 @@ function buildRgbPng(size: number, pixel: (x: number, y: number) => [number, num
     ...Array.from(raw),
     ...u32be(adler32(raw)),
   ];
-  const ihdr = [...u32be(size), ...u32be(size), 8, 2, 0, 0, 0]; // 8-bit, colour type 2 (RGB)
+  const ihdr = [...u32be(size), ...u32be(size), 8, rgba ? 6 : 2, 0, 0, 0];
   return new Uint8Array([
     0x89,
     0x50,
@@ -92,7 +99,7 @@ function buildRgbPng(size: number, pixel: (x: number, y: number) => [number, num
 }
 
 /**
- * PDF/UA-1 + PDF/A-1b tagged example exercising raster images:
+ * PDF/UA-1 + PDF/A-2a tagged example exercising raster images:
  *   - an informative Image with alt text  -> Figure structure element + /Alt
  *   - a decorative Image (isDecorative)    -> Artifact (excluded from reading order)
  *
@@ -102,8 +109,13 @@ function buildRgbPng(size: number, pixel: (x: number, y: number) => [number, num
  * tools/verapdf/validate.sh.
  */
 export function generate(): Document {
-  const photoPng = buildRgbPng(96, (x, y) => [Math.round((x * 255) / 95), Math.round((y * 255) / 95), 128]);
-  const dividerPng = buildRgbPng(48, () => [220, 224, 230]);
+  const alphaPng = buildPng(96, true, (x, y) => {
+    const dx = x - 48;
+    const dy = y - 48;
+    const t = Math.min(1, Math.sqrt(dx * dx + dy * dy) / 48);
+    return [Math.round(t * 255), Math.round((1 - t) * 100), Math.round((1 - t) * 255), Math.round((1 - t) * 255)];
+  });
+  const dividerPng = buildPng(48, false, () => [220, 224, 230]);
 
   const doc = new Document();
 
@@ -115,6 +127,7 @@ export function generate(): Document {
 
   doc.settings = new DocumentSettings();
   doc.settings.version = PdfVersion.Pdf17;
+  doc.settings.conformance = PdfAConformance.PdfA2a;
   doc.settings.accessibility = AccessibilityMode.PdfUa1;
   doc.settings.language = 'en-GB';
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
@@ -137,11 +150,11 @@ export function generate(): Document {
 
   // Informative image -> Figure + /Alt (alt text present, not decorative).
   const figure = new Image();
-  figure.imageData = photoPng;
+  figure.imageData = alphaPng;
   figure.width = 200;
   figure.height = 200;
   figure.fitMode = ImageFitMode.Contain;
-  figure.altText = 'A square gradient blending red across the horizontal axis and green down the vertical axis.';
+  figure.altText = 'A circular blue-to-red gradient fading to transparent at the edges.';
   figure.margin = new Thickness(0, 0, 0, 12);
   doc.add(figure);
 

@@ -252,7 +252,12 @@ export class PdfCanvas implements ICanvas {
 
     PdfOperators.saveState(this.stream);
     PdfOperators.translate(this.stream, pdfX, pdfY);
-    PdfOperators.scale(this.stream, width, height);
+    // Combine EXIF orientation with the display-size scale into a single
+    // `cm` matrix.  For orientation=1 (the common case) this is identical
+    // to the previous translate+scale sequence.
+    const orientation = typeof image?.orientation === 'number' ? image.orientation : 1;
+    const m = orientationMatrix(orientation, width, height);
+    PdfOperators.concatMatrix(this.stream, m[0], m[1], m[2], m[3], m[4], m[5]);
     PdfOperators.paintXObject(this.stream, imageName);
     PdfOperators.restoreState(this.stream);
   }
@@ -395,5 +400,46 @@ export class PdfCanvas implements ICanvas {
   private applyColorAlpha(color: Color): void {
     if (color.scA >= 1) return;
     PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(color.scA));
+  }
+}
+
+/**
+ * Combined "EXIF-orient + scale-to-display-box" affine matrix.  The image
+ * XObject is painted into the PDF unit square with its stored top edge at
+ * y=1; this matrix transforms that unit square so the visually-correct
+ * image fills the requested `width × height` display box.
+ *
+ * The eight EXIF orientations (per TIFF tag 0x0112) are:
+ *   1 = normal      5 = transpose
+ *   2 = flip-H      6 = rotate 90° CW
+ *   3 = rotate 180° 7 = transverse
+ *   4 = flip-V      8 = rotate 90° CCW
+ *
+ * `width` and `height` are the post-rotation display dimensions, so for
+ * orientations 5–8 the caller has already swapped the natural aspect ratio.
+ */
+function orientationMatrix(
+  orientation: number,
+  width: number,
+  height: number
+): [number, number, number, number, number, number] {
+  switch (orientation) {
+    case 2:
+      return [-width, 0, 0, height, width, 0];
+    case 3:
+      return [-width, 0, 0, -height, width, height];
+    case 4:
+      return [width, 0, 0, -height, 0, height];
+    case 5:
+      return [0, -height, -width, 0, width, height];
+    case 6:
+      return [0, -height, width, 0, 0, height];
+    case 7:
+      return [0, height, width, 0, 0, 0];
+    case 8:
+      return [0, height, -width, 0, width, 0];
+    case 1:
+    default:
+      return [width, 0, 0, height, 0, 0];
   }
 }

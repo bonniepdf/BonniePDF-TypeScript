@@ -25,7 +25,7 @@ import {
   BarChart,
 } from '@bonniepdf/core';
 
-import { DateHelper } from './date-helpers';
+import { DateHelper } from './date-helpers.ts';
 
 // ── Brand colours — drawn from the BonniePDF logo palette ────────────────────
 const Espresso = Color.fromHex('#442714');

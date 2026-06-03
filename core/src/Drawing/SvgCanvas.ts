@@ -23,7 +23,9 @@ export class SvgCanvas implements ICanvas {
   }
 
   public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
-    this.svgElements.push(`<rect x="${x}" y="${y}" width="${width}" height="${height}" ${this.getFillAttributes(color)}/>`);
+    this.svgElements.push(
+      `<rect x="${x}" y="${y}" width="${width}" height="${height}" ${this.getFillAttributes(color)}/>`
+    );
   }
 
   public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
@@ -173,7 +175,9 @@ export class SvgCanvas implements ICanvas {
 
   private getStrokeAttributes(color: Color): string {
     const opacity = this.formatOpacity(color.scA);
-    return opacity < 1 ? `stroke="${color.toHexString()}" stroke-opacity="${opacity}"` : `stroke="${color.toHexString()}"`;
+    return opacity < 1
+      ? `stroke="${color.toHexString()}" stroke-opacity="${opacity}"`
+      : `stroke="${color.toHexString()}"`;
   }
 
   private formatOpacity(opacity: number): number {

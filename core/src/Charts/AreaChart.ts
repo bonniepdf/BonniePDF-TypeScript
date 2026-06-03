@@ -89,7 +89,11 @@ export class AreaChart extends CartesianChartBase {
 
     if (this.orientation === ChartOrientation.Horizontal) {
       canvas.fillPath(
-        [new Point(CartesianChartBase.LEFT_PADDING, first.y), ...coordinates, new Point(CartesianChartBase.LEFT_PADDING, last.y)],
+        [
+          new Point(CartesianChartBase.LEFT_PADDING, first.y),
+          ...coordinates,
+          new Point(CartesianChartBase.LEFT_PADDING, last.y),
+        ],
         fillColor
       );
     } else {

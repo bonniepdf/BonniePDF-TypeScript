@@ -53,7 +53,8 @@ export class PdfCanvas implements ICanvas {
       });
     this._embeddedFontResolver = embeddedFontResolver ?? (_f => null);
     this._glyphTracker = glyphTracker ?? ((_id, _t) => {});
-    this._alphaGraphicsStateResolver = alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
+    this._alphaGraphicsStateResolver =
+      alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
   }
 
   public getStream(): string[] {
@@ -81,13 +82,17 @@ export class PdfCanvas implements ICanvas {
   public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    this.drawWithColorAlpha(color, () => PdfDrawing.strokeRect(this.stream, pdfX, pdfY, width, height, color, strokeWidth));
+    this.drawWithColorAlpha(color, () =>
+      PdfDrawing.strokeRect(this.stream, pdfX, pdfY, width, height, color, strokeWidth)
+    );
   }
 
   public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
-    this.drawWithColorAlpha(color, () => PdfDrawing.fillRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color));
+    this.drawWithColorAlpha(color, () =>
+      PdfDrawing.fillRoundedRect(this.stream, pdfX, pdfY, width, height, radius, color)
+    );
   }
 
   public strokeRoundedRect(

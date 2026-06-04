@@ -13,7 +13,7 @@ export class Spacer extends ElementBase {
     return this.height;
   }
 
-  protected renderContent(_ctx: any, _contentWidth: number): void {
-    // No-op - height is handled by parent
+  protected renderContent(ctx: RenderContext, _contentWidth: number): void {
+    ctx.currentY += this.height;
   }
 }

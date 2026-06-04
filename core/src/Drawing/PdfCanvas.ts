@@ -358,26 +358,13 @@ export class PdfCanvas implements ICanvas {
       const height = fontSize * 1.2;
       return new Size(totalWidth, height);
     }
-    const standardFontName = this.getStandardFontName(fontFamily);
-    const width = FontMetrics.getStringWidth(text, standardFontName, fontSize);
+    const width = FontMetrics.getStringWidth(text, fontFamily, fontSize);
     const height = fontSize * 1.2;
     return new Size(width, height);
   }
 
   private getDefaultFontResourceName(fontFamily: string): string {
-    const lower = fontFamily.toLowerCase();
-    if (lower.includes('arial') || lower.includes('helvetica')) return '/Helvetica';
-    if (lower.includes('times')) return '/Times-Roman';
-    if (lower.includes('courier') || lower.includes('mono')) return '/Courier';
-    return '/Helvetica';
-  }
-
-  private getStandardFontName(fontFamily: string): string {
-    const lower = fontFamily.toLowerCase();
-    if (lower.includes('arial') || lower.includes('helvetica')) return StandardFonts.Helvetica;
-    if (lower.includes('times')) return StandardFonts.TimesRoman;
-    if (lower.includes('courier') || lower.includes('mono')) return StandardFonts.Courier;
-    return StandardFonts.Helvetica;
+    return `/${fontFamily}`;
   }
 
   private drawWithColorAlpha(color: Color, draw: () => void): void {

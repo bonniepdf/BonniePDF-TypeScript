@@ -430,7 +430,7 @@ export class PdfResourceRegistry {
       } else {
         const fontId = writer.getNewId();
         this.fontIdMap.set(fontIdentifier, fontId);
-        fontWriter.writeType1Font(fontId, this.mapToStandardFontName(fontIdentifier));
+        fontWriter.writeType1Font(fontId, fontIdentifier);
       }
     }
 

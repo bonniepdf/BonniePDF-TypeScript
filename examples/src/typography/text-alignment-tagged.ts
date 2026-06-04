@@ -40,12 +40,11 @@ export function generate(): Document {
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
   h1.textColor = Color.slate800;
+  h1.alignment = TextAlignment.Center;
   h1.margin = new Thickness(0, 0, 0, 16);
   doc.add(h1);
 
-  const intro = new TextBlock(
-    'The four standard alignments are shown below. Each paragraph carries the same text and the same /P structure-tree role — alignment is a purely visual property.'
-  );
+  const intro = new TextBlock('The four standard alignments are shown below.');
   intro.margin = new Thickness(0, 0, 0, 14);
   doc.add(intro);
 
@@ -56,6 +55,7 @@ export function generate(): Document {
   h2Left.fontName = StandardFonts.HelveticaBold;
   h2Left.fontSize = 13;
   h2Left.textColor = Color.indigo600;
+  h2Left.alignment = TextAlignment.Left;
   h2Left.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Left);
 
@@ -71,6 +71,7 @@ export function generate(): Document {
   h2Center.fontName = StandardFonts.HelveticaBold;
   h2Center.fontSize = 13;
   h2Center.textColor = Color.indigo600;
+  h2Center.alignment = TextAlignment.Center;
   h2Center.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Center);
 
@@ -86,6 +87,7 @@ export function generate(): Document {
   h2Right.fontName = StandardFonts.HelveticaBold;
   h2Right.fontSize = 13;
   h2Right.textColor = Color.indigo600;
+  h2Right.alignment = TextAlignment.Right;
   h2Right.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Right);
 

@@ -16,6 +16,7 @@ import { generate as multiPageFlow } from './layout/multi-page-flow';
 import { generate as multiPageFlowTagged } from './layout/multi-page-flow-tagged';
 import { generate as textAlignment } from './typography/text-alignment';
 import { generate as textAlignmentTagged } from './typography/text-alignment-tagged';
+import { generate as textAlignmentLiberation } from './typography/text-alignment-liberation';
 import { generate as bookPageLayout } from './typography/book-page-layout';
 import { generate as bookPageLayoutTagged } from './typography/book-page-layout-tagged';
 import { generate as richTextStyles } from './typography/rich-text-styles';
@@ -260,6 +261,18 @@ function typographyExamples(): ExampleDef[] {
       generate: textAlignmentTagged,
       thumbnails: false,
       dotnetClass: 'TextAlignmentTaggedExample',
+      pdfUa1: true,
+    },
+    {
+      id: 'text-alignment-liberation',
+      name: 'Text Alignment (Liberation Sans)',
+      category: 'Typography',
+      description:
+        "PDF/UA-1 tagged variant rendered entirely in embedded Liberation Sans — alignment is measured from the font's own glyph metrics, so right/centre/justified edges are exact.",
+      filename: 'text-alignment-liberation.pdf',
+      generate: textAlignmentLiberation,
+      thumbnails: false,
+      dotnetClass: null,
       pdfUa1: true,
     },
     {

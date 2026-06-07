@@ -9,7 +9,7 @@ import { StandardFonts } from '../Typography/StandardFonts';
 
 /**
  * Pie chart that renders pie slices with a legend on the right side.
- * Supports donut style with a center hole showing the total value.
+ * Supports donut style with a transparent center hole.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  * All layout is computed dynamically from Width and Height, so the chart
  * adapts correctly to any size or StretchToFit mode.
@@ -28,6 +28,7 @@ export class PieChart extends ChartBase {
   private static readonly LEGEND_BOX_SIZE = 14;
   private static readonly LEGEND_BOX_TEXT_GAP = 8;
   private static readonly LEGEND_FONT_SIZE = 11;
+  private static readonly TOTAL_ROW_GAP = 8;
 
   // Donut hole proportions
   private static readonly DONUT_HOLE_RATIO = 0.33;
@@ -62,31 +63,32 @@ export class PieChart extends ChartBase {
   colors: string[] | undefined;
 
   /**
-   * Whether to render as a donut chart with a center hole.
+   * Whether to render as a donut chart with a transparent center hole.
    * Default is true.
    */
   isDonut: boolean = true;
 
   /**
-   * Label to display above the total value in the donut hole.
+   * Label prefix for the total row in the legend (e.g. "Total").
    * Default is "Total".
    */
   totalLabel: string = 'Total';
 
   /**
    * Font size for the total label in the donut hole.
+   * @deprecated No longer used — the total is now shown in the legend. Kept for API compatibility.
    */
   totalLabelFontSize: number = 11;
 
   /**
    * Font size for the total value in the donut hole.
+   * @deprecated No longer used — the total is now shown in the legend. Kept for API compatibility.
    */
   totalValueFontSize: number = 16;
 
   /**
-   * Format string for the total value displayed in the donut hole.
-   * When null (default), uses the LabelFormat from the first data point.
-   * Set to a custom format string (e.g. "C0", "N0", "'$'#,##0") to override.
+   * Format string for the total value.
+   * When null (default), the raw numeric total is displayed.
    */
   totalValueFormat: string | undefined;
 
@@ -95,6 +97,12 @@ export class PieChart extends ChartBase {
    * Default is true.
    */
   showLegend: boolean = true;
+
+  /**
+   * Whether to show the total value as a summary row below the legend items.
+   * Default is true.
+   */
+  showTotal: boolean = true;
 
   /**
    * Draws the pie chart content.
@@ -117,17 +125,12 @@ export class PieChart extends ChartBase {
     // Get colors to use
     const colors = this.getColors(dataPoints.length);
 
-    // Draw pie slices
+    // Draw pie slices (annular sectors when isDonut, full wedges otherwise)
     this.drawPieSlices(canvas, dataPoints, angles, colors, layout);
 
-    // Draw donut hole if enabled
-    if (this.isDonut) {
-      this.drawDonutHole(canvas, total, dataPoints, layout);
-    }
-
-    // Draw legend
+    // Draw legend (including optional total row)
     if (this.showLegend) {
-      this.drawLegend(canvas, dataPoints, colors, layout);
+      this.drawLegend(canvas, dataPoints, colors, layout, total);
     }
   }
 
@@ -218,6 +221,8 @@ export class PieChart extends ChartBase {
 
   /**
    * Draws the pie slices.
+   * Uses annular sector paths when isDonut is true (transparent center hole),
+   * or full triangular wedge paths when isDonut is false.
    */
   private drawPieSlices(
     canvas: ICanvas,
@@ -229,17 +234,15 @@ export class PieChart extends ChartBase {
     for (let i = 0; i < dataPoints.length; i++) {
       const { startAngle, endAngle } = angles[i];
       const color = colors[i];
-
-      // Calculate the path for the pie slice
-      const path = this.createPieSlicePath(startAngle, endAngle, layout);
-
-      // Fill the slice
+      const path = this.isDonut
+        ? this.createAnnularSectorPath(startAngle, endAngle, layout)
+        : this.createPieSlicePath(startAngle, endAngle, layout);
       canvas.fillPath(path, color);
     }
   }
 
   /**
-   * Creates a path for a pie slice.
+   * Creates a full triangular wedge path for a pie slice (non-donut mode).
    */
   private createPieSlicePath(startAngle: number, endAngle: number, layout: PieLayout): Point[] {
     const path: Point[] = [];
@@ -261,44 +264,51 @@ export class PieChart extends ChartBase {
   }
 
   /**
-   * Draws the donut hole with the total value.
+   * Creates an annular sector path for a donut slice (donut mode).
+   * The path traces the outer arc forward then the inner arc in reverse,
+   * producing a ring wedge with a genuinely transparent center.
    */
-  private drawDonutHole(canvas: ICanvas, total: number, dataPoints: ChartDataPoint[], layout: PieLayout): void {
-    // Draw white circle for donut hole
-    canvas.fillCircle(layout.centerX, layout.centerY, layout.donutHoleRadius, Color.white);
+  private createAnnularSectorPath(startAngle: number, endAngle: number, layout: PieLayout): Point[] {
+    const path: Point[] = [];
+    const segments = Math.max(Math.ceil((endAngle - startAngle) / 5), 1);
 
-    // Draw "Total" label
-    const totalLabelY = layout.centerY - 5;
-    canvas.drawText(
-      layout.centerX,
-      totalLabelY,
-      this.totalLabel,
-      PieChart.TOTAL_LABEL_COLOR,
-      this.totalLabelFontSize,
-      PieChart.FONT_FAMILY,
-      TextAlignment.Center
-    );
+    // Outer arc: startAngle → endAngle
+    for (let i = 0; i <= segments; i++) {
+      const angle = startAngle + ((endAngle - startAngle) * i) / segments;
+      const radians = (angle * Math.PI) / 180;
+      path.push(
+        new Point(
+          layout.centerX + layout.radius * Math.cos(radians),
+          layout.centerY + layout.radius * Math.sin(radians)
+        )
+      );
+    }
 
-    // Format total value using the configured format or the first data point's format
-    const format = this.totalValueFormat ?? (dataPoints.length > 0 ? dataPoints[0].labelFormat : 'G');
-    const totalValueText = total.toString();
+    // Inner arc: endAngle → startAngle (reversed)
+    for (let i = segments; i >= 0; i--) {
+      const angle = startAngle + ((endAngle - startAngle) * i) / segments;
+      const radians = (angle * Math.PI) / 180;
+      path.push(
+        new Point(
+          layout.centerX + layout.donutHoleRadius * Math.cos(radians),
+          layout.centerY + layout.donutHoleRadius * Math.sin(radians)
+        )
+      );
+    }
 
-    const totalValueY = layout.centerY + 12;
-    canvas.drawText(
-      layout.centerX,
-      totalValueY,
-      totalValueText,
-      PieChart.TOTAL_VALUE_COLOR,
-      this.totalValueFontSize,
-      PieChart.FONT_FAMILY,
-      TextAlignment.Center
-    );
+    return path;
   }
 
   /**
-   * Draws the legend on the right side.
+   * Draws the legend on the right side, with an optional total summary row below.
    */
-  private drawLegend(canvas: ICanvas, dataPoints: ChartDataPoint[], colors: Color[], layout: PieLayout): void {
+  private drawLegend(
+    canvas: ICanvas,
+    dataPoints: ChartDataPoint[],
+    colors: Color[],
+    layout: PieLayout,
+    total: number
+  ): void {
     for (let i = 0; i < dataPoints.length; i++) {
       const dataPoint = dataPoints[i];
       const color = colors[i];
@@ -315,6 +325,21 @@ export class PieChart extends ChartBase {
         textX,
         textY,
         labelText,
+        PieChart.LEGEND_TEXT_COLOR,
+        PieChart.LEGEND_FONT_SIZE,
+        PieChart.FONT_FAMILY,
+        TextAlignment.Left
+      );
+    }
+
+    if (this.showTotal) {
+      const totalText = `${this.totalLabel}: ${total.toString()}`;
+      const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
+      const totalY = layout.legendStartY + dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT + PieChart.TOTAL_ROW_GAP;
+      canvas.drawText(
+        textX,
+        totalY,
+        totalText,
         PieChart.LEGEND_TEXT_COLOR,
         PieChart.LEGEND_FONT_SIZE,
         PieChart.FONT_FAMILY,

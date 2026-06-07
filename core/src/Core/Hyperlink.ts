@@ -4,7 +4,6 @@ import { Color } from './Color';
 import { Thickness } from './Thickness';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
-import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
@@ -13,6 +12,7 @@ import type { StructureElement } from '../Rendering/Tagging/StructureElement';
 
 /**
  * Represents a hyperlink annotation in a PDF document.
+ *
  * Hyperlinks are clickable areas that navigate to a URI.
  * This element implements IElement so it can be added like other elements.
  */

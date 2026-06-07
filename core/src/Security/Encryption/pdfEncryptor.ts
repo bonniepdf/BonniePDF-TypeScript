@@ -1,6 +1,7 @@
 import { PdfEncryptionKey } from './pdfEncryptionKey';
 import { Aes256EncryptionKey } from './aes256EncryptionKey';
 import { AesCipher } from './aesCipher';
+import { SyncAesCipher } from './syncAesCipher';
 import { RC4Cipher } from './rc4Cipher';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { EncryptionAlgorithm } from '../Models/EncryptionAlgorithm';
@@ -54,17 +55,16 @@ export class PdfEncryptor {
   }
 
   /**
-   * Encrypts binary data for a specific PDF object — **synchronous RC4 path only**.
-   * For AES-256 documents use `encryptDataAsync` or the async serialization pipeline.
+   * Encrypts binary data for a specific PDF object — synchronous path.
+   * RC4: uses per-object key derivation. AES-256: uses the file encryption key
+   * with a pure-JS sync AES-CBC cipher (requires prior async init via create()).
    */
   public encryptData(data: Uint8Array, objectNumber: number, generationNumber = 0): Uint8Array {
     if (!data || data.length === 0) return data;
 
     if (this.isAes256) {
-      // AES-256 requires async; return data unencrypted in the sync path.
-      // Callers that need AES-256 encryption must use encryptDataAsync.
-      console.warn('PdfEncryptor: AES-256 sync encryptData called — data not encrypted. Use encryptDataAsync.');
-      return data;
+      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+      return new SyncAesCipher(this.aesKey.fileEncryptionKey).encrypt(data);
     }
 
     const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
@@ -99,13 +99,13 @@ export class PdfEncryptor {
   }
 
   /**
-   * Encrypts data in-place — sync RC4 only. AES-256 is a no-op with a warning.
+   * Encrypts data in-place — RC4 only. AES-256 changes the output length
+   * (IV + padding), so in-place is not possible; use encryptData instead.
    */
   public encryptInPlace(data: Uint8Array, objectNumber: number, generationNumber = 0): void {
     if (!data || data.length === 0) return;
     if (this.isAes256) {
-      console.warn('PdfEncryptor: AES-256 in-place encryption not supported in sync path.');
-      return;
+      throw new Error('PdfEncryptor: AES-256 in-place encryption not supported — use encryptData().');
     }
     const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
     RC4Cipher.forObject(objectKey).transform(data);

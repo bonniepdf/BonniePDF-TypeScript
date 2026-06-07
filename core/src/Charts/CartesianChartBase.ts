@@ -398,7 +398,8 @@ export abstract class CartesianChartBase extends ChartBase {
       );
     } else if (yAxis.verticalLegend) {
       const x = 15;
-      const y = topY + chartAreaHeight / 2;
+      const textWidth = canvas.measureText(yAxis.legend, CartesianChartBase.LEGEND_FONT_SIZE, this.fontFamily).width;
+      const y = topY + chartAreaHeight / 2 + textWidth / 2 - CartesianChartBase.LEGEND_FONT_SIZE;
       canvas.drawTextRotated(
         x,
         y,
@@ -435,7 +436,12 @@ export abstract class CartesianChartBase extends ChartBase {
   ): void {
     if (this.orientation === ChartOrientation.Horizontal) {
       const x = 15;
-      const y = CartesianChartBase.TITLE_AREA_HEIGHT + chartAreaHeight / 2;
+      const textWidth = canvas.measureText(legend, CartesianChartBase.LEGEND_FONT_SIZE, this.fontFamily).width;
+      const y =
+        CartesianChartBase.TITLE_AREA_HEIGHT +
+        chartAreaHeight / 2 +
+        textWidth / 2 -
+        CartesianChartBase.LEGEND_FONT_SIZE;
       canvas.drawTextRotated(
         x,
         y,

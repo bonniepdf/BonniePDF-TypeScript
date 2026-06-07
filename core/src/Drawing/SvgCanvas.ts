@@ -97,7 +97,7 @@ export class SvgCanvas implements ICanvas {
     angleDegrees: number
   ): void {
     const hex = color.toHexString();
-    const baselineY = this.calculateBaselineY(y, fontSize);
+    const baselineY = y + fontSize;
     this.svgElements.push(
       `<text x="${x}" y="${baselineY}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${baselineY})">${this.escapeXml(text)}</text>`
     );

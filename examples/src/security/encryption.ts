@@ -9,6 +9,10 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  withEncryptionAes256,
+  // withEncryption128,  // 128-bit RC4 alternative
+  // withEncryption40,   // 40-bit RC4 (legacy, not recommended)
+  // withPassword,       // simple one-liner — defaults to 128-bit RC4
 } from '@bonniepdf/core';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -44,12 +48,23 @@ function label(text: string): TextBlock {
 // ── Example ───────────────────────────────────────────────────────────────
 
 export function generate(): Document {
-  // NOTE: This gallery document is intentionally unencrypted so the viewer
-  // can display it. In production code you would call:
-  //   withPassword(settings, 'demo123')              — scenario 1
-  //   withEncryption128(settings, opts => ...)       — scenarios 2 & 3
   const settings = new DocumentSettings(PdfSize.a4, 60);
   settings.version = PdfVersion.Pdf17;
+
+  // AES-256 encryption (PDF 1.7 required). Key derivation is async via
+  // SubtleCrypto; actual stream encryption happens synchronously during
+  // generateBytesAsync().
+  withEncryptionAes256(settings, opts =>
+    opts.withUserPassword('demo123').withOwnerPassword('demo123').allowPrinting().allowCopying().allowAccessibility()
+  );
+
+  // Alternative: 128-bit RC4 (works with generateBytes() and generateBytesAsync())
+  // withEncryption128(settings, opts =>
+  //   opts.withUserPassword('demo123').withOwnerPassword('demo123').allowPrinting().allowCopying().allowAccessibility()
+  // );
+
+  // Alternative: simple one-liner — 128-bit RC4 with a single password
+  // withPassword(settings, 'demo123');
 
   const metadata = new DocumentMetadata();
   metadata.title = 'PDF Encryption';
@@ -58,45 +73,46 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
-  // ── Scenario 1: Simple password ──
-  doc.add(pageTitle('Scenario 1: Password Protection'));
+  // ── Page 1: AES-256 password protection ──
+  doc.add(pageTitle('AES-256 Password Protection'));
   doc.add(
     body(
-      'This page demonstrates the API for password-protecting a PDF with 128-bit RC4 ' +
-        'encryption. The viewer below can display this document because encryption has not ' +
-        'been applied here — see the note at the bottom of the page.'
+      'This document is encrypted with AES-256 encryption (V5, R6). ' + 'You needed to enter the password to open it.'
     )
   );
 
-  const pwd = new TextBlock('Example password: demo123');
+  const pwd = new TextBlock('Password: demo123');
   pwd.fontSize = 14;
   pwd.textColor = Color.slate700;
   doc.add(pwd);
 
-  doc.add(body('When encryption is active, the document cannot be opened without the correct password.'));
+  doc.add(body('Printing and copying are allowed, but modification and annotation are restricted.'));
 
-  const snippet1 = new TextBlock('API usage:\n' + "  withPassword(settings, 'demo123');");
+  const snippet1 = new TextBlock(
+    'API usage:\n' +
+      '  withEncryptionAes256(settings, opts =>\n' +
+      "    opts.withUserPassword('demo123')\n" +
+      "        .withOwnerPassword('demo123')\n" +
+      '        .allowPrinting()\n' +
+      '        .allowCopying()\n' +
+      '        .allowAccessibility()\n' +
+      '  );\n\n' +
+      '  // Or for 128-bit RC4:\n' +
+      '  // withEncryption128(settings, opts => ...)\n\n' +
+      '  // Or the simplest form:\n' +
+      "  // withPassword(settings, 'demo123');"
+  );
   snippet1.fontName = StandardFonts.Courier;
-  snippet1.fontSize = 11;
+  snippet1.fontSize = 10;
   snippet1.textColor = Color.slate600;
   snippet1.margin = new Thickness(0, 20, 0, 0);
   doc.add(snippet1);
 
-  const note1 = new TextBlock(
-    'Note: This demo document is intentionally unencrypted so it can be displayed ' +
-      'in the browser viewer. In a real application, calling withPassword() produces a ' +
-      'fully encrypted PDF that requires the password to open.'
-  );
-  note1.fontSize = 10;
-  note1.textColor = Color.slate500;
-  note1.margin = new Thickness(0, 24, 0, 0);
-  doc.add(note1);
-
-  // ── Scenario 2: User + owner passwords with permissions ──
+  // ── Page 2: User + owner passwords with permissions ──
   doc.addPage();
 
-  doc.add(pageTitle('Scenario 2: Permission Restrictions'));
-  doc.add(body('This page demonstrates encrypting with granular permission flags:'));
+  doc.add(pageTitle('Permission Restrictions'));
+  doc.add(body('Encryption supports granular permission flags via user and owner passwords:'));
 
   doc.add(bullet('  - Printing: Allowed', true));
   doc.add(bullet('  - Copying: Allowed', true));
@@ -109,10 +125,11 @@ export function generate(): Document {
 
   const snippet2 = new TextBlock(
     'API usage:\n' +
-      '  withEncryption128(settings, opts =>\n' +
+      '  withEncryptionAes256(settings, opts =>\n' +
       "    opts.withUserPassword('user')\n" +
       "        .withOwnerPassword('owner')\n" +
-      '        .withPermissions(PdfPermissions.Print | PdfPermissions.Copy)\n' +
+      '        .allowPrinting()\n' +
+      '        .allowCopying()\n' +
       '  );'
   );
   snippet2.fontName = StandardFonts.Courier;
@@ -121,10 +138,10 @@ export function generate(): Document {
   snippet2.margin = new Thickness(0, 20, 0, 0);
   doc.add(snippet2);
 
-  // ── Scenario 3: Owner password only (restricted actions) ──
+  // ── Page 3: Owner password only (restricted actions) ──
   doc.addPage();
 
-  doc.add(pageTitle('Scenario 3: Owner-Only Restrictions'));
+  doc.add(pageTitle('Owner-Only Restrictions'));
   doc.add(
     body('This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.')
   );
@@ -144,7 +161,7 @@ export function generate(): Document {
 
   const snippet3 = new TextBlock(
     'API usage:\n' +
-      '  withEncryption128(settings, opts =>\n' +
+      '  withEncryptionAes256(settings, opts =>\n' +
       "    opts.withOwnerPassword('secret')\n" +
       '        .allowNone()\n' +
       '        .allowPrinting(false)\n' +

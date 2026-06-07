@@ -41,18 +41,19 @@ export class PdfDocumentSerializer {
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
 
-    // 0. Set up encryption if configured. Mirrors the .NET sync path:
-    // create the PdfEncryptor up front so writeObject and the trailer
-    // both see writer.encryptor and emit the /Encrypt entry.
-    //
-    // AES-256 keys must be initialised via PdfEncryptor.create() under
-    // an async context (SubtleCrypto). In the sync path we degrade
-    // silently — the document is generated unencrypted, matching the
-    // documented "AES-256 encryption requires saveAsync" behaviour.
+    // 0. Set up encryption if configured.
+    // RC4: created synchronously here.
+    // AES-256: if serializeAsync() already set writer.encryptor (via async
+    // PdfEncryptor.create()), reuse it. Otherwise (pure sync generateBytes()
+    // call) we skip AES-256 — the async key derivation can't run here.
     let encryptId = 0;
-    if (settings.isEncrypted && settings.encryption!.algorithm !== EncryptionAlgorithm.AES_256) {
-      writer.encryptor = new PdfEncryptor(settings.encryption!);
-      encryptId = writer.getNewId();
+    if (settings.isEncrypted) {
+      if (writer.encryptor) {
+        encryptId = writer.getNewId();
+      } else if (settings.encryption!.algorithm !== EncryptionAlgorithm.AES_256) {
+        writer.encryptor = new PdfEncryptor(settings.encryption!);
+        encryptId = writer.getNewId();
+      }
     }
 
     // 1. Allocate top-level IDs up front
@@ -374,6 +375,15 @@ export class PdfDocumentSerializer {
     }
     if (imagesToDecode.length > 0) {
       await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
+    }
+
+    // ── Phase 2c: Async AES-256 encryptor init ──────────────────────────────
+    // AES-256 key derivation requires SubtleCrypto (async). Initialise the
+    // encryptor here so that the sync serialize() pass can use it via the
+    // pure-JS SyncAesCipher. RC4 encryptors are created inside serialize().
+    const settings2 = this.document.settings;
+    if (settings2.isEncrypted && settings2.encryption!.algorithm === EncryptionAlgorithm.AES_256) {
+      syncWriter.encryptor = await PdfEncryptor.create(settings2.encryption!);
     }
 
     // ── Phase 3: Real serialization with the pre-loaded registry ────────────

@@ -64,6 +64,8 @@ export interface ExampleDef {
   dotnetClass?: string | null;
   /** PDF/UA-1 tagged document — validated by VeraPDF in CI. */
   pdfUa1?: boolean;
+  /** User password for encrypted PDFs — passed to the viewer so it can open the document. */
+  password?: string;
 }
 
 export const examples: ExampleDef[] = [
@@ -601,6 +603,7 @@ function securityExamples(): ExampleDef[] {
         'Three encryption scenarios: simple password, user/owner passwords with permissions, and owner-only restrictions.',
       filename: 'encryption.pdf',
       generate: encryption,
+      password: 'demo123',
       // .NET has three variants; Password is canonical
       dotnetClass: 'EncryptionPasswordExample',
     },

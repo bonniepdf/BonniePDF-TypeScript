@@ -453,7 +453,12 @@ export abstract class CartesianChartBase extends ChartBase {
       );
     } else {
       const x = CartesianChartBase.LEFT_PADDING + chartAreaWidth / 2;
-      const y = baselineY + 50;
+      // Center the legend in the space below the x-axis tick labels (within the
+      // bottom-padding band), then shift up by half the font size to account for
+      // drawText's `y` representing the top of the text box rather than its visual center.
+      const labelsBottom = baselineY + 15 + CartesianChartBase.AXIS_LABEL_FONT_SIZE;
+      const marginBottom = baselineY + CartesianChartBase.BOTTOM_PADDING;
+      const y = (labelsBottom + marginBottom) / 2 - CartesianChartBase.LEGEND_FONT_SIZE / 2;
       canvas.drawText(
         x,
         y,

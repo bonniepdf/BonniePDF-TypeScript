@@ -16,6 +16,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  Placeholders,
   asCell,
   cellBackground,
   cellPadding,
@@ -35,124 +36,21 @@ interface User {
 }
 
 function getMockUsers(): User[] {
-  const departments: string[] = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Design', 'Operations'];
-  const roles: string[] = ['Manager', 'Lead', 'Senior', 'Junior', 'Intern', 'Director', 'VP'];
-  const locations: string[] = ['New York', 'London', 'Berlin', 'Tokyo', 'Sydney', 'Toronto', 'Paris'];
   const statuses: User['status'][] = ['Active', 'Active', 'Active', 'Inactive', 'Pending'];
+  const source = Placeholders.withSeed(100);
 
-  const firstNames = [
-    'Alice',
-    'Bob',
-    'Carol',
-    'Dan',
-    'Eve',
-    'Frank',
-    'Grace',
-    'Hank',
-    'Iris',
-    'Jack',
-    'Kate',
-    'Leo',
-    'Mia',
-    'Nate',
-    'Olivia',
-    'Pete',
-    'Quinn',
-    'Rose',
-    'Sam',
-    'Tina',
-    'Uma',
-    'Victor',
-    'Wendy',
-    'Xander',
-    'Yara',
-    'Zach',
-    'Amy',
-    'Brian',
-    'Chloe',
-    'David',
-    'Emma',
-    'Felix',
-    'Gina',
-    'Hugo',
-    'Isabel',
-    'James',
-    'Karen',
-    'Liam',
-    'Mona',
-    'Neil',
-    'Ophelia',
-    'Paul',
-    'Rachel',
-    'Steven',
-    'Theresa',
-    'Ulrich',
-    'Violet',
-    'Will',
-    'Xena',
-    'Yvonne',
-  ];
-  const lastNames = [
-    'Smith',
-    'Jones',
-    'Brown',
-    'Taylor',
-    'Wilson',
-    'Davis',
-    'Moore',
-    'Anderson',
-    'Thomas',
-    'Jackson',
-    'White',
-    'Harris',
-    'Martin',
-    'Garcia',
-    'Martinez',
-    'Lee',
-    'Perez',
-    'Thompson',
-    'Walker',
-    'Hall',
-    'Allen',
-    'Young',
-    'Hernandez',
-    'King',
-    'Wright',
-    'Lopez',
-    'Hill',
-    'Scott',
-    'Green',
-    'Adams',
-    'Baker',
-    'Nelson',
-    'Carter',
-    'Mitchell',
-    'Roberts',
-    'Turner',
-    'Phillips',
-    'Campbell',
-    'Parker',
-    'Evans',
-    'Edwards',
-    'Collins',
-    'Stewart',
-    'Sanchez',
-    'Morris',
-    'Rogers',
-    'Reed',
-    'Cook',
-    'Morgan',
-  ];
-
-  return firstNames.map((first, i): User => {
-    const last = lastNames[i] ?? 'User';
-    const dept = departments[i % departments.length];
-    const role = roles[i % roles.length];
-    const loc = locations[i % locations.length];
-    const stat = statuses[i % statuses.length];
-    const id = `USR-${String(i + 1).padStart(3, '0')}`;
-    const email = `${first.toLowerCase()}.${last.toLowerCase()}@company.com`;
-    return { id, name: `${first} ${last}`, email, department: dept, role, location: loc, status: stat };
+  return Array.from({ length: 50 }, (_, i): User => {
+    const first = source.firstName();
+    const last = source.lastName();
+    return {
+      id: `USR-${String(i + 1).padStart(3, '0')}`,
+      name: `${first} ${last}`,
+      email: `${first.toLowerCase()}.${last.toLowerCase()}@company.com`,
+      department: source.department(),
+      role: source.role(),
+      location: source.location(),
+      status: statuses[i % statuses.length],
+    };
   });
 }
 

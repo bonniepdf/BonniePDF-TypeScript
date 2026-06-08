@@ -91,6 +91,7 @@ export * from './Elements/Shapes/QrEcc';
 export * from './Elements/Shapes/QrSegment';
 export * from './Elements/Shapes/QrCodeEncoder';
 export * from './Elements/Shapes/Circle';
+export * from './Elements/Shapes/Ellipse';
 export * from './Elements/Shapes/Line';
 export * from './Elements/Shapes/QRCode';
 
@@ -181,3 +182,5 @@ export * from './Rendering/Writers/PdfWriter';
 export * from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
 export * from './Platform/NodePlatformIO';
+
+export * from './Prototyping/Placeholders';

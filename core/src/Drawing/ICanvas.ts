@@ -14,6 +14,7 @@ export interface ICanvas {
   strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void;
   drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void;
   fillCircle(cx: number, cy: number, radius: number, color: Color): void;
+  fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void;
   fillPath(points: Point[], color: Color): void;
   fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void;
   strokeRoundedRect(

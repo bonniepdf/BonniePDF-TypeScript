@@ -11,6 +11,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  Placeholders,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
@@ -48,6 +49,7 @@ export function generate(): Document {
   const stack = new VerticalStack();
   stack.margin = new Thickness(0);
 
+  const source = Placeholders.withSeed(401);
   for (let i = 1; i <= 75; i++) {
     const itemStack = new VerticalStack();
     itemStack.margin = new Thickness(0, 0, 0, 14);
@@ -61,9 +63,7 @@ export function generate(): Document {
     itemTitle.margin = new Thickness(0, 0, 0, 4);
     itemStack.addChild(itemTitle);
 
-    const itemDesc = new TextBlock(
-      `This is the description for item ${i}. It contains details about what this item represents and why it is important to the catalogue.`
-    );
+    const itemDesc = new TextBlock(source.sentence());
     itemStack.addChild(itemDesc);
 
     stack.addChild(itemStack);

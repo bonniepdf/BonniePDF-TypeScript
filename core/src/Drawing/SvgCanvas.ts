@@ -44,6 +44,10 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(`<circle cx="${cx}" cy="${cy}" r="${radius}" ${this.getFillAttributes(color)}/>`);
   }
 
+  public fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+    this.svgElements.push(`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" ${this.getFillAttributes(color)}/>`);
+  }
+
   public fillPath(points: Point[], color: Color): void {
     if (points.length < 3) return;
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
@@ -97,7 +101,7 @@ export class SvgCanvas implements ICanvas {
     angleDegrees: number
   ): void {
     const hex = color.toHexString();
-    const baselineY = y + fontSize;
+    const baselineY = this.calculateBaselineY(y, fontSize);
     this.svgElements.push(
       `<text x="${x}" y="${baselineY}" fill="${hex}" font-size="${fontSize}" font-family="${fontFamily}" transform="rotate(${-angleDegrees} ${x} ${baselineY})">${this.escapeXml(text)}</text>`
     );

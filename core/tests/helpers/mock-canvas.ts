@@ -77,6 +77,10 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`FillCircle(${cx},${cy},${radius})`);
   }
 
+  fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+    this.operations.push(`FillEllipse(${cx},${cy},${rx},${ry})`);
+  }
+
   fillPath(points: Point[], color: Color): void {
     this.operations.push(`FillPath(${points.length} points)`);
   }

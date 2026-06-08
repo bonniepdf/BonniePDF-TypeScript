@@ -129,6 +129,12 @@ export class PdfCanvas implements ICanvas {
     this.drawWithColorAlpha(color, () => PdfDrawing.fillCircle(this.stream, pdfCx, pdfCy, radius, color));
   }
 
+  public fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+    const pdfCx = cx + this.xOffset;
+    const pdfCy = this.height - (cy + this.yOffset);
+    this.drawWithColorAlpha(color, () => PdfDrawing.fillEllipse(this.stream, pdfCx, pdfCy, rx, ry, color));
+  }
+
   public fillPath(points: Point[], color: Color): void {
     if (!points || points.length < 3) return;
     const pdfPoints = points.map(p => new Point(p.x + this.xOffset, this.height - (p.y + this.yOffset)));

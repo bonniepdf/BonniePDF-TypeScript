@@ -106,6 +106,31 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
+  public static fillEllipse(
+    stream: string[],
+    centerX: number,
+    centerY: number,
+    rx: number,
+    ry: number,
+    color: Color
+  ): void {
+    const k = 0.552284749831;
+    const kx = k * rx;
+    const ky = k * ry;
+
+    PdfOperators.saveState(stream);
+    PdfOperators.setFillColor(stream, color);
+
+    PdfOperators.moveTo(stream, centerX + rx, centerY);
+    PdfOperators.curveTo(stream, centerX + rx, centerY + ky, centerX + kx, centerY + ry, centerX, centerY + ry);
+    PdfOperators.curveTo(stream, centerX - kx, centerY + ry, centerX - rx, centerY + ky, centerX - rx, centerY);
+    PdfOperators.curveTo(stream, centerX - rx, centerY - ky, centerX - kx, centerY - ry, centerX, centerY - ry);
+    PdfOperators.curveTo(stream, centerX + kx, centerY - ry, centerX + rx, centerY - ky, centerX + rx, centerY);
+
+    PdfOperators.fill(stream);
+    PdfOperators.restoreState(stream);
+  }
+
   public static fillRoundedRect(
     stream: string[],
     x: number,

@@ -7,6 +7,7 @@ import { VerticalStack } from '../../Elements/Layout/VerticalStack';
 import { HorizontalStack } from '../../Elements/Layout/HorizontalStack';
 import { Table } from '../../Elements/Tables/Table';
 import { Image } from '../../Elements/Media/Image';
+import { Ellipse } from '../../Elements/Shapes/Ellipse';
 import { Line } from '../../Elements/Shapes/Line';
 import { QRCode } from '../../Elements/Shapes/QRCode';
 import { TextBlock } from '../../Elements/Text/TextBlock';
@@ -151,6 +152,17 @@ export class ContainerElementExtensions {
   }
 
   /**
+   * Adds a filled ellipse.
+   */
+  static ellipse(c: IContentContainer, width: number, height: number, color?: Color): Ellipse {
+    const el = new Ellipse();
+    el.width = width;
+    el.height = height;
+    if (color) el.fillColor = color;
+    return ContainerBridgeExtensions.elementTyped(c, el);
+  }
+
+  /**
    * Adds a QR code element.
    */
   static qrCode(c: IContentContainer, data: string, size: number = 100): QRCode {
@@ -229,6 +241,10 @@ export function line(c: IContentContainer, thickness?: number): Line {
 
 export function lineWithColor(c: IContentContainer, thickness: number, color: Color): Line {
   return ContainerElementExtensions.lineWithColor(c, thickness, color);
+}
+
+export function ellipse(c: IContentContainer, width: number, height: number, color?: Color): Ellipse {
+  return ContainerElementExtensions.ellipse(c, width, height, color);
 }
 
 export function qrCode(c: IContentContainer, data: string, size?: number): QRCode {

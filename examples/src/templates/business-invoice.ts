@@ -19,6 +19,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  Placeholders,
   asCell,
   cellBackground,
   cellPadding,
@@ -218,13 +219,14 @@ export function generate(): Document {
     alignRight(tb('Amount', StandardFonts.HelveticaBold, 9, TextDark))
   );
 
-  const items = [
-    { service: 'Strategy Workshop', desc: '2-day brand strategy intensive', qty: 1, price: 4500 },
-    { service: 'Identity Design', desc: 'Logo, colors, typography system', qty: 1, price: 8000 },
-    { service: 'Website Design', desc: 'Responsive website with animations', qty: 5, price: 1200 },
-    { service: 'Development', desc: 'Next.js with CMS integration', qty: 1, price: 12000 },
-    { service: 'Motion Graphics', desc: 'Hero animations, micro-interactions', qty: 1, price: 3500 },
-  ];
+  const invoiceSource = Placeholders.withSeed(42);
+  const lineItems = invoiceSource.invoiceLines(5);
+  const items = lineItems.map(li => ({
+    service: li.service,
+    desc: li.description,
+    qty: li.quantity,
+    price: li.unitPrice,
+  }));
 
   let subtotal = 0;
   for (const item of items) {

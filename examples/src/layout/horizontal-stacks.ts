@@ -12,6 +12,7 @@ import {
   StandardFonts,
   WidthDistribution,
   HorizontalAlignment,
+  Placeholders,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
@@ -150,9 +151,10 @@ export function generate(): Document {
   kvLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(kvLabel);
 
+  const kvSource = Placeholders.withSeed(300);
   for (const [key, value, topMargin] of [
-    ['Name:', 'John Doe', false],
-    ['Email:', 'john.doe@example.com', true],
+    ['Name:', kvSource.name(), false],
+    ['Email:', kvSource.email(), true],
   ] as [string, string, boolean][]) {
     const kv = new HorizontalStack();
     kv.spacing = 10;

@@ -1,3 +1,8 @@
+/**
+ * A segment of character/binary/control data in a QR Code symbol.
+ * Based on Project Nayuki's qrcodegen library (MIT License).
+ * https://www.nayuki.io/page/qr-code-generator-library
+ */
 export class Mode {
   public static readonly Numeric = new Mode(0x1, [10, 12, 14]);
   public static readonly Alphanumeric = new Mode(0x2, [9, 11, 13]);

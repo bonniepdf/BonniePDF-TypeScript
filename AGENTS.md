@@ -28,10 +28,11 @@ These differ on purpose. If you spot what looks like a bug in matching the .NET 
 
 These have public-API shape but the serializer is incomplete. Tests assert what _is_ written, not what would be in a finished implementation:
 
-- **Encryption serialization** — `/Encrypt` dictionary is **not** written to PDF output yet (Session 4 in the porting plan). The encryption API accepts settings, but the output is not actually encrypted.
+- ~~**Encryption serialization** — `/Encrypt` dictionary is **not** written to PDF output yet (Session 4 in the porting plan). The encryption API accepts settings, but the output is not actually encrypted.~~ **Shipped** (`feat(security): implement AES-256 encryption support`). The `/Encrypt` dictionary is written (`PdfDocumentSerializer` → `writer.writeEncryptDictionary`, referenced from the trailer), and content streams/strings are genuinely encrypted via `PdfEncryptor.encryptData` / `encryptString`. Supports **RC4 (40/128-bit)** and **AES-256 (V5/R6, ISO 32000-2:2020 Algorithm 2.B)**. Integration tests in `core/tests/encryption.test.ts` assert the emitted `/Encrypt`, `/V 5`, `/R 6`, `/OE`, `/UE`, `/Perms`, `/StmF /StdCF`, `/StrF /StdCF`, and that encrypted streams differ from plaintext.
+  - **AES-256 needs the async generate path.** Key derivation runs via `SubtleCrypto`, so AES-256 requires `generateBytesAsync()` (the serializer does async key derivation, then a sync `SyncAesCipher` pass). RC4 works under sync `generateBytes()`. AES-256 also requires PDF 1.7 (throws on Pdf14). `AsyncPdfWriter.writeEncryptDictionaryAsync` itself is unimplemented, but the live `PdfWriter` path handles both.
 - ~~**XMP `pdfaid` namespace content** — only the `/Metadata /Subtype /XML` object is written; the inner pdfaid claims are stubbed.~~ Shipped — `XmpConformanceBlock.forPdfA(settings.conformance)` emits the right `pdfaid:part` / `pdfaid:conformance` pair for every level.
 
-If a task involves either, confirm scope before implementing — the user may want the stub completed, or may want behaviour around the existing stub.
+Both items above are now shipped — the section is kept as a historical record. If a new task touches encryption or PDF/A XMP, treat them as implemented and verify against the tests rather than assuming a stub.
 
 ## Gotchas
 

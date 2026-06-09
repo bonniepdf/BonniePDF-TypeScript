@@ -8,6 +8,7 @@ export default defineConfig({
     charts: 'src/charts.ts',
     security: 'src/security.ts',
     qr: 'src/qr.ts',
+    prototyping: 'src/prototyping.ts',
   },
   format: ['esm', 'cjs'],
   platform: 'neutral',
@@ -20,7 +21,7 @@ export default defineConfig({
   treeshake: true,
   minifyIdentifiers: true,
   minifySyntax: true,
-  minifyWhitespace: false,
+  minifyWhitespace: true,
   clean: true,
   outDir: 'dist',
 });

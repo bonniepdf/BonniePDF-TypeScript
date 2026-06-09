@@ -40,6 +40,11 @@
       "import": "./dist/qr.js",
       "require": "./dist/qr.cjs"
     },
+    "./prototyping": {
+      "types": "./dist/prototyping.d.ts",
+      "import": "./dist/prototyping.js",
+      "require": "./dist/prototyping.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

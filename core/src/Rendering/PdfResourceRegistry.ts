@@ -66,7 +66,7 @@ export class PdfResourceRegistry {
     }
 
     if (this.pdfAEnabled) {
-      // 1. Try FontManager (bytes-based — works in all environments)
+      // 1. Try FontManager (bytes-based - works in all environments)
       const bytes = FontManager.getBytesForStandardFont(fontIdentifier);
       if (bytes) {
         const virtualKey = `virtual:${fontIdentifier}`;
@@ -165,7 +165,7 @@ export class PdfResourceRegistry {
    * the serializer suppresses the PDF/A conformance claim rather
    * than emitting an invalid one.
    *
-   * Mirrors what {@link writeResources} does — anything that won't
+   * Mirrors what {@link writeResources} does - anything that won't
    * be aliased to a TTF and isn't already an embedded-font path will
    * be written via `writeType1Font` (non-embedded).
    */
@@ -185,7 +185,7 @@ export class PdfResourceRegistry {
    */
   public async preloadEmbeddedFont(filePath: string): Promise<void> {
     const info = this.embeddedFonts.get(filePath);
-    if (!info) return; // not registered — nothing to do
+    if (!info) return; // not registered - nothing to do
     if (info.font instanceof TtfFont) return; // already loaded
 
     try {
@@ -197,7 +197,7 @@ export class PdfResourceRegistry {
       // per-glyph advances during the subsequent render pass.
       FontMetrics.registerFontInstance(filePath, font);
     } catch (err) {
-      // Don't reject the whole render — record the failure so the caller can
+      // Don't reject the whole render - record the failure so the caller can
       // surface it via `Document.diagnostics`, and leave the font with no
       // tracker so the renderer falls back to the nearest standard Type1.
       this.diagnostics.addError('font', `Failed to preload embedded font: ${(err as Error).message}`, filePath, err);
@@ -243,7 +243,7 @@ export class PdfResourceRegistry {
   }
 
   private resolveStandardFontToTtf(_fontIdentifier: string): string | null {
-    // FontManager covers all cases via bytes — this is a fallback for direct file paths.
+    // FontManager covers all cases via bytes - this is a fallback for direct file paths.
     return null;
   }
 
@@ -415,13 +415,13 @@ export class PdfResourceRegistry {
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
         const fontInfo = this.embeddedFonts.get(fontIdentifier);
         if (fontInfo && fontInfo.font) {
-          // Font was successfully loaded — write as a proper Type0 embedded font.
+          // Font was successfully loaded - write as a proper Type0 embedded font.
           const type0Id = writer.getNewId();
           fontInfo.type0ObjectId = type0Id;
           this.fontIdMap.set(fontIdentifier, type0Id);
           fontWriter.writeEmbeddedTtfFont(type0Id, fontInfo);
         } else {
-          // Font failed to load (file missing, parse error, etc.) — fall back to
+          // Font failed to load (file missing, parse error, etc.) - fall back to
           // the nearest standard Type1 font so the document is still valid.
           const fontId = writer.getNewId();
           this.fontIdMap.set(fontIdentifier, fontId);

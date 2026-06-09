@@ -32,7 +32,7 @@ export class Aes256EncryptionKey {
   /** Encoded permissions value for the /P entry. */
   public permissionsValue!: number;
 
-  // Private constructor — use the static async factory.
+  // Private constructor - use the static async factory.
   private constructor() {}
 
   /**

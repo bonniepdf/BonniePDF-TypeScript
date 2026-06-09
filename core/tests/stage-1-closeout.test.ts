@@ -25,7 +25,7 @@ import { pdfToText } from './helpers/test-base';
  * .NET BonniePDF.Validation tool at TS-generated PDFs (the byte
  * format is identical between the two repos).
  */
-describe('Stage 1 closeout — TS', () => {
+describe('Stage 1 closeout - TS', () => {
   let doc: Document;
 
   afterEach(() => {
@@ -160,7 +160,7 @@ describe('Stage 1 closeout — TS', () => {
 
   // ── Business invoice ────────────────────────────────────────────
 
-  it('business-invoice — struct tree has Heading + Table + Link', () => {
+  it('business-invoice - struct tree has Heading + Table + Link', () => {
     const text = generate(buildBusinessInvoiceDocument());
 
     expect(text).toContain('/S /Document');
@@ -173,21 +173,21 @@ describe('Stage 1 closeout — TS', () => {
     expect(text).toContain('/Contents (View invoice online)');
   });
 
-  it('business-invoice — every page stream is BDC/EMC-balanced', () => {
+  it('business-invoice - every page stream is BDC/EMC-balanced', () => {
     const text = generate(buildBusinessInvoiceDocument());
     assertAllPagesBalanced(text);
   });
 
   // ── Multi-page flow ─────────────────────────────────────────────
 
-  it('multi-page-flow — overflows and stays BDC/EMC-balanced', () => {
+  it('multi-page-flow - overflows and stays BDC/EMC-balanced', () => {
     const text = generate(buildMultiPageFlowDocument());
     const streams = splitPageContentStreams(text);
     expect(streams.length).toBeGreaterThanOrEqual(2);
     assertAllPagesBalanced(text);
   });
 
-  it('multi-page-flow — struct tree has Table + TR + TH/TD', () => {
+  it('multi-page-flow - struct tree has Table + TR + TH/TD', () => {
     const text = generate(buildMultiPageFlowDocument());
     expect(text).toContain('/S /Table');
     expect(text).toContain('/S /TR');
@@ -195,7 +195,7 @@ describe('Stage 1 closeout — TS', () => {
     expect(text).toContain('/S /TD');
   });
 
-  it('multi-page-flow — page-break-aware tagging keeps row groups valid across pages', () => {
+  it('multi-page-flow - page-break-aware tagging keeps row groups valid across pages', () => {
     const text = generate(buildMultiPageFlowDocument());
     expect(countSubstring(text, '/S /THead')).toBe(1);
     expect(countSubstring(text, '/S /TBody')).toBeGreaterThanOrEqual(2);
@@ -203,19 +203,19 @@ describe('Stage 1 closeout — TS', () => {
 
   // ── Dickens novel / TOC ─────────────────────────────────────────
 
-  it('dickens-novel — struct tree has TOC + TOCI + H1 + P', () => {
+  it('dickens-novel - struct tree has TOC + TOCI + H1 + P', () => {
     const text = generate(buildDickensNovelDocument());
     expect(text).toContain('/S /TOC');
     expect(text).toContain('/S /TOCI');
     expect(text).toContain('/S /H1');
   });
 
-  it('dickens-novel — TOCI count matches chapter count', () => {
+  it('dickens-novel - TOCI count matches chapter count', () => {
     const text = generate(buildDickensNovelDocument());
     expect(countSubstring(text, '/S /TOCI')).toBe(3);
   });
 
-  it('dickens-novel — every page stream is BDC/EMC-balanced', () => {
+  it('dickens-novel - every page stream is BDC/EMC-balanced', () => {
     const text = generate(buildDickensNovelDocument());
     assertAllPagesBalanced(text);
   });

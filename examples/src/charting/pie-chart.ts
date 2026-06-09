@@ -49,7 +49,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Pie Chart');
+    const left = new TextBlock('BonniePDF - Pie Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -66,7 +66,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Pie Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Pie / donut chart example — monthly sales breakdown with legend and centre total';
+  metadata.subject = 'Pie / donut chart example - monthly sales breakdown with legend and centre total';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

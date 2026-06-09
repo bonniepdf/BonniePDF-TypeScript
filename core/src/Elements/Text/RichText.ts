@@ -259,7 +259,7 @@ export class RichText extends ElementBase implements IStatefulElement {
       const totalNeeded = currentWidth > 0 ? spaceWidth + wordWidth : wordWidth;
 
       if (currentWidth + totalNeeded > maxWidth && currentWidth > 0) {
-        // Line is full — wrap to next line
+        // Line is full - wrap to next line
         currentLine.totalWidth = currentWidth;
         this.updateLineHeight(currentLine);
         lines.push(currentLine);

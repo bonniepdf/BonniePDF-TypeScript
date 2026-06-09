@@ -48,7 +48,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Multi-Series Line Chart');
+    const left = new TextBlock('BonniePDF - Multi-Series Line Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -65,7 +65,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Multi-Series Line Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = `Year-over-year revenue comparison — ${year - 1} vs ${year} on a shared axis`;
+  metadata.subject = `Year-over-year revenue comparison - ${year - 1} vs ${year} on a shared axis`;
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

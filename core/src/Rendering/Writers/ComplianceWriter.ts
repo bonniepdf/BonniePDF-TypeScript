@@ -92,7 +92,7 @@ export class ComplianceWriter {
     await this.asyncWriter.writeObjectAsync(id, dict, undefined, cancellationToken);
   }
 
-  // (compressData removed — we emit ICC streams uncompressed.)
+  // (compressData removed - we emit ICC streams uncompressed.)
 }
 
 // Constructor overloads

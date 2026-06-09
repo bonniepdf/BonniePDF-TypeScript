@@ -111,12 +111,12 @@ export abstract class ListElementBase extends TextElementBase {
         const textX = ctx.currentX + markerWidth + 5;
 
         if (!tagging) {
-          // Non-tagged: original behavior — marker drawn on every wrapped line
+          // Non-tagged: original behavior - marker drawn on every wrapped line
           renderMarker(markerX, y);
           ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0);
         } else {
           if (i === 0) {
-            // Lbl — list item label (drawn once, on the first line only)
+            // Lbl - list item label (drawn once, on the first line only)
             tagging.tree.begin(SemanticRole.Lbl);
             ctx.canvas.beginMarkedContent('Lbl');
             renderMarker(markerX, y);

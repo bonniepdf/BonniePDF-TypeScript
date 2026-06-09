@@ -286,7 +286,7 @@ function addAreaChart(doc: Document): void {
 
 function addLollipopChart(doc: Document): void {
   doc.add(pageTitle('Lollipop Chart: Quarterly Metrics'));
-  doc.add(pageSubtitle('Stems with circular heads — clear and minimal bar alternative'));
+  doc.add(pageSubtitle('Stems with circular heads - clear and minimal bar alternative'));
 
   const data = new ChartData();
   data.title = 'Quarterly Revenue';

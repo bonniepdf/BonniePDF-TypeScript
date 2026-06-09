@@ -61,7 +61,7 @@ export class FontWriter {
     let fontData: Uint8Array;
     let cidToGidMapRef = '/Identity';
     // Highest CID in the CIDToGIDMap (= highest original GID used). The CIDSet
-    // must mirror the CIDToGIDMap's domain — see writeCIDSet / buildCIDSetData.
+    // must mirror the CIDToGIDMap's domain - see writeCIDSet / buildCIDSetData.
     let cidToGidMapMaxCid = -1;
 
     if (enableSubsetting) {
@@ -80,7 +80,7 @@ export class FontWriter {
         cidToGidMapMaxCid = subsetter.maxOriginalGid;
         cidToGidMapRef = `${cidToGidMapId} 0 R`;
       } catch (err) {
-        // Subsetting failed — fall back to embedding the full font with an
+        // Subsetting failed - fall back to embedding the full font with an
         // Identity CIDToGIDMap so original GIDs from the content stream map
         // directly to glyphs in the (un-subsetted) font file.
         this.diagnostics.addWarning(
@@ -153,7 +153,7 @@ export class FontWriter {
 
     const baseFontName = fontInfo.subsetFontName;
 
-    // 1. Build subset (or full font) in one shot — same logic as the sync version.
+    // 1. Build subset (or full font) in one shot - same logic as the sync version.
     let fontData: Uint8Array;
     let cidToGidMapRef = '/Identity';
     let cidToGidMapMaxCid = -1;
@@ -332,8 +332,8 @@ export class FontWriter {
    * Builds the CIDSet bit-field for a CIDFontType2 subset.
    *
    * The CIDSet must mirror the CIDToGIDMap's domain (CIDs 0..maxCid). VeraPDF
-   * (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" — an
-   * unmapped CIDToGIDMap entry points at GID 0, which is < numGlyphs — and
+   * (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" - an
+   * unmapped CIDToGIDMap entry points at GID 0, which is < numGlyphs - and
    * requires the CIDSet to mark all of them, not just the glyphs actually
    * subset. So set every bit from 0 to maxCid inclusive.
    */

@@ -11,7 +11,7 @@ import type { IStructureVisitor } from './IStructureVisitor';
  * is written.
  *
  * A new builder starts with an implicit {@link SemanticRole.Document}
- * root already open and at the top of the stack — every element added
+ * root already open and at the top of the stack - every element added
  * is a descendant of Document.
  */
 export class StructureTreeBuilder {
@@ -29,7 +29,7 @@ export class StructureTreeBuilder {
   }
 
   /**
-   * The element currently at the top of the open-element stack — the
+   * The element currently at the top of the open-element stack - the
    * element that {@link addMcid} attaches to and that new {@link begin}
    * calls nest under.
    */
@@ -54,7 +54,7 @@ export class StructureTreeBuilder {
   /**
    * Close the current structure element, returning to its parent.
    * Throws {@link StructureTreeException} if called more times than
-   * {@link begin} (the document root cannot be closed — it is owned by
+   * {@link begin} (the document root cannot be closed - it is owned by
    * the builder).
    */
   end(): void {
@@ -69,7 +69,7 @@ export class StructureTreeBuilder {
   /**
    * Attach a marked-content identifier (MCID) to the current structure
    * element, optionally paired with the zero-based page index it was
-   * emitted on. Page index defaults to 0 — the page-aware overload is
+   * emitted on. Page index defaults to 0 - the page-aware overload is
    * what the canvas uses in real rendering; the default is for unit
    * tests of the structure-tree model in isolation.
    */

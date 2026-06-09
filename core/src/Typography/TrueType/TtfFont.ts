@@ -48,7 +48,7 @@ export class TtfFont {
 
   /**
    * Loads a TtfFont synchronously from a file path.
-   * Only works in Node.js environments — throws in browser contexts.
+   * Only works in Node.js environments - throws in browser contexts.
    */
   public static fromFileSync(filePath: string): TtfFont {
     if (typeof process === 'undefined' || !process.versions?.node) {

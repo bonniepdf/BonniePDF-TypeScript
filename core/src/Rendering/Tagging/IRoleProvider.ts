@@ -9,7 +9,7 @@ import { SemanticRole } from './SemanticRole';
  *
  * Elements that don't implement this interface render as before with
  * no structure-tree contribution. Implementing the interface is
- * strictly additive — untagged documents are unaffected because the
+ * strictly additive - untagged documents are unaffected because the
  * pipeline checks `RenderContext.tagging` first.
  */
 export interface IRoleProvider {
@@ -21,7 +21,7 @@ export interface IRoleProvider {
   readonly semanticRole: SemanticRole;
 }
 
-/** Type guard for IRoleProvider — used by the pipeline to detect role-providing elements. */
+/** Type guard for IRoleProvider - used by the pipeline to detect role-providing elements. */
 export function isRoleProvider(x: unknown): x is IRoleProvider {
   return x != null && typeof x === 'object' && 'semanticRole' in (x as object);
 }

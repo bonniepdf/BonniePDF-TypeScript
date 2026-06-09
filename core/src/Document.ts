@@ -28,7 +28,7 @@ export class Document {
 
   /**
    * Recoverable issues collected during the most recent `generateBytes` /
-   * `generateBytesAsync` call — typically font load failures or subset
+   * `generateBytesAsync` call - typically font load failures or subset
    * fallbacks. Empty before generation. Call {@link printDiagnostics} to
    * surface them via console, or inspect directly to feed into custom UI
    * / telemetry.
@@ -40,7 +40,7 @@ export class Document {
   /**
    * Convenience: writes each diagnostic to `console.error` / `console.warn`
    * / `console.info` according to its severity. Library code never calls
-   * this implicitly — callers opt in.
+   * this implicitly - callers opt in.
    */
   public printDiagnostics(): void {
     this._diagnostics.print();
@@ -123,7 +123,7 @@ export class Document {
       return page;
     }
 
-    // addPage(size) — document margin
+    // addPage(size) - document margin
     const page = new Page(pageSize, this.settings.margin);
     this._pages.push(page);
     return page;
@@ -151,7 +151,7 @@ export class Document {
    * requires a Node.js environment.  In browser contexts call
    * `generateBytesAsync()` instead so fonts are fetched via the Fetch API.
    *
-   * Fully synchronous — uses the RC4 encryption path if encryption is set
+   * Fully synchronous - uses the RC4 encryption path if encryption is set
    * (AES-256 encryption requires saveAsync).
    */
   public generateBytes(): Uint8Array {
@@ -188,7 +188,7 @@ export class Document {
     return writer.toUint8Array();
   }
 
-  /** Alias for generateBytes() — matches the C# ToByteArray() name. */
+  /** Alias for generateBytes() - matches the C# ToByteArray() name. */
   public toByteArray(): Uint8Array {
     return this.generateBytes();
   }
@@ -204,7 +204,7 @@ export class Document {
 
   /**
    * Saves the document to the given file path synchronously.
-   * Requires a Node.js environment; throws in browser contexts — use saveAsync instead.
+   * Requires a Node.js environment; throws in browser contexts - use saveAsync instead.
    */
   public save(path: string): void {
     if (!path) throw new Error('path cannot be null or empty.');
@@ -282,7 +282,7 @@ export class Document {
       throw new Error('AES-256 encryption requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
     }
 
-    // PDF/A requires PDF 1.7. Silently upgrade rather than throw —
+    // PDF/A requires PDF 1.7. Silently upgrade rather than throw -
     // the caller asked for archival output, so honour that intent.
     if (s.conformance !== PdfAConformance.None && s.version !== PdfVersion.Pdf17) {
       s.version = PdfVersion.Pdf17;

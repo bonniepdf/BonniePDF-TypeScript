@@ -56,7 +56,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   settings.headerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`BonniePDF — Headers & Footers — Page ${pageNumber}`);
+    const b = new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.textColor = Color.slate500;
@@ -74,7 +74,7 @@ export function generate(): Document {
   };
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Headers and Footers — Tagged (PDF/UA-1)';
+  metadata.title = 'Headers and Footers - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates page headers and footers in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, headers, footers, page numbers';
@@ -82,7 +82,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
-  const h1 = new Heading('Headers & Footers — PDF/UA-1');
+  const h1 = new Heading('Headers & Footers - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
@@ -92,7 +92,7 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'Headers and footers are rendered as Artifact elements — they are visible on every page but are excluded from the accessibility structure tree. The sections below describe how the template system works.'
+    'Headers and footers are rendered as Artifact elements - they are visible on every page but are excluded from the accessibility structure tree. The sections below describe how the template system works.'
   );
   intro.margin = new Thickness(0, 0, 0, 12);
   doc.add(intro);

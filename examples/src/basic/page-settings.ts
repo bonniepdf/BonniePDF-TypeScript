@@ -13,7 +13,7 @@ import {
   StandardFonts,
 } from '@bonniepdf/core';
 
-// PdfSize has no AllSizes static — enumerate the standard sizes explicitly.
+// PdfSize has no AllSizes static - enumerate the standard sizes explicitly.
 const ALL_SIZES: PdfSize[] = [
   PdfSize.a0,
   PdfSize.a1,
@@ -48,7 +48,7 @@ export function generate(): Document {
   settings.version = PdfVersion.Pdf17;
   settings.pdfAEnabled = true;
   settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} — BonniePDF Standard Formats`);
+    const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.textColor = Color.slate400;

@@ -18,7 +18,7 @@ import { pdfToText } from './helpers/test-base';
  * byte-level shape VeraPDF profile `ua1` verifies (catalog refs, XMP
  * conformance claim, structure tree shape, per-page BDC/EMC balance).
  *
- * VeraPDF verification itself lives only on the .NET side (Q-V2 — the
+ * VeraPDF verification itself lives only on the .NET side (Q-V2 - the
  * BonniePDF.Validation tool validates PDFs from either repo, so the
  * developer runs it against TS-generated output out-of-band).
  */
@@ -32,7 +32,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
   function buildTaggedDocument(): Document {
     const d = new Document();
     d.metadata = new DocumentMetadata();
-    d.metadata.title = 'Simple Document — Tagged (PDF/UA-1)';
+    d.metadata.title = 'Simple Document - Tagged (PDF/UA-1)';
     d.metadata.author = 'BonniePDF';
     d.metadata.subject = 'this feature stage-0 closeout fixture.';
     d.metadata.keywords = 'pdf, pdf/ua, accessibility';
@@ -60,7 +60,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     d.add(p1);
 
     const p2 = new TextBlock();
-    p2.text = 'Existing elements tag themselves automatically — no semantic verbs required.';
+    p2.text = 'Existing elements tag themselves automatically - no semantic verbs required.';
     p2.fontName = StandardFonts.Helvetica;
     p2.fontSize = 12;
     p2.textColor = Color.slate700;

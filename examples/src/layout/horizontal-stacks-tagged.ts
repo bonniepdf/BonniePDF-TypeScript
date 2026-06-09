@@ -22,7 +22,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Horizontal Stacks — Tagged (PDF/UA-1)';
+  metadata.title = 'Horizontal Stacks - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates horizontal stack layouts in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, layout, horizontal stack, columns';
@@ -30,7 +30,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
-  const h1 = new Heading('Horizontal Stack Layouts — PDF/UA-1');
+  const h1 = new Heading('Horizontal Stack Layouts - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
@@ -92,7 +92,7 @@ export function generate(): Document {
   doc.add(h2Weighted);
 
   const weightedDesc = new TextBlock(
-    'Columns with a 1:2:3 weight ratio — the second column is twice as wide as the first, and the third is three times as wide.'
+    'Columns with a 1:2:3 weight ratio - the second column is twice as wide as the first, and the third is three times as wide.'
   );
   weightedDesc.margin = new Thickness(0, 0, 0, 8);
   doc.add(weightedDesc);
@@ -135,7 +135,7 @@ export function generate(): Document {
   doc.add(kvDesc);
 
   for (const [key, value] of [
-    ['Document Title:', 'Horizontal Stacks — Tagged (PDF/UA-1)'],
+    ['Document Title:', 'Horizontal Stacks - Tagged (PDF/UA-1)'],
     ['Author:', 'BonniePDF'],
     ['Standard:', 'ISO 14289-1 (PDF/UA-1)'],
     ['Layout Engine:', 'BonniePDF Flow Layout'],

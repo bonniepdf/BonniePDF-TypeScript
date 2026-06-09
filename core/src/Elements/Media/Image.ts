@@ -110,7 +110,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
    * containing PNG images decoded from arbitrary sources.
    *
    * No-ops if the image is already prepared, or if `imageData` is a JPEG
-   * (JPEGs need no decompression — their bytes pass straight into
+   * (JPEGs need no decompression - their bytes pass straight into
    * `/DCTDecode`).
    */
   public async prepareAsync(): Promise<void> {

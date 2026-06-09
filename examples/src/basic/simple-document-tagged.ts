@@ -14,7 +14,7 @@ import {
 
 /**
  * this feature stage-0 closeout example. PDF/UA-1 tagged variant of
- * simple-document — same shape as the .NET SimpleDocumentTaggedExample.
+ * simple-document - same shape as the .NET SimpleDocumentTaggedExample.
  *
  * Acceptance: byte-level structural assertions in
  * `core/tests/tagged-simple-document.test.ts`. The same generated
@@ -26,7 +26,7 @@ export function generate(): Document {
   const doc = new Document();
 
   doc.metadata = new DocumentMetadata();
-  doc.metadata.title = 'Simple Document — Tagged (PDF/UA-1)';
+  doc.metadata.title = 'Simple Document - Tagged (PDF/UA-1)';
   doc.metadata.author = 'BonniePDF';
   doc.metadata.subject = 'this feature stage-0 closeout: a screen-reader-friendly tagged PDF.';
   doc.metadata.keywords = 'pdf, pdf/ua, accessibility, tagged, BonniePDF';
@@ -58,7 +58,7 @@ export function generate(): Document {
 
   const p2 = new TextBlock();
   p2.text =
-    'Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically — no semantic ' +
+    'Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically - no semantic ' +
     'verbs required. Authors who want explicit control over the structure tree can use the Semantic* ' +
     'extensions that arrive in stage 2.';
   p2.fontName = StandardFonts.Helvetica;

@@ -10,7 +10,7 @@ import { TaggingContext } from '../src/Rendering/Tagging/TaggingContext';
  * operators wrap content in BDC/EMC. Mirrors the .NET
  * PdfCanvasMarkedContentTests.
  */
-describe('PdfCanvas — marked content', () => {
+describe('PdfCanvas - marked content', () => {
   function newTaggedCanvas(): { canvas: PdfCanvas; tree: StructureTreeBuilder; ctx: TaggingContext } {
     const tree = new StructureTreeBuilder();
     const ctx = new TaggingContext(tree);
@@ -100,7 +100,7 @@ describe('PdfCanvas — marked content', () => {
     const { canvas, tree } = newTaggedCanvas();
     tree.begin(SemanticRole.P);
 
-    // No matching begin — end is a no-op rather than emitting a stray EMC.
+    // No matching begin - end is a no-op rather than emitting a stray EMC.
     canvas.endMarkedContent();
     expect(canvas.getStream()).toEqual([]);
   });

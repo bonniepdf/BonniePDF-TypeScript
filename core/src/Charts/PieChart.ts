@@ -76,13 +76,13 @@ export class PieChart extends ChartBase {
 
   /**
    * Font size for the total label in the donut hole.
-   * @deprecated No longer used — the total is now shown in the legend. Kept for API compatibility.
+   * @deprecated No longer used - the total is now shown in the legend. Kept for API compatibility.
    */
   totalLabelFontSize: number = 11;
 
   /**
    * Font size for the total value in the donut hole.
-   * @deprecated No longer used — the total is now shown in the legend. Kept for API compatibility.
+   * @deprecated No longer used - the total is now shown in the legend. Kept for API compatibility.
    */
   totalValueFontSize: number = 16;
 

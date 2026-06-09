@@ -1,5 +1,5 @@
 /**
- * Text Alignment — Liberation Sans (embedded TrueType, PDF/UA-1).
+ * Text Alignment - Liberation Sans (embedded TrueType, PDF/UA-1).
  *
  * Identical in content to `text-alignment-tagged.ts`, but every text element is
  * rendered with the bundled **Liberation Sans** TrueType font instead of the
@@ -7,7 +7,7 @@
  * fetches the bytes (via BrowserPlatformIO) and embeds a compact glyph subset.
  *
  * Because the font is embedded, both layout measurement and glyph placement use
- * the font's own `hmtx` advance widths — so right/centre/justified alignment is
+ * the font's own `hmtx` advance widths - so right/centre/justified alignment is
  * exact, with no reliance on the approximate standard-font width tables.
  *
  * The Liberation TTFs are served from `/fonts/liberation/` (copied from
@@ -27,7 +27,7 @@ import {
   Thickness,
 } from '@bonniepdf/core';
 
-// Liberation Sans — Regular for body text, Bold for headings.
+// Liberation Sans - Regular for body text, Bold for headings.
 const SANS = '/fonts/liberation/LiberationSans-Regular.ttf';
 const SANS_BOLD = '/fonts/liberation/LiberationSans-Bold.ttf';
 
@@ -44,7 +44,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Text Alignment — Liberation Sans (PDF/UA-1)';
+  metadata.title = 'Text Alignment - Liberation Sans (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'All four text alignments rendered with an embedded Liberation Sans TrueType font.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, alignment, justified, truetype, liberation';
@@ -64,7 +64,7 @@ export function generate(): Document {
 
   const intro = new TextBlock(
     'The four standard alignments are shown below, all set in embedded Liberation Sans. Each paragraph ' +
-      'carries the same text and the same /P structure-tree role — alignment is a purely visual property.'
+      'carries the same text and the same /P structure-tree role - alignment is a purely visual property.'
   );
   intro.margin = new Thickness(0, 0, 0, 14);
   doc.add(intro);

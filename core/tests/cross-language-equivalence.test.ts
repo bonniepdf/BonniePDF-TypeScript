@@ -16,13 +16,13 @@ import { pdfToText } from './helpers/test-base';
  * cross-language equivalence (TS mirror). The .NET and TS
  * implementations must produce structurally-equivalent PDF/UA
  * output. This test extracts a "canonical fingerprint" from a
- * generated PDF — a sorted map of `role → count` for every
- * StructElem — and asserts the same expectations the .NET sibling
+ * generated PDF - a sorted map of `role → count` for every
+ * StructElem - and asserts the same expectations the .NET sibling
  * (`BonniePDF.Tests/CrossLanguageEquivalenceTests.cs`) asserts on
  * the equivalent fixtures.
  *
  * If both sides pass their respective tests, structural equivalence
- * is verified. Object IDs and byte-level diffs are ignored —
+ * is verified. Object IDs and byte-level diffs are ignored -
  * fingerprints are derived from `/S /Role` occurrences which are
  * stable regardless of allocation order.
  */

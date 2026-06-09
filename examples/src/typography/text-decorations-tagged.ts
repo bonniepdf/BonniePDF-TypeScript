@@ -20,7 +20,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Text Decorations — Tagged (PDF/UA-1)';
+  metadata.title = 'Text Decorations - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates text decorations in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, underline, strikethrough';
@@ -28,7 +28,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
 
-  const h1 = new Heading('Text Decorations — PDF/UA-1');
+  const h1 = new Heading('Text Decorations - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;

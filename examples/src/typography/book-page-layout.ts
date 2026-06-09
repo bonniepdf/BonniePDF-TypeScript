@@ -71,7 +71,7 @@ export function generate(): Document {
   );
 
   const quote1 = new TextBlock(
-    '"Memory," he began, his voice gravelly with age, "is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex — a living, breathing architecture that shapes and is shaped by who we are."'
+    '"Memory," he began, his voice gravelly with age, "is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex - a living, breathing architecture that shapes and is shaped by who we are."'
   );
   quote1.fontName = StandardFonts.TimesItalic;
   quote1.fontSize = 11;
@@ -86,24 +86,24 @@ export function generate(): Document {
 
   content.addChild(
     paragraph(
-      'Halloway smiled, and for a moment, the years seemed to fall away. "An excellent question, Ms. Chen. The answer is both yes and no. Consider a cathedral. From a distance, it appears to follow a precise architectural plan — spires, nave, transept, all arranged according to centuries-old design principles. Yet upon closer inspection, you find modifications made by generations of builders, each leaving their mark on the structure. Memory is much the same."'
+      'Halloway smiled, and for a moment, the years seemed to fall away. "An excellent question, Ms. Chen. The answer is both yes and no. Consider a cathedral. From a distance, it appears to follow a precise architectural plan - spires, nave, transept, all arranged according to centuries-old design principles. Yet upon closer inspection, you find modifications made by generations of builders, each leaving their mark on the structure. Memory is much the same."'
     )
   );
 
   content.addChild(
     paragraph(
-      'He turned to the board and drew a simple diagram — a series of interconnected nodes that resembled both a neural network and a medieval cathedral\'s flying buttresses. "We have what I call the foundational framework: sensory encoding, short-term consolidation, and long-term storage. These are the nave and transept of our memory cathedral, present in every human mind, shaped by millions of years of evolution."'
+      'He turned to the board and drew a simple diagram - a series of interconnected nodes that resembled both a neural network and a medieval cathedral\'s flying buttresses. "We have what I call the foundational framework: sensory encoding, short-term consolidation, and long-term storage. These are the nave and transept of our memory cathedral, present in every human mind, shaped by millions of years of evolution."'
     )
   );
 
   const emphStack = new VerticalStack();
-  const butThen = new TextBlock('But then —');
+  const butThen = new TextBlock('But then -');
   butThen.fontName = StandardFonts.TimesBold;
   butThen.fontSize = 11;
   butThen.textColor = Color.slate800;
   emphStack.addChild(butThen);
 
-  const whisper = new TextBlock('he continued, his voice dropping to a conspiratorial whisper —');
+  const whisper = new TextBlock('he continued, his voice dropping to a conspiratorial whisper -');
   whisper.fontName = StandardFonts.TimesItalic;
   whisper.fontSize = 11;
   whisper.textColor = Color.slate700;
@@ -112,7 +112,7 @@ export function generate(): Document {
 
   content.addChild(
     paragraph(
-      '"there are the personal modifications. Each experience, each trauma, each moment of profound joy adds a new room to our internal cathedral, alters an existing corridor, or sometimes — rarely but catastrophically — brings down an entire wing."'
+      '"there are the personal modifications. Each experience, each trauma, each moment of profound joy adds a new room to our internal cathedral, alters an existing corridor, or sometimes - rarely but catastrophically - brings down an entire wing."'
     )
   );
 
@@ -126,7 +126,7 @@ export function generate(): Document {
   const quoteInner = new VerticalStack();
   quoteInner.margin = new Thickness(5);
   const quoteText = new TextBlock(
-    'We have discovered, through decades of research across multiple disciplines, that the architectural blueprint of memory is not unique to humans. It exists in varying forms across all mammalian species, suggesting an ancient origin predating consciousness itself. More remarkably — and this is where conventional science begins to grow uncomfortable — we have found evidence that this architecture can be influenced, modified, and in some cases, completely redesigned.'
+    'We have discovered, through decades of research across multiple disciplines, that the architectural blueprint of memory is not unique to humans. It exists in varying forms across all mammalian species, suggesting an ancient origin predating consciousness itself. More remarkably - and this is where conventional science begins to grow uncomfortable - we have found evidence that this architecture can be influenced, modified, and in some cases, completely redesigned.'
   );
   quoteText.fontName = StandardFonts.TimesItalic;
   quoteText.fontSize = 10;

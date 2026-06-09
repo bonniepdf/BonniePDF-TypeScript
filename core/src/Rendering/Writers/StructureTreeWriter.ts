@@ -1,5 +1,5 @@
 // IPdfWriter / IAsyncPdfWriter live alongside their implementations in
-// PdfWriter.ts — the standalone `./IPdfWriter` / `./IAsyncPdfWriter`
+// PdfWriter.ts - the standalone `./IPdfWriter` / `./IAsyncPdfWriter`
 // files are shadow definitions that drift from the real ones, so this
 // module imports from the kitchen-sink file the serializer also uses.
 import type { IPdfWriter, IAsyncPdfWriter } from './PdfWriter';
@@ -185,7 +185,7 @@ function buildStructElemDict(
   if (element.lang) dict.set('/Lang', PdfSyntax.encodeMetadataString(element.lang));
   if (element.title) dict.set('/T', PdfSyntax.encodeMetadataString(element.title));
 
-  // /A — attributes dictionary (raw PDF syntax provided by caller).
+  // /A - attributes dictionary (raw PDF syntax provided by caller).
   // Tables use this for /ColSpan; future stages may use it for
   // /RowSpan and list characteristics.
   if (element.attributes) dict.set('/A', element.attributes);
@@ -293,7 +293,7 @@ function buildKidsAndPg(
         }
       }
     } else {
-      // Test mode (no page IDs) — bare ints, no /Pg.
+      // Test mode (no page IDs) - bare ints, no /Pg.
       for (const mcid of element.mcIds) parts.push(mcid.toString());
     }
   }

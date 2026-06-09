@@ -101,7 +101,7 @@ export function generate(): Document {
   c1.margin = new Thickness(0, 0, 0, 12);
   doc.add(c1);
 
-  const c2 = new TextBlock('Decorations are bitwise flags — combine them with the | operator.');
+  const c2 = new TextBlock('Decorations are bitwise flags - combine them with the | operator.');
   c2.fontName = StandardFonts.Helvetica;
   c2.fontSize = 12;
   c2.textColor = Color.slate700;

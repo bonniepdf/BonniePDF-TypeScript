@@ -120,7 +120,7 @@ export function generate(): Document {
   doc.add(strokeBox);
 
   const alertText = new TextBlock(
-    'Rounded border combined with a background fill — great for alert boxes and callouts.'
+    'Rounded border combined with a background fill - great for alert boxes and callouts.'
   );
   alertText.fontName = StandardFonts.Helvetica;
   alertText.fontSize = 12;

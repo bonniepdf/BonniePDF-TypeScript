@@ -4,10 +4,10 @@ import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 
 /**
  * Round-trip tests for the new accessibility-related properties on
- * DocumentSettings. this feature of the this feature (PDF/UA) plan — only verifies the
+ * DocumentSettings. this feature of the this feature (PDF/UA) plan - only verifies the
  * public surface; no writer behaviour yet.
  */
-describe('DocumentSettings — accessibility', () => {
+describe('DocumentSettings - accessibility', () => {
   it('defaults accessibility to None', () => {
     const settings = new DocumentSettings();
     expect(settings.accessibility).toBe(AccessibilityMode.None);

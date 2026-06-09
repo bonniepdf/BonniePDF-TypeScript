@@ -11,14 +11,14 @@ import {
   Thickness,
 } from '@bonniepdf/core';
 
-// PDF/A is disabled — emoji colour fonts often contain proprietary tables
+// PDF/A is disabled - emoji colour fonts often contain proprietary tables
 // (COLR, CBDT) that are incompatible with PDF/A-1b. PDF/UA-1 is still set.
 const TEXT_FONT = '/fonts/NotoSans-Regular.ttf';
 const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
 const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
 
-// Section headings always use TEXT_FONT (NotoSans) for the Latin label —
+// Section headings always use TEXT_FONT (NotoSans) for the Latin label -
 // the section's body content uses the relevant symbol / emoji font, but the
 // heading itself ("Emoji Faces", "Mathematical Operators", …) is plain Latin
 // text and must be rendered with a Latin-capable font, otherwise glyphs come
@@ -78,7 +78,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Emojis & Unicode — Tagged (PDF/UA-1)';
+  metadata.title = 'Emojis & Unicode - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Full Unicode range including supplementary planes in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, emoji, unicode, fonts';
@@ -86,7 +86,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
-  const h1 = new Heading('Emojis & Supplementary Unicode — PDF/UA-1');
+  const h1 = new Heading('Emojis & Supplementary Unicode - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = TEXT_FONT;

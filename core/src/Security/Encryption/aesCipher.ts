@@ -1,6 +1,6 @@
 /**
  * AES-CBC/ECB encryption for PDF AES-256 encryption (V5, R6).
- * Uses the Web Crypto API (SubtleCrypto) — works in browser and Node.js 19+.
+ * Uses the Web Crypto API (SubtleCrypto) - works in browser and Node.js 19+.
  * All methods are async because SubtleCrypto is strictly Promise-based.
  */
 
@@ -25,12 +25,12 @@ export class AesCipher {
 
   constructor(key: Uint8Array) {
     if (!key || key.length === 0) throw new Error('AesCipher: key cannot be null or empty');
-    this.key = new Uint8Array(key); // fresh copy — always plain ArrayBuffer-backed
+    this.key = new Uint8Array(key); // fresh copy - always plain ArrayBuffer-backed
   }
 
   /**
    * AES-CBC encrypt with a randomly generated IV and PKCS7 padding.
-   * Returns IV (16 bytes) + ciphertext — matches the C# AesCipher.Encrypt output format.
+   * Returns IV (16 bytes) + ciphertext - matches the C# AesCipher.Encrypt output format.
    */
   async encrypt(data: Uint8Array): Promise<Uint8Array> {
     if (!data || data.length === 0) return data ?? new Uint8Array(0);

@@ -5,7 +5,7 @@ import { StructureTreeWriter } from '../src/Rendering/Writers/StructureTreeWrite
 import type { IPdfWriter } from '../src/Rendering/Writers/PdfWriter';
 
 /**
- * Stage-1 prep — /Pg + /ParentTree foundational fix. These tests
+ * Stage-1 prep - /Pg + /ParentTree foundational fix. These tests
  * drive StructureTreeWriter with explicit page IDs (the production
  * path) rather than test-mode (no pages) and assert that:
  *   - Each StructElem whose MCIDs all live on one page gets
@@ -19,7 +19,7 @@ import type { IPdfWriter } from '../src/Rendering/Writers/PdfWriter';
  * Pre-existing structure-tree-writer tests assert the test-mode
  * behaviour (no page IDs); together both suites cover the writer.
  */
-describe('StructureTreeWriter — /Pg + /ParentTree', () => {
+describe('StructureTreeWriter - /Pg + /ParentTree', () => {
   interface EmittedObject {
     id: number;
     dict: Map<string, string>;

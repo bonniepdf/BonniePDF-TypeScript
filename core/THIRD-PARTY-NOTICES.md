@@ -18,7 +18,7 @@ upstream licence text in full and unmodified.
 
 - **Files:** `core/src/Elements/Shapes/QrCodeEncoder.ts`,
   `core/src/Elements/Shapes/QrSegment.ts`
-- **Upstream project:** [Project Nayuki — QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library)
+- **Upstream project:** [Project Nayuki - QR Code generator library](https://www.nayuki.io/page/qr-code-generator-library)
 - **Upstream source:** https://github.com/nayuki/QR-Code-generator
 - **Licence:** MIT License
 - **Nature of use:** `QrCodeEncoder.ts` and `QrSegment.ts` are a TypeScript
@@ -26,9 +26,9 @@ upstream licence text in full and unmodified.
   of Project Nayuki's `qrcodegen.ts` QR Code encoder (ISO/IEC 18004 Model 2).
   This mirrors the porting relationship of the .NET reference implementation,
   whose `QrCodeEncoder.cs` / `QrSegment.cs` are derived from the same
-  upstream source — see `../BonniePDF-NET/THIRD-PARTY-NOTICES.md`. The
-  encoding algorithms — version selection, Reed-Solomon error correction,
-  mask penalty scoring, function-pattern drawing, and codeword interleaving —
+  upstream source - see `../BonniePDF-NET/THIRD-PARTY-NOTICES.md`. The
+  encoding algorithms - version selection, Reed-Solomon error correction,
+  mask penalty scoring, function-pattern drawing, and codeword interleaving -
   originate from the upstream project.
 
 ### Licence text

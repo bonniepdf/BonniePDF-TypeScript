@@ -34,7 +34,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Bar Chart');
+    const left = new TextBlock('BonniePDF - Bar Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -51,7 +51,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Bar Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Bar chart example — monthly sales with vertical bars, grid lines, and value labels';
+  metadata.subject = 'Bar chart example - monthly sales with vertical bars, grid lines, and value labels';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

@@ -26,7 +26,7 @@ export class ImageLoader {
    * Async counterpart to {@link loadFromBytes}.  For JPEGs the two paths are
    * equivalent (no decompression needed).  For PNGs this path uses the
    * runtime's built-in `DecompressionStream('deflate')` to inflate IDAT data,
-   * which handles every real-world PNG — the sync path only supports the
+   * which handles every real-world PNG - the sync path only supports the
    * stored-block subset and throws on Huffman-compressed streams.
    */
   public static async loadFromBytesAsync(data: Uint8Array): Promise<ImageInfo> {
@@ -59,7 +59,7 @@ export class ImageLoader {
 
   /**
    * Async PNG loader that uses `DecompressionStream` for inflate, so it
-   * handles Huffman-compressed IDAT chunks — i.e. every PNG exported from a
+   * handles Huffman-compressed IDAT chunks - i.e. every PNG exported from a
    * real image editor.  Prefer this over {@link loadPng} unless the input is
    * known to use stored deflate blocks only.
    */
@@ -151,13 +151,13 @@ export class ImageLoader {
           throw new Error('Invalid JPEG file: Invalid dimensions');
         }
 
-        // Don't return yet — keep scanning for APP1/APP14 markers that may
+        // Don't return yet - keep scanning for APP1/APP14 markers that may
         // appear after SOF in some encoders (rare but legal).
         sofFound = true;
         continue;
       }
 
-      // APP0 (0xFFE0) — JFIF density (DPI hint).
+      // APP0 (0xFFE0) - JFIF density (DPI hint).
       if (marker === 0xe0) {
         const segStart = pos + 2;
         const segLen = (data[segStart] << 8) | data[segStart + 1];
@@ -168,7 +168,7 @@ export class ImageLoader {
         continue;
       }
 
-      // APP2 (0xFFE2) — may carry one chunk of an embedded ICC profile.
+      // APP2 (0xFFE2) - may carry one chunk of an embedded ICC profile.
       if (marker === 0xe2) {
         const segStart = pos + 2;
         const segLen = (data[segStart] << 8) | data[segStart + 1];
@@ -183,7 +183,7 @@ export class ImageLoader {
         continue;
       }
 
-      // APP1 (0xFFE1) — may contain "Exif\0\0" + TIFF header with orientation.
+      // APP1 (0xFFE1) - may contain "Exif\0\0" + TIFF header with orientation.
       if (marker === 0xe1) {
         const segStart = pos + 2;
         const segLen = (data[segStart] << 8) | data[segStart + 1];
@@ -194,7 +194,7 @@ export class ImageLoader {
         continue;
       }
 
-      // APP14 (0xFFEE) — Adobe marker; transform=0 means CMYK ink-inverted.
+      // APP14 (0xFFEE) - Adobe marker; transform=0 means CMYK ink-inverted.
       if (marker === 0xee) {
         const segStart = pos + 2;
         const segLen = (data[segStart] << 8) | data[segStart + 1];
@@ -205,7 +205,7 @@ export class ImageLoader {
         continue;
       }
 
-      // SOS marker — start of scan; no further metadata segments follow.
+      // SOS marker - start of scan; no further metadata segments follow.
       if (marker === 0xda) break;
 
       // Skip any other marker segment by jumping past its declared length.
@@ -222,7 +222,7 @@ export class ImageLoader {
 
     // Assemble the ICC profile when every announced chunk arrived.  If
     // anything is missing (out-of-spec encoder) we drop the profile rather
-    // than emit a truncated one — better to render with the device space.
+    // than emit a truncated one - better to render with the device space.
     if (iccChunks.length > 0 && iccChunks.length === iccTotal) {
       iccChunks.sort((a, b) => a.seq - b.seq);
       const totalLen = iccChunks.reduce((s, c) => s + c.bytes.length, 0);
@@ -293,7 +293,7 @@ export class ImageLoader {
   /**
    * Parse the EXIF orientation tag (0x0112) from an APP1 payload, if present.
    * Returns silently when the segment isn't an EXIF blob or doesn't carry an
-   * orientation tag — JPEGs without EXIF are extremely common.
+   * orientation tag - JPEGs without EXIF are extremely common.
    */
   private static tryParseExifOrientation(data: Uint8Array, start: number, end: number, info: ImageInfo): void {
     // "Exif\0\0" identifier (6 bytes).
@@ -364,7 +364,7 @@ export class ImageLoader {
     }
     // Bytes: version(2) + flags0(2) + flags1(2) + transform(1).
     // APP14 typically precedes SOF in real-world JPEGs, so we can't check
-    // colorSpace here — the writer guards on CMYK at emit time.
+    // colorSpace here - the writer guards on CMYK at emit time.
     const transform = data[start + 11];
     if (transform === 0) {
       info.invertCmykColors = true;
@@ -521,7 +521,7 @@ export class ImageLoader {
 
     // Adopt the pre-inflated ICC profile if the async path supplied one.
     // The sync path never inflates iCCP, so a Huffman-compressed profile
-    // is silently dropped — matching the sync IDAT behaviour.
+    // is silently dropped - matching the sync IDAT behaviour.
     if (preInflatedIcc && preInflatedIcc.length > 0) {
       info.iccProfile = preInflatedIcc;
     }
@@ -593,7 +593,7 @@ export class ImageLoader {
 
   /**
    * Sync inflate for zlib streams that consist of stored (type-00) deflate
-   * blocks only.  Throws on Huffman-compressed blocks — those require the
+   * blocks only.  Throws on Huffman-compressed blocks - those require the
    * async path via {@link inflatePngIdatAsync}, which uses the runtime's
    * built-in `DecompressionStream`.  Every PNG produced by a real image
    * editor uses Huffman compression, so production code should prefer the
@@ -614,7 +614,7 @@ export class ImageLoader {
       if (btype !== 0) {
         throw new Error(
           `Compressed deflate block (btype=${btype}) is not supported by the synchronous PNG loader. ` +
-            'Use ImageLoader.loadPngAsync() or Document.generateBytesAsync() — the async path uses ' +
+            'Use ImageLoader.loadPngAsync() or Document.generateBytesAsync() - the async path uses ' +
             "the runtime's built-in DecompressionStream and handles every real-world PNG."
         );
       }
@@ -641,7 +641,7 @@ export class ImageLoader {
 
   /**
    * Inflate every zlib stream embedded in a PNG that the async loader cares
-   * about — IDAT (always present) and iCCP (when an embedded ICC profile is
+   * about - IDAT (always present) and iCCP (when an embedded ICC profile is
    * carried).  Both are inflated through the runtime's built-in
    * `DecompressionStream('deflate')`, so no inflate dependency is needed.
    * Works in every modern browser (Chrome 80+, Firefox 113+, Safari 16.4+),
@@ -704,7 +704,7 @@ export class ImageLoader {
     const writer = ds.writable.getWriter();
     const reader = ds.readable.getReader();
     // Slice into a fresh Uint8Array backed by a concrete ArrayBuffer (not
-    // ArrayBufferLike) — TS's stricter typings reject the parameter view
+    // ArrayBufferLike) - TS's stricter typings reject the parameter view
     // when its buffer might be a SharedArrayBuffer, and Node's web-streams
     // adapter rejects bare ArrayBuffer arguments.  This shape works in
     // both Node and the browser.

@@ -6,24 +6,24 @@ import { XmpConformanceBlock } from './XmpConformanceBlock';
  *
  * The packet body is composed of:
  *
- *   1. **Conformance blocks** — pdfaid, pdfuaid, and any future
+ *   1. **Conformance blocks** - pdfaid, pdfuaid, and any future
  *      additive namespace (ZUGFeRD's fx, etc.) emitted via the
  *      `conformanceBlocks` hook. These are PDF/A and PDF/UA-1
  *      requirements.
  *
- *   2. **Dublin Core (dc)** — title, creator (author), description
+ *   2. **Dublin Core (dc)** - title, creator (author), description
  *      (subject). Required by Matterhorn Protocol §6 for PDF/UA-1
- *      and by ISO 19005-1 §6.7.3 for PDF/A — every key in the
+ *      and by ISO 19005-1 §6.7.3 for PDF/A - every key in the
  *      document-info dictionary that has an analogous XMP property
  *      must be mirrored.
  *
- *   3. **PDF schema (pdf)** — Keywords, Producer. Mirrors the
+ *   3. **PDF schema (pdf)** - Keywords, Producer. Mirrors the
  *      /Keywords and /Producer entries from the info dict.
  *
- *   4. **XMP basic schema (xmp)** — CreatorTool, CreateDate,
+ *   4. **XMP basic schema (xmp)** - CreatorTool, CreateDate,
  *      ModifyDate. Mirrors /Creator, /CreationDate, /ModDate.
  *
- * Returns an empty string when no conformance blocks are provided —
+ * Returns an empty string when no conformance blocks are provided -
  * preserves existing behaviour for the pre-T-14 "no XMP body" code
  * path used by plain (non-tagged, non-PDF/A) documents.
  */
@@ -54,7 +54,7 @@ export class XmpMetadataWriter {
     }
     parts.push('    </rdf:Description>\n');
 
-    // 2. Dublin Core — title, creator (author), subject (keywords),
+    // 2. Dublin Core - title, creator (author), subject (keywords),
     //    description (subject). Naming is unintuitive because PDF and
     //    Dublin Core overlap: PDF /Subject → dc:description, while
     //    PDF /Keywords → dc:subject (an unordered Bag of topic words).
@@ -76,7 +76,7 @@ export class XmpMetadataWriter {
         parts.push('      </dc:creator>\n');
       }
       if (metadata.keywords) {
-        // dc:subject — Bag of individual keywords (comma- or
+        // dc:subject - Bag of individual keywords (comma- or
         // semicolon-separated in PDF /Keywords). Matches .NET behaviour.
         const tokens = metadata.keywords
           .split(/[,;]/)
@@ -101,7 +101,7 @@ export class XmpMetadataWriter {
       parts.push('    </rdf:Description>\n');
     }
 
-    // 3. PDF schema — Keywords, Producer.
+    // 3. PDF schema - Keywords, Producer.
     if (metadata?.keywords || metadata?.producer) {
       parts.push('    <rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">\n');
       if (metadata.keywords) {
@@ -113,7 +113,7 @@ export class XmpMetadataWriter {
       parts.push('    </rdf:Description>\n');
     }
 
-    // 4. XMP basic schema — CreatorTool, CreateDate, ModifyDate.
+    // 4. XMP basic schema - CreatorTool, CreateDate, ModifyDate.
     if (metadata?.creator || metadata?.creationDate || metadata?.modifiedDate) {
       parts.push('    <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">\n');
       if (metadata.creator) {
@@ -132,7 +132,7 @@ export class XmpMetadataWriter {
     // 5. PDF/A extension schema declarations (ISO 19005-2/3 §6.6.2.3).
     // Every conformance block whose namespace is NOT predefined by ISO
     // 19005 must be declared in a pdfaExtension:schemas bag. Only emit
-    // when a PDF/A claim is also present — without PDF/A there's no
+    // when a PDF/A claim is also present - without PDF/A there's no
     // validator that checks this rule and the bag is dead weight.
     const hasPdfA = conformanceBlocks.some(b => b.prefix === 'pdfaid');
     const extensionSchemas = conformanceBlocks
@@ -191,7 +191,7 @@ function escapeXmlText(s: string): string {
 /** Formats a Date as an XMP-compliant ISO 8601 string (e.g. 2026-05-24T07:23:11Z). */
 function toXmpDate(d: Date): string {
   const iso = d.toISOString(); // 2026-05-24T07:23:11.123Z
-  // Strip milliseconds — XMP allows them but writing whole seconds keeps
+  // Strip milliseconds - XMP allows them but writing whole seconds keeps
   // generated PDFs byte-stable across CI runs that re-parse the date.
   return iso.replace(/\.\d{3}Z$/, 'Z');
 }

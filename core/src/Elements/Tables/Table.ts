@@ -172,7 +172,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     const tagging = ctx.tagging;
     // Guarantee a Table ancestor for the row-groups. The pipeline/stack opens
     // the Table for the first fragment, but a continuation fragment after a
-    // page break re-enters with only the page/Document open — so open a Table
+    // page break re-enters with only the page/Document open - so open a Table
     // here when one isn't already current (PDF/UA 7.2). Guard avoids
     // double-wrapping the common (already-wrapped) case. A paginated table can
     // yield one Table per page fragment, which is structurally valid.
@@ -318,7 +318,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     let headersAddedOnNewPage = false;
     const tagging = ctx.tagging;
 
-    // Render headers — grouped under a THead structure element so the rows
+    // Render headers - grouped under a THead structure element so the rows
     // satisfy PDF/UA 7.2 (TR must live in Table/THead/TBody/TFoot).
     if (this.headers.length > 0) {
       if (tagging) tagging.tree.begin(SemanticRole.THead);
@@ -331,7 +331,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       }
     }
 
-    // Render data rows — grouped under TBody.
+    // Render data rows - grouped under TBody.
     if (this.rows.length > 0) {
       if (tagging) tagging.tree.begin(SemanticRole.TBody);
       try {
@@ -359,7 +359,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       }
     }
 
-    // Render footers — grouped under TFoot.
+    // Render footers - grouped under TFoot.
     if (this.footers.length > 0) {
       if (tagging) tagging.tree.begin(SemanticRole.TFoot);
       try {

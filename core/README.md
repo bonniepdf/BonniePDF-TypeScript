@@ -5,7 +5,7 @@
 [![CI](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](./LICENSE)
 
-High-performance, zero-dependency PDF generation for TypeScript and JavaScript — runs in the **browser** and **Node.js**.
+High-performance, zero-dependency PDF generation for TypeScript and JavaScript - runs in the **browser** and **Node.js**.
 
 > Interactive examples → [bonniepdf.dev/examples](https://bonniepdf.dev/examples)  
 > Also available for **.NET** → [BonniePDF/bonniepdf](https://github.com/BonniePDF/bonniepdf)
@@ -33,7 +33,7 @@ const bytes = await new Document()
   .addPage(page =>
     page
       .add(new TextBlock('Hello, BonniePDF!').fontSize(24).bold())
-      .add(new TextBlock('Generated entirely in TypeScript — no server required.'))
+      .add(new TextBlock('Generated entirely in TypeScript - no server required.'))
   )
   .generateAsync();
 
@@ -77,11 +77,11 @@ No native addons. No WASM. No server.
 | Environment                 | ESM | CJS |
 | --------------------------- | --- | --- |
 | Node.js ≥ 18                | ✅  | ✅  |
-| Browser (native ESM)        | ✅  | —   |
+| Browser (native ESM)        | ✅  | -   |
 | Vite / webpack / esbuild    | ✅  | ✅  |
 | Bun                         | ✅  | ✅  |
-| Deno (via `npm:` specifier) | ✅  | —   |
-| Cloudflare Workers          | ✅  | —   |
+| Deno (via `npm:` specifier) | ✅  | -   |
+| Cloudflare Workers          | ✅  | -   |
 
 ---
 
@@ -176,7 +176,7 @@ new Document()
 
 ## Platform configuration
 
-BonniePDF abstracts file I/O and compression behind a `configurePlatform()` call. This is only required when loading fonts from disk or saving files — pure in-memory generation works without it.
+BonniePDF abstracts file I/O and compression behind a `configurePlatform()` call. This is only required when loading fonts from disk or saving files - pure in-memory generation works without it.
 
 ```typescript
 // Node.js
@@ -196,8 +196,8 @@ BonniePDF uses a **dual-license** model:
 
 | Use case                                    | License                                             |
 | ------------------------------------------- | --------------------------------------------------- |
-| Personal projects                           | [Community](./LICENSE) — free                 |
-| Open source projects (OSI-approved license) | [Community](./LICENSE) — free                 |
+| Personal projects                           | [Community](./LICENSE) - free                 |
+| Open source projects (OSI-approved license) | [Community](./LICENSE) - free                 |
 | Commercial / for-profit use                 | [Commercial License](https://bonniepdf.dev/license) |
 | Internal business tools                     | [Commercial License](https://bonniepdf.dev/license) |
 

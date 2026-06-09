@@ -109,7 +109,7 @@ const SECTIONS: [string, string][] = [
   ],
   [
     'Sustainability Commitment',
-    "Environmental responsibility is not just a corporate policy — it's a core value that influences everything we do. We have committed to achieving carbon neutrality by 2030 and have implemented comprehensive sustainability programs across all our facilities.",
+    "Environmental responsibility is not just a corporate policy - it's a core value that influences everything we do. We have committed to achieving carbon neutrality by 2030 and have implemented comprehensive sustainability programs across all our facilities.",
   ],
   [
     'Community Engagement',
@@ -272,7 +272,7 @@ export function generate(): Document {
   closing.margin = new Thickness(0, 0, 0, 20);
   doc.add(closing);
 
-  const footer = new TextBlock('Generated with BonniePDF — Flow Architecture Demo');
+  const footer = new TextBlock('Generated with BonniePDF - Flow Architecture Demo');
   footer.fontName = StandardFonts.HelveticaOblique;
   footer.fontSize = 10;
   footer.textColor = Color.slate400;

@@ -14,7 +14,7 @@ import { pdfToText } from './helpers/test-base';
  * Mirrors the .NET MediaAltTextTests: Image is tested at the property
  * level (no real-image fixture needed), QRCode is tested end-to-end.
  */
-describe('Media — alt-text and Figure tagging', () => {
+describe('Media - alt-text and Figure tagging', () => {
   // ── Image role / alt-text wiring ────────────────────────────────
 
   it('Image with altText => Figure role', () => {
@@ -95,7 +95,7 @@ describe('Media — alt-text and Figure tagging', () => {
 
     const text = pdfToText(doc.generateBytes());
     // A decorative element is an /Artifact marked-content region, NOT a
-    // structure element. Emitting /S /Artifact (a StructElem) is invalid —
+    // structure element. Emitting /S /Artifact (a StructElem) is invalid -
     // Artifact is a marked-content type, not a structure type (VeraPDF 7.1-5).
     expect(text).toContain('/Artifact BMC');
     expect(text).not.toContain('/S /Artifact');

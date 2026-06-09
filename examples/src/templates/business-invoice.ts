@@ -147,7 +147,7 @@ export function generate(): Document {
   companyStack.addChild(tb('Phone  (555) 123-4567', StandardFonts.Helvetica, 9, TextMedium));
   companyStack.addChild(tb('Email  hello@studioeleven.co', StandardFonts.Helvetica, 9, TextMedium));
 
-  // H1 heading — visually identical to a styled TextBlock but carries
+  // H1 heading - visually identical to a styled TextBlock but carries
   // the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
   const invoiceTitle = new Heading('Invoice');
   invoiceTitle.level = 1;

@@ -153,7 +153,7 @@ export class PdfWriter implements IPdfWriter {
   constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
     const header = version === PdfVersion.Pdf17 ? '%PDF-1.7\n' : '%PDF-1.4\n';
     this._output.writeString(header);
-    // Binary comment (4 bytes > 127) — signals to PDF readers that this is binary
+    // Binary comment (4 bytes > 127) - signals to PDF readers that this is binary
     this._output.writeBytes(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a])); // %âãÏÓ\n
   }
 
@@ -260,7 +260,7 @@ export class PdfWriter implements IPdfWriter {
       ['/Rect', link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
       ['/F', '4'], // Print flag (required for PDF/A-1B)
       // this feature / PDF/UA rule 7-18: /Contents must mirror the visible link
-      // text. Emitted unconditionally — even untagged docs benefit, and
+      // text. Emitted unconditionally - even untagged docs benefit, and
       // the field is a no-op for viewers that don't surface annotation
       // alt-text.
       ['/Contents', `(${PdfSyntax.escape((link.text ?? '').toString())})`],
@@ -282,7 +282,7 @@ export class PdfWriter implements IPdfWriter {
   }
 
   /**
-   * Writes the encryption dictionary. Stub — full encryption in Session 4.
+   * Writes the encryption dictionary. Stub - full encryption in Session 4.
    */
   public writeEncryptDictionary(id: number): number {
     this._encryptId = id;
@@ -361,7 +361,7 @@ export class PdfWriter implements IPdfWriter {
   public close(catalogId: number, infoId: number): void {
     const xrefPos = this._output.bytePosition;
 
-    // xref table — each entry is exactly 20 bytes per PDF spec
+    // xref table - each entry is exactly 20 bytes per PDF spec
     let xref = `xref\n0 ${this._currentObjId + 1}\n`;
     xref += '0000000000 65535 f \n';
     for (let i = 1; i <= this._currentObjId; i++) {
@@ -517,7 +517,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
 // ─── FontWriter ───────────────────────────────────────────────────────────────
 
 /**
- * Writes font objects to PDF — both standard Type1 fonts and embedded TrueType fonts.
+ * Writes font objects to PDF - both standard Type1 fonts and embedded TrueType fonts.
  * Matches the C# FontWriter class (sync path only; async path delegates to this).
  */
 export class FontWriter {
@@ -568,7 +568,7 @@ export class FontWriter {
         const usedGlyphIds = new Set<number>(tracker.getUsedGlyphIds() as ReadonlySet<number>);
         fontData = subsetter.createSubset(usedGlyphIds, tracker.getUsedCharToGlyphMap());
       } catch (err) {
-        // Subsetting failed — fall back to embedding the full font with an
+        // Subsetting failed - fall back to embedding the full font with an
         // Identity CIDToGIDMap so original GIDs from the content stream map
         // directly to glyphs in the (un-subsetted) font file.
         this.diagnostics.addWarning(
@@ -586,7 +586,7 @@ export class FontWriter {
     this.writeFontFile2(fontFile2Id, fontData);
 
     // 2. CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap domain
-    //    (0..maxOriginalGid) — see buildCIDSetData.
+    //    (0..maxOriginalGid) - see buildCIDSetData.
     let cidSetId = 0;
     if (enableSubsetting && subsetter) {
       cidSetId = this.writer.getNewId();
@@ -645,8 +645,8 @@ export class FontWriter {
    * Builds the CIDSet bit-field for a CIDFontType2 subset.
    *
    * The CIDSet must mirror the CIDToGIDMap's domain (CIDs 0..maxCid). VeraPDF
-   * (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" — an
-   * unmapped CIDToGIDMap entry points at GID 0, which is < numGlyphs — and
+   * (PDF/UA-1, clause 7.21.4.2) treats every in-range CID as "present" - an
+   * unmapped CIDToGIDMap entry points at GID 0, which is < numGlyphs - and
    * requires the CIDSet to mark all of them, so set every bit 0..maxCid.
    */
   private buildCIDSetData(maxCid: number): Uint8Array {
@@ -834,7 +834,7 @@ export class MetadataWriter {
     const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
     const bytes = new TextEncoder().encode(xmpXml);
     // No async unencrypted-binary helper today; the sync writer would
-    // be fine here but stays the async writer's contract — write via
+    // be fine here but stays the async writer's contract - write via
     // writeObjectAsync with a stream string. The byte content is what
     // matters; encoding follows the same UTF-8 path.
     void bytes;
@@ -942,7 +942,7 @@ export class NavigationWriter {
   }
 
   public async writeOutlineTreeAsync(rootId: number, bookmarks: any[], pageIds: number[]): Promise<number> {
-    // Delegate synchronously — async path is out of scope
+    // Delegate synchronously - async path is out of scope
     return this.writeOutlineTree(rootId, bookmarks, pageIds);
   }
 

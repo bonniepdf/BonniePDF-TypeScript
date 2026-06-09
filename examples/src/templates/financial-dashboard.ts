@@ -27,7 +27,7 @@ import {
 
 import { DateHelper } from './date-helpers.ts';
 
-// ── Brand colours — drawn from the BonniePDF logo palette ────────────────────
+// ── Brand colours - drawn from the BonniePDF logo palette ────────────────────
 const Espresso = Color.fromHex('#442714');
 const Terra = Color.fromHex('#956b51');
 const Brown = Color.fromHex('#805e48');
@@ -90,7 +90,7 @@ function kpiCell(value: string, label: string, delta: string, positive: boolean,
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function generate(): Document {
-  // Landscape, zero margin — layout elements carry their own padding
+  // Landscape, zero margin - layout elements carry their own padding
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 0);
   settings.version = PdfVersion.Pdf17;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -103,7 +103,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = title;
   metadata.author = 'Acme Corporation';
-  metadata.subject = `${DateHelper.quarterLabel(quarter, year)} financial dashboard — KPIs, monthly revenue chart, and product breakdown`;
+  metadata.subject = `${DateHelper.quarterLabel(quarter, year)} financial dashboard - KPIs, monthly revenue chart, and product breakdown`;
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
@@ -115,7 +115,7 @@ export function generate(): Document {
   const companyStack = new VerticalStack();
   companyStack.addChild(tb('ACME CORPORATION', StandardFonts.HelveticaBold, 14, Cream));
   companyStack.addChild(
-    tb('Confidential — Internal Use Only', StandardFonts.Helvetica, 8, HeaderMute, new Thickness(0, 5, 0, 0))
+    tb('Confidential - Internal Use Only', StandardFonts.Helvetica, 8, HeaderMute, new Thickness(0, 5, 0, 0))
   );
 
   const reportTitle = tb(title, StandardFonts.HelveticaBold, 13, Cream);
@@ -147,7 +147,7 @@ export function generate(): Document {
   doc.add(header);
 
   // ════════════════════════════════════════════════════════════════════════════
-  // 2.  KPI strip — four equal-width metric cards
+  // 2.  KPI strip - four equal-width metric cards
   // ════════════════════════════════════════════════════════════════════════════
 
   const kpiTable = new Table(1, 1, 1, 1);
@@ -164,7 +164,7 @@ export function generate(): Document {
   doc.add(rule(Sand));
 
   // ════════════════════════════════════════════════════════════════════════════
-  // 3.  Monthly revenue bar chart — ChartElement must be a direct doc.add() call;
+  // 3.  Monthly revenue bar chart - ChartElement must be a direct doc.add() call;
   //     nesting it inside a Container or Table prevents width resolution.
   // ════════════════════════════════════════════════════════════════════════════
 
@@ -200,7 +200,7 @@ export function generate(): Document {
   barChart.labelFontSize = 8;
   barChart.backgroundColor = Cream;
 
-  // Direct doc.add — the only way ChartElement resolves its available width
+  // Direct doc.add - the only way ChartElement resolves its available width
   doc.add(
     new ChartElement(
       barChart,
@@ -239,7 +239,7 @@ export function generate(): Document {
     { name: 'Enterprise Plan', units: '142', revenue: '£890,400', margin: '71%' },
     { name: 'Pro Plan', units: '1,204', revenue: '£722,400', margin: '64%' },
     { name: 'Starter Plan', units: '2,468', revenue: '£493,600', margin: '58%' },
-    { name: 'Add-ons', units: '—', revenue: '£304,000', margin: '82%' },
+    { name: 'Add-ons', units: '-', revenue: '£304,000', margin: '82%' },
   ];
 
   for (const p of products) {

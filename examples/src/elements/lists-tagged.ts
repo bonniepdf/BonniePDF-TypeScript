@@ -52,7 +52,7 @@ export function generate(): Document {
   const doc = new Document();
 
   doc.metadata = new DocumentMetadata();
-  doc.metadata.title = 'Accessible Lists — Tagged (PDF/UA-1)';
+  doc.metadata.title = 'Accessible Lists - Tagged (PDF/UA-1)';
   doc.metadata.author = 'BonniePDF';
   doc.metadata.subject = 'PDF/UA-1 tagged ordered and unordered lists with nested items.';
   doc.metadata.keywords = 'pdf, pdf/ua, accessibility, lists, ordered, unordered';

@@ -141,7 +141,7 @@ export class FontMetrics {
     if (!text) return 0;
 
     // A. IS IT A CUSTOM TTF FILE (direct path)?
-    // Prefer a pre-loaded TtfFont instance registered under this exact path —
+    // Prefer a pre-loaded TtfFont instance registered under this exact path -
     // populated by PdfResourceRegistry after async font preloading, or
     // explicitly by `loadFontFromUrl(url)`. Falling through to `getTtfWidth`
     // uses a stub width table that under-measures supplementary-plane glyphs.
@@ -194,7 +194,7 @@ export class FontMetrics {
       // string of length 1 for BMP chars, 2 for surrogate-pair supplementary
       // chars). `charCodeAt(0)` only sees the high surrogate of supplementary
       // chars (e.g. 0xD83D for U+1F600), causing emoji to miss their glyph and
-      // fall through to a 500-unit fallback — which under-measures wide emoji
+      // fall through to a 500-unit fallback - which under-measures wide emoji
       // glyphs and prevents word-wrap from triggering. Use codePointAt to get
       // the full code point so the cmap lookup succeeds.
       const code = rune.codePointAt(0) ?? 0;

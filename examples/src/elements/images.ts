@@ -50,7 +50,7 @@ function pngChunk(type: string, data: number[]): number[] {
   return [...u32be(data.length), ...typeBytes, ...data, ...u32be(crc32(forCrc))];
 }
 
-// zlib wrapper using a single stored (uncompressed) deflate block — no library needed.
+// zlib wrapper using a single stored (uncompressed) deflate block - no library needed.
 // Valid for payloads up to 65 535 bytes; each test image is well within that.
 function zlibStored(raw: Uint8Array): number[] {
   const len = raw.length;
@@ -232,14 +232,14 @@ export function generate(): Document {
   doc.add(p2Sub);
 
   // Alpha on plain white background
-  const aTitle1 = sectionTitle('\n1. Alpha PNG — plain background');
+  const aTitle1 = sectionTitle('\n1. Alpha PNG - plain background');
   aTitle1.margin = new Thickness(0, 0, 0, 4);
   doc.add(aTitle1);
   doc.add(caption('The circular gradient fades to transparent at the edges.'));
   doc.add(img(alphaPng, 200, undefined, ImageFitMode.Contain));
 
   // Alpha inside a coloured container
-  const aTitle2 = sectionTitle('\n2. Alpha PNG — coloured container');
+  const aTitle2 = sectionTitle('\n2. Alpha PNG - coloured container');
   aTitle2.margin = new Thickness(0, 0, 0, 4);
   doc.add(aTitle2);
   doc.add(caption('The same image inside a tinted container; the alpha reveals the background colour.'));

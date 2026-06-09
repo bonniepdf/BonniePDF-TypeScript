@@ -66,7 +66,7 @@ function createMinimalPng(): Uint8Array {
 }
 
 // Builds a Huffman-compressed (real-world) PNG by running raw scanlines
-// through the runtime's CompressionStream — exactly what a real image
+// through the runtime's CompressionStream - exactly what a real image
 // editor would produce.  Used to exercise the async PNG path.
 async function createHuffmanPng(width: number, height: number): Promise<Uint8Array> {
   const bpp = 3;
@@ -245,7 +245,7 @@ function createPngWithPhys(ppmX: number, ppmY: number): Uint8Array {
 // Used to verify (a) the async path inflates iCCP correctly and (b) the
 // sync path silently drops iCCP rather than crashing.
 async function createPngWithIccp(profile: Uint8Array): Promise<Uint8Array> {
-  // Stored-block IDAT — same shape as createMinimalPng so sync inflate works.
+  // Stored-block IDAT - same shape as createMinimalPng so sync inflate works.
   const raw = new Uint8Array([0, 0, 0, 0]);
   const len = raw.length;
   const nlen = (len ^ 0xffff) & 0xffff;

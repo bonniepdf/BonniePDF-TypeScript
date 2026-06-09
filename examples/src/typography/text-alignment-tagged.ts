@@ -26,7 +26,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Text Alignment — Tagged (PDF/UA-1)';
+  metadata.title = 'Text Alignment - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates all four text alignments in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, alignment, justified';

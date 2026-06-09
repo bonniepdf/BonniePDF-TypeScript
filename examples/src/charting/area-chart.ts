@@ -34,7 +34,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Area Chart');
+    const left = new TextBlock('BonniePDF - Area Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -51,7 +51,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Area Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Area chart example — filled area under the line with configurable opacity';
+  metadata.subject = 'Area chart example - filled area under the line with configurable opacity';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

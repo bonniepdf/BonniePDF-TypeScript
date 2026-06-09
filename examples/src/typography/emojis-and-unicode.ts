@@ -1,14 +1,14 @@
 /**
- * Emojis & Unicode — full Unicode range including supplementary planes.
+ * Emojis & Unicode - full Unicode range including supplementary planes.
  *
  * Two fonts are used:
  *
- *   TEXT_FONT  — NotoSans-Regular.ttf
+ *   TEXT_FONT  - NotoSans-Regular.ttf
  *     Covers the entire Basic Multilingual Plane: Latin, Greek, Cyrillic,
  *     arrows, mathematical operators, currency symbols, box-drawing, etc.
  *     Place at:  public/fonts/NotoSans-Regular.ttf
  *
- *   EMOJI_FONT — NotoEmoji-Regular.ttf
+ *   EMOJI_FONT - NotoEmoji-Regular.ttf
  *     Monochrome TrueType emoji font covering the Supplementary Multilingual
  *     Plane (U+1F000 and above).  The subsetter needs glyf-based outlines;
  *     NotoEmoji Regular (single-weight, non-color variant) satisfies this.
@@ -37,7 +37,7 @@ import {
 const TEXT_FONT = '/fonts/NotoSans-Regular.ttf'; // Latin, Greek, Cyrillic, currency
 // NotoSansMath covers Arrows (U+2190–U+21FF) and Mathematical Operators
 // (U+2200–U+22FF).  Neither NotoSansSymbols nor NotoSansSymbols2 contains
-// these blocks — they must be routed through NotoSansMath.
+// these blocks - they must be routed through NotoSansMath.
 const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
 // NotoSansSymbols2 covers Miscellaneous Symbols (U+2600) and Dingbats (U+2700).
 const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf'; // Misc symbols, dingbats
@@ -63,7 +63,7 @@ function uniLine(text: string, bottom = 0): TextBlock {
   return b;
 }
 
-// Arrows & math operators — routed through NotoSansMath
+// Arrows & math operators - routed through NotoSansMath
 function mathLine(text: string, bottom = 0): TextBlock {
   const b = new TextBlock(text);
   b.fontName = MATH_FONT;
@@ -73,7 +73,7 @@ function mathLine(text: string, bottom = 0): TextBlock {
   return b;
 }
 
-// Misc symbols & dingbats — routed through NotoSansSymbols2
+// Misc symbols & dingbats - routed through NotoSansSymbols2
 function symLine(text: string, bottom = 0): TextBlock {
   const b = new TextBlock(text);
   b.fontName = SYMBOLS_FONT;
@@ -97,7 +97,7 @@ function emojiLine(text: string): TextBlock {
 export function generate(): Document {
   const settings = new DocumentSettings();
   settings.version = PdfVersion.Pdf17;
-  // PDF/A compliance is disabled here — color emoji fonts often contain
+  // PDF/A compliance is disabled here - color emoji fonts often contain
   // proprietary tables (COLR, CBDT) that require relaxed validation.
   settings.pdfAEnabled = false;
 

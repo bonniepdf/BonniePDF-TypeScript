@@ -97,7 +97,7 @@ export class ImageWriter {
    * Writes a PNG image as an XObject (using FlateDecode)
    */
   public writePngImage(id: number, image: ImageInfo, resourceName: string): number {
-    // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
+    // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
     let pixelData = image.data;
     let writeSmask = image.hasAlpha && image.alphaData.length > 0;
 
@@ -117,7 +117,7 @@ export class ImageWriter {
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/FlateDecode');
 
-    // Handle color space — ICC profile (when present) overrides device space.
+    // Handle color space - ICC profile (when present) overrides device space.
     dict.set('/ColorSpace', this.resolveColorSpace(image));
 
     // Handle alpha channel (soft mask)
@@ -162,7 +162,7 @@ export class ImageWriter {
   }
 
   /**
-   * Pick the N value (component count) for the ICC profile stream — must
+   * Pick the N value (component count) for the ICC profile stream - must
    * match the number of channels in the decoded image data, not the
    * stored-bitstream layout.  PNG RGBA splits alpha out before the PDF
    * pixel stream is written, so the colour channel count is `components`
@@ -357,7 +357,7 @@ export class ImageWriter {
       throw new Error('Async writer not configured');
     }
 
-    // PDF/A-1 forbids SMask — flatten alpha by compositing against white.
+    // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
     let pixelData = image.data;
     let writeSmask = image.hasAlpha && image.alphaData.length > 0;
 
@@ -377,7 +377,7 @@ export class ImageWriter {
     dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
     dict.set('/Filter', '/FlateDecode');
 
-    // Handle color space — ICC profile (when present) overrides device space.
+    // Handle color space - ICC profile (when present) overrides device space.
     dict.set('/ColorSpace', this.resolveColorSpace(image));
 
     // Handle alpha channel (soft mask)

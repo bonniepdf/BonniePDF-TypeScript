@@ -26,7 +26,7 @@ export function generate(): Document {
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'The Architecture of Memory — Tagged (PDF/UA-1)';
+  metadata.title = 'The Architecture of Memory - Tagged (PDF/UA-1)';
   metadata.author = 'Professor Halloway';
   metadata.subject = 'Book-style page layout in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, book, typography, times roman';
@@ -67,7 +67,7 @@ export function generate(): Document {
   doc.add(p1);
 
   const quote1 = new TextBlock(
-    '"Memory," he began, his voice gravelly with age, "is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex — a living, breathing architecture that shapes and is shaped by who we are."'
+    '"Memory," he began, his voice gravelly with age, "is not a repository of facts, neatly cataloged and retrieved at will. It is something far more complex - a living, breathing architecture that shapes and is shaped by who we are."'
   );
   quote1.fontName = StandardFonts.TimesItalic;
   quote1.fontSize = 11;
@@ -87,7 +87,7 @@ export function generate(): Document {
   doc.add(p2);
 
   const p3 = new TextBlock(
-    'Halloway smiled, and for a moment, the years seemed to fall away. "Consider a cathedral. From a distance, it appears to follow a precise architectural plan — spires, nave, transept, all arranged according to centuries-old design principles. Yet upon closer inspection, you find modifications made by generations of builders, each leaving their mark on the structure. Memory is much the same."'
+    'Halloway smiled, and for a moment, the years seemed to fall away. "Consider a cathedral. From a distance, it appears to follow a precise architectural plan - spires, nave, transept, all arranged according to centuries-old design principles. Yet upon closer inspection, you find modifications made by generations of builders, each leaving their mark on the structure. Memory is much the same."'
   );
   p3.fontName = StandardFonts.TimesRoman;
   p3.fontSize = 11;

@@ -36,7 +36,7 @@ try {
     nextPatch = Math.max(...thisMonth) + 1
   }
 } catch {
-  // Package not yet on npm, or network unavailable — start at 0
+  // Package not yet on npm, or network unavailable - start at 0
 }
 
 const newVersion = `${prefix}${nextPatch}`

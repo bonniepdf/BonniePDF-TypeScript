@@ -31,7 +31,7 @@ export function generate(): Document {
   };
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'TextBlock Overflow — Tagged (PDF/UA-1)';
+  metadata.title = 'TextBlock Overflow - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates text flowing across page boundaries in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, overflow, pagination';
@@ -39,7 +39,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
-  const h1 = new Heading('Long Text Document — PDF/UA-1');
+  const h1 = new Heading('Long Text Document - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;

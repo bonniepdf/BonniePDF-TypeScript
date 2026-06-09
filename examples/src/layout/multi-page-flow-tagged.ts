@@ -77,7 +77,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Employee Directory — Tagged (PDF/UA-1)';
+  metadata.title = 'Employee Directory - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Multi-page flow demonstration with tagged table and prose sections.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, table, multi-page';

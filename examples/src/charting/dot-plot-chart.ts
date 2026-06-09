@@ -33,7 +33,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Dot Plot Chart');
+    const left = new TextBlock('BonniePDF - Dot Plot Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -50,7 +50,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Dot Plot Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Dot plot chart example — circular markers positioned along a value axis';
+  metadata.subject = 'Dot plot chart example - circular markers positioned along a value axis';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

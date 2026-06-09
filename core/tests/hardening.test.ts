@@ -18,7 +18,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 /**
- * this feature (TS mirror) — 10-fixture hardening pass. Throws representative
+ * this feature (TS mirror) - 10-fixture hardening pass. Throws representative
  * edge-case documents at the tagging machinery to surface bugs the
  * focused stage-1 closeout tests don't hit: encryption + tagging,
  * PDF/A + PDF/UA combination, empty docs, internal hyperlinks, every
@@ -33,7 +33,7 @@ import { join } from 'path';
  *  - Header/footer template content is rendered but not tagged as
  *    /Artifact (this feature fixes this).
  *  - Hyperlink annotations don't carry /StructParent (full annotation
- *    reachability — deferred from this feature).
+ *    reachability - deferred from this feature).
  */
 describe('Hardening fixtures', () => {
   let doc: Document;
@@ -59,7 +59,7 @@ describe('Hardening fixtures', () => {
 
   // ── 1. Empty tagged document ────────────────────────────────────
 
-  it('fixture 01 — empty tagged document produces valid struct tree', () => {
+  it('fixture 01 - empty tagged document produces valid struct tree', () => {
     const pdf = generate(d => {
       d.settings.version = PdfVersion.Pdf17;
       d.settings.accessibility = AccessibilityMode.PdfUa1;
@@ -77,7 +77,7 @@ describe('Hardening fixtures', () => {
 
   // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
-  it('fixture 02 — PDF/A claim is suppressed when standard fonts are used (this feature contract)', () => {
+  it('fixture 02 - PDF/A claim is suppressed when standard fonts are used (this feature contract)', () => {
     // PDF/A-1b §6.3.4 forbids non-embedded fonts. When the caller
     // asks for PDF/A but uses any of the standard 14 (Helvetica
     // here), the serializer drops the PDF/A claim rather than
@@ -106,7 +106,7 @@ describe('Hardening fixtures', () => {
 
   // ── 3. Encrypted tagged document ────────────────────────────────
 
-  it('fixture 03 — encrypted tagged document generates without error', () => {
+  it('fixture 03 - encrypted tagged document generates without error', () => {
     // PDF spec allows tagging inside encrypted docs. XMP stream is
     // unencrypted; struct tree objects are encrypted alongside the
     // content. The combo shouldn't break either feature.
@@ -140,7 +140,7 @@ describe('Hardening fixtures', () => {
 
   // ── 4. Internal hyperlink (targetPageIndex, not URI) ────────────
 
-  it('fixture 04 — internal hyperlink still emits /S /Link and /Contents', () => {
+  it('fixture 04 - internal hyperlink still emits /S /Link and /Contents', () => {
     const pdf = generateTagged(d => {
       const h = new Heading('Go');
       h.tocIdentifier = 'g';
@@ -164,7 +164,7 @@ describe('Hardening fixtures', () => {
 
   // ── 5. All six heading levels ───────────────────────────────────
 
-  it('fixture 05 — all heading levels map to correct struct roles', () => {
+  it('fixture 05 - all heading levels map to correct struct roles', () => {
     const pdf = generateTagged(d => {
       for (let lvl = 1; lvl <= 6; lvl++) {
         const h = new Heading(`Heading ${lvl}`);
@@ -181,9 +181,9 @@ describe('Hardening fixtures', () => {
     }
   });
 
-  // ── 6. Heading.level out of range — clamped to H1/H6 ────────────
+  // ── 6. Heading.level out of range - clamped to H1/H6 ────────────
 
-  it('fixture 06 — heading level out of range is clamped to H1 / H6', () => {
+  it('fixture 06 - heading level out of range is clamped to H1 / H6', () => {
     const pdf = generateTagged(d => {
       const low = new Heading('Too low');
       low.tocIdentifier = 'lo';
@@ -206,9 +206,9 @@ describe('Hardening fixtures', () => {
 
   // ── 7. Long heading text that wraps ─────────────────────────────
 
-  it('fixture 07 — long wrapping heading stays one struct elem', () => {
+  it('fixture 07 - long wrapping heading stays one struct elem', () => {
     // A heading whose text exceeds one line still produces exactly
-    // one /H1 StructElem — wrapping is a layout concern, not a
+    // one /H1 StructElem - wrapping is a layout concern, not a
     // semantic one.
     const pdf = generateTagged(d => {
       const h = new Heading(
@@ -226,20 +226,20 @@ describe('Hardening fixtures', () => {
 
   // ── 8. Header/footer templates (known stage-2 gap) ──────────────
 
-  it('fixture 08 — header/footer templates emit /Artifact BMC (this feature fixed)', () => {
+  it('fixture 08 - header/footer templates emit /Artifact BMC (this feature fixed)', () => {
     // this feature fixed this: header/footer template content is now tagged as
     // /Artifact so screen readers skip it.
     const pdf = generateTagged(d => {
       d.settings.headerTemplate = pageNum => {
         const tb = new TextBlock();
-        tb.text = `Header — page ${pageNum}`;
+        tb.text = `Header - page ${pageNum}`;
         tb.fontSize = 9;
         tb.textColor = Color.slate500;
         return tb;
       };
       d.settings.footerTemplate = pageNum => {
         const tb = new TextBlock();
-        tb.text = `— ${pageNum} —`;
+        tb.text = `- ${pageNum} -`;
         tb.fontSize = 9;
         tb.textColor = Color.slate500;
         return tb;
@@ -261,8 +261,8 @@ describe('Hardening fixtures', () => {
 
   // ── 9. Nested layout: VerticalStack containing Tables ───────────
 
-  it('fixture 09 — nested layout preserves struct hierarchy', () => {
-    // VerticalStack itself isn't IRoleProvider — it's a layout
+  it('fixture 09 - nested layout preserves struct hierarchy', () => {
+    // VerticalStack itself isn't IRoleProvider - it's a layout
     // primitive that doesn't claim a semantic role. Inner content
     // (the Table) still gets tagged correctly.
     const pdf = generateTagged(d => {
@@ -306,7 +306,7 @@ describe('Hardening fixtures', () => {
 
   // ── 10. Alt-text with special characters that need escaping ─────
 
-  it('fixture 10a — alt-text with Latin-1 special chars is PDF-escaped', () => {
+  it('fixture 10a - alt-text with Latin-1 special chars is PDF-escaped', () => {
     // Backslashes and parens are PDF string-literal metacharacters and
     // must be backslash-escaped; the structure-tree writer routes
     // through encodeMetadataString → PdfSyntax.escape for that.
@@ -321,9 +321,9 @@ describe('Hardening fixtures', () => {
     expect(pdf).toContain('/Alt (Chart for FY \\(2026\\) \\\\ revenue "projection")');
   });
 
-  // ── 11. this feature Stage 2 — real PDF/A when fonts are registered ────────
+  // ── 11. this feature Stage 2 - real PDF/A when fonts are registered ────────
 
-  describe('fixture 11 — this feature stage 2: real PDF/A with registered Liberation Sans', () => {
+  describe('fixture 11 - this feature stage 2: real PDF/A with registered Liberation Sans', () => {
     const fontsDir = join(__dirname, '../assets/fonts');
 
     beforeEach(() => {
@@ -384,22 +384,22 @@ describe('Hardening fixtures', () => {
     });
   });
 
-  it('fixture 10b — alt-text with non-Latin-1 chars is UTF-16BE hex encoded', () => {
+  it('fixture 10b - alt-text with non-Latin-1 chars is UTF-16BE hex encoded', () => {
     // Em-dash (U+2014) doesn't fit in a single-byte PDF string literal
     // and would otherwise be byte-truncated to 0x14 by the Latin-1
     // writer. Per the XMP/PDF spec, such strings must become a
-    // <FEFF…> UTF-16BE hex literal — Adobe and VeraPDF both expect
+    // <FEFF…> UTF-16BE hex literal - Adobe and VeraPDF both expect
     // this form.
     const pdf = generateTagged(d => {
       const qr = new QRCode();
       qr.data = 'https://example.com';
       qr.size = 60;
-      qr.altText = 'Year 2026 — projection';
+      qr.altText = 'Year 2026 - projection';
       d.add(qr);
     });
 
     // BOM (FEFF) then UTF-16BE bytes:
-    //   "Y" 0x0059, "e" 0x0065, …, " " 0x0020, "—" 0x2014, …
+    //   "Y" 0x0059, "e" 0x0065, …, " " 0x0020, "-" 0x2014, …
     expect(pdf).toMatch(/\/Alt <FEFF[0-9A-F]+>/);
     // Spot-check the em-dash codepoint is present in the hex stream.
     expect(pdf).toMatch(/\/Alt <FEFF[0-9A-F]*2014[0-9A-F]*>/);

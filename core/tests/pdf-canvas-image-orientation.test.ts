@@ -8,7 +8,7 @@ import { PdfCanvas } from '../src/Drawing/PdfCanvas';
  * inline in PdfCanvas.ts.  PdfOperators.concatMatrix renders values with
  * 3-decimal precision, so expectations are matched in that format.
  */
-describe('PdfCanvas.drawImage — EXIF orientation', () => {
+describe('PdfCanvas.drawImage - EXIF orientation', () => {
   function emit(orientation: number): string {
     const canvas = new PdfCanvas(1000, 0, 0, undefined, () => '/Im1');
     canvas.drawImage({ orientation }, 10, 20, 100, 50);

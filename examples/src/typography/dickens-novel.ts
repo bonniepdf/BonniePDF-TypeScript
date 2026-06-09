@@ -1,5 +1,5 @@
 /**
- * Dickens Novel — multi-page book layout demo.
+ * Dickens Novel - multi-page book layout demo.
  *
  * Demonstrates: running headers, footer page numbers, VisualToc, Heading
  * elements, justified body text, and automatic pagination across hundreds
@@ -35,10 +35,10 @@ const SENTENCES = [
   'She had not spoken for several minutes, and the silence between them had grown into something almost tangible, a presence in the room as real as either of them.',
   'He turned the letter over in his hands, reading it for the fourth time, each reading revealing some new shade of meaning he had previously overlooked.',
   'Beyond the high windows the city carried on its indifferent business, the rattle of carriages on cobblestones a distant counterpoint to the quiet within.',
-  'Memory, he had long believed, was not a faithful record but a creative act — each recollection subtly rewritten by the act of remembering itself.',
+  'Memory, he had long believed, was not a faithful record but a creative act - each recollection subtly rewritten by the act of remembering itself.',
   'The candle had burned low by the time she reached the final page, and she sat for a long moment in the gathering dark before moving to light another.',
   'There are decisions that appear small at the moment of making and reveal their true weight only years later, when their consequences have fully unfolded.',
-  'He said nothing, but his expression carried everything — the weariness of a man who has explained himself too many times to people determined not to understand.',
+  'He said nothing, but his expression carried everything - the weariness of a man who has explained himself too many times to people determined not to understand.',
   'The fog had come in off the river during the night and lay thick across the lower streets, muffling the sounds of the waking city in grey silence.',
   'What we call courage, she thought, is often only the inability to clearly imagine the consequences of what we are about to do.',
 ];
@@ -61,8 +61,8 @@ interface Chapter {
 
 const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
   {
-    tocId: 'Book the First — Recalled to Life',
-    title: 'Book the First — Recalled to Life',
+    tocId: 'Book the First - Recalled to Life',
+    title: 'Book the First - Recalled to Life',
     chapters: [
       { tocId: 'The Period', number: 'CHAPTER I.', title: 'The Period', paragraphCount: 18 },
       { tocId: 'The Mail', number: 'CHAPTER II.', title: 'The Mail', paragraphCount: 20 },
@@ -72,8 +72,8 @@ const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
     ],
   },
   {
-    tocId: 'Book the Second — The Golden Thread',
-    title: 'Book the Second — The Golden Thread',
+    tocId: 'Book the Second - The Golden Thread',
+    title: 'Book the Second - The Golden Thread',
     chapters: [
       { tocId: 'Five Years Later', number: 'CHAPTER I.', title: 'Five Years Later', paragraphCount: 20 },
       { tocId: 'A Sight', number: 'CHAPTER II.', title: 'A Sight', paragraphCount: 17 },
@@ -82,8 +82,8 @@ const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
     ],
   },
   {
-    tocId: 'Book the Third — The Track of a Storm',
-    title: 'Book the Third — The Track of a Storm',
+    tocId: 'Book the Third - The Track of a Storm',
+    title: 'Book the Third - The Track of a Storm',
     chapters: [
       { tocId: 'In Secret', number: 'CHAPTER I.', title: 'In Secret', paragraphCount: 19 },
       { tocId: 'The Grindstone', number: 'CHAPTER II.', title: 'The Grindstone', paragraphCount: 18 },
@@ -113,7 +113,7 @@ function addTitlePage(doc: Document): void {
   sub.margin = new Thickness(0, 0, 0, 40);
   doc.add(sub);
 
-  const rule = new TextBlock('———————————————');
+  const rule = new TextBlock('---------------');
   rule.fontName = StandardFonts.TimesRoman;
   rule.fontSize = 13;
   rule.textColor = Color.slate400;
@@ -137,7 +137,7 @@ function addTitlePage(doc: Document): void {
   edition.margin = new Thickness(0, 0, 0, 4);
   doc.add(edition);
 
-  const pd = new TextBlock('Public domain — free to read, copy, and share.');
+  const pd = new TextBlock('Public domain - free to read, copy, and share.');
   pd.fontName = StandardFonts.TimesItalic;
   pd.fontSize = 9;
   pd.textColor = Color.slate400;
@@ -146,7 +146,7 @@ function addTitlePage(doc: Document): void {
 }
 
 function addBookHeading(doc: Document, title: string, tocId: string): void {
-  const top = new TextBlock('———————————————');
+  const top = new TextBlock('---------------');
   top.fontName = StandardFonts.TimesRoman;
   top.fontSize = 11;
   top.textColor = Color.slate300;
@@ -163,7 +163,7 @@ function addBookHeading(doc: Document, title: string, tocId: string): void {
   h.margin = new Thickness(0, 0, 0, 14);
   doc.add(h);
 
-  const bot = new TextBlock('———————————————');
+  const bot = new TextBlock('---------------');
   bot.fontName = StandardFonts.TimesRoman;
   bot.fontSize = 11;
   bot.textColor = Color.slate300;
@@ -253,7 +253,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'A Tale of Two Cities';
   metadata.author = 'Charles Dickens';
-  metadata.subject = 'Project Gutenberg eBook #98 — A public domain classic.';
+  metadata.subject = 'Project Gutenberg eBook #98 - A public domain classic.';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);

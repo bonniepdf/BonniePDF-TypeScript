@@ -1,5 +1,5 @@
 /**
- * Describes one entry in the PDF/A `pdfaExtension:schemas` bag — the
+ * Describes one entry in the PDF/A `pdfaExtension:schemas` bag - the
  * mechanism ISO 19005-2/3 §6.6.2.3 provides for declaring XMP
  * namespaces that are NOT predefined by the standard (e.g. `pdfuaid`
  * for PDF/UA-1 identification, `fx` for ZUGFeRD / Factur-X).
@@ -14,7 +14,7 @@ export class XmpExtensionSchema {
   public readonly prefix: string;
   /** Human-readable schema name (free text). */
   public readonly schemaName: string;
-  /** Property descriptors — one per property the schema exposes. */
+  /** Property descriptors - one per property the schema exposes. */
   public readonly properties: ReadonlyArray<XmpExtensionSchemaProperty>;
 
   constructor(

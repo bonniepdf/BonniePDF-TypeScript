@@ -22,13 +22,13 @@ describe('XmpMetadata', () => {
 
   it('Pdf14_DoesNotContainXmpMetadata', () => {
     doc = new Document();
-    // Default version is Pdf14 — no XMP expected
+    // Default version is Pdf14 - no XMP expected
     const text = pdfToText(doc.generateBytes());
     expect(text).not.toContain('/Subtype /XML');
   });
 
   it('PdfA_ContainsOutputIntents', () => {
-    // XMP pdfaid namespace is deferred — test OutputIntents which IS written
+    // XMP pdfaid namespace is deferred - test OutputIntents which IS written
     doc = new Document();
     asPdfA(doc.settings);
     const text = pdfToText(doc.generateBytes());

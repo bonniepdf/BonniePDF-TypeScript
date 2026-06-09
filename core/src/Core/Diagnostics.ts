@@ -1,6 +1,6 @@
 /**
  * Structured, non-throwing report of a recoverable issue encountered while
- * generating a PDF — most commonly a font that couldn't be loaded, an image
+ * generating a PDF - most commonly a font that couldn't be loaded, an image
  * that failed to decode, or a subset operation that fell back to embedding
  * the full font. Callers retrieve the collected diagnostics from
  * `Document.diagnostics` after `generateBytes` / `generateBytesAsync`

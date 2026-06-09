@@ -9,7 +9,7 @@ import { pdfToText } from './helpers/test-base';
  * generates bytes, and inspects the raw output for the catalog entries
  * that the writer should now emit.
  *
- * VeraPDF integration lives in the .NET BonniePDF.Validation tool —
+ * VeraPDF integration lives in the .NET BonniePDF.Validation tool -
  * these tests just verify the byte-level wiring is present so a
  * validator run can pick up from here.
  */

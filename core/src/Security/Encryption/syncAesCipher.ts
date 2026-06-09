@@ -4,7 +4,7 @@
  * SubtleCrypto is async-only, but the PDF serializer pipeline is synchronous.
  * Key derivation uses SubtleCrypto (async, in PdfEncryptor.create()), but once
  * the 32-byte file encryption key is ready, per-object stream/string encryption
- * uses this class synchronously — matching the .NET System.Security.Cryptography.Aes
+ * uses this class synchronously - matching the .NET System.Security.Cryptography.Aes
  * behaviour.
  *
  * Implements AES-256 only (14 rounds). Not a general-purpose crypto library.
@@ -78,7 +78,7 @@ function aesEncryptBlock(block: Uint8Array, expandedKey: Uint32Array): Uint8Arra
   const s = new Uint8Array(16);
   for (let i = 0; i < 16; i++) s[i] = block[i];
 
-  // AddRoundKey — round 0
+  // AddRoundKey - round 0
   addRoundKey(s, expandedKey, 0);
 
   for (let round = 1; round < Nr; round++) {
@@ -157,7 +157,7 @@ export class SyncAesCipher {
 
   /**
    * AES-256-CBC encrypt with random IV and PKCS7 padding.
-   * Returns IV (16 bytes) ‖ ciphertext — same format as the async AesCipher.
+   * Returns IV (16 bytes) ‖ ciphertext - same format as the async AesCipher.
    */
   encrypt(data: Uint8Array): Uint8Array {
     if (!data || data.length === 0) return data ?? new Uint8Array(0);

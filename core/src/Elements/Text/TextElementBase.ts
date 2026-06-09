@@ -175,7 +175,7 @@ export abstract class TextElementBase extends ElementBase {
    * DocumentSettings.defaultTextStyle is set.
    *
    * Writes directly to backing fields so it does NOT mark properties as
-   * "explicitly set" — a second call (e.g. after updating defaultTextStyle)
+   * "explicitly set" - a second call (e.g. after updating defaultTextStyle)
    * can still override cascade values.
    */
   public applyDefaultStyleIfNotSet(style: TextStyle): void {
@@ -203,7 +203,7 @@ export abstract class TextElementBase extends ElementBase {
   }
 
   /**
-   * (Legacy path used by subclasses.) Unconditionally applies a default style —
+   * (Legacy path used by subclasses.) Unconditionally applies a default style -
    * marks all set properties as explicit so cascade won't re-override them.
    */
   protected applyDefaultStyle(style: TextStyle): void {

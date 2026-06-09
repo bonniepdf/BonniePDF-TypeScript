@@ -10,14 +10,14 @@ import { IPlatformIO } from './PlatformIO';
  *   configurePlatform(new BrowserPlatformIO());
  *
  * Font loading:
- *   Pass a URL (relative or absolute) to TtfFont.fromFile() — the font
+ *   Pass a URL (relative or absolute) to TtfFont.fromFile() - the font
  *   bytes are fetched via the Fetch API and parsed in-memory.
  */
 export class BrowserPlatformIO implements IPlatformIO {
   async readFile(url: string): Promise<Uint8Array> {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`BrowserPlatformIO: fetch failed for "${url}" — ${response.status} ${response.statusText}`);
+      throw new Error(`BrowserPlatformIO: fetch failed for "${url}" - ${response.status} ${response.statusText}`);
     }
     const buffer = await response.arrayBuffer();
     return new Uint8Array(buffer);

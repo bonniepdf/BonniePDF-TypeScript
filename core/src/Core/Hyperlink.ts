@@ -54,7 +54,7 @@ export class Hyperlink implements IElement, IRoleProvider {
   // Internal properties set during rendering
 
   /**
-   * @internal — the Link struct element opened for this hyperlink during the
+   * @internal - the Link struct element opened for this hyperlink during the
    * render pass. Set by the pipeline so the serializer can write
    * /StructParent + /OBJR on the annotation.
    */
@@ -146,7 +146,7 @@ export class Hyperlink implements IElement, IRoleProvider {
     // Register font
     const fontResourceName = ctx.registerFont(this.fontName);
     const embeddedFont = ctx.resolveEmbeddedFont(this.fontName);
-    // resolveEmbeddedFont returns null (not undefined) for standard fonts —
+    // resolveEmbeddedFont returns null (not undefined) for standard fonts -
     // use != null so both null and undefined are treated as "not embedded".
     const isEmbedded = embeddedFont != null;
 

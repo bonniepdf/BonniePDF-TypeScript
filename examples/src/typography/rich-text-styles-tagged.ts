@@ -24,7 +24,7 @@ export function generate(): Document {
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Rich Text Styles — Tagged (PDF/UA-1)';
+  metadata.title = 'Rich Text Styles - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Mixed inline formatting in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, rich text, bold, italic, underline, strikethrough';
@@ -32,7 +32,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
-  const h1 = new Heading('Rich Text Styles — PDF/UA-1');
+  const h1 = new Heading('Rich Text Styles - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
@@ -42,7 +42,7 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'RichText lets you mix bold, italic, coloured, highlighted, and sized spans within a single flowing paragraph. All spans share the same /P structure-tree role — formatting is presentational only.'
+    'RichText lets you mix bold, italic, coloured, highlighted, and sized spans within a single flowing paragraph. All spans share the same /P structure-tree role - formatting is presentational only.'
   );
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
@@ -187,7 +187,7 @@ export function generate(): Document {
     .span(' where the text is evenly distributed across the line width. This works with ')
     .span('mixed styles', new TextStyle().withItalic())
     .span(
-      ' — each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.'
+      ' - each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.'
     );
   doc.add(rt6);
 

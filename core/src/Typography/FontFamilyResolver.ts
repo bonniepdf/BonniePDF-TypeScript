@@ -111,7 +111,7 @@ export class FontFamilyResolver {
 
     // If it's a TTF file path, check custom families first
     if (family.toLowerCase().endsWith('.ttf') || family.toLowerCase().endsWith('.otf')) {
-      return family; // Direct file path — no variant resolution
+      return family; // Direct file path - no variant resolution
     }
 
     const isBold = weight >= FontWeight.SemiBold;

@@ -29,7 +29,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Simple Document Example';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Demonstrating the Document API — TypeScript / Browser';
+  metadata.subject = 'Demonstrating the Document API - TypeScript / Browser';
   metadata.keywords = 'pdf, document, example, BonniePDF';
 
   const doc = new Document(settings, metadata);
@@ -75,7 +75,7 @@ export function generate(): Document {
   doc.add(heading('Page 2', 20, Color.slate800, 12));
   doc.add(body('This demonstrates multipage support with automatic page management.'));
 
-  // ── Page 3 — custom square ──
+  // ── Page 3 - custom square ──
   const squareSize = new PdfSize(300, 300, 'Square Card');
   doc.addPage(squareSize);
 

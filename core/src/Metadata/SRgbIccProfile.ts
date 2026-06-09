@@ -173,7 +173,7 @@ function buildCurveTag(gamma: number): Uint8Array {
 function buildTextDescriptionTag(text: string): Uint8Array {
   // desc type (ICC v2): sig(4) + reserved(4) + asciiCount(4) + ascii(N+1)
   //                    + uniCode(4) + uniCount(4) + macScriptCode(2)
-  //                    + macCount(1) + macDesc(67) — pad to fixed total.
+  //                    + macCount(1) + macDesc(67) - pad to fixed total.
   const textBytes = asciiBytes(text);
   const size = 12 + textBytes.length + 1 + 4 + 4 + 2 + 1 + 67;
   const data = new Uint8Array(size);

@@ -141,10 +141,10 @@ export class PdfOperators {
     s.push(`${name} Do\n`);
   }
 
-  // ── Marked content (PDF Ref 14.6 — tagged PDF / PDF/UA) ──────────
+  // ── Marked content (PDF Ref 14.6 - tagged PDF / PDF/UA) ──────────
 
   /**
-   * `/<role> << /MCID n >> BDC` — begin a marked-content sequence with
+   * `/<role> << /MCID n >> BDC` - begin a marked-content sequence with
    * a PDF structure role and an MCID. Content emitted up to the
    * matching {@link endMarkedContent} is associated with the structure
    * element holding this MCID.
@@ -153,17 +153,17 @@ export class PdfOperators {
     s.push(`/${role} << /MCID ${mcid} >> BDC\n`);
   }
 
-  /** `/<role> BMC` — begin a container marked-content sequence without an MCID. */
+  /** `/<role> BMC` - begin a container marked-content sequence without an MCID. */
   public static beginMarkedContentBmc(s: string[], role: string): void {
     s.push(`/${role} BMC\n`);
   }
 
-  /** `EMC` — end the most recent marked-content sequence. */
+  /** `EMC` - end the most recent marked-content sequence. */
   public static endMarkedContent(s: string[]): void {
     s.push('EMC\n');
   }
 
-  /** `/Artifact BMC` — begin an artifact region (no MCID, not in struct tree). */
+  /** `/Artifact BMC` - begin an artifact region (no MCID, not in struct tree). */
   public static beginArtifact(s: string[]): void {
     s.push('/Artifact BMC\n');
   }

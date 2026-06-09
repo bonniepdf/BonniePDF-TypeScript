@@ -86,7 +86,7 @@ export class DocumentSettings {
   public version: PdfVersion;
   /**
    * Gets or sets the PDF/A archival conformance level. Default
-   * {@link PdfAConformance.None} — the document is a normal PDF.
+   * {@link PdfAConformance.None} - the document is a normal PDF.
    *
    * When set to any non-`None` value the serializer auto-upgrades
    * {@link version} to PDF 1.7, embeds the sRGB ICC profile, emits the
@@ -125,7 +125,7 @@ export class DocumentSettings {
   }
   /**
    * Gets or sets the accessibility / tagged-PDF conformance mode.
-   * Default {@link AccessibilityMode.None} — the writer produces an
+   * Default {@link AccessibilityMode.None} - the writer produces an
    * untagged PDF and ignores all tagging machinery. Set to
    * {@link AccessibilityMode.PdfUa1} to opt the document into PDF/UA-1
    * emission (structure tree, MCIDs, XMP conformance claim, `/Lang`,

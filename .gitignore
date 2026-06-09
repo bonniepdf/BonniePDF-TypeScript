@@ -11,7 +11,7 @@ dist/
 # pnpm
 .pnpm-store/
 
-# Changesets — only ignore pre-release state files, not changeset descriptors
+# Changesets - only ignore pre-release state files, not changeset descriptors
 .changeset/pre.json
 
 # Editor

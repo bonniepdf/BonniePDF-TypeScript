@@ -112,7 +112,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
 
       // Don't violate orphan control when adjusting for widows
       if (startLine === 0 && targetFit < this.minLinesBeforeBreak && notAtTop) {
-        // Can't satisfy both constraints — move the entire block
+        // Can't satisfy both constraints - move the entire block
         return RenderStatus.WrapRequired;
       }
 
@@ -201,7 +201,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     baseX: number,
     isLastLine: boolean
   ): void {
-    // Substitute current page number inline — it is known at render time
+    // Substitute current page number inline - it is known at render time
     let processedLine = line;
     if (line.includes(TextElementBase.CurrentPageToken)) {
       processedLine = line.replace(TextElementBase.CurrentPageToken, (ctx.currentPageIndex + 1).toString());

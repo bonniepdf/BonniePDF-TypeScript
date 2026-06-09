@@ -33,7 +33,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Lollipop Chart');
+    const left = new TextBlock('BonniePDF - Lollipop Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -50,7 +50,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Lollipop Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Lollipop chart example — stems with circular heads, a clear minimal bar alternative';
+  metadata.subject = 'Lollipop chart example - stems with circular heads, a clear minimal bar alternative';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
@@ -62,7 +62,7 @@ export function generate(): Document {
   title.margin = new Thickness(0, 0, 0, 8);
   doc.add(title);
 
-  const subtitle = new TextBlock('Stems with circular heads — clear and minimal bar alternative');
+  const subtitle = new TextBlock('Stems with circular heads - clear and minimal bar alternative');
   subtitle.fontSize = 14;
   subtitle.textColor = Color.slate600;
   subtitle.alignment = TextAlignment.Center;

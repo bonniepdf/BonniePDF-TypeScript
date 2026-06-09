@@ -22,7 +22,7 @@ import { ContainerBridgeExtensions } from './ContainerBridgeExtensions';
 
 /**
  * Fluent extension methods for adding content elements to containers.
- * These are typically terminal methods — they create an element and end the chain,
+ * These are typically terminal methods - they create an element and end the chain,
  * or return the concrete element type for element-specific styling.
  */
 export class ContainerElementExtensions {

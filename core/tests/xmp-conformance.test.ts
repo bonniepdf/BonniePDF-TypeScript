@@ -8,7 +8,7 @@ import { XmpMetadataWriter } from '../src/Metadata/XmpMetadataWriter';
  * the same matrix as the .NET this feature tests in
  * BonniePDF.Tests/XmpMetadataTests.cs.
  */
-describe('XmpMetadataWriter — conformance blocks', () => {
+describe('XmpMetadataWriter - conformance blocks', () => {
   it('PdfUa1 block emits pdfuaid:part', () => {
     const metadata = new DocumentMetadata('Accessibility test');
     const xml = XmpMetadataWriter.generateXmpXml(metadata, [XmpConformanceBlock.pdfUa1()]);

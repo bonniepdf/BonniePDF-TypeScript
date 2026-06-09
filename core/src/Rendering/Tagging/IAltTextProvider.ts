@@ -25,7 +25,7 @@ export interface IAltTextProvider {
   readonly isDecorative: boolean;
 }
 
-/** Type guard for IAltTextProvider — used by the pipeline. */
+/** Type guard for IAltTextProvider - used by the pipeline. */
 export function isAltTextProvider(x: unknown): x is IAltTextProvider {
   return x != null && typeof x === 'object' && 'altText' in (x as object);
 }

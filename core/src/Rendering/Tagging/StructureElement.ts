@@ -40,33 +40,33 @@ export class StructureElement {
   public readonly mcIdPages: number[] = [];
 
   /**
-   * `/Alt` alternate text — read by assistive tech in place of the
+   * `/Alt` alternate text - read by assistive tech in place of the
    * visible content. Required by PDF/UA on {@link SemanticRole.Figure}
    * elements that aren't {@link SemanticRole.Artifact}.
    */
   public alt?: string;
 
   /**
-   * `/ActualText` — the literal text equivalent of the rendered
+   * `/ActualText` - the literal text equivalent of the rendered
    * content. Used for ligatures, decorative letterforms, and figures
    * whose visible content is itself words (e.g. a logo).
    */
   public actualText?: string;
 
   /**
-   * `/Lang` — BCP-47 language tag for this subtree. Overrides the
+   * `/Lang` - BCP-47 language tag for this subtree. Overrides the
    * document-level language for content underneath.
    */
   public lang?: string;
 
   /**
-   * `/T` — a short title for the structure element. Used by some
+   * `/T` - a short title for the structure element. Used by some
    * viewers' navigation panes.
    */
   public title?: string;
 
   /**
-   * `/A` — raw structure-element attributes dictionary as PDF syntax
+   * `/A` - raw structure-element attributes dictionary as PDF syntax
    * (e.g. `"<< /O /Table /ColSpan 2 >>"`). Used for table cell
    * column/row spans, list label characteristics, and other
    * attribute-owner-namespaced metadata per ISO 32000-1 §14.7.5.

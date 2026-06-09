@@ -29,5 +29,5 @@ body:
       label: How important is this to you?
       options:
         - Nice to have
-        - Important — blocking a use-case
-        - Critical — blocking adoption
+        - Important - blocking a use-case
+        - Critical - blocking adoption

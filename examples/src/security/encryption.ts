@@ -12,7 +12,7 @@ import {
   withEncryptionAes256,
   // withEncryption128,  // 128-bit RC4 alternative
   // withEncryption40,   // 40-bit RC4 (legacy, not recommended)
-  // withPassword,       // simple one-liner — defaults to 128-bit RC4
+  // withPassword,       // simple one-liner - defaults to 128-bit RC4
 } from '@bonniepdf/core';
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ export function generate(): Document {
   //   opts.withUserPassword('demo123').withOwnerPassword('demo123').allowPrinting().allowCopying().allowAccessibility()
   // );
 
-  // Alternative: simple one-liner — 128-bit RC4 with a single password
+  // Alternative: simple one-liner - 128-bit RC4 with a single password
   // withPassword(settings, 'demo123');
 
   const metadata = new DocumentMetadata();

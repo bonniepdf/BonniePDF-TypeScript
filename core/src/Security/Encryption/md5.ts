@@ -1,6 +1,6 @@
 /**
  * MD5 hashing utility for PDF encryption key derivation.
- * Pure TypeScript implementation — no Node.js dependency.
+ * Pure TypeScript implementation - no Node.js dependency.
  */
 
 function _md5(data: Uint8Array): Uint8Array {

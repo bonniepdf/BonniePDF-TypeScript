@@ -11,7 +11,7 @@ import { join } from 'path';
 
 const fontsDir = join(__dirname, '../assets/fonts');
 
-describe('this feature Stage 2 — FontManager', () => {
+describe('this feature Stage 2 - FontManager', () => {
   beforeEach(() => FontManager.clear());
   afterEach(() => FontManager.clear());
 

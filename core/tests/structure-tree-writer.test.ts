@@ -135,7 +135,7 @@ class FakeWriter implements IPdfWriter {
     this.objects.push({ id, dict: new Map(dict) });
   }
 
-  // Unused-by-tests interface fillers — return sensible defaults.
+  // Unused-by-tests interface fillers - return sensible defaults.
   writeCompressedObject(): void {}
   writeBinaryObject(): void {}
   writeCompressedBinaryObject(): void {}

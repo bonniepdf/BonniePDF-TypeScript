@@ -62,9 +62,9 @@ export interface ExampleDef {
   thumbnails?: boolean;
   /** Corresponding .NET class name in BonniePDF-NET/Examples/. null = TypeScript-only. */
   dotnetClass?: string | null;
-  /** PDF/UA-1 tagged document — validated by VeraPDF in CI. */
+  /** PDF/UA-1 tagged document - validated by VeraPDF in CI. */
   pdfUa1?: boolean;
-  /** User password for encrypted PDFs — passed to the viewer so it can open the document. */
+  /** User password for encrypted PDFs - passed to the viewer so it can open the document. */
   password?: string;
 }
 
@@ -84,7 +84,7 @@ function basicExamples(): ExampleDef[] {
       id: 'simple-document',
       name: 'Simple Document',
       category: 'Basic',
-      description: '3-page document demonstrating the core Document API — text, spacers, and custom page sizes.',
+      description: '3-page document demonstrating the core Document API - text, spacers, and custom page sizes.',
       filename: 'simple-document.pdf',
       generate: simpleDocument,
       dotnetClass: 'SimpleDocumentExample',
@@ -94,7 +94,7 @@ function basicExamples(): ExampleDef[] {
       name: 'Simple Document (PDF/UA-1)',
       category: 'Basic',
       description:
-        'PDF/UA-1 tagged variant of Simple Document — screen-reader friendly with headings, paragraphs, and a Figure with alt-text.',
+        'PDF/UA-1 tagged variant of Simple Document - screen-reader friendly with headings, paragraphs, and a Figure with alt-text.',
       filename: 'simple-document-tagged.pdf',
       generate: simpleDocumentTagged,
       dotnetClass: 'SimpleDocumentTaggedExample',
@@ -105,7 +105,7 @@ function basicExamples(): ExampleDef[] {
       name: 'PDF/A-2a + PDF/UA-1',
       category: 'Basic',
       description:
-        'The modern archival + accessible baseline. Sets settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 — validated by veraPDF against profile 2a.',
+        'The modern archival + accessible baseline. Sets settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 - validated by veraPDF against profile 2a.',
       filename: 'pdfa2a-compliant.pdf',
       generate: pdfa2aCompliant,
       dotnetClass: 'PdfA2aCompliantExample',
@@ -148,7 +148,7 @@ function layoutExamples(): ExampleDef[] {
       name: 'Headers & Footers (PDF/UA-1)',
       category: 'Layout',
       description:
-        'PDF/UA-1 tagged variant — running header and footer are Artifacts; body sections use /H2 headings and /P paragraphs.',
+        'PDF/UA-1 tagged variant - running header and footer are Artifacts; body sections use /H2 headings and /P paragraphs.',
       filename: 'headers-footers-tagged.pdf',
       generate: headersFootersTagged,
       dotnetClass: 'HeadersFootersTaggedExample',
@@ -169,7 +169,7 @@ function layoutExamples(): ExampleDef[] {
       name: 'Horizontal Stacks (PDF/UA-1)',
       category: 'Layout',
       description:
-        'PDF/UA-1 tagged variant — equal-width, weighted, key-value pair, and two-column stack layouts, all with /H2 section headings.',
+        'PDF/UA-1 tagged variant - equal-width, weighted, key-value pair, and two-column stack layouts, all with /H2 section headings.',
       filename: 'horizontal-stacks-tagged.pdf',
       generate: horizontalStacksTagged,
       thumbnails: false,
@@ -190,7 +190,7 @@ function layoutExamples(): ExampleDef[] {
       name: 'TextBlock Overflow (PDF/UA-1)',
       category: 'Layout',
       description:
-        'PDF/UA-1 tagged variant — twenty /H2-headed sections of body text flowing across pages with an Artifact page-number footer.',
+        'PDF/UA-1 tagged variant - twenty /H2-headed sections of body text flowing across pages with an Artifact page-number footer.',
       filename: 'text-block-overflow-tagged.pdf',
       generate: textBlockOverflowTagged,
       dotnetClass: 'TextBlockOverflowTaggedExample',
@@ -210,7 +210,7 @@ function layoutExamples(): ExampleDef[] {
       name: 'VerticalStack Overflow (PDF/UA-1)',
       category: 'Layout',
       description:
-        'PDF/UA-1 tagged variant — 75-item catalogue, each item with a /H3 heading and /P description inside a paginating VerticalStack.',
+        'PDF/UA-1 tagged variant - 75-item catalogue, each item with a /H3 heading and /P description inside a paginating VerticalStack.',
       filename: 'vertical-stack-overflow-tagged.pdf',
       generate: verticalStackOverflowTagged,
       dotnetClass: 'VerticalStackOverflowTaggedExample',
@@ -258,7 +258,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Text Alignment (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — all four alignments demonstrated with /H2 section headings and /P paragraphs.',
+        'PDF/UA-1 tagged variant - all four alignments demonstrated with /H2 section headings and /P paragraphs.',
       filename: 'text-alignment-tagged.pdf',
       generate: textAlignmentTagged,
       thumbnails: false,
@@ -270,7 +270,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Text Alignment (Liberation Sans)',
       category: 'Typography',
       description:
-        "PDF/UA-1 tagged variant rendered entirely in embedded Liberation Sans — alignment is measured from the font's own glyph metrics, so right/centre/justified edges are exact.",
+        "PDF/UA-1 tagged variant rendered entirely in embedded Liberation Sans - alignment is measured from the font's own glyph metrics, so right/centre/justified edges are exact.",
       filename: 'text-alignment-liberation.pdf',
       generate: textAlignmentLiberation,
       thumbnails: false,
@@ -292,7 +292,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Book Page Layout (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — chapter title as /H1, body paragraphs as /P, and a pull-quote block with bordered container.',
+        'PDF/UA-1 tagged variant - chapter title as /H1, body paragraphs as /P, and a pull-quote block with bordered container.',
       filename: 'book-page-layout-tagged.pdf',
       generate: bookPageLayoutTagged,
       thumbnails: false,
@@ -304,7 +304,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Rich Text Styles',
       category: 'Typography',
       description:
-        'Mixed inline formatting — bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
+        'Mixed inline formatting - bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
       filename: 'rich-text-styles.pdf',
       generate: richTextStyles,
       dotnetClass: 'RichTextExample',
@@ -314,7 +314,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Rich Text Styles (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — bold, italic, coloured, underlined, and strikethrough spans with /H2 section headings.',
+        'PDF/UA-1 tagged variant - bold, italic, coloured, underlined, and strikethrough spans with /H2 section headings.',
       filename: 'rich-text-styles-tagged.pdf',
       generate: richTextStylesTagged,
       dotnetClass: 'RichTextTaggedExample',
@@ -336,7 +336,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Text Decorations (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — underline, strikethrough, and combined decorations with /H2 section headings and /P paragraphs.',
+        'PDF/UA-1 tagged variant - underline, strikethrough, and combined decorations with /H2 section headings and /P paragraphs.',
       filename: 'text-decorations-tagged.pdf',
       generate: textDecorationsTagged,
       thumbnails: false,
@@ -348,7 +348,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Custom Fonts',
       category: 'Typography',
       description:
-        'TrueType font embedding with full Unicode symbol coverage — currency, Greek, mathematical, and arrow characters.',
+        'TrueType font embedding with full Unicode symbol coverage - currency, Greek, mathematical, and arrow characters.',
       filename: 'custom-fonts.pdf',
       generate: customFonts,
       thumbnails: false,
@@ -359,7 +359,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Custom Fonts (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — TrueType Unicode coverage (symbols, currency, math, Greek) with /H2 section headings.',
+        'PDF/UA-1 tagged variant - TrueType Unicode coverage (symbols, currency, math, Greek) with /H2 section headings.',
       filename: 'custom-fonts-tagged.pdf',
       generate: customFontsTagged,
       thumbnails: false,
@@ -381,7 +381,7 @@ function typographyExamples(): ExampleDef[] {
       name: 'Emojis & Unicode (PDF/UA-1)',
       category: 'Typography',
       description:
-        'PDF/UA-1 tagged variant — emoji and supplementary Unicode sections with /H2 headings. PDF/A disabled; PDF/UA-1 enabled.',
+        'PDF/UA-1 tagged variant - emoji and supplementary Unicode sections with /H2 headings. PDF/A disabled; PDF/UA-1 enabled.',
       filename: 'emojis-and-unicode-tagged.pdf',
       generate: emojisAndUnicodeTagged,
       thumbnails: false,
@@ -419,7 +419,7 @@ function elementsExamples(): ExampleDef[] {
       name: 'Lists (PDF/UA-1)',
       category: 'Elements',
       description:
-        'PDF/UA-1 tagged ordered and unordered lists — each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
+        'PDF/UA-1 tagged ordered and unordered lists - each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
       filename: 'lists-tagged.pdf',
       generate: listsTagged,
       dotnetClass: null,
@@ -469,7 +469,7 @@ function elementsExamples(): ExampleDef[] {
       name: 'Images (PDF/UA-1)',
       category: 'Elements',
       description:
-        'PDF/UA-1 tagged image example — an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
+        'PDF/UA-1 tagged image example - an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
       filename: 'images-tagged.pdf',
       generate: imagesTagged,
       dotnetClass: null,
@@ -539,7 +539,7 @@ function chartingExamples(): ExampleDef[] {
       id: 'lollipop-chart',
       name: 'Lollipop Chart',
       category: 'Charting',
-      description: 'Stems with circular heads — a clear, minimal alternative to bar charts for quarterly metrics.',
+      description: 'Stems with circular heads - a clear, minimal alternative to bar charts for quarterly metrics.',
       filename: 'lollipop-chart.pdf',
       generate: lollipopChart,
       dotnetClass: 'LollipopChartExample',
@@ -650,7 +650,7 @@ function templatesExamples(): ExampleDef[] {
       name: 'Financial Dashboard',
       category: 'Templates',
       description:
-        'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table — all styled with a warm earth-tone palette.',
+        'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
       filename: 'financial-dashboard.pdf',
       generate: financialDashboard,
       dotnetClass: null,

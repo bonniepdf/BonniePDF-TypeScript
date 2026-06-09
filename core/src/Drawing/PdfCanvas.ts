@@ -294,14 +294,14 @@ export class PdfCanvas implements ICanvas {
     if (!this.tagging) return;
     let tagged = false;
     if (this.openTaggedCount === 0) {
-      // No outer BDC is open — this sequence can carry its own MCID.
+      // No outer BDC is open - this sequence can carry its own MCID.
       const mcid = this.tagging.allocateMcid();
       this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
       PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
       this.openTaggedCount++;
       tagged = true;
     } else {
-      // Already inside a BDC — emit BMC to prevent nested MCIDs.
+      // Already inside a BDC - emit BMC to prevent nested MCIDs.
       // The content is covered by the ancestor BDC's MCID.
       PdfOperators.beginMarkedContentBmc(this.stream, role);
     }
@@ -313,7 +313,7 @@ export class PdfCanvas implements ICanvas {
   /** @inheritdoc */
   public beginContainerContent(role: string): void {
     if (!this.tagging) return;
-    // BMC — no MCID. Container StructElems (Table, TR, …) reference content
+    // BMC - no MCID. Container StructElems (Table, TR, …) reference content
     // via child StructElems, not directly. Never increments openTaggedCount.
     PdfOperators.beginMarkedContentBmc(this.stream, role);
     this.markedContentTagged.push(false);

@@ -7,7 +7,7 @@
  * `settings.accessibility = AccessibilityMode.PdfUa1`. The serializer
  * enforces this at save time.
  *
- * "b" (basic) levels guarantee visual reproducibility only — they do
+ * "b" (basic) levels guarantee visual reproducibility only - they do
  * not require structure tagging and so are the safe upgrade path for
  * documents that have not yet adopted PDF/UA-1.
  *

@@ -120,7 +120,7 @@ export function generate(): Document {
   const doc = new Document();
 
   doc.metadata = new DocumentMetadata();
-  doc.metadata.title = 'Accessible Images — Tagged (PDF/UA-1)';
+  doc.metadata.title = 'Accessible Images - Tagged (PDF/UA-1)';
   doc.metadata.author = 'BonniePDF';
   doc.metadata.subject = 'A tagged document with an informative figure and a decorative artifact image.';
   doc.metadata.keywords = 'pdf, pdf/ua, accessibility, image, figure, alt-text';

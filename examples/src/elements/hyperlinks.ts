@@ -48,7 +48,7 @@ export function generate(): Document {
     ['Visit Microsoft', 'https://microsoft.com', 8],
     ['Search on Google', 'https://google.com', 16],
   ] as [string, string, number][]) {
-    // TS constructor: Hyperlink(text, uri) — note .NET swaps the order
+    // TS constructor: Hyperlink(text, uri) - note .NET swaps the order
     const link = new Hyperlink(text, uri);
     link.margin = new Thickness(0, 0, 0, mb);
     doc.add(link);

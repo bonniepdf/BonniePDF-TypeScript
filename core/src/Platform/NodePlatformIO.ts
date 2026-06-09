@@ -25,7 +25,7 @@ export class NodePlatformIO implements IPlatformIO {
     const { promisify } = await import('node:util');
     const { deflate: zlibDeflate } = await import('node:zlib');
     const deflateAsync = promisify(zlibDeflate);
-    // node:zlib deflate produces zlib-wrapped DEFLATE (RFC 1950) — correct for PDF /FlateDecode
+    // node:zlib deflate produces zlib-wrapped DEFLATE (RFC 1950) - correct for PDF /FlateDecode
     const result = await deflateAsync(data);
     return new Uint8Array(result.buffer, result.byteOffset, result.byteLength);
   }

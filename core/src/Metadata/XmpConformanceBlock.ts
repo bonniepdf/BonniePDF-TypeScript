@@ -9,7 +9,7 @@ import { XmpExtensionSchema, XmpExtensionSchemaProperty } from './XmpExtensionSc
  * namespace prefix.
  *
  * Per the this feature design (`the specification`),
- * XMP injection must be additive — every conformance feature
+ * XMP injection must be additive - every conformance feature
  * (current PDF/A, PDF/UA from this feature, ZUGFeRD's `fx` later) registers
  * through this same hook so no one feature has to rewrite the packet.
  */
@@ -22,7 +22,7 @@ export class XmpConformanceBlock {
   public readonly elements: ReadonlyArray<readonly [string, string]>;
   /**
    * Optional PDF/A extension-schema descriptor. Set when this block's
-   * namespace is NOT one of the schemas predefined by ISO 19005 — in
+   * namespace is NOT one of the schemas predefined by ISO 19005 - in
    * which case PDF/A-2/3 §6.6.2.3.1 requires the namespace to be
    * declared in a `pdfaExtension:schemas` bag. `undefined` when the
    * namespace is already predefined (e.g. `pdfaid`).

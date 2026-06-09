@@ -196,14 +196,14 @@ export class QrCodeEncoder {
     for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
     const bits = ((data << 10) | rem) ^ 0x5412;
 
-    // Copy 1 — around top-left finder
+    // Copy 1 - around top-left finder
     for (let i = 0; i <= 5; i++) this.setFunctionModule(8, i, getBit(bits, i));
     this.setFunctionModule(8, 7, getBit(bits, 6));
     this.setFunctionModule(8, 8, getBit(bits, 7));
     this.setFunctionModule(7, 8, getBit(bits, 8));
     for (let i = 9; i < 15; i++) this.setFunctionModule(14 - i, 8, getBit(bits, i));
 
-    // Copy 2 — bottom-left and top-right finders
+    // Copy 2 - bottom-left and top-right finders
     for (let i = 0; i < 8; i++) this.setFunctionModule(this.size - 1 - i, 8, getBit(bits, i));
     for (let i = 8; i < 15; i++) this.setFunctionModule(8, this.size - 15 + i, getBit(bits, i));
     this.setFunctionModule(8, this.size - 8, true); // always-dark module

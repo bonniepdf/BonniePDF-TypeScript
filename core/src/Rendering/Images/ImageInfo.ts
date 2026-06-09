@@ -13,7 +13,7 @@ export enum ImageFormat {
 export class ImageInfo {
   public data: Uint8Array = new Uint8Array();
   public originalData: Uint8Array = new Uint8Array();
-  /** Pixel dimensions as stored in the bitstream — the values that go into the PDF XObject's /Width and /Height. */
+  /** Pixel dimensions as stored in the bitstream - the values that go into the PDF XObject's /Width and /Height. */
   public width: number = 0;
   public height: number = 0;
   public format: ImageFormat = ImageFormat.Png;
@@ -41,7 +41,7 @@ export class ImageInfo {
   /**
    * Embedded ICC colour profile, uncompressed.  Populated from JPEG APP2
    * `ICC_PROFILE\0` segments (sync path) and from PNG `iCCP` chunks (async
-   * path only — the iCCP profile is itself zlib-compressed and requires
+   * path only - the iCCP profile is itself zlib-compressed and requires
    * `DecompressionStream`).  When non-empty, the writer emits a PDF
    * `/ICCBased` colour space referencing a dedicated stream object so the
    * image renders with its captured colour transform instead of falling

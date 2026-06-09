@@ -153,7 +153,7 @@ export * from './Drawing/ICanvas';
 export * from './Drawing/PdfCanvas';
 export * from './Drawing/SvgCanvas';
 
-// Extensions (non-Fluent) — some omitted to avoid name conflicts with Fluent API
+// Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
 export * from './Extensions/DocumentEncryptionExtensions';
 export * from './Extensions/DocumentSettingsExtensions';
 export * from './Extensions/HorizontalStackExtensions';
@@ -162,7 +162,7 @@ export * from './Extensions/QRCodeExtensions';
 export * from './Extensions/SvgExportExtensions';
 export * from './Extensions/TableCellExtensions';
 export * from './Extensions/VerticalStackExtensions';
-// TextBlockExtensions omitted — alignLeft/alignCenter/alignRight conflict with ContainerStyleExtensions
+// TextBlockExtensions omitted - alignLeft/alignCenter/alignRight conflict with ContainerStyleExtensions
 
 export * from './Rendering/RenderContext';
 export * from './Rendering/PageDimensions';
@@ -173,7 +173,7 @@ export * from './Rendering/Pdf/PdfSyntax';
 export * from './Rendering/Pdf/PdfOperators';
 export * from './Rendering/Pdf/PdfDrawing';
 export * from './Rendering/Images/ImageInfo';
-// BigEndianReader is also in ImageInfo.ts — use that export
+// BigEndianReader is also in ImageInfo.ts - use that export
 export * from './Rendering/Images/ImageLoader';
 export * from './Rendering/Images/ImageWriter';
 // PdfWriter.ts contains: FontWriter, MetadataWriter, NavigationWriter, ComplianceWriter, CatalogOptions, IPdfWriter, IAsyncPdfWriter, AsyncPdfWriter

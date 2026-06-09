@@ -81,7 +81,7 @@ export function deflate(data: Uint8Array): Promise<Uint8Array> {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 async function deflateWithCompressionStream(data: Uint8Array): Promise<Uint8Array> {
-  // 'deflate' format = zlib-wrapped DEFLATE (RFC 1950) — required by PDF /FlateDecode
+  // 'deflate' format = zlib-wrapped DEFLATE (RFC 1950) - required by PDF /FlateDecode
   const cs = new CompressionStream('deflate');
   const writer = cs.writable.getWriter();
   const reader = cs.readable.getReader();

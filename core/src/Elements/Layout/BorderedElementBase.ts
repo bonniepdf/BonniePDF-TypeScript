@@ -44,7 +44,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
     height: number,
     color: Color
   ): void {
-    // Decorative fill — tag as an artifact so tagged (PDF/UA) output does not
+    // Decorative fill - tag as an artifact so tagged (PDF/UA) output does not
     // leave it as untagged content. No-op wrapper for non-tagged documents.
     ctx.canvas.beginArtifact();
     try {
@@ -66,7 +66,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   protected drawBorder(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
     if (!this.border.hasAnyBorder) return;
 
-    // Decorative strokes — tag as an artifact (no-op for non-tagged output).
+    // Decorative strokes - tag as an artifact (no-op for non-tagged output).
     ctx.canvas.beginArtifact();
     try {
       this.drawBorderStrokes(ctx, x, y, width, height);
@@ -77,7 +77,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
 
   private drawBorderStrokes(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
     if (this.cornerRadius > 0) {
-      // Rounded rectangle — use the first available colour and the max side width
+      // Rounded rectangle - use the first available colour and the max side width
       const strokeColor =
         this.borderColors.top ??
         this.borderColors.left ??
@@ -91,7 +91,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
       return;
     }
 
-    // Flat rectangle — draw each active side independently so per-side
+    // Flat rectangle - draw each active side independently so per-side
     // colours and widths are respected (e.g. left-only accent borders).
     if (this.border.top > 0) {
       ctx.canvas.drawLine(x, y, x + width, y, this.borderColors.top ?? Color.black, this.border.top);

@@ -1,7 +1,7 @@
 /**
  * Shared date-formatting utilities for BonniePDF examples.
  *
- * All methods are static — import the class and call directly:
+ * All methods are static - import the class and call directly:
  *   import { DateHelper } from './date-helpers'
  *   const { quarter, year, endDate } = DateHelper.previousQuarter()
  */

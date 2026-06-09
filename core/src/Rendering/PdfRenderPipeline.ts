@@ -76,7 +76,7 @@ export class PdfRenderPipeline {
     }
   }
 
-  /** Safety cap — prevents infinite loops if an element never returns Complete. */
+  /** Safety cap - prevents infinite loops if an element never returns Complete. */
   private static readonly maxPageGuard = 500;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
@@ -148,7 +148,7 @@ export class PdfRenderPipeline {
         guard++;
       } while (status !== RenderStatus.Complete && guard < this.maxPageGuard);
     } else {
-      // Non-stateful fallback — render once without pagination
+      // Non-stateful fallback - render once without pagination
       try {
         ctx.canvas.saveState();
         element.render(ctx, contentWidth);

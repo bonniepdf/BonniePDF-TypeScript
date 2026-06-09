@@ -59,7 +59,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
       // Overflow/WrapRequired propagates upward.
       const tagging = ctx.tagging;
       const childRole = tagging != null && isRoleProvider(child) ? child.semanticRole : null;
-      // Artifact is a marked-content type, not a structure type — a decorative
+      // Artifact is a marked-content type, not a structure type - a decorative
       // child is wrapped in /Artifact and kept out of the structure tree.
       const isArtifact = childRole === SemanticRole.Artifact;
       const tagChild = childRole != null && !isArtifact;
@@ -184,7 +184,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   }
 
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
-    // Non-stateful fallback — renders all children without pagination.
+    // Non-stateful fallback - renders all children without pagination.
     // Used when VerticalStack is a child of Container or another element
     // that calls child.render() directly.
     for (const child of this.children) {

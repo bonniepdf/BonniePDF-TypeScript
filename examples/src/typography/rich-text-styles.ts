@@ -206,7 +206,7 @@ export function generate(): Document {
     .span(' where the text is evenly distributed across the line width. This works with ')
     .span('mixed styles', new TextStyle().withItalic())
     .span(
-      ' — each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.'
+      ' - each span maintains its own formatting while the spacing between words is adjusted to fill the available width. The last line remains left-aligned as per standard typographic convention.'
     );
   doc.add(rt10);
 

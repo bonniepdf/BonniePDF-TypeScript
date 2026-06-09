@@ -21,7 +21,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'VerticalStack Overflow — Tagged (PDF/UA-1)';
+  metadata.title = 'VerticalStack Overflow - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrates a VerticalStack flowing across page boundaries in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, layout, vertical stack, pagination';
@@ -29,7 +29,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
-  const h1 = new Heading('Item Catalogue — PDF/UA-1');
+  const h1 = new Heading('Item Catalogue - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;

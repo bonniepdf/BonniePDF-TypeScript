@@ -46,7 +46,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF — Grouped Bar Chart');
+    const left = new TextBlock('BonniePDF - Grouped Bar Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = Color.slate500;
@@ -63,7 +63,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Grouped Bar Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Grouped bar chart example — three product lines compared across 12 months';
+  metadata.subject = 'Grouped bar chart example - three product lines compared across 12 months';
 
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);

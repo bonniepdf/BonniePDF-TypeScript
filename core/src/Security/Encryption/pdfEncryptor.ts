@@ -38,7 +38,7 @@ export class PdfEncryptor {
   }
 
   /**
-   * Async factory — correctly initialises AES-256 key material via SubtleCrypto.
+   * Async factory - correctly initialises AES-256 key material via SubtleCrypto.
    * For RC4 this is equivalent to `new PdfEncryptor(settings, documentId)`.
    */
   public static async create(settings: EncryptionSettings, documentId?: Uint8Array): Promise<PdfEncryptor> {
@@ -55,7 +55,7 @@ export class PdfEncryptor {
   }
 
   /**
-   * Encrypts binary data for a specific PDF object — synchronous path.
+   * Encrypts binary data for a specific PDF object - synchronous path.
    * RC4: uses per-object key derivation. AES-256: uses the file encryption key
    * with a pure-JS sync AES-CBC cipher (requires prior async init via create()).
    */
@@ -63,7 +63,7 @@ export class PdfEncryptor {
     if (!data || data.length === 0) return data;
 
     if (this.isAes256) {
-      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised - use PdfEncryptor.create()');
       return new SyncAesCipher(this.aesKey.fileEncryptionKey).encrypt(data);
     }
 
@@ -72,13 +72,13 @@ export class PdfEncryptor {
   }
 
   /**
-   * Encrypts binary data asynchronously — works for both RC4 and AES-256.
+   * Encrypts binary data asynchronously - works for both RC4 and AES-256.
    */
   public async encryptDataAsync(data: Uint8Array, objectNumber: number, generationNumber = 0): Promise<Uint8Array> {
     if (!data || data.length === 0) return data;
 
     if (this.isAes256) {
-      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+      if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised - use PdfEncryptor.create()');
       const cipher = new AesCipher(this.aesKey.fileEncryptionKey);
       return cipher.encrypt(data);
     }
@@ -99,13 +99,13 @@ export class PdfEncryptor {
   }
 
   /**
-   * Encrypts data in-place — RC4 only. AES-256 changes the output length
+   * Encrypts data in-place - RC4 only. AES-256 changes the output length
    * (IV + padding), so in-place is not possible; use encryptData instead.
    */
   public encryptInPlace(data: Uint8Array, objectNumber: number, generationNumber = 0): void {
     if (!data || data.length === 0) return;
     if (this.isAes256) {
-      throw new Error('PdfEncryptor: AES-256 in-place encryption not supported — use encryptData().');
+      throw new Error('PdfEncryptor: AES-256 in-place encryption not supported - use encryptData().');
     }
     const objectKey = this.key!.getObjectKey(objectNumber, generationNumber);
     RC4Cipher.forObject(objectKey).transform(data);
@@ -132,7 +132,7 @@ export class PdfEncryptor {
   }
 
   private getAes256EncryptDictionary(): Map<string, string> {
-    if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised — use PdfEncryptor.create()');
+    if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised - use PdfEncryptor.create()');
     return new Map<string, string>([
       ['/Filter', '/Standard'],
       ['/V', '5'],

@@ -45,7 +45,7 @@ export class PdfDocumentSerializer {
     // RC4: created synchronously here.
     // AES-256: if serializeAsync() already set writer.encryptor (via async
     // PdfEncryptor.create()), reuse it. Otherwise (pure sync generateBytes()
-    // call) we skip AES-256 — the async key derivation can't run here.
+    // call) we skip AES-256 - the async key derivation can't run here.
     let encryptId = 0;
     if (settings.isEncrypted) {
       if (writer.encryptor) {
@@ -59,7 +59,7 @@ export class PdfDocumentSerializer {
     // 1. Allocate top-level IDs up front
     const catalogId = writer.getNewId();
     const infoId = writer.getNewId();
-    const pagesId = writer.getNewId(); // /Pages parent — written after all page objects
+    const pagesId = writer.getNewId(); // /Pages parent - written after all page objects
     // Resources are written as a single indirect object that every page
     // references explicitly (PDF/A-2b clause 6.2.2.2 / ISO 32000-1
     // §7.8.3). veraPDF profile `2b` rejects /Pages-inheritance even
@@ -72,7 +72,7 @@ export class PdfDocumentSerializer {
     ctx.resources.diagnostics = this.diagnostics;
     ctx.resources.conformance = settings.conformance;
 
-    // PDF/UA tagging context — shared between the render pipeline
+    // PDF/UA tagging context - shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).
     const taggingContext =
@@ -81,7 +81,7 @@ export class PdfDocumentSerializer {
         : undefined;
     ctx.tagging = taggingContext;
 
-    // Two-pass layout (VisualToc) is out of scope — requiresTwoPassLayout() always false.
+    // Two-pass layout (VisualToc) is out of scope - requiresTwoPassLayout() always false.
 
     // annotation bindings for /StructParent + /OBJR wiring.
     // Keys start at 10_000 above page keys so the /ParentTree number tree
@@ -118,7 +118,7 @@ export class PdfDocumentSerializer {
       // Write the page content stream immediately (flush memory)
       writer.writeCompressedObject(contentId, new Map(), pageOutput.contentStream);
 
-      // Build page dictionary — /Resources is an indirect reference
+      // Build page dictionary - /Resources is an indirect reference
       // (see resourcesId comment above) so each page satisfies PDF/A-2b
       // clause 6.2.2.2 without duplicating the resources dict per page.
       const pageDict = new Map<string, string>([
@@ -172,7 +172,7 @@ export class PdfDocumentSerializer {
     // non-embedded fonts. If the user asked for PDF/A but used any of
     // the standard 14 fonts (which we don't embed), we silently drop
     // the claim: no pdfaid block in XMP, no OutputIntent, no
-    // /MarkInfo-via-pdfA path. The document is still a valid PDF —
+    // /MarkInfo-via-pdfA path. The document is still a valid PDF -
     // it just doesn't lie about being PDF/A-1b.
     //
     // To actually deliver PDF/A-1b the caller must register a real
@@ -181,11 +181,11 @@ export class PdfDocumentSerializer {
     const effectivePdfA = settings.pdfAEnabled && (registry == null || !registry.hasNonEmbeddedStandardFont());
 
     // 6a. Write the global Resources object every page references.
-    // PDF/A-2b clause 6.2.2.2 — see page-dict comment above.
+    // PDF/A-2b clause 6.2.2.2 - see page-dict comment above.
     writer.writeRawObject(resourcesId, globalResources);
 
     // 6b. Write the /Pages parent object. /Resources is intentionally
-    // omitted — the per-page indirect references are authoritative.
+    // omitted - the per-page indirect references are authoritative.
     writer.writeObject(
       pagesId,
       new Map<string, string>([
@@ -215,9 +215,9 @@ export class PdfDocumentSerializer {
     if (settings.version === PdfVersion.Pdf17) {
       catalogOptions.xmpMetadataId = writer.getNewId();
       // Object.create preserves the DocumentSettings prototype (getters,
-      // methods) — plain object spread would drop hasBookmarks/isEncrypted.
+      // methods) - plain object spread would drop hasBookmarks/isEncrypted.
       // When the honest-claim guard suppresses the PDF/A claim, reset
-      // `conformance` to None on the clone — that's the source of truth
+      // `conformance` to None on the clone - that's the source of truth
       // for buildConformanceBlocks; `pdfAEnabled` is a derived getter.
       const xmpSettings =
         effectivePdfA === settings.pdfAEnabled
@@ -237,7 +237,7 @@ export class PdfDocumentSerializer {
 
     // 11. Write PDF/A output intents.
     // this feature guard (§6.3.4): for PDF/A, suppress the OutputIntent (and the pdfaid XMP claim)
-    // when standard-14 fonts are not embedded — the claim would be dishonest.
+    // when standard-14 fonts are not embedded - the claim would be dishonest.
     // For PDF/UA-1 the OutputIntent is needed for colour management regardless of font
     // embedding status (font embedding is a separate §6.3.4 violation on its own).
     const needsOutputIntent =
@@ -255,7 +255,7 @@ export class PdfDocumentSerializer {
     }
 
     // 11b. Write PDF/UA structure tree. The in-memory tree currently only
-    // contains the implicit Document root — actual semantic tagging arrives
+    // contains the implicit Document root - actual semantic tagging arrives
     // once the renderer populates the tree. What lands here in this feature
     // is the catalog wiring: a valid empty StructTreeRoot referencing a
     // Document StructElem, plus /MarkInfo and /Lang.
@@ -285,21 +285,21 @@ export class PdfDocumentSerializer {
    * Serializes the document asynchronously.
    *
    * Uses a two-phase approach so that embedded TrueType fonts are loaded before
-   * the render pass begins — without rendering the document twice (which would
+   * the render pass begins - without rendering the document twice (which would
    * corrupt stateful element pagination state):
    *
-   *   Phase 1 — Font scan: walks the element tree and document settings to
+   *   Phase 1 - Font scan: walks the element tree and document settings to
    *             collect every embedded font path / URL referenced by any element.
    *             No rendering happens; element state is untouched.
    *
-   *   Phase 2 — Preload: creates a `PdfResourceRegistry`, registers every
+   *   Phase 2 - Preload: creates a `PdfResourceRegistry`, registers every
    *             discovered embedded font path, then awaits
    *             `preloadAllFontsAsync()`.  In browser environments this fetches
    *             TTF bytes via the Fetch API (requires
    *             `configurePlatform(new BrowserPlatformIO())` to have been called
    *             first).
    *
-   *   Phase 3 — Real render: calls `serialize()` with the pre-loaded registry
+   *   Phase 3 - Real render: calls `serialize()` with the pre-loaded registry
    *             injected into the `RenderContext` so content streams use GID hex
    *             encoding for every embedded font.
    *
@@ -387,14 +387,14 @@ export class PdfDocumentSerializer {
     }
 
     // ── Phase 3: Real serialization with the pre-loaded registry ────────────
-    // Only pass the registry when there are actually embedded fonts to inject —
+    // Only pass the registry when there are actually embedded fonts to inject -
     // otherwise let serialize() create its own fresh registry (no-op optimisation).
     this.serialize(syncWriter, embeddedPaths.size > 0 ? preRegistry : undefined);
   }
 
   /**
    * Returns true if the document contains a VisualToc element, requiring
-   * two-pass layout. Stubbed as false — VisualToc is out of scope.
+   * two-pass layout. Stubbed as false - VisualToc is out of scope.
    */
   private requiresTwoPassLayout(): boolean {
     return false;

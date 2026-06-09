@@ -1,5 +1,5 @@
 /**
- * Custom Fonts — TrueType font embedding with full Unicode coverage.
+ * Custom Fonts - TrueType font embedding with full Unicode coverage.
  *
  * ── How font embedding works ──────────────────────────────────────────────────
  * Set `fontName` on any TextBlock to the path (Node.js) or URL (browser) of a
@@ -46,15 +46,15 @@ import {
 
 // ── Font selection ─────────────────────────────────────────────────────────────
 //
-// Primary font — Latin, Greek, Cyrillic, currency symbols:
+// Primary font - Latin, Greek, Cyrillic, currency symbols:
 const FONT = '/fonts/NotoSans-Regular.ttf';
 //
-// Math font — Arrows (U+2190–U+21FF) and Mathematical Operators (U+2200–U+22FF).
+// Math font - Arrows (U+2190–U+21FF) and Mathematical Operators (U+2200–U+22FF).
 // Neither NotoSansSymbols nor NotoSansSymbols2 contains these blocks.
 // NotoSansMath explicitly covers both.
 const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
 
-// Symbols font — Miscellaneous Symbols (U+2600) and Dingbats (U+2700).
+// Symbols font - Miscellaneous Symbols (U+2600) and Dingbats (U+2700).
 // NotoSansSymbols2 covers these blocks well.
 const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 //
@@ -106,18 +106,18 @@ export function generate(): Document {
   subtitle.margin = new Thickness(0, 0, 0, 16);
   doc.add(subtitle);
 
-  // ── Unicode Symbols (Latin-1 range — covered by NotoSans) ────────────────
+  // ── Unicode Symbols (Latin-1 range - covered by NotoSans) ────────────────
   doc.add(heading('Unicode Symbols:'));
   doc.add(sym('• Bullet point (U+2022)'));
   doc.add(sym('© Copyright (U+00A9)   ® Registered (U+00AE)   ™ Trademark (U+2122)'));
-  doc.add(sym('– En-dash (U+2013)  — Em-dash (U+2014)'));
+  doc.add(sym('– En-dash (U+2013)  - Em-dash (U+2014)'));
   doc.add(sym('± Plus-minus  × Multiply  ÷ Divide', 12));
 
   // ── Currency Symbols (covered by NotoSans) ────────────────────────────────
   doc.add(heading('Currency Symbols:'));
   doc.add(sym('€ Euro  £ Pound  ¥ Yen  ₹ Rupee', 12));
 
-  // ── Arrows & Math (U+2190–U+22FF — NotoSansMath) ────────────────────────
+  // ── Arrows & Math (U+2190–U+22FF - NotoSansMath) ────────────────────────
   // These blocks are absent from NotoSansSymbols and NotoSansSymbols2.
   // NotoSansMath explicitly covers both Arrows and Mathematical Operators.
   const mathBlock = (text: string, bottom = 0): TextBlock => {
@@ -128,7 +128,7 @@ export function generate(): Document {
     if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
     return b;
   };
-  // ── Dingbats & Misc Symbols (U+2600–U+27FF — NotoSansSymbols2) ───────────
+  // ── Dingbats & Misc Symbols (U+2600–U+27FF - NotoSansSymbols2) ───────────
   const symBlock = (text: string, bottom = 0): TextBlock => {
     const b = new TextBlock(text);
     b.fontName = SYMBOLS_FONT;
@@ -161,7 +161,7 @@ export function generate(): Document {
   stdLine.textColor = Color.slate600;
   doc.add(stdLine);
 
-  const embeddedLine = new TextBlock('This line uses an embedded TrueType font — full Unicode range supported');
+  const embeddedLine = new TextBlock('This line uses an embedded TrueType font - full Unicode range supported');
   embeddedLine.fontName = FONT;
   embeddedLine.fontSize = 11;
   embeddedLine.textColor = Color.slate600;

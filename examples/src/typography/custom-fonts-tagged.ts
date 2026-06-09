@@ -22,7 +22,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Custom Fonts — Tagged (PDF/UA-1)';
+  metadata.title = 'Custom Fonts - Tagged (PDF/UA-1)';
   metadata.author = 'BonniePDF';
   metadata.subject = 'TrueType font embedding with Unicode coverage in a PDF/UA-1 accessible document.';
   metadata.keywords = 'pdf, pdf/ua, accessibility, fonts, unicode, truetype';
@@ -30,7 +30,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
   doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
-  const h1 = new Heading('TrueType Font Embedding — PDF/UA-1');
+  const h1 = new Heading('TrueType Font Embedding - PDF/UA-1');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = FONT;
@@ -70,7 +70,7 @@ export function generate(): Document {
   };
 
   doc.add(symBlock('• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)'));
-  doc.add(symBlock('– En-dash (U+2013)  — Em-dash (U+2014)'));
+  doc.add(symBlock('– En-dash (U+2013)  - Em-dash (U+2014)'));
   doc.add(symBlock('± Plus-minus  × Multiply  ÷ Divide'));
 
   // ── Currency Symbols ──────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { TextBlock } from './TextBlock';
-import { IStatefulElement } from './IStatefulElement';
+import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';

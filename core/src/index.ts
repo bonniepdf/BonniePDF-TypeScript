@@ -12,7 +12,7 @@ export * from './Core/HorizontalAlignment';
 export * from './Core/Hyperlink';
 
 export * from './Configuration/PdfSize';
-export * from './Configuration/PageOrientation';
+export * from './Core/PageOrientation';
 export * from './Configuration/PdfVersion';
 export * from './Configuration/PageMode';
 export * from './Configuration/ZoomLevel';
@@ -84,7 +84,9 @@ export * from './Elements/Tables/Table';
 
 export * from './Elements/Lists/BulletStyle';
 export * from './Elements/Lists/ListElementBase';
-export { OrderedList, NumberFormat as ListNumberFormat } from './Elements/Lists/OrderedList';
+export * from './Elements/Lists/NumberFormat';
+export { NumberFormat as ListNumberFormat } from './Elements/Lists/NumberFormat';
+export { OrderedList } from './Elements/Lists/OrderedList';
 export * from './Elements/Lists/UnorderedList';
 
 export * from './Elements/Shapes/QrEcc';
@@ -95,7 +97,6 @@ export * from './Elements/Shapes/Ellipse';
 export * from './Elements/Shapes/Line';
 export * from './Elements/Shapes/QRCode';
 
-export * from './Charts/Models/NumberFormat';
 export * from './Charts/Models/ChartDataPoint';
 export * from './Charts/Models/ChartSeries';
 export * from './Charts/Models/ChartData';

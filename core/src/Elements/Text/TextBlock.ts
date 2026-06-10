@@ -1,10 +1,9 @@
 import { TextElementBase } from './TextElementBase';
-import { IStatefulElement } from './IStatefulElement';
+import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { TextAlignment } from './TextAlignment';
 import { TextDecoration } from './TextDecoration';
-import { FontMetrics } from '../../Typography/FontMetrics';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 

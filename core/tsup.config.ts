@@ -8,7 +8,6 @@ export default defineConfig({
     charts: 'src/charts.ts',
     security: 'src/security.ts',
     qr: 'src/qr.ts',
-    prototyping: 'src/prototyping.ts',
   },
   format: ['esm', 'cjs'],
   platform: 'neutral',

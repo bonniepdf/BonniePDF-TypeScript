@@ -66,18 +66,19 @@ export class PdfSyntax {
   }
 
   public static formatDate(date: Date): string {
-    const datePart = date.toISOString().replace(/[-:]/g, '').substring(0, 14) + '00';
-    const offset = date.getTimezoneOffset();
-    if (offset === 0) {
-      return `D:${datePart}Z`;
-    }
-    const sign = offset > 0 ? '-' : '+';
-    const absOffset = Math.abs(offset);
-    const hours = Math.floor(absOffset / 60)
-      .toString()
-      .padStart(2, '0');
-    const mins = (absOffset % 60).toString().padStart(2, '0');
-    return `D:${datePart}${sign}${hours}'${mins}'`;
+    // Emit UTC with an explicit Z zone so the Info-dict date denotes the
+    // same instant as the XMP xmp:CreateDate/ModifyDate (which use
+    // toISOString() → UTC). PDF/A-1 §6.7.3 requires Info and XMP dates
+    // to be equivalent; a zone-less PDF date can't be proven equal to a
+    // UTC XMP date, so VeraPDF flags it. Using UTC getters + Z on both
+    // sides keeps them byte-consistent.
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hh = String(date.getUTCHours()).padStart(2, '0');
+    const mm = String(date.getUTCMinutes()).padStart(2, '0');
+    const ss = String(date.getUTCSeconds()).padStart(2, '0');
+    return `D:${year}${month}${day}${hh}${mm}${ss}Z`;
   }
 
   public static formatDecimal(value: number): string {

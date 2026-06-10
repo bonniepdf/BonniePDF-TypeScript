@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SemanticRole } from '../src/Rendering/Tagging/SemanticRole';
 import { StructureTreeBuilder } from '../src/Rendering/Tagging/StructureTreeBuilder';
 import { StructureTreeWriter } from '../src/Rendering/Writers/StructureTreeWriter';
-import type { IPdfWriter } from '../src/Rendering/Writers/PdfWriter';
+import type { IPdfWriter } from '../src/Rendering/Writers/IPdfWriter';
 
 interface EmittedObject {
   id: number;

@@ -3,15 +3,13 @@ import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { PdfResourceRegistry } from './PdfResourceRegistry';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
-import {
-  AsyncPdfWriter,
-  MetadataWriter,
-  NavigationWriter,
-  ComplianceWriter,
-  CatalogOptions,
-  IPdfWriter,
-  IAsyncPdfWriter,
-} from './Writers/PdfWriter';
+import { AsyncPdfWriter } from './Writers/AsyncPdfWriter';
+import { MetadataWriter } from './Writers/MetadataWriter';
+import { NavigationWriter } from './Writers/NavigationWriter';
+import { ComplianceWriter } from './Writers/ComplianceWriter';
+import { CatalogOptions } from './Writers/CatalogOptions';
+import { IPdfWriter } from './Writers/IPdfWriter';
+import { IAsyncPdfWriter } from './Writers/IAsyncPdfWriter';
 import { StructureTreeWriter } from './Writers/StructureTreeWriter';
 import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';

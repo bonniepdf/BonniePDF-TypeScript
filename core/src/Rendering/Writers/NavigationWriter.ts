@@ -1,0 +1,85 @@
+import { PdfSyntax } from '../Pdf/PdfSyntax';
+import { IPdfWriter } from './IPdfWriter';
+import { IAsyncPdfWriter } from './IAsyncPdfWriter';
+
+/**
+ * Writes PDF navigation objects (Outlines/Bookmarks) to PDF.
+ */
+export class NavigationWriter {
+  constructor(
+    private writer: IPdfWriter,
+    private asyncWriter?: IAsyncPdfWriter
+  ) {}
+
+  public writeOutlineTree(rootId: number, bookmarks: any[], pageIds: number[]): number {
+    if (!bookmarks || bookmarks.length === 0) return 0;
+
+    const flatList: Array<{ item: any; id: number; parentId: number; depth: number }> = [];
+
+    const flatten = (items: any[], parentId: number, depth: number): void => {
+      for (const item of items) {
+        const itemId = this.writer.getNewId();
+        flatList.push({ item, id: itemId, parentId, depth });
+        if (item.children?.length > 0) flatten(item.children, itemId, depth + 1);
+      }
+    };
+    flatten(bookmarks, rootId, 0);
+
+    const childrenByParent = new Map<number, number[]>();
+    for (let i = 0; i < flatList.length; i++) {
+      const { parentId } = flatList[i];
+      if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
+      childrenByParent.get(parentId)!.push(i);
+    }
+
+    const countVisible = (parentId: number): number => {
+      const children = childrenByParent.get(parentId);
+      if (!children) return 0;
+      let count = 0;
+      for (const idx of children) {
+        count++;
+        count += countVisible(flatList[idx].id);
+      }
+      return count;
+    };
+
+    const rootChildren = childrenByParent.get(rootId) ?? [];
+    const rootDict = new Map<string, string>([
+      ['/Type', '/Outlines'],
+      ['/Count', countVisible(rootId).toString()],
+    ]);
+    if (rootChildren.length > 0) {
+      rootDict.set('/First', `${flatList[rootChildren[0]].id} 0 R`);
+      rootDict.set('/Last', `${flatList[rootChildren[rootChildren.length - 1]].id} 0 R`);
+    }
+    this.writer.writeObject(rootId, rootDict);
+
+    for (let i = 0; i < flatList.length; i++) {
+      const { item, id: itemId, parentId } = flatList[i];
+      const siblings = childrenByParent.get(parentId)!;
+      const siblingIdx = siblings.indexOf(i);
+
+      const dict = new Map<string, string>([
+        ['/Title', `(${PdfSyntax.escape(item.title)})`],
+        ['/Parent', `${parentId} 0 R`],
+        ['/Dest', `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`],
+      ]);
+      if (siblingIdx > 0) dict.set('/Prev', `${flatList[siblings[siblingIdx - 1]].id} 0 R`);
+      if (siblingIdx < siblings.length - 1) dict.set('/Next', `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
+
+      const myChildren = childrenByParent.get(itemId);
+      if (myChildren?.length > 0) {
+        dict.set('/Count', countVisible(itemId).toString());
+        dict.set('/First', `${flatList[myChildren[0]].id} 0 R`);
+        dict.set('/Last', `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
+      }
+      this.writer.writeObject(itemId, dict);
+    }
+    return rootId;
+  }
+
+  public async writeOutlineTreeAsync(rootId: number, bookmarks: any[], pageIds: number[]): Promise<number> {
+    // Delegate synchronously - async path is out of scope
+    return this.writeOutlineTree(rootId, bookmarks, pageIds);
+  }
+}

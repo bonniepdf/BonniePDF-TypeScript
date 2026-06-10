@@ -70,6 +70,16 @@ export class PdfRenderPipeline {
     return result;
   }
 
+  /**
+   * Lays out a page's elements through the same overflow/pagination loop used
+   * for PDF output, driving everything through `ICanvas`. Exposed so the SVG
+   * render pipeline shares the exact pagination decisions (page breaks,
+   * stateful continuation) rather than re-implementing them and drifting.
+   */
+  public static layoutElements(elements: IElement[], ctx: RenderContext, contentWidth: number): void {
+    this.renderElementsWithOverflow(elements, ctx, contentWidth);
+  }
+
   private static renderElementsWithOverflow(elements: IElement[], ctx: RenderContext, contentWidth: number): void {
     for (const element of elements) {
       this.renderElementWithOverflow(element, ctx, contentWidth);

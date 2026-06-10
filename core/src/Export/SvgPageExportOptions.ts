@@ -1,0 +1,65 @@
+/**
+ * Options controlling how a document page is exported to SVG.
+ *
+ * Mirrors the public surface documented in api-gap this feature (faithful page SVG
+ * export). All fields are optional; the defaults produce compact, deterministic,
+ * standalone SVG suitable for website thumbnails and CI snapshots.
+ */
+export interface SvgPageExportOptions {
+  /**
+   * Decimal places for generated coordinates. Defaults to 3 for stable, compact
+   * output.
+   */
+  precision?: number;
+
+  /**
+   * How raster images should be represented. `data-uri` (default) is best for
+   * standalone website thumbnails - the SVG carries the image bytes inline and
+   * needs no asset coordination. `omit` drops images entirely.
+   */
+  embedImages?: 'data-uri' | 'external-ref' | 'omit';
+
+  /**
+   * `text` (default) keeps text selectable and compact, positioning glyphs with
+   * the document's real font metrics. `paths` is reserved for a future
+   * glyph-outline mode that removes any dependency on viewer-installed fonts.
+   */
+  textMode?: 'text' | 'paths';
+
+  /**
+   * Include SVG `<a>` wrappers for PDF hyperlinks where possible. Defaults to
+   * false; page previews are primarily visual assets.
+   */
+  includeLinks?: boolean;
+
+  /**
+   * Include `<title>`, `<desc>`, `role`, and `aria-label` on the root `<svg>`
+   * element. This is a lightweight preview affordance, not PDF/UA structure
+   * export. Defaults to true.
+   */
+  includeAccessibilityMetadata?: boolean;
+
+  /**
+   * Human-readable document title used to build the `<title>`/`aria-label`
+   * when {@link includeAccessibilityMetadata} is set. Defaults to the document
+   * metadata title, then a generic label.
+   */
+  title?: string;
+
+  /**
+   * Maximum number of pages to emit. The full document is still laid out (so
+   * pagination/overflow stays correct), but only the first `maxPages` pages are
+   * serialized to SVG. Omit (or use a non-positive value) to export every page.
+   * Useful for preview/thumbnail pipelines that only need the first few pages.
+   */
+  maxPages?: number;
+}
+
+/** Default values applied when an option is omitted. */
+export const SVG_PAGE_EXPORT_DEFAULTS: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages'>> = {
+  precision: 3,
+  embedImages: 'data-uri',
+  textMode: 'text',
+  includeLinks: false,
+  includeAccessibilityMetadata: true,
+};

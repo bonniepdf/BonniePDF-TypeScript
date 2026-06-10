@@ -51,6 +51,8 @@ import { generate as userDirectory } from './templates/user-directory';
 import { generate as movieCatalog } from './templates/movie-catalog';
 import { generate as financialDashboard } from './templates/financial-dashboard';
 
+export * from './svg';
+
 export interface ExampleDef {
   id: string;
   name: string;

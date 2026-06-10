@@ -1,4 +1,3 @@
-export * from './Charts/Models/NumberFormat';
 export * from './Charts/Models/ChartDataPoint';
 export * from './Charts/Models/ChartSeries';
 export * from './Charts/Models/ChartData';

@@ -1,12 +1,11 @@
 import { ElementBase } from '../ElementBase';
-import { IStatefulElement } from './IStatefulElement';
+import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { TextAlignment } from './TextAlignment';
 import { TextStyle } from './TextStyle';
 import { TextSpan } from './TextSpan';
 import { TextDecoration } from './TextDecoration';
-import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 

@@ -1,3 +1,6 @@
+import { RenderStatus } from './RenderStatus';
+export { RenderStatus };
+
 export interface RenderContext {
   maxY: number;
   margin: number;
@@ -62,10 +65,4 @@ export interface IStatefulElement extends IElement {
    * Should be called before starting a new document or after completing a multipage render.
    */
   resetState(): void;
-}
-
-export enum RenderStatus {
-  Complete = 'Complete',
-  Overflow = 'Overflow',
-  WrapRequired = 'WrapRequired',
 }

@@ -1,6 +1,6 @@
 import { TextAlignment } from './TextAlignment';
 import { ElementBase } from '../ElementBase';
-import { IStatefulElement } from './IStatefulElement';
+import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { StandardFonts } from '../../Typography/StandardFonts';

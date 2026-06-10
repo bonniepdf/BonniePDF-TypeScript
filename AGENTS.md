@@ -55,7 +55,7 @@ This is the most accident-prone area. Some hard rules:
   - PDF/UA-1 only (no PDF/A) → always written, for colour management.
 - **XMP extension schema is required** for any non-predefined namespace (e.g. `pdfuaid`) per ISO 19005-2/3 §6.6.2.3. The descriptor hangs off `XmpConformanceBlock.extensionSchema` (set by the `pdfUa1()` factory). `XmpMetadataWriter` emits a `pdfaExtension:schemas` bag whenever a PDF/A claim coexists with at least one schema-carrying block. Don't strip it - veraPDF profile `2a` and above will fail without it.
 - **Resources live on the page, not the parent.** Each `/Page` carries its own `/Resources` indirect reference to a single object written via `IPdfWriter.writeRawObject` (PDF/A-2b clause 6.2.2.2). The `/Pages` parent does not carry `/Resources`. Don't "fix" this back to inheritance.
-- **`ComplianceWriter`:** the one re-exported from the `PdfWriter.ts` barrel is the live implementation. The standalone `ComplianceWriter.ts` file is dead code - don't edit it expecting changes to take effect.
+- **`ComplianceWriter`** lives in the `PdfWriter.ts` barrel (re-exported from there). The serializer imports it from `./Writers/PdfWriter`. (A standalone `Writers/ComplianceWriter.ts` file used to shadow this as dead code; it has been deleted.)
 - **Browser font registration:** in the website, `LocalExampleSource.ensureFontsLoaded()` fetches Liberation TTFs from `public/fonts/liberation/` and registers them via `FontManager.registerFont(bytes, { family, subfamily })` **before** generating each PDF. The `registerFontFilePath` path is for Node only and is currently broken under ESM (see above).
 
 ## Tests

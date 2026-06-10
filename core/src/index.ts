@@ -183,6 +183,4 @@ export * from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
 export * from './Platform/NodePlatformIO';
 
-// Prototyping helpers (Placeholders) are intentionally NOT re-exported here.
-// They ship as a separate '@bonniepdf/core/prototyping' entry to keep them
-// out of the main bundle. See src/prototyping.ts.
+export * from './Prototyping/Placeholders';

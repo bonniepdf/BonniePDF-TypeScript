@@ -5,7 +5,11 @@ import { TtfFont } from './TrueType/TtfFont';
  * Supports both standard PDF fonts and custom TTF fonts.
  */
 export class FontMetrics {
-  private static readonly TtfCache: Map<string, number[]> = new Map();
+  /**
+   * Cache of TTF fonts parsed from a file path (used by {@link getTtfWidth}).
+   * A cached `null` records a path that failed to load so we don't retry it.
+   */
+  private static readonly TtfInstanceCache: Map<string, TtfFont | null> = new Map();
   private static readonly FontPathAliases: Map<string, string> = new Map();
   /** Bytes-based font instances registered when FontManager provides bytes (no file path available). */
   private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
@@ -216,34 +220,27 @@ export class FontMetrics {
   }
 
   private static getTtfWidth(text: string, filepath: string, fontSize: number): number {
-    // 1. Load into cache if missing
-    let widths = this.TtfCache.get(filepath);
-    if (!widths) {
+    // Parse the TTF (once per path) and measure with real per-glyph advances and
+    // kern pairs. This replaces the former stub that returned a flat 500-unit
+    // advance for every character, which mis-measured every embedded-by-path font
+    // and broke wrapping/alignment. In non-Node contexts (no filesystem) the
+    // sync load throws and we fall back to a coarse estimate.
+    let font = this.TtfInstanceCache.get(filepath);
+    if (font === undefined) {
       try {
-        widths = this.loadTtfWidths(filepath);
-        this.TtfCache.set(filepath, widths);
+        font = TtfFont.fromFileSync(filepath);
       } catch {
-        // Fallback if file not found or corrupted
-        return text.length * (fontSize * 0.5);
+        font = null;
       }
+      this.TtfInstanceCache.set(filepath, font);
     }
 
-    let totalWidth = 0;
-    for (const c of text) {
-      const index = c.charCodeAt(0) - 32;
-      if (index >= 0 && index < widths.length) {
-        totalWidth += widths[index];
-      } else {
-        totalWidth += 500;
-      }
+    if (font) {
+      return this.getKernedStringWidth(text, font, fontSize);
     }
 
-    return (totalWidth / 1000) * fontSize;
-  }
-
-  private static loadTtfWidths(filepath: string): number[] {
-    // Stub - would implement TTF parsing in a real implementation
-    return new Array(95).fill(500);
+    // Fallback when the font cannot be loaded (e.g. browser, missing/corrupt file).
+    return text.length * (fontSize * 0.5);
   }
 
   private static getStandardFontTable(fontName: string): readonly number[] | null {

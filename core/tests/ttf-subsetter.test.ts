@@ -1,17 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { TtfFont } from '../src/Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../src/Typography/TrueType/TtfSubsetter';
 
-const ARIAL_PATH = 'C:/Windows/Fonts/arial.ttf';
-const fontAvailable = existsSync(ARIAL_PATH);
+// Bundled, cross-platform Liberation Sans (metric-compatible with Arial).
+const FONT_PATH = fileURLToPath(new URL('../assets/fonts/LiberationSans-Regular.ttf', import.meta.url));
+const fontAvailable = existsSync(FONT_PATH);
 const describeIfFont = fontAvailable ? describe : describe.skip;
 
-describeIfFont('TtfSubsetter (Arial)', () => {
+describeIfFont('TtfSubsetter (Liberation Sans)', () => {
   let font: TtfFont;
 
   function getFont(): TtfFont {
-    if (!font) font = TtfFont.fromFileSync(ARIAL_PATH);
+    if (!font) font = TtfFont.fromFileSync(FONT_PATH);
     return font;
   }
 

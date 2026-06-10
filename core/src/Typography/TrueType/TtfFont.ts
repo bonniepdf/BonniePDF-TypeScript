@@ -551,7 +551,7 @@ export class TtfFont {
     const usWidthClass = reader.readUInt16();
     const fsType = reader.readUInt16();
 
-    reader.skip(22); // subscript/superscript metrics
+    reader.skip(16); // subscript (8) + superscript (8) metrics
 
     reader.skip(2); // yStrikeoutSize
     reader.skip(2); // yStrikeoutPosition
@@ -573,11 +573,13 @@ export class TtfFont {
 
     reader.skip(4); // usWinAscent, usWinDescent
 
-    // Read sCapHeight and sxHeight if version >= 2
+    // Read sxHeight and sCapHeight if version >= 2.
+    // Per the OpenType OS/2 spec the field order is sxHeight THEN sCapHeight
+    // (both follow the two ulCodePageRange uint32s).
     if (version >= 2) {
-      reader.skip(8); // ulCodePageRange
-      this.capHeight = reader.readInt16();
+      reader.skip(8); // ulCodePageRange1 + ulCodePageRange2
       this.xHeight = reader.readInt16();
+      this.capHeight = reader.readInt16();
     } else {
       // Estimate from UnitsPerEm
       this.capHeight = Math.floor(this.unitsPerEm * 0.7);

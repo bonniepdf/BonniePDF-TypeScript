@@ -153,6 +153,11 @@ export * from './Drawing/ICanvas';
 export * from './Drawing/PdfCanvas';
 export * from './Drawing/SvgCanvas';
 
+// SVG page export
+export * from './Export/SvgPageExportOptions';
+export * from './Rendering/SvgRenderPipeline';
+export { exportSvgPagesAsync } from './Export/SvgPageExporter';
+
 // Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
 export * from './Extensions/DocumentEncryptionExtensions';
 export * from './Extensions/DocumentSettingsExtensions';

@@ -13,6 +13,8 @@ import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
 import { TextElementBase } from './Elements/Text/TextElementBase';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
+import { exportSvgPagesAsync } from './Export/SvgPageExporter';
+import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 
 /**
  * High-level entry point for creating PDF documents.
@@ -186,6 +188,41 @@ export class Document {
     const serializer = new PdfDocumentSerializer(this, this._diagnostics);
     await serializer.serializeAsync(writer);
     return writer.toUint8Array();
+  }
+
+  // ─── SVG page export ────────────────────────────────────────────────
+
+  /**
+   * Renders every laid-out page of the document to a standalone SVG string.
+   *
+   * Runs the same layout, pagination, watermark, and header/footer pipeline as
+   * PDF output, so the returned array has one entry per generated PDF page and
+   * the visual layout matches. Embedded fonts and PNG images are preloaded
+   * exactly as the async PDF path does, so this is the recommended export entry
+   * point in both Node and the browser.
+   */
+  public async generateSvgPagesAsync(options?: SvgPageExportOptions): Promise<string[]> {
+    this.applyDefaultStyleToTree();
+    return exportSvgPagesAsync(this, options);
+  }
+
+  /**
+   * Renders a single page (zero-based index) to a standalone SVG string.
+   */
+  public async generateSvgPageAsync(pageIndex: number, options?: SvgPageExportOptions): Promise<string> {
+    const pages = await this.generateSvgPagesAsync(options);
+    if (pageIndex < 0 || pageIndex >= pages.length) {
+      throw new Error(`Page index ${pageIndex} out of range (document has ${pages.length} page(s))`);
+    }
+    return pages[pageIndex];
+  }
+
+  /**
+   * Convenience for example cards and social previews: renders the first page
+   * to a standalone SVG string.
+   */
+  public async generateFirstPageSvgAsync(options?: SvgPageExportOptions): Promise<string> {
+    return this.generateSvgPageAsync(0, options);
   }
 
   /** Alias for generateBytes() - matches the C# ToByteArray() name. */

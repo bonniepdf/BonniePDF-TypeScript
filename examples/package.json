@@ -10,13 +10,15 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate-svgs": "tsx scripts/generate-svgs.ts"
   },
   "dependencies": {
     "@bonniepdf/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^6.0.3"
   }
 }

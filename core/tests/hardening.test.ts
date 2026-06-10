@@ -394,7 +394,7 @@ describe('Hardening fixtures', () => {
       const qr = new QRCode();
       qr.data = 'https://example.com';
       qr.size = 60;
-      qr.altText = 'Year 2026 - projection';
+      qr.altText = 'Year 2026 — projection';
       d.add(qr);
     });
 

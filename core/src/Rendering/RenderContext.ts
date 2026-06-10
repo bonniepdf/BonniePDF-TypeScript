@@ -2,7 +2,7 @@ import { PdfResourceRegistry } from './PdfResourceRegistry';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
 import { PdfCanvas } from '../Drawing/PdfCanvas';
-import { SvgCanvas } from '../Drawing/SvgCanvas';
+import { SvgCanvas, SvgCanvasOptions } from '../Drawing/SvgCanvas';
 import { Color } from '../Core/Color';
 import { ImageInfo } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
@@ -41,6 +41,21 @@ export class RenderContext {
 
   public canvas: ICanvas;
   public readonly isSvgMode: boolean;
+
+  /**
+   * Low-level SVG canvas options threaded into every {@link SvgCanvas} created
+   * by this context (precision, image embedding, PDF baseline parity). Set by
+   * the SVG render pipeline before rendering begins.
+   */
+  public svgOptions: SvgCanvasOptions = {};
+
+  /**
+   * One persisted {@link SvgCanvas} per page index in SVG mode. Unlike the PDF
+   * path - which flushes operator strings into `pages[]` - the SVG canvas is a
+   * stateful object, so it must survive page switches and overflow page
+   * creation rather than being recreated and discarded.
+   */
+  private readonly svgPages: SvgCanvas[] = [];
   public currentPageIndex: number = 0;
   public currentX: number = 0;
   public currentY: number = 0;
@@ -64,7 +79,13 @@ export class RenderContext {
    *                          registrations from a previous dry-run pass.  When omitted a fresh
    *                          registry is created automatically.
    */
-  constructor(size: PdfSize, margin: number, isSvgMode = false, existingResources?: PdfResourceRegistry) {
+  constructor(
+    size: PdfSize,
+    margin: number,
+    isSvgMode = false,
+    existingResources?: PdfResourceRegistry,
+    svgOptions?: SvgCanvasOptions
+  ) {
     this.isSvgMode = isSvgMode;
     this.pageSize = size;
     this.margin = margin;
@@ -72,8 +93,24 @@ export class RenderContext {
     this.currentX = margin;
     this.currentY = margin;
     this.resources = existingResources ?? new PdfResourceRegistry();
+    if (svgOptions) this.svgOptions = svgOptions;
 
     this.updateCanvas();
+  }
+
+  /** Returns the persisted SVG canvas for a page index, if one exists. */
+  public getSvgPage(index: number): SvgCanvas | undefined {
+    return this.svgPages[index];
+  }
+
+  /** Factory for an SVG canvas wired to this context's font resolver + options. */
+  private createSvgCanvas(): SvgCanvas {
+    return new SvgCanvas(
+      this.pageSize.width,
+      this.pageSize.height,
+      family => this.resolveEmbeddedFont(family),
+      this.svgOptions
+    );
   }
 
   public get pdfAEnabled(): boolean {
@@ -108,7 +145,14 @@ export class RenderContext {
 
   private updateCanvas(): void {
     if (this.isSvgMode) {
-      this.canvas = new SvgCanvas(this.pageSize.width, this.pageSize.height);
+      // Reuse the persisted canvas for this page so content survives page
+      // switches (e.g. the second watermark/template pass) and overflow.
+      let svg = this.svgPages[this.currentPageIndex];
+      if (!svg) {
+        svg = this.createSvgCanvas();
+        this.svgPages[this.currentPageIndex] = svg;
+      }
+      this.canvas = svg;
     } else {
       const pdfCanvas = new PdfCanvas(
         this.pageSize.height,
@@ -127,7 +171,13 @@ export class RenderContext {
 
   public getCanvas(x: number, y: number): ICanvas {
     if (this.isSvgMode) {
-      return new SvgCanvas(this.pageSize.width, this.pageSize.height);
+      // Positioned child canvas. The child records its origin so
+      // flushExternalCanvas can composite it into the page via a translate
+      // group, mirroring the xOffset/yOffset baked into the PDF child canvas.
+      const child = this.createSvgCanvas();
+      child.offsetX = x;
+      child.offsetY = y;
+      return child;
     }
     const pdfCanvas = new PdfCanvas(
       this.pageSize.height,
@@ -226,7 +276,18 @@ export class RenderContext {
    * positioned canvas rather than ctx.canvas.
    */
   public flushExternalCanvas(canvas: ICanvas): void {
-    if (this.isSvgMode) return;
+    if (this.isSvgMode) {
+      const child = canvas as SvgCanvas;
+      if (typeof child.getInnerSvg !== 'function') return;
+      const inner = child.getInnerSvg();
+      if (!inner) return;
+      const pageCanvas = this.canvas as SvgCanvas;
+      const tx = child.offsetX;
+      const ty = child.offsetY;
+      const wrapped = tx !== 0 || ty !== 0 ? `<g transform="translate(${tx} ${ty})">${inner}</g>` : `<g>${inner}</g>`;
+      pageCanvas.appendRawMarkup(wrapped);
+      return;
+    }
     const pdfCanvas = canvas as PdfCanvas;
     if (!pdfCanvas || typeof pdfCanvas.getStream !== 'function') return;
     const ops = pdfCanvas.getStream();

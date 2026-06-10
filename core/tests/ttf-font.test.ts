@@ -1,16 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { TtfFont } from '../src/Typography/TrueType/TtfFont';
+import { FontMetrics } from '../src/Typography/FontMetrics';
 
-const ARIAL_PATH = 'C:/Windows/Fonts/arial.ttf';
-const fontAvailable = existsSync(ARIAL_PATH);
+// Use the bundled, cross-platform Liberation Sans font (metric-compatible with
+// Arial) instead of a Windows-only C:\Windows\Fonts path, so these tests run on
+// every OS rather than silently skipping off Windows.
+const FONT_PATH = fileURLToPath(new URL('../assets/fonts/LiberationSans-Regular.ttf', import.meta.url));
+const fontAvailable = existsSync(FONT_PATH);
 const describeIfFont = fontAvailable ? describe : describe.skip;
 
-describeIfFont('TtfFont (Arial)', () => {
+describeIfFont('TtfFont (Liberation Sans)', () => {
   let font: TtfFont;
 
   function getFont(): TtfFont {
-    if (!font) font = TtfFont.fromFileSync(ARIAL_PATH);
+    if (!font) font = TtfFont.fromFileSync(FONT_PATH);
     return font;
   }
 
@@ -121,5 +126,32 @@ describeIfFont('TtfFont (Arial)', () => {
   it('italicAngle is a number', () => {
     const f = getFont();
     expect(typeof f.italicAngle).toBe('number');
+  });
+
+  it('capHeight is larger than xHeight (OS/2 fields not swapped)', () => {
+    const f = getFont();
+    expect(f.capHeight).toBeGreaterThan(0);
+    expect(f.xHeight).toBeGreaterThan(0);
+    expect(f.capHeight).toBeGreaterThan(f.xHeight);
+    expect(f.capHeight).toBeLessThan(f.unitsPerEm);
+  });
+});
+
+describeIfFont('FontMetrics.getStringWidth (TTF by file path)', () => {
+  it('measures real proportional advances, not a flat stub', () => {
+    // The former stub returned 500 units for every glyph, so 'W' and 'I' were
+    // measured identically. Real metrics make 'W' clearly wider than 'I'.
+    const wide = FontMetrics.getStringWidth('W', FONT_PATH, 12);
+    const narrow = FontMetrics.getStringWidth('I', FONT_PATH, 12);
+    expect(wide).toBeGreaterThan(0);
+    expect(narrow).toBeGreaterThan(0);
+    expect(wide).toBeGreaterThan(narrow);
+  });
+
+  it('returns 0 for empty text and scales with length', () => {
+    expect(FontMetrics.getStringWidth('', FONT_PATH, 12)).toBe(0);
+    const one = FontMetrics.getStringWidth('A', FONT_PATH, 12);
+    const many = FontMetrics.getStringWidth('AAAA', FONT_PATH, 12);
+    expect(many).toBeGreaterThan(one);
   });
 });

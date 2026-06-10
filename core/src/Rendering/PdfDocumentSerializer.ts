@@ -441,7 +441,7 @@ function hasViewerPreferences(settings: any): boolean {
  * an async decode step (i.e. a PNG that hasn't been prepared yet).  Uses the
  * same child-resolution rules as {@link collectEmbeddedFonts}.
  */
-function collectImagesNeedingDecode(element: any, out: Image[]): void {
+export function collectImagesNeedingDecode(element: any, out: Image[]): void {
   if (!element || typeof element !== 'object') return;
 
   if (element instanceof Image && element.needsAsyncDecode()) {
@@ -489,7 +489,7 @@ function forEachChild(element: any, visit: (child: any) => void): void {
   }
 }
 
-function collectEmbeddedFonts(element: any, paths: Set<string>): void {
+export function collectEmbeddedFonts(element: any, paths: Set<string>): void {
   if (!element || typeof element !== 'object') return;
 
   // ── fontName on the element itself ────────────────────────────────────────

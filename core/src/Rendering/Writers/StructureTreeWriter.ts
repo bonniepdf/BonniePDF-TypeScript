@@ -2,7 +2,8 @@
 // PdfWriter.ts - the standalone `./IPdfWriter` / `./IAsyncPdfWriter`
 // files are shadow definitions that drift from the real ones, so this
 // module imports from the kitchen-sink file the serializer also uses.
-import type { IPdfWriter, IAsyncPdfWriter } from './PdfWriter';
+import type { IPdfWriter } from './IPdfWriter';
+import type { IAsyncPdfWriter } from './IAsyncPdfWriter';
 import { StructureElement } from '../Tagging/StructureElement';
 import { StructureTreeBuilder } from '../Tagging/StructureTreeBuilder';
 import { toPdfTag } from '../Tagging/SemanticRole';

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { ImageWriter } from '../src/Rendering/Images/ImageWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from '../src/Rendering/Images/ImageInfo';
-import { IPdfWriter } from '../src/Rendering/Writers/PdfWriter';
+import { IPdfWriter } from '../src/Rendering/Writers/IPdfWriter';
 import { createMinimalJpeg } from './helpers/test-base';
 import { PdfAConformance } from '../src/Configuration/PdfAConformance';
 import { PdfResourceRegistry } from '../src/Rendering/PdfResourceRegistry';

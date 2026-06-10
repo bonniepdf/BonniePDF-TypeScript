@@ -1,4 +1,5 @@
-import { IPdfWriter, IAsyncPdfWriter } from '../Writers/PdfWriter';
+import { IPdfWriter } from '../Writers/IPdfWriter';
+import { IAsyncPdfWriter } from '../Writers/IAsyncPdfWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
 import { PdfAConformance } from '../../Configuration/PdfAConformance';
 

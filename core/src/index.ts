@@ -182,8 +182,16 @@ export * from './Rendering/Images/ImageInfo';
 // BigEndianReader is also in ImageInfo.ts - use that export
 export * from './Rendering/Images/ImageLoader';
 export * from './Rendering/Images/ImageWriter';
-// PdfWriter.ts contains: FontWriter, MetadataWriter, NavigationWriter, ComplianceWriter, CatalogOptions, IPdfWriter, IAsyncPdfWriter, AsyncPdfWriter
+// Writers: one type per file, mirroring the .NET Rendering/Writers layout.
+export * from './Rendering/Writers/CatalogOptions';
+export * from './Rendering/Writers/IPdfWriter';
+export * from './Rendering/Writers/IAsyncPdfWriter';
 export * from './Rendering/Writers/PdfWriter';
+export * from './Rendering/Writers/AsyncPdfWriter';
+export * from './Rendering/Writers/FontWriter';
+export * from './Rendering/Writers/MetadataWriter';
+export * from './Rendering/Writers/NavigationWriter';
+export * from './Rendering/Writers/ComplianceWriter';
 
 export * from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';

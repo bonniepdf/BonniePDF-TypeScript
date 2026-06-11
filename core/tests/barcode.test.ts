@@ -7,6 +7,9 @@ import { Color } from '../src/Core/Color';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
 import { SemanticRole } from '../src/Rendering/Tagging/SemanticRole';
+import { Container } from '../src/Elements/Layout/Container';
+import { Pdf } from '../src/Fluent/Pdf';
+import { ContainerElementExtensions, barcode } from '../src/Fluent/Extensions/ContainerElementExtensions';
 import { pdfToText } from './helpers/test-base';
 
 // ── Independent reverse tables (transcribed from the same ISO sources) ──
@@ -505,5 +508,37 @@ describe('Barcode element', () => {
       d.add(bc);
     });
     expect(pdf).toContain('%PDF-');
+  });
+});
+
+// this feature parity: the fluent container `barcode()` entry, mirroring the .NET
+// ContainerElementExtensions.Barcode extension (previously only `qrCode()`
+// was wired on the TypeScript fluent surface).
+describe('Barcode fluent API (this feature parity)', () => {
+  it('ContainerElementExtensions.barcode attaches a Barcode with value + symbology', () => {
+    const container = new Container();
+    const bc = ContainerElementExtensions.barcode(container, '5012345678900', BarcodeSymbology.Ean13);
+    expect(bc).toBeInstanceOf(Barcode);
+    expect(bc.value).toBe('5012345678900');
+    expect(bc.symbology).toBe(BarcodeSymbology.Ean13);
+    expect(container.child).toBe(bc);
+  });
+
+  it('defaults to Code 128 via the shortcut function', () => {
+    const bc = barcode(new Container(), '1Z9999W99999999999');
+    expect(bc).toBeInstanceOf(Barcode);
+    expect(bc.symbology).toBe(BarcodeSymbology.Code128);
+  });
+
+  it('renders through the fluent Pdf.create builder', () => {
+    const doc = Pdf.create(b => {
+      b.page(p => {
+        ContainerElementExtensions.barcode(p.content(), 'SHIP-128', BarcodeSymbology.Code128);
+      });
+    }).build();
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('%PDF-');
+    expect(pdf).toContain('%%EOF');
+    doc.dispose();
   });
 });

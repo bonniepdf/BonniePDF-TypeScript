@@ -1,5 +1,6 @@
 import { BorderedElementBase } from './BorderedElementBase';
 import { IContentContainer } from '../../Fluent/IContentContainer';
+import { LayersDescriptor } from '../../Fluent/Descriptors/LayersDescriptor';
 import { IElement } from '../IElement';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
@@ -31,6 +32,24 @@ export class Container extends BorderedElementBase implements IContentContainer 
     this.padding = new Thickness(0);
   }
 
+  /**
+   * Fills this container with an inline z-stack. Layers paint in
+   * declaration order: `background` behind, `primaryLayer` in the middle (it
+   * sets the flow height), and `foreground` on top.
+   *
+   * ```typescript
+   * new Container().layers(layers => layers
+   *   .background(Image.load('card-bg.jpg'))
+   *   .foreground(new TextBlock('Horizon Ventures')));
+   * ```
+   */
+  public layers(configure: (layers: LayersDescriptor) => void): Container {
+    const descriptor = new LayersDescriptor();
+    configure(descriptor);
+    this.child = descriptor.build();
+    return this;
+  }
+
   protected getPreferredContentWidth(): number {
     if (this.width !== undefined) {
       return this.width;
@@ -40,69 +59,37 @@ export class Container extends BorderedElementBase implements IContentContainer 
   }
 
   protected measureContentHeight(contentWidth: number): number {
-    // A fixed height wins outright.
-    if (this.height !== undefined) return this.height;
-
-    // Use the fixed width if specified, otherwise the available width.
-    const effectiveWidth = this.width ?? contentWidth;
-    const childContentWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
-
-    const childHeight = this.child ? this.child.measureHeight(childContentWidth) : 0;
-    return childHeight + this.padding.top + this.padding.bottom + this.border.verticalWidth;
+    if (!this.child) return this.padding.top + this.padding.bottom;
+    const innerWidth = Math.max(0, contentWidth - this.padding.left - this.padding.right);
+    return this.child.measureHeight(innerWidth) + this.padding.top + this.padding.bottom;
   }
 
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
-    // Use the fixed width/height if specified, otherwise size to content.
-    const effectiveWidth = this.width ?? contentWidth;
-    const containerHeight = this.height ?? this.measureContentHeight(effectiveWidth);
-
-    // Pagination: if the whole container would not fit and we are not already at
-    // the top of the page, break first so the border/background stay intact.
-    if (ctx.currentY + containerHeight > ctx.maxY && ctx.currentY > ctx.margin) {
-      ctx.newPage();
-    }
-
+    // Draw background (drawBackground is currently a stub in BorderedElementBase)
     if (this.backgroundColor) {
-      this.drawBackground(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.backgroundColor);
+      const totalHeight = this.measureContentHeight(contentWidth);
+      this.drawBackground(ctx, ctx.currentX, ctx.currentY, contentWidth, totalHeight, this.backgroundColor);
     }
 
     if (this.border.hasAnyBorder) {
-      this.drawBorder(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight);
+      const totalHeight = this.measureContentHeight(contentWidth);
+      this.drawBorder(ctx, ctx.currentX, ctx.currentY, contentWidth, totalHeight);
     }
 
     if (!this.child) {
-      ctx.currentY += containerHeight;
+      ctx.currentY += this.padding.top + this.padding.bottom;
       return;
     }
 
     const originalX = ctx.currentX;
-    const yBeforePadding = ctx.currentY;
-
     ctx.currentX += this.padding.left;
     ctx.currentY += this.padding.top;
-    const childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
+    const innerWidth = Math.max(0, contentWidth - this.padding.left - this.padding.right);
 
-    const yBeforeChildRender = ctx.currentY;
-    this.renderChild(ctx, childWidth);
-    const yAfterChildRender = ctx.currentY;
+    this.renderChild(ctx, innerWidth);
 
     ctx.currentX = originalX;
-
-    // If the child did not advance Y (e.g. an absolutely-measured element), advance
-    // by its measured height instead.
-    if (yAfterChildRender === yBeforeChildRender) {
-      const childHeight = this.child.measureHeight(childWidth);
-      ctx.currentY = yBeforePadding + this.padding.top + childHeight;
-    }
-
     ctx.currentY += this.padding.bottom;
-
-    // Ensure we advance by at least the full container height (e.g. when an
-    // explicit Height is larger than the content).
-    const expectedBottom = yBeforePadding + containerHeight;
-    if (ctx.currentY < expectedBottom) {
-      ctx.currentY = expectedBottom;
-    }
   }
 
   private renderChild(ctx: RenderContext, innerWidth: number): void {

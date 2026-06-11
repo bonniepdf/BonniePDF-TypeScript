@@ -62,6 +62,7 @@ export * from './Elements/Layout/IBackgroundColor';
 export * from './Elements/Layout/BorderedElementBase';
 export * from './Elements/Layout/Container';
 export * from './Elements/Layout/HorizontalStack';
+export * from './Elements/Layout/Layers';
 export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';
 
@@ -123,6 +124,7 @@ export * from './Fluent/Pdf';
 export * from './Fluent/PdfBuilder';
 
 export * from './Fluent/Descriptors/PageDescriptor';
+export * from './Fluent/Descriptors/LayersDescriptor';
 export * from './Fluent/Descriptors/ColumnDescriptor';
 export * from './Fluent/Descriptors/RowDescriptor';
 export * from './Fluent/Descriptors/TableDescriptor';
@@ -171,6 +173,7 @@ export * from './Extensions/BarcodeExtensions';
 export * from './Extensions/SvgExportExtensions';
 export * from './Extensions/TableCellExtensions';
 export * from './Extensions/VerticalStackExtensions';
+// TextBlockExtensions omitted - alignLeft/alignCenter/alignRight conflict with ContainerStyleExtensions
 
 export * from './Rendering/RenderContext';
 export * from './Rendering/PageDimensions';

@@ -16,6 +16,8 @@ export class PageDescriptor {
   headerSlot: ContentSlot = new ContentSlot();
   contentSlot: ContentSlot = new ContentSlot();
   footerSlot: ContentSlot = new ContentSlot();
+  backgroundSlot: ContentSlot = new ContentSlot();
+  foregroundSlot: ContentSlot = new ContentSlot();
   defaultStyle: TextStyle | undefined;
 
   /**
@@ -73,5 +75,25 @@ export class PageDescriptor {
    */
   footer(): IContentContainer {
     return this.footerSlot;
+  }
+
+  /**
+   * Returns a container for the full-page **background** slot.
+   * Content placed here is painted behind everything else and spans the entire
+   * page, ignoring the margins - ideal for letterhead, certificate
+   * backgrounds, and bleed images.
+   */
+  background(): IContentContainer {
+    return this.backgroundSlot;
+  }
+
+  /**
+   * Returns a container for the full-page **foreground** slot.
+   * Content placed here is painted on top of everything else and spans the
+   * entire page, ignoring the margins - ideal for "DRAFT"/"CONFIDENTIAL"
+   * overlays and stamps.
+   */
+  foreground(): IContentContainer {
+    return this.foregroundSlot;
   }
 }

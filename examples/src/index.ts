@@ -34,6 +34,7 @@ import { generate as imagesTagged } from './elements/images-tagged';
 import { generate as hyperlinks } from './elements/hyperlinks';
 import { generate as shapesAndBorders } from './elements/shapes-and-borders';
 import { generate as qrCodes } from './elements/qr-codes';
+import { generate as barcodes } from './elements/barcodes';
 import { generate as images } from './elements/images';
 import { generate as chartShowcase } from './charting/chart-showcase';
 import { generate as barChart } from './charting/bar-chart';
@@ -456,6 +457,17 @@ function elementsExamples(): ExampleDef[] {
       generate: qrCodes,
       // .NET ships the Fluent variant as the canonical source
       dotnetClass: 'QRCodesExampleFluent',
+    },
+    {
+      id: 'barcodes',
+      name: 'Barcodes',
+      category: 'Elements',
+      description:
+        'Native vector 1D barcodes - Code 128, EAN-13, UPC-A, and ITF-14 - covering retail and logistics ' +
+        'across the UK, EU, and US, with automatic check digits and human-readable labels.',
+      filename: 'barcodes.pdf',
+      generate: barcodes,
+      dotnetClass: 'BarcodesExampleFluent',
     },
     {
       id: 'images',

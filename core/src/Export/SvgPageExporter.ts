@@ -6,6 +6,7 @@ import { collectEmbeddedFonts, collectImagesNeedingDecode } from '../Rendering/P
 import { Image } from '../Elements/Media/Image';
 import { SvgCanvasOptions } from '../Drawing/SvgCanvas';
 import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportOptions';
+import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 
 /**
  * Renders every laid-out page of a document to a standalone SVG string.
@@ -124,17 +125,4 @@ function assemblePageSvg(
 function round(value: number, precision: number): string {
   if (!Number.isFinite(value)) return '0';
   return `${Number(value.toFixed(precision))}`;
-}
-
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-function escapeAttr(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }

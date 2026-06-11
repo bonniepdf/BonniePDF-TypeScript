@@ -4,6 +4,7 @@ import { IElement } from '../Elements/IElement';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { SvgCanvas } from '../Drawing/SvgCanvas';
+import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 
 /** A single laid-out page rendered to an SVG surface. */
 export interface SvgPageRenderOutput {
@@ -171,17 +172,4 @@ export class SvgRenderPipeline {
       ctx.currentY = originalY;
     }
   }
-}
-
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-function escapeAttr(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }

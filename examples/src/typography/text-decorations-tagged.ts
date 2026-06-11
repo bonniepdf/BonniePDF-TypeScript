@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -11,13 +10,15 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Decorations - Tagged (PDF/UA-1)';
@@ -26,7 +27,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, underline, strikethrough';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
 
   const h1 = new Heading('Text Decorations - PDF/UA-1');
   h1.tocIdentifier = 'intro';

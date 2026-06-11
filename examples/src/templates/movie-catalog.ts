@@ -4,7 +4,6 @@ import {
   DocumentMetadata,
   PdfSize,
   PageOrientation,
-  PdfVersion,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -19,6 +18,8 @@ import {
   cellBackground,
   cellPadding,
   cellBorder,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 interface Movie {
@@ -365,15 +366,16 @@ export function generate(): Document {
   const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 40);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Classic Movies Collection';
   metadata.author = 'Classic Cinema Archive';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   // ── Title section ──
   const titleStack = new VerticalStack();

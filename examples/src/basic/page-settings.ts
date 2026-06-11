@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   PdfSize,
   PageOrientation,
   TextBlock,
@@ -11,6 +10,8 @@ import {
   Line,
   Color,
   StandardFonts,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 // PdfSize has no AllSizes static - enumerate the standard sizes explicitly.
@@ -35,18 +36,12 @@ const ALL_SIZES: PdfSize[] = [
   PdfSize.executive,
 ].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
 
-function specLine(label: string, value: string): TextBlock {
-  const b = new TextBlock(`${label.padEnd(15)} ${value}`);
-  b.fontName = StandardFonts.Courier;
-  b.fontSize = 11;
-  b.textColor = Color.slate600;
-  return b;
-}
-
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
     b.fontName = StandardFonts.Helvetica;
@@ -59,7 +54,6 @@ export function generate(): Document {
   metadata.title = 'Standard PDF Page Formats Gallery';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   let isFirstPage = true;
 
@@ -95,16 +89,29 @@ export function generate(): Document {
       content.addChild(divider);
 
       const mmPerInch = 25.4;
-      content.addChild(specLine('Points:', `${current.width.toFixed(2)}pt x ${current.height.toFixed(2)}pt`));
-      content.addChild(
-        specLine('Inches:', `${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`)
+      const points = new TextBlock(
+        `${'Points:'.padEnd(15)} ${current.width.toFixed(2)}pt x ${current.height.toFixed(2)}pt`
       );
-      content.addChild(
-        specLine(
-          'Millimeters:',
-          `${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`
-        )
+      points.fontName = StandardFonts.Courier;
+      points.fontSize = 11;
+      points.textColor = Color.slate600;
+      content.addChild(points);
+
+      const inches = new TextBlock(
+        `${'Inches:'.padEnd(15)} ${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`
       );
+      inches.fontName = StandardFonts.Courier;
+      inches.fontSize = 11;
+      inches.textColor = Color.slate600;
+      content.addChild(inches);
+
+      const millimeters = new TextBlock(
+        `${'Millimeters:'.padEnd(15)} ${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`
+      );
+      millimeters.fontName = StandardFonts.Courier;
+      millimeters.fontSize = 11;
+      millimeters.textColor = Color.slate600;
+      content.addChild(millimeters);
 
       doc.add(content);
     }

@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -11,28 +10,22 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-function sectionHeader(title: string): TextBlock {
-  const b = new TextBlock(title);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 13;
-  b.textColor = Color.indigo600;
-  b.margin = new Thickness(0, 0, 0, 6);
-  return b;
-}
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Justified Text Alignment';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // Title
   const title = new TextBlock('Text Alignment Comparison');
@@ -49,31 +42,68 @@ export function generate(): Document {
     'the margins, creating a clean, professional look commonly seen in books, newspapers, ' +
     'and formal documents.';
 
-  const addSample = (alignment?: TextAlignment): void => {
-    const b = new TextBlock(sampleText);
-    b.fontName = StandardFonts.TimesRoman;
-    b.fontSize = 11;
-    b.textColor = Color.slate700;
-    b.margin = new Thickness(0, 0, 0, 20);
-    if (alignment !== undefined) b.alignment = alignment;
-    doc.add(b);
-  };
-
   // Left aligned (default)
-  doc.add(sectionHeader('Left Aligned (Default)'));
-  addSample();
+  const leftHeader = new TextBlock('Left Aligned (Default)');
+  leftHeader.fontName = StandardFonts.HelveticaBold;
+  leftHeader.fontSize = 13;
+  leftHeader.textColor = Color.indigo600;
+  leftHeader.margin = new Thickness(0, 0, 0, 6);
+  doc.add(leftHeader);
+
+  const leftSample = new TextBlock(sampleText);
+  leftSample.fontName = StandardFonts.TimesRoman;
+  leftSample.fontSize = 11;
+  leftSample.textColor = Color.slate700;
+  leftSample.margin = new Thickness(0, 0, 0, 20);
+  doc.add(leftSample);
 
   // Center aligned
-  doc.add(sectionHeader('Center Aligned'));
-  addSample(TextAlignment.Center);
+  const centerHeader = new TextBlock('Center Aligned');
+  centerHeader.fontName = StandardFonts.HelveticaBold;
+  centerHeader.fontSize = 13;
+  centerHeader.textColor = Color.indigo600;
+  centerHeader.margin = new Thickness(0, 0, 0, 6);
+  doc.add(centerHeader);
+
+  const centerSample = new TextBlock(sampleText);
+  centerSample.fontName = StandardFonts.TimesRoman;
+  centerSample.fontSize = 11;
+  centerSample.textColor = Color.slate700;
+  centerSample.margin = new Thickness(0, 0, 0, 20);
+  centerSample.alignment = TextAlignment.Center;
+  doc.add(centerSample);
 
   // Right aligned
-  doc.add(sectionHeader('Right Aligned'));
-  addSample(TextAlignment.Right);
+  const rightHeader = new TextBlock('Right Aligned');
+  rightHeader.fontName = StandardFonts.HelveticaBold;
+  rightHeader.fontSize = 13;
+  rightHeader.textColor = Color.indigo600;
+  rightHeader.margin = new Thickness(0, 0, 0, 6);
+  doc.add(rightHeader);
+
+  const rightSample = new TextBlock(sampleText);
+  rightSample.fontName = StandardFonts.TimesRoman;
+  rightSample.fontSize = 11;
+  rightSample.textColor = Color.slate700;
+  rightSample.margin = new Thickness(0, 0, 0, 20);
+  rightSample.alignment = TextAlignment.Right;
+  doc.add(rightSample);
 
   // Justified
-  doc.add(sectionHeader('Justified'));
-  addSample(TextAlignment.Justify);
+  const justifiedHeader = new TextBlock('Justified');
+  justifiedHeader.fontName = StandardFonts.HelveticaBold;
+  justifiedHeader.fontSize = 13;
+  justifiedHeader.textColor = Color.indigo600;
+  justifiedHeader.margin = new Thickness(0, 0, 0, 6);
+  doc.add(justifiedHeader);
+
+  const justifiedSample = new TextBlock(sampleText);
+  justifiedSample.fontName = StandardFonts.TimesRoman;
+  justifiedSample.fontSize = 11;
+  justifiedSample.textColor = Color.slate700;
+  justifiedSample.margin = new Thickness(0, 0, 0, 20);
+  justifiedSample.alignment = TextAlignment.Justify;
+  doc.add(justifiedSample);
 
   // Divider
   const divider = new Line();
@@ -81,7 +111,12 @@ export function generate(): Document {
   divider.thickness = 1;
   doc.add(divider);
 
-  doc.add(sectionHeader('Book-Style Justified Paragraphs'));
+  const bookHeader = new TextBlock('Book-Style Justified Paragraphs');
+  bookHeader.fontName = StandardFonts.HelveticaBold;
+  bookHeader.fontSize = 13;
+  bookHeader.textColor = Color.indigo600;
+  bookHeader.margin = new Thickness(0, 0, 0, 6);
+  doc.add(bookHeader);
 
   const paragraphs = [
     'In the beginning, there was only the vast emptiness of space, stretching infinitely in ' +

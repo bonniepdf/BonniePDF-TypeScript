@@ -36,7 +36,8 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
+  PdfAConformance,
+  AccessibilityMode,
   TextBlock,
   TextStyle,
   Color,
@@ -62,35 +63,18 @@ const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 //   const FONT = 'C:\\Windows\\Fonts\\arial.ttf';
 //   const FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
 
-function heading(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = FONT;
-  b.fontSize = 12;
-  b.textColor = Color.slate700;
-  b.margin = new Thickness(0, 0, 0, 6);
-  return b;
-}
-
-function sym(text: string, bottomMargin = 0): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = FONT;
-  b.fontSize = 11;
-  b.textColor = Color.slate600;
-  if (bottomMargin) b.margin = new Thickness(0, 0, 0, bottomMargin);
-  return b;
-}
-
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Embedded Font Example';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('TrueType Font Embedding Demo');
   title.fontName = FONT;
@@ -107,53 +91,118 @@ export function generate(): Document {
   doc.add(subtitle);
 
   // ── Unicode Symbols (Latin-1 range - covered by NotoSans) ────────────────
-  doc.add(heading('Unicode Symbols:'));
-  doc.add(sym('• Bullet point (U+2022)'));
-  doc.add(sym('© Copyright (U+00A9)   ® Registered (U+00AE)   ™ Trademark (U+2122)'));
-  doc.add(sym('– En-dash (U+2013)  - Em-dash (U+2014)'));
-  doc.add(sym('± Plus-minus  × Multiply  ÷ Divide', 12));
+  const unicodeHeading = new TextBlock('Unicode Symbols:');
+  unicodeHeading.fontName = FONT;
+  unicodeHeading.fontSize = 12;
+  unicodeHeading.textColor = Color.slate700;
+  unicodeHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(unicodeHeading);
+  const bulletSymbol = new TextBlock('• Bullet point (U+2022)');
+  bulletSymbol.fontName = FONT;
+  bulletSymbol.fontSize = 11;
+  bulletSymbol.textColor = Color.slate600;
+  doc.add(bulletSymbol);
+  const copyrightSymbol = new TextBlock('© Copyright (U+00A9)   ® Registered (U+00AE)   ™ Trademark (U+2122)');
+  copyrightSymbol.fontName = FONT;
+  copyrightSymbol.fontSize = 11;
+  copyrightSymbol.textColor = Color.slate600;
+  doc.add(copyrightSymbol);
+  const dashSymbol = new TextBlock('– En-dash (U+2013)  - Em-dash (U+2014)');
+  dashSymbol.fontName = FONT;
+  dashSymbol.fontSize = 11;
+  dashSymbol.textColor = Color.slate600;
+  doc.add(dashSymbol);
+  const operationSymbol = new TextBlock('± Plus-minus  × Multiply  ÷ Divide');
+  operationSymbol.fontName = FONT;
+  operationSymbol.fontSize = 11;
+  operationSymbol.textColor = Color.slate600;
+  operationSymbol.margin = new Thickness(0, 0, 0, 12);
+  doc.add(operationSymbol);
 
   // ── Currency Symbols (covered by NotoSans) ────────────────────────────────
-  doc.add(heading('Currency Symbols:'));
-  doc.add(sym('€ Euro  £ Pound  ¥ Yen  ₹ Rupee', 12));
+  const currencyHeading = new TextBlock('Currency Symbols:');
+  currencyHeading.fontName = FONT;
+  currencyHeading.fontSize = 12;
+  currencyHeading.textColor = Color.slate700;
+  currencyHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(currencyHeading);
+  const currencySymbols = new TextBlock('€ Euro  £ Pound  ¥ Yen  ₹ Rupee');
+  currencySymbols.fontName = FONT;
+  currencySymbols.fontSize = 11;
+  currencySymbols.textColor = Color.slate600;
+  currencySymbols.margin = new Thickness(0, 0, 0, 12);
+  doc.add(currencySymbols);
 
   // ── Arrows & Math (U+2190–U+22FF - NotoSansMath) ────────────────────────
   // These blocks are absent from NotoSansSymbols and NotoSansSymbols2.
   // NotoSansMath explicitly covers both Arrows and Mathematical Operators.
-  const mathBlock = (text: string, bottom = 0): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = MATH_FONT;
-    b.fontSize = 11;
-    b.textColor = Color.slate600;
-    if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
-    return b;
-  };
   // ── Dingbats & Misc Symbols (U+2600–U+27FF - NotoSansSymbols2) ───────────
-  const symBlock = (text: string, bottom = 0): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = SYMBOLS_FONT;
-    b.fontSize = 11;
-    b.textColor = Color.slate600;
-    if (bottom) b.margin = new Thickness(0, 0, 0, bottom);
-    return b;
-  };
 
-  doc.add(heading('Arrows (via NotoSansMath):'));
-  doc.add(mathBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪', 8));
+  const arrowsHeading = new TextBlock('Arrows (via NotoSansMath):');
+  arrowsHeading.fontName = FONT;
+  arrowsHeading.fontSize = 12;
+  arrowsHeading.textColor = Color.slate700;
+  arrowsHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(arrowsHeading);
+  const arrowsLine = new TextBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪');
+  arrowsLine.fontName = MATH_FONT;
+  arrowsLine.fontSize = 11;
+  arrowsLine.textColor = Color.slate600;
+  arrowsLine.margin = new Thickness(0, 0, 0, 8);
+  doc.add(arrowsLine);
 
-  doc.add(heading('Mathematical Symbols (via NotoSansMath):'));
-  doc.add(mathBlock('≠ Not equal   ≤ Less-equal   ≥ Greater-equal   ∞ Infinity'));
-  doc.add(mathBlock('∑ Sum   ∏ Product   √ Root   ∫ Integral   ± Plus-minus', 8));
+  const mathHeading = new TextBlock('Mathematical Symbols (via NotoSansMath):');
+  mathHeading.fontName = FONT;
+  mathHeading.fontSize = 12;
+  mathHeading.textColor = Color.slate700;
+  mathHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(mathHeading);
+  const relationsLine = new TextBlock('≠ Not equal   ≤ Less-equal   ≥ Greater-equal   ∞ Infinity');
+  relationsLine.fontName = MATH_FONT;
+  relationsLine.fontSize = 11;
+  relationsLine.textColor = Color.slate600;
+  doc.add(relationsLine);
+  const operatorsLine = new TextBlock('∑ Sum   ∏ Product   √ Root   ∫ Integral   ± Plus-minus');
+  operatorsLine.fontName = MATH_FONT;
+  operatorsLine.fontSize = 11;
+  operatorsLine.textColor = Color.slate600;
+  operatorsLine.margin = new Thickness(0, 0, 0, 8);
+  doc.add(operatorsLine);
 
-  doc.add(heading('Dingbats (via NotoSansSymbols2):'));
-  doc.add(symBlock('✓ Check   ✗ Cross   ★ Star   ♠ Spade   ♥ Heart   ♦ Diamond   ♣ Club', 12));
+  const dingbatsHeading = new TextBlock('Dingbats (via NotoSansSymbols2):');
+  dingbatsHeading.fontName = FONT;
+  dingbatsHeading.fontSize = 12;
+  dingbatsHeading.textColor = Color.slate700;
+  dingbatsHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(dingbatsHeading);
+  const dingbatsLine = new TextBlock('✓ Check   ✗ Cross   ★ Star   ♠ Spade   ♥ Heart   ♦ Diamond   ♣ Club');
+  dingbatsLine.fontName = SYMBOLS_FONT;
+  dingbatsLine.fontSize = 11;
+  dingbatsLine.textColor = Color.slate600;
+  dingbatsLine.margin = new Thickness(0, 0, 0, 12);
+  doc.add(dingbatsLine);
 
   // ── Greek Letters ──────────────────────────────────────────────────────────
-  doc.add(heading('Greek Letters:'));
-  doc.add(sym('α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega', 16));
+  const greekHeading = new TextBlock('Greek Letters:');
+  greekHeading.fontName = FONT;
+  greekHeading.fontSize = 12;
+  greekHeading.textColor = Color.slate700;
+  greekHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(greekHeading);
+  const greekLine = new TextBlock('α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega');
+  greekLine.fontName = FONT;
+  greekLine.fontSize = 11;
+  greekLine.textColor = Color.slate600;
+  greekLine.margin = new Thickness(0, 0, 0, 16);
+  doc.add(greekLine);
 
   // ── Mixed fonts ────────────────────────────────────────────────────────────
-  doc.add(heading('Mixed Font Demonstration:'));
+  const mixedHeading = new TextBlock('Mixed Font Demonstration:');
+  mixedHeading.fontName = FONT;
+  mixedHeading.fontSize = 12;
+  mixedHeading.textColor = Color.slate700;
+  mixedHeading.margin = new Thickness(0, 0, 0, 6);
+  doc.add(mixedHeading);
 
   const stdLine = new TextBlock('This line uses standard Helvetica (Type1, not embedded)');
   stdLine.fontName = StandardFonts.Helvetica;

@@ -13,7 +13,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -26,6 +25,7 @@ import {
   StandardFonts,
   HorizontalStack,
   WidthDistribution,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
@@ -42,15 +42,6 @@ const SENTENCES = [
   'The fog had come in off the river during the night and lay thick across the lower streets, muffling the sounds of the waking city in grey silence.',
   'What we call courage, she thought, is often only the inability to clearly imagine the consequences of what we are about to do.',
 ];
-
-function makeParagraph(seed: number): string {
-  const count = 4 + (seed % 4);
-  const parts: string[] = [];
-  for (let i = 0; i < count; i++) {
-    parts.push(SENTENCES[(seed + i) % SENTENCES.length]);
-  }
-  return parts.join(' ');
-}
 
 interface Chapter {
   tocId: string;
@@ -94,124 +85,14 @@ const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
   },
 ];
 
-// ── Rendering helpers ──────────────────────────────────────────────────────
-
-function addTitlePage(doc: Document): void {
-  const t = new TextBlock('A TALE OF TWO CITIES');
-  t.fontName = StandardFonts.TimesBold;
-  t.fontSize = 28;
-  t.textColor = Color.slate900;
-  t.alignment = TextAlignment.Center;
-  t.margin = new Thickness(0, 100, 0, 12);
-  doc.add(t);
-
-  const sub = new TextBlock('A Story of the French Revolution');
-  sub.fontName = StandardFonts.TimesItalic;
-  sub.fontSize = 15;
-  sub.textColor = Color.slate600;
-  sub.alignment = TextAlignment.Center;
-  sub.margin = new Thickness(0, 0, 0, 40);
-  doc.add(sub);
-
-  const rule = new TextBlock('---------------');
-  rule.fontName = StandardFonts.TimesRoman;
-  rule.fontSize = 13;
-  rule.textColor = Color.slate400;
-  rule.alignment = TextAlignment.Center;
-  rule.margin = new Thickness(0, 0, 0, 40);
-  doc.add(rule);
-
-  const author = new TextBlock('Charles Dickens');
-  author.fontName = StandardFonts.TimesBold;
-  author.fontSize = 20;
-  author.textColor = Color.slate800;
-  author.alignment = TextAlignment.Center;
-  author.margin = new Thickness(0, 0, 0, 60);
-  doc.add(author);
-
-  const edition = new TextBlock('Project Gutenberg Edition · eBook #98');
-  edition.fontName = StandardFonts.TimesRoman;
-  edition.fontSize = 10;
-  edition.textColor = Color.slate400;
-  edition.alignment = TextAlignment.Center;
-  edition.margin = new Thickness(0, 0, 0, 4);
-  doc.add(edition);
-
-  const pd = new TextBlock('Public domain - free to read, copy, and share.');
-  pd.fontName = StandardFonts.TimesItalic;
-  pd.fontSize = 9;
-  pd.textColor = Color.slate400;
-  pd.alignment = TextAlignment.Center;
-  doc.add(pd);
-}
-
-function addBookHeading(doc: Document, title: string, tocId: string): void {
-  const top = new TextBlock('---------------');
-  top.fontName = StandardFonts.TimesRoman;
-  top.fontSize = 11;
-  top.textColor = Color.slate300;
-  top.alignment = TextAlignment.Center;
-  top.margin = new Thickness(0, 56, 0, 14);
-  doc.add(top);
-
-  const h = new Heading(title.toUpperCase());
-  h.tocIdentifier = tocId;
-  h.fontName = StandardFonts.TimesBold;
-  h.fontSize = 14;
-  h.textColor = Color.slate800;
-  h.alignment = TextAlignment.Center;
-  h.margin = new Thickness(0, 0, 0, 14);
-  doc.add(h);
-
-  const bot = new TextBlock('---------------');
-  bot.fontName = StandardFonts.TimesRoman;
-  bot.fontSize = 11;
-  bot.textColor = Color.slate300;
-  bot.alignment = TextAlignment.Center;
-  bot.margin = new Thickness(0, 0, 0, 32);
-  doc.add(bot);
-}
-
-function addChapterHeading(doc: Document, number: string, title: string, tocId: string): void {
-  const num = new TextBlock(number);
-  num.fontName = StandardFonts.TimesBold;
-  num.fontSize = 10;
-  num.textColor = Color.slate500;
-  num.alignment = TextAlignment.Center;
-  num.margin = new Thickness(0, 32, 0, 6);
-  doc.add(num);
-
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.fontName = StandardFonts.TimesBold;
-  h.fontSize = 17;
-  h.textColor = Color.slate900;
-  h.alignment = TextAlignment.Center;
-  h.margin = new Thickness(0, 0, 0, 18);
-  doc.add(h);
-}
-
-let paraIndex = 0;
-
-function addParagraph(doc: Document): void {
-  const b = new TextBlock(makeParagraph(paraIndex++));
-  b.fontName = StandardFonts.TimesRoman;
-  b.fontSize = 11;
-  b.textColor = Color.slate900;
-  b.alignment = TextAlignment.Justify;
-  b.margin = new Thickness(0, 0, 0, 7);
-  doc.add(b);
-}
-
 // ── Entry point ────────────────────────────────────────────────────────────
 
 export function generate(): Document {
-  paraIndex = 0;
-
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
   settings.margin = 72;
   settings.displayDocTitle = true;
 
@@ -256,10 +137,54 @@ export function generate(): Document {
   metadata.subject = 'Project Gutenberg eBook #98 - A public domain classic.';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   // ── Title page ─────────────────────────────────────────────────────────
-  addTitlePage(doc);
+  const titlePageTitle = new TextBlock('A TALE OF TWO CITIES');
+  titlePageTitle.fontName = StandardFonts.TimesBold;
+  titlePageTitle.fontSize = 28;
+  titlePageTitle.textColor = Color.slate900;
+  titlePageTitle.alignment = TextAlignment.Center;
+  titlePageTitle.margin = new Thickness(0, 100, 0, 12);
+  doc.add(titlePageTitle);
+
+  const titlePageSubtitle = new TextBlock('A Story of the French Revolution');
+  titlePageSubtitle.fontName = StandardFonts.TimesItalic;
+  titlePageSubtitle.fontSize = 15;
+  titlePageSubtitle.textColor = Color.slate600;
+  titlePageSubtitle.alignment = TextAlignment.Center;
+  titlePageSubtitle.margin = new Thickness(0, 0, 0, 40);
+  doc.add(titlePageSubtitle);
+
+  const titlePageRule = new TextBlock('---------------');
+  titlePageRule.fontName = StandardFonts.TimesRoman;
+  titlePageRule.fontSize = 13;
+  titlePageRule.textColor = Color.slate400;
+  titlePageRule.alignment = TextAlignment.Center;
+  titlePageRule.margin = new Thickness(0, 0, 0, 40);
+  doc.add(titlePageRule);
+
+  const titlePageAuthor = new TextBlock('Charles Dickens');
+  titlePageAuthor.fontName = StandardFonts.TimesBold;
+  titlePageAuthor.fontSize = 20;
+  titlePageAuthor.textColor = Color.slate800;
+  titlePageAuthor.alignment = TextAlignment.Center;
+  titlePageAuthor.margin = new Thickness(0, 0, 0, 60);
+  doc.add(titlePageAuthor);
+
+  const titlePageEdition = new TextBlock('Project Gutenberg Edition · eBook #98');
+  titlePageEdition.fontName = StandardFonts.TimesRoman;
+  titlePageEdition.fontSize = 10;
+  titlePageEdition.textColor = Color.slate400;
+  titlePageEdition.alignment = TextAlignment.Center;
+  titlePageEdition.margin = new Thickness(0, 0, 0, 4);
+  doc.add(titlePageEdition);
+
+  const titlePagePublicDomain = new TextBlock('Public domain - free to read, copy, and share.');
+  titlePagePublicDomain.fontName = StandardFonts.TimesItalic;
+  titlePagePublicDomain.fontSize = 9;
+  titlePagePublicDomain.textColor = Color.slate400;
+  titlePagePublicDomain.alignment = TextAlignment.Center;
+  doc.add(titlePagePublicDomain);
   doc.addPage();
 
   // ── Table of Contents ─────────────────────────────────────────────────
@@ -288,11 +213,67 @@ export function generate(): Document {
   doc.addPage();
 
   // ── Body ──────────────────────────────────────────────────────────────
+  let paraIndex = 0;
   for (const book of BOOKS) {
-    addBookHeading(doc, book.title, book.tocId);
+    const bookTopRule = new TextBlock('---------------');
+    bookTopRule.fontName = StandardFonts.TimesRoman;
+    bookTopRule.fontSize = 11;
+    bookTopRule.textColor = Color.slate300;
+    bookTopRule.alignment = TextAlignment.Center;
+    bookTopRule.margin = new Thickness(0, 56, 0, 14);
+    doc.add(bookTopRule);
+
+    const bookHeading = new Heading(book.title.toUpperCase());
+    bookHeading.tocIdentifier = book.tocId;
+    bookHeading.fontName = StandardFonts.TimesBold;
+    bookHeading.fontSize = 14;
+    bookHeading.textColor = Color.slate800;
+    bookHeading.alignment = TextAlignment.Center;
+    bookHeading.margin = new Thickness(0, 0, 0, 14);
+    doc.add(bookHeading);
+
+    const bookBottomRule = new TextBlock('---------------');
+    bookBottomRule.fontName = StandardFonts.TimesRoman;
+    bookBottomRule.fontSize = 11;
+    bookBottomRule.textColor = Color.slate300;
+    bookBottomRule.alignment = TextAlignment.Center;
+    bookBottomRule.margin = new Thickness(0, 0, 0, 32);
+    doc.add(bookBottomRule);
+
     for (const ch of book.chapters) {
-      addChapterHeading(doc, ch.number, ch.title, ch.tocId);
-      for (let i = 0; i < ch.paragraphCount; i++) addParagraph(doc);
+      const chapterNumber = new TextBlock(ch.number);
+      chapterNumber.fontName = StandardFonts.TimesBold;
+      chapterNumber.fontSize = 10;
+      chapterNumber.textColor = Color.slate500;
+      chapterNumber.alignment = TextAlignment.Center;
+      chapterNumber.margin = new Thickness(0, 32, 0, 6);
+      doc.add(chapterNumber);
+
+      const chapterHeading = new Heading(ch.title);
+      chapterHeading.tocIdentifier = ch.tocId;
+      chapterHeading.fontName = StandardFonts.TimesBold;
+      chapterHeading.fontSize = 17;
+      chapterHeading.textColor = Color.slate900;
+      chapterHeading.alignment = TextAlignment.Center;
+      chapterHeading.margin = new Thickness(0, 0, 0, 18);
+      doc.add(chapterHeading);
+
+      for (let i = 0; i < ch.paragraphCount; i++) {
+        const sentenceCount = 4 + (paraIndex % 4);
+        const paragraphParts: string[] = [];
+        for (let j = 0; j < sentenceCount; j++) {
+          paragraphParts.push(SENTENCES[(paraIndex + j) % SENTENCES.length]);
+        }
+        paraIndex++;
+
+        const paragraph = new TextBlock(paragraphParts.join(' '));
+        paragraph.fontName = StandardFonts.TimesRoman;
+        paragraph.fontSize = 11;
+        paragraph.textColor = Color.slate900;
+        paragraph.alignment = TextAlignment.Justify;
+        paragraph.margin = new Thickness(0, 0, 0, 7);
+        doc.add(paragraph);
+      }
     }
   }
 

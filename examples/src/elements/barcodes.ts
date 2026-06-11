@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   TextBlock,
   TextStyle,
   VerticalStack,
@@ -24,7 +23,6 @@ import {
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.version = PdfVersion.Pdf17;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

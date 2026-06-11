@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -12,13 +11,15 @@ import {
   Thickness,
   StandardFonts,
   Placeholders,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'VerticalStack Overflow - Tagged (PDF/UA-1)';
@@ -27,7 +28,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, layout, vertical stack, pagination';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
   const h1 = new Heading('Item Catalogue - PDF/UA-1');
   h1.tocIdentifier = 'intro';

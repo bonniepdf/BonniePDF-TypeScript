@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -19,74 +18,22 @@ import {
   BorderColors,
   StandardFonts,
   WidthDistribution,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-function sectionHeader(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 16;
-  b.textColor = Color.indigo600;
-  b.margin = new Thickness(0, 0, 0, 10);
-  return b;
-}
-
-function divider(): Line {
-  const l = new Line();
-  l.color = Color.slate200;
-  l.thickness = 1;
-  l.margin = new Thickness(0, 20, 0, 20);
-  return l;
-}
-
-function qrCard(data: string, size: number, ecc: QrEcc, eccLabel: string, eccDetail: string): VerticalStack {
-  const qr = new QRCode();
-  qr.data = data;
-  qr.size = size;
-  qr.errorCorrection = ecc;
-  qr.quietZone = 1;
-
-  const qrWrap = new Container();
-  qrWrap.backgroundColor = Color.slate50;
-  qrWrap.border = new Border(1);
-  qrWrap.borderColors = new BorderColors(Color.slate200);
-  qrWrap.padding = new Thickness(10);
-  qrWrap.child = qr;
-
-  const label = new TextBlock(eccLabel);
-  label.fontName = StandardFonts.HelveticaBold;
-  label.alignment = TextAlignment.Center;
-  label.margin = new Thickness(0, 8, 0, 0);
-
-  const detail = new TextBlock(eccDetail);
-  detail.fontSize = 9;
-  detail.textColor = Color.slate500;
-  detail.alignment = TextAlignment.Center;
-
-  const url = new TextBlock(data);
-  url.fontSize = 8;
-  url.textColor = Color.slate400;
-  url.alignment = TextAlignment.Center;
-  url.margin = new Thickness(0, 4, 0, 0);
-
-  const col = new VerticalStack();
-  col.addChild(qrWrap);
-  col.addChild(label);
-  col.addChild(detail);
-  col.addChild(url);
-  return col;
-}
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'QR Codes';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Title ──
   const title = new TextBlock('QR Code Generator');
@@ -105,7 +52,12 @@ export function generate(): Document {
   doc.add(intro);
 
   // ── Section 1: Basic QR Code ──
-  doc.add(sectionHeader('Basic QR Code'));
+  const basicHeader = new TextBlock('Basic QR Code');
+  basicHeader.fontName = StandardFonts.HelveticaBold;
+  basicHeader.fontSize = 16;
+  basicHeader.textColor = Color.indigo600;
+  basicHeader.margin = new Thickness(0, 0, 0, 10);
+  doc.add(basicHeader);
 
   const basicRow = new HorizontalStack();
   basicRow.spacing = 20;
@@ -137,10 +89,19 @@ export function generate(): Document {
   basicRow.addChild(basicDetails, 2);
   doc.add(basicRow);
 
-  doc.add(divider());
+  const basicDivider = new Line();
+  basicDivider.color = Color.slate200;
+  basicDivider.thickness = 1;
+  basicDivider.margin = new Thickness(0, 20, 0, 20);
+  doc.add(basicDivider);
 
   // ── Section 2: Error correction levels ──
-  doc.add(sectionHeader('Error Correction Levels'));
+  const eccHeader = new TextBlock('Error Correction Levels');
+  eccHeader.fontName = StandardFonts.HelveticaBold;
+  eccHeader.fontSize = 16;
+  eccHeader.textColor = Color.indigo600;
+  eccHeader.margin = new Thickness(0, 0, 0, 10);
+  doc.add(eccHeader);
 
   const eccIntro = new TextBlock(
     'Higher error correction levels provide more redundancy at the cost of denser modules and ' +
@@ -154,16 +115,63 @@ export function generate(): Document {
   eccRow.widthDistribution = WidthDistribution.Equal;
 
   const urlData = 'https://github.com/bonniepdf';
-  eccRow.addChild(qrCard(urlData, 100, QrEcc.Low, 'Low', '~7% restoration'));
-  eccRow.addChild(qrCard(urlData, 100, QrEcc.Medium, 'Medium', '~15% restoration'));
-  eccRow.addChild(qrCard(urlData, 100, QrEcc.Quartile, 'Quartile', '~25% restoration'));
-  eccRow.addChild(qrCard(urlData, 100, QrEcc.High, 'High', '~30% restoration'));
+  for (const [ecc, eccLabel, eccDetail] of [
+    [QrEcc.Low, 'Low', '~7% restoration'],
+    [QrEcc.Medium, 'Medium', '~15% restoration'],
+    [QrEcc.Quartile, 'Quartile', '~25% restoration'],
+    [QrEcc.High, 'High', '~30% restoration'],
+  ] as [QrEcc, string, string][]) {
+    const qr = new QRCode();
+    qr.data = urlData;
+    qr.size = 100;
+    qr.errorCorrection = ecc;
+    qr.quietZone = 1;
+
+    const qrWrap = new Container();
+    qrWrap.backgroundColor = Color.slate50;
+    qrWrap.border = new Border(1);
+    qrWrap.borderColors = new BorderColors(Color.slate200);
+    qrWrap.padding = new Thickness(10);
+    qrWrap.child = qr;
+
+    const label = new TextBlock(eccLabel);
+    label.fontName = StandardFonts.HelveticaBold;
+    label.alignment = TextAlignment.Center;
+    label.margin = new Thickness(0, 8, 0, 0);
+
+    const detail = new TextBlock(eccDetail);
+    detail.fontSize = 9;
+    detail.textColor = Color.slate500;
+    detail.alignment = TextAlignment.Center;
+
+    const url = new TextBlock(urlData);
+    url.fontSize = 8;
+    url.textColor = Color.slate400;
+    url.alignment = TextAlignment.Center;
+    url.margin = new Thickness(0, 4, 0, 0);
+
+    const col = new VerticalStack();
+    col.addChild(qrWrap);
+    col.addChild(label);
+    col.addChild(detail);
+    col.addChild(url);
+    eccRow.addChild(col);
+  }
   doc.add(eccRow);
 
-  doc.add(divider());
+  const eccDivider = new Line();
+  eccDivider.color = Color.slate200;
+  eccDivider.thickness = 1;
+  eccDivider.margin = new Thickness(0, 20, 0, 20);
+  doc.add(eccDivider);
 
   // ── Section 3: Colors & backgrounds ──
-  doc.add(sectionHeader('Colors & Backgrounds'));
+  const colorsHeader = new TextBlock('Colors & Backgrounds');
+  colorsHeader.fontName = StandardFonts.HelveticaBold;
+  colorsHeader.fontSize = 16;
+  colorsHeader.textColor = Color.indigo600;
+  colorsHeader.margin = new Thickness(0, 0, 0, 10);
+  doc.add(colorsHeader);
 
   const colorRow = new HorizontalStack();
   colorRow.spacing = 20;

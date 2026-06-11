@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   Heading,
@@ -10,6 +9,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 /**
@@ -32,7 +32,7 @@ export function generate(): Document {
   doc.metadata.keywords = 'pdf, pdf/ua, accessibility, tagged, BonniePDF';
 
   doc.settings = new DocumentSettings();
-  doc.settings.version = PdfVersion.Pdf17;
+  doc.settings.conformance = PdfAConformance.PdfA2a;
   doc.settings.accessibility = AccessibilityMode.PdfUa1;
   doc.settings.language = 'en-GB';
 

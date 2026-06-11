@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -13,13 +12,15 @@ import {
   Thickness,
   StandardFonts,
   WidthDistribution,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Horizontal Stacks - Tagged (PDF/UA-1)';
@@ -28,7 +29,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, layout, horizontal stack, columns';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const h1 = new Heading('Horizontal Stack Layouts - PDF/UA-1');
   h1.tocIdentifier = 'intro';

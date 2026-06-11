@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -12,6 +11,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const SECTIONS: [string, string][] = [
@@ -51,9 +51,10 @@ const SECTIONS: [string, string][] = [
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   settings.headerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`);
@@ -80,7 +81,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, headers, footers, page numbers';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const h1 = new Heading('Headers & Footers - PDF/UA-1');
   h1.tocIdentifier = 'intro';

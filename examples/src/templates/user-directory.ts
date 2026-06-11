@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   PageOrientation,
   TextBlock,
   TextStyle,
@@ -21,6 +20,8 @@ import {
   cellBackground,
   cellPadding,
   cellBorder,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 // ── Mock user data ─────────────────────────────────────────────────────────────
@@ -35,41 +36,14 @@ interface User {
   status: 'Active' | 'Inactive' | 'Pending';
 }
 
-function getMockUsers(): User[] {
-  const statuses: User['status'][] = ['Active', 'Active', 'Active', 'Inactive', 'Pending'];
-  const source = Placeholders.withSeed(100);
-
-  return Array.from({ length: 50 }, (_, i): User => {
-    const first = source.firstName();
-    const last = source.lastName();
-    return {
-      id: `USR-${String(i + 1).padStart(3, '0')}`,
-      name: `${first} ${last}`,
-      email: `${first.toLowerCase()}.${last.toLowerCase()}@company.com`,
-      department: source.department(),
-      role: source.role(),
-      location: source.location(),
-      status: statuses[i % statuses.length],
-    };
-  });
-}
-
-// ── Helper ────────────────────────────────────────────────────────────────────
-
-function hdr(text: string, center = false): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  if (center) b.alignment = TextAlignment.Center;
-  return b;
-}
-
 // ── Generator ─────────────────────────────────────────────────────────────────
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 40);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
@@ -79,7 +53,6 @@ export function generate(): Document {
   metadata.author = 'Company HR';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   // Title
   const title = new TextBlock('User Directory');
@@ -106,17 +79,48 @@ export function generate(): Document {
   usersTable.headerTextColor = Color.white;
   usersTable.repeatHeadersOnNewPage = true;
 
-  usersTable.addHeader(
-    hdr('ID', true),
-    hdr('Name'),
-    hdr('Email'),
-    hdr('Department'),
-    hdr('Role'),
-    hdr('Location'),
-    hdr('Status', true)
-  );
+  const idText = new TextBlock('ID');
+  idText.fontName = StandardFonts.HelveticaBold;
+  idText.fontSize = 9;
+  idText.alignment = TextAlignment.Center;
+  const nameText = new TextBlock('Name');
+  nameText.fontName = StandardFonts.HelveticaBold;
+  nameText.fontSize = 9;
+  const emailText = new TextBlock('Email');
+  emailText.fontName = StandardFonts.HelveticaBold;
+  emailText.fontSize = 9;
+  const departmentText = new TextBlock('Department');
+  departmentText.fontName = StandardFonts.HelveticaBold;
+  departmentText.fontSize = 9;
+  const roleText = new TextBlock('Role');
+  roleText.fontName = StandardFonts.HelveticaBold;
+  roleText.fontSize = 9;
+  const locationText = new TextBlock('Location');
+  locationText.fontName = StandardFonts.HelveticaBold;
+  locationText.fontSize = 9;
+  const statusHeaderText = new TextBlock('Status');
+  statusHeaderText.fontName = StandardFonts.HelveticaBold;
+  statusHeaderText.fontSize = 9;
+  statusHeaderText.alignment = TextAlignment.Center;
+  usersTable.addHeader(idText, nameText, emailText, departmentText, roleText, locationText, statusHeaderText);
 
-  const users = getMockUsers();
+  const statuses: User['status'][] = ['Active', 'Active', 'Active', 'Inactive', 'Pending'];
+  const source = Placeholders.withSeed(100);
+  const users: User[] = [];
+  for (let i = 0; i < 50; i++) {
+    const first = source.firstName();
+    const last = source.lastName();
+    users.push({
+      id: `USR-${String(i + 1).padStart(3, '0')}`,
+      name: `${first} ${last}`,
+      email: `${first.toLowerCase()}.${last.toLowerCase()}@company.com`,
+      department: source.department(),
+      role: source.role(),
+      location: source.location(),
+      status: statuses[i % statuses.length],
+    });
+  }
+
   users.forEach((user, rowIndex) => {
     const statusColor =
       user.status === 'Active' ? Color.green600 : user.status === 'Inactive' ? Color.gray500 : Color.amber600;

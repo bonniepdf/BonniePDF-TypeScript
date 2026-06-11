@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   AccessibilityMode,
   PageOrientation,
   TextBlock,
@@ -23,105 +22,71 @@ import {
   ChartDataPoint,
   ChartElement,
   BarChart,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
-import { DateHelper } from './date-helpers.ts';
-
 // ── Brand colours - drawn from the BonniePDF logo palette ────────────────────
-const Espresso = Color.fromHex('#442714');
-const Terra = Color.fromHex('#956b51');
-const Brown = Color.fromHex('#805e48');
-const Sand = Color.fromHex('#d2c8b7');
-const Cream = Color.fromHex('#f4f1ef');
-const HeaderMute = Color.fromHex('#b99a88');
-const RowAlt = Color.fromHex('#e8e0d8');
-const DeltaPos = Color.fromHex('#2d7a3a');
-const DeltaNeg = Color.fromHex('#b94040');
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function tb(text: string, font: string, size: number, color: Color, margin?: Thickness): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = font;
-  b.fontSize = size;
-  b.textColor = color;
-  if (margin) b.margin = margin;
-  return b;
-}
-
-function ta(b: TextBlock, a: TextAlignment): TextBlock {
-  b.alignment = a;
-  return b;
-}
-function alignLeft(b: TextBlock): TextBlock {
-  return ta(b, TextAlignment.Left);
-}
-function alignRight(b: TextBlock): TextBlock {
-  return ta(b, TextAlignment.Right);
-}
-
-/** Thin horizontal rule used as a section divider. */
-function rule(color: Color): Container {
-  const spacer = new TextBlock(' ');
-  spacer.fontSize = 1;
-  const c = new Container();
-  c.backgroundColor = color;
-  c.padding = new Thickness(0, 0.75, 0, 0);
-  c.child = spacer;
-  return c;
-}
-
-/** One KPI card for the metrics strip. */
-function kpiCell(value: string, label: string, delta: string, positive: boolean, addLeftBorder: boolean): Container {
-  const stack = new VerticalStack();
-  stack.addChild(tb(value, StandardFonts.HelveticaBold, 18, Espresso));
-  stack.addChild(tb(label.toUpperCase(), StandardFonts.Helvetica, 7, Brown, new Thickness(0, 4, 0, 0)));
-  stack.addChild(tb(delta, StandardFonts.HelveticaBold, 7, positive ? DeltaPos : DeltaNeg, new Thickness(0, 4, 0, 0)));
-
-  const c = new Container();
-  c.child = stack;
-  c.backgroundColor = Cream;
-  c.padding = new Thickness(20, 16, 20, 16);
-  if (addLeftBorder) {
-    c.border = Border.leftOnly(0.75);
-    c.borderColors = BorderColors.leftOnly(Sand);
-  }
-  return c;
-}
+const ESPRESSO = Color.fromHex('#442714');
+const TERRA = Color.fromHex('#956b51');
+const BROWN = Color.fromHex('#805e48');
+const SAND = Color.fromHex('#d2c8b7');
+const CREAM = Color.fromHex('#f4f1ef');
+const HEADER_MUTE = Color.fromHex('#b99a88');
+const ROW_ALT = Color.fromHex('#e8e0d8');
+const DELTA_POS = Color.fromHex('#2d7a3a');
+const DELTA_NEG = Color.fromHex('#b94040');
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function generate(): Document {
   // Landscape, zero margin - layout elements carry their own padding
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 0);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
-  const { quarter, year } = DateHelper.previousQuarter();
-  const title = DateHelper.reportTitle(quarter, year);
-  const generated = DateHelper.generatedStamp();
+  const today = new Date();
+  const currentQuarter = Math.floor(today.getMonth() / 3) + 1;
+  const quarter = currentQuarter === 1 ? 4 : currentQuarter - 1;
+  const year = currentQuarter === 1 ? today.getFullYear() - 1 : today.getFullYear();
+  const quarterLabel = `Q${quarter} ${year}`;
+  const title = `${quarterLabel} Financial Report`;
+  const generated = `Generated ${new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(today)}`;
 
   const metadata = new DocumentMetadata();
   metadata.title = title;
   metadata.author = 'Acme Corporation';
-  metadata.subject = `${DateHelper.quarterLabel(quarter, year)} financial dashboard - KPIs, monthly revenue chart, and product breakdown`;
+  metadata.subject = `${quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown`;
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
 
   // ════════════════════════════════════════════════════════════════════════════
   // 1.  Header bar
   // ════════════════════════════════════════════════════════════════════════════
 
   const companyStack = new VerticalStack();
-  companyStack.addChild(tb('ACME CORPORATION', StandardFonts.HelveticaBold, 14, Cream));
-  companyStack.addChild(
-    tb('Confidential - Internal Use Only', StandardFonts.Helvetica, 8, HeaderMute, new Thickness(0, 5, 0, 0))
-  );
+  const acmeCorporationText = new TextBlock('ACME CORPORATION');
+  acmeCorporationText.fontName = StandardFonts.HelveticaBold;
+  acmeCorporationText.fontSize = 14;
+  acmeCorporationText.textColor = CREAM;
+  companyStack.addChild(acmeCorporationText);
+  const confidentialInternalUseOnlyText = new TextBlock('Confidential - Internal Use Only');
+  confidentialInternalUseOnlyText.fontName = StandardFonts.Helvetica;
+  confidentialInternalUseOnlyText.fontSize = 8;
+  confidentialInternalUseOnlyText.textColor = HEADER_MUTE;
+  confidentialInternalUseOnlyText.margin = new Thickness(0, 5, 0, 0);
+  companyStack.addChild(confidentialInternalUseOnlyText);
 
-  const reportTitle = tb(title, StandardFonts.HelveticaBold, 13, Cream);
+  const reportTitle = new TextBlock(title);
+  reportTitle.fontName = StandardFonts.HelveticaBold;
+  reportTitle.fontSize = 13;
+  reportTitle.textColor = CREAM;
   reportTitle.alignment = TextAlignment.Right;
 
-  const reportDate = tb(generated, StandardFonts.Helvetica, 8, HeaderMute);
+  const reportDate = new TextBlock(generated);
+  reportDate.fontName = StandardFonts.Helvetica;
+  reportDate.fontSize = 8;
+  reportDate.textColor = HEADER_MUTE;
   reportDate.alignment = TextAlignment.Right;
   reportDate.margin = new Thickness(0, 5, 0, 0);
 
@@ -140,7 +105,7 @@ export function generate(): Document {
   headerLayout.addRow(leftHeaderCell, rightHeaderCell);
 
   const header = new Container();
-  header.backgroundColor = Espresso;
+  header.backgroundColor = ESPRESSO;
   header.padding = new Thickness(24, 20, 24, 20);
   header.child = headerLayout;
 
@@ -150,18 +115,118 @@ export function generate(): Document {
   // 2.  KPI strip - four equal-width metric cards
   // ════════════════════════════════════════════════════════════════════════════
 
+  const totalRevenueStack = new VerticalStack();
+  const totalRevenueValueText = new TextBlock('£2.41M');
+  totalRevenueValueText.fontName = StandardFonts.HelveticaBold;
+  totalRevenueValueText.fontSize = 18;
+  totalRevenueValueText.textColor = ESPRESSO;
+  totalRevenueStack.addChild(totalRevenueValueText);
+  const totalRevenueText = new TextBlock('TOTAL REVENUE');
+  totalRevenueText.fontName = StandardFonts.Helvetica;
+  totalRevenueText.fontSize = 7;
+  totalRevenueText.textColor = BROWN;
+  totalRevenueText.margin = new Thickness(0, 4, 0, 0);
+  totalRevenueStack.addChild(totalRevenueText);
+  const totalRevenueDeltaText = new TextBlock('↑ 18.3% YoY');
+  totalRevenueDeltaText.fontName = StandardFonts.HelveticaBold;
+  totalRevenueDeltaText.fontSize = 7;
+  totalRevenueDeltaText.textColor = DELTA_POS;
+  totalRevenueDeltaText.margin = new Thickness(0, 4, 0, 0);
+  totalRevenueStack.addChild(totalRevenueDeltaText);
+  const totalRevenueCell = new Container();
+  totalRevenueCell.child = totalRevenueStack;
+  totalRevenueCell.backgroundColor = CREAM;
+  totalRevenueCell.padding = new Thickness(20, 16, 20, 16);
+
+  const grossProfitStack = new VerticalStack();
+  const grossProfitValueText = new TextBlock('£640K');
+  grossProfitValueText.fontName = StandardFonts.HelveticaBold;
+  grossProfitValueText.fontSize = 18;
+  grossProfitValueText.textColor = ESPRESSO;
+  grossProfitStack.addChild(grossProfitValueText);
+  const grossProfitText = new TextBlock('GROSS PROFIT');
+  grossProfitText.fontName = StandardFonts.Helvetica;
+  grossProfitText.fontSize = 7;
+  grossProfitText.textColor = BROWN;
+  grossProfitText.margin = new Thickness(0, 4, 0, 0);
+  grossProfitStack.addChild(grossProfitText);
+  const grossProfitDeltaText = new TextBlock('↑ 11.7% YoY');
+  grossProfitDeltaText.fontName = StandardFonts.HelveticaBold;
+  grossProfitDeltaText.fontSize = 7;
+  grossProfitDeltaText.textColor = DELTA_POS;
+  grossProfitDeltaText.margin = new Thickness(0, 4, 0, 0);
+  grossProfitStack.addChild(grossProfitDeltaText);
+  const grossProfitCell = new Container();
+  grossProfitCell.child = grossProfitStack;
+  grossProfitCell.backgroundColor = CREAM;
+  grossProfitCell.padding = new Thickness(20, 16, 20, 16);
+  grossProfitCell.border = Border.leftOnly(0.75);
+  grossProfitCell.borderColors = BorderColors.leftOnly(SAND);
+
+  const newCustomersStack = new VerticalStack();
+  const newCustomersValueText = new TextBlock('3,814');
+  newCustomersValueText.fontName = StandardFonts.HelveticaBold;
+  newCustomersValueText.fontSize = 18;
+  newCustomersValueText.textColor = ESPRESSO;
+  newCustomersStack.addChild(newCustomersValueText);
+  const newCustomersText = new TextBlock('NEW CUSTOMERS');
+  newCustomersText.fontName = StandardFonts.Helvetica;
+  newCustomersText.fontSize = 7;
+  newCustomersText.textColor = BROWN;
+  newCustomersText.margin = new Thickness(0, 4, 0, 0);
+  newCustomersStack.addChild(newCustomersText);
+  const newCustomersDeltaText = new TextBlock('↑ 24.1% YoY');
+  newCustomersDeltaText.fontName = StandardFonts.HelveticaBold;
+  newCustomersDeltaText.fontSize = 7;
+  newCustomersDeltaText.textColor = DELTA_POS;
+  newCustomersDeltaText.margin = new Thickness(0, 4, 0, 0);
+  newCustomersStack.addChild(newCustomersDeltaText);
+  const newCustomersCell = new Container();
+  newCustomersCell.child = newCustomersStack;
+  newCustomersCell.backgroundColor = CREAM;
+  newCustomersCell.padding = new Thickness(20, 16, 20, 16);
+  newCustomersCell.border = Border.leftOnly(0.75);
+  newCustomersCell.borderColors = BorderColors.leftOnly(SAND);
+
+  const satisfactionStack = new VerticalStack();
+  const satisfactionValueText = new TextBlock('94.2%');
+  satisfactionValueText.fontName = StandardFonts.HelveticaBold;
+  satisfactionValueText.fontSize = 18;
+  satisfactionValueText.textColor = ESPRESSO;
+  satisfactionStack.addChild(satisfactionValueText);
+  const satisfactionText = new TextBlock('SATISFACTION');
+  satisfactionText.fontName = StandardFonts.Helvetica;
+  satisfactionText.fontSize = 7;
+  satisfactionText.textColor = BROWN;
+  satisfactionText.margin = new Thickness(0, 4, 0, 0);
+  satisfactionStack.addChild(satisfactionText);
+  const satisfactionDeltaText = new TextBlock('↓ 0.8%');
+  satisfactionDeltaText.fontName = StandardFonts.HelveticaBold;
+  satisfactionDeltaText.fontSize = 7;
+  satisfactionDeltaText.textColor = DELTA_NEG;
+  satisfactionDeltaText.margin = new Thickness(0, 4, 0, 0);
+  satisfactionStack.addChild(satisfactionDeltaText);
+  const satisfactionCell = new Container();
+  satisfactionCell.child = satisfactionStack;
+  satisfactionCell.backgroundColor = CREAM;
+  satisfactionCell.padding = new Thickness(20, 16, 20, 16);
+  satisfactionCell.border = Border.leftOnly(0.75);
+  satisfactionCell.borderColors = BorderColors.leftOnly(SAND);
+
   const kpiTable = new Table(1, 1, 1, 1);
   kpiTable.border = Border.none;
   kpiTable.cellPadding = 0;
-  kpiTable.addRow(
-    kpiCell('£2.41M', 'Total Revenue', '↑ 18.3% YoY', true, false),
-    kpiCell('£640K', 'Gross Profit', '↑ 11.7% YoY', true, true),
-    kpiCell('3,814', 'New Customers', '↑ 24.1% YoY', true, true),
-    kpiCell('94.2%', 'Satisfaction', '↓ 0.8%', false, true)
-  );
+  kpiTable.addRow(totalRevenueCell, grossProfitCell, newCustomersCell, satisfactionCell);
 
   doc.add(kpiTable);
-  doc.add(rule(Sand));
+
+  const kpiRuleSpacer = new TextBlock(' ');
+  kpiRuleSpacer.fontSize = 1;
+  const kpiRule = new Container();
+  kpiRule.backgroundColor = SAND;
+  kpiRule.padding = new Thickness(0, 0.75, 0, 0);
+  kpiRule.child = kpiRuleSpacer;
+  doc.add(kpiRule);
 
   // ════════════════════════════════════════════════════════════════════════════
   // 3.  Monthly revenue bar chart - ChartElement must be a direct doc.add() call;
@@ -169,16 +234,20 @@ export function generate(): Document {
   // ════════════════════════════════════════════════════════════════════════════
 
   const chartTitleCell = new Container();
-  chartTitleCell.backgroundColor = Cream;
+  chartTitleCell.backgroundColor = CREAM;
   chartTitleCell.padding = new Thickness(24, 14, 24, 6);
-  chartTitleCell.child = tb('MONTHLY REVENUE  (£000s)', StandardFonts.HelveticaBold, 7, Terra);
+  const monthlyRevenueTitleText = new TextBlock('MONTHLY REVENUE  (£000s)');
+  monthlyRevenueTitleText.fontName = StandardFonts.HelveticaBold;
+  monthlyRevenueTitleText.fontSize = 7;
+  monthlyRevenueTitleText.textColor = TERRA;
+  chartTitleCell.child = monthlyRevenueTitleText;
   doc.add(chartTitleCell);
 
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
 
   const series = new ChartSeries();
-  series.color = Terra;
+  series.color = TERRA;
   series.dataPoints = MONTHS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
@@ -195,10 +264,10 @@ export function generate(): Document {
   const barChart = new BarChart();
   barChart.height = 200;
   barChart.stretchToFit = true;
-  barChart.barColor = Terra;
+  barChart.barColor = TERRA;
   barChart.fontFamily = StandardFonts.Helvetica;
   barChart.labelFontSize = 8;
-  barChart.backgroundColor = Cream;
+  barChart.backgroundColor = CREAM;
 
   // Direct doc.add - the only way ChartElement resolves its available width
   doc.add(
@@ -213,27 +282,52 @@ export function generate(): Document {
   // 4.  Top products table
   // ════════════════════════════════════════════════════════════════════════════
 
-  doc.add(rule(Sand));
+  const productRuleSpacer = new TextBlock(' ');
+  productRuleSpacer.fontSize = 1;
+  const productRule = new Container();
+  productRule.backgroundColor = SAND;
+  productRule.padding = new Thickness(0, 0.75, 0, 0);
+  productRule.child = productRuleSpacer;
+  doc.add(productRule);
 
   const tableTitleCell = new Container();
-  tableTitleCell.backgroundColor = Cream;
+  tableTitleCell.backgroundColor = CREAM;
   tableTitleCell.padding = new Thickness(24, 14, 24, 6);
-  tableTitleCell.child = tb('TOP PRODUCTS', StandardFonts.HelveticaBold, 7, Terra);
+  const topProductsText = new TextBlock('TOP PRODUCTS');
+  topProductsText.fontName = StandardFonts.HelveticaBold;
+  topProductsText.fontSize = 7;
+  topProductsText.textColor = TERRA;
+  tableTitleCell.child = topProductsText;
   doc.add(tableTitleCell);
 
   const productTable = new Table(2.2, 1, 1.4, 0.8);
   productTable.border = new Border(0.5);
-  productTable.borderColors = new BorderColors(Sand);
+  productTable.borderColors = new BorderColors(SAND);
   productTable.cellPadding = 8;
-  productTable.headerBackgroundColor = RowAlt;
-  productTable.headerTextColor = Espresso;
+  productTable.headerBackgroundColor = ROW_ALT;
+  productTable.headerTextColor = ESPRESSO;
 
-  productTable.addHeader(
-    alignLeft(tb('Product', StandardFonts.HelveticaBold, 8, Espresso)),
-    alignRight(tb('Units', StandardFonts.HelveticaBold, 8, Espresso)),
-    alignRight(tb('Revenue', StandardFonts.HelveticaBold, 8, Espresso)),
-    alignRight(tb('Margin', StandardFonts.HelveticaBold, 8, Espresso))
-  );
+  const productText = new TextBlock('Product');
+  productText.fontName = StandardFonts.HelveticaBold;
+  productText.fontSize = 8;
+  productText.textColor = ESPRESSO;
+  productText.alignment = TextAlignment.Left;
+  const unitsText = new TextBlock('Units');
+  unitsText.fontName = StandardFonts.HelveticaBold;
+  unitsText.fontSize = 8;
+  unitsText.textColor = ESPRESSO;
+  unitsText.alignment = TextAlignment.Right;
+  const revenueText = new TextBlock('Revenue');
+  revenueText.fontName = StandardFonts.HelveticaBold;
+  revenueText.fontSize = 8;
+  revenueText.textColor = ESPRESSO;
+  revenueText.alignment = TextAlignment.Right;
+  const marginText = new TextBlock('Margin');
+  marginText.fontName = StandardFonts.HelveticaBold;
+  marginText.fontSize = 8;
+  marginText.textColor = ESPRESSO;
+  marginText.alignment = TextAlignment.Right;
+  productTable.addHeader(productText, unitsText, revenueText, marginText);
 
   const products = [
     { name: 'Enterprise Plan', units: '142', revenue: '£890,400', margin: '71%' },
@@ -243,25 +337,40 @@ export function generate(): Document {
   ];
 
   for (const p of products) {
-    productTable.addRow(
-      alignLeft(tb(p.name, StandardFonts.Helvetica, 8, Espresso)),
-      alignRight(tb(p.units, StandardFonts.Helvetica, 8, Brown)),
-      alignRight(tb(p.revenue, StandardFonts.HelveticaBold, 8, Espresso)),
-      alignRight(tb(p.margin, StandardFonts.Helvetica, 8, Brown))
-    );
+    const pNameText = new TextBlock(p.name);
+    pNameText.fontName = StandardFonts.Helvetica;
+    pNameText.fontSize = 8;
+    pNameText.textColor = ESPRESSO;
+    pNameText.alignment = TextAlignment.Left;
+    const pUnitsText = new TextBlock(p.units);
+    pUnitsText.fontName = StandardFonts.Helvetica;
+    pUnitsText.fontSize = 8;
+    pUnitsText.textColor = BROWN;
+    pUnitsText.alignment = TextAlignment.Right;
+    const pRevenueText = new TextBlock(p.revenue);
+    pRevenueText.fontName = StandardFonts.HelveticaBold;
+    pRevenueText.fontSize = 8;
+    pRevenueText.textColor = ESPRESSO;
+    pRevenueText.alignment = TextAlignment.Right;
+    const pMarginText = new TextBlock(p.margin);
+    pMarginText.fontName = StandardFonts.Helvetica;
+    pMarginText.fontSize = 8;
+    pMarginText.textColor = BROWN;
+    pMarginText.alignment = TextAlignment.Right;
+    productTable.addRow(pNameText, pUnitsText, pRevenueText, pMarginText);
   }
 
   const tableCell = new Container();
-  tableCell.backgroundColor = Cream;
+  tableCell.backgroundColor = CREAM;
   tableCell.padding = new Thickness(24, 0, 24, 20);
   tableCell.child = productTable;
   doc.add(tableCell);
 
-  // Cream background flood-fill to the page bottom.
+  // CREAM background flood-fill to the page bottom.
   // Container is non-stateful so it renders once without overflow detection;
   // any excess beyond the MediaBox is clipped by the PDF viewer.
   const pageFill = new Container();
-  pageFill.backgroundColor = Cream;
+  pageFill.backgroundColor = CREAM;
   pageFill.child = new Spacer(500);
   doc.add(pageFill);
 

@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -12,6 +11,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const EMPLOYEES: [string, string, string][] = [
@@ -72,9 +72,10 @@ const OVERVIEW_SECTIONS: [string, string][] = [
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Employee Directory - Tagged (PDF/UA-1)';
@@ -83,7 +84,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, table, multi-page';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   // ── Part 1: Employee table ─────────────────────────────────────────────────
 
@@ -107,14 +107,16 @@ export function generate(): Document {
   table.headerBackgroundColor = Color.blue600;
   table.headerTextColor = Color.white;
 
-  const mkHeader = (text: string): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = StandardFonts.HelveticaBold;
-    b.fontSize = 10;
-    return b;
-  };
-
-  table.addHeader(mkHeader('Department'), mkHeader('Name'), mkHeader('Role'));
+  const departmentText = new TextBlock('Department');
+  departmentText.fontName = StandardFonts.HelveticaBold;
+  departmentText.fontSize = 10;
+  const nameText = new TextBlock('Name');
+  nameText.fontName = StandardFonts.HelveticaBold;
+  nameText.fontSize = 10;
+  const roleText = new TextBlock('Role');
+  roleText.fontName = StandardFonts.HelveticaBold;
+  roleText.fontSize = 10;
+  table.addHeader(departmentText, nameText, roleText);
 
   let row = 0;
   for (const [name, dept, role] of EMPLOYEES) {

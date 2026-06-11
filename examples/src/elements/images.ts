@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   PdfAConformance,
   TextBlock,
   TextStyle,
@@ -14,155 +13,193 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-// ── Minimal PNG generator ──────────────────────────────────────────────────
-// The .NET Images example loads files from disk; the browser has no filesystem
-// so we generate equivalent PNG bytes programmatically.
-
-function adler32(data: Uint8Array): number {
-  const MOD = 65521;
-  let a = 1,
-    b = 0;
-  for (const d of data) {
-    a = (a + d) % MOD;
-    b = (b + a) % MOD;
-  }
-  return ((b << 16) | a) >>> 0;
-}
-
-function crc32(data: Uint8Array): number {
-  let crc = 0xffffffff >>> 0;
-  for (const v of data) {
-    crc ^= v;
-    for (let i = 0; i < 8; i++) crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function u32be(n: number): number[] {
-  return [(n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff];
-}
-
-function pngChunk(type: string, data: number[]): number[] {
-  const typeBytes = [type.charCodeAt(0), type.charCodeAt(1), type.charCodeAt(2), type.charCodeAt(3)];
-  const forCrc = new Uint8Array([...typeBytes, ...data]);
-  return [...u32be(data.length), ...typeBytes, ...data, ...u32be(crc32(forCrc))];
-}
-
-// zlib wrapper using a single stored (uncompressed) deflate block - no library needed.
-// Valid for payloads up to 65 535 bytes; each test image is well within that.
-function zlibStored(raw: Uint8Array): number[] {
-  const len = raw.length;
-  const nlen = (len ^ 0xffff) & 0xffff;
-  return [
-    0x78,
-    0x01, // zlib header (stored, check OK)
-    0x01, // BFINAL=1 | BTYPE=00 (stored block)
-    len & 0xff,
-    (len >>> 8) & 0xff, // LEN little-endian
-    nlen & 0xff,
-    (nlen >>> 8) & 0xff, // NLEN (one's complement)
-    ...Array.from(raw), // raw bytes
-    ...u32be(adler32(raw)), // Adler-32 checksum
-  ];
-}
-
-// Build a minimal valid PNG from raw scanline data produced by pixelFn.
-function buildPng(
-  width: number,
-  height: number,
-  rgba: boolean,
-  pixelFn: (x: number, y: number) => number[]
-): Uint8Array {
-  const bpp = rgba ? 4 : 3;
-  const stride = 1 + width * bpp;
-  const raw = new Uint8Array(stride * height);
-  for (let y = 0; y < height; y++) {
-    raw[y * stride] = 0; // filter = None
-    for (let x = 0; x < width; x++) {
-      const px = pixelFn(x, y);
-      const off = y * stride + 1 + x * bpp;
-      for (let c = 0; c < bpp; c++) raw[off + c] = px[c];
-    }
-  }
-
-  const ihdr = [...u32be(width), ...u32be(height), 8, rgba ? 6 : 2, 0, 0, 0];
-  const idat = zlibStored(raw);
-  return new Uint8Array([
-    0x89,
-    0x50,
-    0x4e,
-    0x47,
-    0x0d,
-    0x0a,
-    0x1a,
-    0x0a, // PNG signature
-    ...pngChunk('IHDR', ihdr),
-    ...pngChunk('IDAT', idat),
-    ...pngChunk('IEND', []),
-  ]);
-}
-
-// RGB gradient: red=x, green=y, blue=x+y
-function makeGradientPng(): Uint8Array {
-  return buildPng(100, 100, false, (x, y) => [
-    Math.round((x * 255) / 99),
-    Math.round((y * 255) / 99),
-    Math.round(((x + y) * 255) / 198),
-  ]);
-}
-
-// RGBA circular gradient fading to transparent at the edges
-function makeAlphaPng(): Uint8Array {
-  return buildPng(100, 100, true, (x, y) => {
-    const dx = x - 50,
-      dy = y - 50;
-    const t = Math.min(1, Math.sqrt(dx * dx + dy * dy) / 50);
-    return [Math.round(t * 255), Math.round((1 - t) * 100), Math.round((1 - t) * 255), Math.round((1 - t) * 255)];
-  });
-}
 
 // ── Example ───────────────────────────────────────────────────────────────
 
-function sectionTitle(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 16;
-  b.textColor = new Color(51, 102, 204);
-  return b;
-}
-
-function caption(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontSize = 10;
-  b.textColor = new Color(128, 128, 128);
-  return b;
-}
-
-function img(data: Uint8Array, width: number, height: number | undefined, fit: ImageFitMode): Image {
-  const i = new Image();
-  i.imageData = data;
-  i.width = width;
-  i.height = height;
-  i.fitMode = fit;
-  return i;
-}
-
 export function generate(): Document {
-  const gradientPng = makeGradientPng();
-  const alphaPng = makeAlphaPng();
+  const gradientRaw = new Uint8Array((1 + 100 * 3) * 100);
+  for (let y = 0; y < 100; y++) {
+    gradientRaw[y * (1 + 100 * 3)] = 0;
+    for (let x = 0; x < 100; x++) {
+      const off = y * (1 + 100 * 3) + 1 + x * 3;
+      gradientRaw[off] = Math.round((x * 255) / 99);
+      gradientRaw[off + 1] = Math.round((y * 255) / 99);
+      gradientRaw[off + 2] = Math.round(((x + y) * 255) / 198);
+    }
+  }
+  let gradientAdlerA = 1;
+  let gradientAdlerB = 0;
+  for (const d of gradientRaw) {
+    gradientAdlerA = (gradientAdlerA + d) % 65521;
+    gradientAdlerB = (gradientAdlerB + gradientAdlerA) % 65521;
+  }
+  const gradientAdler = ((gradientAdlerB << 16) | gradientAdlerA) >>> 0;
+  const gradientDeflateLength = gradientRaw.length;
+  const gradientDeflateNLength = (gradientDeflateLength ^ 0xffff) & 0xffff;
+  const gradientIdat = [
+    0x78,
+    0x01,
+    0x01,
+    gradientDeflateLength & 0xff,
+    (gradientDeflateLength >>> 8) & 0xff,
+    gradientDeflateNLength & 0xff,
+    (gradientDeflateNLength >>> 8) & 0xff,
+    ...Array.from(gradientRaw),
+    (gradientAdler >>> 24) & 0xff,
+    (gradientAdler >>> 16) & 0xff,
+    (gradientAdler >>> 8) & 0xff,
+    gradientAdler & 0xff,
+  ];
+  const gradientPngBytes: number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  for (const chunk of [
+    {
+      type: 'IHDR',
+      data: [
+        (100 >>> 24) & 0xff,
+        (100 >>> 16) & 0xff,
+        (100 >>> 8) & 0xff,
+        100 & 0xff,
+        (100 >>> 24) & 0xff,
+        (100 >>> 16) & 0xff,
+        (100 >>> 8) & 0xff,
+        100 & 0xff,
+        8,
+        2,
+        0,
+        0,
+        0,
+      ],
+    },
+    { type: 'IDAT', data: gradientIdat },
+    { type: 'IEND', data: [] },
+  ]) {
+    const typeBytes = [
+      chunk.type.charCodeAt(0),
+      chunk.type.charCodeAt(1),
+      chunk.type.charCodeAt(2),
+      chunk.type.charCodeAt(3),
+    ];
+    let crc = 0xffffffff >>> 0;
+    for (const value of [...typeBytes, ...chunk.data]) {
+      crc ^= value;
+      for (let bit = 0; bit < 8; bit++) crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
+    }
+    crc = (crc ^ 0xffffffff) >>> 0;
+    gradientPngBytes.push(
+      (chunk.data.length >>> 24) & 0xff,
+      (chunk.data.length >>> 16) & 0xff,
+      (chunk.data.length >>> 8) & 0xff,
+      chunk.data.length & 0xff,
+      ...typeBytes,
+      ...chunk.data,
+      (crc >>> 24) & 0xff,
+      (crc >>> 16) & 0xff,
+      (crc >>> 8) & 0xff,
+      crc & 0xff
+    );
+  }
+  const gradientPng = new Uint8Array(gradientPngBytes);
+
+  const alphaRaw = new Uint8Array((1 + 100 * 4) * 100);
+  for (let y = 0; y < 100; y++) {
+    alphaRaw[y * (1 + 100 * 4)] = 0;
+    for (let x = 0; x < 100; x++) {
+      const dx = x - 50;
+      const dy = y - 50;
+      const t = Math.min(1, Math.sqrt(dx * dx + dy * dy) / 50);
+      const off = y * (1 + 100 * 4) + 1 + x * 4;
+      alphaRaw[off] = Math.round(t * 255);
+      alphaRaw[off + 1] = Math.round((1 - t) * 100);
+      alphaRaw[off + 2] = Math.round((1 - t) * 255);
+      alphaRaw[off + 3] = Math.round((1 - t) * 255);
+    }
+  }
+  let alphaAdlerA = 1;
+  let alphaAdlerB = 0;
+  for (const d of alphaRaw) {
+    alphaAdlerA = (alphaAdlerA + d) % 65521;
+    alphaAdlerB = (alphaAdlerB + alphaAdlerA) % 65521;
+  }
+  const alphaAdler = ((alphaAdlerB << 16) | alphaAdlerA) >>> 0;
+  const alphaDeflateLength = alphaRaw.length;
+  const alphaDeflateNLength = (alphaDeflateLength ^ 0xffff) & 0xffff;
+  const alphaIdat = [
+    0x78,
+    0x01,
+    0x01,
+    alphaDeflateLength & 0xff,
+    (alphaDeflateLength >>> 8) & 0xff,
+    alphaDeflateNLength & 0xff,
+    (alphaDeflateNLength >>> 8) & 0xff,
+    ...Array.from(alphaRaw),
+    (alphaAdler >>> 24) & 0xff,
+    (alphaAdler >>> 16) & 0xff,
+    (alphaAdler >>> 8) & 0xff,
+    alphaAdler & 0xff,
+  ];
+  const alphaPngBytes: number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  for (const chunk of [
+    {
+      type: 'IHDR',
+      data: [
+        (100 >>> 24) & 0xff,
+        (100 >>> 16) & 0xff,
+        (100 >>> 8) & 0xff,
+        100 & 0xff,
+        (100 >>> 24) & 0xff,
+        (100 >>> 16) & 0xff,
+        (100 >>> 8) & 0xff,
+        100 & 0xff,
+        8,
+        6,
+        0,
+        0,
+        0,
+      ],
+    },
+    { type: 'IDAT', data: alphaIdat },
+    { type: 'IEND', data: [] },
+  ]) {
+    const typeBytes = [
+      chunk.type.charCodeAt(0),
+      chunk.type.charCodeAt(1),
+      chunk.type.charCodeAt(2),
+      chunk.type.charCodeAt(3),
+    ];
+    let crc = 0xffffffff >>> 0;
+    for (const value of [...typeBytes, ...chunk.data]) {
+      crc ^= value;
+      for (let bit = 0; bit < 8; bit++) crc = crc & 1 ? (crc >>> 1) ^ 0xedb88320 : crc >>> 1;
+    }
+    crc = (crc ^ 0xffffffff) >>> 0;
+    alphaPngBytes.push(
+      (chunk.data.length >>> 24) & 0xff,
+      (chunk.data.length >>> 16) & 0xff,
+      (chunk.data.length >>> 8) & 0xff,
+      chunk.data.length & 0xff,
+      ...typeBytes,
+      ...chunk.data,
+      (crc >>> 24) & 0xff,
+      (crc >>> 16) & 0xff,
+      (crc >>> 8) & 0xff,
+      crc & 0xff
+    );
+  }
+  const alphaPng = new Uint8Array(alphaPngBytes);
 
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.conformance = PdfAConformance.PdfA2b;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Image Support Demo';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Page 1: RGB gradient PNG ──
   const p1Title = new TextBlock('PNG Image Support');
@@ -172,45 +209,89 @@ export function generate(): Document {
   p1Title.margin = new Thickness(0, 0, 0, 4);
   doc.add(p1Title);
 
-  const p1Sub = new TextBlock(
+  const pngIntro = new TextBlock(
     'This section demonstrates PNG image embedding using programmatically-generated test images.'
   );
-  p1Sub.fontSize = 12;
-  p1Sub.textColor = new Color(128, 128, 128);
-  p1Sub.margin = new Thickness(0, 0, 0, 8);
-  doc.add(p1Sub);
+  pngIntro.fontSize = 12;
+  pngIntro.textColor = new Color(128, 128, 128);
+  pngIntro.margin = new Thickness(0, 0, 0, 8);
+  doc.add(pngIntro);
 
   // 1. Contain
-  const t1 = sectionTitle('\n1. Contain Mode (Default)');
-  t1.margin = new Thickness(0, 0, 0, 4);
-  doc.add(t1);
-  doc.add(caption('Image scaled to fit within 300×200 bounds while maintaining aspect ratio.'));
-  doc.add(img(gradientPng, 300, 200, ImageFitMode.Contain));
+  const containTitle = new TextBlock('\n1. Contain Mode (Default)');
+  containTitle.fontName = StandardFonts.HelveticaBold;
+  containTitle.fontSize = 16;
+  containTitle.textColor = new Color(51, 102, 204);
+  containTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(containTitle);
+  const imageScaledToFitWithinText = new TextBlock(
+    'Image scaled to fit within 300×200 bounds while maintaining aspect ratio.'
+  );
+  imageScaledToFitWithinText.fontSize = 10;
+  imageScaledToFitWithinText.textColor = new Color(128, 128, 128);
+  doc.add(imageScaledToFitWithinText);
+  const containImage = new Image();
+  containImage.imageData = gradientPng;
+  containImage.width = 300;
+  containImage.height = 200;
+  containImage.fitMode = ImageFitMode.Contain;
+  doc.add(containImage);
 
   // 2. Cover
-  const t2 = sectionTitle('\n2. Cover Mode');
-  t2.margin = new Thickness(0, 0, 0, 4);
-  doc.add(t2);
-  doc.add(caption('Image scaled to fill 300×200 bounds, maintaining aspect ratio (may crop).'));
-  doc.add(img(gradientPng, 300, 200, ImageFitMode.Cover));
+  const coverTitle = new TextBlock('\n2. Cover Mode');
+  coverTitle.fontName = StandardFonts.HelveticaBold;
+  coverTitle.fontSize = 16;
+  coverTitle.textColor = new Color(51, 102, 204);
+  coverTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(coverTitle);
+  const imageScaledToFillText = new TextBlock(
+    'Image scaled to fill 300×200 bounds, maintaining aspect ratio (may crop).'
+  );
+  imageScaledToFillText.fontSize = 10;
+  imageScaledToFillText.textColor = new Color(128, 128, 128);
+  doc.add(imageScaledToFillText);
+  const coverImage = new Image();
+  coverImage.imageData = gradientPng;
+  coverImage.width = 300;
+  coverImage.height = 200;
+  coverImage.fitMode = ImageFitMode.Cover;
+  doc.add(coverImage);
 
   // 3. Fill
-  const t3 = sectionTitle('\n3. Fill Mode');
-  t3.margin = new Thickness(0, 0, 0, 4);
-  doc.add(t3);
-  doc.add(caption('Image stretched to fill 300×200 bounds, ignoring aspect ratio.'));
-  doc.add(img(gradientPng, 300, 200, ImageFitMode.Fill));
+  const fillTitle = new TextBlock('\n3. Fill Mode');
+  fillTitle.fontName = StandardFonts.HelveticaBold;
+  fillTitle.fontSize = 16;
+  fillTitle.textColor = new Color(51, 102, 204);
+  fillTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(fillTitle);
+  const imageStretchedToFillText = new TextBlock('Image stretched to fill 300×200 bounds, ignoring aspect ratio.');
+  imageStretchedToFillText.fontSize = 10;
+  imageStretchedToFillText.textColor = new Color(128, 128, 128);
+  doc.add(imageStretchedToFillText);
+  const fillImage = new Image();
+  fillImage.imageData = gradientPng;
+  fillImage.width = 300;
+  fillImage.height = 200;
+  fillImage.fitMode = ImageFitMode.Fill;
+  doc.add(fillImage);
 
   // 4. In container
-  const t4 = sectionTitle('\n4. Image in Container');
-  t4.margin = new Thickness(0, 0, 0, 4);
-  doc.add(t4);
-  const innerImg = img(gradientPng, 250, undefined, ImageFitMode.Contain);
+  const containerTitle = new TextBlock('\n4. Image in Container');
+  containerTitle.fontName = StandardFonts.HelveticaBold;
+  containerTitle.fontSize = 16;
+  containerTitle.textColor = new Color(51, 102, 204);
+  containerTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(containerTitle);
+  const containerImage = new Image();
+  containerImage.imageData = gradientPng;
+  containerImage.width = 250;
+  containerImage.height = undefined;
+  containerImage.fitMode = ImageFitMode.Contain;
   const bordered = new Container();
   bordered.padding = new Thickness(15);
   bordered.border = new Border(2);
   bordered.borderColors = new BorderColors(new Color(77, 77, 77));
-  bordered.child = innerImg;
+  bordered.child = containerImage;
   doc.add(bordered);
 
   // ── Page 2: RGBA alpha PNG ──
@@ -223,31 +304,56 @@ export function generate(): Document {
   p2Title.margin = new Thickness(0, 0, 0, 4);
   doc.add(p2Title);
 
-  const p2Sub = new TextBlock(
+  const alphaIntro = new TextBlock(
     'PNG images can carry an alpha channel (PDF soft mask), allowing elements to show through.'
   );
-  p2Sub.fontSize = 12;
-  p2Sub.textColor = new Color(128, 128, 128);
-  p2Sub.margin = new Thickness(0, 0, 0, 8);
-  doc.add(p2Sub);
+  alphaIntro.fontSize = 12;
+  alphaIntro.textColor = new Color(128, 128, 128);
+  alphaIntro.margin = new Thickness(0, 0, 0, 8);
+  doc.add(alphaIntro);
 
   // Alpha on plain white background
-  const aTitle1 = sectionTitle('\n1. Alpha PNG - plain background');
-  aTitle1.margin = new Thickness(0, 0, 0, 4);
-  doc.add(aTitle1);
-  doc.add(caption('The circular gradient fades to transparent at the edges.'));
-  doc.add(img(alphaPng, 200, undefined, ImageFitMode.Contain));
+  const plainAlphaTitle = new TextBlock('\n1. Alpha PNG - plain background');
+  plainAlphaTitle.fontName = StandardFonts.HelveticaBold;
+  plainAlphaTitle.fontSize = 16;
+  plainAlphaTitle.textColor = new Color(51, 102, 204);
+  plainAlphaTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(plainAlphaTitle);
+  const circularGradientFadesToTransparentText = new TextBlock(
+    'The circular gradient fades to transparent at the edges.'
+  );
+  circularGradientFadesToTransparentText.fontSize = 10;
+  circularGradientFadesToTransparentText.textColor = new Color(128, 128, 128);
+  doc.add(circularGradientFadesToTransparentText);
+  const plainAlphaImage = new Image();
+  plainAlphaImage.imageData = alphaPng;
+  plainAlphaImage.width = 200;
+  plainAlphaImage.height = undefined;
+  plainAlphaImage.fitMode = ImageFitMode.Contain;
+  doc.add(plainAlphaImage);
 
   // Alpha inside a coloured container
-  const aTitle2 = sectionTitle('\n2. Alpha PNG - coloured container');
-  aTitle2.margin = new Thickness(0, 0, 0, 4);
-  doc.add(aTitle2);
-  doc.add(caption('The same image inside a tinted container; the alpha reveals the background colour.'));
-  const alphaInner = img(alphaPng, 200, undefined, ImageFitMode.Contain);
+  const coloredAlphaTitle = new TextBlock('\n2. Alpha PNG - coloured container');
+  coloredAlphaTitle.fontName = StandardFonts.HelveticaBold;
+  coloredAlphaTitle.fontSize = 16;
+  coloredAlphaTitle.textColor = new Color(51, 102, 204);
+  coloredAlphaTitle.margin = new Thickness(0, 0, 0, 4);
+  doc.add(coloredAlphaTitle);
+  const sameImageInsideATintedText = new TextBlock(
+    'The same image inside a tinted container; the alpha reveals the background colour.'
+  );
+  sameImageInsideATintedText.fontSize = 10;
+  sameImageInsideATintedText.textColor = new Color(128, 128, 128);
+  doc.add(sameImageInsideATintedText);
+  const coloredAlphaImage = new Image();
+  coloredAlphaImage.imageData = alphaPng;
+  coloredAlphaImage.width = 200;
+  coloredAlphaImage.height = undefined;
+  coloredAlphaImage.fitMode = ImageFitMode.Contain;
   const alphaWrap = new Container();
   alphaWrap.backgroundColor = new Color(204, 230, 217);
   alphaWrap.padding = new Thickness(10);
-  alphaWrap.child = alphaInner;
+  alphaWrap.child = coloredAlphaImage;
   doc.add(alphaWrap);
 
   return doc;

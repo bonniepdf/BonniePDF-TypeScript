@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   WatermarkSettings,
   TextBlock,
   TextStyle,
@@ -11,12 +10,16 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
   settings.watermark = new WatermarkSettings('DRAFT');
 
   const metadata = new DocumentMetadata();
@@ -24,7 +27,6 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Page 1: Title page ──
   const title = new TextBlock('Project Proposal');

@@ -8,6 +8,7 @@ import {
   TextStyle,
   TextAlignment,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   Placeholders,
@@ -22,14 +23,14 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
   settings.defaultZoom = ZoomLevel.FitPage;
 
   settings.headerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`BonniePDF Documentation - Page ${pageNumber}`);
     b.fontName = StandardFonts.HelveticaBold;
     b.fontSize = 10;
-    b.textColor = Color.slate600;
+    b.textColor = ColorPalette.slate[600];
     b.alignment = TextAlignment.Center;
     return b;
   };
@@ -38,7 +39,7 @@ export function generate(): Document {
     const b = new TextBlock(`Page ${pageNumber} - Confidential`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 10;
-    b.textColor = Color.slate500;
+    b.textColor = ColorPalette.slate[500];
     b.alignment = TextAlignment.Center;
     return b;
   };
@@ -53,7 +54,7 @@ export function generate(): Document {
   const heading = new TextBlock('Chapter 1: Introduction');
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 20;
-  heading.textColor = Color.slate800;
+  heading.textColor = ColorPalette.slate[800];
   heading.margin = new Thickness(0, 0, 0, 15);
   doc.add(heading);
 
@@ -62,7 +63,7 @@ export function generate(): Document {
     const secTitle = new TextBlock(`1.${section} Section Title`);
     secTitle.fontName = StandardFonts.HelveticaBold;
     secTitle.fontSize = 14;
-    secTitle.textColor = Color.slate700;
+    secTitle.textColor = ColorPalette.slate[700];
     secTitle.margin = new Thickness(0, 15, 0, 10);
     doc.add(secTitle);
 

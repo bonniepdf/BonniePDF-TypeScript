@@ -9,6 +9,7 @@ import {
   UnorderedList,
   BulletStyle,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -20,7 +21,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'List Examples';
@@ -32,7 +33,7 @@ export function generate(): Document {
   const orderedTitle = new TextBlock('Ordered List Examples');
   orderedTitle.fontName = StandardFonts.HelveticaBold;
   orderedTitle.fontSize = 24;
-  orderedTitle.textColor = Color.slate800;
+  orderedTitle.textColor = ColorPalette.slate[800];
   orderedTitle.margin = new Thickness(0, 0, 0, 12);
   doc.add(orderedTitle);
 
@@ -40,7 +41,7 @@ export function generate(): Document {
   const decimalHeading = new TextBlock('Decimal Numbered List (1, 2, 3...)');
   decimalHeading.fontName = StandardFonts.HelveticaBold;
   decimalHeading.fontSize = 14;
-  decimalHeading.textColor = Color.slate700;
+  decimalHeading.textColor = ColorPalette.slate[700];
   doc.add(decimalHeading);
   const decimalList = new OrderedList();
   decimalList.numberFormat = ListNumberFormat.Decimal;
@@ -57,7 +58,7 @@ export function generate(): Document {
   const romanHeading = new TextBlock('Upper Roman Numerals (I, II, III...)');
   romanHeading.fontName = StandardFonts.HelveticaBold;
   romanHeading.fontSize = 14;
-  romanHeading.textColor = Color.slate700;
+  romanHeading.textColor = ColorPalette.slate[700];
   romanHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(romanHeading);
   const romanList = new OrderedList();
@@ -75,7 +76,7 @@ export function generate(): Document {
   const alphaHeading = new TextBlock('Lowercase Letters (a, b, c...)');
   alphaHeading.fontName = StandardFonts.HelveticaBold;
   alphaHeading.fontSize = 14;
-  alphaHeading.textColor = Color.slate700;
+  alphaHeading.textColor = ColorPalette.slate[700];
   alphaHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(alphaHeading);
   const alphaList = new OrderedList();
@@ -92,7 +93,7 @@ export function generate(): Document {
   const customStartHeading = new TextBlock('List Starting at Number 5');
   customStartHeading.fontName = StandardFonts.HelveticaBold;
   customStartHeading.fontSize = 14;
-  customStartHeading.textColor = Color.slate700;
+  customStartHeading.textColor = ColorPalette.slate[700];
   customStartHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(customStartHeading);
   const customStartList = new OrderedList();
@@ -110,7 +111,7 @@ export function generate(): Document {
   const nestedOrderedTitle = new TextBlock('Nested Ordered Lists');
   nestedOrderedTitle.fontName = StandardFonts.HelveticaBold;
   nestedOrderedTitle.fontSize = 24;
-  nestedOrderedTitle.textColor = Color.slate800;
+  nestedOrderedTitle.textColor = ColorPalette.slate[800];
   nestedOrderedTitle.margin = new Thickness(0, 0, 0, 12);
   doc.add(nestedOrderedTitle);
 
@@ -142,7 +143,7 @@ export function generate(): Document {
   const unorderedTitle = new TextBlock('Unordered List Examples');
   unorderedTitle.fontName = StandardFonts.HelveticaBold;
   unorderedTitle.fontSize = 24;
-  unorderedTitle.textColor = Color.slate800;
+  unorderedTitle.textColor = ColorPalette.slate[800];
   unorderedTitle.margin = new Thickness(0, 0, 0, 12);
   doc.add(unorderedTitle);
 
@@ -150,7 +151,7 @@ export function generate(): Document {
   const discHeading = new TextBlock('Disc Bullet Style (•)');
   discHeading.fontName = StandardFonts.HelveticaBold;
   discHeading.fontSize = 14;
-  discHeading.textColor = Color.slate700;
+  discHeading.textColor = ColorPalette.slate[700];
   doc.add(discHeading);
   const discList = new UnorderedList();
   discList.bulletStyle = BulletStyle.Disc;
@@ -166,7 +167,7 @@ export function generate(): Document {
   const circleHeading = new TextBlock('Circle Bullet Style (◦)');
   circleHeading.fontName = StandardFonts.HelveticaBold;
   circleHeading.fontSize = 14;
-  circleHeading.textColor = Color.slate700;
+  circleHeading.textColor = ColorPalette.slate[700];
   circleHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(circleHeading);
   const circleList = new UnorderedList();
@@ -182,7 +183,7 @@ export function generate(): Document {
   const squareHeading = new TextBlock('Square Bullet Style (■)');
   squareHeading.fontName = StandardFonts.HelveticaBold;
   squareHeading.fontSize = 14;
-  squareHeading.textColor = Color.slate700;
+  squareHeading.textColor = ColorPalette.slate[700];
   squareHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(squareHeading);
   const squareList = new UnorderedList();
@@ -198,7 +199,7 @@ export function generate(): Document {
   const dashHeading = new TextBlock('Dash Bullet Style (-)');
   dashHeading.fontName = StandardFonts.HelveticaBold;
   dashHeading.fontSize = 14;
-  dashHeading.textColor = Color.slate700;
+  dashHeading.textColor = ColorPalette.slate[700];
   dashHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(dashHeading);
   const dashList = new UnorderedList();
@@ -214,7 +215,7 @@ export function generate(): Document {
   const customHeading = new TextBlock('Custom Bullet Style (★)');
   customHeading.fontName = StandardFonts.HelveticaBold;
   customHeading.fontSize = 14;
-  customHeading.textColor = Color.slate700;
+  customHeading.textColor = ColorPalette.slate[700];
   customHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(customHeading);
   const customList = new UnorderedList();
@@ -232,7 +233,7 @@ export function generate(): Document {
   const nestedUnorderedTitle = new TextBlock('Nested Unordered Lists');
   nestedUnorderedTitle.fontName = StandardFonts.HelveticaBold;
   nestedUnorderedTitle.fontSize = 24;
-  nestedUnorderedTitle.textColor = Color.slate800;
+  nestedUnorderedTitle.textColor = ColorPalette.slate[800];
   nestedUnorderedTitle.margin = new Thickness(0, 0, 0, 12);
   doc.add(nestedUnorderedTitle);
 
@@ -261,13 +262,13 @@ export function generate(): Document {
   const coloredHeading = new TextBlock('Colored Bullets');
   coloredHeading.fontName = StandardFonts.HelveticaBold;
   coloredHeading.fontSize = 14;
-  coloredHeading.textColor = Color.slate700;
+  coloredHeading.textColor = ColorPalette.slate[700];
   coloredHeading.margin = new Thickness(0, 16, 0, 0);
   doc.add(coloredHeading);
   const coloredList = new UnorderedList();
   coloredList.bulletStyle = BulletStyle.Square;
   coloredList.bulletColor = Color.red;
-  coloredList.textColor = Color.slate600;
+  coloredList.textColor = ColorPalette.slate[600];
   coloredList.fontSize = 12;
   coloredList.itemSpacing = 8;
   coloredList.addItem('Red bullet point');

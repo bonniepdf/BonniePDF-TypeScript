@@ -1,4 +1,3 @@
-import { Color } from '../Core/Color';
 import { IElement } from '../Elements/IElement';
 import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Ellipse } from '../src/Elements/Shapes/Ellipse';
 import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { PdfSize, RenderContext } from '../src';
 import { MockCanvas } from './helpers/mock-canvas';
 
@@ -35,7 +36,7 @@ describe('Ellipse', () => {
     const el = new Ellipse();
     el.width = 30;
     el.height = 20;
-    el.fillColor = Color.blue600;
+    el.fillColor = ColorPalette.blue[600];
 
     (el as any).renderContent(ctx, 200);
 

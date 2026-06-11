@@ -3,7 +3,7 @@ import { Document } from '../src/Document';
 import { Barcode } from '../src/Elements/Shapes/Barcode';
 import { BarcodeSymbology, BarcodeContentException } from '../src/Elements/Shapes/BarcodeSymbology';
 import { BarcodeEncoder } from '../src/Elements/Shapes/BarcodeEncoder';
-import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
 import { SemanticRole } from '../src/Rendering/Tagging/SemanticRole';
@@ -504,7 +504,7 @@ describe('Barcode element', () => {
     const pdf = generate(d => {
       const bc = new Barcode();
       bc.value = 'SHIP-12345';
-      bc.foregroundColor = Color.blue700;
+      bc.foregroundColor = ColorPalette.blue[700];
       d.add(bc);
     });
     expect(pdf).toContain('%PDF-');

@@ -7,6 +7,7 @@ import {
   Heading,
   QRCode,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -41,7 +42,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -52,7 +53,7 @@ export function generate(): Document {
     'and an XMP packet declaring pdfuaid:part 1.';
   p1.fontName = StandardFonts.Helvetica;
   p1.fontSize = 12;
-  p1.textColor = Color.slate700;
+  p1.textColor = ColorPalette.slate[700];
   p1.margin = new Thickness(0, 0, 0, 8);
   doc.add(p1);
 
@@ -63,7 +64,7 @@ export function generate(): Document {
     'extensions that arrive in stage 2.';
   p2.fontName = StandardFonts.Helvetica;
   p2.fontSize = 12;
-  p2.textColor = Color.slate700;
+  p2.textColor = ColorPalette.slate[700];
   p2.margin = new Thickness(0, 0, 0, 12);
   doc.add(p2);
 
@@ -72,7 +73,7 @@ export function generate(): Document {
   h2.level = 2;
   h2.fontName = StandardFonts.HelveticaBold;
   h2.fontSize = 16;
-  h2.textColor = Color.slate800;
+  h2.textColor = ColorPalette.slate[800];
   h2.margin = new Thickness(0, 0, 0, 8);
   doc.add(h2);
 

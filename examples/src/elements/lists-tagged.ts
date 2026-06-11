@@ -11,6 +11,7 @@ import {
   UnorderedList,
   BulletStyle,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -35,7 +36,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
   doc.settings = settings;
 
   // ── Ordered list ──────────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ export function generate(): Document {
   orderedHeading.level = 1;
   orderedHeading.fontName = StandardFonts.HelveticaBold;
   orderedHeading.fontSize = 22;
-  orderedHeading.textColor = Color.slate800;
+  orderedHeading.textColor = ColorPalette.slate[800];
   orderedHeading.margin = new Thickness(0, 0, 0, 10);
   doc.add(orderedHeading);
 
@@ -58,7 +59,7 @@ export function generate(): Document {
   decimalHeading.level = 2;
   decimalHeading.fontName = StandardFonts.HelveticaBold;
   decimalHeading.fontSize = 14;
-  decimalHeading.textColor = Color.slate700;
+  decimalHeading.textColor = ColorPalette.slate[700];
   decimalHeading.margin = new Thickness(0, 14, 0, 6);
   doc.add(decimalHeading);
   const decimalList = new OrderedList();
@@ -75,7 +76,7 @@ export function generate(): Document {
   romanHeading.level = 2;
   romanHeading.fontName = StandardFonts.HelveticaBold;
   romanHeading.fontSize = 14;
-  romanHeading.textColor = Color.slate700;
+  romanHeading.textColor = ColorPalette.slate[700];
   romanHeading.margin = new Thickness(0, 14, 0, 6);
   doc.add(romanHeading);
   const romanList = new OrderedList();
@@ -104,7 +105,7 @@ export function generate(): Document {
   unorderedHeading.level = 1;
   unorderedHeading.fontName = StandardFonts.HelveticaBold;
   unorderedHeading.fontSize = 22;
-  unorderedHeading.textColor = Color.slate800;
+  unorderedHeading.textColor = ColorPalette.slate[800];
   unorderedHeading.margin = new Thickness(0, 0, 0, 10);
   doc.add(unorderedHeading);
 
@@ -118,7 +119,7 @@ export function generate(): Document {
   discHeading.level = 2;
   discHeading.fontName = StandardFonts.HelveticaBold;
   discHeading.fontSize = 14;
-  discHeading.textColor = Color.slate700;
+  discHeading.textColor = ColorPalette.slate[700];
   discHeading.margin = new Thickness(0, 14, 0, 6);
   doc.add(discHeading);
   const discList = new UnorderedList();
@@ -134,7 +135,7 @@ export function generate(): Document {
   squareHeading.level = 2;
   squareHeading.fontName = StandardFonts.HelveticaBold;
   squareHeading.fontSize = 14;
-  squareHeading.textColor = Color.slate700;
+  squareHeading.textColor = ColorPalette.slate[700];
   squareHeading.margin = new Thickness(0, 14, 0, 6);
   doc.add(squareHeading);
   const squareList = new UnorderedList();

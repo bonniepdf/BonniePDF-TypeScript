@@ -6,7 +6,7 @@ import {
   AccessibilityMode,
   TextBlock,
   Heading,
-  Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
 } from '@bonniepdf/core';
@@ -51,7 +51,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -62,7 +62,7 @@ export function generate(): Document {
     'Both claims are verified by veraPDF against profiles 2a and ua1 respectively.';
   intro.fontName = StandardFonts.Helvetica;
   intro.fontSize = 12;
-  intro.textColor = Color.slate700;
+  intro.textColor = ColorPalette.slate[700];
   intro.margin = new Thickness(0, 0, 0, 12);
   doc.add(intro);
 
@@ -70,7 +70,7 @@ export function generate(): Document {
   h2.level = 2;
   h2.fontName = StandardFonts.HelveticaBold;
   h2.fontSize = 16;
-  h2.textColor = Color.slate800;
+  h2.textColor = ColorPalette.slate[800];
   h2.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2);
 
@@ -82,7 +82,7 @@ export function generate(): Document {
     'PDF/A-2a is the natural target - and BonniePDF reaches it with two lines of configuration.';
   body.fontName = StandardFonts.Helvetica;
   body.fontSize = 12;
-  body.textColor = Color.slate700;
+  body.textColor = ColorPalette.slate[700];
   body.margin = new Thickness(0, 0, 0, 12);
   doc.add(body);
 
@@ -93,7 +93,7 @@ export function generate(): Document {
     '`settings.conformance = PdfAConformance.PdfA2a` shown above.';
   note.fontName = StandardFonts.Helvetica;
   note.fontSize = 10;
-  note.textColor = Color.slate600;
+  note.textColor = ColorPalette.slate[600];
   doc.add(note);
 
   return doc;

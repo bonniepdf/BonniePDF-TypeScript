@@ -8,6 +8,7 @@ import {
   TextStyle,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -29,7 +30,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.None;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
   // PDF/A is intentionally not claimed because emoji fonts can include tables that archival validators reject.
 
   const metadata = new DocumentMetadata();
@@ -45,7 +46,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = TEXT_FONT;
   h1.fontSize = 20;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 8);
   doc.add(h1);
 
@@ -56,7 +57,7 @@ export function generate(): Document {
   );
   intro.fontName = TEXT_FONT;
   intro.fontSize = 11;
-  intro.textColor = Color.slate500;
+  intro.textColor = ColorPalette.slate[500];
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
 
@@ -66,13 +67,13 @@ export function generate(): Document {
   sectionHeading1.level = 2;
   sectionHeading1.fontName = TEXT_FONT;
   sectionHeading1.fontSize = 13;
-  sectionHeading1.textColor = Color.slate700;
+  sectionHeading1.textColor = ColorPalette.slate[700];
   sectionHeading1.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading1);
   const mathLine1 = new TextBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪  ↖ ↗ ↘ ↙');
   mathLine1.fontName = MATH_FONT;
   mathLine1.fontSize = 12;
-  mathLine1.textColor = Color.slate600;
+  mathLine1.textColor = ColorPalette.slate[600];
   mathLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(mathLine1);
 
@@ -82,13 +83,13 @@ export function generate(): Document {
   sectionHeading2.level = 2;
   sectionHeading2.fontName = TEXT_FONT;
   sectionHeading2.fontSize = 13;
-  sectionHeading2.textColor = Color.slate700;
+  sectionHeading2.textColor = ColorPalette.slate[700];
   sectionHeading2.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading2);
   const mathLine2 = new TextBlock('∀ ∃ ∈ ∉ ∋  ∑ ∏ ∫ √ ∞  ≈ ≠ ≡ ≤ ≥  ⊕ ⊗ ⊂ ⊃');
   mathLine2.fontName = MATH_FONT;
   mathLine2.fontSize = 12;
-  mathLine2.textColor = Color.slate600;
+  mathLine2.textColor = ColorPalette.slate[600];
   mathLine2.margin = new Thickness(0, 0, 0, 4);
   doc.add(mathLine2);
 
@@ -98,13 +99,13 @@ export function generate(): Document {
   sectionHeading3.level = 2;
   sectionHeading3.fontName = TEXT_FONT;
   sectionHeading3.fontSize = 13;
-  sectionHeading3.textColor = Color.slate700;
+  sectionHeading3.textColor = ColorPalette.slate[700];
   sectionHeading3.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading3);
   const unicodeLine1 = new TextBlock('€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽');
   unicodeLine1.fontName = TEXT_FONT;
   unicodeLine1.fontSize = 12;
-  unicodeLine1.textColor = Color.slate600;
+  unicodeLine1.textColor = ColorPalette.slate[600];
   unicodeLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(unicodeLine1);
 
@@ -114,19 +115,19 @@ export function generate(): Document {
   sectionHeading4.level = 2;
   sectionHeading4.fontName = TEXT_FONT;
   sectionHeading4.fontSize = 13;
-  sectionHeading4.textColor = Color.slate700;
+  sectionHeading4.textColor = ColorPalette.slate[700];
   sectionHeading4.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading4);
   const unicodeLine2 = new TextBlock('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω');
   unicodeLine2.fontName = TEXT_FONT;
   unicodeLine2.fontSize = 12;
-  unicodeLine2.textColor = Color.slate600;
+  unicodeLine2.textColor = ColorPalette.slate[600];
   unicodeLine2.margin = new Thickness(0, 0, 0, 2);
   doc.add(unicodeLine2);
   const unicodeLine3 = new TextBlock('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω');
   unicodeLine3.fontName = TEXT_FONT;
   unicodeLine3.fontSize = 12;
-  unicodeLine3.textColor = Color.slate600;
+  unicodeLine3.textColor = ColorPalette.slate[600];
   unicodeLine3.margin = new Thickness(0, 0, 0, 4);
   doc.add(unicodeLine3);
 
@@ -136,13 +137,13 @@ export function generate(): Document {
   sectionHeading5.level = 2;
   sectionHeading5.fontName = TEXT_FONT;
   sectionHeading5.fontSize = 13;
-  sectionHeading5.textColor = Color.slate700;
+  sectionHeading5.textColor = ColorPalette.slate[700];
   sectionHeading5.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading5);
   const unicodeLine4 = new TextBlock('А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я');
   unicodeLine4.fontName = TEXT_FONT;
   unicodeLine4.fontSize = 12;
-  unicodeLine4.textColor = Color.slate600;
+  unicodeLine4.textColor = ColorPalette.slate[600];
   unicodeLine4.margin = new Thickness(0, 0, 0, 4);
   doc.add(unicodeLine4);
 
@@ -152,13 +153,13 @@ export function generate(): Document {
   sectionHeading6.level = 2;
   sectionHeading6.fontName = TEXT_FONT;
   sectionHeading6.fontSize = 13;
-  sectionHeading6.textColor = Color.slate700;
+  sectionHeading6.textColor = ColorPalette.slate[700];
   sectionHeading6.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading6);
   const symbolLine1 = new TextBlock('☀ ☁ ☂ ☃ ☄ ★ ☆ ♠ ♣ ♥ ♦ ☺ ☻ ♻ ⚡ ⚽ ⚾ ⛄ ⛅ ⛪ ⛽');
   symbolLine1.fontName = SYMBOLS_FONT;
   symbolLine1.fontSize = 12;
-  symbolLine1.textColor = Color.slate600;
+  symbolLine1.textColor = ColorPalette.slate[600];
   symbolLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(symbolLine1);
 
@@ -168,13 +169,13 @@ export function generate(): Document {
   sectionHeading7.level = 2;
   sectionHeading7.fontName = TEXT_FONT;
   sectionHeading7.fontSize = 13;
-  sectionHeading7.textColor = Color.slate700;
+  sectionHeading7.textColor = ColorPalette.slate[700];
   sectionHeading7.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading7);
   const symbolLine2 = new TextBlock('✀ ✁ ✂ ✃ ✄ ✆ ✇ ✈ ✉ ✊ ✋ ✌ ✍ ✎ ✏ ✐ ✑ ✒ ✓ ✗ ✘');
   symbolLine2.fontName = SYMBOLS_FONT;
   symbolLine2.fontSize = 12;
-  symbolLine2.textColor = Color.slate600;
+  symbolLine2.textColor = ColorPalette.slate[600];
   symbolLine2.margin = new Thickness(0, 0, 0, 12);
   doc.add(symbolLine2);
 
@@ -184,13 +185,13 @@ export function generate(): Document {
   sectionHeading8.level = 2;
   sectionHeading8.fontName = TEXT_FONT;
   sectionHeading8.fontSize = 13;
-  sectionHeading8.textColor = Color.slate700;
+  sectionHeading8.textColor = ColorPalette.slate[700];
   sectionHeading8.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading8);
   const emojiLine1 = new TextBlock('😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 😍 😎 🤩');
   emojiLine1.fontName = EMOJI_FONT;
   emojiLine1.fontSize = 20;
-  emojiLine1.textColor = Color.slate800;
+  emojiLine1.textColor = ColorPalette.slate[800];
   emojiLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(emojiLine1);
 
@@ -200,13 +201,13 @@ export function generate(): Document {
   sectionHeading9.level = 2;
   sectionHeading9.fontName = TEXT_FONT;
   sectionHeading9.fontSize = 13;
-  sectionHeading9.textColor = Color.slate700;
+  sectionHeading9.textColor = ColorPalette.slate[700];
   sectionHeading9.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading9);
   const emojiLine2 = new TextBlock('👍 👎 👋 🤚 ✋ 🖐 👌 ✌ 🤞 👈 👉 👆 👇 👏');
   emojiLine2.fontName = EMOJI_FONT;
   emojiLine2.fontSize = 20;
-  emojiLine2.textColor = Color.slate800;
+  emojiLine2.textColor = ColorPalette.slate[800];
   emojiLine2.margin = new Thickness(0, 0, 0, 4);
   doc.add(emojiLine2);
 
@@ -216,13 +217,13 @@ export function generate(): Document {
   sectionHeading10.level = 2;
   sectionHeading10.fontName = TEXT_FONT;
   sectionHeading10.fontSize = 13;
-  sectionHeading10.textColor = Color.slate700;
+  sectionHeading10.textColor = ColorPalette.slate[700];
   sectionHeading10.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading10);
   const emojiLine3 = new TextBlock('🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸');
   emojiLine3.fontName = EMOJI_FONT;
   emojiLine3.fontSize = 20;
-  emojiLine3.textColor = Color.slate800;
+  emojiLine3.textColor = ColorPalette.slate[800];
   emojiLine3.margin = new Thickness(0, 0, 0, 4);
   doc.add(emojiLine3);
 
@@ -232,13 +233,13 @@ export function generate(): Document {
   sectionHeading11.level = 2;
   sectionHeading11.fontName = TEXT_FONT;
   sectionHeading11.fontSize = 13;
-  sectionHeading11.textColor = Color.slate700;
+  sectionHeading11.textColor = ColorPalette.slate[700];
   sectionHeading11.margin = new Thickness(0, 12, 0, 4);
   doc.add(sectionHeading11);
   const emojiLine4 = new TextBlock('🚀 🌈 🎉 🎵 💡 🔥 ⭐ 💯 🏆 🎯 📱 💻');
   emojiLine4.fontName = EMOJI_FONT;
   emojiLine4.fontSize = 20;
-  emojiLine4.textColor = Color.slate800;
+  emojiLine4.textColor = ColorPalette.slate[800];
   emojiLine4.margin = new Thickness(0, 0, 0, 4);
   doc.add(emojiLine4);
 

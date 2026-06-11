@@ -13,6 +13,7 @@ import {
   QRCode,
   QrEcc,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -27,7 +28,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'QR Codes';
@@ -39,7 +40,7 @@ export function generate(): Document {
   const title = new TextBlock('QR Code Generator');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -55,7 +56,7 @@ export function generate(): Document {
   const basicHeader = new TextBlock('Basic QR Code');
   basicHeader.fontName = StandardFonts.HelveticaBold;
   basicHeader.fontSize = 16;
-  basicHeader.textColor = Color.indigo600;
+  basicHeader.textColor = ColorPalette.indigo[600];
   basicHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(basicHeader);
 
@@ -90,7 +91,7 @@ export function generate(): Document {
   doc.add(basicRow);
 
   const basicDivider = new Line();
-  basicDivider.color = Color.slate200;
+  basicDivider.color = ColorPalette.slate[200];
   basicDivider.thickness = 1;
   basicDivider.margin = new Thickness(0, 20, 0, 20);
   doc.add(basicDivider);
@@ -99,7 +100,7 @@ export function generate(): Document {
   const eccHeader = new TextBlock('Error Correction Levels');
   eccHeader.fontName = StandardFonts.HelveticaBold;
   eccHeader.fontSize = 16;
-  eccHeader.textColor = Color.indigo600;
+  eccHeader.textColor = ColorPalette.indigo[600];
   eccHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(eccHeader);
 
@@ -128,9 +129,9 @@ export function generate(): Document {
     qr.quietZone = 1;
 
     const qrWrap = new Container();
-    qrWrap.backgroundColor = Color.slate50;
+    qrWrap.backgroundColor = ColorPalette.slate[50];
     qrWrap.border = new Border(1);
-    qrWrap.borderColors = new BorderColors(Color.slate200);
+    qrWrap.borderColors = new BorderColors(ColorPalette.slate[200]);
     qrWrap.padding = new Thickness(10);
     qrWrap.child = qr;
 
@@ -141,12 +142,12 @@ export function generate(): Document {
 
     const detail = new TextBlock(eccDetail);
     detail.fontSize = 9;
-    detail.textColor = Color.slate500;
+    detail.textColor = ColorPalette.slate[500];
     detail.alignment = TextAlignment.Center;
 
     const url = new TextBlock(urlData);
     url.fontSize = 8;
-    url.textColor = Color.slate400;
+    url.textColor = ColorPalette.slate[400];
     url.alignment = TextAlignment.Center;
     url.margin = new Thickness(0, 4, 0, 0);
 
@@ -160,7 +161,7 @@ export function generate(): Document {
   doc.add(eccRow);
 
   const eccDivider = new Line();
-  eccDivider.color = Color.slate200;
+  eccDivider.color = ColorPalette.slate[200];
   eccDivider.thickness = 1;
   eccDivider.margin = new Thickness(0, 20, 0, 20);
   doc.add(eccDivider);
@@ -169,7 +170,7 @@ export function generate(): Document {
   const colorsHeader = new TextBlock('Colors & Backgrounds');
   colorsHeader.fontName = StandardFonts.HelveticaBold;
   colorsHeader.fontSize = 16;
-  colorsHeader.textColor = Color.indigo600;
+  colorsHeader.textColor = ColorPalette.indigo[600];
   colorsHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(colorsHeader);
 
@@ -186,17 +187,17 @@ export function generate(): Document {
   const fgQr = new QRCode();
   fgQr.data = 'tel:+1234567890';
   fgQr.size = 120;
-  fgQr.foregroundColor = Color.blue700;
+  fgQr.foregroundColor = ColorPalette.blue[700];
   fgQr.quietZone = 2;
   const fgWrap = new Container();
   fgWrap.border = new Border(1);
-  fgWrap.borderColors = new BorderColors(Color.blue200);
+  fgWrap.borderColors = new BorderColors(ColorPalette.blue[200]);
   fgWrap.padding = new Thickness(10);
   fgWrap.child = fgQr;
   fgCol.addChild(fgWrap);
   const fgLabel = new TextBlock('tel:+1234567890');
   fgLabel.fontSize = 9;
-  fgLabel.textColor = Color.slate500;
+  fgLabel.textColor = ColorPalette.slate[500];
   fgLabel.alignment = TextAlignment.Center;
   fgLabel.margin = new Thickness(0, 8, 0, 0);
   fgCol.addChild(fgLabel);
@@ -211,18 +212,18 @@ export function generate(): Document {
   const bgQr = new QRCode();
   bgQr.data = 'mailto:hello@example.com';
   bgQr.size = 120;
-  bgQr.foregroundColor = Color.rose900;
-  bgQr.backgroundColor = Color.rose50;
+  bgQr.foregroundColor = ColorPalette.rose[900];
+  bgQr.backgroundColor = ColorPalette.rose[50];
   bgQr.quietZone = 2;
   const bgWrap = new Container();
   bgWrap.border = new Border(1);
-  bgWrap.borderColors = new BorderColors(Color.rose200);
+  bgWrap.borderColors = new BorderColors(ColorPalette.rose[200]);
   bgWrap.padding = new Thickness(10);
   bgWrap.child = bgQr;
   bgCol.addChild(bgWrap);
   const bgLabel = new TextBlock('mailto:hello@example.com');
   bgLabel.fontSize = 9;
-  bgLabel.textColor = Color.slate500;
+  bgLabel.textColor = ColorPalette.slate[500];
   bgLabel.alignment = TextAlignment.Center;
   bgLabel.margin = new Thickness(0, 8, 0, 0);
   bgCol.addChild(bgLabel);
@@ -237,19 +238,19 @@ export function generate(): Document {
   const transQr = new QRCode();
   transQr.data = 'WIFI:S:MyNetwork;T:WPA;P:password;;';
   transQr.size = 120;
-  transQr.foregroundColor = Color.amber900;
+  transQr.foregroundColor = ColorPalette.amber[900];
   transQr.drawBackground = false;
   transQr.quietZone = 2;
   const transWrap = new Container();
-  transWrap.backgroundColor = Color.amber100;
+  transWrap.backgroundColor = ColorPalette.amber[100];
   transWrap.border = new Border(1);
-  transWrap.borderColors = new BorderColors(Color.amber300);
+  transWrap.borderColors = new BorderColors(ColorPalette.amber[300]);
   transWrap.padding = new Thickness(10);
   transWrap.child = transQr;
   transCol.addChild(transWrap);
   const transLabel = new TextBlock('WIFI:S:MyNetwork;...');
   transLabel.fontSize = 9;
-  transLabel.textColor = Color.slate500;
+  transLabel.textColor = ColorPalette.slate[500];
   transLabel.alignment = TextAlignment.Center;
   transLabel.margin = new Thickness(0, 8, 0, 0);
   transCol.addChild(transLabel);

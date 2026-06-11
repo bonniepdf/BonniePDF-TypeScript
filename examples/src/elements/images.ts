@@ -9,6 +9,7 @@ import {
   Image,
   ImageFitMode,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -193,7 +194,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Image Support Demo';

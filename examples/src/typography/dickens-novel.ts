@@ -21,6 +21,7 @@ import {
   VisualToc,
   Spacer,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   HorizontalStack,
@@ -92,7 +93,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
   settings.margin = 72;
   settings.displayDocTitle = true;
 
@@ -106,14 +107,14 @@ export function generate(): Document {
     const left = new TextBlock('A Tale of Two Cities');
     left.fontName = StandardFonts.TimesItalic;
     left.fontSize = 9;
-    left.textColor = Color.slate500;
+    left.textColor = ColorPalette.slate[500];
     left.alignment = TextAlignment.Left;
     stack.addChild(left, 1);
 
     const right = new TextBlock('Charles Dickens');
     right.fontName = StandardFonts.TimesItalic;
     right.fontSize = 9;
-    right.textColor = Color.slate500;
+    right.textColor = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
     stack.addChild(right, 1);
 
@@ -125,7 +126,7 @@ export function generate(): Document {
     const b = new TextBlock(String(pageNum));
     b.fontName = StandardFonts.TimesRoman;
     b.fontSize = 9;
-    b.textColor = Color.slate500;
+    b.textColor = ColorPalette.slate[500];
     b.alignment = TextAlignment.Center;
     b.margin = new Thickness(0, 2, 0, 0);
     return b;
@@ -142,7 +143,7 @@ export function generate(): Document {
   const titlePageTitle = new TextBlock('A TALE OF TWO CITIES');
   titlePageTitle.fontName = StandardFonts.TimesBold;
   titlePageTitle.fontSize = 28;
-  titlePageTitle.textColor = Color.slate900;
+  titlePageTitle.textColor = ColorPalette.slate[900];
   titlePageTitle.alignment = TextAlignment.Center;
   titlePageTitle.margin = new Thickness(0, 100, 0, 12);
   doc.add(titlePageTitle);
@@ -150,7 +151,7 @@ export function generate(): Document {
   const titlePageSubtitle = new TextBlock('A Story of the French Revolution');
   titlePageSubtitle.fontName = StandardFonts.TimesItalic;
   titlePageSubtitle.fontSize = 15;
-  titlePageSubtitle.textColor = Color.slate600;
+  titlePageSubtitle.textColor = ColorPalette.slate[600];
   titlePageSubtitle.alignment = TextAlignment.Center;
   titlePageSubtitle.margin = new Thickness(0, 0, 0, 40);
   doc.add(titlePageSubtitle);
@@ -158,7 +159,7 @@ export function generate(): Document {
   const titlePageRule = new TextBlock('---------------');
   titlePageRule.fontName = StandardFonts.TimesRoman;
   titlePageRule.fontSize = 13;
-  titlePageRule.textColor = Color.slate400;
+  titlePageRule.textColor = ColorPalette.slate[400];
   titlePageRule.alignment = TextAlignment.Center;
   titlePageRule.margin = new Thickness(0, 0, 0, 40);
   doc.add(titlePageRule);
@@ -166,7 +167,7 @@ export function generate(): Document {
   const titlePageAuthor = new TextBlock('Charles Dickens');
   titlePageAuthor.fontName = StandardFonts.TimesBold;
   titlePageAuthor.fontSize = 20;
-  titlePageAuthor.textColor = Color.slate800;
+  titlePageAuthor.textColor = ColorPalette.slate[800];
   titlePageAuthor.alignment = TextAlignment.Center;
   titlePageAuthor.margin = new Thickness(0, 0, 0, 60);
   doc.add(titlePageAuthor);
@@ -174,7 +175,7 @@ export function generate(): Document {
   const titlePageEdition = new TextBlock('Project Gutenberg Edition · eBook #98');
   titlePageEdition.fontName = StandardFonts.TimesRoman;
   titlePageEdition.fontSize = 10;
-  titlePageEdition.textColor = Color.slate400;
+  titlePageEdition.textColor = ColorPalette.slate[400];
   titlePageEdition.alignment = TextAlignment.Center;
   titlePageEdition.margin = new Thickness(0, 0, 0, 4);
   doc.add(titlePageEdition);
@@ -182,7 +183,7 @@ export function generate(): Document {
   const titlePagePublicDomain = new TextBlock('Public domain - free to read, copy, and share.');
   titlePagePublicDomain.fontName = StandardFonts.TimesItalic;
   titlePagePublicDomain.fontSize = 9;
-  titlePagePublicDomain.textColor = Color.slate400;
+  titlePagePublicDomain.textColor = ColorPalette.slate[400];
   titlePagePublicDomain.alignment = TextAlignment.Center;
   doc.add(titlePagePublicDomain);
   doc.addPage();
@@ -191,7 +192,7 @@ export function generate(): Document {
   const tocTitle = new TextBlock('Table of Contents');
   tocTitle.fontName = StandardFonts.TimesBold;
   tocTitle.fontSize = 24;
-  tocTitle.textColor = Color.slate900;
+  tocTitle.textColor = ColorPalette.slate[900];
   tocTitle.alignment = TextAlignment.Center;
   tocTitle.margin = new Thickness(0, 40, 0, 40);
   doc.add(tocTitle);
@@ -206,7 +207,7 @@ export function generate(): Document {
   toc.headingIdentifiers = tocIds;
   toc.fontName = StandardFonts.TimesRoman;
   toc.fontSize = 11;
-  toc.textColor = Color.slate800;
+  toc.textColor = ColorPalette.slate[800];
   toc.margin = new Thickness(0, 0, 0, 40);
   doc.add(toc);
 
@@ -218,7 +219,7 @@ export function generate(): Document {
     const bookTopRule = new TextBlock('---------------');
     bookTopRule.fontName = StandardFonts.TimesRoman;
     bookTopRule.fontSize = 11;
-    bookTopRule.textColor = Color.slate300;
+    bookTopRule.textColor = ColorPalette.slate[300];
     bookTopRule.alignment = TextAlignment.Center;
     bookTopRule.margin = new Thickness(0, 56, 0, 14);
     doc.add(bookTopRule);
@@ -227,7 +228,7 @@ export function generate(): Document {
     bookHeading.tocIdentifier = book.tocId;
     bookHeading.fontName = StandardFonts.TimesBold;
     bookHeading.fontSize = 14;
-    bookHeading.textColor = Color.slate800;
+    bookHeading.textColor = ColorPalette.slate[800];
     bookHeading.alignment = TextAlignment.Center;
     bookHeading.margin = new Thickness(0, 0, 0, 14);
     doc.add(bookHeading);
@@ -235,7 +236,7 @@ export function generate(): Document {
     const bookBottomRule = new TextBlock('---------------');
     bookBottomRule.fontName = StandardFonts.TimesRoman;
     bookBottomRule.fontSize = 11;
-    bookBottomRule.textColor = Color.slate300;
+    bookBottomRule.textColor = ColorPalette.slate[300];
     bookBottomRule.alignment = TextAlignment.Center;
     bookBottomRule.margin = new Thickness(0, 0, 0, 32);
     doc.add(bookBottomRule);
@@ -244,7 +245,7 @@ export function generate(): Document {
       const chapterNumber = new TextBlock(ch.number);
       chapterNumber.fontName = StandardFonts.TimesBold;
       chapterNumber.fontSize = 10;
-      chapterNumber.textColor = Color.slate500;
+      chapterNumber.textColor = ColorPalette.slate[500];
       chapterNumber.alignment = TextAlignment.Center;
       chapterNumber.margin = new Thickness(0, 32, 0, 6);
       doc.add(chapterNumber);
@@ -253,7 +254,7 @@ export function generate(): Document {
       chapterHeading.tocIdentifier = ch.tocId;
       chapterHeading.fontName = StandardFonts.TimesBold;
       chapterHeading.fontSize = 17;
-      chapterHeading.textColor = Color.slate900;
+      chapterHeading.textColor = ColorPalette.slate[900];
       chapterHeading.alignment = TextAlignment.Center;
       chapterHeading.margin = new Thickness(0, 0, 0, 18);
       doc.add(chapterHeading);
@@ -269,7 +270,7 @@ export function generate(): Document {
         const paragraph = new TextBlock(paragraphParts.join(' '));
         paragraph.fontName = StandardFonts.TimesRoman;
         paragraph.fontSize = 11;
-        paragraph.textColor = Color.slate900;
+        paragraph.textColor = ColorPalette.slate[900];
         paragraph.alignment = TextAlignment.Justify;
         paragraph.margin = new Thickness(0, 0, 0, 7);
         doc.add(paragraph);

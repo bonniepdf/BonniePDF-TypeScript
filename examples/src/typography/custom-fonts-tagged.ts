@@ -7,6 +7,7 @@ import {
   TextStyle,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -20,7 +21,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Custom Fonts - Tagged (PDF/UA-1)';
@@ -35,7 +36,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = FONT;
   h1.fontSize = 22;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -45,7 +46,7 @@ export function generate(): Document {
   );
   intro.fontName = FONT;
   intro.fontSize = 11;
-  intro.textColor = Color.slate500;
+  intro.textColor = ColorPalette.slate[500];
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
 
@@ -56,7 +57,7 @@ export function generate(): Document {
   h2Symbols.level = 2;
   h2Symbols.fontName = FONT;
   h2Symbols.fontSize = 13;
-  h2Symbols.textColor = Color.slate700;
+  h2Symbols.textColor = ColorPalette.slate[700];
   h2Symbols.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Symbols);
 
@@ -65,19 +66,19 @@ export function generate(): Document {
   );
   symbolLine1.fontName = FONT;
   symbolLine1.fontSize = 11;
-  symbolLine1.textColor = Color.slate600;
+  symbolLine1.textColor = ColorPalette.slate[600];
   symbolLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(symbolLine1);
   const symbolLine2 = new TextBlock('– En-dash (U+2013)  - Em-dash (U+2014)');
   symbolLine2.fontName = FONT;
   symbolLine2.fontSize = 11;
-  symbolLine2.textColor = Color.slate600;
+  symbolLine2.textColor = ColorPalette.slate[600];
   symbolLine2.margin = new Thickness(0, 0, 0, 4);
   doc.add(symbolLine2);
   const symbolLine3 = new TextBlock('± Plus-minus  × Multiply  ÷ Divide');
   symbolLine3.fontName = FONT;
   symbolLine3.fontSize = 11;
-  symbolLine3.textColor = Color.slate600;
+  symbolLine3.textColor = ColorPalette.slate[600];
   symbolLine3.margin = new Thickness(0, 0, 0, 4);
   doc.add(symbolLine3);
 
@@ -88,14 +89,14 @@ export function generate(): Document {
   h2Currency.level = 2;
   h2Currency.fontName = FONT;
   h2Currency.fontSize = 13;
-  h2Currency.textColor = Color.slate700;
+  h2Currency.textColor = ColorPalette.slate[700];
   h2Currency.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Currency);
 
   const cur = new TextBlock('€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin');
   cur.fontName = FONT;
   cur.fontSize = 11;
-  cur.textColor = Color.slate600;
+  cur.textColor = ColorPalette.slate[600];
   cur.margin = new Thickness(0, 0, 0, 4);
   doc.add(cur);
 
@@ -106,26 +107,26 @@ export function generate(): Document {
   h2Math.level = 2;
   h2Math.fontName = MATH_FONT;
   h2Math.fontSize = 13;
-  h2Math.textColor = Color.slate700;
+  h2Math.textColor = ColorPalette.slate[700];
   h2Math.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Math);
 
   const mathLine1 = new TextBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪');
   mathLine1.fontName = MATH_FONT;
   mathLine1.fontSize = 11;
-  mathLine1.textColor = Color.slate600;
+  mathLine1.textColor = ColorPalette.slate[600];
   mathLine1.margin = new Thickness(0, 0, 0, 4);
   doc.add(mathLine1);
   const mathLine2 = new TextBlock('≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity');
   mathLine2.fontName = MATH_FONT;
   mathLine2.fontSize = 11;
-  mathLine2.textColor = Color.slate600;
+  mathLine2.textColor = ColorPalette.slate[600];
   mathLine2.margin = new Thickness(0, 0, 0, 4);
   doc.add(mathLine2);
   const mathLine3 = new TextBlock('∑ Sum  ∏ Product  √ Root  ∫ Integral');
   mathLine3.fontName = MATH_FONT;
   mathLine3.fontSize = 11;
-  mathLine3.textColor = Color.slate600;
+  mathLine3.textColor = ColorPalette.slate[600];
   mathLine3.margin = new Thickness(0, 0, 0, 4);
   doc.add(mathLine3);
 
@@ -136,14 +137,14 @@ export function generate(): Document {
   h2Dingbats.level = 2;
   h2Dingbats.fontName = SYMBOLS_FONT;
   h2Dingbats.fontSize = 13;
-  h2Dingbats.textColor = Color.slate700;
+  h2Dingbats.textColor = ColorPalette.slate[700];
   h2Dingbats.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Dingbats);
 
   const dingbatLine = new TextBlock('✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club');
   dingbatLine.fontName = SYMBOLS_FONT;
   dingbatLine.fontSize = 11;
-  dingbatLine.textColor = Color.slate600;
+  dingbatLine.textColor = ColorPalette.slate[600];
   dingbatLine.margin = new Thickness(0, 0, 0, 4);
   doc.add(dingbatLine);
 
@@ -154,14 +155,14 @@ export function generate(): Document {
   h2Greek.level = 2;
   h2Greek.fontName = FONT;
   h2Greek.fontSize = 13;
-  h2Greek.textColor = Color.slate700;
+  h2Greek.textColor = ColorPalette.slate[700];
   h2Greek.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Greek);
 
   const greek = new TextBlock('α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega');
   greek.fontName = FONT;
   greek.fontSize = 11;
-  greek.textColor = Color.slate600;
+  greek.textColor = ColorPalette.slate[600];
   doc.add(greek);
 
   return doc;

@@ -3,6 +3,7 @@ import { TextStyle } from '../src/Elements/Text/TextStyle';
 import { TextDecoration } from '../src/Elements/Text/TextDecoration';
 import { FontWeight } from '../src/Typography/FontWeight';
 import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 
 // TextStyle.mergeWith(base) returns a new style where THIS style's explicitly-set
 // values win, and unset (undefined/Normal/None) values fall back to `base`. These
@@ -29,16 +30,16 @@ describe('TextStyle.mergeWith — size and colour inheritance', () => {
   it('colour and background inherit from the base when unset, and override when set', () => {
     const baseStyle = base(s => {
       s.color = Color.black;
-      s.backgroundColor = Color.amber400;
+      s.backgroundColor = ColorPalette.amber[400];
     });
 
     const inherits = new TextStyle().mergeWith(baseStyle);
     expect(inherits.color).toBe(Color.black);
-    expect(inherits.backgroundColor).toBe(Color.amber400);
+    expect(inherits.backgroundColor).toBe(ColorPalette.amber[400]);
 
     const overrides = base(s => (s.color = Color.red)).mergeWith(baseStyle);
     expect(overrides.color).toBe(Color.red);
-    expect(overrides.backgroundColor).toBe(Color.amber400); // still inherited
+    expect(overrides.backgroundColor).toBe(ColorPalette.amber[400]); // still inherited
   });
 });
 
@@ -141,7 +142,7 @@ describe('TextStyle — fluent setters', () => {
     expect(new TextStyle().withItalic().italic).toBe(true);
     expect(new TextStyle().withSize(18).fontSize).toBe(18);
     expect(new TextStyle().withColor(Color.red).color).toBe(Color.red);
-    expect(new TextStyle().withBackground(Color.amber400).backgroundColor).toBe(Color.amber400);
+    expect(new TextStyle().withBackground(ColorPalette.amber[400]).backgroundColor).toBe(ColorPalette.amber[400]);
     expect(new TextStyle().withWeight(FontWeight.Bold).weight).toBe(FontWeight.Bold);
     expect(new TextStyle().withFamily('Times').fontFamily).toBe('Times');
     expect(new TextStyle().withLineHeight(1.5).lineHeightMultiplier).toBe(1.5);

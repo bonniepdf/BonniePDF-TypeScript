@@ -8,6 +8,7 @@ import {
   VerticalStack,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   Placeholders,
@@ -19,7 +20,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'VerticalStack Overflow - Tagged (PDF/UA-1)';
@@ -34,7 +35,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1);
 
@@ -42,7 +43,7 @@ export function generate(): Document {
     'Seventy-five catalogue items inside a VerticalStack that paginates automatically. Each item carries a /H3 heading and a /P description.'
   );
   sub.fontSize = 12;
-  sub.textColor = Color.slate500;
+  sub.textColor = ColorPalette.slate[500];
   sub.margin = new Thickness(0, 0, 0, 20);
   doc.add(sub);
 
@@ -59,7 +60,7 @@ export function generate(): Document {
     itemTitle.level = 3;
     itemTitle.fontName = StandardFonts.HelveticaBold;
     itemTitle.fontSize = 11;
-    itemTitle.textColor = Color.blue600;
+    itemTitle.textColor = ColorPalette.blue[600];
     itemTitle.margin = new Thickness(0, 0, 0, 4);
     itemStack.addChild(itemTitle);
 

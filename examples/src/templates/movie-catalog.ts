@@ -11,6 +11,7 @@ import {
   Table,
   TableRow,
   Color,
+  ColorPalette,
   Border,
   BorderColors,
   StandardFonts,
@@ -369,7 +370,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Classic Movies Collection';
@@ -383,27 +384,27 @@ export function generate(): Document {
   const titleText = new TextBlock('Classic Movies Collection');
   titleText.fontName = StandardFonts.TimesBold;
   titleText.fontSize = 26;
-  titleText.textColor = Color.slate900;
+  titleText.textColor = ColorPalette.slate[900];
   titleStack.addChild(titleText);
 
   const tagline = new TextBlock('A curated selection of timeless cinema from the golden age of Hollywood');
   tagline.fontName = StandardFonts.TimesItalic;
   tagline.fontSize = 12;
-  tagline.textColor = Color.slate600;
+  tagline.textColor = ColorPalette.slate[600];
   titleStack.addChild(tagline);
 
   const countLine = new TextBlock(`Total Movies: ${MOVIES.length} | Compiled: ${monthYear}`);
   countLine.fontName = StandardFonts.Helvetica;
   countLine.fontSize = 10;
-  countLine.textColor = Color.slate500;
+  countLine.textColor = ColorPalette.slate[500];
   titleStack.addChild(countLine);
 
   // ── Movies table ──
   const moviesTable = new Table(1, 3, 4, 2, 1.5, 2);
   moviesTable.cellPadding = 8;
   moviesTable.border = new Border(0.5);
-  moviesTable.borderColors = new BorderColors(Color.slate400);
-  moviesTable.headerBackgroundColor = Color.indigo800;
+  moviesTable.borderColors = new BorderColors(ColorPalette.slate[400]);
+  moviesTable.headerBackgroundColor = ColorPalette.indigo[800];
   moviesTable.headerTextColor = Color.white;
   moviesTable.repeatHeadersOnNewPage = true;
 
@@ -431,42 +432,56 @@ export function generate(): Document {
   moviesTable.addHeader(hYear, hTitle, hDirector, hGenre, hRating, hDuration);
 
   MOVIES.forEach((movie, rowIndex) => {
-    const ratingColor = movie.rating >= 9.0 ? Color.green600 : movie.rating >= 7.5 ? Color.amber600 : Color.slate600;
-    const ratingBg = movie.rating >= 9.0 ? Color.green50 : movie.rating >= 7.5 ? Color.amber50 : Color.slate100;
-    const rowBg = rowIndex % 2 === 0 ? Color.white : Color.slate50;
+    const ratingColor =
+      movie.rating >= 9.0
+        ? ColorPalette.green[600]
+        : movie.rating >= 7.5
+          ? ColorPalette.amber[600]
+          : ColorPalette.slate[600];
+    const ratingBg =
+      movie.rating >= 9.0
+        ? ColorPalette.green[50]
+        : movie.rating >= 7.5
+          ? ColorPalette.amber[50]
+          : ColorPalette.slate[100];
+    const rowBg = rowIndex % 2 === 0 ? Color.white : ColorPalette.slate[50];
 
     const yearText = new TextBlock(String(movie.year));
     yearText.fontName = StandardFonts.CourierBold;
     yearText.fontSize = 10;
-    yearText.textColor = Color.indigo700;
+    yearText.textColor = ColorPalette.indigo[700];
     yearText.alignment = TextAlignment.Center;
 
     const titleCell = new TextBlock(movie.title);
     titleCell.fontName = StandardFonts.HelveticaBold;
     titleCell.fontSize = 10;
-    titleCell.textColor = Color.slate900;
+    titleCell.textColor = ColorPalette.slate[900];
 
     const directorText = new TextBlock(movie.director);
     directorText.fontName = StandardFonts.Helvetica;
     directorText.fontSize = 10;
-    directorText.textColor = Color.slate700;
+    directorText.textColor = ColorPalette.slate[700];
 
     const genreText = new TextBlock(movie.genre);
     genreText.fontName = StandardFonts.Helvetica;
     genreText.fontSize = 9;
-    genreText.textColor = Color.slate600;
+    genreText.textColor = ColorPalette.slate[600];
 
     const ratingText = new TextBlock(movie.rating.toFixed(1));
     ratingText.fontName = StandardFonts.HelveticaBold;
     ratingText.fontSize = 10;
     ratingText.textColor = ratingColor;
     ratingText.alignment = TextAlignment.Center;
-    const ratingCell = cellBorder(cellPadding(cellBackground(asCell(ratingText), ratingBg), 4), Color.slate300, 0.5);
+    const ratingCell = cellBorder(
+      cellPadding(cellBackground(asCell(ratingText), ratingBg), 4),
+      ColorPalette.slate[300],
+      0.5
+    );
 
     const durText = new TextBlock(movie.duration);
     durText.fontName = StandardFonts.Courier;
     durText.fontSize = 9;
-    durText.textColor = Color.slate600;
+    durText.textColor = ColorPalette.slate[600];
     durText.alignment = TextAlignment.Center;
 
     const row = TableRow.fromElements(yearText, titleCell, directorText, genreText, ratingCell, durText);
@@ -480,7 +495,7 @@ export function generate(): Document {
   const statsTitle = new TextBlock('Collection Statistics');
   statsTitle.fontName = StandardFonts.HelveticaBold;
   statsTitle.fontSize = 12;
-  statsTitle.textColor = Color.slate800;
+  statsTitle.textColor = ColorPalette.slate[800];
   statsStack.addChild(statsTitle);
 
   const avgRating = MOVIES.reduce((s, m) => s + m.rating, 0) / MOVIES.length;
@@ -497,7 +512,7 @@ export function generate(): Document {
     const t = new TextBlock(text);
     t.fontName = StandardFonts.Helvetica;
     t.fontSize = 10;
-    t.textColor = Color.slate700;
+    t.textColor = ColorPalette.slate[700];
     statsStack.addChild(t);
   }
 
@@ -507,7 +522,7 @@ export function generate(): Document {
   );
   footer.fontName = StandardFonts.HelveticaOblique;
   footer.fontSize = 8;
-  footer.textColor = Color.slate400;
+  footer.textColor = ColorPalette.slate[400];
 
   // ── Assemble ──
   const mainStack = new VerticalStack();

@@ -9,6 +9,7 @@ import {
   VerticalStack,
   Line,
   Color,
+  ColorPalette,
   StandardFonts,
   PdfAConformance,
   AccessibilityMode,
@@ -41,12 +42,12 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
-    b.textColor = Color.slate400;
+    b.textColor = ColorPalette.slate[400];
     return b;
   };
 
@@ -75,16 +76,16 @@ export function generate(): Document {
       const heading = new TextBlock(`${formatName} (${orientation})`);
       heading.fontName = StandardFonts.HelveticaBold;
       heading.fontSize = 28;
-      heading.textColor = Color.slate800;
+      heading.textColor = ColorPalette.slate[800];
       content.addChild(heading);
 
       const sub = new TextBlock('Technical Specifications');
       sub.fontSize = 14;
-      sub.textColor = Color.slate500;
+      sub.textColor = ColorPalette.slate[500];
       content.addChild(sub);
 
       const divider = new Line();
-      divider.color = Color.slate200;
+      divider.color = ColorPalette.slate[200];
       divider.thickness = 1;
       content.addChild(divider);
 
@@ -94,7 +95,7 @@ export function generate(): Document {
       );
       points.fontName = StandardFonts.Courier;
       points.fontSize = 11;
-      points.textColor = Color.slate600;
+      points.textColor = ColorPalette.slate[600];
       content.addChild(points);
 
       const inches = new TextBlock(
@@ -102,7 +103,7 @@ export function generate(): Document {
       );
       inches.fontName = StandardFonts.Courier;
       inches.fontSize = 11;
-      inches.textColor = Color.slate600;
+      inches.textColor = ColorPalette.slate[600];
       content.addChild(inches);
 
       const millimeters = new TextBlock(
@@ -110,7 +111,7 @@ export function generate(): Document {
       );
       millimeters.fontName = StandardFonts.Courier;
       millimeters.fontSize = 11;
-      millimeters.textColor = Color.slate600;
+      millimeters.textColor = ColorPalette.slate[600];
       content.addChild(millimeters);
 
       doc.add(content);

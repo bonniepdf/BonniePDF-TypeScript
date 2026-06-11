@@ -7,7 +7,7 @@ import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { Heading } from '../src/Elements/Text/Heading';
 import { TextBlock } from '../src/Elements/Text/TextBlock';
 import { QRCode } from '../src/Elements/Shapes/QRCode';
-import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { Thickness } from '../src/Core/Thickness';
 import { StandardFonts } from '../src/Typography/StandardFonts';
 import { pdfToText } from './helpers/test-base';
@@ -47,7 +47,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     h1.level = 1;
     h1.fontName = StandardFonts.HelveticaBold;
     h1.fontSize = 24;
-    h1.textColor = Color.slate800;
+    h1.textColor = ColorPalette.slate[800];
     h1.margin = new Thickness(0, 0, 0, 12);
     d.add(h1);
 
@@ -55,7 +55,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     p1.text = 'This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1.';
     p1.fontName = StandardFonts.Helvetica;
     p1.fontSize = 12;
-    p1.textColor = Color.slate700;
+    p1.textColor = ColorPalette.slate[700];
     p1.margin = new Thickness(0, 0, 0, 8);
     d.add(p1);
 
@@ -63,7 +63,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     p2.text = 'Existing elements tag themselves automatically - no semantic verbs required.';
     p2.fontName = StandardFonts.Helvetica;
     p2.fontSize = 12;
-    p2.textColor = Color.slate700;
+    p2.textColor = ColorPalette.slate[700];
     p2.margin = new Thickness(0, 0, 0, 12);
     d.add(p2);
 
@@ -72,7 +72,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     h2.level = 2;
     h2.fontName = StandardFonts.HelveticaBold;
     h2.fontSize = 16;
-    h2.textColor = Color.slate800;
+    h2.textColor = ColorPalette.slate[800];
     h2.margin = new Thickness(0, 0, 0, 8);
     d.add(h2);
 

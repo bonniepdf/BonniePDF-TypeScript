@@ -1,4 +1,5 @@
 import { Color } from '../Core/Color';
+import { ColorPalette } from '../Core/ColorPalette';
 
 /**
  * Configuration for rendering a text watermark behind page content.
@@ -36,7 +37,7 @@ export class WatermarkSettings {
     this.text = text;
     this.fontName = 'Helvetica';
     this.fontSize = 72;
-    this.textColor = Color.gray500;
+    this.textColor = ColorPalette.gray[500];
     this.opacity = 0.15;
     this.rotationDegrees = -45;
   }

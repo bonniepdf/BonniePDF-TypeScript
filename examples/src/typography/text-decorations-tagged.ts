@@ -8,6 +8,7 @@ import {
   TextDecoration,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -18,7 +19,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Decorations - Tagged (PDF/UA-1)';
@@ -33,7 +34,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 14);
   doc.add(h1);
 
@@ -50,19 +51,19 @@ export function generate(): Document {
   h2Under.level = 2;
   h2Under.fontName = StandardFonts.HelveticaBold;
   h2Under.fontSize = 14;
-  h2Under.textColor = Color.indigo600;
+  h2Under.textColor = ColorPalette.indigo[600];
   h2Under.margin = new Thickness(0, 12, 0, 6);
   doc.add(h2Under);
 
   const u1 = new TextBlock('This text has an underline decoration applied.');
   u1.textDecoration = TextDecoration.Underline;
-  u1.textColor = Color.slate700;
+  u1.textColor = ColorPalette.slate[700];
   u1.margin = new Thickness(0, 0, 0, 8);
   doc.add(u1);
 
   const u2 = new TextBlock('Underlines can mark hyperlinks, emphasis, or headings in informal documents.');
   u2.textDecoration = TextDecoration.Underline;
-  u2.textColor = Color.slate700;
+  u2.textColor = ColorPalette.slate[700];
   u2.margin = new Thickness(0, 0, 0, 8);
   doc.add(u2);
 
@@ -73,7 +74,7 @@ export function generate(): Document {
   h2Strike.level = 2;
   h2Strike.fontName = StandardFonts.HelveticaBold;
   h2Strike.fontSize = 14;
-  h2Strike.textColor = Color.indigo600;
+  h2Strike.textColor = ColorPalette.indigo[600];
   h2Strike.margin = new Thickness(0, 12, 0, 6);
   doc.add(h2Strike);
 
@@ -81,13 +82,13 @@ export function generate(): Document {
     'This text has a strikethrough decoration, useful for showing deleted or superseded content.'
   );
   s1.textDecoration = TextDecoration.Strikethrough;
-  s1.textColor = Color.slate700;
+  s1.textColor = ColorPalette.slate[700];
   s1.margin = new Thickness(0, 0, 0, 8);
   doc.add(s1);
 
   const s2 = new TextBlock('Strikethrough visually signals content that has been withdrawn or revised.');
   s2.textDecoration = TextDecoration.Strikethrough;
-  s2.textColor = Color.slate700;
+  s2.textColor = ColorPalette.slate[700];
   s2.margin = new Thickness(0, 0, 0, 8);
   doc.add(s2);
 
@@ -98,13 +99,13 @@ export function generate(): Document {
   h2Combined.level = 2;
   h2Combined.fontName = StandardFonts.HelveticaBold;
   h2Combined.fontSize = 14;
-  h2Combined.textColor = Color.indigo600;
+  h2Combined.textColor = ColorPalette.indigo[600];
   h2Combined.margin = new Thickness(0, 12, 0, 6);
   doc.add(h2Combined);
 
   const c1 = new TextBlock('This text has both underline and strikethrough applied simultaneously.');
   c1.textDecoration = TextDecoration.Underline | TextDecoration.Strikethrough;
-  c1.textColor = Color.slate700;
+  c1.textColor = ColorPalette.slate[700];
   c1.margin = new Thickness(0, 0, 0, 8);
   doc.add(c1);
 
@@ -115,7 +116,7 @@ export function generate(): Document {
   h2Sizes.level = 2;
   h2Sizes.fontName = StandardFonts.HelveticaBold;
   h2Sizes.fontSize = 14;
-  h2Sizes.textColor = Color.indigo600;
+  h2Sizes.textColor = ColorPalette.indigo[600];
   h2Sizes.margin = new Thickness(0, 12, 0, 6);
   doc.add(h2Sizes);
 
@@ -123,7 +124,7 @@ export function generate(): Document {
     const b = new TextBlock(`Underline at ${size}pt`);
     b.fontSize = size;
     b.textDecoration = TextDecoration.Underline;
-    b.textColor = Color.slate700;
+    b.textColor = ColorPalette.slate[700];
     b.margin = new Thickness(0, 0, 0, 4);
     doc.add(b);
   }
@@ -135,13 +136,13 @@ export function generate(): Document {
   h2Prices.level = 2;
   h2Prices.fontName = StandardFonts.HelveticaBold;
   h2Prices.fontSize = 14;
-  h2Prices.textColor = Color.indigo600;
+  h2Prices.textColor = ColorPalette.indigo[600];
   h2Prices.margin = new Thickness(0, 12, 0, 6);
   doc.add(h2Prices);
 
   const original = new TextBlock('Original Price: £199.99');
   original.fontSize = 14;
-  original.textColor = Color.slate400;
+  original.textColor = ColorPalette.slate[400];
   original.textDecoration = TextDecoration.Strikethrough;
   original.margin = new Thickness(0, 0, 0, 4);
   doc.add(original);
@@ -156,7 +157,7 @@ export function generate(): Document {
 
   const saving = new TextBlock('You save £50.00!');
   saving.fontSize = 11;
-  saving.textColor = Color.green600;
+  saving.textColor = ColorPalette.green[600];
   doc.add(saving);
 
   return doc;

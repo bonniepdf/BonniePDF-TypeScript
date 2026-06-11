@@ -6,6 +6,7 @@ import {
   TextStyle,
   VerticalStack,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   Placeholders,
@@ -18,7 +19,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'VerticalStack Overflow Demo';
@@ -30,13 +31,13 @@ export function generate(): Document {
   const title = new TextBlock('Item Catalog');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 10);
   doc.add(title);
 
   const sub = new TextBlock('A collection of items demonstrating automatic pagination');
   sub.fontSize = 12;
-  sub.textColor = Color.slate500;
+  sub.textColor = ColorPalette.slate[500];
   sub.margin = new Thickness(0, 0, 0, 20);
   doc.add(sub);
 
@@ -51,7 +52,7 @@ export function generate(): Document {
     const itemTitle = new TextBlock(`Item #${String(i).padStart(3, '0')}`);
     itemTitle.fontName = StandardFonts.HelveticaBold;
     itemTitle.fontSize = 12;
-    itemTitle.textColor = Color.blue600;
+    itemTitle.textColor = ColorPalette.blue[600];
     itemTitle.margin = new Thickness(0, 0, 0, 5);
     itemStack.addChild(itemTitle);
 

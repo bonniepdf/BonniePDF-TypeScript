@@ -10,6 +10,7 @@ import {
   Image,
   ImageFitMode,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
 } from '@bonniepdf/core';
@@ -205,14 +206,14 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
   doc.settings = settings;
 
   const h1 = new Heading('Accessible Images');
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -238,7 +239,7 @@ export function generate(): Document {
   h2.level = 2;
   h2.fontName = StandardFonts.HelveticaBold;
   h2.fontSize = 16;
-  h2.textColor = Color.slate800;
+  h2.textColor = ColorPalette.slate[800];
   h2.margin = new Thickness(0, 0, 0, 8);
   doc.add(h2);
 

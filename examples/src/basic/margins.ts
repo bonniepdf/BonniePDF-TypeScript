@@ -9,6 +9,7 @@ import {
   Container,
   Table,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -22,7 +23,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Margin Example';
@@ -35,7 +36,7 @@ export function generate(): Document {
   const title = new TextBlock('Margin Example');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -53,14 +54,14 @@ export function generate(): Document {
       'Notice how the margin creates space outside the border, while padding creates space inside.'
   );
   infoText.fontSize = 11;
-  infoText.textColor = Color.blue900;
+  infoText.textColor = ColorPalette.blue[900];
 
   const infoBox = new Container();
   infoBox.margin = new Thickness(0, 10, 0, 10);
   infoBox.padding = new Thickness(15);
-  infoBox.backgroundColor = Color.blue100;
+  infoBox.backgroundColor = ColorPalette.blue[100];
   infoBox.border = new Border(1);
-  infoBox.borderColors = new BorderColors(Color.blue500);
+  infoBox.borderColors = new BorderColors(ColorPalette.blue[500]);
   infoBox.child = infoText;
   doc.add(infoBox);
 
@@ -68,7 +69,7 @@ export function generate(): Document {
   const imgHeader = new TextBlock('Image with Margin');
   imgHeader.fontName = StandardFonts.HelveticaBold;
   imgHeader.fontSize = 16;
-  imgHeader.textColor = Color.slate700;
+  imgHeader.textColor = ColorPalette.slate[700];
   imgHeader.margin = new Thickness(0, 20, 0, 10);
   doc.add(imgHeader);
 
@@ -80,12 +81,12 @@ export function generate(): Document {
   // Coloured rectangle as image placeholder
   const placeholderLabel = new TextBlock('Image Placeholder (100x60)');
   placeholderLabel.fontSize = 10;
-  placeholderLabel.textColor = Color.amber900;
+  placeholderLabel.textColor = ColorPalette.amber[900];
   placeholderLabel.alignment = TextAlignment.Center;
 
   const placeholder = new Container();
   placeholder.margin = new Thickness(20);
-  placeholder.backgroundColor = Color.amber400;
+  placeholder.backgroundColor = ColorPalette.amber[400];
   placeholder.padding = new Thickness(10, 25, 10, 25);
   placeholder.child = placeholderLabel;
   doc.add(placeholder);
@@ -94,7 +95,7 @@ export function generate(): Document {
   const tableHeading = new TextBlock('Table with Margin');
   tableHeading.fontName = StandardFonts.HelveticaBold;
   tableHeading.fontSize = 16;
-  tableHeading.textColor = Color.slate700;
+  tableHeading.textColor = ColorPalette.slate[700];
   tableHeading.margin = new Thickness(0, 20, 0, 10);
   doc.add(tableHeading);
 
@@ -102,9 +103,9 @@ export function generate(): Document {
   table.margin = new Thickness(10, 0, 10, 0);
   table.cellPadding = 8;
   table.border = new Border(1);
-  table.borderColors = new BorderColors(Color.slate300);
-  table.headerBackgroundColor = Color.slate200;
-  table.headerTextColor = Color.slate800;
+  table.borderColors = new BorderColors(ColorPalette.slate[300]);
+  table.headerBackgroundColor = ColorPalette.slate[200];
+  table.headerTextColor = ColorPalette.slate[800];
 
   const th1 = new TextBlock('Property');
   th1.fontName = StandardFonts.HelveticaBold;
@@ -132,7 +133,7 @@ export function generate(): Document {
   const stackHeading = new TextBlock('VerticalStack with Margin');
   stackHeading.fontName = StandardFonts.HelveticaBold;
   stackHeading.fontSize = 16;
-  stackHeading.textColor = Color.slate700;
+  stackHeading.textColor = ColorPalette.slate[700];
   stackHeading.margin = new Thickness(0, 20, 0, 10);
   doc.add(stackHeading);
 
@@ -140,9 +141,9 @@ export function generate(): Document {
   stack.margin = new Thickness(20, 10, 20, 10);
 
   for (const [bg, fg, text, topMargin] of [
-    [Color.green100, Color.green800, 'Item 1 in stack', false],
-    [Color.purple100, Color.purple800, 'Item 2 in stack (with top margin)', true],
-    [Color.red100, Color.red800, 'Item 3 in stack (with top margin)', true],
+    [ColorPalette.green[100], ColorPalette.green[800], 'Item 1 in stack', false],
+    [ColorPalette.purple[100], ColorPalette.purple[800], 'Item 2 in stack (with top margin)', true],
+    [ColorPalette.red[100], ColorPalette.red[800], 'Item 3 in stack (with top margin)', true],
   ] as [Color, Color, string, boolean][]) {
     const t = new TextBlock(text);
     t.fontSize = 10;
@@ -163,7 +164,7 @@ export function generate(): Document {
   );
   note.fontName = StandardFonts.HelveticaOblique;
   note.fontSize = 10;
-  note.textColor = Color.slate500;
+  note.textColor = ColorPalette.slate[500];
   note.margin = new Thickness(0, 30, 0, 0);
   doc.add(note);
 

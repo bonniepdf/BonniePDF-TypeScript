@@ -7,6 +7,7 @@ import {
   TextElementBase,
   TextAlignment,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   Placeholders,
@@ -19,12 +20,12 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 10;
-    b.textColor = Color.slate500;
+    b.textColor = ColorPalette.slate[500];
     b.alignment = TextAlignment.Right;
     return b;
   };
@@ -39,7 +40,7 @@ export function generate(): Document {
   const title = new TextBlock('Long Text Document');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 

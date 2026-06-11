@@ -40,7 +40,7 @@ const doc = new Document();
 const title = new TextBlock('Hello, BonniePDF!');
 title.fontName = StandardFonts.HelveticaBold;
 title.fontSize = 24;
-title.textColor = Color.slate800;
+title.textColor = ColorPalette.slate[800];
 doc.add(title);
 
 doc.add(new TextBlock('Generated entirely in TypeScript, no server required.'));
@@ -72,11 +72,11 @@ import { Document, TextBlock, TextStyle, Color, Thickness } from '@bonniepdf/cor
 const doc = new Document();
 
 // Every text element inherits this unless it sets its own values.
-doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
 
 const heading = new TextBlock('Quarterly Report');
 heading.fontSize = 22;
-heading.textColor = Color.indigo600;
+heading.textColor = ColorPalette.indigo[600];
 heading.margin = new Thickness(0, 0, 0, 12); // left, top, right, bottom
 doc.add(heading);
 ```

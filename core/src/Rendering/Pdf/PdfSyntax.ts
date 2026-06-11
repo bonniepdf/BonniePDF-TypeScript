@@ -82,7 +82,14 @@ export class PdfSyntax {
   }
 
   public static formatDecimal(value: number): string {
-    return value.toFixed(3);
+    // Matches the .NET reference's "0.###" format: up to 3 fractional digits with
+    // trailing zeros (and a bare trailing dot) trimmed. This keeps content streams
+    // compact (e.g. "11" not "11.000") and byte-aligned with the .NET output.
+    let s = value.toFixed(3);
+    if (s.includes('.')) {
+      s = s.replace(/0+$/, '').replace(/\.$/, '');
+    }
+    return s === '-0' ? '0' : s;
   }
 
   public static formatColor(c: { scR: number; scG: number; scB: number }): string {

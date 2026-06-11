@@ -129,3 +129,36 @@ describe('TextStyle — effective getters and font resolution', () => {
     expect(base(s => (s.fontFamily = 'Helvetica')).resolvedFontName).toBe('Helvetica');
   });
 });
+
+describe('TextStyle — fluent setters', () => {
+  it('weight shortcuts set the corresponding weight', () => {
+    expect(new TextStyle().bold().weight).toBe(FontWeight.Bold);
+    expect(new TextStyle().light().weight).toBe(FontWeight.Light);
+    expect(new TextStyle().thin().weight).toBe(FontWeight.Thin);
+  });
+
+  it('value setters assign their field', () => {
+    expect(new TextStyle().withItalic().italic).toBe(true);
+    expect(new TextStyle().withSize(18).fontSize).toBe(18);
+    expect(new TextStyle().withColor(Color.red).color).toBe(Color.red);
+    expect(new TextStyle().withBackground(Color.amber400).backgroundColor).toBe(Color.amber400);
+    expect(new TextStyle().withWeight(FontWeight.Bold).weight).toBe(FontWeight.Bold);
+    expect(new TextStyle().withFamily('Times').fontFamily).toBe('Times');
+    expect(new TextStyle().withLineHeight(1.5).lineHeightMultiplier).toBe(1.5);
+  });
+
+  it('decoration setters are additive (OR), unlike mergeWith which replaces', () => {
+    expect(new TextStyle().underline().decoration).toBe(TextDecoration.Underline);
+    const both = new TextStyle().underline().strikethrough().decoration;
+    expect(both & TextDecoration.Underline).toBe(TextDecoration.Underline);
+    expect(both & TextDecoration.Strikethrough).toBe(TextDecoration.Strikethrough);
+  });
+
+  it('every fluent setter returns the same instance for chaining', () => {
+    const s = new TextStyle();
+    expect(s.bold()).toBe(s);
+    expect(s.withSize(10)).toBe(s);
+    expect(s.withColor(Color.red)).toBe(s);
+    expect(s.underline()).toBe(s);
+  });
+});

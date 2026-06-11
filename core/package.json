@@ -50,7 +50,8 @@
     "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist', { recursive: true, force: true });\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "coverage": "vitest run --coverage && node ../scripts/coverage-badge.mjs"
   },
   "keywords": [
     "pdf",

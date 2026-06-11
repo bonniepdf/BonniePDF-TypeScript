@@ -4,6 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core)](https://www.npmjs.com/package/@bonniepdf/core)
 [![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](./core/LICENSE)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core)](https://bundlephobia.com/package/@bonniepdf/core)
+![coverage](./badges/coverage.svg)
 
 [Live examples](https://www.bonniepdf.dev/examples) | [Documentation](https://www.bonniepdf.dev) | [.NET package](https://www.nuget.org/packages/BonniePDF)
 

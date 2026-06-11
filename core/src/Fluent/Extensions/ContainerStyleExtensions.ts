@@ -184,6 +184,26 @@ export class ContainerStyleExtensions {
     return container;
   }
 
+  /**
+   * Sets horizontal borders (left and right), matching the paddingHorizontal convention.
+   */
+  static borderHorizontal(c: IContentContainer, width: number, color?: Color): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.border = Border.verticalSides(width);
+    container.borderColors = new BorderColors(color ?? Color.black);
+    return container;
+  }
+
+  /**
+   * Sets vertical borders (top and bottom), matching the paddingVertical convention.
+   */
+  static borderVertical(c: IContentContainer, width: number, color?: Color): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.border = Border.horizontalSides(width);
+    container.borderColors = new BorderColors(color ?? Color.black);
+    return container;
+  }
+
   // --- Size Constraints ---
 
   /**
@@ -201,6 +221,16 @@ export class ContainerStyleExtensions {
   static height(c: IContentContainer, value: number): IContentContainer {
     const container = ContainerStyleExtensions.getOrCreateContainer(c);
     container.height = value;
+    return container;
+  }
+
+  /**
+   * Sets a fixed width and height.
+   */
+  static size(c: IContentContainer, width: number, height: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.width = width;
+    container.height = height;
     return container;
   }
 
@@ -241,6 +271,60 @@ export class ContainerStyleExtensions {
   static marginFull(c: IContentContainer, left: number, top: number, right: number, bottom: number): IContentContainer {
     const container = ContainerStyleExtensions.getOrCreateContainer(c);
     container.margin = new Thickness(left, top, right, bottom);
+    return container;
+  }
+
+  /**
+   * Sets top margin.
+   */
+  static marginTop(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(0, value, 0, 0);
+    return container;
+  }
+
+  /**
+   * Sets bottom margin.
+   */
+  static marginBottom(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(0, 0, 0, value);
+    return container;
+  }
+
+  /**
+   * Sets left margin.
+   */
+  static marginLeft(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(value, 0, 0, 0);
+    return container;
+  }
+
+  /**
+   * Sets right margin.
+   */
+  static marginRight(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(0, 0, value, 0);
+    return container;
+  }
+
+  /**
+   * Sets horizontal margin (left and right).
+   */
+  static marginHorizontal(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(value, 0, value, 0);
+    return container;
+  }
+
+  /**
+   * Sets vertical margin (top and bottom).
+   */
+  static marginVertical(c: IContentContainer, value: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.margin = new Thickness(0, value, 0, value);
     return container;
   }
 
@@ -351,12 +435,24 @@ export function borderRight(c: IContentContainer, width: number, color?: Color):
   return ContainerStyleExtensions.borderRight(c, width, color);
 }
 
+export function borderHorizontal(c: IContentContainer, width: number, color?: Color): IContentContainer {
+  return ContainerStyleExtensions.borderHorizontal(c, width, color);
+}
+
+export function borderVertical(c: IContentContainer, width: number, color?: Color): IContentContainer {
+  return ContainerStyleExtensions.borderVertical(c, width, color);
+}
+
 export function width(c: IContentContainer, value: number): IContentContainer {
   return ContainerStyleExtensions.width(c, value);
 }
 
 export function height(c: IContentContainer, value: number): IContentContainer {
   return ContainerStyleExtensions.height(c, value);
+}
+
+export function size(c: IContentContainer, width: number, height: number): IContentContainer {
+  return ContainerStyleExtensions.size(c, width, height);
 }
 
 export function cornerRadius(c: IContentContainer, radius: number): IContentContainer {
@@ -386,6 +482,30 @@ export function margin(
   } else {
     return ContainerStyleExtensions.marginFull(c, arg1, arg2, arg3!, arg4!);
   }
+}
+
+export function marginTop(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginTop(c, value);
+}
+
+export function marginBottom(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginBottom(c, value);
+}
+
+export function marginLeft(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginLeft(c, value);
+}
+
+export function marginRight(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginRight(c, value);
+}
+
+export function marginHorizontal(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginHorizontal(c, value);
+}
+
+export function marginVertical(c: IContentContainer, value: number): IContentContainer {
+  return ContainerStyleExtensions.marginVertical(c, value);
 }
 
 export function alignCenter(c: IContentContainer): IContentContainer {

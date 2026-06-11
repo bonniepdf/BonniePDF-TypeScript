@@ -171,7 +171,6 @@ export * from './Extensions/BarcodeExtensions';
 export * from './Extensions/SvgExportExtensions';
 export * from './Extensions/TableCellExtensions';
 export * from './Extensions/VerticalStackExtensions';
-// TextBlockExtensions omitted - alignLeft/alignCenter/alignRight conflict with ContainerStyleExtensions
 
 export * from './Rendering/RenderContext';
 export * from './Rendering/PageDimensions';

@@ -33,6 +33,7 @@ import { generate as listsTagged } from './elements/lists-tagged';
 import { generate as imagesTagged } from './elements/images-tagged';
 import { generate as hyperlinks } from './elements/hyperlinks';
 import { generate as shapesAndBorders } from './elements/shapes-and-borders';
+import { generate as colorPalette } from './elements/color-palette';
 import { generate as qrCodes } from './elements/qr-codes';
 import { generate as barcodes } from './elements/barcodes';
 import { generate as images } from './elements/images';
@@ -440,6 +441,18 @@ export const examples: ExampleDef[] = [
     generate: shapesAndBorders,
     dotnetClass: 'ShapesAndBordersExample',
     pdfUa1: true,
+  },
+  {
+    id: 'color-palette',
+    name: 'Colour Palette',
+    category: 'Elements',
+    description:
+      'The full ColorPalette as a swatch grid - all 22 Tailwind v4 ramps × 11 shades, drawn as little squares.',
+    filename: 'color-palette.pdf',
+    generate: colorPalette,
+    thumbnails: false,
+    dotnetClass: 'ColorPaletteExample',
+    pdfUa1: false,
   },
   {
     id: 'qr-codes',

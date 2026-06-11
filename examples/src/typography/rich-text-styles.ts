@@ -9,6 +9,7 @@ import {
   Spacer,
   Line,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   FontWeight,
@@ -21,7 +22,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -33,7 +34,7 @@ export function generate(): Document {
   const title = new TextBlock('Rich Text (Mixed Styling)');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -41,7 +42,7 @@ export function generate(): Document {
   const sectionHeader1 = new TextBlock('Bold Words in a Paragraph');
   sectionHeader1.fontName = StandardFonts.HelveticaBold;
   sectionHeader1.fontSize = 14;
-  sectionHeader1.textColor = Color.indigo600;
+  sectionHeader1.textColor = ColorPalette.indigo[600];
   sectionHeader1.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader1);
   const rt1 = new RichText();
@@ -58,7 +59,7 @@ export function generate(): Document {
   const sectionHeader2 = new TextBlock('Italic Text');
   sectionHeader2.fontName = StandardFonts.HelveticaBold;
   sectionHeader2.fontSize = 14;
-  sectionHeader2.textColor = Color.indigo600;
+  sectionHeader2.textColor = ColorPalette.indigo[600];
   sectionHeader2.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader2);
   const rt2 = new RichText();
@@ -77,7 +78,7 @@ export function generate(): Document {
   const sectionHeader3 = new TextBlock('Bold and Italic Combined');
   sectionHeader3.fontName = StandardFonts.HelveticaBold;
   sectionHeader3.fontSize = 14;
-  sectionHeader3.textColor = Color.indigo600;
+  sectionHeader3.textColor = ColorPalette.indigo[600];
   sectionHeader3.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader3);
   const boldItalic = new TextStyle();
@@ -99,7 +100,7 @@ export function generate(): Document {
   const sectionHeader4 = new TextBlock('Colored Spans');
   sectionHeader4.fontName = StandardFonts.HelveticaBold;
   sectionHeader4.fontSize = 14;
-  sectionHeader4.textColor = Color.indigo600;
+  sectionHeader4.textColor = ColorPalette.indigo[600];
   sectionHeader4.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader4);
   const rt4 = new RichText();
@@ -108,13 +109,13 @@ export function generate(): Document {
     .span('Text can be ')
     .span('red', new TextStyle().withColor(Color.red))
     .span(', ')
-    .span('blue', new TextStyle().withColor(Color.blue600))
+    .span('blue', new TextStyle().withColor(ColorPalette.blue[600]))
     .span(', ')
-    .span('green', new TextStyle().withColor(Color.green600))
+    .span('green', new TextStyle().withColor(ColorPalette.green[600]))
     .span(', or ')
-    .span('any color', new TextStyle().withColor(Color.purple600))
+    .span('any color', new TextStyle().withColor(ColorPalette.purple[600]))
     .span(' you choose. Colors can be combined with ')
-    .span('bold colored text', new TextStyle().bold().withColor(Color.indigo600))
+    .span('bold colored text', new TextStyle().bold().withColor(ColorPalette.indigo[600]))
     .span(' for maximum emphasis.');
   doc.add(rt4);
 
@@ -122,7 +123,7 @@ export function generate(): Document {
   const sectionHeader5 = new TextBlock('Inline Decorations');
   sectionHeader5.fontName = StandardFonts.HelveticaBold;
   sectionHeader5.fontSize = 14;
-  sectionHeader5.textColor = Color.indigo600;
+  sectionHeader5.textColor = ColorPalette.indigo[600];
   sectionHeader5.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader5);
   const rt5 = new RichText();
@@ -141,7 +142,7 @@ export function generate(): Document {
   const sectionHeader6 = new TextBlock('Mixed Font Sizes');
   sectionHeader6.fontName = StandardFonts.HelveticaBold;
   sectionHeader6.fontSize = 14;
-  sectionHeader6.textColor = Color.indigo600;
+  sectionHeader6.textColor = ColorPalette.indigo[600];
   sectionHeader6.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader6);
   const rt6 = new RichText();
@@ -158,7 +159,7 @@ export function generate(): Document {
   const sectionHeader7 = new TextBlock('Background Highlights');
   sectionHeader7.fontName = StandardFonts.HelveticaBold;
   sectionHeader7.fontSize = 14;
-  sectionHeader7.textColor = Color.indigo600;
+  sectionHeader7.textColor = ColorPalette.indigo[600];
   sectionHeader7.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader7);
   const rt7 = new RichText();
@@ -180,23 +181,23 @@ export function generate(): Document {
   const sectionHeader8 = new TextBlock('Reusable TextStyle Objects');
   sectionHeader8.fontName = StandardFonts.HelveticaBold;
   sectionHeader8.fontSize = 14;
-  sectionHeader8.textColor = Color.indigo600;
+  sectionHeader8.textColor = ColorPalette.indigo[600];
   sectionHeader8.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader8);
 
   const labelStyle = new TextStyle();
   labelStyle.fontFamily = 'Helvetica';
   labelStyle.weight = FontWeight.Bold;
-  labelStyle.color = Color.slate800;
+  labelStyle.color = ColorPalette.slate[800];
 
   const valueStyle = new TextStyle();
   valueStyle.fontFamily = 'Helvetica';
-  valueStyle.color = Color.blue600;
+  valueStyle.color = ColorPalette.blue[600];
 
   const unitStyle = new TextStyle();
   unitStyle.fontFamily = 'Helvetica';
   unitStyle.fontSize = 9;
-  unitStyle.color = Color.slate500;
+  unitStyle.color = ColorPalette.slate[500];
 
   const rtTemp = new RichText();
   rtTemp.margin = new Thickness(0, 0, 0, 4);
@@ -217,7 +218,7 @@ export function generate(): Document {
   const sectionHeader9 = new TextBlock('Font Weight Variants');
   sectionHeader9.fontName = StandardFonts.HelveticaBold;
   sectionHeader9.fontSize = 14;
-  sectionHeader9.textColor = Color.indigo600;
+  sectionHeader9.textColor = ColorPalette.indigo[600];
   sectionHeader9.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader9);
   const normalStyle = new TextStyle();
@@ -237,7 +238,7 @@ export function generate(): Document {
   const sectionHeader10 = new TextBlock('Justified Alignment');
   sectionHeader10.fontName = StandardFonts.HelveticaBold;
   sectionHeader10.fontSize = 14;
-  sectionHeader10.textColor = Color.indigo600;
+  sectionHeader10.textColor = ColorPalette.indigo[600];
   sectionHeader10.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader10);
   const rt10 = new RichText();
@@ -256,20 +257,20 @@ export function generate(): Document {
   // ── 11. Legal disclaimer ──────────────────────────────────────────────────
   doc.add(new Spacer(12));
   const divider = new Line();
-  divider.color = Color.slate300;
+  divider.color = ColorPalette.slate[300];
   divider.thickness = 1;
   doc.add(divider);
   const sectionHeader11 = new TextBlock('Practical Example: Legal Disclaimer');
   sectionHeader11.fontName = StandardFonts.HelveticaBold;
   sectionHeader11.fontSize = 14;
-  sectionHeader11.textColor = Color.indigo600;
+  sectionHeader11.textColor = ColorPalette.indigo[600];
   sectionHeader11.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader11);
 
   const disclaimerDefault = new TextStyle();
   disclaimerDefault.fontFamily = 'Helvetica';
   disclaimerDefault.fontSize = 10;
-  disclaimerDefault.color = Color.slate600;
+  disclaimerDefault.color = ColorPalette.slate[600];
 
   const rt11 = new RichText();
   rt11.defaultStyle = disclaimerDefault;
@@ -284,7 +285,7 @@ export function generate(): Document {
     .span('. All data is processed in accordance with ')
     .span('GDPR', new TextStyle().bold())
     .span(' regulations. For questions, contact ')
-    .span('support@example.com', new TextStyle().withColor(Color.blue600))
+    .span('support@example.com', new TextStyle().withColor(ColorPalette.blue[600]))
     .span('.');
   doc.add(rt11);
 
@@ -292,16 +293,16 @@ export function generate(): Document {
   const sectionHeader12 = new TextBlock('Callback-based Styling');
   sectionHeader12.fontName = StandardFonts.HelveticaBold;
   sectionHeader12.fontSize = 14;
-  sectionHeader12.textColor = Color.indigo600;
+  sectionHeader12.textColor = ColorPalette.indigo[600];
   sectionHeader12.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader12);
   const rt12 = new RichText();
   rt12.margin = new Thickness(0, 0, 0, 16);
   rt12
     .span('The callback API lets you configure styles inline: ')
-    .spanWithConfigure('bold blue', s => s.bold().withColor(Color.blue600))
+    .spanWithConfigure('bold blue', s => s.bold().withColor(ColorPalette.blue[600]))
     .span(', ')
-    .spanWithConfigure('italic green', s => s.withItalic().withColor(Color.green600))
+    .spanWithConfigure('italic green', s => s.withItalic().withColor(ColorPalette.green[600]))
     .span(', ')
     .spanWithConfigure('underlined red', s => s.underline().withColor(Color.red))
     .span('. Useful for one-off styles.');

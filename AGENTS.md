@@ -23,6 +23,7 @@ These differ on purpose. If you spot what looks like a bug in matching the .NET 
 - **`versionValue()` is a method**, but `revisionValue` is a getter, on `EncryptionSettings`. Don't unify them.
 - **SVG export of charts is a standalone function:** `chartToSvg(chart, data)`, not `chart.toSvg(data)`.
 - **`Document` auto-creates the first page on construction.** Calling `addPage()` once after `new Document()` gives you two pages, not one. (The .NET version is lazier.)
+- **Tailwind palette tokens live on `ColorPalette`, not `Color`.** `Color` is just the RGBA primitive (`black`/`white`/`red`/`fromHex`/…); it does **not** carry `red500` etc. Access shades via `ColorPalette.red[500]` (bracket-on-a-frozen-`Record`, since TS has no class indexers). The .NET port uses a real indexer (`ColorPalette.Red[500]`) — same shape, different mechanism, don't "unify" them. `ColorPalette` is the **single source of truth** for the hex values; they are the exact Tailwind v4 swatches and are intentionally **not** computed from a base colour (Tailwind ramps are hand-tuned in OKLCH). See [`core/src/Core/ColorPalette.ts`](core/src/Core/ColorPalette.ts).
 
 ## Active stubs (do not treat as implemented)
 

@@ -11,6 +11,7 @@ import {
   TextAlignment,
   HorizontalStack,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   WidthDistribution,
@@ -29,7 +30,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -37,12 +38,12 @@ export function generate(): Document {
     const left = new TextBlock('BonniePDF - Dot Plot Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
-    left.textColor = Color.slate500;
+    left.textColor = ColorPalette.slate[500];
     stack.addChild(left);
     const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
-    right.textColor = Color.slate500;
+    right.textColor = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
     stack.addChild(right, 1);
     return stack;
@@ -57,14 +58,14 @@ export function generate(): Document {
 
   const title = new TextBlock('Dot Plot Chart: Product Performance');
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.alignment = TextAlignment.Center;
   title.margin = new Thickness(0, 0, 0, 8);
   doc.add(title);
 
   const subtitle = new TextBlock('Circular markers positioned along a value axis');
   subtitle.fontSize = 14;
-  subtitle.textColor = Color.slate600;
+  subtitle.textColor = ColorPalette.slate[600];
   subtitle.alignment = TextAlignment.Center;
   subtitle.margin = new Thickness(0, 0, 0, 20);
   doc.add(subtitle);

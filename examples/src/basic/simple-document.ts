@@ -11,6 +11,7 @@ import {
   VerticalStack,
   Spacer,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -24,7 +25,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
   settings.defaultZoom = ZoomLevel.FitPage;
   settings.pageMode = PageModeEnum.UseNone;
   settings.displayDocTitle = true;
@@ -41,7 +42,7 @@ export function generate(): Document {
   const h1 = new TextBlock('Hello, Document API!');
   h1.fontName = HEADING;
   h1.fontSize = 24;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -51,7 +52,7 @@ export function generate(): Document {
   const keyFeatures = new TextBlock('Key Features:');
   keyFeatures.fontName = HEADING;
   keyFeatures.fontSize = 14;
-  keyFeatures.textColor = Color.slate700;
+  keyFeatures.textColor = ColorPalette.slate[700];
   keyFeatures.margin = new Thickness(0, 0, 0, 6);
   doc.add(keyFeatures);
 
@@ -75,7 +76,7 @@ export function generate(): Document {
   const page2 = new TextBlock('Page 2');
   page2.fontName = HEADING;
   page2.fontSize = 20;
-  page2.textColor = Color.slate800;
+  page2.textColor = ColorPalette.slate[800];
   page2.margin = new Thickness(0, 0, 0, 12);
   doc.add(page2);
   doc.add(new TextBlock('This demonstrates multipage support with automatic page management.'));
@@ -87,7 +88,7 @@ export function generate(): Document {
   const p3title = new TextBlock(`Page 3: ${squareSize.name}`);
   p3title.fontName = HEADING;
   p3title.fontSize = 16;
-  p3title.textColor = Color.slate800;
+  p3title.textColor = ColorPalette.slate[800];
   p3title.alignment = TextAlignment.Center;
   p3title.margin = new Thickness(0, 50, 0, 0);
   doc.add(p3title);

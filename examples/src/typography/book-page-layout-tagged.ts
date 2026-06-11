@@ -11,6 +11,7 @@ import {
   Spacer,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -23,7 +24,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate800);
+  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(ColorPalette.slate[800]);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -39,7 +40,7 @@ export function generate(): Document {
   const chapterLabel = new TextBlock('CHAPTER III');
   chapterLabel.fontName = StandardFonts.TimesBold;
   chapterLabel.fontSize = 11;
-  chapterLabel.textColor = Color.slate700;
+  chapterLabel.textColor = ColorPalette.slate[700];
   chapterLabel.alignment = TextAlignment.Center;
   chapterLabel.margin = new Thickness(0, 0, 0, 6);
   doc.add(chapterLabel);
@@ -49,7 +50,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.TimesBold;
   h1.fontSize = 18;
-  h1.textColor = Color.slate900;
+  h1.textColor = ColorPalette.slate[900];
   h1.alignment = TextAlignment.Center;
   h1.margin = new Thickness(0, 0, 0, 16);
   doc.add(h1);
@@ -61,7 +62,7 @@ export function generate(): Document {
   );
   p1.fontName = StandardFonts.TimesRoman;
   p1.fontSize = 11;
-  p1.textColor = Color.slate800;
+  p1.textColor = ColorPalette.slate[800];
   p1.alignment = TextAlignment.Justify;
   p1.margin = new Thickness(0, 0, 0, 10);
   doc.add(p1);
@@ -71,7 +72,7 @@ export function generate(): Document {
   );
   quote1.fontName = StandardFonts.TimesItalic;
   quote1.fontSize = 11;
-  quote1.textColor = Color.slate700;
+  quote1.textColor = ColorPalette.slate[700];
   quote1.alignment = TextAlignment.Justify;
   quote1.margin = new Thickness(0, 0, 0, 10);
   doc.add(quote1);
@@ -81,7 +82,7 @@ export function generate(): Document {
   );
   p2.fontName = StandardFonts.TimesRoman;
   p2.fontSize = 11;
-  p2.textColor = Color.slate800;
+  p2.textColor = ColorPalette.slate[800];
   p2.alignment = TextAlignment.Justify;
   p2.margin = new Thickness(0, 0, 0, 10);
   doc.add(p2);
@@ -91,7 +92,7 @@ export function generate(): Document {
   );
   p3.fontName = StandardFonts.TimesRoman;
   p3.fontSize = 11;
-  p3.textColor = Color.slate800;
+  p3.textColor = ColorPalette.slate[800];
   p3.alignment = TextAlignment.Justify;
   p3.margin = new Thickness(0, 0, 0, 10);
   doc.add(p3);
@@ -105,15 +106,15 @@ export function generate(): Document {
   );
   quoteText.fontName = StandardFonts.TimesItalic;
   quoteText.fontSize = 10;
-  quoteText.textColor = Color.slate600;
+  quoteText.textColor = ColorPalette.slate[600];
   quoteText.alignment = TextAlignment.Justify;
   quoteInner.addChild(quoteText);
 
   const quoteBlock = new Container();
   quoteBlock.child = quoteInner;
-  quoteBlock.backgroundColor = Color.slate50;
+  quoteBlock.backgroundColor = ColorPalette.slate[50];
   quoteBlock.border = new Border(1);
-  quoteBlock.borderColors = new BorderColors(Color.slate300);
+  quoteBlock.borderColors = new BorderColors(ColorPalette.slate[300]);
   quoteBlock.padding = new Thickness(20, 8, 20, 8);
   doc.add(quoteBlock);
 
@@ -124,7 +125,7 @@ export function generate(): Document {
   );
   p4.fontName = StandardFonts.TimesRoman;
   p4.fontSize = 11;
-  p4.textColor = Color.slate800;
+  p4.textColor = ColorPalette.slate[800];
   p4.alignment = TextAlignment.Justify;
   p4.margin = new Thickness(0, 0, 0, 20);
   doc.add(p4);
@@ -134,7 +135,7 @@ export function generate(): Document {
   const pageNum = new TextBlock('42');
   pageNum.fontName = StandardFonts.TimesBold;
   pageNum.fontSize = 10;
-  pageNum.textColor = Color.slate500;
+  pageNum.textColor = ColorPalette.slate[500];
   pageNum.alignment = TextAlignment.Center;
   pageNum.margin = new Thickness(0, 0, 0, 4);
   doc.add(pageNum);
@@ -142,7 +143,7 @@ export function generate(): Document {
   const imprint = new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS | Cambridge University Press, 2024');
   imprint.fontName = StandardFonts.TimesItalic;
   imprint.fontSize = 8;
-  imprint.textColor = Color.slate400;
+  imprint.textColor = ColorPalette.slate[400];
   imprint.alignment = TextAlignment.Center;
   doc.add(imprint);
 

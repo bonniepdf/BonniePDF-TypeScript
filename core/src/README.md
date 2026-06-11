@@ -170,7 +170,7 @@ const pdf = Pdf.create(builder => {
     page.size(PdfSize.a4);
     page.margin(50);
     page.content().column(col => {
-      col.item().text('Hello World').fontSize(24).color(Color.blue500);
+      col.item().text('Hello World').fontSize(24).color(ColorPalette.blue[500]);
     });
   });
 });

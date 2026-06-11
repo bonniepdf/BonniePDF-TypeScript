@@ -9,6 +9,7 @@ import {
   TableRow,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -75,7 +76,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Employee Directory - Tagged (PDF/UA-1)';
@@ -92,7 +93,7 @@ export function generate(): Document {
   h1Dir.level = 1;
   h1Dir.fontName = StandardFonts.HelveticaBold;
   h1Dir.fontSize = 20;
-  h1Dir.textColor = Color.slate800;
+  h1Dir.textColor = ColorPalette.slate[800];
   h1Dir.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1Dir);
 
@@ -104,7 +105,7 @@ export function generate(): Document {
 
   const table = new Table(100, 160, 140);
   table.repeatHeadersOnNewPage = true;
-  table.headerBackgroundColor = Color.blue600;
+  table.headerBackgroundColor = ColorPalette.blue[600];
   table.headerTextColor = Color.white;
 
   const departmentText = new TextBlock('Department');
@@ -120,16 +121,16 @@ export function generate(): Document {
 
   let row = 0;
   for (const [name, dept, role] of EMPLOYEES) {
-    const bg = row++ % 2 === 0 ? Color.white : Color.slate50;
+    const bg = row++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
     const deptCell = new TextBlock(dept);
     deptCell.fontSize = 10;
-    deptCell.textColor = Color.slate600;
+    deptCell.textColor = ColorPalette.slate[600];
     const nameCell = new TextBlock(name);
     nameCell.fontSize = 10;
-    nameCell.textColor = Color.slate800;
+    nameCell.textColor = ColorPalette.slate[800];
     const roleCell = new TextBlock(role);
     roleCell.fontSize = 10;
-    roleCell.textColor = Color.slate600;
+    roleCell.textColor = ColorPalette.slate[600];
     table.addRowRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
   }
 
@@ -142,7 +143,7 @@ export function generate(): Document {
   h1Overview.level = 1;
   h1Overview.fontName = StandardFonts.HelveticaBold;
   h1Overview.fontSize = 20;
-  h1Overview.textColor = Color.slate800;
+  h1Overview.textColor = ColorPalette.slate[800];
   h1Overview.margin = new Thickness(0, 20, 0, 10);
   doc.add(h1Overview);
 
@@ -152,7 +153,7 @@ export function generate(): Document {
     h2.level = 2;
     h2.fontName = StandardFonts.HelveticaBold;
     h2.fontSize = 14;
-    h2.textColor = Color.slate700;
+    h2.textColor = ColorPalette.slate[700];
     h2.margin = new Thickness(0, 14, 0, 6);
     doc.add(h2);
 

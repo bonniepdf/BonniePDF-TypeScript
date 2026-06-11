@@ -12,6 +12,7 @@ import {
   Barcode,
   BarcodeSymbology,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -26,7 +27,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Barcodes';
@@ -38,7 +39,7 @@ export function generate(): Document {
   const title = new TextBlock('1D Barcodes');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 16);
   doc.add(title);
 
@@ -101,7 +102,7 @@ export function generate(): Document {
     const header = new TextBlock(sectionTitle);
     header.fontName = StandardFonts.HelveticaBold;
     header.fontSize = 16;
-    header.textColor = Color.indigo600;
+    header.textColor = ColorPalette.indigo[600];
     header.margin = new Thickness(0, 0, 0, 10);
     doc.add(header);
 
@@ -114,7 +115,7 @@ export function generate(): Document {
     const barcodeWrap = new Container();
     barcodeWrap.backgroundColor = Color.white;
     barcodeWrap.border = new Border(1);
-    barcodeWrap.borderColors = new BorderColors(Color.slate200);
+    barcodeWrap.borderColors = new BorderColors(ColorPalette.slate[200]);
     barcodeWrap.padding = new Thickness(12);
     barcodeWrap.child = barcode;
 
@@ -128,20 +129,20 @@ export function generate(): Document {
     const heading = new TextBlock(cardTitle);
     heading.fontName = StandardFonts.HelveticaBold;
     heading.fontSize = 13;
-    heading.textColor = Color.slate800;
+    heading.textColor = ColorPalette.slate[800];
     heading.margin = new Thickness(0, 0, 0, 6);
     details.addChild(heading);
 
     const desc = new TextBlock(description);
     desc.fontSize = 10;
-    desc.textColor = Color.slate600;
+    desc.textColor = ColorPalette.slate[600];
     desc.margin = new Thickness(0, 0, 0, 6);
     details.addChild(desc);
 
     for (const line of specifics) {
       const s = new TextBlock(line);
       s.fontSize = 9;
-      s.textColor = Color.slate500;
+      s.textColor = ColorPalette.slate[500];
       s.margin = new Thickness(0, 0, 0, 2);
       details.addChild(s);
     }
@@ -151,7 +152,7 @@ export function generate(): Document {
 
     if (i < barcodeSections.length - 1) {
       const divider = new Line();
-      divider.color = Color.slate200;
+      divider.color = ColorPalette.slate[200];
       divider.thickness = 1;
       divider.margin = new Thickness(0, 20, 0, 20);
       doc.add(divider);

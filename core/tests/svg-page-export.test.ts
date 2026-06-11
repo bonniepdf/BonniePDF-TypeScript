@@ -8,7 +8,7 @@ import { ChartElement } from '../src/Charts/ChartElement';
 import { BarChart } from '../src/Charts/BarChart';
 import { WatermarkSettings } from '../src/Configuration/WatermarkSettings';
 import { StandardFonts } from '../src/Typography/StandardFonts';
-import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { createMinimalJpeg, createTestChartData } from './helpers/test-base';
 
 function simpleDoc(): Document {
@@ -168,14 +168,14 @@ describe('SVG page export', () => {
       const tb = new TextBlock();
       tb.text = `Header ${pageNum}`;
       tb.fontSize = 9;
-      tb.textColor = Color.slate500;
+      tb.textColor = ColorPalette.slate[500];
       return tb;
     };
     doc.settings.footerTemplate = pageNum => {
       const tb = new TextBlock();
       tb.text = `Footer ${pageNum}`;
       tb.fontSize = 9;
-      tb.textColor = Color.slate500;
+      tb.textColor = ColorPalette.slate[500];
       return tb;
     };
     const svg = await doc.generateFirstPageSvgAsync();

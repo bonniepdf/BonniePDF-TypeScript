@@ -8,6 +8,7 @@ import {
   TextStyle,
   TextAlignment,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -19,7 +20,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
   settings.watermark = new WatermarkSettings('DRAFT');
 
   const metadata = new DocumentMetadata();
@@ -32,7 +33,7 @@ export function generate(): Document {
   const title = new TextBlock('Project Proposal');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 28;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 80, 0, 12);
   title.alignment = TextAlignment.Center;
   doc.add(title);
@@ -40,7 +41,7 @@ export function generate(): Document {
   const subtitle = new TextBlock('Prepared for Internal Review');
   subtitle.fontName = StandardFonts.Helvetica;
   subtitle.fontSize = 14;
-  subtitle.textColor = Color.slate500;
+  subtitle.textColor = ColorPalette.slate[500];
   subtitle.margin = new Thickness(0, 0, 0, 40);
   subtitle.alignment = TextAlignment.Center;
   doc.add(subtitle);
@@ -52,7 +53,7 @@ export function generate(): Document {
   );
   disclaimer.fontName = StandardFonts.TimesRoman;
   disclaimer.fontSize = 12;
-  disclaimer.textColor = Color.slate600;
+  disclaimer.textColor = ColorPalette.slate[600];
   disclaimer.alignment = TextAlignment.Justify;
   doc.add(disclaimer);
 
@@ -62,7 +63,7 @@ export function generate(): Document {
   const s1 = new TextBlock('Section 1: Executive Summary');
   s1.fontName = StandardFonts.HelveticaBold;
   s1.fontSize = 18;
-  s1.textColor = Color.slate800;
+  s1.textColor = ColorPalette.slate[800];
   s1.margin = new Thickness(0, 0, 0, 12);
   doc.add(s1);
 
@@ -75,7 +76,7 @@ export function generate(): Document {
   );
   para1.fontName = StandardFonts.TimesRoman;
   para1.fontSize = 11;
-  para1.textColor = Color.slate700;
+  para1.textColor = ColorPalette.slate[700];
   para1.alignment = TextAlignment.Justify;
   para1.margin = new Thickness(0, 0, 0, 12);
   doc.add(para1);
@@ -87,7 +88,7 @@ export function generate(): Document {
   );
   para2.fontName = StandardFonts.TimesRoman;
   para2.fontSize = 11;
-  para2.textColor = Color.slate700;
+  para2.textColor = ColorPalette.slate[700];
   para2.alignment = TextAlignment.Justify;
   doc.add(para2);
 

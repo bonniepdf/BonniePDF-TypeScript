@@ -12,6 +12,7 @@ import {
   TableRow,
   Spacer,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -134,7 +135,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Flow Architecture Demo';
@@ -147,7 +148,7 @@ export function generate(): Document {
   const mainTitle = new TextBlock('Employee Directory & Company Overview');
   mainTitle.fontName = StandardFonts.HelveticaBold;
   mainTitle.fontSize = 28;
-  mainTitle.textColor = Color.slate800;
+  mainTitle.textColor = ColorPalette.slate[800];
   mainTitle.alignment = TextAlignment.Center;
   mainTitle.margin = new Thickness(0, 0, 0, 10);
   doc.add(mainTitle);
@@ -155,7 +156,7 @@ export function generate(): Document {
   const yearSub = new TextBlock(`Annual Report ${new Date().getFullYear()}`);
   yearSub.fontName = StandardFonts.Helvetica;
   yearSub.fontSize = 14;
-  yearSub.textColor = Color.slate500;
+  yearSub.textColor = ColorPalette.slate[500];
   yearSub.alignment = TextAlignment.Center;
   yearSub.margin = new Thickness(0, 0, 0, 30);
   doc.add(yearSub);
@@ -164,7 +165,7 @@ export function generate(): Document {
   const tableHeading = new TextBlock('Part 1: Complete Employee Directory');
   tableHeading.fontName = StandardFonts.HelveticaBold;
   tableHeading.fontSize = 18;
-  tableHeading.textColor = Color.slate700;
+  tableHeading.textColor = ColorPalette.slate[700];
   tableHeading.margin = new Thickness(0, 0, 0, 15);
   doc.add(tableHeading);
 
@@ -176,7 +177,7 @@ export function generate(): Document {
 
   const table = new Table(0.5, 1.5, 1, 1, 1);
   table.repeatHeadersOnNewPage = true;
-  table.headerBackgroundColor = Color.blue600;
+  table.headerBackgroundColor = ColorPalette.blue[600];
   table.headerTextColor = Color.white;
   table.cellPadding = 8;
 
@@ -204,28 +205,28 @@ export function generate(): Document {
     const position = POSITIONS[(i * 3) % POSITIONS.length];
     const startYear = 2015 + (i % 10);
     const startMonth = ((i * 5) % 12) + 1;
-    const rowBg = i % 2 === 0 ? Color.slate50 : Color.white;
+    const rowBg = i % 2 === 0 ? ColorPalette.slate[50] : Color.white;
 
     const id = new TextBlock(String(i).padStart(4, '0'));
     id.fontName = StandardFonts.Helvetica;
     id.fontSize = 9;
-    id.textColor = Color.slate600;
+    id.textColor = ColorPalette.slate[600];
     const name = new TextBlock(`${firstName} ${lastName}`);
     name.fontName = StandardFonts.Helvetica;
     name.fontSize = 9;
-    name.textColor = Color.slate800;
+    name.textColor = ColorPalette.slate[800];
     const dept = new TextBlock(department);
     dept.fontName = StandardFonts.Helvetica;
     dept.fontSize = 9;
-    dept.textColor = Color.slate600;
+    dept.textColor = ColorPalette.slate[600];
     const pos = new TextBlock(position);
     pos.fontName = StandardFonts.Helvetica;
     pos.fontSize = 9;
-    pos.textColor = Color.slate600;
+    pos.textColor = ColorPalette.slate[600];
     const date = new TextBlock(`${String(startMonth).padStart(2, '0')}/${startYear}`);
     date.fontName = StandardFonts.Helvetica;
     date.fontSize = 9;
-    date.textColor = Color.slate500;
+    date.textColor = ColorPalette.slate[500];
 
     table.addRowRow(TableRow.fromElements(id, name, dept, pos, date).withBackground(rowBg));
   }
@@ -238,7 +239,7 @@ export function generate(): Document {
   const textHeading = new TextBlock('Part 2: Company Overview & History');
   textHeading.fontName = StandardFonts.HelveticaBold;
   textHeading.fontSize = 18;
-  textHeading.textColor = Color.slate700;
+  textHeading.textColor = ColorPalette.slate[700];
   textHeading.margin = new Thickness(0, 0, 0, 15);
   doc.add(textHeading);
 
@@ -246,7 +247,7 @@ export function generate(): Document {
     const h = new TextBlock(sectionTitle);
     h.fontName = StandardFonts.HelveticaBold;
     h.fontSize = 14;
-    h.textColor = Color.slate700;
+    h.textColor = ColorPalette.slate[700];
     h.margin = new Thickness(0, 20, 0, 8);
     doc.add(h);
 
@@ -270,7 +271,7 @@ export function generate(): Document {
   const conclusion = new TextBlock('Conclusion');
   conclusion.fontName = StandardFonts.HelveticaBold;
   conclusion.fontSize = 18;
-  conclusion.textColor = Color.slate700;
+  conclusion.textColor = ColorPalette.slate[700];
   conclusion.margin = new Thickness(0, 0, 0, 15);
   doc.add(conclusion);
 
@@ -287,7 +288,7 @@ export function generate(): Document {
   const footer = new TextBlock('Generated with BonniePDF - Flow Architecture Demo');
   footer.fontName = StandardFonts.HelveticaOblique;
   footer.fontSize = 10;
-  footer.textColor = Color.slate400;
+  footer.textColor = ColorPalette.slate[400];
   footer.alignment = TextAlignment.Center;
   footer.margin = new Thickness(0, 20, 0, 0);
   doc.add(footer);

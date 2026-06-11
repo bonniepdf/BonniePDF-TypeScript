@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { Thickness } from '../src/Core/Thickness';
 import { ElementBase } from '../src/Elements/ElementBase';
 import { Container } from '../src/Elements/Layout/Container';
@@ -36,7 +36,7 @@ describe('padding layout', () => {
   it('empty containers still draw and consume vertical padding', () => {
     const { ctx, canvas } = createMockedContext();
     const container = new Container();
-    container.backgroundColor = Color.amber400;
+    container.backgroundColor = ColorPalette.amber[400];
     container.padding = new Thickness(10, 20, 10, 30);
 
     container.render(ctx, 500);

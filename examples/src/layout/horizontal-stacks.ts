@@ -7,6 +7,7 @@ import {
   HorizontalStack,
   Container,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   WidthDistribution,
@@ -21,7 +22,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Horizontal Stack Example';
@@ -33,7 +34,7 @@ export function generate(): Document {
   const title = new TextBlock('Horizontal Stack Examples');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
@@ -41,7 +42,7 @@ export function generate(): Document {
   const equalLabel = new TextBlock('Equal Width Distribution');
   equalLabel.fontName = StandardFonts.HelveticaBold;
   equalLabel.fontSize = 14;
-  equalLabel.textColor = Color.slate700;
+  equalLabel.textColor = ColorPalette.slate[700];
   equalLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(equalLabel);
 
@@ -56,14 +57,14 @@ export function generate(): Document {
   const equalWrap = new Container();
   equalWrap.child = equalStack;
   equalWrap.padding = new Thickness(10);
-  equalWrap.backgroundColor = Color.slate200;
+  equalWrap.backgroundColor = ColorPalette.slate[200];
   doc.add(equalWrap);
 
   // ── Weighted distribution ──
   const weightedLabel = new TextBlock('Weighted Width Distribution (1:2:3 ratio)');
   weightedLabel.fontName = StandardFonts.HelveticaBold;
   weightedLabel.fontSize = 14;
-  weightedLabel.textColor = Color.slate700;
+  weightedLabel.textColor = ColorPalette.slate[700];
   weightedLabel.margin = new Thickness(0, 16, 0, 8);
   doc.add(weightedLabel);
 
@@ -82,14 +83,14 @@ export function generate(): Document {
   const weightedWrap = new Container();
   weightedWrap.child = weightedStack;
   weightedWrap.padding = new Thickness(10);
-  weightedWrap.backgroundColor = Color.slate200;
+  weightedWrap.backgroundColor = ColorPalette.slate[200];
   doc.add(weightedWrap);
 
   // ── Centre vertical alignment ──
   const centerLabel = new TextBlock('Center Vertical Alignment');
   centerLabel.fontName = StandardFonts.HelveticaBold;
   centerLabel.fontSize = 14;
-  centerLabel.textColor = Color.slate700;
+  centerLabel.textColor = ColorPalette.slate[700];
   centerLabel.margin = new Thickness(0, 16, 0, 8);
   doc.add(centerLabel);
 
@@ -113,7 +114,7 @@ export function generate(): Document {
   const colorLabel = new TextBlock('Colored Containers');
   colorLabel.fontName = StandardFonts.HelveticaBold;
   colorLabel.fontSize = 14;
-  colorLabel.textColor = Color.slate700;
+  colorLabel.textColor = ColorPalette.slate[700];
   colorLabel.margin = new Thickness(0, 16, 0, 8);
   doc.add(colorLabel);
 
@@ -122,7 +123,7 @@ export function generate(): Document {
   colorStack.widthDistribution = WidthDistribution.Equal;
   for (const [label, bg] of [
     ['Red', Color.red],
-    ['Green', Color.green600],
+    ['Green', ColorPalette.green[600]],
     ['Blue', Color.blue],
   ] as [string, Color][]) {
     const t = new TextBlock(label);
@@ -141,7 +142,7 @@ export function generate(): Document {
   const practicalTitle = new TextBlock('Practical Examples');
   practicalTitle.fontName = StandardFonts.HelveticaBold;
   practicalTitle.fontSize = 24;
-  practicalTitle.textColor = Color.slate800;
+  practicalTitle.textColor = ColorPalette.slate[800];
   practicalTitle.margin = new Thickness(0, 24, 0, 12);
   doc.add(practicalTitle);
 
@@ -149,7 +150,7 @@ export function generate(): Document {
   const kvLabel = new TextBlock('Key-Value Pairs');
   kvLabel.fontName = StandardFonts.HelveticaBold;
   kvLabel.fontSize = 14;
-  kvLabel.textColor = Color.slate700;
+  kvLabel.textColor = ColorPalette.slate[700];
   kvLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(kvLabel);
 
@@ -165,7 +166,7 @@ export function generate(): Document {
     const k = new TextBlock(key);
     k.fontName = StandardFonts.HelveticaBold;
     const v = new TextBlock(value);
-    v.textColor = Color.slate800;
+    v.textColor = ColorPalette.slate[800];
     kv.addChild(k, 1);
     kv.addChild(v, 3);
     doc.add(kv);
@@ -175,7 +176,7 @@ export function generate(): Document {
   const progressLabel = new TextBlock('Progress Bar Style');
   progressLabel.fontName = StandardFonts.HelveticaBold;
   progressLabel.fontSize = 14;
-  progressLabel.textColor = Color.slate700;
+  progressLabel.textColor = ColorPalette.slate[700];
   progressLabel.margin = new Thickness(0, 16, 0, 8);
   doc.add(progressLabel);
 
@@ -189,13 +190,13 @@ export function generate(): Document {
   const filled = new Container();
   filled.child = filledText;
   filled.padding = new Thickness(10, 5, 10, 5);
-  filled.backgroundColor = Color.green600;
+  filled.backgroundColor = ColorPalette.green[600];
   filled.height = 24;
   progressBar.addChild(filled, 75);
 
   const empty = new Container();
   empty.padding = new Thickness(10, 5, 10, 5);
-  empty.backgroundColor = Color.slate300;
+  empty.backgroundColor = ColorPalette.slate[300];
   empty.height = 24;
   progressBar.addChild(empty, 25);
   doc.add(progressBar);
@@ -204,7 +205,7 @@ export function generate(): Document {
   const badgeLabel = new TextBlock('Badge Style Layout');
   badgeLabel.fontName = StandardFonts.HelveticaBold;
   badgeLabel.fontSize = 14;
-  badgeLabel.textColor = Color.slate700;
+  badgeLabel.textColor = ColorPalette.slate[700];
   badgeLabel.margin = new Thickness(0, 16, 0, 8);
   doc.add(badgeLabel);
 
@@ -216,7 +217,7 @@ export function generate(): Document {
   badgeStack.addChild(statusText);
 
   for (const [label, bg] of [
-    ['Active', Color.green600],
+    ['Active', ColorPalette.green[600]],
     ['Verified', Color.blue],
   ] as [string, Color][]) {
     const t = new TextBlock(label);

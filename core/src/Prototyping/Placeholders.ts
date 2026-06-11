@@ -1,4 +1,5 @@
 import { Color } from '../Core/Color';
+import { ColorPalette } from '../Core/ColorPalette';
 
 const FIRST_NAMES = [
   'Alice',
@@ -170,25 +171,25 @@ const SERVICE_DESCRIPTIONS = [
 ];
 
 const BACKGROUND_COLORS = [
-  Color.blue50,
-  Color.green50,
-  Color.amber50,
-  Color.rose50,
-  Color.indigo50,
-  Color.slate50,
-  Color.purple50,
-  Color.cyan50,
+  ColorPalette.blue[50],
+  ColorPalette.green[50],
+  ColorPalette.amber[50],
+  ColorPalette.rose[50],
+  ColorPalette.indigo[50],
+  ColorPalette.slate[50],
+  ColorPalette.purple[50],
+  ColorPalette.cyan[50],
 ];
 
 const ACCENT_COLORS = [
-  Color.indigo600,
-  Color.blue600,
-  Color.green600,
-  Color.amber600,
-  Color.rose600,
-  Color.purple600,
-  Color.cyan600,
-  Color.slate600,
+  ColorPalette.indigo[600],
+  ColorPalette.blue[600],
+  ColorPalette.green[600],
+  ColorPalette.amber[600],
+  ColorPalette.rose[600],
+  ColorPalette.purple[600],
+  ColorPalette.cyan[600],
+  ColorPalette.slate[600],
 ];
 
 export interface InvoiceLineItem {

@@ -7,6 +7,7 @@ import { RenderContext } from '../src/Rendering/RenderContext';
 import { RenderStatus } from '../src/Elements/RenderStatus';
 import { PdfSize } from '../src/Configuration/PdfSize';
 import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { MockCanvas } from './helpers/mock-canvas';
 
 // Table layout (mirrors the .NET reference): column widths are proportional to weights;
@@ -152,7 +153,7 @@ describe('Table — cell background styling precedence', () => {
     const row = TableRow.fromCells(
       TableCell.from(new Probe(20)).withBackground(Color.red), // cell override
       TableCell.from(new Probe(20)) // inherits row
-    ).withBackground(Color.amber400); // row override (beats table default)
+    ).withBackground(ColorPalette.amber[400]); // row override (beats table default)
     t.addRowRow(row);
     t.render(ctx, 500);
 
@@ -160,7 +161,7 @@ describe('Table — cell background styling precedence', () => {
     // cell 0 uses its own red; cell 1 falls back to the row's amber (not table blue).
     expect(canvas.rects).toEqual([
       { x: 0, y: 0, width: 250, height: rowHeight, color: Color.red },
-      { x: 250, y: 0, width: 250, height: rowHeight, color: Color.amber400 },
+      { x: 250, y: 0, width: 250, height: rowHeight, color: ColorPalette.amber[400] },
     ]);
   });
 });

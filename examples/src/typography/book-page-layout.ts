@@ -9,6 +9,7 @@ import {
   Container,
   Spacer,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -22,7 +23,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate800);
+  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(ColorPalette.slate[800]);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -37,21 +38,21 @@ export function generate(): Document {
   const chapterLabel = new TextBlock('CHAPTER III');
   chapterLabel.fontName = StandardFonts.TimesBold;
   chapterLabel.fontSize = 11;
-  chapterLabel.textColor = Color.slate700;
+  chapterLabel.textColor = ColorPalette.slate[700];
   chapterLabel.alignment = TextAlignment.Center;
   header.addChild(chapterLabel);
 
   const mainTitle = new TextBlock('The Architecture of Memory');
   mainTitle.fontName = StandardFonts.TimesBold;
   mainTitle.fontSize = 18;
-  mainTitle.textColor = Color.slate900;
+  mainTitle.textColor = ColorPalette.slate[900];
   mainTitle.alignment = TextAlignment.Center;
   header.addChild(mainTitle);
 
   const rule = new TextBlock('--------------------------------------------------------------------');
   rule.fontName = StandardFonts.Courier;
   rule.fontSize = 8;
-  rule.textColor = Color.slate400;
+  rule.textColor = ColorPalette.slate[400];
   rule.alignment = TextAlignment.Center;
   header.addChild(rule);
 
@@ -63,7 +64,7 @@ export function generate(): Document {
   );
   para1.fontName = StandardFonts.TimesRoman;
   para1.fontSize = 11;
-  para1.textColor = Color.slate800;
+  para1.textColor = ColorPalette.slate[800];
   content.addChild(para1);
 
   const quote1 = new TextBlock(
@@ -71,7 +72,7 @@ export function generate(): Document {
   );
   quote1.fontName = StandardFonts.TimesItalic;
   quote1.fontSize = 11;
-  quote1.textColor = Color.slate700;
+  quote1.textColor = ColorPalette.slate[700];
   content.addChild(quote1);
 
   const para2 = new TextBlock(
@@ -79,7 +80,7 @@ export function generate(): Document {
   );
   para2.fontName = StandardFonts.TimesRoman;
   para2.fontSize = 11;
-  para2.textColor = Color.slate800;
+  para2.textColor = ColorPalette.slate[800];
   content.addChild(para2);
 
   const para3 = new TextBlock(
@@ -87,7 +88,7 @@ export function generate(): Document {
   );
   para3.fontName = StandardFonts.TimesRoman;
   para3.fontSize = 11;
-  para3.textColor = Color.slate800;
+  para3.textColor = ColorPalette.slate[800];
   content.addChild(para3);
 
   const para4 = new TextBlock(
@@ -95,20 +96,20 @@ export function generate(): Document {
   );
   para4.fontName = StandardFonts.TimesRoman;
   para4.fontSize = 11;
-  para4.textColor = Color.slate800;
+  para4.textColor = ColorPalette.slate[800];
   content.addChild(para4);
 
   const emphStack = new VerticalStack();
   const butThen = new TextBlock('But then -');
   butThen.fontName = StandardFonts.TimesBold;
   butThen.fontSize = 11;
-  butThen.textColor = Color.slate800;
+  butThen.textColor = ColorPalette.slate[800];
   emphStack.addChild(butThen);
 
   const whisper = new TextBlock('he continued, his voice dropping to a conspiratorial whisper -');
   whisper.fontName = StandardFonts.TimesItalic;
   whisper.fontSize = 11;
-  whisper.textColor = Color.slate700;
+  whisper.textColor = ColorPalette.slate[700];
   emphStack.addChild(whisper);
   content.addChild(emphStack);
 
@@ -117,7 +118,7 @@ export function generate(): Document {
   );
   para5.fontName = StandardFonts.TimesRoman;
   para5.fontSize = 11;
-  para5.textColor = Color.slate800;
+  para5.textColor = ColorPalette.slate[800];
   content.addChild(para5);
 
   const para6 = new TextBlock(
@@ -125,7 +126,7 @@ export function generate(): Document {
   );
   para6.fontName = StandardFonts.TimesRoman;
   para6.fontSize = 11;
-  para6.textColor = Color.slate800;
+  para6.textColor = ColorPalette.slate[800];
   content.addChild(para6);
 
   // ── Block Quote ─────────────────────────────────────────────────────────────
@@ -136,14 +137,14 @@ export function generate(): Document {
   );
   quoteText.fontName = StandardFonts.TimesItalic;
   quoteText.fontSize = 10;
-  quoteText.textColor = Color.slate600;
+  quoteText.textColor = ColorPalette.slate[600];
   quoteInner.addChild(quoteText);
 
   const quoteBlock = new Container();
   quoteBlock.child = quoteInner;
-  quoteBlock.backgroundColor = Color.slate50;
+  quoteBlock.backgroundColor = ColorPalette.slate[50];
   quoteBlock.border = new Border(1);
-  quoteBlock.borderColors = new BorderColors(Color.slate300);
+  quoteBlock.borderColors = new BorderColors(ColorPalette.slate[300]);
   quoteBlock.padding = new Thickness(20, 8, 20, 8);
   content.addChild(quoteBlock);
 
@@ -152,7 +153,7 @@ export function generate(): Document {
   );
   para7.fontName = StandardFonts.TimesRoman;
   para7.fontSize = 11;
-  para7.textColor = Color.slate800;
+  para7.textColor = ColorPalette.slate[800];
   content.addChild(para7);
 
   const para8 = new TextBlock(
@@ -160,7 +161,7 @@ export function generate(): Document {
   );
   para8.fontName = StandardFonts.TimesRoman;
   para8.fontSize = 11;
-  para8.textColor = Color.slate800;
+  para8.textColor = ColorPalette.slate[800];
   content.addChild(para8);
 
   // ── Footer ──────────────────────────────────────────────────────────────────
@@ -169,21 +170,21 @@ export function generate(): Document {
   const footerRule = new TextBlock('--------------------------------------------------------------------');
   footerRule.fontName = StandardFonts.Courier;
   footerRule.fontSize = 8;
-  footerRule.textColor = Color.slate400;
+  footerRule.textColor = ColorPalette.slate[400];
   footerRule.alignment = TextAlignment.Center;
   footer.addChild(footerRule);
 
   const pageNum = new TextBlock('42');
   pageNum.fontName = StandardFonts.TimesBold;
   pageNum.fontSize = 10;
-  pageNum.textColor = Color.slate500;
+  pageNum.textColor = ColorPalette.slate[500];
   pageNum.alignment = TextAlignment.Center;
   footer.addChild(pageNum);
 
   const imprint = new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS | Cambridge University Press, 2024');
   imprint.fontName = StandardFonts.TimesItalic;
   imprint.fontSize = 8;
-  imprint.textColor = Color.slate400;
+  imprint.textColor = ColorPalette.slate[400];
   imprint.alignment = TextAlignment.Center;
   footer.addChild(imprint);
 

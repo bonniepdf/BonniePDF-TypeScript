@@ -10,6 +10,7 @@ import {
   Heading,
   Line,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   FontWeight,
@@ -21,7 +22,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -37,7 +38,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -54,7 +55,7 @@ export function generate(): Document {
   h2Bold.level = 2;
   h2Bold.fontName = StandardFonts.HelveticaBold;
   h2Bold.fontSize = 14;
-  h2Bold.textColor = Color.indigo600;
+  h2Bold.textColor = ColorPalette.indigo[600];
   h2Bold.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Bold);
 
@@ -75,7 +76,7 @@ export function generate(): Document {
   h2Italic.level = 2;
   h2Italic.fontName = StandardFonts.HelveticaBold;
   h2Italic.fontSize = 14;
-  h2Italic.textColor = Color.indigo600;
+  h2Italic.textColor = ColorPalette.indigo[600];
   h2Italic.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Italic);
 
@@ -98,7 +99,7 @@ export function generate(): Document {
   h2BoldItalic.level = 2;
   h2BoldItalic.fontName = StandardFonts.HelveticaBold;
   h2BoldItalic.fontSize = 14;
-  h2BoldItalic.textColor = Color.indigo600;
+  h2BoldItalic.textColor = ColorPalette.indigo[600];
   h2BoldItalic.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2BoldItalic);
 
@@ -124,7 +125,7 @@ export function generate(): Document {
   h2Colors.level = 2;
   h2Colors.fontName = StandardFonts.HelveticaBold;
   h2Colors.fontSize = 14;
-  h2Colors.textColor = Color.indigo600;
+  h2Colors.textColor = ColorPalette.indigo[600];
   h2Colors.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Colors);
 
@@ -134,13 +135,13 @@ export function generate(): Document {
     .span('Text can be ')
     .span('red', new TextStyle().withColor(Color.red))
     .span(', ')
-    .span('blue', new TextStyle().withColor(Color.blue600))
+    .span('blue', new TextStyle().withColor(ColorPalette.blue[600]))
     .span(', ')
-    .span('green', new TextStyle().withColor(Color.green600))
+    .span('green', new TextStyle().withColor(ColorPalette.green[600]))
     .span(', or ')
-    .span('any colour', new TextStyle().withColor(Color.purple600))
+    .span('any colour', new TextStyle().withColor(ColorPalette.purple[600]))
     .span(' you choose. Colours can be combined with ')
-    .span('bold coloured text', new TextStyle().bold().withColor(Color.indigo600))
+    .span('bold coloured text', new TextStyle().bold().withColor(ColorPalette.indigo[600]))
     .span(' for maximum emphasis.');
   doc.add(rt4);
 
@@ -151,7 +152,7 @@ export function generate(): Document {
   h2Dec.level = 2;
   h2Dec.fontName = StandardFonts.HelveticaBold;
   h2Dec.fontSize = 14;
-  h2Dec.textColor = Color.indigo600;
+  h2Dec.textColor = ColorPalette.indigo[600];
   h2Dec.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Dec);
 
@@ -174,7 +175,7 @@ export function generate(): Document {
   h2Just.level = 2;
   h2Just.fontName = StandardFonts.HelveticaBold;
   h2Just.fontSize = 14;
-  h2Just.textColor = Color.indigo600;
+  h2Just.textColor = ColorPalette.indigo[600];
   h2Just.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Just);
 
@@ -194,7 +195,7 @@ export function generate(): Document {
   // ── 7. Legal disclaimer ───────────────────────────────────────────────────
 
   const divider = new Line();
-  divider.color = Color.slate300;
+  divider.color = ColorPalette.slate[300];
   divider.thickness = 1;
   doc.add(divider);
 
@@ -203,14 +204,14 @@ export function generate(): Document {
   h2Legal.level = 2;
   h2Legal.fontName = StandardFonts.HelveticaBold;
   h2Legal.fontSize = 14;
-  h2Legal.textColor = Color.indigo600;
+  h2Legal.textColor = ColorPalette.indigo[600];
   h2Legal.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Legal);
 
   const disclaimerDefault = new TextStyle();
   disclaimerDefault.fontFamily = 'Helvetica';
   disclaimerDefault.fontSize = 10;
-  disclaimerDefault.color = Color.slate600;
+  disclaimerDefault.color = ColorPalette.slate[600];
 
   const rt7 = new RichText();
   rt7.defaultStyle = disclaimerDefault;
@@ -225,7 +226,7 @@ export function generate(): Document {
     .span('. All data is processed in accordance with ')
     .span('GDPR', new TextStyle().bold())
     .span(' regulations. For questions, contact ')
-    .span('support@example.com', new TextStyle().withColor(Color.blue600))
+    .span('support@example.com', new TextStyle().withColor(ColorPalette.blue[600]))
     .span('.');
   doc.add(rt7);
 

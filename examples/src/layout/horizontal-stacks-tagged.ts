@@ -9,6 +9,7 @@ import {
   Container,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   WidthDistribution,
@@ -20,7 +21,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Horizontal Stacks - Tagged (PDF/UA-1)';
@@ -35,7 +36,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -52,7 +53,7 @@ export function generate(): Document {
   h2Equal.level = 2;
   h2Equal.fontName = StandardFonts.HelveticaBold;
   h2Equal.fontSize = 14;
-  h2Equal.textColor = Color.indigo600;
+  h2Equal.textColor = ColorPalette.indigo[600];
   h2Equal.margin = new Thickness(0, 0, 0, 8);
   doc.add(h2Equal);
 
@@ -64,9 +65,9 @@ export function generate(): Document {
   equalStack.spacing = 10;
   equalStack.widthDistribution = WidthDistribution.Equal;
   for (const [label, bg] of [
-    ['Column 1', Color.blue600],
-    ['Column 2', Color.indigo600],
-    ['Column 3', Color.slate600],
+    ['Column 1', ColorPalette.blue[600]],
+    ['Column 2', ColorPalette.indigo[600]],
+    ['Column 3', ColorPalette.slate[600]],
   ] as [string, Color][]) {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.HelveticaBold;
@@ -87,7 +88,7 @@ export function generate(): Document {
   h2Weighted.level = 2;
   h2Weighted.fontName = StandardFonts.HelveticaBold;
   h2Weighted.fontSize = 14;
-  h2Weighted.textColor = Color.indigo600;
+  h2Weighted.textColor = ColorPalette.indigo[600];
   h2Weighted.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2Weighted);
 
@@ -101,9 +102,9 @@ export function generate(): Document {
   weightedStack.spacing = 10;
   weightedStack.widthDistribution = WidthDistribution.Weighted;
   for (const [label, weight, bg] of [
-    ['1×', 1, Color.slate400],
-    ['2×', 2, Color.slate600],
-    ['3×', 3, Color.slate800],
+    ['1×', 1, ColorPalette.slate[400]],
+    ['2×', 2, ColorPalette.slate[600]],
+    ['3×', 3, ColorPalette.slate[800]],
   ] as [string, number, Color][]) {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.HelveticaBold;
@@ -124,7 +125,7 @@ export function generate(): Document {
   h2Kv.level = 2;
   h2Kv.fontName = StandardFonts.HelveticaBold;
   h2Kv.fontSize = 14;
-  h2Kv.textColor = Color.indigo600;
+  h2Kv.textColor = ColorPalette.indigo[600];
   h2Kv.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2Kv);
 
@@ -146,9 +147,9 @@ export function generate(): Document {
     kv.margin = new Thickness(0, 0, 0, 6);
     const k = new TextBlock(key);
     k.fontName = StandardFonts.HelveticaBold;
-    k.textColor = Color.slate700;
+    k.textColor = ColorPalette.slate[700];
     const v = new TextBlock(value);
-    v.textColor = Color.slate800;
+    v.textColor = ColorPalette.slate[800];
     kv.addChild(k, 1);
     kv.addChild(v, 3);
     doc.add(kv);
@@ -161,7 +162,7 @@ export function generate(): Document {
   h2TwoCols.level = 2;
   h2TwoCols.fontName = StandardFonts.HelveticaBold;
   h2TwoCols.fontSize = 14;
-  h2TwoCols.textColor = Color.indigo600;
+  h2TwoCols.textColor = ColorPalette.indigo[600];
   h2TwoCols.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2TwoCols);
 

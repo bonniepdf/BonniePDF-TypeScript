@@ -7,7 +7,7 @@ import { TableCell } from '../src/Elements/Tables/TableCell';
 import { VerticalStack } from '../src/Elements/Layout/VerticalStack';
 import { QRCode } from '../src/Elements/Shapes/QRCode';
 import { Hyperlink } from '../src/Core/Hyperlink';
-import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
 import { EncryptionSettings } from '../src/Security/Models/EncryptionSettings';
@@ -234,14 +234,14 @@ describe('Hardening fixtures', () => {
         const tb = new TextBlock();
         tb.text = `Header - page ${pageNum}`;
         tb.fontSize = 9;
-        tb.textColor = Color.slate500;
+        tb.textColor = ColorPalette.slate[500];
         return tb;
       };
       d.settings.footerTemplate = pageNum => {
         const tb = new TextBlock();
         tb.text = `- ${pageNum} -`;
         tb.fontSize = 9;
-        tb.textColor = Color.slate500;
+        tb.textColor = ColorPalette.slate[500];
         return tb;
       };
       const h = new Heading('Body');

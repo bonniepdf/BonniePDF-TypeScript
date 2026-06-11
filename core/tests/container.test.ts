@@ -7,6 +7,7 @@ import { Thickness } from '../src/Core/Thickness';
 import { Border } from '../src/Core/Border';
 import { BorderColors } from '../src/Core/BorderColors';
 import { Color } from '../src/Core/Color';
+import { ColorPalette } from '../src/Core/ColorPalette';
 import { MockCanvas } from './helpers/mock-canvas';
 
 // Container layout matches the .NET reference: a fixed Height wins outright; otherwise
@@ -184,7 +185,7 @@ describe('Container — background and border drawing', () => {
     const { ctx, canvas } = makeContext();
     const c = new Container();
     c.child = new Probe(10);
-    c.backgroundColor = Color.amber400;
+    c.backgroundColor = ColorPalette.amber[400];
     c.render(ctx, 500);
 
     expect(canvas.rects).toHaveLength(1);
@@ -195,7 +196,7 @@ describe('Container — background and border drawing', () => {
     const { ctx, canvas } = makeContext();
     const c = new Container();
     c.child = new Probe(10);
-    c.backgroundColor = Color.amber400;
+    c.backgroundColor = ColorPalette.amber[400];
     c.cornerRadius = 6;
     c.render(ctx, 500);
 

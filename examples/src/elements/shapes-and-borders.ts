@@ -11,6 +11,7 @@ import {
   Spacer,
   Line,
   Color,
+  ColorPalette,
   Thickness,
   Border,
   BorderColors,
@@ -25,7 +26,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Rounded Rectangles';
@@ -37,7 +38,7 @@ export function generate(): Document {
   const title = new TextBlock('Rounded Rectangles');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -45,16 +46,16 @@ export function generate(): Document {
   const basicHeader = new TextBlock('Basic Rounded Containers');
   basicHeader.fontName = StandardFonts.HelveticaBold;
   basicHeader.fontSize = 14;
-  basicHeader.textColor = Color.indigo600;
+  basicHeader.textColor = ColorPalette.indigo[600];
   basicHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(basicHeader);
 
   const box1Text = new TextBlock('A container with 8pt corner radius and a light blue background.');
   box1Text.fontName = StandardFonts.Helvetica;
   box1Text.fontSize = 12;
-  box1Text.textColor = Color.blue800;
+  box1Text.textColor = ColorPalette.blue[800];
   const box1 = new Container();
-  box1.backgroundColor = Color.blue50;
+  box1.backgroundColor = ColorPalette.blue[50];
   box1.cornerRadius = 8;
   box1.padding = new Thickness(16);
   box1.margin = new Thickness(0, 0, 0, 12);
@@ -66,9 +67,9 @@ export function generate(): Document {
   );
   box2Text.fontName = StandardFonts.Helvetica;
   box2Text.fontSize = 12;
-  box2Text.textColor = Color.green800;
+  box2Text.textColor = ColorPalette.green[800];
   const box2 = new Container();
-  box2.backgroundColor = Color.green50;
+  box2.backgroundColor = ColorPalette.green[50];
   box2.cornerRadius = 16;
   box2.padding = new Thickness(20);
   box2.margin = new Thickness(0, 0, 0, 12);
@@ -79,17 +80,17 @@ export function generate(): Document {
   const bordersHeader = new TextBlock('Rounded Borders');
   bordersHeader.fontName = StandardFonts.HelveticaBold;
   bordersHeader.fontSize = 14;
-  bordersHeader.textColor = Color.indigo600;
+  bordersHeader.textColor = ColorPalette.indigo[600];
   bordersHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(bordersHeader);
 
   const strokeText = new TextBlock('A rounded border with no background fill. The stroke follows the curved path.');
   strokeText.fontName = StandardFonts.Helvetica;
   strokeText.fontSize = 12;
-  strokeText.textColor = Color.slate700;
+  strokeText.textColor = ColorPalette.slate[700];
   const strokeBox = new Container();
   strokeBox.border = new Border(2);
-  strokeBox.borderColors = new BorderColors(Color.indigo500);
+  strokeBox.borderColors = new BorderColors(ColorPalette.indigo[500]);
   strokeBox.cornerRadius = 10;
   strokeBox.padding = new Thickness(16);
   strokeBox.margin = new Thickness(0, 0, 0, 12);
@@ -116,7 +117,7 @@ export function generate(): Document {
   const cardHeader = new TextBlock('Card Layout');
   cardHeader.fontName = StandardFonts.HelveticaBold;
   cardHeader.fontSize = 14;
-  cardHeader.textColor = Color.indigo600;
+  cardHeader.textColor = ColorPalette.indigo[600];
   cardHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(cardHeader);
 
@@ -125,9 +126,24 @@ export function generate(): Document {
   cardRow.spacing = 12;
   cardRow.margin = new Thickness(0, 0, 0, 12);
   for (const [cardTitle, description, accent, bg] of [
-    ['Feature A', 'Rounded corners make UI elements feel modern and approachable.', Color.blue500, Color.blue50],
-    ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', Color.purple500, Color.fromHex('#faf5ff')],
-    ['Feature C', 'Works with backgrounds, borders, or both combined.', Color.teal500, Color.fromHex('#f0fdfa')],
+    [
+      'Feature A',
+      'Rounded corners make UI elements feel modern and approachable.',
+      ColorPalette.blue[500],
+      ColorPalette.blue[50],
+    ],
+    [
+      'Feature B',
+      'Bezier curves approximate perfect quarter-circle arcs.',
+      ColorPalette.purple[500],
+      Color.fromHex('#faf5ff'),
+    ],
+    [
+      'Feature C',
+      'Works with backgrounds, borders, or both combined.',
+      ColorPalette.teal[500],
+      Color.fromHex('#f0fdfa'),
+    ],
   ] as [string, string, Color, Color][]) {
     const stack = new VerticalStack();
 
@@ -141,7 +157,7 @@ export function generate(): Document {
     const d = new TextBlock(description);
     d.fontName = StandardFonts.Helvetica;
     d.fontSize = 10;
-    d.textColor = Color.slate600;
+    d.textColor = ColorPalette.slate[600];
     stack.addChild(d);
 
     const c = new Container();
@@ -159,7 +175,7 @@ export function generate(): Document {
   const radiusHeader = new TextBlock('Radius Comparison');
   radiusHeader.fontName = StandardFonts.HelveticaBold;
   radiusHeader.fontSize = 14;
-  radiusHeader.textColor = Color.indigo600;
+  radiusHeader.textColor = ColorPalette.indigo[600];
   radiusHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(radiusHeader);
 
@@ -168,11 +184,11 @@ export function generate(): Document {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.Helvetica;
     t.fontSize = 11;
-    t.textColor = Color.slate700;
+    t.textColor = ColorPalette.slate[700];
     const c = new Container();
-    c.backgroundColor = Color.slate100;
+    c.backgroundColor = ColorPalette.slate[100];
     c.border = new Border(1);
-    c.borderColors = new BorderColors(Color.slate400);
+    c.borderColors = new BorderColors(ColorPalette.slate[400]);
     c.cornerRadius = r;
     c.padding = new Thickness(12, 8, 12, 8);
     c.margin = new Thickness(0, 0, 0, 6);
@@ -183,13 +199,13 @@ export function generate(): Document {
   // ── Section 5: Practical banners ──
   doc.add(new Spacer(16));
   const divider = new Line();
-  divider.color = Color.slate300;
+  divider.color = ColorPalette.slate[300];
   divider.thickness = 1;
   doc.add(divider);
   const practicalHeader = new TextBlock('Practical Examples');
   practicalHeader.fontName = StandardFonts.HelveticaBold;
   practicalHeader.fontSize = 14;
-  practicalHeader.textColor = Color.indigo600;
+  practicalHeader.textColor = ColorPalette.indigo[600];
   practicalHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(practicalHeader);
 
@@ -201,8 +217,18 @@ export function generate(): Document {
   ];
 
   const bannerAccents: string[] = ['', '#ca8a04', '#991b1b', ''];
-  const bannerBorders = [Color.green600, Color.fromHex('#ca8a04'), Color.fromHex('#991b1b'), Color.blue600];
-  const bannerTexts = [Color.green800, Color.fromHex('#854d0e'), Color.fromHex('#991b1b'), Color.blue800];
+  const bannerBorders = [
+    ColorPalette.green[600],
+    Color.fromHex('#ca8a04'),
+    Color.fromHex('#991b1b'),
+    ColorPalette.blue[600],
+  ];
+  const bannerTexts = [
+    ColorPalette.green[800],
+    Color.fromHex('#854d0e'),
+    Color.fromHex('#991b1b'),
+    ColorPalette.blue[800],
+  ];
   const bannerBgs = ['#dcfce7', '#fef9c3', '#fee2e2', '#dbeafe'];
   const bannerMessages = [
     'Success! Your document has been generated successfully.',

@@ -2,7 +2,6 @@ import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
-import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
 import { TextAlignment } from '../Elements/Text/TextAlignment';

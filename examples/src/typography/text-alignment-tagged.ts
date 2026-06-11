@@ -8,6 +8,7 @@ import {
   TextStyle,
   Heading,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -24,7 +25,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(ColorPalette.slate[700]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Alignment - Tagged (PDF/UA-1)';
@@ -39,7 +40,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = Color.slate800;
+  h1.textColor = ColorPalette.slate[800];
   h1.alignment = TextAlignment.Center;
   h1.margin = new Thickness(0, 0, 0, 16);
   doc.add(h1);
@@ -54,7 +55,7 @@ export function generate(): Document {
   h2Left.level = 2;
   h2Left.fontName = StandardFonts.HelveticaBold;
   h2Left.fontSize = 13;
-  h2Left.textColor = Color.indigo600;
+  h2Left.textColor = ColorPalette.indigo[600];
   h2Left.alignment = TextAlignment.Left;
   h2Left.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Left);
@@ -70,7 +71,7 @@ export function generate(): Document {
   h2Center.level = 2;
   h2Center.fontName = StandardFonts.HelveticaBold;
   h2Center.fontSize = 13;
-  h2Center.textColor = Color.indigo600;
+  h2Center.textColor = ColorPalette.indigo[600];
   h2Center.alignment = TextAlignment.Center;
   h2Center.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Center);
@@ -86,7 +87,7 @@ export function generate(): Document {
   h2Right.level = 2;
   h2Right.fontName = StandardFonts.HelveticaBold;
   h2Right.fontSize = 13;
-  h2Right.textColor = Color.indigo600;
+  h2Right.textColor = ColorPalette.indigo[600];
   h2Right.alignment = TextAlignment.Right;
   h2Right.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Right);
@@ -102,7 +103,7 @@ export function generate(): Document {
   h2Justify.level = 2;
   h2Justify.fontName = StandardFonts.HelveticaBold;
   h2Justify.fontSize = 13;
-  h2Justify.textColor = Color.indigo600;
+  h2Justify.textColor = ColorPalette.indigo[600];
   h2Justify.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Justify);
 
@@ -117,7 +118,7 @@ export function generate(): Document {
   h2Book.level = 2;
   h2Book.fontName = StandardFonts.HelveticaBold;
   h2Book.fontSize = 13;
-  h2Book.textColor = Color.indigo600;
+  h2Book.textColor = ColorPalette.indigo[600];
   h2Book.margin = new Thickness(0, 6, 0, 6);
   doc.add(h2Book);
 
@@ -137,7 +138,7 @@ export function generate(): Document {
     const p = new TextBlock(text);
     p.fontName = StandardFonts.TimesRoman;
     p.fontSize = 11;
-    p.textColor = Color.slate800;
+    p.textColor = ColorPalette.slate[800];
     p.alignment = TextAlignment.Justify;
     p.margin = new Thickness(0, 0, 0, 8);
     doc.add(p);

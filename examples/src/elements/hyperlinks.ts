@@ -7,6 +7,7 @@ import {
   TextStyle,
   Hyperlink,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -18,7 +19,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
   settings.defaultZoom = ZoomLevel.FitPage;
   settings.displayDocTitle = true;
 
@@ -33,7 +34,7 @@ export function generate(): Document {
   const title = new TextBlock('Hyperlink Support Demo');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
@@ -41,7 +42,7 @@ export function generate(): Document {
   const basicLabel = new TextBlock('Basic Links:');
   basicLabel.fontName = StandardFonts.HelveticaBold;
   basicLabel.fontSize = 14;
-  basicLabel.textColor = Color.slate700;
+  basicLabel.textColor = ColorPalette.slate[700];
   basicLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(basicLabel);
 
@@ -60,7 +61,7 @@ export function generate(): Document {
   const styledLabel = new TextBlock('Styled Links:');
   styledLabel.fontName = StandardFonts.HelveticaBold;
   styledLabel.fontSize = 14;
-  styledLabel.textColor = Color.slate700;
+  styledLabel.textColor = ColorPalette.slate[700];
   styledLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(styledLabel);
 
@@ -71,14 +72,14 @@ export function generate(): Document {
 
   // Green
   const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
-  greenLink.textColor = Color.green500;
+  greenLink.textColor = ColorPalette.green[500];
   greenLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(greenLink);
 
   // Large purple
   const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
   purpleLink.fontSize = 16;
-  purpleLink.textColor = Color.purple500;
+  purpleLink.textColor = ColorPalette.purple[500];
   purpleLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(purpleLink);
 
@@ -94,7 +95,7 @@ export function generate(): Document {
   const marginLabel = new TextBlock('Links with Margins:');
   marginLabel.fontName = StandardFonts.HelveticaBold;
   marginLabel.fontSize = 14;
-  marginLabel.textColor = Color.slate700;
+  marginLabel.textColor = ColorPalette.slate[700];
   doc.add(marginLabel);
 
   const before = new TextBlock('Text before link.');

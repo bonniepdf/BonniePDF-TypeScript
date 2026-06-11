@@ -8,6 +8,7 @@ import {
   TextAlignment,
   Line,
   Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
@@ -19,7 +20,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Justified Text Alignment';
@@ -31,7 +32,7 @@ export function generate(): Document {
   const title = new TextBlock('Text Alignment Comparison');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 22;
-  title.textColor = Color.slate800;
+  title.textColor = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -46,14 +47,14 @@ export function generate(): Document {
   const leftHeader = new TextBlock('Left Aligned (Default)');
   leftHeader.fontName = StandardFonts.HelveticaBold;
   leftHeader.fontSize = 13;
-  leftHeader.textColor = Color.indigo600;
+  leftHeader.textColor = ColorPalette.indigo[600];
   leftHeader.margin = new Thickness(0, 0, 0, 6);
   doc.add(leftHeader);
 
   const leftSample = new TextBlock(sampleText);
   leftSample.fontName = StandardFonts.TimesRoman;
   leftSample.fontSize = 11;
-  leftSample.textColor = Color.slate700;
+  leftSample.textColor = ColorPalette.slate[700];
   leftSample.margin = new Thickness(0, 0, 0, 20);
   doc.add(leftSample);
 
@@ -61,14 +62,14 @@ export function generate(): Document {
   const centerHeader = new TextBlock('Center Aligned');
   centerHeader.fontName = StandardFonts.HelveticaBold;
   centerHeader.fontSize = 13;
-  centerHeader.textColor = Color.indigo600;
+  centerHeader.textColor = ColorPalette.indigo[600];
   centerHeader.margin = new Thickness(0, 0, 0, 6);
   doc.add(centerHeader);
 
   const centerSample = new TextBlock(sampleText);
   centerSample.fontName = StandardFonts.TimesRoman;
   centerSample.fontSize = 11;
-  centerSample.textColor = Color.slate700;
+  centerSample.textColor = ColorPalette.slate[700];
   centerSample.margin = new Thickness(0, 0, 0, 20);
   centerSample.alignment = TextAlignment.Center;
   doc.add(centerSample);
@@ -77,14 +78,14 @@ export function generate(): Document {
   const rightHeader = new TextBlock('Right Aligned');
   rightHeader.fontName = StandardFonts.HelveticaBold;
   rightHeader.fontSize = 13;
-  rightHeader.textColor = Color.indigo600;
+  rightHeader.textColor = ColorPalette.indigo[600];
   rightHeader.margin = new Thickness(0, 0, 0, 6);
   doc.add(rightHeader);
 
   const rightSample = new TextBlock(sampleText);
   rightSample.fontName = StandardFonts.TimesRoman;
   rightSample.fontSize = 11;
-  rightSample.textColor = Color.slate700;
+  rightSample.textColor = ColorPalette.slate[700];
   rightSample.margin = new Thickness(0, 0, 0, 20);
   rightSample.alignment = TextAlignment.Right;
   doc.add(rightSample);
@@ -93,28 +94,28 @@ export function generate(): Document {
   const justifiedHeader = new TextBlock('Justified');
   justifiedHeader.fontName = StandardFonts.HelveticaBold;
   justifiedHeader.fontSize = 13;
-  justifiedHeader.textColor = Color.indigo600;
+  justifiedHeader.textColor = ColorPalette.indigo[600];
   justifiedHeader.margin = new Thickness(0, 0, 0, 6);
   doc.add(justifiedHeader);
 
   const justifiedSample = new TextBlock(sampleText);
   justifiedSample.fontName = StandardFonts.TimesRoman;
   justifiedSample.fontSize = 11;
-  justifiedSample.textColor = Color.slate700;
+  justifiedSample.textColor = ColorPalette.slate[700];
   justifiedSample.margin = new Thickness(0, 0, 0, 20);
   justifiedSample.alignment = TextAlignment.Justify;
   doc.add(justifiedSample);
 
   // Divider
   const divider = new Line();
-  divider.color = Color.slate300;
+  divider.color = ColorPalette.slate[300];
   divider.thickness = 1;
   doc.add(divider);
 
   const bookHeader = new TextBlock('Book-Style Justified Paragraphs');
   bookHeader.fontName = StandardFonts.HelveticaBold;
   bookHeader.fontSize = 13;
-  bookHeader.textColor = Color.indigo600;
+  bookHeader.textColor = ColorPalette.indigo[600];
   bookHeader.margin = new Thickness(0, 0, 0, 6);
   doc.add(bookHeader);
 
@@ -136,7 +137,7 @@ export function generate(): Document {
     const b = new TextBlock(para);
     b.fontName = StandardFonts.TimesRoman;
     b.fontSize = 11;
-    b.textColor = Color.slate800;
+    b.textColor = ColorPalette.slate[800];
     b.alignment = TextAlignment.Justify;
     b.margin = new Thickness(0, 0, 0, 8);
     doc.add(b);

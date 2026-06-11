@@ -191,7 +191,7 @@ export class DocumentSettings {
    * doc.settings.defaultTextStyle = new TextStyle()
    *   .withFamily('Helvetica')
    *   .withSize(11)
-   *   .withColor(Color.slate600);
+   *   .withColor(ColorPalette.slate[600]);
    * ```
    */
   public defaultTextStyle?: TextStyle;

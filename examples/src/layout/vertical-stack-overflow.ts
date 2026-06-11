@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   TextBlock,
   TextStyle,
   VerticalStack,
@@ -10,12 +9,16 @@ import {
   Thickness,
   StandardFonts,
   Placeholders,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'VerticalStack Overflow Demo';
@@ -23,7 +26,6 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates VerticalStack flowing across page boundaries';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(Color.slate600);
 
   const title = new TextBlock('Item Catalog');
   title.fontName = StandardFonts.HelveticaBold;

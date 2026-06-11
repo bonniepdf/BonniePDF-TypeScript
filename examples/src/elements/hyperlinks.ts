@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   ZoomLevel,
   TextBlock,
   TextStyle,
@@ -10,12 +9,16 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
   settings.defaultZoom = ZoomLevel.FitPage;
   settings.displayDocTitle = true;
 
@@ -25,7 +28,6 @@ export function generate(): Document {
   metadata.subject = 'Demonstrating hyperlink support in PDFs';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
 
   // ── Title ──
   const title = new TextBlock('Hyperlink Support Demo');

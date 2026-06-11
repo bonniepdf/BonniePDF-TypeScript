@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -12,28 +11,16 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-function sectionHeader(title: string): TextBlock {
-  const b = new TextBlock(title);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 14;
-  b.textColor = Color.indigo600;
-  b.margin = new Thickness(0, 12, 0, 6);
-  return b;
-}
-
-function divider(): Line {
-  const l = new Line();
-  l.color = Color.slate300;
-  l.thickness = 1;
-  return l;
-}
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -41,7 +28,6 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Text Decorations');
   title.fontName = StandardFonts.HelveticaBold;
@@ -51,7 +37,12 @@ export function generate(): Document {
   doc.add(title);
 
   // ── Underline ────────────────────────────────────────────────────────────
-  doc.add(sectionHeader('Underline'));
+  const sectionHeader1 = new TextBlock('Underline');
+  sectionHeader1.fontName = StandardFonts.HelveticaBold;
+  sectionHeader1.fontSize = 14;
+  sectionHeader1.textColor = Color.indigo600;
+  sectionHeader1.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader1);
 
   const u1 = new TextBlock('This text has an underline decoration applied.');
   u1.fontName = StandardFonts.Helvetica;
@@ -70,7 +61,12 @@ export function generate(): Document {
   doc.add(u2);
 
   // ── Strikethrough ────────────────────────────────────────────────────────
-  doc.add(sectionHeader('Strikethrough'));
+  const sectionHeader2 = new TextBlock('Strikethrough');
+  sectionHeader2.fontName = StandardFonts.HelveticaBold;
+  sectionHeader2.fontSize = 14;
+  sectionHeader2.textColor = Color.indigo600;
+  sectionHeader2.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader2);
 
   const s1 = new TextBlock(
     'This text has a strikethrough decoration, useful for showing deleted or superseded content.'
@@ -91,7 +87,12 @@ export function generate(): Document {
   doc.add(s2);
 
   // ── Combined ─────────────────────────────────────────────────────────────
-  doc.add(sectionHeader('Combined Decorations'));
+  const sectionHeader3 = new TextBlock('Combined Decorations');
+  sectionHeader3.fontName = StandardFonts.HelveticaBold;
+  sectionHeader3.fontSize = 14;
+  sectionHeader3.textColor = Color.indigo600;
+  sectionHeader3.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader3);
 
   const c1 = new TextBlock('This text has both underline and strikethrough applied simultaneously.');
   c1.fontName = StandardFonts.Helvetica;
@@ -110,8 +111,16 @@ export function generate(): Document {
   doc.add(c2);
 
   // ── Different alignments ──────────────────────────────────────────────────
-  doc.add(divider());
-  doc.add(sectionHeader('Decorations with Different Alignments'));
+  const divider1 = new Line();
+  divider1.color = Color.slate300;
+  divider1.thickness = 1;
+  doc.add(divider1);
+  const sectionHeader4 = new TextBlock('Decorations with Different Alignments');
+  sectionHeader4.fontName = StandardFonts.HelveticaBold;
+  sectionHeader4.fontSize = 14;
+  sectionHeader4.textColor = Color.indigo600;
+  sectionHeader4.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader4);
 
   for (const [text, align] of [
     ['Left-aligned underlined text', TextAlignment.Left],
@@ -129,8 +138,16 @@ export function generate(): Document {
   }
 
   // ── Scales with font size ─────────────────────────────────────────────────
-  doc.add(divider());
-  doc.add(sectionHeader('Decoration Thickness Scales with Font Size'));
+  const divider2 = new Line();
+  divider2.color = Color.slate300;
+  divider2.thickness = 1;
+  doc.add(divider2);
+  const sectionHeader5 = new TextBlock('Decoration Thickness Scales with Font Size');
+  sectionHeader5.fontName = StandardFonts.HelveticaBold;
+  sectionHeader5.fontSize = 14;
+  sectionHeader5.textColor = Color.indigo600;
+  sectionHeader5.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader5);
 
   for (const size of [8, 12, 18, 24, 36]) {
     const b = new TextBlock(`Underline at ${size}pt`);
@@ -143,8 +160,16 @@ export function generate(): Document {
   }
 
   // ── Practical: price list ─────────────────────────────────────────────────
-  doc.add(divider());
-  doc.add(sectionHeader('Practical Example: Price List'));
+  const divider3 = new Line();
+  divider3.color = Color.slate300;
+  divider3.thickness = 1;
+  doc.add(divider3);
+  const sectionHeader6 = new TextBlock('Practical Example: Price List');
+  sectionHeader6.fontName = StandardFonts.HelveticaBold;
+  sectionHeader6.fontSize = 14;
+  sectionHeader6.textColor = Color.indigo600;
+  sectionHeader6.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader6);
 
   const priceList = new VerticalStack();
 

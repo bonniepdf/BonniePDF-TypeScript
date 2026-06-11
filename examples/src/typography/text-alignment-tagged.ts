@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextAlignment,
@@ -11,6 +10,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const SAMPLE_TEXT =
@@ -21,9 +21,10 @@ const SAMPLE_TEXT =
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate700);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Alignment - Tagged (PDF/UA-1)';
@@ -32,7 +33,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, text, alignment, justified';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate700);
 
   const h1 = new Heading('Text Alignment Comparison');
   h1.tocIdentifier = 'intro';

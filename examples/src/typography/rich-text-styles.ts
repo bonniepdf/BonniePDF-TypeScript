@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   TextBlock,
   TextAlignment,
   RichText,
@@ -13,21 +12,16 @@ import {
   Thickness,
   StandardFonts,
   FontWeight,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-function sectionHeader(title: string): TextBlock {
-  const b = new TextBlock(title);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 14;
-  b.textColor = Color.indigo600;
-  b.margin = new Thickness(0, 12, 0, 6);
-  return b;
-}
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -35,7 +29,6 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Rich Text (Mixed Styling)');
   title.fontName = StandardFonts.HelveticaBold;
@@ -45,7 +38,12 @@ export function generate(): Document {
   doc.add(title);
 
   // ── 1. Bold words ─────────────────────────────────────────────────────────
-  doc.add(sectionHeader('Bold Words in a Paragraph'));
+  const sectionHeader1 = new TextBlock('Bold Words in a Paragraph');
+  sectionHeader1.fontName = StandardFonts.HelveticaBold;
+  sectionHeader1.fontSize = 14;
+  sectionHeader1.textColor = Color.indigo600;
+  sectionHeader1.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader1);
   const rt1 = new RichText();
   rt1.margin = new Thickness(0, 0, 0, 16);
   rt1
@@ -57,7 +55,12 @@ export function generate(): Document {
   doc.add(rt1);
 
   // ── 2. Italic ─────────────────────────────────────────────────────────────
-  doc.add(sectionHeader('Italic Text'));
+  const sectionHeader2 = new TextBlock('Italic Text');
+  sectionHeader2.fontName = StandardFonts.HelveticaBold;
+  sectionHeader2.fontSize = 14;
+  sectionHeader2.textColor = Color.indigo600;
+  sectionHeader2.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader2);
   const rt2 = new RichText();
   rt2.margin = new Thickness(0, 0, 0, 16);
   rt2
@@ -71,7 +74,12 @@ export function generate(): Document {
   doc.add(rt2);
 
   // ── 3. Bold + Italic ──────────────────────────────────────────────────────
-  doc.add(sectionHeader('Bold and Italic Combined'));
+  const sectionHeader3 = new TextBlock('Bold and Italic Combined');
+  sectionHeader3.fontName = StandardFonts.HelveticaBold;
+  sectionHeader3.fontSize = 14;
+  sectionHeader3.textColor = Color.indigo600;
+  sectionHeader3.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader3);
   const boldItalic = new TextStyle();
   boldItalic.weight = FontWeight.Bold;
   boldItalic.italic = true;
@@ -88,7 +96,12 @@ export function generate(): Document {
   doc.add(rt3);
 
   // ── 4. Colored spans ──────────────────────────────────────────────────────
-  doc.add(sectionHeader('Colored Spans'));
+  const sectionHeader4 = new TextBlock('Colored Spans');
+  sectionHeader4.fontName = StandardFonts.HelveticaBold;
+  sectionHeader4.fontSize = 14;
+  sectionHeader4.textColor = Color.indigo600;
+  sectionHeader4.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader4);
   const rt4 = new RichText();
   rt4.margin = new Thickness(0, 0, 0, 16);
   rt4
@@ -106,7 +119,12 @@ export function generate(): Document {
   doc.add(rt4);
 
   // ── 5. Inline decorations ─────────────────────────────────────────────────
-  doc.add(sectionHeader('Inline Decorations'));
+  const sectionHeader5 = new TextBlock('Inline Decorations');
+  sectionHeader5.fontName = StandardFonts.HelveticaBold;
+  sectionHeader5.fontSize = 14;
+  sectionHeader5.textColor = Color.indigo600;
+  sectionHeader5.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader5);
   const rt5 = new RichText();
   rt5.margin = new Thickness(0, 0, 0, 16);
   rt5
@@ -120,7 +138,12 @@ export function generate(): Document {
   doc.add(rt5);
 
   // ── 6. Mixed font sizes ───────────────────────────────────────────────────
-  doc.add(sectionHeader('Mixed Font Sizes'));
+  const sectionHeader6 = new TextBlock('Mixed Font Sizes');
+  sectionHeader6.fontName = StandardFonts.HelveticaBold;
+  sectionHeader6.fontSize = 14;
+  sectionHeader6.textColor = Color.indigo600;
+  sectionHeader6.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader6);
   const rt6 = new RichText();
   rt6.margin = new Thickness(0, 0, 0, 16);
   rt6
@@ -132,7 +155,12 @@ export function generate(): Document {
   doc.add(rt6);
 
   // ── 7. Background highlights ─────────────────────────────────────────────
-  doc.add(sectionHeader('Background Highlights'));
+  const sectionHeader7 = new TextBlock('Background Highlights');
+  sectionHeader7.fontName = StandardFonts.HelveticaBold;
+  sectionHeader7.fontSize = 14;
+  sectionHeader7.textColor = Color.indigo600;
+  sectionHeader7.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader7);
   const rt7 = new RichText();
   rt7.margin = new Thickness(0, 0, 0, 16);
   rt7
@@ -149,7 +177,12 @@ export function generate(): Document {
   doc.add(rt7);
 
   // ── 8. Reusable styles ────────────────────────────────────────────────────
-  doc.add(sectionHeader('Reusable TextStyle Objects'));
+  const sectionHeader8 = new TextBlock('Reusable TextStyle Objects');
+  sectionHeader8.fontName = StandardFonts.HelveticaBold;
+  sectionHeader8.fontSize = 14;
+  sectionHeader8.textColor = Color.indigo600;
+  sectionHeader8.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader8);
 
   const labelStyle = new TextStyle();
   labelStyle.fontFamily = 'Helvetica';
@@ -181,7 +214,12 @@ export function generate(): Document {
   doc.add(rtHum);
 
   // ── 9. Font weight variants ───────────────────────────────────────────────
-  doc.add(sectionHeader('Font Weight Variants'));
+  const sectionHeader9 = new TextBlock('Font Weight Variants');
+  sectionHeader9.fontName = StandardFonts.HelveticaBold;
+  sectionHeader9.fontSize = 14;
+  sectionHeader9.textColor = Color.indigo600;
+  sectionHeader9.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader9);
   const normalStyle = new TextStyle();
   normalStyle.weight = FontWeight.Normal;
   const boldStyle = new TextStyle();
@@ -196,7 +234,12 @@ export function generate(): Document {
   doc.add(rt9);
 
   // ── 10. Justified rich text ───────────────────────────────────────────────
-  doc.add(sectionHeader('Justified Alignment'));
+  const sectionHeader10 = new TextBlock('Justified Alignment');
+  sectionHeader10.fontName = StandardFonts.HelveticaBold;
+  sectionHeader10.fontSize = 14;
+  sectionHeader10.textColor = Color.indigo600;
+  sectionHeader10.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader10);
   const rt10 = new RichText();
   rt10.alignment = TextAlignment.Justify;
   rt10.margin = new Thickness(0, 0, 0, 16);
@@ -216,7 +259,12 @@ export function generate(): Document {
   divider.color = Color.slate300;
   divider.thickness = 1;
   doc.add(divider);
-  doc.add(sectionHeader('Practical Example: Legal Disclaimer'));
+  const sectionHeader11 = new TextBlock('Practical Example: Legal Disclaimer');
+  sectionHeader11.fontName = StandardFonts.HelveticaBold;
+  sectionHeader11.fontSize = 14;
+  sectionHeader11.textColor = Color.indigo600;
+  sectionHeader11.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader11);
 
   const disclaimerDefault = new TextStyle();
   disclaimerDefault.fontFamily = 'Helvetica';
@@ -241,7 +289,12 @@ export function generate(): Document {
   doc.add(rt11);
 
   // ── 12. Callback-based styling ────────────────────────────────────────────
-  doc.add(sectionHeader('Callback-based Styling'));
+  const sectionHeader12 = new TextBlock('Callback-based Styling');
+  sectionHeader12.fontName = StandardFonts.HelveticaBold;
+  sectionHeader12.fontSize = 14;
+  sectionHeader12.textColor = Color.indigo600;
+  sectionHeader12.margin = new Thickness(0, 12, 0, 6);
+  doc.add(sectionHeader12);
   const rt12 = new RichText();
   rt12.margin = new Thickness(0, 0, 0, 16);
   rt12

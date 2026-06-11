@@ -37,6 +37,23 @@ export class PdfResourceRegistry {
   }
 
   /**
+   * When true, standard-14 font references are substituted with embedded
+   * Liberation TTFs even without a PDF/A claim. PDF/UA-1 mandates font
+   * embedding (ISO 14289-1, veraPDF rule 7.21.4.1) independently of PDF/A,
+   * so the serializer sets this for tagged output. PDF/A implies it via
+   * `conformance`.
+   */
+  public embedStandardFonts = false;
+
+  /**
+   * Whether standard-14 names should be resolved to embedded TTFs. True for
+   * any PDF/A conformance, or when {@link embedStandardFonts} is set (PDF/UA-1).
+   */
+  private get shouldEmbedStandardFonts(): boolean {
+    return this._conformance !== PdfAConformance.None || this.embedStandardFonts;
+  }
+
+  /**
    * Collector that receives recoverable failures encountered while loading
    * or embedding resources. Wired by Document; defaults to a private
    * collector so non-Document callers still get a usable instance.
@@ -66,7 +83,7 @@ export class PdfResourceRegistry {
       return this.embeddedFonts.get(virtualKey)!.resourceName;
     }
 
-    if (this.pdfAEnabled) {
+    if (this.shouldEmbedStandardFonts) {
       // 1. Try FontManager (bytes-based - works in all environments)
       const bytes = FontManager.getBytesForStandardFont(fontIdentifier);
       if (bytes) {

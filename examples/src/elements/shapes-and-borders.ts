@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   TextBlock,
   TextStyle,
   HorizontalStack,
@@ -17,54 +16,22 @@ import {
   BorderColors,
   StandardFonts,
   WidthDistribution,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-function sectionHeader(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 14;
-  b.textColor = Color.indigo600;
-  b.margin = new Thickness(0, 12, 0, 6);
-  return b;
-}
-
-function card(title: string, description: string, accent: Color, bg: Color): Container {
-  const stack = new VerticalStack();
-
-  const t = new TextBlock(title);
-  t.fontName = StandardFonts.HelveticaBold;
-  t.fontSize = 14;
-  t.textColor = accent;
-  t.margin = new Thickness(0, 0, 0, 6);
-  stack.addChild(t);
-
-  const d = new TextBlock(description);
-  d.fontName = StandardFonts.Helvetica;
-  d.fontSize = 10;
-  d.textColor = Color.slate600;
-  stack.addChild(d);
-
-  const c = new Container();
-  c.backgroundColor = bg;
-  c.border = new Border(1);
-  c.borderColors = new BorderColors(accent);
-  c.cornerRadius = 10;
-  c.padding = new Thickness(14);
-  c.child = stack;
-  return c;
-}
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Rounded Rectangles';
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Title ──
   const title = new TextBlock('Rounded Rectangles');
@@ -75,7 +42,12 @@ export function generate(): Document {
   doc.add(title);
 
   // ── Section 1: Basic rounded containers ──
-  doc.add(sectionHeader('Basic Rounded Containers'));
+  const basicHeader = new TextBlock('Basic Rounded Containers');
+  basicHeader.fontName = StandardFonts.HelveticaBold;
+  basicHeader.fontSize = 14;
+  basicHeader.textColor = Color.indigo600;
+  basicHeader.margin = new Thickness(0, 12, 0, 6);
+  doc.add(basicHeader);
 
   const box1Text = new TextBlock('A container with 8pt corner radius and a light blue background.');
   box1Text.fontName = StandardFonts.Helvetica;
@@ -104,7 +76,12 @@ export function generate(): Document {
   doc.add(box2);
 
   // ── Section 2: Rounded borders ──
-  doc.add(sectionHeader('Rounded Borders'));
+  const bordersHeader = new TextBlock('Rounded Borders');
+  bordersHeader.fontName = StandardFonts.HelveticaBold;
+  bordersHeader.fontSize = 14;
+  bordersHeader.textColor = Color.indigo600;
+  bordersHeader.margin = new Thickness(0, 12, 0, 6);
+  doc.add(bordersHeader);
 
   const strokeText = new TextBlock('A rounded border with no background fill. The stroke follows the curved path.');
   strokeText.fontName = StandardFonts.Helvetica;
@@ -136,33 +113,55 @@ export function generate(): Document {
   doc.add(alertBox);
 
   // ── Section 3: Card layout ──
-  doc.add(sectionHeader('Card Layout'));
+  const cardHeader = new TextBlock('Card Layout');
+  cardHeader.fontName = StandardFonts.HelveticaBold;
+  cardHeader.fontSize = 14;
+  cardHeader.textColor = Color.indigo600;
+  cardHeader.margin = new Thickness(0, 12, 0, 6);
+  doc.add(cardHeader);
 
   const cardRow = new HorizontalStack();
   cardRow.widthDistribution = WidthDistribution.Weighted;
   cardRow.spacing = 12;
   cardRow.margin = new Thickness(0, 0, 0, 12);
-  cardRow.addChild(
-    card('Feature A', 'Rounded corners make UI elements feel modern and approachable.', Color.blue500, Color.blue50),
-    1
-  );
-  cardRow.addChild(
-    card(
-      'Feature B',
-      'Bezier curves approximate perfect quarter-circle arcs.',
-      Color.purple500,
-      Color.fromHex('#faf5ff')
-    ),
-    1
-  );
-  cardRow.addChild(
-    card('Feature C', 'Works with backgrounds, borders, or both combined.', Color.teal500, Color.fromHex('#f0fdfa')),
-    1
-  );
+  for (const [cardTitle, description, accent, bg] of [
+    ['Feature A', 'Rounded corners make UI elements feel modern and approachable.', Color.blue500, Color.blue50],
+    ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', Color.purple500, Color.fromHex('#faf5ff')],
+    ['Feature C', 'Works with backgrounds, borders, or both combined.', Color.teal500, Color.fromHex('#f0fdfa')],
+  ] as [string, string, Color, Color][]) {
+    const stack = new VerticalStack();
+
+    const t = new TextBlock(cardTitle);
+    t.fontName = StandardFonts.HelveticaBold;
+    t.fontSize = 14;
+    t.textColor = accent;
+    t.margin = new Thickness(0, 0, 0, 6);
+    stack.addChild(t);
+
+    const d = new TextBlock(description);
+    d.fontName = StandardFonts.Helvetica;
+    d.fontSize = 10;
+    d.textColor = Color.slate600;
+    stack.addChild(d);
+
+    const c = new Container();
+    c.backgroundColor = bg;
+    c.border = new Border(1);
+    c.borderColors = new BorderColors(accent);
+    c.cornerRadius = 10;
+    c.padding = new Thickness(14);
+    c.child = stack;
+    cardRow.addChild(c, 1);
+  }
   doc.add(cardRow);
 
   // ── Section 4: Radius comparison ──
-  doc.add(sectionHeader('Radius Comparison'));
+  const radiusHeader = new TextBlock('Radius Comparison');
+  radiusHeader.fontName = StandardFonts.HelveticaBold;
+  radiusHeader.fontSize = 14;
+  radiusHeader.textColor = Color.indigo600;
+  radiusHeader.margin = new Thickness(0, 12, 0, 6);
+  doc.add(radiusHeader);
 
   for (const r of [0, 4, 8, 12, 20, 30]) {
     const label = r === 0 ? 'CornerRadius = 0 (sharp corners, default)' : `CornerRadius = ${r}`;
@@ -187,7 +186,12 @@ export function generate(): Document {
   divider.color = Color.slate300;
   divider.thickness = 1;
   doc.add(divider);
-  doc.add(sectionHeader('Practical Examples'));
+  const practicalHeader = new TextBlock('Practical Examples');
+  practicalHeader.fontName = StandardFonts.HelveticaBold;
+  practicalHeader.fontSize = 14;
+  practicalHeader.textColor = Color.indigo600;
+  practicalHeader.margin = new Thickness(0, 12, 0, 6);
+  doc.add(practicalHeader);
 
   const banners: [string, string, string, string, boolean][] = [
     ['Success! Your document has been generated successfully.', '#dcfce7', '', '', false],

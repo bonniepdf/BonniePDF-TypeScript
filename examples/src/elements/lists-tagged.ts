@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -14,33 +13,8 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
-
-function h1(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 1;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 22;
-  h.textColor = Color.slate800;
-  h.margin = new Thickness(0, 0, 0, 10);
-  return h;
-}
-
-function h2(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 14;
-  h.textColor = Color.slate700;
-  h.margin = new Thickness(0, 14, 0, 6);
-  return h;
-}
-
-function para(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.margin = new Thickness(0, 0, 0, 8);
-  return b;
-}
 
 /**
  * PDF/UA-1 tagged list example.
@@ -57,20 +31,36 @@ export function generate(): Document {
   doc.metadata.subject = 'PDF/UA-1 tagged ordered and unordered lists with nested items.';
   doc.metadata.keywords = 'pdf, pdf/ua, accessibility, lists, ordered, unordered';
 
-  doc.settings = new DocumentSettings();
-  doc.settings.version = PdfVersion.Pdf17;
-  doc.settings.accessibility = AccessibilityMode.PdfUa1;
-  doc.settings.language = 'en-GB';
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  const settings = new DocumentSettings();
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate700);
+  doc.settings = settings;
 
   // ── Ordered list ──────────────────────────────────────────────────────────
 
-  doc.add(h1('Ordered Lists'));
-  doc.add(
-    para('Each numbered item maps to an LI structure element containing a Lbl (the number) and an LBody (the text).')
-  );
+  const orderedHeading = new Heading('Ordered Lists');
+  orderedHeading.level = 1;
+  orderedHeading.fontName = StandardFonts.HelveticaBold;
+  orderedHeading.fontSize = 22;
+  orderedHeading.textColor = Color.slate800;
+  orderedHeading.margin = new Thickness(0, 0, 0, 10);
+  doc.add(orderedHeading);
 
-  doc.add(h2('Decimal numbered'));
+  const orderedIntro = new TextBlock(
+    'Each numbered item maps to an LI structure element containing a Lbl (the number) and an LBody (the text).'
+  );
+  orderedIntro.margin = new Thickness(0, 0, 0, 8);
+  doc.add(orderedIntro);
+
+  const decimalHeading = new Heading('Decimal numbered');
+  decimalHeading.level = 2;
+  decimalHeading.fontName = StandardFonts.HelveticaBold;
+  decimalHeading.fontSize = 14;
+  decimalHeading.textColor = Color.slate700;
+  decimalHeading.margin = new Thickness(0, 14, 0, 6);
+  doc.add(decimalHeading);
   const decimalList = new OrderedList();
   decimalList.numberFormat = ListNumberFormat.Decimal;
   decimalList.fontSize = 12;
@@ -81,7 +71,13 @@ export function generate(): Document {
   decimalList.addItem('Validate the output with VeraPDF before publishing.');
   doc.add(decimalList);
 
-  doc.add(h2('Roman numerals with nested sub-list'));
+  const romanHeading = new Heading('Roman numerals with nested sub-list');
+  romanHeading.level = 2;
+  romanHeading.fontName = StandardFonts.HelveticaBold;
+  romanHeading.fontSize = 14;
+  romanHeading.textColor = Color.slate700;
+  romanHeading.margin = new Thickness(0, 14, 0, 6);
+  doc.add(romanHeading);
   const romanList = new OrderedList();
   romanList.numberFormat = ListNumberFormat.UpperRoman;
   romanList.fontSize = 12;
@@ -104,10 +100,27 @@ export function generate(): Document {
 
   // ── Unordered list ────────────────────────────────────────────────────────
 
-  doc.add(h1('Unordered Lists'));
-  doc.add(para('Bullet items follow the same L > LI > Lbl + LBody tree structure as numbered lists.'));
+  const unorderedHeading = new Heading('Unordered Lists');
+  unorderedHeading.level = 1;
+  unorderedHeading.fontName = StandardFonts.HelveticaBold;
+  unorderedHeading.fontSize = 22;
+  unorderedHeading.textColor = Color.slate800;
+  unorderedHeading.margin = new Thickness(0, 0, 0, 10);
+  doc.add(unorderedHeading);
 
-  doc.add(h2('Disc bullets'));
+  const unorderedIntro = new TextBlock(
+    'Bullet items follow the same L > LI > Lbl + LBody tree structure as numbered lists.'
+  );
+  unorderedIntro.margin = new Thickness(0, 0, 0, 8);
+  doc.add(unorderedIntro);
+
+  const discHeading = new Heading('Disc bullets');
+  discHeading.level = 2;
+  discHeading.fontName = StandardFonts.HelveticaBold;
+  discHeading.fontSize = 14;
+  discHeading.textColor = Color.slate700;
+  discHeading.margin = new Thickness(0, 14, 0, 6);
+  doc.add(discHeading);
   const discList = new UnorderedList();
   discList.bulletStyle = BulletStyle.Disc;
   discList.fontSize = 12;
@@ -117,7 +130,13 @@ export function generate(): Document {
   discList.addItem('Nested lists are announced with their own list depth.');
   doc.add(discList);
 
-  doc.add(h2('Square bullets with nested sub-list'));
+  const squareHeading = new Heading('Square bullets with nested sub-list');
+  squareHeading.level = 2;
+  squareHeading.fontName = StandardFonts.HelveticaBold;
+  squareHeading.fontSize = 14;
+  squareHeading.textColor = Color.slate700;
+  squareHeading.margin = new Thickness(0, 14, 0, 6);
+  doc.add(squareHeading);
   const squareList = new UnorderedList();
   squareList.bulletStyle = BulletStyle.Square;
   squareList.fontSize = 12;

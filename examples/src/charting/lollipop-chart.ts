@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   AccessibilityMode,
   PageOrientation,
   TextBlock,
@@ -20,15 +19,17 @@ import {
   ChartDataPoint,
   ChartElement,
   LollipopChart,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const C_PINK = '#ec4899';
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -53,7 +54,6 @@ export function generate(): Document {
   metadata.subject = 'Lollipop chart example - stems with circular heads, a clear minimal bar alternative';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
   title.fontSize = 24;

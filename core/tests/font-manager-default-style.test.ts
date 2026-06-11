@@ -5,6 +5,7 @@ import { FontManager } from '../src/Typography/FontManager';
 import { TextStyle } from '../src/Elements/Text/TextStyle';
 import { Color } from '../src/Core/Color';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
+import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { pdfToText } from './helpers/test-base';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -63,6 +64,47 @@ describe('this feature Stage 2 - FontManager', () => {
     // PDF/A compliance markers are present when fonts are embedded
     expect(pdf).toContain('/OutputIntents');
     expect(pdf).toContain('/GTS_PDFA1');
+    doc.dispose();
+  });
+});
+
+describe('PDF/UA-1 font embedding (veraPDF 7.21.4.1)', () => {
+  beforeEach(() => FontManager.clear());
+  afterEach(() => FontManager.clear());
+
+  it('embeds standard-14 fonts in PDF/UA-1 output even without a PDF/A claim', () => {
+    // PDF/UA-1 mandates font embedding independently of PDF/A. A tagged
+    // document that uses Helvetica must substitute the embedded Liberation
+    // face, not reference an unembedded /Type1 standard font.
+    FontManager.autoRegisterBundledFonts(fontsDir);
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    const tb = new TextBlock('Accessible text');
+    tb.fontName = 'Helvetica';
+    tb.fontSize = 12;
+    doc.add(tb);
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/FontFile2'); // embedded TrueType program
+    expect(pdf).toContain('LiberationSans'); // metric-compatible substitute
+    expect(pdf).not.toContain('/BaseFont /Helvetica'); // no unembedded standard-14
+    doc.dispose();
+  });
+
+  it('leaves standard-14 fonts unembedded for a plain document (no PDF/A, no PDF/UA)', () => {
+    // Regression guard: the UA-1 embedding path must not leak into ordinary
+    // documents, where standard-14 fonts are legitimately referenced without
+    // embedding.
+    FontManager.autoRegisterBundledFonts(fontsDir);
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    const tb = new TextBlock('Plain text');
+    tb.fontName = 'Helvetica';
+    tb.fontSize = 12;
+    doc.add(tb);
+    const pdf = pdfToText(doc.generateBytes());
+    expect(pdf).toContain('/BaseFont /Helvetica');
+    expect(pdf).not.toContain('/FontFile2');
     doc.dispose();
   });
 });

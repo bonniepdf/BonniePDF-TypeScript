@@ -13,43 +13,20 @@ import {
   // withEncryption128,  // 128-bit RC4 alternative
   // withEncryption40,   // 40-bit RC4 (legacy, not recommended)
   // withPassword,       // simple one-liner - defaults to 128-bit RC4
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-
-function pageTitle(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 24;
-  b.textColor = Color.blue700;
-  return b;
-}
-
-function body(text: string, margin = true): TextBlock {
-  const b = new TextBlock(text);
-  b.fontSize = 12;
-  if (margin) b.margin = new Thickness(0, 20, 0, 10);
-  return b;
-}
-
-function bullet(text: string, allowed: boolean): TextBlock {
-  const b = new TextBlock(text);
-  b.textColor = allowed ? Color.green600 : Color.red600;
-  return b;
-}
-
-function label(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontSize = 14;
-  b.margin = new Thickness(0, 20, 0, 5);
-  return b;
-}
 
 // ── Example ───────────────────────────────────────────────────────────────
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 60);
   settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.None;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
+  // PDF/A is intentionally not claimed because archival PDF/A output cannot be encrypted.
 
   // AES-256 encryption (PDF 1.7 required). Key derivation is async via
   // SubtleCrypto; actual stream encryption happens synchronously during
@@ -71,22 +48,31 @@ export function generate(): Document {
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   // ── Page 1: AES-256 password protection ──
-  doc.add(pageTitle('AES-256 Password Protection'));
-  doc.add(
-    body(
-      'This document is encrypted with AES-256 encryption (V5, R6). ' + 'You needed to enter the password to open it.'
-    )
+  const aesPasswordProtectionText = new TextBlock('AES-256 Password Protection');
+  aesPasswordProtectionText.fontName = StandardFonts.HelveticaBold;
+  aesPasswordProtectionText.fontSize = 24;
+  aesPasswordProtectionText.textColor = Color.blue700;
+  doc.add(aesPasswordProtectionText);
+  const documentIsEncryptedAesText = new TextBlock(
+    'This document is encrypted with AES-256 encryption (V5, R6). ' + 'You needed to enter the password to open it.'
   );
+  documentIsEncryptedAesText.fontSize = 12;
+  documentIsEncryptedAesText.margin = new Thickness(0, 20, 0, 10);
+  doc.add(documentIsEncryptedAesText);
 
   const pwd = new TextBlock('Password: demo123');
   pwd.fontSize = 14;
   pwd.textColor = Color.slate700;
   doc.add(pwd);
 
-  doc.add(body('Printing and copying are allowed, but modification and annotation are restricted.'));
+  const printingCopyingAllowedButModificationText = new TextBlock(
+    'Printing and copying are allowed, but modification and annotation are restricted.'
+  );
+  printingCopyingAllowedButModificationText.fontSize = 12;
+  printingCopyingAllowedButModificationText.margin = new Thickness(0, 20, 0, 10);
+  doc.add(printingCopyingAllowedButModificationText);
 
   const snippet1 = new TextBlock(
     'API usage:\n' +
@@ -111,15 +97,35 @@ export function generate(): Document {
   // ── Page 2: User + owner passwords with permissions ──
   doc.addPage();
 
-  doc.add(pageTitle('Permission Restrictions'));
-  doc.add(body('Encryption supports granular permission flags via user and owner passwords:'));
+  const permissionRestrictionsText = new TextBlock('Permission Restrictions');
+  permissionRestrictionsText.fontName = StandardFonts.HelveticaBold;
+  permissionRestrictionsText.fontSize = 24;
+  permissionRestrictionsText.textColor = Color.blue700;
+  doc.add(permissionRestrictionsText);
+  const encryptionSupportsGranularPermissionFlagsText = new TextBlock(
+    'Encryption supports granular permission flags via user and owner passwords:'
+  );
+  encryptionSupportsGranularPermissionFlagsText.fontSize = 12;
+  encryptionSupportsGranularPermissionFlagsText.margin = new Thickness(0, 20, 0, 10);
+  doc.add(encryptionSupportsGranularPermissionFlagsText);
 
-  doc.add(bullet('  - Printing: Allowed', true));
-  doc.add(bullet('  - Copying: Allowed', true));
-  doc.add(bullet('  - Modifying: Denied', false));
-  doc.add(bullet('  - Annotations: Denied', false));
+  const printingAllowedText = new TextBlock('  - Printing: Allowed');
+  printingAllowedText.textColor = Color.green600;
+  doc.add(printingAllowedText);
+  const copyingAllowedText = new TextBlock('  - Copying: Allowed');
+  copyingAllowedText.textColor = Color.green600;
+  doc.add(copyingAllowedText);
+  const modifyingDeniedText = new TextBlock('  - Modifying: Denied');
+  modifyingDeniedText.textColor = Color.red600;
+  doc.add(modifyingDeniedText);
+  const annotationsDeniedText = new TextBlock('  - Annotations: Denied');
+  annotationsDeniedText.textColor = Color.red600;
+  doc.add(annotationsDeniedText);
 
-  doc.add(label('Passwords:'));
+  const passwordsText = new TextBlock('Passwords:');
+  passwordsText.fontSize = 14;
+  passwordsText.margin = new Thickness(0, 20, 0, 5);
+  doc.add(passwordsText);
   doc.add(new TextBlock('  User password: user'));
   doc.add(new TextBlock('  Owner password: owner (unlocks all permissions)'));
 
@@ -141,17 +147,36 @@ export function generate(): Document {
   // ── Page 3: Owner password only (restricted actions) ──
   doc.addPage();
 
-  doc.add(pageTitle('Owner-Only Restrictions'));
-  doc.add(
-    body('This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.')
+  const ownerOnlyRestrictionsText = new TextBlock('Owner-Only Restrictions');
+  ownerOnlyRestrictionsText.fontName = StandardFonts.HelveticaBold;
+  ownerOnlyRestrictionsText.fontSize = 24;
+  ownerOnlyRestrictionsText.textColor = Color.blue700;
+  doc.add(ownerOnlyRestrictionsText);
+  const pageDemonstratesAnOwnerPasswordText = new TextBlock(
+    'This page demonstrates an owner-password-only document: it opens freely but most actions are restricted.'
   );
-  doc.add(body('Restricted permissions in this scenario:', false));
+  pageDemonstratesAnOwnerPasswordText.fontSize = 12;
+  pageDemonstratesAnOwnerPasswordText.margin = new Thickness(0, 20, 0, 10);
+  doc.add(pageDemonstratesAnOwnerPasswordText);
+  const restrictedPermissionsInScenarioText = new TextBlock('Restricted permissions in this scenario:');
+  restrictedPermissionsInScenarioText.fontSize = 12;
+  doc.add(restrictedPermissionsInScenarioText);
 
-  doc.add(bullet('  - Low-quality printing: Allowed', true));
-  doc.add(bullet('  - Accessibility extraction: Allowed', true));
-  doc.add(bullet('  - Copying text: Denied', false));
-  doc.add(bullet('  - Modifying: Denied', false));
-  doc.add(bullet('  - High-quality printing: Denied', false));
+  const lowQualityPrintingAllowedText = new TextBlock('  - Low-quality printing: Allowed');
+  lowQualityPrintingAllowedText.textColor = Color.green600;
+  doc.add(lowQualityPrintingAllowedText);
+  const accessibilityExtractionAllowedText = new TextBlock('  - Accessibility extraction: Allowed');
+  accessibilityExtractionAllowedText.textColor = Color.green600;
+  doc.add(accessibilityExtractionAllowedText);
+  const copyingTextDeniedText = new TextBlock('  - Copying text: Denied');
+  copyingTextDeniedText.textColor = Color.red600;
+  doc.add(copyingTextDeniedText);
+  const ownerModifyingDeniedText = new TextBlock('  - Modifying: Denied');
+  ownerModifyingDeniedText.textColor = Color.red600;
+  doc.add(ownerModifyingDeniedText);
+  const highQualityPrintingDeniedText = new TextBlock('  - High-quality printing: Denied');
+  highQualityPrintingDeniedText.textColor = Color.red600;
+  doc.add(highQualityPrintingDeniedText);
 
   const ownerPwd = new TextBlock('Owner password: secret');
   ownerPwd.fontSize = 14;

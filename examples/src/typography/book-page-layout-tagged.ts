@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
@@ -16,13 +15,15 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate800);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
@@ -32,7 +33,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, book, typography, times roman';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(Color.slate800);
 
   // ── Chapter heading ──────────────────────────────────────────────────────
 

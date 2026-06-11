@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   AccessibilityMode,
   PageOrientation,
   TextBlock,
@@ -20,30 +19,19 @@ import {
   ChartDataPoint,
   ChartElement,
   LineChart,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function makeSeries(values: number[], color: string, name: string): ChartSeries {
-  const s = new ChartSeries();
-  s.color = Color.fromHex(color);
-  s.name = name;
-  s.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
-  });
-  return s;
-}
 
 export function generate(): Document {
   const year = new Date().getFullYear();
 
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -68,7 +56,6 @@ export function generate(): Document {
   metadata.subject = `Year-over-year revenue comparison - ${year - 1} vs ${year} on a shared axis`;
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Multi-Series Line Chart: Year-over-Year Comparison');
   title.fontSize = 24;
@@ -86,18 +73,27 @@ export function generate(): Document {
 
   const data = new ChartData();
   data.title = 'Year-over-Year Revenue Comparison';
-  data.series = [
-    makeSeries(
-      [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000],
-      '#4f46e5',
-      String(year - 1)
-    ),
-    makeSeries(
-      [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000],
-      '#7c3aed',
-      String(year)
-    ),
-  ];
+  const previousYear = new ChartSeries();
+  previousYear.color = Color.fromHex('#4f46e5');
+  previousYear.name = String(year - 1);
+  previousYear.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000][i];
+    return p;
+  });
+
+  const currentYear = new ChartSeries();
+  currentYear.color = Color.fromHex('#7c3aed');
+  currentYear.name = String(year);
+  currentYear.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000][i];
+    return p;
+  });
+
+  data.series = [previousYear, currentYear];
   data.yAxis.prefix = '£';
   data.yAxis.maxValue = 150000;
   data.yAxis.stepCount = 5;

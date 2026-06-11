@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   PdfSize,
   PageOrientation,
@@ -15,6 +14,7 @@ import {
   Color,
   Thickness,
   StandardFonts,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const FIRST_NAMES = [
@@ -131,9 +131,10 @@ const SECTIONS: [string, string][] = [
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 50);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-US';
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Flow Architecture Demo';
@@ -141,7 +142,6 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates tables with repeating headers and text overflow';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   // === Section 1: Title ===
   const mainTitle = new TextBlock('Employee Directory & Company Overview');
@@ -180,20 +180,22 @@ export function generate(): Document {
   table.headerTextColor = Color.white;
   table.cellPadding = 8;
 
-  const mkCell = (text: string, bold = false): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-    b.fontSize = bold ? 10 : 9;
-    return b;
-  };
-
-  table.addHeader(
-    mkCell('ID', true),
-    mkCell('Full Name', true),
-    mkCell('Department', true),
-    mkCell('Position', true),
-    mkCell('Start Date', true)
-  );
+  const idText = new TextBlock('ID');
+  idText.fontName = StandardFonts.HelveticaBold;
+  idText.fontSize = 10;
+  const fullNameText = new TextBlock('Full Name');
+  fullNameText.fontName = StandardFonts.HelveticaBold;
+  fullNameText.fontSize = 10;
+  const departmentText = new TextBlock('Department');
+  departmentText.fontName = StandardFonts.HelveticaBold;
+  departmentText.fontSize = 10;
+  const positionText = new TextBlock('Position');
+  positionText.fontName = StandardFonts.HelveticaBold;
+  positionText.fontSize = 10;
+  const startDateText = new TextBlock('Start Date');
+  startDateText.fontName = StandardFonts.HelveticaBold;
+  startDateText.fontSize = 10;
+  table.addHeader(idText, fullNameText, departmentText, positionText, startDateText);
 
   for (let i = 1; i <= 150; i++) {
     const firstName = FIRST_NAMES[(i - 1) % FIRST_NAMES.length];
@@ -204,15 +206,25 @@ export function generate(): Document {
     const startMonth = ((i * 5) % 12) + 1;
     const rowBg = i % 2 === 0 ? Color.slate50 : Color.white;
 
-    const id = mkCell(String(i).padStart(4, '0'));
+    const id = new TextBlock(String(i).padStart(4, '0'));
+    id.fontName = StandardFonts.Helvetica;
+    id.fontSize = 9;
     id.textColor = Color.slate600;
-    const name = mkCell(`${firstName} ${lastName}`);
+    const name = new TextBlock(`${firstName} ${lastName}`);
+    name.fontName = StandardFonts.Helvetica;
+    name.fontSize = 9;
     name.textColor = Color.slate800;
-    const dept = mkCell(department);
+    const dept = new TextBlock(department);
+    dept.fontName = StandardFonts.Helvetica;
+    dept.fontSize = 9;
     dept.textColor = Color.slate600;
-    const pos = mkCell(position);
+    const pos = new TextBlock(position);
+    pos.fontName = StandardFonts.Helvetica;
+    pos.fontSize = 9;
     pos.textColor = Color.slate600;
-    const date = mkCell(`${String(startMonth).padStart(2, '0')}/${startYear}`);
+    const date = new TextBlock(`${String(startMonth).padStart(2, '0')}/${startYear}`);
+    date.fontName = StandardFonts.Helvetica;
+    date.fontSize = 9;
     date.textColor = Color.slate500;
 
     table.addRowRow(TableRow.fromElements(id, name, dept, pos, date).withBackground(rowBg));

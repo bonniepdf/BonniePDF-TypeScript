@@ -2,13 +2,13 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextStyle,
   Heading,
   Color,
   Thickness,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const FONT = '/fonts/NotoSans-Regular.ttf';
@@ -17,9 +17,10 @@ const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Custom Fonts - Tagged (PDF/UA-1)';
@@ -28,7 +29,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, fonts, unicode, truetype';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate600);
 
   const h1 = new Heading('TrueType Font Embedding - PDF/UA-1');
   h1.tocIdentifier = 'intro';
@@ -60,18 +60,26 @@ export function generate(): Document {
   h2Symbols.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Symbols);
 
-  const symBlock = (text: string): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = FONT;
-    b.fontSize = 11;
-    b.textColor = Color.slate600;
-    b.margin = new Thickness(0, 0, 0, 4);
-    return b;
-  };
-
-  doc.add(symBlock('• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)'));
-  doc.add(symBlock('– En-dash (U+2013)  - Em-dash (U+2014)'));
-  doc.add(symBlock('± Plus-minus  × Multiply  ÷ Divide'));
+  const symbolLine1 = new TextBlock(
+    '• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)'
+  );
+  symbolLine1.fontName = FONT;
+  symbolLine1.fontSize = 11;
+  symbolLine1.textColor = Color.slate600;
+  symbolLine1.margin = new Thickness(0, 0, 0, 4);
+  doc.add(symbolLine1);
+  const symbolLine2 = new TextBlock('– En-dash (U+2013)  - Em-dash (U+2014)');
+  symbolLine2.fontName = FONT;
+  symbolLine2.fontSize = 11;
+  symbolLine2.textColor = Color.slate600;
+  symbolLine2.margin = new Thickness(0, 0, 0, 4);
+  doc.add(symbolLine2);
+  const symbolLine3 = new TextBlock('± Plus-minus  × Multiply  ÷ Divide');
+  symbolLine3.fontName = FONT;
+  symbolLine3.fontSize = 11;
+  symbolLine3.textColor = Color.slate600;
+  symbolLine3.margin = new Thickness(0, 0, 0, 4);
+  doc.add(symbolLine3);
 
   // ── Currency Symbols ──────────────────────────────────────────────────────
 
@@ -102,18 +110,24 @@ export function generate(): Document {
   h2Math.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Math);
 
-  const mathBlock = (text: string): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = MATH_FONT;
-    b.fontSize = 11;
-    b.textColor = Color.slate600;
-    b.margin = new Thickness(0, 0, 0, 4);
-    return b;
-  };
-
-  doc.add(mathBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪'));
-  doc.add(mathBlock('≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity'));
-  doc.add(mathBlock('∑ Sum  ∏ Product  √ Root  ∫ Integral'));
+  const mathLine1 = new TextBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪');
+  mathLine1.fontName = MATH_FONT;
+  mathLine1.fontSize = 11;
+  mathLine1.textColor = Color.slate600;
+  mathLine1.margin = new Thickness(0, 0, 0, 4);
+  doc.add(mathLine1);
+  const mathLine2 = new TextBlock('≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity');
+  mathLine2.fontName = MATH_FONT;
+  mathLine2.fontSize = 11;
+  mathLine2.textColor = Color.slate600;
+  mathLine2.margin = new Thickness(0, 0, 0, 4);
+  doc.add(mathLine2);
+  const mathLine3 = new TextBlock('∑ Sum  ∏ Product  √ Root  ∫ Integral');
+  mathLine3.fontName = MATH_FONT;
+  mathLine3.fontSize = 11;
+  mathLine3.textColor = Color.slate600;
+  mathLine3.margin = new Thickness(0, 0, 0, 4);
+  doc.add(mathLine3);
 
   // ── Dingbats (NotoSansSymbols2) ───────────────────────────────────────────
 
@@ -126,16 +140,12 @@ export function generate(): Document {
   h2Dingbats.margin = new Thickness(0, 10, 0, 6);
   doc.add(h2Dingbats);
 
-  const dingBlock = (text: string): TextBlock => {
-    const b = new TextBlock(text);
-    b.fontName = SYMBOLS_FONT;
-    b.fontSize = 11;
-    b.textColor = Color.slate600;
-    b.margin = new Thickness(0, 0, 0, 4);
-    return b;
-  };
-
-  doc.add(dingBlock('✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club'));
+  const dingbatLine = new TextBlock('✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club');
+  dingbatLine.fontName = SYMBOLS_FONT;
+  dingbatLine.fontSize = 11;
+  dingbatLine.textColor = Color.slate600;
+  dingbatLine.margin = new Thickness(0, 0, 0, 4);
+  doc.add(dingbatLine);
 
   // ── Greek Letters ─────────────────────────────────────────────────────────
 

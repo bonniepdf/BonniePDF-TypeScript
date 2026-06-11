@@ -70,6 +70,11 @@ export class PdfDocumentSerializer {
     ctx.resources.diagnostics = this.diagnostics;
     ctx.resources.conformance = settings.conformance;
 
+    // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
+    // independently of any PDF/A claim - substitute embedded Liberation for
+    // the standard-14 references in tagged output too.
+    ctx.resources.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
+
     // PDF/UA tagging context - shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).

@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   TextBlock,
   TextStyle,
   TextElementBase,
@@ -11,12 +10,16 @@ import {
   Thickness,
   StandardFonts,
   Placeholders,
+  PdfAConformance,
+  AccessibilityMode,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
@@ -32,7 +35,6 @@ export function generate(): Document {
   metadata.subject = 'Demonstrates text flowing across page boundaries';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(Color.slate700);
 
   const title = new TextBlock('Long Text Document');
   title.fontName = StandardFonts.HelveticaBold;

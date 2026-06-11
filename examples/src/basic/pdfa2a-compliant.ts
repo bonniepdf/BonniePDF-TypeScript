@@ -2,7 +2,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   PdfAConformance,
   AccessibilityMode,
   TextBlock,
@@ -40,13 +39,13 @@ export function generate(): Document {
   doc.metadata.keywords = 'pdf, pdf/a-2a, pdf/ua, accessibility, archival, BonniePDF';
 
   doc.settings = new DocumentSettings();
+  doc.settings.conformance = PdfAConformance.PdfA2a;
+  doc.settings.accessibility = AccessibilityMode.PdfUa1;
+  doc.settings.language = 'en-GB';
   // Conformance is the source of truth. PdfA2a auto-upgrades version
   // to PDF 1.7 and triggers all the PDF/A emission machinery.
-  doc.settings.conformance = PdfAConformance.PdfA2a;
   // "a" levels require PDF/UA-1 tagging.
-  doc.settings.accessibility = AccessibilityMode.PdfUa1;
   // BCP-47 tag - required for PDF/UA-1.
-  doc.settings.language = 'en-GB';
 
   const h1 = new Heading('PDF/A-2a + PDF/UA-1');
   h1.level = 1;

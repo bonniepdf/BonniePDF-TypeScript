@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   AccessibilityMode,
   PageOrientation,
   TextBlock,
@@ -20,28 +19,17 @@ import {
   ChartDataPoint,
   GroupedBarChartElement,
   GroupedBarChart,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function makeSeries(values: number[], color: string, name: string): ChartSeries {
-  const s = new ChartSeries();
-  s.color = Color.fromHex(color);
-  s.name = name;
-  s.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
-  });
-  return s;
-}
-
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -66,7 +54,6 @@ export function generate(): Document {
   metadata.subject = 'Grouped bar chart example - three product lines compared across 12 months';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Grouped Bar Chart: Quarterly Revenue by Product Line');
   title.fontSize = 24;
@@ -86,11 +73,37 @@ export function generate(): Document {
   data.yAxis.prefix = '£';
   data.yAxis.maxValue = 15000;
   data.yAxis.stepCount = 5;
-  data.series = [
-    makeSeries([4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800], '#4f46e5', 'Electronics'),
-    makeSeries([3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200], '#f43f5e', 'Clothing'),
-    makeSeries([2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800], '#22c55e', 'Home & Garden'),
-  ];
+  const electronics = new ChartSeries();
+  electronics.color = Color.fromHex('#4f46e5');
+  electronics.name = 'Electronics';
+  electronics.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800][i];
+    return p;
+  });
+
+  const clothing = new ChartSeries();
+  clothing.color = Color.fromHex('#f43f5e');
+  clothing.name = 'Clothing';
+  clothing.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200][i];
+    return p;
+  });
+
+  const homeAndGarden = new ChartSeries();
+  homeAndGarden.color = Color.fromHex('#22c55e');
+  homeAndGarden.name = 'Home & Garden';
+  homeAndGarden.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800][i];
+    return p;
+  });
+
+  data.series = [electronics, clothing, homeAndGarden];
 
   const chart = new GroupedBarChart();
   chart.height = 380;

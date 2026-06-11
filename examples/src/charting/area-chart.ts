@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PdfVersion,
   AccessibilityMode,
   PageOrientation,
   TextBlock,
@@ -20,6 +19,7 @@ import {
   ChartDataPoint,
   ChartElement,
   AreaChart,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -27,9 +27,10 @@ const C_PURPLE = '#a855f7';
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   settings.footerTemplate = (pageNumber: number) => {
     const stack = new HorizontalStack();
@@ -54,7 +55,6 @@ export function generate(): Document {
   metadata.subject = 'Area chart example - filled area under the line with configurable opacity';
 
   const doc = new Document(settings, metadata);
-  doc.settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(Color.slate600);
 
   const title = new TextBlock('Area Chart: Monthly Sales Performance');
   title.fontSize = 24;

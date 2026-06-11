@@ -17,7 +17,6 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
-  PdfVersion,
   AccessibilityMode,
   TextBlock,
   TextAlignment,
@@ -25,6 +24,7 @@ import {
   Heading,
   Color,
   Thickness,
+  PdfAConformance,
 } from '@bonniepdf/core';
 
 // Liberation Sans - Regular for body text, Bold for headings.
@@ -39,9 +39,10 @@ const SAMPLE_TEXT =
 
 export function generate(): Document {
   const settings = new DocumentSettings();
-  settings.version = PdfVersion.Pdf17;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily(SANS).withSize(11).withColor(Color.slate700);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Alignment - Liberation Sans (PDF/UA-1)';
@@ -51,7 +52,6 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
   // Body text inherits Liberation Sans (Regular) via the default-style cascade.
-  doc.settings.defaultTextStyle = new TextStyle().withFamily(SANS).withSize(11).withColor(Color.slate700);
 
   const h1 = new Heading('Text Alignment Comparison');
   h1.tocIdentifier = 'intro';

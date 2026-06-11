@@ -1,9 +1,9 @@
 # BonniePDF for TypeScript and JavaScript
 
-[![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3)](https://www.npmjs.com/package/@bonniepdf/core)
-[![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core)](https://www.npmjs.com/package/@bonniepdf/core)
-[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](./core/LICENSE)
-[![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core)](https://bundlephobia.com/package/@bonniepdf/core)
+[![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3&style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
+[![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core?style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
+[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](./core/LICENSE)
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core?style=flat-square)](https://bundlephobia.com/package/@bonniepdf/core)
 ![coverage](./badges/coverage.svg)
 
 [Live examples](https://www.bonniepdf.dev/examples) | [Documentation](https://www.bonniepdf.dev) | [.NET package](https://www.nuget.org/packages/BonniePDF)

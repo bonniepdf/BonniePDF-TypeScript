@@ -358,7 +358,9 @@ export class SvgCanvas implements ICanvas {
 
   /** Returns the inner SVG markup without the enclosing `<svg>` element. */
   public getInnerSvg(): string {
-    return this.svgElements.join('');
+    // Newline-separated to match the .NET reference's per-element line output and to
+    // keep all three accessors (getInnerSvg/toSvg/getSvg) consistent.
+    return this.svgElements.join('\n');
   }
 
   /**
@@ -382,7 +384,7 @@ export class SvgCanvas implements ICanvas {
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
-    )}">${this.svgElements.join('')}</svg>`;
+    )}">${this.svgElements.join('\n')}</svg>`;
   }
 
   public getSvg(): string {

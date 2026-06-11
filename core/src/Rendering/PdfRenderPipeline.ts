@@ -227,7 +227,17 @@ export class PdfRenderPipeline {
       ctx.switchToPage(i);
 
       this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
+
+      // full-page background slot. Painted behind everything (even the
+      // watermark), ignoring margins. Prepended last so it ends up at the very
+      // back of the painter's-model stream.
+      this.renderPageSlot(ctx, settings.pageBackground, i, true);
+
       this.renderTemplate(ctx, settings, i);
+
+      // full-page foreground slot. Painted on top of everything, ignoring
+      // margins (DRAFT / CONFIDENTIAL overlays and stamps).
+      this.renderPageSlot(ctx, settings.pageForeground, i, false);
 
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
 
@@ -347,5 +357,62 @@ export class PdfRenderPipeline {
       ctx.currentX = originalX;
       ctx.currentY = originalY;
     }
+  }
+
+  /**
+   * Renders a full-page slot element (this feature page background / foreground). The
+   * slot spans the entire page and ignores the margins, so the element is
+   * rendered at the page origin (0, 0) with the full page width.
+   *
+   * When `isBackground` is true the slot's operators are prepended to the page
+   * stream so they paint behind all existing content (including the
+   * watermark); otherwise they are appended so they paint on top of everything.
+   */
+  private static renderPageSlot(
+    ctx: RenderContext,
+    template: ((pageNumber: number) => IElement | undefined) | undefined,
+    pageIndex: number,
+    isBackground: boolean
+  ): void {
+    if (!template) return;
+
+    const element = template(pageIndex + 1);
+    if (!element) return;
+
+    const originalCanvas = ctx.canvas;
+    const originalX = ctx.currentX;
+    const originalY = ctx.currentY;
+
+    // Fixed canvas accumulates the slot's operators in its own buffer so we can
+    // decide where to splice them into the page stream.
+    ctx.setCanvas(ctx.getFixedCanvas());
+
+    let slotOps = '';
+    try {
+      // Slots ignore margins: full page width, origin at the top-left corner.
+      const fullWidth = ctx.pageSize.width;
+      ctx.currentX = 0;
+      ctx.currentY = 0;
+
+      // Page slots are decorative chrome - keep them out of the structure tree
+      // (PDF/UA) by wrapping in an /Artifact marked-content section.
+      if (ctx.tagging) ctx.canvas.beginArtifact();
+      element.render(ctx, fullWidth);
+      if (ctx.tagging) ctx.canvas.endArtifact();
+
+      const fixedCanvas = ctx.canvas as any;
+      if (typeof fixedCanvas.getStream === 'function') {
+        slotOps = (fixedCanvas.getStream() as string[]).join('');
+      }
+    } finally {
+      ctx.setCanvas(originalCanvas);
+      ctx.currentX = originalX;
+      ctx.currentY = originalY;
+    }
+
+    if (!slotOps) return;
+    ctx.pages[pageIndex] = isBackground
+      ? slotOps + (ctx.pages[pageIndex] ?? '')
+      : (ctx.pages[pageIndex] ?? '') + slotOps;
   }
 }

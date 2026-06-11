@@ -58,6 +58,29 @@ export class PdfBuilder {
 
     this.settingsAction?.(settings);
 
+    // Wire the first page's slots into the document settings so they render on
+    // every page, mirroring the .NET PdfBuilder.
+    if (firstPage.headerSlot.child) {
+      const headerElement = firstPage.headerSlot.child;
+      settings.headerTemplate = () => headerElement;
+    }
+
+    if (firstPage.footerSlot.child) {
+      const footerElement = firstPage.footerSlot.child;
+      settings.footerTemplate = () => footerElement;
+    }
+
+    // full-page background / foreground slots.
+    if (firstPage.backgroundSlot.child) {
+      const backgroundElement = firstPage.backgroundSlot.child;
+      settings.pageBackground = () => backgroundElement;
+    }
+
+    if (firstPage.foregroundSlot.child) {
+      const foregroundElement = firstPage.foregroundSlot.child;
+      settings.pageForeground = () => foregroundElement;
+    }
+
     const doc = new Document(settings);
 
     this.metadataAction?.(doc.metadata);

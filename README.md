@@ -107,16 +107,16 @@ A synchronous fluent builder, `Pdf.create(builder => ...)`, is also available fo
 
 ## Features
 
-| Area                       | Capabilities                                                                                                                                                                   |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Text                       | 14 standard fonts plus embedded TTF/OTF (auto-subset); bold, italic, underline, strikethrough; left, centre, right, and justified; mixed inline styles; full Unicode and emoji |
-| Layout                     | Pages, margins and padding, vertical and horizontal stacks, containers, headers and footers, automatic multi-page flow                                                         |
-| Tables                     | Multi-column, cell styling, borders, repeating headers                                                                                                                         |
-| Charts                     | Bar, grouped bar, line, multi-series line, area, pie, lollipop, dot-plot, drawn as vectors with optional SVG export                                                            |
-| Images                     | PNG and JPEG with contain, cover, and fill modes plus alpha transparency; native QR codes                                                                                      |
-| Accessibility and archival | PDF/A-1b through A-3a and PDF/UA-1 tagged output, validated against veraPDF                                                                                                    |
-| Pages                      | All standard sizes, portrait and landscape, watermarks with opacity and rotation, page numbering                                                                               |
-| Platform                   | Browser (no WASM, no server), Node.js, Bun, Deno, edge runtimes                                                                                                                |
+| Area                       | Capabilities                                                                                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Text                       | 14 standard fonts plus embedded TTF/OTF (auto-subset); bold, italic, underline, strikethrough; left, centre, right, and justified; mixed inline styles; full Unicode and emoji           |
+| Layout                     | Pages, margins and padding, vertical and horizontal stacks, containers, headers and footers, inline z-stacking with `Layers`, automatic multi-page flow                                  |
+| Tables                     | Multi-column, cell styling, borders, repeating headers                                                                                                                                   |
+| Charts                     | Bar, grouped bar, line, multi-series line, area, pie, lollipop, dot-plot, drawn as vectors with optional SVG export                                                                      |
+| Images                     | PNG and JPEG with contain, cover, and fill modes plus alpha transparency; native QR codes                                                                                                |
+| Accessibility and archival | PDF/A-1b through A-3a and PDF/UA-1 tagged output, validated against veraPDF                                                                                                              |
+| Pages                      | All standard sizes, portrait and landscape, full-page background and foreground slots (bleed images, letterhead, "DRAFT" overlays), watermarks with opacity and rotation, page numbering |
+| Platform                   | Browser (no WASM, no server), Node.js, Bun, Deno, edge runtimes                                                                                                                          |
 
 Document encryption (passwords and permissions) exists in the API, but output encryption is not implemented yet: the generated file is not actually encrypted. It is being brought over from the .NET version.
 

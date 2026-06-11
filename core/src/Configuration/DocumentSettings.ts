@@ -33,6 +33,25 @@ export class DocumentSettings {
    */
   public footerTemplate?: (pageNumber: number) => _LocalIElement | undefined;
   /**
+   * Template function for the full-page **background** slot.
+   * Called with the page number (1-based); the returned element is painted
+   * *behind* all page content. Unlike {@link headerTemplate} /
+   * {@link footerTemplate}, the background slot spans the **entire page and
+   * ignores the margins**, so bleed images, scanned letterhead, and
+   * certificate backgrounds reach the page edge. Rendered at the page origin
+   * (0, 0) with the full page width available.
+   */
+  public pageBackground?: (pageNumber: number) => _LocalIElement | undefined;
+  /**
+   * Template function for the full-page **foreground** slot.
+   * Called with the page number (1-based); the returned element is painted
+   * *on top of* all page content (including headers and footers), making it
+   * ideal for "DRAFT"/"CONFIDENTIAL" overlays and stamps. Like
+   * {@link pageBackground} it spans the entire page and ignores the margins,
+   * rendered at the page origin (0, 0) with the full page width available.
+   */
+  public pageForeground?: (pageNumber: number) => _LocalIElement | undefined;
+  /**
    * The page size for the document (default: A4)
    */
   public pageSize: PdfSize;

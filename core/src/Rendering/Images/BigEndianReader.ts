@@ -76,4 +76,16 @@ export class BigEndianReader {
     this.position += count;
     return result;
   }
+
+  public readUInt8(): number {
+    return this.data[this.position++];
+  }
+
+  public getLength(): number {
+    return this.data.length;
+  }
+
+  public hasMore(): boolean {
+    return this.position < this.data.length;
+  }
 }

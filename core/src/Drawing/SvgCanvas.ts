@@ -1,4 +1,5 @@
 import { ICanvas } from './ICanvas';
+import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
@@ -205,7 +206,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}"${fillOpacityAttr} font-size="${this.n(
         fontSize
-      )}" font-family="${this.escapeAttr(fontFamily)}" text-anchor="${anchor}">${this.escapeXml(text)}</text>`
+      )}" font-family="${escapeAttr(fontFamily)}" text-anchor="${anchor}">${escapeXml(text)}</text>`
     );
   }
 
@@ -235,7 +236,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
         fontSize
-      )}" font-family="${this.escapeAttr(fontFamily)}" transform="${transform}">${this.escapeXml(text)}</text>`
+      )}" font-family="${escapeAttr(fontFamily)}" transform="${transform}">${escapeXml(text)}</text>`
     );
   }
 
@@ -279,13 +280,13 @@ export class SvgCanvas implements ICanvas {
     const spans: string[] = [];
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
-      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${this.escapeXml(word)}</tspan>`);
+      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${escapeXml(word)}</tspan>`);
       const wordWidth = FontMetrics.getStringWidth(word, fontFamily, fontSize);
       const spaceWidth = FontMetrics.getStringWidth(' ', fontFamily, fontSize);
       cursor += wordWidth + spaceWidth + extraPerSpace;
     }
     this.svgElements.push(
-      `<text fill="${hex}" font-size="${this.n(fontSize)}" font-family="${this.escapeAttr(
+      `<text fill="${hex}" font-size="${this.n(fontSize)}" font-family="${escapeAttr(
         fontFamily
       )}" xml:space="preserve">${spans.join('')}</text>`
     );
@@ -434,7 +435,7 @@ export class SvgCanvas implements ICanvas {
       if (hasPrev && font.hasKerning) {
         cursor += font.getKerning(prevGid, gid) * scale;
       }
-      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${this.escapeXml(rune)}</tspan>`);
+      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${escapeXml(rune)}</tspan>`);
       cursor += font.getGlyphWidth(gid) * scale;
       if (rune === ' ') cursor += extraPerSpace;
       prevGid = gid;
@@ -443,25 +444,12 @@ export class SvgCanvas implements ICanvas {
 
     const transformAttr = transform ? ` transform="${transform}"` : '';
     return (
-      `<text fill="${fillHex}" font-size="${this.n(fontSize)}" font-family="${this.escapeAttr(
+      `<text fill="${fillHex}" font-size="${this.n(fontSize)}" font-family="${escapeAttr(
         fontFamily
       )}" xml:space="preserve"${transformAttr}>` +
       spans.join('') +
       '</text>'
     );
-  }
-
-  private escapeXml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  }
-
-  private escapeAttr(text: string): string {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   }
 
   private calculateBaselineY(y: number, fontSize: number, _fontFamily: string): number {

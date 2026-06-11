@@ -96,7 +96,9 @@ export * from './Elements/Shapes/Circle';
 export * from './Elements/Shapes/Ellipse';
 export * from './Elements/Shapes/Line';
 export * from './Elements/Shapes/QRCode';
-
+export * from './Elements/Shapes/BarcodeSymbology';
+export * from './Elements/Shapes/BarcodeEncoder';
+export * from './Elements/Shapes/Barcode';
 export * from './Charts/Models/ChartDataPoint';
 export * from './Charts/Models/ChartSeries';
 export * from './Charts/Models/ChartData';
@@ -165,6 +167,7 @@ export * from './Extensions/DocumentSettingsExtensions';
 export * from './Extensions/HorizontalStackExtensions';
 export * from './Extensions/ImageExtensions';
 export * from './Extensions/QRCodeExtensions';
+export * from './Extensions/BarcodeExtensions';
 export * from './Extensions/SvgExportExtensions';
 export * from './Extensions/TableCellExtensions';
 export * from './Extensions/VerticalStackExtensions';
@@ -179,7 +182,7 @@ export * from './Rendering/Pdf/PdfSyntax';
 export * from './Rendering/Pdf/PdfOperators';
 export * from './Rendering/Pdf/PdfDrawing';
 export * from './Rendering/Images/ImageInfo';
-// BigEndianReader is also in ImageInfo.ts - use that export
+export * from './Rendering/Images/BigEndianReader';
 export * from './Rendering/Images/ImageLoader';
 export * from './Rendering/Images/ImageWriter';
 // Writers: one type per file, mirroring the .NET Rendering/Writers layout.

@@ -3,11 +3,17 @@ import { IElement } from '../../Elements/IElement';
 import { Container } from '../../Elements/Layout/Container';
 import { Spacer } from '../../Elements/Layout/Spacer';
 import { PageBreak } from '../../Elements/Layout/PageBreak';
+import { VerticalStack } from '../../Elements/Layout/VerticalStack';
+import { HorizontalStack } from '../../Elements/Layout/HorizontalStack';
+import { Table } from '../../Elements/Tables/Table';
 import { Image } from '../../Elements/Media/Image';
 import { Ellipse } from '../../Elements/Shapes/Ellipse';
 import { Line } from '../../Elements/Shapes/Line';
 import { QRCode } from '../../Elements/Shapes/QRCode';
+import { Barcode } from '../../Elements/Shapes/Barcode';
+import { BarcodeSymbology } from '../../Elements/Shapes/BarcodeSymbology';
 import { TextBlock } from '../../Elements/Text/TextBlock';
+import { RichText } from '../../Elements/Text/RichText';
 import { IContentContainer } from '../IContentContainer';
 import { IComponent } from '../IComponent';
 import { ColumnDescriptor } from '../Descriptors/ColumnDescriptor';
@@ -26,8 +32,7 @@ export class ContainerElementExtensions {
 
   /**
    * Adds a simple text element. Returns the TextBlock for further styling
-   * (font, size, color, etc.). For rich/multi-span text use the text descriptor
-   * and TextSpanDescriptor (.bold(), .fontSize(), .underline(), etc.).
+   * via existing TextBlockExtensions (.Bold(), .FontSize(), .AlignCenter(), etc.).
    */
   static text(c: IContentContainer, text: string): TextBlock {
     const textBlock = new TextBlock();
@@ -169,6 +174,16 @@ export class ContainerElementExtensions {
     return ContainerBridgeExtensions.elementTyped(c, qr);
   }
 
+  /**
+   * Adds a 1D barcode element (Code 128 by default).
+   */
+  static barcode(c: IContentContainer, value: string, symbology: BarcodeSymbology = BarcodeSymbology.Code128): Barcode {
+    const barcode = new Barcode();
+    barcode.value = value;
+    barcode.symbology = symbology;
+    return ContainerBridgeExtensions.elementTyped(c, barcode);
+  }
+
   // --- Raw Element Escape Hatch ---
 
   /**
@@ -246,6 +261,10 @@ export function ellipse(c: IContentContainer, width: number, height: number, col
 
 export function qrCode(c: IContentContainer, data: string, size?: number): QRCode {
   return ContainerElementExtensions.qrCode(c, data, size);
+}
+
+export function barcode(c: IContentContainer, value: string, symbology?: BarcodeSymbology): Barcode {
+  return ContainerElementExtensions.barcode(c, value, symbology);
 }
 
 export function rawElement(c: IContentContainer, element: IElement): void {

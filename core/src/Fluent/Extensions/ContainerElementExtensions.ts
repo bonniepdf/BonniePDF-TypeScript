@@ -3,15 +3,11 @@ import { IElement } from '../../Elements/IElement';
 import { Container } from '../../Elements/Layout/Container';
 import { Spacer } from '../../Elements/Layout/Spacer';
 import { PageBreak } from '../../Elements/Layout/PageBreak';
-import { VerticalStack } from '../../Elements/Layout/VerticalStack';
-import { HorizontalStack } from '../../Elements/Layout/HorizontalStack';
-import { Table } from '../../Elements/Tables/Table';
 import { Image } from '../../Elements/Media/Image';
 import { Ellipse } from '../../Elements/Shapes/Ellipse';
 import { Line } from '../../Elements/Shapes/Line';
 import { QRCode } from '../../Elements/Shapes/QRCode';
 import { TextBlock } from '../../Elements/Text/TextBlock';
-import { RichText } from '../../Elements/Text/RichText';
 import { IContentContainer } from '../IContentContainer';
 import { IComponent } from '../IComponent';
 import { ColumnDescriptor } from '../Descriptors/ColumnDescriptor';
@@ -30,7 +26,8 @@ export class ContainerElementExtensions {
 
   /**
    * Adds a simple text element. Returns the TextBlock for further styling
-   * via existing TextBlockExtensions (.Bold(), .FontSize(), .AlignCenter(), etc.).
+   * (font, size, color, etc.). For rich/multi-span text use the text descriptor
+   * and TextSpanDescriptor (.bold(), .fontSize(), .underline(), etc.).
    */
   static text(c: IContentContainer, text: string): TextBlock {
     const textBlock = new TextBlock();

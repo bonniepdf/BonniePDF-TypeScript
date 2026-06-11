@@ -1,5 +1,6 @@
 import { RichText } from '../../Elements/Text/RichText';
 import { TextStyle } from '../../Elements/Text/TextStyle';
+import { TextAlignment } from '../../Elements/Text/TextAlignment';
 import { TextElementBase } from '../../Elements/Text/TextElementBase';
 import { TextSpanDescriptor } from './TextSpanDescriptor';
 
@@ -10,6 +11,44 @@ import { TextSpanDescriptor } from './TextSpanDescriptor';
  */
 export class TextDescriptor {
   richText: RichText = new RichText();
+
+  /**
+   * Sets the paragraph alignment for the whole text block
+   * (Left, Center, Right, or Justify).
+   * @returns This descriptor for continued chaining.
+   */
+  align(alignment: TextAlignment): TextDescriptor {
+    this.richText.alignment = alignment;
+    return this;
+  }
+
+  /**
+   * Aligns the paragraph to the left (default).
+   */
+  alignLeft(): TextDescriptor {
+    return this.align(TextAlignment.Left);
+  }
+
+  /**
+   * Centers the paragraph.
+   */
+  alignCenter(): TextDescriptor {
+    return this.align(TextAlignment.Center);
+  }
+
+  /**
+   * Aligns the paragraph to the right.
+   */
+  alignRight(): TextDescriptor {
+    return this.align(TextAlignment.Right);
+  }
+
+  /**
+   * Justifies the paragraph (flush on both edges, except the last line).
+   */
+  justify(): TextDescriptor {
+    return this.align(TextAlignment.Justify);
+  }
 
   /**
    * Adds a text span with optional styling.

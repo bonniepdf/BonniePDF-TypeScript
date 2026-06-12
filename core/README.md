@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3)](https://www.npmjs.com/package/@bonniepdf/core)
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core)](https://www.npmjs.com/package/@bonniepdf/core)
 [![CI](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg)](./LICENSE)
+[![License](<https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg>)](./LICENSE)
 
 High-performance, zero-dependency PDF generation for TypeScript and JavaScript - runs in the **browser** and **Node.js**.
 
@@ -192,14 +192,17 @@ configurePlatform(new BrowserPlatformIO());
 
 ## License
 
-BonniePDF uses a **dual-license** model:
+BonniePDF is **source-available** (BonniePDF Community License 1.0) - not OSI open source. The full source
+is included.
 
-| Use case                                    | License                                             |
-| ------------------------------------------- | --------------------------------------------------- |
-| Personal projects                           | [Community](./LICENSE) - free                 |
-| Open source projects (OSI-approved license) | [Community](./LICENSE) - free                 |
-| Commercial / for-profit use                 | [Commercial License](https://bonniepdf.dev/license) |
-| Internal business tools                     | [Commercial License](https://bonniepdf.dev/license) |
+| Use case                                      | License                                             |
+| --------------------------------------------- | --------------------------------------------------- |
+| Individuals, non-profits, education           | [BonniePDF Community License 1.0](./LICENSE) - free       |
+| Commercial use under $1M USD annual revenue   | [BonniePDF Community License 1.0](./LICENSE) - free       |
+| Commercial use at or above $1M annual revenue | [Commercial License](https://bonniepdf.dev/license) |
+
+The only restriction, for everyone, is that you may not resell BonniePDF itself as
+a competing PDF library or PDF-generation service.
 
 Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for Commercial license details.
 

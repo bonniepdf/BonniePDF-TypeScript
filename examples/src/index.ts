@@ -36,6 +36,7 @@ import { generate as shapesAndBorders } from './elements/shapes-and-borders';
 import { generate as colorPalette } from './elements/color-palette';
 import { generate as qrCodes } from './elements/qr-codes';
 import { generate as barcodes } from './elements/barcodes';
+import { generate as dataMatrix } from './elements/data-matrix';
 import { generate as images } from './elements/images';
 import { generate as chartShowcase } from './charting/chart-showcase';
 import { generate as barChart } from './charting/bar-chart';
@@ -476,6 +477,18 @@ export const examples: ExampleDef[] = [
     filename: 'barcodes.pdf',
     generate: barcodes,
     dotnetClass: 'BarcodesExampleFluent',
+    pdfUa1: true,
+  },
+  {
+    id: 'data-matrix',
+    name: 'Data Matrix',
+    category: 'Elements',
+    description:
+      'Native vector Data Matrix (ECC200) symbols with automatic encodation (ASCII, C40, Text, X12, EDIFACT, ' +
+      'Base-256), Reed-Solomon error correction, square and rectangular sizes, and custom colours.',
+    filename: 'data-matrix.pdf',
+    generate: dataMatrix,
+    dotnetClass: 'DataMatrixExampleFluent',
     pdfUa1: true,
   },
   {

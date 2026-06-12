@@ -315,18 +315,35 @@ export class Document {
   private validateSettings(): void {
     const s = this.settings;
 
-    if (s.isEncrypted && s.encryption!.algorithm === EncryptionAlgorithm.AES_256 && s.version !== PdfVersion.Pdf17) {
-      throw new Error('AES-256 encryption requires PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
+    if (
+      s.isEncrypted &&
+      s.encryption!.algorithm === EncryptionAlgorithm.AES_256 &&
+      s.version !== PdfVersion.Pdf17 &&
+      s.version !== PdfVersion.Pdf20
+    ) {
+      throw new Error('AES-256 encryption requires PdfVersion.Pdf17 or PdfVersion.Pdf20.');
     }
 
-    // PDF/A requires PDF 1.7. Silently upgrade rather than throw -
-    // the caller asked for archival output, so honour that intent.
-    if (s.conformance !== PdfAConformance.None && s.version !== PdfVersion.Pdf17) {
+    // PDF/A requires a matching PDF base version. Silently upgrade rather
+    // than throw - the caller asked for archival output, so honour that intent.
+    if (s.conformance === PdfAConformance.PdfA4 && s.version !== PdfVersion.Pdf20) {
+      s.version = PdfVersion.Pdf20;
+    } else if (
+      s.conformance !== PdfAConformance.None &&
+      s.conformance !== PdfAConformance.PdfA4 &&
+      s.version !== PdfVersion.Pdf17
+    ) {
       s.version = PdfVersion.Pdf17;
     }
 
     if (s.conformance !== PdfAConformance.None && s.isEncrypted) {
       throw new Error('PDF/A mode cannot be combined with encryption.');
+    }
+
+    if (s.accessibility === AccessibilityMode.PdfUa1 && s.version === PdfVersion.Pdf20) {
+      throw new Error(
+        'PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.'
+      );
     }
 
     // "a" levels require tagged output (PDF/UA-1).
@@ -336,8 +353,8 @@ export class Document {
       );
     }
 
-    if (s.hasBookmarks && s.version !== PdfVersion.Pdf17) {
-      throw new Error('Bookmarks require PdfVersion.Pdf17. Set settings.version = PdfVersion.Pdf17.');
+    if (s.hasBookmarks && s.version !== PdfVersion.Pdf17 && s.version !== PdfVersion.Pdf20) {
+      throw new Error('Bookmarks require PdfVersion.Pdf17 or PdfVersion.Pdf20.');
     }
   }
 

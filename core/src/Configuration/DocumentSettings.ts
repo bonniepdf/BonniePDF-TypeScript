@@ -107,8 +107,8 @@ export class DocumentSettings {
    * Gets or sets the PDF/A archival conformance level. Default
    * {@link PdfAConformance.None} - the document is a normal PDF.
    *
-   * When set to any non-`None` value the serializer auto-upgrades
-   * {@link version} to PDF 1.7, embeds the sRGB ICC profile, emits the
+   * When set to PDF/A-1/2/3 the serializer auto-upgrades {@link version}
+   * to PDF 1.7; PDF/A-4 auto-upgrades to PDF 2.0. It embeds the sRGB ICC profile, emits the
    * matching `/OutputIntents`, and writes a `pdfaid:part` /
    * `pdfaid:conformance` XMP block.
    *

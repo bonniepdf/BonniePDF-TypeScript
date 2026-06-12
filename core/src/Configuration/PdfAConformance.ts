@@ -4,7 +4,8 @@
  * Orthogonal to {@link AccessibilityMode} in storage, but the two
  * interact: "a" (accessible) levels presuppose tagged output, so
  * selecting {@link PdfA1a}, {@link PdfA2a}, or {@link PdfA3a} requires
- * `settings.accessibility = AccessibilityMode.PdfUa1`. The serializer
+ * `settings.accessibility = AccessibilityMode.PdfUa1`. PDF/A-4 baseline has
+ * no legacy `a`/`b`/`u` conformance suffix. The serializer
  * enforces this at save time.
  *
  * "b" (basic) levels guarantee visual reproducibility only - they do
@@ -35,4 +36,7 @@ export enum PdfAConformance {
 
   /** PDF/A-3a (ISO 19005-3:2012, conformance A). PDF/A-3b + tagging. */
   PdfA3a = 'PdfA3a',
+
+  /** PDF/A-4 (ISO 19005-4:2020 baseline). PDF 2.0-based archival output. */
+  PdfA4 = 'PdfA4',
 }

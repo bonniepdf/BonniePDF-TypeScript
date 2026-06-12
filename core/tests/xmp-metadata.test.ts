@@ -1,7 +1,9 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../src/Document';
-import { asPdf17, asPdfA } from '../src/Extensions/DocumentSettingsExtensions';
+import { asPdf17, asPdfA, asPdfA4 } from '../src/Extensions/DocumentSettingsExtensions';
 import { pdfToText } from './helpers/test-base';
+import { TextBlock } from '../src/Elements/Text/TextBlock';
+import { FontManager } from '../src/Typography/FontManager';
 
 describe('XmpMetadata', () => {
   let doc: Document;
@@ -34,6 +36,32 @@ describe('XmpMetadata', () => {
     const text = pdfToText(doc.generateBytes());
     expect(text).toContain('/GTS_PDFA1');
     expect(text).toContain('/OutputIntents');
+  });
+
+  it('PdfA4_ContainsBaselineIdentificationWithoutLegacyConformance', () => {
+    doc = new Document();
+    asPdfA4(doc.settings);
+    const text = pdfToText(doc.generateBytes());
+    expect(text.startsWith('%PDF-2.0')).toBe(true);
+    expect(text).toContain('<pdfaid:part>4</pdfaid:part>');
+    expect(text).toContain('<pdfaid:rev>2020</pdfaid:rev>');
+    expect(text).not.toContain('pdfaid:conformance');
+    expect(text).toContain('/OutputIntents');
+  });
+
+  it('PdfA4_HonestClaimGuardSuppressesXmpAndOutputIntentForNonEmbeddedStandardFonts', () => {
+    FontManager.clear();
+    doc = new Document();
+    asPdfA4(doc.settings);
+    const tb = new TextBlock('PDF/A-4 claim must be suppressed');
+    tb.fontName = 'Helvetica';
+    doc.add(tb);
+
+    const text = pdfToText(doc.generateBytes());
+
+    expect(text.startsWith('%PDF-2.0')).toBe(true);
+    expect(text).not.toContain('pdfaid:part');
+    expect(text).not.toContain('/OutputIntents');
   });
 
   it('Pdf17_metadata_title_in_info_dict', () => {

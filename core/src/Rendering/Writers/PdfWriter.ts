@@ -64,7 +64,7 @@ class BinaryOutputStream {
 // ─── PdfWriter ───────────────────────────────────────────────────────────────
 
 /**
- * PDF 1.4/1.7 writer that accumulates output in memory as a Uint8Array.
+ * PDF 1.4/1.7/2.0 writer that accumulates output in memory as a Uint8Array.
  * Tracks precise byte offsets for each object so the xref table is valid.
  */
 export class PdfWriter implements IPdfWriter {
@@ -76,7 +76,8 @@ export class PdfWriter implements IPdfWriter {
   public encryptor: any = null;
 
   constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
-    const header = version === PdfVersion.Pdf17 ? '%PDF-1.7\n' : '%PDF-1.4\n';
+    const header =
+      version === PdfVersion.Pdf20 ? '%PDF-2.0\n' : version === PdfVersion.Pdf17 ? '%PDF-1.7\n' : '%PDF-1.4\n';
     this._output.writeString(header);
     // Binary comment (4 bytes > 127) - signals to PDF readers that this is binary
     this._output.writeBytes(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a])); // %âãÏÓ\n

@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3&style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core?style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
-[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](./core/LICENSE)
+[![License: source-available](<https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square>)](./core/LICENSE)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core?style=flat-square)](https://bundlephobia.com/package/@bonniepdf/core)
 ![coverage](./badges/coverage.svg)
 
@@ -152,10 +152,10 @@ The API here mirrors the [.NET reference implementation](https://www.nuget.org/p
 
 ## License
 
-BonniePDF is dual-licensed:
+BonniePDF is **source-available** (BonniePDF Community License 1.0), not OSI open source:
 
-- Free for personal and open-source use.
-- Commercial for proprietary and commercial use. There are no license keys, activation servers, or runtime checks.
+- **Free** under the BonniePDF Community License 1.0 for individuals, non-profits, education, and any business under $1M USD annual revenue - full source included, no license keys, activation servers, or runtime checks.
+- **Commercial** license required at or above $1M revenue. The only thing no one may do is resell BonniePDF itself as a competing PDF library or service.
 
 See [`core/LICENSE`](./core/LICENSE) for the full terms, or [bonniepdf.dev/license](https://www.bonniepdf.dev/license) to buy a commercial license.
 

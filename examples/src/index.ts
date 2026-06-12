@@ -53,6 +53,7 @@ import { generate as businessInvoice } from './templates/business-invoice';
 import { generate as userDirectory } from './templates/user-directory';
 import { generate as movieCatalog } from './templates/movie-catalog';
 import { generate as financialDashboard } from './templates/financial-dashboard';
+import { generate as annualReport } from './templates/annual-report';
 
 export * from './svg';
 
@@ -685,5 +686,17 @@ export const examples: ExampleDef[] = [
     dotnetClass: null,
     thumbnails: false,
     pdfUa1: true,
+  },
+  {
+    id: 'annual-report',
+    name: 'Annual Report',
+    category: 'Templates',
+    description:
+      'A4 portrait annual-report template: a full-bleed navy front cover, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
+    filename: 'annual-report.pdf',
+    generate: annualReport,
+    dotnetClass: 'AnnualReportExample',
+    thumbnails: false,
+    pdfUa1: false,
   },
 ];

@@ -167,7 +167,7 @@ export class SyncAesCipher {
     const numBlocks = padded.length / 16;
     const ciphertext = new Uint8Array(padded.length);
 
-    let prev = iv;
+    let prev: Uint8Array<ArrayBufferLike> = iv;
     for (let b = 0; b < numBlocks; b++) {
       const plainBlock = padded.subarray(b * 16, b * 16 + 16);
       const xored = new Uint8Array(16);

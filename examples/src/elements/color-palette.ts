@@ -22,7 +22,7 @@ import {
 
 // Layout constants for the swatch grid. Squares are kept small so all 22 palettes
 // (× 11 shades) fit on a single A4 sheet.
-const SQUARE = 28;
+const BOX_HEIGHT = 28;
 const H_GAP = 4;
 const V_GAP = 3;
 const LABEL_WIDTH = 56;
@@ -30,8 +30,9 @@ const LABEL_WIDTH = 56;
 /** A single colour square for one palette/shade. */
 function swatch(name: PaletteName, shade: (typeof SHADES)[number]): Container {
   const cell = new Container();
-  cell.width = SQUARE;
-  cell.height = SQUARE;
+  // No fixed width: under the row's Weighted distribution the stack stretches each swatch
+  // to fill the page, so the 11 boxes span the full width minus the label gutter.
+  cell.height = BOX_HEIGHT;
   cell.backgroundColor = ColorPalette[name][shade];
   // A hairline border keeps the lightest shades (50) visible against the white page.
   cell.border = new Border(0.5);
@@ -49,8 +50,8 @@ function rowLabel(name: PaletteName): Container {
 
   const box = new Container();
   box.width = LABEL_WIDTH;
-  box.height = SQUARE;
-  // Nudge the label down so it sits roughly centred against the square.
+  box.height = BOX_HEIGHT;
+  // Nudge the label down so it sits roughly centred against the box.
   box.padding = new Thickness(0, 9, H_GAP, 0);
   box.child = text;
   return box;
@@ -64,8 +65,9 @@ function headerCell(label: string): Container {
   text.textColor = ColorPalette.slate[500];
   text.alignment = TextAlignment.Center;
 
+  // No fixed width: the header cells stretch with their columns so the numbers stay centred
+  // above the swatches.
   const box = new Container();
-  box.width = SQUARE;
   box.child = text;
   return box;
 }
@@ -104,13 +106,15 @@ export function generate(): Document {
 
   // Header row: an empty gutter above the labels, then a shade number per column.
   const header = new HorizontalStack();
-  header.widthDistribution = WidthDistribution.Auto;
+  // Weighted distribution: the gutter keeps its fixed width (null weight), and the 11 columns
+  // share the remaining page width equally (weight 1 each).
+  header.widthDistribution = WidthDistribution.Weighted;
   header.spacing = H_GAP;
   const gutter = new Container();
   gutter.width = LABEL_WIDTH;
   header.addChild(gutter);
   for (const shade of SHADES) {
-    header.addChild(headerCell(String(shade)));
+    header.addChild(headerCell(String(shade)), 1);
   }
   grid.addChild(header);
 
@@ -118,11 +122,12 @@ export function generate(): Document {
   const names = Object.keys(ColorPalette) as PaletteName[];
   for (const name of names) {
     const row = new HorizontalStack();
-    row.widthDistribution = WidthDistribution.Auto;
+    // Fixed-width label (null weight) + 11 swatches that fill the rest equally (weight 1).
+    row.widthDistribution = WidthDistribution.Weighted;
     row.spacing = H_GAP;
     row.addChild(rowLabel(name));
     for (const shade of SHADES) {
-      row.addChild(swatch(name, shade));
+      row.addChild(swatch(name, shade), 1);
     }
     grid.addChild(row);
   }

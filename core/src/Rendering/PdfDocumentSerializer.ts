@@ -15,8 +15,8 @@ import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
-import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
+import { ConformancePlan } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
 
@@ -38,6 +38,7 @@ export class PdfDocumentSerializer {
    */
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
+    let conformancePlan = ConformancePlan.fromSettings(settings);
 
     // 0. Set up encryption if configured.
     // RC4: created synchronously here.
@@ -78,10 +79,9 @@ export class PdfDocumentSerializer {
     // PDF/UA tagging context - shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).
-    const taggingContext =
-      settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17
-        ? new TaggingContext(new StructureTreeBuilder())
-        : undefined;
+    const taggingContext = conformancePlan.needsStructureTree
+      ? new TaggingContext(new StructureTreeBuilder())
+      : undefined;
     ctx.tagging = taggingContext;
 
     // Two-pass layout (VisualToc) is out of scope - requiresTwoPassLayout() always false.
@@ -171,17 +171,11 @@ export class PdfDocumentSerializer {
     let globalResources: string = (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
 
     // ── Honest PDF/A claim ──────────────────────────────────────
-    // settings.pdfAEnabled is an opt-IN, but PDF/A-1b §6.3.4 forbids
-    // non-embedded fonts. If the user asked for PDF/A but used any of
-    // the standard 14 fonts (which we don't embed), we silently drop
-    // the claim: no pdfaid block in XMP, no OutputIntent, no
-    // /MarkInfo-via-pdfA path. The document is still a valid PDF -
-    // it just doesn't lie about being PDF/A-1b.
-    //
-    // To actually deliver PDF/A-1b the caller must register a real
-    // TTF (TtfFont.fromFile / FontMetrics.registerFontAlias).
+    // PDF/A is an opt-in claim. Once resources have been written, ask the
+    // conformance plan whether that claim can still be emitted honestly
+    // (currently: no non-embedded standard-14 font references).
     const registry: PdfResourceRegistry | undefined = (ctx as any).resources;
-    const effectivePdfA = settings.pdfAEnabled && (registry == null || !registry.hasNonEmbeddedStandardFont());
+    conformancePlan = conformancePlan.withResourceRegistry(registry);
 
     // 6a. Write the global Resources object every page references.
     // PDF/A-2b clause 6.2.2.2 - see page-dict comment above.
@@ -206,33 +200,31 @@ export class PdfDocumentSerializer {
 
     // 8. Write ViewerPreferences if any non-default settings are active.
     // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
-    if (hasViewerPreferences(settings) || taggingContext != null) {
+    if (hasViewerPreferences(settings) || conformancePlan.needsViewerPreferencesDisplayDocTitle) {
       catalogOptions.viewerPrefsId = writer.getNewId();
-      const vp = taggingContext != null ? { ...settings, displayDocTitle: true } : settings;
+      const vp = conformancePlan.needsViewerPreferencesDisplayDocTitle
+        ? { ...settings, displayDocTitle: true }
+        : settings;
       writer.writeViewerPreferences(catalogOptions.viewerPrefsId, vp);
     }
 
-    // 9. Write XMP metadata for PDF 1.7. Pass the effective PDF/A
+    // 9. Write XMP metadata for PDF 1.7+ output. Pass the effective PDF/A
     // flag (not the raw settings flag) so we don't emit a pdfaid
     // claim we can't honour.
-    if (settings.version === PdfVersion.Pdf17) {
+    if (conformancePlan.needsXmpMetadata) {
       catalogOptions.xmpMetadataId = writer.getNewId();
-      // Object.create preserves the DocumentSettings prototype (getters,
-      // methods) - plain object spread would drop hasBookmarks/isEncrypted.
-      // When the honest-claim guard suppresses the PDF/A claim, reset
-      // `conformance` to None on the clone - that's the source of truth
-      // for buildConformanceBlocks; `pdfAEnabled` is a derived getter.
-      const xmpSettings =
-        effectivePdfA === settings.pdfAEnabled
-          ? settings
-          : Object.assign(Object.create(Object.getPrototypeOf(settings)), settings, {
-              conformance: effectivePdfA ? settings.conformance : PdfAConformance.None,
-            });
-      metadataWriter.writeXmpMetadata(catalogOptions.xmpMetadataId, this.document.metadata, xmpSettings);
+      metadataWriter.writeXmpMetadata(
+        catalogOptions.xmpMetadataId,
+        this.document.metadata,
+        conformancePlan.createXmpSettings()
+      );
     }
 
-    // 10. Write bookmarks (outlines) for PDF 1.7
-    if (settings.version === PdfVersion.Pdf17 && settings.hasBookmarks) {
+    // 10. Write bookmarks (outlines) for PDF 1.7+ output
+    if (
+      (conformancePlan.pdfVersion === PdfVersion.Pdf17 || conformancePlan.pdfVersion === PdfVersion.Pdf20) &&
+      settings.hasBookmarks
+    ) {
       const navWriter = new NavigationWriter(writer);
       const outlinesStartId = writer.getNewId();
       catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
@@ -243,13 +235,9 @@ export class PdfDocumentSerializer {
     // when standard-14 fonts are not embedded - the claim would be dishonest.
     // For PDF/UA-1 the OutputIntent is needed for colour management regardless of font
     // embedding status (font embedding is a separate §6.3.4 violation on its own).
-    const needsOutputIntent =
-      settings.version === PdfVersion.Pdf17 &&
-      ((settings.pdfAEnabled && !ctx.resources.hasNonEmbeddedStandardFont()) ||
-        (settings.accessibility === AccessibilityMode.PdfUa1 && !settings.pdfAEnabled));
-    if (needsOutputIntent) {
+    if (conformancePlan.needsOutputIntent) {
       const complianceWriter = new ComplianceWriter(writer);
-      catalogOptions.pdfAEnabled = true;
+      catalogOptions.pdfAEnabled = conformancePlan.effectivePdfAEnabled;
       const iccProfileId = writer.getNewId();
       complianceWriter.writeIccProfile(iccProfileId);
       const outputIntentId = writer.getNewId();

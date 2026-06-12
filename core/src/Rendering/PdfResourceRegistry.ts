@@ -1,4 +1,4 @@
-import { ImageInfo } from './Images/ImageInfo';
+import { ImageInfo, ImageFormat } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { Color } from '../Core/Color';
 import { DeferredXObjectInfo } from './RenderContext';
@@ -13,6 +13,20 @@ import { FontManager } from '../Typography/FontManager';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
+
+export type PdfAResourceIssueCode =
+  | 'non-embedded-standard-font'
+  | 'alpha-graphics-state-flattened'
+  | 'png-soft-mask-flattened';
+
+export type PdfAResourceIssueSeverity = 'blocking' | 'mitigated';
+
+export interface PdfAResourceIssue {
+  code: PdfAResourceIssueCode;
+  severity: PdfAResourceIssueSeverity;
+  message: string;
+  resource?: string;
+}
 
 export class PdfResourceRegistry {
   private fontCounter = 0;
@@ -70,6 +84,7 @@ export class PdfResourceRegistry {
   private imagePdfObjectIds: Map<string, number> = new Map();
   public deferredXObjects: Map<string, DeferredXObjectInfo> = new Map();
   private alphaGraphicsStates: Map<string, { resourceName: string; alpha: number }> = new Map();
+  private requestedAlphaValues: Set<string> = new Set();
 
   public registerFont(fontIdentifier: string): string {
     // (A) Direct TTF/OTF path
@@ -188,12 +203,65 @@ export class PdfResourceRegistry {
    * be written via `writeType1Font` (non-embedded).
    */
   public hasNonEmbeddedStandardFont(): boolean {
+    return this.getNonEmbeddedStandardFonts().length > 0;
+  }
+
+  /**
+   * Returns resource-policy issues relevant to PDF/A conformance. Blocking
+   * issues suppress the PDF/A claim; mitigated issues document resources that
+   * BonniePDF already rewrites into a PDF/A-safe form (for example by making
+   * alpha graphics states opaque or flattening PNG soft masks).
+   */
+  public getPdfAResourceIssues(): PdfAResourceIssue[] {
+    const issues: PdfAResourceIssue[] = [];
+
+    for (const fontIdentifier of this.getNonEmbeddedStandardFonts()) {
+      issues.push({
+        code: 'non-embedded-standard-font',
+        severity: 'blocking',
+        resource: fontIdentifier,
+        message: `Font ${fontIdentifier} would be emitted as a non-embedded standard Type1 font.`,
+      });
+    }
+
+    for (const alphaKey of this.requestedAlphaValues) {
+      const alpha = Number(alphaKey);
+      if (alpha < 1) {
+        issues.push({
+          code: 'alpha-graphics-state-flattened',
+          severity: this.pdfAEnabled ? 'mitigated' : 'blocking',
+          resource: alphaKey,
+          message: this.pdfAEnabled
+            ? `Requested alpha ${alphaKey} was replaced with an opaque graphics state for PDF/A output.`
+            : `Requested alpha ${alphaKey} would require a transparent graphics state.`,
+        });
+      }
+    }
+
+    for (const [key, image] of this.loadedImages) {
+      if (image.format === ImageFormat.Png && image.hasAlpha && image.alphaData.length > 0) {
+        issues.push({
+          code: 'png-soft-mask-flattened',
+          severity: this.pdfAEnabled ? 'mitigated' : 'blocking',
+          resource: key,
+          message: this.pdfAEnabled
+            ? `PNG image ${key} has alpha data that will be flattened for PDF/A output.`
+            : `PNG image ${key} has alpha data that would be emitted as a soft mask.`,
+        });
+      }
+    }
+
+    return issues;
+  }
+
+  private getNonEmbeddedStandardFonts(): string[] {
+    const result: string[] = [];
     for (const fontIdentifier of this.fontNameMap.keys()) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) continue;
-      return true;
+      result.push(fontIdentifier);
     }
-    return false;
+    return result;
   }
 
   /**
@@ -379,6 +447,7 @@ export class PdfResourceRegistry {
 
   public registerAlphaGraphicsState(alpha: number): string {
     const clamped = Math.max(0, Math.min(1, alpha));
+    this.requestedAlphaValues.add(clamped.toFixed(4));
     const effectiveAlpha = this.requiresPdfA1TransparencyFallback() ? 1 : clamped;
     const key = effectiveAlpha.toFixed(4);
 

@@ -41,11 +41,11 @@ export class XmpConformanceBlock {
     this.extensionSchema = extensionSchema;
   }
 
-  private static pdfAid(part: string, conformance: string): XmpConformanceBlock {
-    return new XmpConformanceBlock('pdfaid', 'http://www.aiim.org/pdfa/ns/id/', [
-      ['part', part],
-      ['conformance', conformance],
-    ]);
+  private static pdfAid(part: string, conformance?: string, rev?: string): XmpConformanceBlock {
+    const elements: Array<readonly [string, string]> = [['part', part]];
+    if (conformance) elements.push(['conformance', conformance]);
+    if (rev) elements.push(['rev', rev]);
+    return new XmpConformanceBlock('pdfaid', 'http://www.aiim.org/pdfa/ns/id/', elements);
   }
 
   /** PDF/A-1b: ISO 19005-1, part 1, conformance B. */
@@ -78,6 +78,11 @@ export class XmpConformanceBlock {
     return XmpConformanceBlock.pdfAid('3', 'A');
   }
 
+  /** PDF/A-4: ISO 19005-4:2020 baseline. No legacy A/B/U conformance suffix. */
+  static pdfA4(): XmpConformanceBlock {
+    return XmpConformanceBlock.pdfAid('4', undefined, '2020');
+  }
+
   /**
    * Returns the conformance block matching `conformance`, or
    * `undefined` if no PDF/A claim should be emitted.
@@ -96,6 +101,8 @@ export class XmpConformanceBlock {
         return XmpConformanceBlock.pdfA3B();
       case PdfAConformance.PdfA3a:
         return XmpConformanceBlock.pdfA3A();
+      case PdfAConformance.PdfA4:
+        return XmpConformanceBlock.pdfA4();
       default:
         return undefined;
     }

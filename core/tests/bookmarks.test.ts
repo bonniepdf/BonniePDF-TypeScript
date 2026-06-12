@@ -56,6 +56,15 @@ describe('Bookmarks', () => {
     expect(() => doc.generateBytes()).toThrow();
   });
 
+  it('PDF 2.0 bytes contain /Outlines when bookmarks present', () => {
+    doc = new Document();
+    doc.settings.version = PdfVersion.Pdf20;
+    doc.settings.bookmarks.push(new BookmarkItem('Chapter 1', 0));
+    const text = pdfToText(doc.generateBytes());
+    expect(text.startsWith('%PDF-2.0')).toBe(true);
+    expect(text).toContain('/Outlines');
+  });
+
   it('PDF bytes contain /Outlines when bookmarks present', () => {
     doc = new Document();
     addBookmark(doc.settings, 'Chapter 1', 0);

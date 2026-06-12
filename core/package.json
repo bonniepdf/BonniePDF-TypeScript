@@ -51,7 +51,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "coverage": "vitest run --coverage && node ../scripts/coverage-badge.mjs"
+    "coverage": "vitest run --coverage && node ../scripts/coverage-badge.mjs",
+    "test:pdf-validation": "pnpm run build && node scripts/validate-pdfa4-samples.mjs"
   },
   "keywords": [
     "pdf",

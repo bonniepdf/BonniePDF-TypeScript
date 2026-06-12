@@ -447,7 +447,7 @@ export const examples: ExampleDef[] = [
     name: 'Colour Palette',
     category: 'Elements',
     description:
-      'The full ColorPalette as a swatch grid - all 22 Tailwind v4 ramps × 11 shades, drawn as little squares.',
+      'The full ColorPalette as a swatch grid - all 22 Tailwind v4 ramps x 11 shades, drawn as little squares.',
     filename: 'color-palette.pdf',
     generate: colorPalette,
     thumbnails: false,

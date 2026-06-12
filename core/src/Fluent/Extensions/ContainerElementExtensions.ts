@@ -12,6 +12,7 @@ import { Line } from '../../Elements/Shapes/Line';
 import { QRCode } from '../../Elements/Shapes/QRCode';
 import { Barcode } from '../../Elements/Shapes/Barcode';
 import { BarcodeSymbology } from '../../Elements/Shapes/BarcodeSymbology';
+import { DataMatrix } from '../../Elements/Shapes/DataMatrix';
 import { TextBlock } from '../../Elements/Text/TextBlock';
 import { RichText } from '../../Elements/Text/RichText';
 import { IContentContainer } from '../IContentContainer';
@@ -184,6 +185,16 @@ export class ContainerElementExtensions {
     return ContainerBridgeExtensions.elementTyped(c, barcode);
   }
 
+  /**
+   * Adds a Data Matrix (ECC200) element.
+   */
+  static dataMatrix(c: IContentContainer, data: string, size: number = 100): DataMatrix {
+    const dm = new DataMatrix();
+    dm.data = data;
+    dm.size = size;
+    return ContainerBridgeExtensions.elementTyped(c, dm);
+  }
+
   // --- Raw Element Escape Hatch ---
 
   /**
@@ -265,6 +276,10 @@ export function qrCode(c: IContentContainer, data: string, size?: number): QRCod
 
 export function barcode(c: IContentContainer, value: string, symbology?: BarcodeSymbology): Barcode {
   return ContainerElementExtensions.barcode(c, value, symbology);
+}
+
+export function dataMatrix(c: IContentContainer, data: string, size?: number): DataMatrix {
+  return ContainerElementExtensions.dataMatrix(c, data, size);
 }
 
 export function rawElement(c: IContentContainer, element: IElement): void {

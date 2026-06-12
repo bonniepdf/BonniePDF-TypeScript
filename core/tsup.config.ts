@@ -8,6 +8,7 @@ export default defineConfig({
     charts: 'src/charts.ts',
     security: 'src/security.ts',
     qr: 'src/qr.ts',
+    datamatrix: 'src/datamatrix.ts',
   },
   format: ['esm', 'cjs'],
   platform: 'neutral',

@@ -594,12 +594,15 @@ export class PdfResourceRegistry {
     const graphicsStateRefs: string[] = [];
     for (const { resourceName, alpha } of this.alphaGraphicsStates.values()) {
       const objectId = writer.getNewId();
+      // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
+      // (mitigated issue: the original transparency was flattened to a background).
+      const alphaValue = this.pdfAEnabled ? 1.0 : alpha;
       writer.writeObject(
         objectId,
         new Map<string, string>([
           ['/Type', '/ExtGState'],
-          ['/ca', alpha.toFixed(4)],
-          ['/CA', alpha.toFixed(4)],
+          ['/ca', alphaValue.toFixed(4)],
+          ['/CA', alphaValue.toFixed(4)],
         ])
       );
       graphicsStateRefs.push(`${resourceName} ${objectId} 0 R`);

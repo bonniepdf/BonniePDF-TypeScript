@@ -4,8 +4,6 @@ import { TableRow } from './TableRow';
 import { TableCell } from './TableCell';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
-import { Border } from '../../Core/Border';
-import { BorderColors } from '../../Core/BorderColors';
 import { TextBlock } from '../Text/TextBlock';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
@@ -299,16 +297,16 @@ export class Table extends BorderedElementBase implements IRoleProvider {
 
   protected override renderContent(ctx: RenderContext, contentWidth: number): void {
     const tagging = ctx.tagging;
-    // Nested tables (rendered inside a container/cell) don't pass through the
-    // pipeline's role wrapper, so they get no Table structure element. Open one
-    // here so the THead/TBody/TFoot groups have a Table parent (PDF/UA 7.2).
-    // Top-level tables use renderStateful instead and are wrapped by the
-    // pipeline, so this path only ever runs for nested tables.
-    if (tagging) tagging.tree.begin(SemanticRole.Table);
+    // Some hosts (e.g. VerticalStack) already open a Table struct element for
+    // role-providing children before calling render. Only open our own when one
+    // isn't already current, so the THead/TBody/TFoot groups get exactly one
+    // Table ancestor (PDF/UA 7.2) instead of Table-in-Table.
+    const ownTable = tagging != null && tagging.tree.current.role !== SemanticRole.Table;
+    if (ownTable) tagging!.tree.begin(SemanticRole.Table);
     try {
       this.renderContentRows(ctx, contentWidth);
     } finally {
-      if (tagging) tagging.tree.end();
+      if (ownTable) tagging!.tree.end();
     }
   }
 

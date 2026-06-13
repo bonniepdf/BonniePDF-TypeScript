@@ -4,6 +4,8 @@ import { Table } from '../src/Elements/Tables/Table';
 import { TableRow } from '../src/Elements/Tables/TableRow';
 import { TableCell } from '../src/Elements/Tables/TableCell';
 import { TextBlock } from '../src/Elements/Text/TextBlock';
+import { VerticalStack } from '../src/Elements/Layout/VerticalStack';
+import { Border } from '../src/Core/Border';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { PdfVersion } from '../src/Configuration/PdfVersion';
 import { SemanticRole } from '../src/Rendering/Tagging/SemanticRole';
@@ -106,6 +108,43 @@ describe('Table tagging', () => {
     // PDF/UA 7.2: rows are grouped under THead/TBody.
     expect(countSubstring(text, '/S /THead\n')).toBe(1);
     expect(countSubstring(text, '/S /TBody\n')).toBe(1);
+  });
+
+  it('table nested inside a cell VerticalStack does not double-wrap as Table', () => {
+    // Mirrors the BusinessInvoice footer: an outer Table whose cell content is
+    // a VerticalStack containing another Table (e.g. a totals table nested
+    // inside a footer cell's stack). The cell content renders via
+    // Table.renderContent (non-stateful), and VerticalStack.renderContent
+    // already opens a /Table StructElem for role-providing children, so the
+    // nested Table must not open a second one - otherwise the tree has
+    // /Table > /Table, which violates PDF/UA 7.2-3 (a Table may only contain
+    // TR, THead, TBody, TFoot, Caption).
+    doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+
+    const cellStack = new VerticalStack();
+    const nested = new Table(1, 1);
+    nested.border = Border.none;
+    nested.addRow(tb('Subtotal'), tb('$1.00'));
+    cellStack.addChild(nested);
+
+    const outer = new Table(1, 1);
+    outer.border = Border.none;
+    const cell = new TableCell();
+    cell.content = cellStack;
+    outer.addRow(tb('left'), cell);
+    doc.add(outer);
+
+    const text = pdfToText(doc.generateBytes());
+
+    // Two Table StructElems: the outer table and the nested totals table -
+    // never three (which would mean the nested table got double-wrapped).
+    expect(countSubstring(text, '/S /Table\n')).toBe(2);
+    expect(countSubstring(text, '/S /TBody\n')).toBe(2);
+    expect(countSubstring(text, '/S /TR\n')).toBe(2);
+    expect(countSubstring(text, '/S /TD\n')).toBe(4);
   });
 
   it('ColumnSpan surfaces as /A << /O /Table /ColSpan n >>', () => {

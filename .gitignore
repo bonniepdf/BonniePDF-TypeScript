@@ -37,6 +37,9 @@ pnpm-debug.log*
 # CI-generated PDFs (output of scripts/generate-tagged-pdfs.ts)
 generated-pdfs/
 
+# CI veraPDF gate summary (written by tools/verapdf/Validate.java)
+verapdf-summary.md
+
 # Coverage output (the badge in badges/ is committed; raw reports are not)
 coverage/
 

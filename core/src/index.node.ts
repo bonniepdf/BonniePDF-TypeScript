@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 
 configurePlatform(new NodePlatformIO());
+export { NodePlatformIO } from './Platform/NodePlatformIO';
 
 // Auto-register bundled Liberation fonts so pdfAEnabled: true works
 // without the caller having to supply font files.

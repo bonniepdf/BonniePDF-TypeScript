@@ -204,6 +204,5 @@ export * from './Rendering/Writers/ComplianceWriter';
 
 export * from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
-export * from './Platform/NodePlatformIO';
 
 export * from './Prototyping/Placeholders';

@@ -3,7 +3,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  IElement,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -20,6 +19,7 @@ import {
   WidthDistribution,
   PdfAConformance,
 } from '@bonniepdf/core';
+import type { IElement } from '@bonniepdf/core';
 
 // ── Brand colours ───────────────────────────────────────────────────────────
 // Three brand colours drive the whole template - the cover accents, the

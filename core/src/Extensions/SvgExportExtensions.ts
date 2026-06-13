@@ -1,6 +1,10 @@
 import { Page } from '../Elements/Layout/Page';
 import { ChartBase } from '../Charts/ChartBase';
 import { ChartData } from '../Charts/Models/ChartData';
+import { IElement } from '../Elements/IElement';
+import { Barcode } from '../Elements/Shapes/Barcode';
+import { DataMatrix } from '../Elements/Shapes/DataMatrix';
+import { QRCode } from '../Elements/Shapes/QRCode';
 import { RenderContext } from '../Rendering/RenderContext';
 import { PdfSize } from '../Configuration/PdfSize';
 import { SvgCanvas } from '../Drawing/SvgCanvas';
@@ -48,6 +52,44 @@ export class SvgExportExtensions {
     // Finalize SVG
     return canvas.getSvg();
   }
+
+  /**
+   * Renders a 1D barcode to a standalone SVG string using the same vector
+   * element renderer as PDF output.
+   */
+  static barcodeToSvg(barcode: Barcode): string {
+    return this.elementToSvg(barcode);
+  }
+
+  /**
+   * Renders a QR code to a standalone SVG string using the same vector element
+   * renderer as PDF output.
+   */
+  static qrCodeToSvg(qrCode: QRCode): string {
+    return this.elementToSvg(qrCode);
+  }
+
+  /**
+   * Renders a Data Matrix symbol to a standalone SVG string using the same
+   * vector element renderer as PDF output.
+   */
+  static dataMatrixToSvg(dataMatrix: DataMatrix): string {
+    return this.elementToSvg(dataMatrix);
+  }
+
+  private static elementToSvg(element: IElement): string {
+    const width = element.getPreferredWidth();
+    const height = element.measureHeight(width);
+    const ctx = new RenderContext(new PdfSize(width, height), 0, true);
+
+    element.render(ctx, width);
+
+    if (ctx.canvas instanceof SvgCanvas) {
+      return ctx.canvas.getSvg();
+    }
+
+    return ctx.currentStream.toString();
+  }
 }
 
 /**
@@ -59,4 +101,16 @@ export function toSvg(page: Page): string {
 
 export function chartToSvg(chart: ChartBase, data: ChartData): string {
   return SvgExportExtensions.chartToSvg(chart, data);
+}
+
+export function barcodeToSvg(barcode: Barcode): string {
+  return SvgExportExtensions.barcodeToSvg(barcode);
+}
+
+export function qrCodeToSvg(qrCode: QRCode): string {
+  return SvgExportExtensions.qrCodeToSvg(qrCode);
+}
+
+export function dataMatrixToSvg(dataMatrix: DataMatrix): string {
+  return SvgExportExtensions.dataMatrixToSvg(dataMatrix);
 }

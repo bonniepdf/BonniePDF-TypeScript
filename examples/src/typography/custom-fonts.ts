@@ -40,7 +40,7 @@ import {
   AccessibilityMode,
   TextBlock,
   TextStyle,
-  Color,
+  ColorPalette,
   Thickness,
   StandardFonts,
 } from '@bonniepdf/core';

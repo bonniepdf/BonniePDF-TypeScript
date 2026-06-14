@@ -57,8 +57,11 @@ jobs:
       - name: Build
         run: pnpm turbo build
 
+      # The example set is derived from the shared registry (examples/src/index.ts):
+      # every example with `pdfUa1: true` (and no password) is generated and
+      # validated, so new examples are picked up automatically — no edit here.
       - name: Generate tagged example PDFs
-        run: node --experimental-strip-types scripts/generate-tagged-pdfs.ts
+        run: pnpm generate-tagged
 
       - name: Validate with veraPDF (PDF/UA-1)
         run: tools/verapdf/validate.sh generated-pdfs ua1

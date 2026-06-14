@@ -56,4 +56,33 @@ to the following conditions:
   dealings in the Software.
 ```
 
-</content>
+---
+
+## Liberation fonts
+
+- **Files:** `core/assets/fonts/Liberation*.ttf` (Sans, Serif, Mono -
+  Regular/Bold/Italic/BoldItalic), shipped in the published `@bonniepdf/core`
+  package.
+- **Upstream project:** [Liberation Fonts](https://github.com/liberationfonts/liberation-fonts)
+- **Licence:** SIL Open Font License, Version 1.1 (see
+  [`core/assets/fonts/OFL.txt`](assets/fonts/OFL.txt)).
+- **Nature of use:** The Liberation fonts are metric-compatible substitutes for
+  the standard-14 PDF fonts (Helvetica/Times/Courier). They are bundled so that
+  PDF/A and PDF/UA output can embed real glyph outlines without relying on
+  machine-installed fonts. The fonts are redistributed unmodified. This mirrors
+  the .NET reference implementation, which embeds the same fonts - see
+  `../../BonniePDF-NET/THIRD-PARTY-NOTICES.md`.
+
+### Licence text
+
+```
+Digitized data copyright (c) 2010 Google Corporation
+with Reserved Font Arimo, Tinos and Cousine.
+
+Copyright (c) 2012 Red Hat, Inc.
+with Reserved Font Name Liberation.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+The full licence text is reproduced in core/assets/fonts/OFL.txt and is
+available with a FAQ at https://openfontlicense.org
+```

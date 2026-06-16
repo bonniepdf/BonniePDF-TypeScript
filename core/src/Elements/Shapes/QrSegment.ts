@@ -105,8 +105,7 @@ export class QrSegment {
     const bits: boolean[] = [];
     let i = 0;
     while (i + 1 < text.length) {
-      const val =
-        this.alphanumericCharset.indexOf(text[i]) * 45 + this.alphanumericCharset.indexOf(text[i + 1]);
+      const val = this.alphanumericCharset.indexOf(text[i]) * 45 + this.alphanumericCharset.indexOf(text[i + 1]);
       this.appendBits(val, 11, bits);
       i += 2;
     }

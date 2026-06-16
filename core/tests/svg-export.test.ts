@@ -37,25 +37,34 @@ describe('SvgExport', () => {
     expect(canvas.getSvg()).toContain('y="28"');
   });
 
-  it('BarChart_ToSvg_UsesCrispEdges', () => {
-    // Bars + gridlines are axis-aligned: crisp edges render sharper than antialiased.
+  it('BarChart_ToSvg_RootUsesCrispEdges', () => {
+    // Bars + gridlines are axis-aligned: the whole bar chart renders crisp.
     const svg = chartToSvg(new BarChart(), createSampleData());
-    expect(svg).toContain('shape-rendering="crispEdges"');
+    expect(svg).toMatch(/<svg[^>]*shape-rendering="crispEdges"/);
   });
 
-  it('GroupedBarChart_ToSvg_UsesCrispEdges', () => {
+  it('GroupedBarChart_ToSvg_RootUsesCrispEdges', () => {
     const svg = chartToSvg(new GroupedBarChart(), createSampleData());
-    expect(svg).toContain('shape-rendering="crispEdges"');
+    expect(svg).toMatch(/<svg[^>]*shape-rendering="crispEdges"/);
   });
 
-  it('LineChart_ToSvg_KeepsDefaultAntialiasing', () => {
-    // Diagonal segments + circle markers must stay antialiased.
+  it('LineChart_ToSvg_KeepsRootAntialiasedButCrispAxisLines', () => {
+    // The diagonal trend line + circle markers must stay antialiased (root is
+    // NOT crisp), but the axis lines are wrapped in a crisp-edges group.
     const svg = chartToSvg(new LineChart(), createSampleData());
-    expect(svg).not.toContain('shape-rendering');
+    expect(svg).not.toMatch(/<svg[^>]*shape-rendering/);
+    expect(svg).toContain('<g shape-rendering="crispEdges">');
   });
 
-  it('PieChart_ToSvg_KeepsDefaultAntialiasing', () => {
-    // Arc paths must stay antialiased.
+  it('CartesianCharts_ToSvg_WrapAxisLinesInCrispGroup', () => {
+    // Axis lines render crisp uniformly across every cartesian chart type.
+    for (const chart of [new LineChart(), new AreaChart(), new DotPlotChart(), new LollipopChart()]) {
+      expect(chartToSvg(chart, createSampleData())).toContain('<g shape-rendering="crispEdges">');
+    }
+  });
+
+  it('PieChart_ToSvg_HasNoShapeRendering', () => {
+    // Pie has no axes and only arc paths, so it stays fully antialiased.
     const svg = chartToSvg(new PieChart(), createSampleData());
     expect(svg).not.toContain('shape-rendering');
   });

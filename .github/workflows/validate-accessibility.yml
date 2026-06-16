@@ -1,7 +1,7 @@
-name: PDF/UA-1 Validation
+name: PDF Conformance Validation
 
 # Compliance gate: builds the library, generates the tagged example PDFs, and
-# validates every one against PDF/UA-1 with veraPDF. The job fails if any PDF
+# validates every claimed PDF/A and PDF/UA conformance level with veraPDF. The job fails if any PDF
 # is non-compliant (tools/verapdf/validate.sh exits non-zero), so a regression
 # cannot reach master. See docs/ci/pdf-validation.md.
 
@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   validate:
-    name: Generate & validate (UA-1)
+    name: Generate & validate claimed conformance
     runs-on: ubuntu-latest
 
     steps:
@@ -63,8 +63,8 @@ jobs:
       - name: Generate tagged example PDFs
         run: pnpm generate-tagged
 
-      - name: Validate with veraPDF (PDF/UA-1)
-        run: tools/verapdf/validate.sh generated-pdfs ua1
+      - name: Validate with veraPDF (auto-detected claims)
+        run: tools/verapdf/validate.sh generated-pdfs auto
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4
@@ -78,5 +78,5 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: verapdf-ua1
+          header: verapdf-conformance
           path: verapdf-summary.md

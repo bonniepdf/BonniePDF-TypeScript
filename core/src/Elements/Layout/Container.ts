@@ -4,6 +4,7 @@ import { LayersDescriptor } from '../../Fluent/Descriptors/LayersDescriptor';
 import { IElement } from '../IElement';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
+import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { isAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { isRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { isContainerRole, SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
@@ -26,6 +27,15 @@ export class Container extends BorderedElementBase implements IContentContainer 
    * Optional fixed height for the container (null = auto-size based on content)
    */
   public height?: number;
+
+  /**
+   * Horizontal alignment of the child within the container's available width
+   * (`AlignCenter`/`AlignRight`/`AlignLeft`). When the child is
+   * narrower than the container, it is positioned accordingly; otherwise it
+   * fills the width as before. `undefined`/`Start` keep the default left
+   * placement. `Stretch` is treated as "fill" (no offset).
+   */
+  public horizontalAlignment?: HorizontalAlignment;
 
   constructor() {
     super();
@@ -99,7 +109,19 @@ export class Container extends BorderedElementBase implements IContentContainer 
 
     ctx.currentX += this.padding.left;
     ctx.currentY += this.padding.top;
-    const childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
+    let childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
+
+    // Horizontal alignment: when the child is narrower than the available inner
+    // width, position it within that width rather than always pinning it left.
+    const align = this.horizontalAlignment;
+    if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
+      const preferred = this.child.getPreferredWidth();
+      if (preferred > 0 && preferred < childWidth) {
+        const slack = childWidth - preferred;
+        ctx.currentX += align === HorizontalAlignment.Center ? slack / 2 : slack;
+        childWidth = preferred;
+      }
+    }
 
     const yBeforeChildRender = ctx.currentY;
     this.renderChild(ctx, childWidth);

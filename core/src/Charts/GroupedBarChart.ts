@@ -12,6 +12,9 @@ import { TextAlignment } from '../Elements/Text/TextAlignment';
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
 export class GroupedBarChart extends CartesianChartBase {
+  /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
+  override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';
+
   /**
    * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
    */

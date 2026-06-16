@@ -14,6 +14,9 @@ import { ICanvas } from '../Drawing/ICanvas';
 export class BarChart extends CartesianChartBase {
   private static readonly BAR_COLOR_HEX = '#4f46e5';
 
+  /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
+  override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';
+
   /**
    * Color for the bars (backward compatibility).
    */

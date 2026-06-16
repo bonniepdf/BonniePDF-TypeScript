@@ -105,4 +105,19 @@ export interface ICanvas {
    * on PDF; no-op on SVG.
    */
   endArtifact(): void;
+
+  // ── Crisp-edge region (SVG only) ─────────────────────────────────
+
+  /**
+   * Begin a region whose shapes should render with `shape-rendering="crispEdges"`
+   * (axis-aligned lines/rects snapped to the device pixel grid, no antialiasing
+   * seams or blur). Used for chart axis lines so they stay sharp even when the
+   * chart as a whole keeps default antialiasing for diagonals/arcs. On SVG this
+   * opens a `<g shape-rendering="crispEdges">`; on PDF (and other canvases) it is
+   * an optional no-op. Must be paired with {@link endCrispEdges}.
+   */
+  beginCrispEdges?(): void;
+
+  /** End the region opened by {@link beginCrispEdges}. */
+  endCrispEdges?(): void;
 }

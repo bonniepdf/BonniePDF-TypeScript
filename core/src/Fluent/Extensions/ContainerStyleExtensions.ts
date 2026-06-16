@@ -5,6 +5,7 @@ import { Border } from '../../Core/Border';
 import { BorderColors } from '../../Core/BorderColors';
 import { Container } from '../../Elements/Layout/Container';
 import { IContentContainer } from '../IContentContainer';
+import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 
 /**
  * Fluent chaining extension methods for styling containers.
@@ -335,6 +336,7 @@ export class ContainerStyleExtensions {
    */
   static alignCenter(c: IContentContainer): IContentContainer {
     const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.horizontalAlignment = HorizontalAlignment.Center;
     return container;
   }
 
@@ -343,6 +345,7 @@ export class ContainerStyleExtensions {
    */
   static alignRight(c: IContentContainer): IContentContainer {
     const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.horizontalAlignment = HorizontalAlignment.End;
     return container;
   }
 
@@ -351,6 +354,7 @@ export class ContainerStyleExtensions {
    */
   static alignLeft(c: IContentContainer): IContentContainer {
     const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.horizontalAlignment = HorizontalAlignment.Start;
     return container;
   }
 }

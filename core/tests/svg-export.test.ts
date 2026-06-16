@@ -37,6 +37,29 @@ describe('SvgExport', () => {
     expect(canvas.getSvg()).toContain('y="28"');
   });
 
+  it('BarChart_ToSvg_UsesCrispEdges', () => {
+    // Bars + gridlines are axis-aligned: crisp edges render sharper than antialiased.
+    const svg = chartToSvg(new BarChart(), createSampleData());
+    expect(svg).toContain('shape-rendering="crispEdges"');
+  });
+
+  it('GroupedBarChart_ToSvg_UsesCrispEdges', () => {
+    const svg = chartToSvg(new GroupedBarChart(), createSampleData());
+    expect(svg).toContain('shape-rendering="crispEdges"');
+  });
+
+  it('LineChart_ToSvg_KeepsDefaultAntialiasing', () => {
+    // Diagonal segments + circle markers must stay antialiased.
+    const svg = chartToSvg(new LineChart(), createSampleData());
+    expect(svg).not.toContain('shape-rendering');
+  });
+
+  it('PieChart_ToSvg_KeepsDefaultAntialiasing', () => {
+    // Arc paths must stay antialiased.
+    const svg = chartToSvg(new PieChart(), createSampleData());
+    expect(svg).not.toContain('shape-rendering');
+  });
+
   it('BarChart_ToSvg_ContainsSvgTags', () => {
     const chart = new BarChart();
     chart.width = 600;

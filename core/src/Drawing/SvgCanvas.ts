@@ -38,6 +38,15 @@ export interface SvgCanvasOptions {
    * approximation is used.
    */
   pdfBaseline?: boolean;
+
+  /**
+   * Value for the root `shape-rendering` attribute. Set to `'crispEdges'` for
+   * pixel-grid symbologies (barcodes, QR, Data Matrix) so abutting module
+   * rectangles snap to the device pixel grid and don't leave faint
+   * anti-aliasing seams ("1px lines") between modules. Omitted for charts and
+   * page export, which rely on the default antialiased rendering.
+   */
+  shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
 interface FragmentEntry {
@@ -354,6 +363,18 @@ export class SvgCanvas implements ICanvas {
   /** @inheritdoc */
   public endArtifact(): void {}
 
+  // ── Crisp-edge region ──────────────────────────────────────────────────────
+
+  /** @inheritdoc */
+  public beginCrispEdges(): void {
+    this.svgElements.push('<g shape-rendering="crispEdges">');
+  }
+
+  /** @inheritdoc */
+  public endCrispEdges(): void {
+    this.svgElements.push('</g>');
+  }
+
   // ── Output ─────────────────────────────────────────────────────────────────
 
   /** Returns the inner SVG markup without the enclosing `<svg>` element. */
@@ -384,14 +405,23 @@ export class SvgCanvas implements ICanvas {
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
-    )}">${this.svgElements.join('\n')}</svg>`;
+    )}"${this.shapeRenderingAttr()}>${this.svgElements.join('\n')}</svg>`;
   }
 
   public getSvg(): string {
     const inner = this.svgElements.join('\n');
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
-    )}">\n${inner}\n</svg>`;
+    )}"${this.shapeRenderingAttr()}>\n${inner}\n</svg>`;
+  }
+
+  /**
+   * Emits the root `shape-rendering` attribute when configured (e.g. for
+   * barcodes/QR/Data Matrix), otherwise nothing so charts and page export keep
+   * their byte-stable antialiased output.
+   */
+  private shapeRenderingAttr(): string {
+    return this.options.shapeRendering ? ` shape-rendering="${this.options.shapeRendering}"` : '';
   }
 
   // ── Internals ────────────────────────────────────────────────────────────

@@ -53,6 +53,16 @@ export interface SvgPageExportOptions {
    * Useful for preview/thumbnail pipelines that only need the first few pages.
    */
   maxPages?: number;
+
+  /**
+   * Value for the root `shape-rendering` attribute. Defaults to `auto` (the SVG
+   * default), which keeps antialiased curves/charts looking smooth. Set to
+   * `crispEdges` for pages dominated by pixel-grid graphics (barcodes, QR, Data
+   * Matrix) so abutting module rectangles snap to the device pixel grid and
+   * don't leave faint anti-aliasing seams between modules. Text is governed by
+   * `text-rendering`, so it is unaffected either way.
+   */
+  shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
 /** Default values applied when an option is omitted. */
@@ -62,4 +72,5 @@ export const SVG_PAGE_EXPORT_DEFAULTS: Required<Omit<SvgPageExportOptions, 'titl
   textMode: 'text',
   includeLinks: false,
   includeAccessibilityMetadata: true,
+  shapeRendering: 'auto',
 };

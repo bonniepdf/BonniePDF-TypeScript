@@ -296,6 +296,11 @@ export abstract class CartesianChartBase extends ChartBase {
    * Draws the X and Y axis lines.
    */
   protected static drawAxisLines(canvas: ICanvas, chartAreaWidth: number, baselineY: number, topY: number): void {
+    // The X and Y axis lines are axis-aligned, so render them with crisp edges
+    // on every chart type (a sharp, fully-opaque hairline rather than a blurred
+    // antialiased one) while leaving any diagonal/curved series geometry smooth.
+    canvas.beginCrispEdges?.();
+
     // Left vertical line
     canvas.drawLine(
       CartesianChartBase.LEFT_PADDING,
@@ -315,6 +320,8 @@ export abstract class CartesianChartBase extends ChartBase {
       CartesianChartBase.AXIS_COLOR,
       CartesianChartBase.AXIS_LINE_WIDTH
     );
+
+    canvas.endCrispEdges?.();
   }
 
   /**

@@ -58,7 +58,10 @@ export class QrSegment {
 
     if (/^\d*$/.test(text)) {
       result.push(this.makeNumeric(text));
-    } else if (/^[0-9A-Z $%*+./:-]*$/i.test(text)) {
+    } else if (/^[0-9A-Z $%*+./:-]*$/.test(text)) {
+      // Case-sensitive on purpose: QR alphanumeric mode has no lowercase. A
+      // string with lowercase must fall through to byte mode (below) so its
+      // case is preserved, rather than being silently upper-cased.
       result.push(this.makeAlphanumeric(text));
     } else {
       const encoder = new TextEncoder();
@@ -103,13 +106,12 @@ export class QrSegment {
     let i = 0;
     while (i + 1 < text.length) {
       const val =
-        this.alphanumericCharset.indexOf(text[i].toUpperCase()) * 45 +
-        this.alphanumericCharset.indexOf(text[i + 1].toUpperCase());
+        this.alphanumericCharset.indexOf(text[i]) * 45 + this.alphanumericCharset.indexOf(text[i + 1]);
       this.appendBits(val, 11, bits);
       i += 2;
     }
     if (i < text.length) {
-      this.appendBits(this.alphanumericCharset.indexOf(text[i].toUpperCase()), 6, bits);
+      this.appendBits(this.alphanumericCharset.indexOf(text[i]), 6, bits);
     }
     return new QrSegment(Mode.Alphanumeric, text.length, bits);
   }

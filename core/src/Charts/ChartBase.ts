@@ -40,6 +40,17 @@ export abstract class ChartBase {
   stretchToFit: boolean = false;
 
   /**
+   * Preferred root `shape-rendering` for standalone SVG export ({@link
+   * SvgExportExtensions.chartToSvg}). `undefined` (the default) keeps the SVG
+   * default antialiasing, which is required for charts with diagonal lines,
+   * arcs, or circles. Axis-aligned charts (bar, grouped bar) override this to
+   * `'crispEdges'` so their bars and gridlines snap to the pixel grid instead
+   * of softening into blurred edges. Text is governed by `text-rendering`, so
+   * it is unaffected either way.
+   */
+  svgShapeRendering: 'auto' | 'crispEdges' | undefined = undefined;
+
+  /**
    * Draws the chart to the specified canvas.
    * This method handles the common setup (background, title) and calls the abstract DrawContent method.
    * @param canvas The canvas to draw to

@@ -8,6 +8,7 @@ import { Border } from '../src/Core/Border';
 import { BorderColors } from '../src/Core/BorderColors';
 import { Color } from '../src/Core/Color';
 import { ColorPalette } from '../src/Core/ColorPalette';
+import { HorizontalAlignment } from '../src/Core/HorizontalAlignment';
 import { MockCanvas } from './helpers/mock-canvas';
 
 // Container layout matches the .NET reference: a fixed Height wins outright; otherwise
@@ -177,6 +178,71 @@ describe('Container — child positioning on render', () => {
     const startY = ctx.currentY;
     c.render(ctx, 500);
     expect(ctx.currentY - startY).toBeCloseTo(200, 4);
+  });
+});
+
+describe('Container — horizontal alignment of a narrower child', () => {
+  /** Builds a container whose child reports a fixed preferred width. */
+  function setup(alignment: (typeof HorizontalAlignment)[keyof typeof HorizontalAlignment] | undefined) {
+    const { ctx } = makeContext();
+    const c = new Container();
+    const probe = new Probe(10);
+    probe.preferredWidth = 100;
+    c.child = probe;
+    if (alignment !== undefined) c.horizontalAlignment = alignment;
+    c.render(ctx, 500);
+    return probe;
+  }
+
+  it('left-aligns by default (no alignment set)', () => {
+    const probe = setup(undefined);
+    expect(probe.renderedX).toBeCloseTo(0, 4);
+    expect(probe.renderedWidth).toBeCloseTo(500, 4); // fills, no centering
+  });
+
+  it('Start keeps the child pinned left', () => {
+    const probe = setup(HorizontalAlignment.Start);
+    expect(probe.renderedX).toBeCloseTo(0, 4);
+    expect(probe.renderedWidth).toBeCloseTo(500, 4);
+  });
+
+  it('Center offsets the child by half the slack and renders it at its preferred width', () => {
+    const probe = setup(HorizontalAlignment.Center);
+    expect(probe.renderedX).toBeCloseTo((500 - 100) / 2, 4); // 200
+    expect(probe.renderedWidth).toBeCloseTo(100, 4);
+  });
+
+  it('End right-aligns the child', () => {
+    const probe = setup(HorizontalAlignment.End);
+    expect(probe.renderedX).toBeCloseTo(500 - 100, 4); // 400
+    expect(probe.renderedWidth).toBeCloseTo(100, 4);
+  });
+
+  it('does not offset when the child is as wide as (or wider than) the container', () => {
+    const { ctx } = makeContext();
+    const c = new Container();
+    const probe = new Probe(10);
+    probe.preferredWidth = 0; // flexible/full-width child reports no preference
+    c.child = probe;
+    c.horizontalAlignment = HorizontalAlignment.Center;
+    c.render(ctx, 500);
+    expect(probe.renderedX).toBeCloseTo(0, 4);
+    expect(probe.renderedWidth).toBeCloseTo(500, 4);
+  });
+
+  it('honours alignment within a fixed width and inside padding/border', () => {
+    const { ctx } = makeContext();
+    const c = new Container();
+    const probe = new Probe(10);
+    probe.preferredWidth = 40;
+    c.child = probe;
+    c.width = 200;
+    c.padding = new Thickness(10, 0, 10, 0); // inner width 180
+    c.horizontalAlignment = HorizontalAlignment.Center;
+    c.render(ctx, 500);
+    // inner width 180, slack 140, half = 70, plus padding.left 10
+    expect(probe.renderedX).toBeCloseTo(10 + 70, 4);
+    expect(probe.renderedWidth).toBeCloseTo(40, 4);
   });
 });
 

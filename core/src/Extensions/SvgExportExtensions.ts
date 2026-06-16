@@ -44,7 +44,15 @@ export class SvgExportExtensions {
    */
   static chartToSvg(chart: ChartBase, data: ChartData): string {
     // Charts use standard fonts internally, so no per-glyph font resolver is needed here.
-    const canvas = new SvgCanvas(chart.width, chart.height);
+    // Axis-aligned charts (bar, grouped bar) opt into crisp edges via
+    // `svgShapeRendering`; others keep the default antialiasing for their
+    // diagonals/arcs/circles.
+    const canvas = new SvgCanvas(
+      chart.width,
+      chart.height,
+      undefined,
+      chart.svgShapeRendering ? { shapeRendering: chart.svgShapeRendering } : undefined
+    );
 
     // Draw the chart
     chart.draw(canvas, data);
@@ -80,7 +88,13 @@ export class SvgExportExtensions {
   private static elementToSvg(element: IElement): string {
     const width = element.getPreferredWidth();
     const height = element.measureHeight(width);
-    const ctx = new RenderContext(new PdfSize(width, height), 0, true);
+    // Barcodes, QR, and Data Matrix are pixel-grid symbologies drawn as a mosaic
+    // of abutting rectangles. crispEdges snaps module edges to the device pixel
+    // grid so adjacent modules meet exactly, eliminating the faint anti-aliasing
+    // seams ("1px lines") that otherwise appear between blocks.
+    const ctx = new RenderContext(new PdfSize(width, height), 0, true, undefined, {
+      shapeRendering: 'crispEdges',
+    });
 
     element.render(ctx, width);
 

@@ -105,6 +105,7 @@ function assemblePageSvg(
   const h = round(output.height, opts.precision);
 
   const attrs = ['xmlns="http://www.w3.org/2000/svg"', `width="${w}"`, `height="${h}"`, `viewBox="0 0 ${w} ${h}"`];
+  if (opts.shapeRendering !== 'auto') attrs.push(`shape-rendering="${opts.shapeRendering}"`);
 
   const pageLabel = `${escapeAttr(title)} - page ${output.pageNumber}`;
   let head = '';

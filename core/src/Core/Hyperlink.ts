@@ -4,8 +4,8 @@ import { Color } from './Color';
 import { Thickness } from './Thickness';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
-import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
+import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
 import type { StructureElement } from '../Rendering/Tagging/StructureElement';
@@ -143,27 +143,14 @@ export class Hyperlink implements IElement, IRoleProvider {
     // Apply top margin
     ctx.currentY += this.margin.top;
 
-    // Register font
-    const fontResourceName = ctx.registerFont(this.fontName);
-    const embeddedFont = ctx.resolveEmbeddedFont(this.fontName);
-    // resolveEmbeddedFont returns null (not undefined) for standard fonts -
-    // use != null so both null and undefined are treated as "not embedded".
-    const isEmbedded = embeddedFont != null;
-
     const contentWidth = width - this.margin.left - this.margin.right;
     const lines = this.computeLines(contentWidth);
     let localY = ctx.currentY;
 
-    const ops: string[] = [];
-    if (this.textColor.scA < 1) {
-      PdfOperators.saveState(ops);
-      PdfOperators.setGraphicsState(ops, ctx.registerAlphaGraphicsState(this.textColor.scA));
-    }
-
-    PdfOperators.beginText(ops);
-    PdfOperators.setFont(ops, fontResourceName, this.fontSize);
-    PdfOperators.setFillColor(ops, this.textColor);
-
+    // Draw through the canvas (not by appending raw operators to the page
+    // stream) so the link text lands inside the /Link marked-content scope the
+    // pipeline opens around this element. Writing to ctx.pages directly emitted
+    // the text outside that scope, leaving it untagged (PDF/UA 7.1).
     let maxWidth = 0;
     for (const line of lines) {
       const lineWidth = FontMetrics.getStringWidth(line, this.fontName, this.fontSize);
@@ -171,24 +158,18 @@ export class Hyperlink implements IElement, IRoleProvider {
         maxWidth = lineWidth;
       }
 
-      const pdfY = ctx.pageSize.height - (localY + this.fontSize);
-
-      PdfOperators.setTextPosition(ops, ctx.currentX + this.margin.left, pdfY);
-
-      if (isEmbedded) {
-        PdfOperators.showText(ops, this.encodeTextAsGlyphIds(ctx, line));
-      } else {
-        PdfOperators.showText(ops, `(${PdfSyntax.escape(line)})`);
-      }
+      ctx.canvas.drawText(
+        ctx.currentX + this.margin.left,
+        localY,
+        line,
+        this.textColor,
+        this.fontSize,
+        this.fontName,
+        TextAlignment.Left
+      );
 
       localY += this.lineHeight;
     }
-
-    PdfOperators.endText(ops);
-    if (this.textColor.scA < 1) {
-      PdfOperators.restoreState(ops);
-    }
-    ctx.pages[ctx.currentPageIndex] += ops.join('');
 
     // Calculate total content height
     const contentHeight = lines.length * this.lineHeight;
@@ -254,25 +235,5 @@ export class Hyperlink implements IElement, IRoleProvider {
 
     if (currentLine !== '') lines.push(currentLine);
     return lines;
-  }
-
-  /**
-   * Encodes text as a PDF hex string of Glyph IDs for the current font,
-   * and records glyph usage for subsetting. Falls back to a plain escaped PDF string if the
-   * font is not embedded (i.e. a standard PDF font).
-   * @param ctx - The render context
-   * @param text - The text to encode
-   */
-  private encodeTextAsGlyphIds(ctx: RenderContext, text: string): string {
-    const font = ctx.resolveEmbeddedFont(this.fontName);
-    // resolveEmbeddedFont returns null for standard fonts, not undefined.
-    if (font == null) {
-      return `(${PdfSyntax.escape(text)})`;
-    }
-
-    // Track glyph usage for font subsetting (alias-aware)
-    ctx.trackGlyphUsage(this.fontName, text);
-
-    return PdfSyntax.toGlyphIdHexString(text, font);
   }
 }

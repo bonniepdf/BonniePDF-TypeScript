@@ -5,6 +5,7 @@ import { TextBlock } from '../src/Elements/Text/TextBlock';
 import { Table } from '../src/Elements/Tables/Table';
 import { VerticalStack } from '../src/Elements/Layout/VerticalStack';
 import { SemanticGroup } from '../src/Elements/Layout/SemanticGroup';
+import { Line } from '../src/Elements/Shapes/Line';
 import { Hyperlink } from '../src/Core/Hyperlink';
 import { SemanticRole } from '../src/Rendering/Tagging/SemanticRole';
 import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
@@ -141,6 +142,16 @@ describe('Stage 2 accessibility hardening (this feature)', () => {
       p.text = 'Body content.';
       p.fontSize = 12;
       d.add(p);
+    });
+
+    expect(pdf).toContain('/Artifact BMC');
+  });
+
+  it('untagged drawing operations in tagged docs are emitted as artifacts', () => {
+    const pdf = generateTagged(d => {
+      const line = new Line();
+      line.thickness = 2;
+      d.add(line);
     });
 
     expect(pdf).toContain('/Artifact BMC');

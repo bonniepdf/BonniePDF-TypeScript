@@ -8,10 +8,7 @@ import { PdfOperators } from './Pdf/PdfOperators';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
-import { isRoleProvider } from './Tagging/IRoleProvider';
-import { isAltTextProvider } from './Tagging/IAltTextProvider';
-import { toPdfTag, SemanticRole, isContainerRole } from './Tagging/SemanticRole';
-import type { Hyperlink } from '../Core/Hyperlink';
+import { beginChildTag, endChildTag } from './Tagging/ChildTagging';
 
 export class PdfRenderPipeline {
   public static renderPages(pages: Page[], settings: DocumentSettings): PdfRenderResult {
@@ -89,51 +86,17 @@ export class PdfRenderPipeline {
   private static readonly maxPageGuard = 500;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
-    // when tagging is on and the element declares a structure
-    // role, push the role onto the in-memory tree and wrap the
-    // element's render in a /role MCID BDC ... EMC pair. No-op when
-    // tagging is off or the element isn't role-providing. See the .NET
-    // mirror in PdfRenderPipeline.cs for the page-break caveat.
-    const tagging = ctx.tagging;
-    const role = tagging != null && isRoleProvider(element) ? element.semanticRole : null;
-    // Artifact is a marked-content type, NOT a structure type: a decorative
-    // element (e.g. an Image with no alt text) must be wrapped in /Artifact
-    // marked content and kept OUT of the structure tree. Emitting it as a
-    // StructElem with /S /Artifact is invalid (VeraPDF 7.1-5 / 7.1-1).
-    const isArtifact = role === SemanticRole.Artifact;
-    const tagThis = role != null && !isArtifact;
-
-    if (isArtifact) {
-      ctx.canvas.beginArtifact();
-    } else if (tagThis) {
-      const elem = tagging!.tree.begin(role!);
-
-      // Surface alt-text on the structure element when the element provides
-      // it. PDF/UA requires /Alt on Figure structure elements.
-      if (isAltTextProvider(element) && element.altText) {
-        tagging!.tree.setAlt(element.altText);
-      }
-
-      // wire the struct element back to the hyperlink so the
-      // serializer can write /StructParent + /OBJR in the annot dict.
-      if ('linkedStructElement' in element) (element as unknown as Hyperlink).linkedStructElement = elem;
-
-      if (isContainerRole(role!)) {
-        ctx.canvas.beginContainerContent(toPdfTag(role!));
-      } else {
-        ctx.canvas.beginMarkedContent(toPdfTag(role!));
-      }
-    }
-
+    // when tagging is on and the element declares a structure role, wrap
+    // its render in a marked-content sequence (BDC/EMC) or /Artifact region.
+    // Shared with the layout containers via beginChildTag/endChildTag so every
+    // child-render site tags consistently. No-op when tagging is off or the
+    // element isn't role-providing. See the .NET mirror in
+    // PdfRenderPipeline.cs for the page-break caveat.
+    const token = beginChildTag(ctx, element);
     try {
       this.renderElementWithOverflowCore(element, ctx, contentWidth);
     } finally {
-      if (isArtifact) {
-        ctx.canvas.endArtifact();
-      } else if (tagThis) {
-        ctx.canvas.endMarkedContent();
-        tagging!.tree.end();
-      }
+      endChildTag(ctx, token);
     }
   }
 

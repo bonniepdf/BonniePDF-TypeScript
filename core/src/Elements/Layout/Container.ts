@@ -5,9 +5,7 @@ import { IElement } from '../IElement';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
-import { isAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
-import { isRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
-import { isContainerRole, SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
+import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 
 /**
  * A container element that supports padding, background color, and borders.
@@ -111,8 +109,6 @@ export class Container extends BorderedElementBase implements IContentContainer 
     ctx.currentY += this.padding.top;
     let childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
 
-    // Horizontal alignment: when the child is narrower than the available inner
-    // width, position it within that width rather than always pinning it left.
     const align = this.horizontalAlignment;
     if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
       const preferred = this.child.getPreferredWidth();
@@ -149,24 +145,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
   private renderChild(ctx: RenderContext, innerWidth: number): void {
     if (!this.child) return;
 
-    const tagging = ctx.tagging;
-    const childRole = tagging != null && isRoleProvider(this.child) ? this.child.semanticRole : null;
-    const isArtifact = childRole === SemanticRole.Artifact;
-    const tagChild = childRole != null && !isArtifact;
-
-    if (isArtifact) {
-      ctx.canvas.beginArtifact();
-    } else if (tagChild) {
-      const elem = tagging!.tree.begin(childRole!);
-      if (isAltTextProvider(this.child) && this.child.altText) tagging!.tree.setAlt(this.child.altText);
-      if ('linkedStructElement' in this.child) (this.child as any).linkedStructElement = elem;
-      if (isContainerRole(childRole!)) {
-        ctx.canvas.beginContainerContent(toPdfTag(childRole!));
-      } else {
-        ctx.canvas.beginMarkedContent(toPdfTag(childRole!));
-      }
-    }
-
+    const token = beginChildTag(ctx, this.child);
     try {
       if ('renderStateful' in this.child && typeof (this.child as any).renderStateful === 'function') {
         (this.child as any).renderStateful(ctx, innerWidth);
@@ -174,12 +153,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
         this.child.render(ctx, innerWidth);
       }
     } finally {
-      if (isArtifact) {
-        ctx.canvas.endArtifact();
-      } else if (tagChild) {
-        ctx.canvas.endMarkedContent();
-        tagging!.tree.end();
-      }
+      endChildTag(ctx, token);
     }
   }
 }

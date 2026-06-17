@@ -8,13 +8,23 @@ import { TextSpan } from './TextSpan';
 import { TextDecoration } from './TextDecoration';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
+import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
+import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
 /**
  * A rich text element that supports mixed styling within a single flowing paragraph.
  * Text spans with different fonts, sizes, colors, weights, and decorations flow together
  * with automatic word wrapping across span boundaries.
  */
-export class RichText extends ElementBase implements IStatefulElement {
+export class RichText extends ElementBase implements IStatefulElement, IRoleProvider {
+  /**
+   * RichText renders one flowing paragraph, so it tags as /P. Without a role
+   * the pipeline would emit its text as untagged content (PDF/UA 7.1).
+   */
+  get semanticRole(): SemanticRole {
+    return SemanticRole.P;
+  }
+
   private readonly spans: TextSpan[] = [];
   private cachedContentWidth = -1;
   private cachedLines?: RichTextLine[];

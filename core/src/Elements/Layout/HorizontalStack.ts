@@ -2,6 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
+import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 
 /**
  * A layout element that arranges children horizontally with spacing and alignment options
@@ -161,11 +162,18 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       // Note: Stretch is not implemented for horizontal stack as it would require
       // modifying the child's height, which is not supported by the IElement interface
 
-      // Save state and render child
+      // Save state and render child. Tag role-bearing children so their
+      // content isn't emitted untagged (PDF/UA 7.1) - the stack itself renders
+      // children directly rather than via the pipeline.
       const yBefore = ctx.currentY;
       ctx.currentY += verticalOffset;
 
-      child.render(ctx, childWidth);
+      const token = beginChildTag(ctx, child);
+      try {
+        child.render(ctx, childWidth);
+      } finally {
+        endChildTag(ctx, token);
+      }
 
       ctx.currentY = yBefore;
       ctx.currentX += childWidth + this.spacing;

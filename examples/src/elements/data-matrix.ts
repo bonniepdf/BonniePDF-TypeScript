@@ -120,7 +120,7 @@ export function generate(): Document {
     ['0123456789012345', 'Numeric', 'Digit pairs'],
     ['SHIP-LABEL-A7', 'Alphanumeric', 'Text scheme'],
     ['ABCDEF1234', 'Structured', 'X12 / EDIFACT'],
-    ['café · 日本語', 'Unicode', 'Base-256 (UTF-8)'],
+    ['café · €uro', 'Unicode', 'Base-256 (UTF-8)'],
   ] as [string, string, string][]) {
     const dm = new DataMatrix();
     dm.data = data;

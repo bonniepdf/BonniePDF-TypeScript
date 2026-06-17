@@ -9,10 +9,27 @@ import { ImageWriter } from './Images/ImageWriter';
 import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
-import { FontManager } from '../Typography/FontManager';
+import { FontManager, FallbackFont } from '../Typography/FontManager';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
+import { shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
+
+/** Identifier prefix for glyph-fallback fonts registered on demand. */
+const FALLBACK_PREFIX = 'virtual:fallback:';
+
+/**
+ * A maximal substring of a draw call that renders with one font, after
+ * glyph-fallback resolution. `embeddedFont` is `null` for non-embedded
+ * (standard Type1) fonts, in which case the text is emitted as a literal
+ * string rather than glyph IDs.
+ */
+export interface ResolvedTextRun {
+  resourceName: string;
+  embeddedFont: TtfFont | null;
+  fontIdentifier: string;
+  text: string;
+}
 
 export type PdfAResourceIssueCode =
   | 'non-embedded-standard-font'
@@ -382,6 +399,69 @@ export class PdfResourceRegistry {
       const fontInfo = this.getEmbeddedFont(ttfPath);
       fontInfo?.tracker?.markUsedText?.(text);
     }
+  }
+
+  /**
+   * Resolves a draw call's text into one or more runs, each renderable by a
+   * single font. The primary font is used wherever it has the glyph; code
+   * points it lacks are routed to the first registered fallback font that
+   * covers them (registering it for embedding on demand). Control and
+   * default-ignorable code points are dropped, as are code points no font can
+   * render — both silently in output, the latter with a diagnostic — so the
+   * content stream never references the forbidden `.notdef` glyph.
+   *
+   * When the primary font covers the whole string (or is a non-embedded
+   * Type1 font) the result is a single run identical to the legacy path.
+   */
+  public resolveTextRuns(primaryFontIdentifier: string, text: string): ResolvedTextRun[] {
+    const resourceName = this.registerFont(primaryFontIdentifier);
+    const primaryFont = this.resolveEmbeddedFont(primaryFontIdentifier);
+
+    // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
+    // preserve the literal-string emission path unchanged.
+    if (!(primaryFont instanceof TtfFont)) {
+      return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
+    }
+
+    // candidates[0] is the primary font; fallbackByIndex is aligned to
+    // candidates (index 0 is the primary and has no FallbackFont entry).
+    const candidates: ShaperFont[] = [{ fontIdentifier: primaryFontIdentifier, font: primaryFont }];
+    const fallbackByIndex: (FallbackFont | undefined)[] = [undefined];
+    for (const fb of FontManager.getFallbackFonts()) {
+      if (fb.font === primaryFont) continue;
+      candidates.push({ fontIdentifier: `${FALLBACK_PREFIX}${fb.key}`, font: fb.font });
+      fallbackByIndex.push(fb);
+    }
+
+    const { runs, unsupported } = shapeTextRuns(text, candidates);
+
+    if (unsupported.length > 0) {
+      const sample = Array.from(new Set(unsupported))
+        .slice(0, 8)
+        .map(cp => `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`)
+        .join(', ');
+      this.diagnostics.addWarning(
+        'font',
+        `Dropped ${unsupported.length} code point(s) with no glyph in the selected or fallback fonts (${sample}).`,
+        primaryFontIdentifier
+      );
+    }
+
+    return runs.map(run => {
+      if (run.fontIndex === 0) {
+        return { resourceName, embeddedFont: primaryFont, fontIdentifier: primaryFontIdentifier, text: run.text };
+      }
+      const fb = fallbackByIndex[run.fontIndex]!;
+      const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
+      const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
+      const fbFont = this.resolveEmbeddedFont(fbIdentifier);
+      return {
+        resourceName: fbResource,
+        embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
+        fontIdentifier: fbIdentifier,
+        text: run.text,
+      };
+    });
   }
 
   public getNewImageId(): number {

@@ -1,4 +1,4 @@
-import { PdfResourceRegistry } from './PdfResourceRegistry';
+import { PdfResourceRegistry, ResolvedTextRun } from './PdfResourceRegistry';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
 import { PdfCanvas } from '../Drawing/PdfCanvas';
@@ -162,7 +162,9 @@ export class RenderContext {
         this.resolveImageResource.bind(this),
         this.resolveEmbeddedFont.bind(this),
         this.trackGlyphUsage.bind(this),
-        this.registerAlphaGraphicsState.bind(this)
+        this.registerAlphaGraphicsState.bind(this),
+        this.resolveTextRuns.bind(this),
+        this.reportUntaggedImage.bind(this)
       );
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
@@ -204,6 +206,25 @@ export class RenderContext {
 
   public trackGlyphUsage(fontIdentifier: string, text: string): void {
     this.resources.trackGlyphUsage(fontIdentifier, text);
+  }
+
+  public resolveTextRuns(fontIdentifier: string, text: string): ResolvedTextRun[] {
+    return this.resources.resolveTextRuns(fontIdentifier, text);
+  }
+
+  /**
+   * Called when an image/XObject reaches the canvas in a tagged document with
+   * no enclosing structure tag or artifact scope, so it was auto-wrapped as an
+   * /Artifact to stay PDF/UA-valid. Surfacing this as a diagnostic keeps a
+   * meaningful image from being demoted to an artifact *silently* — the author
+   * should tag it (alt text -> Figure) or mark it decorative on purpose.
+   */
+  public reportUntaggedImage(): void {
+    this.resources.diagnostics.addWarning(
+      'tagging',
+      'An image was drawn in a tagged document without a structure tag or artifact scope; ' +
+        'it was emitted as an /Artifact. Provide alt text (tags it as /Figure) or mark it decorative to silence this.'
+    );
   }
 
   public registerFont(fontIdentifier: string): string {

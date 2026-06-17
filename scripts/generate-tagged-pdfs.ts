@@ -11,9 +11,9 @@
 // prefix to the bundled example fonts (examples/assets/fonts) and generate via
 // the async path so the fonts are preloaded before serialisation. These fonts
 // ship only with the private @bonniepdf/examples package - never with @bonniepdf/core.
-import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { configurePlatform, NodePlatformIO } from '@bonniepdf/core';
+import { configurePlatform, NodePlatformIO, FontManager } from '@bonniepdf/core';
 import { examples } from '../examples/src/index.ts';
 
 // Map the browser-style asset URLs the examples use to on-disk font files:
@@ -32,6 +32,26 @@ configurePlatform({
   writeFile: (path: string, data: Uint8Array) => base.writeFile(path, data),
   deflate: (data: Uint8Array) => base.deflate(data),
 });
+
+// Register the bundled Noto fonts as a glyph-fallback chain. The engine routes
+// any code point the document's primary font lacks (e.g. a ★ list bullet, a
+// symbol, an emoji) to the first registered font that covers it, embedding it
+// on demand, rather than emitting a forbidden .notdef glyph. These fonts ship
+// only with the private @bonniepdf/examples package - never with @bonniepdf/core.
+const FALLBACK_FONTS: ReadonlyArray<readonly [file: string, family: string]> = [
+  ['NotoSans-Regular', 'noto sans'],
+  ['NotoSansSymbols2-Regular', 'noto sans symbols 2'],
+  ['NotoSansMath-Regular', 'noto sans math'],
+  ['NotoEmoji-Regular', 'noto emoji'],
+];
+for (const [file, family] of FALLBACK_FONTS) {
+  try {
+    const bytes = new Uint8Array(readFileSync(resolve(exampleFontsDir, `${file}.ttf`)));
+    FontManager.registerFont(bytes, { family, subfamily: 'regular' });
+  } catch {
+    // font not present in this checkout - skip
+  }
+}
 
 const outDir = resolve(import.meta.dirname, '..', 'generated-pdfs');
 rmSync(outDir, { recursive: true, force: true });

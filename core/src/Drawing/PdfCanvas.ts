@@ -9,6 +9,14 @@ import { PdfDrawing } from '../Rendering/Pdf/PdfDrawing';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
 
+/** A maximal substring that renders with one font, after glyph-fallback resolution. */
+interface TextRun {
+  resourceName: string;
+  embeddedFont: any;
+  fontIdentifier: string;
+  text: string;
+}
+
 export class PdfCanvas implements ICanvas {
   public readonly width: number = 0;
   public readonly height: number;
@@ -25,12 +33,16 @@ export class PdfCanvas implements ICanvas {
   private readonly markedContentTagged: boolean[] = [];
   /** Per-beginArtifact record of whether an /Artifact wrapper was actually emitted. */
   private artifactEmitStack: boolean[] = [];
+  /** Logical nesting depth of /Artifact regions (whether or not each emitted a BMC). */
+  private artifactDepth = 0;
 
   private readonly _fontResolver: (fontFamily: string) => string;
   private readonly _imageResolver: (image: any) => string;
   private readonly _embeddedFontResolver: (fontFamily: string) => any;
   private readonly _glyphTracker: (fontIdentifier: string, text: string) => void;
   private readonly _alphaGraphicsStateResolver: (alpha: number) => string;
+  private readonly _textRunResolver?: (fontFamily: string, text: string) => TextRun[];
+  private readonly _reportUntaggedImage?: () => void;
 
   constructor(
     pageHeight: number,
@@ -40,7 +52,9 @@ export class PdfCanvas implements ICanvas {
     imageResolver?: (image: any) => string,
     embeddedFontResolver?: (fontFamily: string) => any,
     glyphTracker?: (fontIdentifier: string, text: string) => void,
-    alphaGraphicsStateResolver?: (alpha: number) => string
+    alphaGraphicsStateResolver?: (alpha: number) => string,
+    textRunResolver?: (fontFamily: string, text: string) => TextRun[],
+    reportUntaggedImage?: () => void
   ) {
     this.height = pageHeight;
     this.xOffset = xOffset;
@@ -55,6 +69,8 @@ export class PdfCanvas implements ICanvas {
     this._glyphTracker = glyphTracker ?? ((_id, _t) => {});
     this._alphaGraphicsStateResolver =
       alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
+    this._textRunResolver = textRunResolver;
+    this._reportUntaggedImage = reportUntaggedImage;
   }
 
   public getStream(): string[] {
@@ -155,24 +171,21 @@ export class PdfCanvas implements ICanvas {
     this.beginColorAlpha(color);
     PdfOperators.beginText(this.stream);
 
-    // Font must be registered before glyph tracking so the GlyphUsageTracker exists for embedded fonts
-    const fontResourceName = this._fontResolver(fontFamily);
-    this._glyphTracker(fontFamily, text);
-    PdfOperators.setFont(this.stream, fontResourceName, fontSize);
+    // Resolve runs first so any embedded/fallback fonts are registered before
+    // glyph tracking and width measurement.
+    const runs = this.resolveRuns(text, fontFamily);
     PdfOperators.setFillColor(this.stream, color);
 
     let xOff = 0;
     if (align === TextAlignment.Center || align === TextAlignment.Right) {
-      const textSize = this.measureText(text, fontSize, fontFamily);
-      xOff = align === TextAlignment.Center ? -textSize.width / 2 : -textSize.width;
+      const width = this.measureRuns(runs, fontSize);
+      xOff = align === TextAlignment.Center ? -width / 2 : -width;
     }
 
     const pdfX = x + this.xOffset + xOff;
     PdfOperators.setTextPosition(this.stream, pdfX, pdfY);
 
-    const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    this.emitShowText(runs, fontSize);
 
     PdfOperators.endText(this.stream);
     this.endColorAlpha(color);
@@ -196,15 +209,11 @@ export class PdfCanvas implements ICanvas {
     this.applyColorAlpha(color);
 
     PdfOperators.beginText(this.stream);
-    const fontResourceName = this._fontResolver(fontFamily);
-    this._glyphTracker(fontFamily, text);
-    PdfOperators.setFont(this.stream, fontResourceName, fontSize);
+    const runs = this.resolveRuns(text, fontFamily);
     PdfOperators.setFillColor(this.stream, color);
     PdfOperators.setTextPosition(this.stream, 0, 0);
 
-    const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    this.emitShowText(runs, fontSize);
 
     PdfOperators.endText(this.stream);
     PdfOperators.restoreState(this.stream);
@@ -227,24 +236,19 @@ export class PdfCanvas implements ICanvas {
       return;
     }
 
-    const textSize = this.measureText(text, fontSize, fontFamily);
-    const wordSpacing = (availableWidth - textSize.width) / spaceCount;
+    const runs = this.resolveRuns(text, fontFamily);
+    const wordSpacing = (availableWidth - this.measureRuns(runs, fontSize)) / spaceCount;
 
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
     this.beginColorAlpha(color);
     PdfOperators.beginText(this.stream);
-    const fontResourceName = this._fontResolver(fontFamily);
-    this._glyphTracker(fontFamily, text);
-    PdfOperators.setFont(this.stream, fontResourceName, fontSize);
     PdfOperators.setFillColor(this.stream, color);
     PdfOperators.setWordSpacing(this.stream, wordSpacing);
     PdfOperators.setTextPosition(this.stream, pdfX, pdfY);
 
-    const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont != null) PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(text, embeddedFont));
-    else PdfOperators.showText(this.stream, `(${PdfSyntax.escape(text)})`);
+    this.emitShowText(runs, fontSize);
 
     PdfOperators.setWordSpacing(this.stream, 0);
     PdfOperators.endText(this.stream);
@@ -256,26 +260,30 @@ export class PdfCanvas implements ICanvas {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
 
-    PdfOperators.saveState(this.stream);
-    PdfOperators.translate(this.stream, pdfX, pdfY);
-    // Combine EXIF orientation with the display-size scale into a single
-    // `cm` matrix.  For orientation=1 (the common case) this is identical
-    // to the previous translate+scale sequence.
-    const orientation = typeof image?.orientation === 'number' ? image.orientation : 1;
-    const m = orientationMatrix(orientation, width, height);
-    PdfOperators.concatMatrix(this.stream, m[0], m[1], m[2], m[3], m[4], m[5]);
-    PdfOperators.paintXObject(this.stream, imageName);
-    PdfOperators.restoreState(this.stream);
+    this.drawAsArtifactFallback(() => {
+      PdfOperators.saveState(this.stream);
+      PdfOperators.translate(this.stream, pdfX, pdfY);
+      // Combine EXIF orientation with the display-size scale into a single
+      // `cm` matrix.  For orientation=1 (the common case) this is identical
+      // to the previous translate+scale sequence.
+      const orientation = typeof image?.orientation === 'number' ? image.orientation : 1;
+      const m = orientationMatrix(orientation, width, height);
+      PdfOperators.concatMatrix(this.stream, m[0], m[1], m[2], m[3], m[4], m[5]);
+      PdfOperators.paintXObject(this.stream, imageName);
+      PdfOperators.restoreState(this.stream);
+    }, this._reportUntaggedImage);
   }
 
   public drawFormXObject(resourceName: string, x: number, y: number): void {
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset);
 
-    PdfOperators.saveState(this.stream);
-    PdfOperators.translate(this.stream, pdfX, pdfY);
-    PdfOperators.paintXObject(this.stream, resourceName);
-    PdfOperators.restoreState(this.stream);
+    this.drawAsArtifactFallback(() => {
+      PdfOperators.saveState(this.stream);
+      PdfOperators.translate(this.stream, pdfX, pdfY);
+      PdfOperators.paintXObject(this.stream, resourceName);
+      PdfOperators.restoreState(this.stream);
+    }, this._reportUntaggedImage);
   }
 
   /**
@@ -338,35 +346,93 @@ export class PdfCanvas implements ICanvas {
     // structure element (e.g. a table cell's /TD) is already enclosed real
     // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag is
     // invalid. The emit decision is recorded so endArtifact() stays balanced.
-    const emit = this.tagging != null && this.openMarkedContent === 0;
+    // Only emit a BMC at the outermost artifact level: a nested /Artifact is
+    // redundant, and emitting one inside an open structure scope is invalid.
+    const emit = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
     if (emit) PdfOperators.beginArtifact(this.stream);
     this.artifactEmitStack.push(emit);
+    this.artifactDepth++;
   }
 
   /** @inheritdoc */
   public endArtifact(): void {
+    if (this.artifactDepth > 0) this.artifactDepth--;
     const emit = this.artifactEmitStack.pop() ?? false;
     if (emit) PdfOperators.endMarkedContent(this.stream);
   }
 
+  /**
+   * True when drawing currently sits inside an /Artifact region. Structure
+   * tagging must be suppressed here: PDF/UA 7.1-2 forbids tagged (real) content
+   * inside an artifact, so role-bearing children of a decorative subtree
+   * (header/footer/slot/chart) stay artifact content rather than getting their
+   * own BDC.
+   */
+  public isInsideArtifact(): boolean {
+    return this.artifactDepth > 0;
+  }
+
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
-    // For embedded TrueType fonts, use the actual glyph advance widths.
-    // Falling back to the Helvetica AFM table produces wrong line-break
-    // positions and misaligned center/right text.
-    const embeddedFont = this._embeddedFontResolver(fontFamily);
-    if (embeddedFont && typeof embeddedFont.getCharWidthInPoints === 'function') {
-      let totalWidth = 0;
-      for (const char of text) {
-        const cp = char.codePointAt(0)!;
-        if (cp < 32) continue; // skip control characters (matches toGlyphIdHexString)
-        totalWidth += (embeddedFont as any).getCharWidthInPoints(cp, fontSize) as number;
+    // Measure per glyph-fallback run so the width matches what is actually
+    // emitted (including any fallback-font glyphs and excluding dropped
+    // default-ignorable code points). When the primary font covers the whole
+    // string this collapses to a single run and is identical to before.
+    const width = this.measureRuns(this.resolveRuns(text, fontFamily), fontSize);
+    return new Size(width, fontSize * 1.2);
+  }
+
+  /**
+   * Resolves `text` into per-font runs via the injected run resolver
+   * (glyph fallback). Without a resolver, returns a single legacy run using
+   * the primary font resolvers, preserving standalone-canvas behaviour.
+   */
+  private resolveRuns(text: string, fontFamily: string): TextRun[] {
+    if (this._textRunResolver) return this._textRunResolver(fontFamily, text);
+    return [
+      {
+        resourceName: this._fontResolver(fontFamily),
+        embeddedFont: this._embeddedFontResolver(fontFamily),
+        fontIdentifier: fontFamily,
+        text,
+      },
+    ];
+  }
+
+  /** Sums the rendered width of `runs` at `fontSize`, each run in its own font. */
+  private measureRuns(runs: TextRun[], fontSize: number): number {
+    let total = 0;
+    for (const run of runs) {
+      const font = run.embeddedFont;
+      if (font && typeof font.getCharWidthInPoints === 'function') {
+        for (const char of run.text) {
+          const cp = char.codePointAt(0)!;
+          if (cp < 32) continue; // matches toGlyphIdHexString
+          total += font.getCharWidthInPoints(cp, fontSize) as number;
+        }
+      } else {
+        total += FontMetrics.getStringWidth(run.text, run.fontIdentifier, fontSize);
       }
-      const height = fontSize * 1.2;
-      return new Size(totalWidth, height);
     }
-    const width = FontMetrics.getStringWidth(text, fontFamily, fontSize);
-    const height = fontSize * 1.2;
-    return new Size(width, height);
+    return total;
+  }
+
+  /**
+   * Emits the font-selection (`Tf`) and show-text (`Tj`) operators for the
+   * resolved runs. The caller must have positioned the text matrix and set the
+   * fill colour first; each `Tj` advances the text point by its glyph widths,
+   * so consecutive runs flow on naturally.
+   */
+  private emitShowText(runs: TextRun[], fontSize: number): void {
+    for (const run of runs) {
+      if (run.text.length === 0) continue;
+      this._glyphTracker(run.fontIdentifier, run.text);
+      PdfOperators.setFont(this.stream, run.resourceName, fontSize);
+      if (run.embeddedFont != null) {
+        PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(run.text, run.embeddedFont));
+      } else {
+        PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
+      }
+    }
   }
 
   private getDefaultFontResourceName(fontFamily: string): string {
@@ -374,9 +440,34 @@ export class PdfCanvas implements ICanvas {
   }
 
   private drawWithColorAlpha(color: Color, draw: () => void): void {
-    this.beginColorAlpha(color);
-    draw();
-    this.endColorAlpha(color);
+    this.drawAsArtifactFallback(() => {
+      this.beginColorAlpha(color);
+      draw();
+      this.endColorAlpha(color);
+    });
+  }
+
+  /**
+   * Wraps unscoped drawing in an /Artifact BMC for tagged documents, so the
+   * marks aren't left as bare (untagged) real content (PDF/UA 7.1). Skips the
+   * wrapper when already inside a structure scope or an explicit /Artifact
+   * region, so decorative content in headers/footers/slots isn't double-marked.
+   *
+   * `onAutoArtifact` runs only when the fallback actually fires, letting image
+   * callers surface a diagnostic rather than silently demoting meaningful
+   * content to an artifact.
+   */
+  private drawAsArtifactFallback(draw: () => void, onAutoArtifact?: () => void): void {
+    const needsFallbackArtifact = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
+    if (needsFallbackArtifact) {
+      PdfOperators.beginArtifact(this.stream);
+      onAutoArtifact?.();
+    }
+    try {
+      draw();
+    } finally {
+      if (needsFallbackArtifact) PdfOperators.endMarkedContent(this.stream);
+    }
   }
 
   private beginColorAlpha(color: Color): void {

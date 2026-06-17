@@ -2,9 +2,7 @@ import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
-import { isRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
-import { isAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
-import { toPdfTag, SemanticRole, isContainerRole } from '../../Rendering/Tagging/SemanticRole';
+import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
@@ -57,25 +55,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
       // Tag children that declare a semantic role. Uses the same try/finally
       // pattern as PdfRenderPipeline so tagging is closed before
       // Overflow/WrapRequired propagates upward.
-      const tagging = ctx.tagging;
-      const childRole = tagging != null && isRoleProvider(child) ? child.semanticRole : null;
-      // Artifact is a marked-content type, not a structure type - a decorative
-      // child is wrapped in /Artifact and kept out of the structure tree.
-      const isArtifact = childRole === SemanticRole.Artifact;
-      const tagChild = childRole != null && !isArtifact;
-      if (isArtifact) {
-        ctx.canvas.beginArtifact();
-      } else if (tagChild) {
-        const elem = tagging!.tree.begin(childRole!);
-        if (isAltTextProvider(child) && child.altText) tagging!.tree.setAlt(child.altText);
-        // Wire LinkedStructElement for Hyperlink children.
-        if ('linkedStructElement' in child) (child as any).linkedStructElement = elem;
-        if (isContainerRole(childRole!)) {
-          ctx.canvas.beginContainerContent(toPdfTag(childRole!));
-        } else {
-          ctx.canvas.beginMarkedContent(toPdfTag(childRole!));
-        }
-      }
+      const token = beginChildTag(ctx, child);
 
       try {
         if ('renderStateful' in child) {
@@ -139,12 +119,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
           }
         }
       } finally {
-        if (isArtifact) {
-          ctx.canvas.endArtifact();
-        } else if (tagChild) {
-          ctx.canvas.endMarkedContent();
-          tagging!.tree.end();
-        }
+        endChildTag(ctx, token);
       }
     }
 
@@ -186,12 +161,19 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
     // Non-stateful fallback - renders all children without pagination.
     // Used when VerticalStack is a child of Container or another element
-    // that calls child.render() directly.
+    // that calls child.render() directly. Children are still tagged so a
+    // role-bearing leaf nested under a non-paginating container is not left
+    // as untagged content (PDF/UA 7.1).
     for (const child of this.children) {
-      if ('renderStateful' in child && typeof (child as any).renderStateful === 'function') {
-        (child as any).renderStateful(ctx, contentWidth);
-      } else {
-        child.render(ctx, contentWidth);
+      const token = beginChildTag(ctx, child);
+      try {
+        if ('renderStateful' in child && typeof (child as any).renderStateful === 'function') {
+          (child as any).renderStateful(ctx, contentWidth);
+        } else {
+          child.render(ctx, contentWidth);
+        }
+      } finally {
+        endChildTag(ctx, token);
       }
     }
   }

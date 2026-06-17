@@ -70,9 +70,22 @@ const BUNDLED_FONTS: ReadonlyArray<readonly [string, string, string]> = [
  * FontManager.registerFont(fontBytes);
  * ```
  */
+/** A registered font available to the glyph-fallback chain. */
+export interface FallbackFont {
+  /** Registry key (`family:weight`), stable across the document. */
+  key: string;
+  /** Raw TTF bytes, for embedding the fallback font on demand. */
+  bytes: Uint8Array;
+  /** Parsed font, for glyph-coverage probing. */
+  font: TtfFont;
+}
+
 export class FontManager {
   // Keys: `${family.toLowerCase()}:${normalizedWeight}`
   private static readonly registry = new Map<string, FontEntry>();
+
+  /** Parsed-font cache for the fallback chain, keyed like {@link registry}. */
+  private static readonly fallbackCache = new Map<string, TtfFont | null>();
 
   /**
    * Registers a TrueType font from raw bytes.
@@ -154,9 +167,47 @@ export class FontManager {
     return this.registry.size > 0;
   }
 
+  /**
+   * Returns every registered font (in registration order) parsed for
+   * glyph-coverage probing, for use as a glyph-fallback chain. Fonts whose
+   * bytes fail to parse are skipped. The parsed instances are cached.
+   *
+   * The fallback chain lets the encoder render a code point the primary font
+   * lacks (e.g. a `★` bullet, a symbol, an emoji) using the first registered
+   * font that covers it, rather than emitting a forbidden `.notdef` glyph.
+   */
+  public static getFallbackFonts(): FallbackFont[] {
+    const result: FallbackFont[] = [];
+    for (const key of this.registry.keys()) {
+      const bytes = this.getBytesForKey(key);
+      if (!bytes) continue;
+
+      let font = this.fallbackCache.get(key);
+      if (font === undefined) {
+        try {
+          font = TtfFont.loadFromBytes(bytes);
+        } catch {
+          font = null;
+        }
+        this.fallbackCache.set(key, font);
+      }
+      if (font) result.push({ key, bytes, font });
+    }
+    return result;
+  }
+
+  private static getBytesForKey(key: string): Uint8Array | null {
+    const entry = this.registry.get(key);
+    if (!entry) return null;
+    if (entry.kind === 'bytes') return entry.bytes;
+    if (!entry.bytes) entry.bytes = this.loadFileBytes(entry.path);
+    return entry.bytes ?? null;
+  }
+
   /** Removes all registered fonts (primarily for test isolation). */
   public static clear(): void {
     this.registry.clear();
+    this.fallbackCache.clear();
   }
 
   /**

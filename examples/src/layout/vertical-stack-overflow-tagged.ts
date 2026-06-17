@@ -40,7 +40,7 @@ export function generate(): Document {
   doc.add(h1);
 
   const sub = new TextBlock(
-    'Seventy-five catalogue items inside a VerticalStack that paginates automatically. Each item carries a /H3 heading and a /P description.'
+    'Seventy-five catalogue items inside a VerticalStack that paginates automatically. Each item carries a /H2 heading and a /P description.'
   );
   sub.fontSize = 12;
   sub.textColor = ColorPalette.slate[500];
@@ -57,7 +57,7 @@ export function generate(): Document {
 
     const itemTitle = new Heading(`Item #${String(i).padStart(3, '0')}`);
     itemTitle.tocIdentifier = `item-${i}`;
-    itemTitle.level = 3;
+    itemTitle.level = 2;
     itemTitle.fontName = StandardFonts.HelveticaBold;
     itemTitle.fontSize = 11;
     itemTitle.textColor = ColorPalette.blue[600];

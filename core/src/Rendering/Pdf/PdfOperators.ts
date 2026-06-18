@@ -79,6 +79,16 @@ export class PdfOperators {
     s.push('h\n');
   }
 
+  /**
+   * `W n` - intersect the current clipping path with the current path (non-zero
+   * winding rule), then end the path without painting it. Subsequent marking
+   * operators are confined to the intersection until the enclosing `q`/`Q`
+   * restores the previous clip.
+   */
+  public static clip(s: string[]): void {
+    s.push('W n\n');
+  }
+
   public static stroke(s: string[]): void {
     s.push('S\n');
   }

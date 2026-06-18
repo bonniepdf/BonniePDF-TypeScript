@@ -82,6 +82,23 @@ describe('PdfDrawing — rounded-rect delegation and guards', () => {
   });
 });
 
+describe('PdfDrawing.clipRoundedRect', () => {
+  it('with a positive radius emits curves then a clip, without painting', () => {
+    const out = emit(s => PdfDrawing.clipRoundedRect(s, 0, 0, 40, 30, 8));
+    expect(out).toContain(' c\n'); // Bézier corner curves
+    expect(out).toContain('W n\n'); // intersect clip, end path without painting
+    expect(out).not.toContain('f\n'); // a clip path never fills
+    expect(out).not.toContain('S\n'); // …or strokes
+  });
+
+  it('with radius <= 0 clips a plain rectangle', () => {
+    const out = emit(s => PdfDrawing.clipRoundedRect(s, 5, 5, 40, 30, 0));
+    expect(out).toContain(`${f(5)} ${f(5)} ${f(40)} ${f(30)} re\n`); // plain rectangle path
+    expect(out).toContain('W n\n');
+    expect(out).not.toContain(' c\n'); // no corner curves
+  });
+});
+
 describe('PdfDrawing.fillPath', () => {
   it('emits nothing for fewer than three points (not a closed area)', () => {
     expect(emit(s => PdfDrawing.fillPath(s, [], Color.red))).toBe('');

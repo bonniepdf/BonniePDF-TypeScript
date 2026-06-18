@@ -120,4 +120,20 @@ export interface ICanvas {
 
   /** End the region opened by {@link beginCrispEdges}. */
   endCrispEdges?(): void;
+
+  // ── Clipping ─────────────────────────────────────────────────────
+
+  /**
+   * Begin a rounded-rectangle clipping region: subsequent drawing is masked to
+   * the rounded rectangle at (`x`, `y`) sized `width`×`height` with the given
+   * corner `radius` (top-left origin, like every other canvas coordinate). On
+   * PDF this pushes the graphics state and emits a rounded-rect clip path
+   * (`W n`); on SVG it opens a `<g clip-path>` referencing a generated
+   * `<clipPath>`. Optional: canvases that don't implement it simply leave the
+   * content un-masked. Must be paired with {@link endClip}.
+   */
+  beginRoundedClip?(x: number, y: number, width: number, height: number, radius: number): void;
+
+  /** End the clipping region opened by {@link beginRoundedClip}. */
+  endClip?(): void;
 }

@@ -27,6 +27,17 @@ export class Container extends BorderedElementBase implements IContentContainer 
   public height?: number;
 
   /**
+   * When `true` and {@link BorderedElementBase.cornerRadius} is positive, the
+   * container's content (background, border, and child) is clipped to the
+   * rounded-rectangle outline. This is what turns a rounded background
+   * into a true rounded-corner card: a full-bleed image or any overflowing child
+   * is masked to the rounded box rather than spilling past the corners. Defaults
+   * to `false`, so setting `cornerRadius` alone keeps the historical behaviour of
+   * a rounded fill/stroke with un-clipped content.
+   */
+  public clipContent = false;
+
+  /**
    * Horizontal alignment of the child within the container's available width
    * (`AlignCenter`/`AlignRight`/`AlignLeft`). When the child is
    * narrower than the container, it is positioned accordingly; otherwise it
@@ -89,6 +100,23 @@ export class Container extends BorderedElementBase implements IContentContainer 
       ctx.newPage();
     }
 
+    // Rounded-corner clipping: mask the background, border, and child to
+    // the rounded outline. Opened here and closed in the finally so the early
+    // childless return still balances the clip. The canvas methods are optional;
+    // a canvas that doesn't support clipping simply leaves the content un-masked.
+    const clip = this.clipContent && this.cornerRadius > 0;
+    if (clip) {
+      ctx.canvas.beginRoundedClip?.(ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.cornerRadius);
+    }
+
+    try {
+      this.renderClippedContent(ctx, effectiveWidth, containerHeight);
+    } finally {
+      if (clip) ctx.canvas.endClip?.();
+    }
+  }
+
+  private renderClippedContent(ctx: RenderContext, effectiveWidth: number, containerHeight: number): void {
     if (this.backgroundColor) {
       this.drawBackground(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.backgroundColor);
     }

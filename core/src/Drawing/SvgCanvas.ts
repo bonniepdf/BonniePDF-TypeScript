@@ -87,6 +87,13 @@ export class SvgCanvas implements ICanvas {
   /** Tracks the open `<g>` nesting depth so unbalanced restores are ignored. */
   private groupDepth = 0;
 
+  /**
+   * Module-wide counter for generating unique `<clipPath>` ids. Static so ids
+   * stay unique even when several canvases compose into one document (page export
+   * appends positioned child canvases into the same surface).
+   */
+  private static clipIdCounter = 0;
+
   constructor(width: number, height: number, fontResolver?: SvgFontResolver, options?: SvgCanvasOptions) {
     this.width = width;
     this.height = height;
@@ -373,6 +380,28 @@ export class SvgCanvas implements ICanvas {
   /** @inheritdoc */
   public endCrispEdges(): void {
     this.svgElements.push('</g>');
+  }
+
+  // ── Clipping ───────────────────────────────────────────────────────────────
+
+  /** @inheritdoc */
+  public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    const id = `clip${SvgCanvas.clipIdCounter++}`;
+    this.svgElements.push(
+      `<clipPath id="${id}"><rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(
+        height
+      )}" rx="${this.n(radius)}" ry="${this.n(radius)}"/></clipPath>`
+    );
+    this.svgElements.push(`<g clip-path="url(#${id})">`);
+    this.groupDepth++;
+  }
+
+  /** @inheritdoc */
+  public endClip(): void {
+    if (this.groupDepth > 0) {
+      this.svgElements.push('</g>');
+      this.groupDepth--;
+    }
   }
 
   // ── Output ─────────────────────────────────────────────────────────────────

@@ -16,8 +16,26 @@ jobs:
       contents: write        # push version-bump commits and create releases
       pull-requests: write   # create and update the "Version Packages" PR
       id-token: write        # npm provenance attestation
+      actions: write         # delete prior workflow runs
 
     steps:
+      # Delete this workflow's prior runs before doing anything else, so the
+      # Actions tab only ever shows the current run. Best-effort: never block
+      # the release if the cleanup API call hiccups.
+      - name: Delete prior workflow runs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow release.yml \
+            --json databaseId \
+            --jq '.[].databaseId' \
+            --limit 100 \
+          | grep -v '^${{ github.run_id }}$' \
+          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
+
       - uses: actions/checkout@v4
         with:
           # Changesets needs full history to determine what changed

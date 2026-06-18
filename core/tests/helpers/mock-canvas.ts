@@ -128,4 +128,12 @@ export class MockCanvas implements ICanvas {
   endArtifact(): void {
     this.operations.push('EndArtifact()');
   }
+
+  beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    this.operations.push(`BeginRoundedClip(${x},${y},${width},${height},${radius})`);
+  }
+
+  endClip(): void {
+    this.operations.push('EndClip()');
+  }
 }

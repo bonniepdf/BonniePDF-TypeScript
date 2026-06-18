@@ -48,6 +48,8 @@ class RecordingCanvas extends MockCanvas {
   readonly rects: { x: number; y: number; width: number; height: number }[] = [];
   readonly roundedRects: { x: number; y: number; width: number; height: number; radius: number }[] = [];
   readonly lines: { x1: number; y1: number; x2: number; y2: number; thickness: number }[] = [];
+  readonly clips: { x: number; y: number; width: number; height: number; radius: number }[] = [];
+  openClips = 0;
 
   override fillRect(x: number, y: number, width: number, height: number, color: Color): void {
     this.rects.push({ x, y, width, height });
@@ -60,6 +62,15 @@ class RecordingCanvas extends MockCanvas {
   override drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
     this.lines.push({ x1, y1, x2, y2, thickness: lineWidth });
     super.drawLine(x1, y1, x2, y2, color, lineWidth);
+  }
+  override beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    this.clips.push({ x, y, width, height, radius });
+    this.openClips++;
+    super.beginRoundedClip(x, y, width, height, radius);
+  }
+  override endClip(): void {
+    this.openClips--;
+    super.endClip();
   }
 }
 
@@ -269,6 +280,44 @@ describe('Container — background and border drawing', () => {
     expect(canvas.rects).toHaveLength(0); // not a sharp fill
     expect(canvas.roundedRects).toHaveLength(1);
     expect(canvas.roundedRects[0]).toMatchObject({ x: 0, y: 0, width: 500, radius: 6 });
+  });
+
+  it('clips content to the rounded box when clipContent is set', () => {
+    const { ctx, canvas } = makeContext();
+    const c = new Container();
+    c.child = new Probe(10);
+    c.backgroundColor = ColorPalette.amber[400];
+    c.cornerRadius = 6;
+    c.clipContent = true;
+    c.render(ctx, 500);
+
+    // The whole box (full width, full height incl. child) is clipped, and the
+    // clip is balanced (opened and closed exactly once).
+    expect(canvas.clips).toHaveLength(1);
+    expect(canvas.clips[0]).toMatchObject({ x: 0, y: 0, width: 500, height: 10, radius: 6 });
+    expect(canvas.openClips).toBe(0);
+  });
+
+  it('does not clip when cornerRadius is zero even if clipContent is set', () => {
+    const { ctx, canvas } = makeContext();
+    const c = new Container();
+    c.child = new Probe(10);
+    c.clipContent = true; // cornerRadius defaults to 0
+    c.render(ctx, 500);
+
+    expect(canvas.clips).toHaveLength(0);
+  });
+
+  it('cornerRadius alone rounds the fill but does not clip', () => {
+    const { ctx, canvas } = makeContext();
+    const c = new Container();
+    c.child = new Probe(10);
+    c.backgroundColor = ColorPalette.amber[400];
+    c.cornerRadius = 6;
+    c.render(ctx, 500);
+
+    expect(canvas.roundedRects).toHaveLength(1);
+    expect(canvas.clips).toHaveLength(0);
   });
 
   it('draws each border side as a stroke around the box', () => {

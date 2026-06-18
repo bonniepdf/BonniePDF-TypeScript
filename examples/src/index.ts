@@ -54,6 +54,8 @@ import { generate as userDirectory } from './templates/user-directory';
 import { generate as movieCatalog } from './templates/movie-catalog';
 import { generate as financialDashboard } from './templates/financial-dashboard';
 import { generate as annualReport } from './templates/annual-report';
+import { generate as patientSummary } from './templates/patient-summary';
+import { generate as productRoadmap } from './templates/product-roadmap';
 
 export * from './svg';
 
@@ -696,6 +698,30 @@ export const examples: ExampleDef[] = [
     filename: 'annual-report.pdf',
     generate: annualReport,
     dotnetClass: 'AnnualReportExample',
+    thumbnails: false,
+    pdfUa1: false,
+  },
+  {
+    id: 'patient-summary',
+    name: 'Patient Summary',
+    category: 'Templates',
+    description:
+      'A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.',
+    filename: 'patient-summary.pdf',
+    generate: patientSummary,
+    dotnetClass: 'PatientSummaryExample',
+    thumbnails: false,
+    pdfUa1: false,
+  },
+  {
+    id: 'product-roadmap',
+    name: 'Product Roadmap',
+    category: 'Templates',
+    description:
+      'Landscape A4 Gantt-style product roadmap: a six-month timeline header over team swimlanes (Development, Design, Marketing), with rounded task bars positioned by month using weighted horizontal stacks.',
+    filename: 'product-roadmap.pdf',
+    generate: productRoadmap,
+    dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
   },

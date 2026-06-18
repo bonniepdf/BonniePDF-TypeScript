@@ -127,6 +127,23 @@ export class PdfCanvas implements ICanvas {
     );
   }
 
+  /**
+   * Begins a rounded-rectangle clip. Pushes the graphics state, then narrows the
+   * clip to the rounded rect so all drawing up to {@link endClip} is masked.
+   * Converts the top-left `y` to PDF's bottom-up space.
+   */
+  public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    const pdfX = x + this.xOffset;
+    const pdfY = this.height - (y + this.yOffset + height);
+    this.saveState();
+    PdfDrawing.clipRoundedRect(this.stream, pdfX, pdfY, width, height, radius);
+  }
+
+  /** Restores the graphics state pushed by {@link beginRoundedClip}. */
+  public endClip(): void {
+    this.restoreState();
+  }
+
   public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
     const pdfX1 = x1 + this.xOffset;
     const pdfX2 = x2 + this.xOffset;

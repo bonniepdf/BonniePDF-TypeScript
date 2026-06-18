@@ -246,6 +246,25 @@ export class ContainerStyleExtensions {
     return container;
   }
 
+  /**
+   * Rounds the container's corners *and* clips its content to that rounded
+   * outline. Unlike {@link cornerRadius} - which only rounds the
+   * background fill and border stroke - this masks the child too, so a full-bleed
+   * image or any overflowing content is cut to the rounded box. This is the
+   * idiomatic way to build rounded image cards and avatars.
+   *
+   * ```typescript
+   * roundedCorners(container, 12).image('avatar.png');
+   * roundedCorners(container, 6).background(ColorPalette.slate[100]);
+   * ```
+   */
+  static roundedCorners(c: IContentContainer, radius: number): IContentContainer {
+    const container = ContainerStyleExtensions.getOrCreateContainer(c);
+    container.cornerRadius = radius;
+    container.clipContent = true;
+    return container;
+  }
+
   // --- Margin ---
 
   /**
@@ -461,6 +480,10 @@ export function size(c: IContentContainer, width: number, height: number): ICont
 
 export function cornerRadius(c: IContentContainer, radius: number): IContentContainer {
   return ContainerStyleExtensions.cornerRadius(c, radius);
+}
+
+export function roundedCorners(c: IContentContainer, radius: number): IContentContainer {
+  return ContainerStyleExtensions.roundedCorners(c, radius);
 }
 
 export function margin(c: IContentContainer, value: number): IContentContainer;

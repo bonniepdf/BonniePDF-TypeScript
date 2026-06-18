@@ -191,6 +191,34 @@ export class PdfDrawing {
     PdfOperators.restoreState(stream);
   }
 
+  /**
+   * Intersects the current clipping path with a rounded-rectangle region. Appends
+   * the rounded-rect path (the same Bézier construction the fill/stroke variants
+   * use) followed by `W n`, so subsequent drawing is masked to the rounded rect.
+   * The caller owns the surrounding `q`/`Q` so the clip can be undone. A radius of
+   * zero clips to a plain rectangle.
+   */
+  public static clipRoundedRect(
+    stream: string[],
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+  ): void {
+    if (radius <= 0) {
+      PdfOperators.rectangle(stream, x, y, width, height);
+      PdfOperators.clip(stream);
+      return;
+    }
+
+    const maxRadius = Math.min(width, height) / 2;
+    if (radius > maxRadius) radius = maxRadius;
+
+    this.appendRoundedRectPath(stream, x, y, width, height, radius);
+    PdfOperators.clip(stream);
+  }
+
   public static fillPath(stream: string[], points: Point[], color: Color): void {
     if (!points || points.length < 3) return;
 

@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -54,3 +55,17 @@ jobs:
       - name: Verify package exports
         run: node --input-type=module -e "import('@bonniepdf/core')"
         working-directory: core
+
+      - name: Delete prior workflow runs
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow ci.yml \
+            --json databaseId \
+            --jq '.[].databaseId' \
+            --limit 100 \
+          | grep -v '^${{ github.run_id }}$' \
+          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}

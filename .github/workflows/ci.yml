@@ -21,6 +21,23 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
+      # Delete this workflow's prior runs before doing anything else, so the
+      # Actions tab only ever shows the current run. Best-effort: never block
+      # the real job if the cleanup API call hiccups.
+      - name: Delete prior workflow runs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow ci.yml \
+            --json databaseId \
+            --jq '.[].databaseId' \
+            --limit 100 \
+          | grep -v '^${{ github.run_id }}$' \
+          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
@@ -55,17 +72,3 @@ jobs:
       - name: Verify package exports
         run: node --input-type=module -e "import('@bonniepdf/core')"
         working-directory: core
-
-      - name: Delete prior workflow runs
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh run list \
-            --repo "${{ github.repository }}" \
-            --workflow ci.yml \
-            --json databaseId \
-            --jq '.[].databaseId' \
-            --limit 100 \
-          | grep -v '^${{ github.run_id }}$' \
-          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}

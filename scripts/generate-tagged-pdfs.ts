@@ -13,7 +13,7 @@
 // ship only with the private @bonniepdf/examples package - never with @bonniepdf/core.
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { configurePlatform, NodePlatformIO, FontManager } from '@bonniepdf/core';
+import { configurePlatform, NodePlatformIO, FontManager, exportSvgPagesAsync } from '@bonniepdf/core';
 import { examples } from '../examples/src/index.ts';
 
 // Map the browser-style asset URLs the examples use to on-disk font files:
@@ -66,6 +66,16 @@ async function main(): Promise<void> {
     const outPath = resolve(outDir, filename);
     // Async path so embedded TrueType fonts are loaded (via the IO above) first.
     writeFileSync(outPath, await doc.generateBytesAsync());
+    // First-page SVG preview, written next to the PDF for the CI card report.
+    // Runs the same layout pipeline as PDF output (with its own font preload),
+    // so it's faithful to the validated PDF. Non-fatal: a preview failure must
+    // never break the conformance gate, so swallow and warn.
+    try {
+      const svgs = await exportSvgPagesAsync(doc, { maxPages: 1 });
+      if (svgs[0]) writeFileSync(outPath.replace(/\.pdf$/i, '.svg'), svgs[0]);
+    } catch (err) {
+      console.warn(`[BonniePDF/preview] warn: SVG preview failed for ${filename}: ${err}`);
+    }
     // The synchronous font-collection pass logs a "Could not load embedded font"
     // warning for every '/fonts/..' URL before the async preload resolves it via
     // the IO above. That preload then succeeds, so drop those expected warnings

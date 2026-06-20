@@ -9,6 +9,8 @@ import { BarChart } from '../src/Charts/BarChart';
 import { WatermarkSettings } from '../src/Configuration/WatermarkSettings';
 import { StandardFonts } from '../src/Typography/StandardFonts';
 import { ColorPalette } from '../src/Core/ColorPalette';
+import { Color } from '../src/Core/Color';
+import { Container } from '../src/Elements/Layout/Container';
 import { createMinimalJpeg, createTestChartData } from './helpers/test-base';
 
 function simpleDoc(): Document {
@@ -69,6 +71,24 @@ describe('SVG page export', () => {
     const a = await simpleDoc().generateFirstPageSvgAsync();
     const b = await simpleDoc().generateFirstPageSvgAsync();
     expect(a).toEqual(b);
+  });
+
+  it('renders the page-background slot behind page content', async () => {
+    // The SVG export must paint settings.pageBackground just like the PDF path,
+    // otherwise full-bleed cover fields disappear and light text on them becomes
+    // invisible (annual-report cover regression).
+    doc = new Document();
+    const bg = new Container();
+    bg.backgroundColor = Color.fromHex('#123456');
+    bg.height = 841.89;
+    doc.settings.pageBackground = () => bg;
+    doc.add(new TextBlock('On top of the background', 14, StandardFonts.Helvetica));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    // A full-page rect with the background fill is present…
+    expect(svg).toMatch(/<rect[^>]*fill="#123456"/i);
+    // …and it sits before the content text in document order (painted behind).
+    expect(svg.indexOf('#123456')).toBeLessThan(svg.indexOf('On top of the background'));
   });
 
   it('honours the precision option', async () => {

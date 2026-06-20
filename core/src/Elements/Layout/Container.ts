@@ -175,11 +175,12 @@ export class Container extends BorderedElementBase implements IContentContainer 
 
     const token = beginChildTag(ctx, this.child);
     try {
-      if ('renderStateful' in this.child && typeof (this.child as any).renderStateful === 'function') {
-        (this.child as any).renderStateful(ctx, innerWidth);
-      } else {
-        this.child.render(ctx, innerWidth);
-      }
+      // Render the child statelessly (atomic), matching the .NET reference
+      // (Container.cs Child.Render). The stateful continuation path is reserved
+      // for top-level page flow driven by the render pipeline; calling
+      // renderStateful here instead would set one-shot flags on nested elements
+      // that nothing resets, so a second export pass would skip them.
+      this.child.render(ctx, innerWidth);
     } finally {
       endChildTag(ctx, token);
     }

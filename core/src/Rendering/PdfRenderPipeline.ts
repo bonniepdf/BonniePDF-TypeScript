@@ -119,6 +119,13 @@ export class PdfRenderPipeline {
         }
         guard++;
       } while (status !== RenderStatus.Complete && guard < this.maxPageGuard);
+
+      // Clear continuation state once the element has finished so the document
+      // tree returns to its pristine state. Without this a second export pass
+      // (e.g. SVG preview followed by PDF download) sees stale lastLineRendered
+      // markers and skips already-"rendered" content. Mirrors the .NET
+      // reference pipeline (PdfRenderPipeline.cs ResetState after completion).
+      if (typeof stateful.resetState === 'function') stateful.resetState();
     } else {
       // Non-stateful fallback - render once without pagination
       try {

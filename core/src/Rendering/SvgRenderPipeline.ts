@@ -86,7 +86,13 @@ export class SvgRenderPipeline {
       if (!canvas) continue;
 
       this.renderWatermark(canvas, settings, dim.width, dim.height);
+      // this feature page slots, mirroring PdfRenderPipeline: the background is prepended
+      // so it paints behind everything (even the watermark, which was prepended
+      // just above), and the foreground is appended so it paints on top of all
+      // content. Both ignore margins and span the full page.
+      this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true);
       this.renderTemplate(ctx, settings, i, dim.width, dim.height, dim.margin);
+      this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false);
 
       outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
     }
@@ -122,6 +128,50 @@ export class SvgRenderPipeline {
       `</g>`;
 
     canvas.prependRawMarkup(markup);
+  }
+
+  /**
+   * Renders a full-page background/foreground slot, mirroring
+   * {@link PdfRenderPipeline.renderPageSlot}. The slot element ignores margins
+   * (origin at the page's top-left, full page width) and is composited as a
+   * single SVG group: prepended for backgrounds (behind all content) and
+   * appended for foregrounds (on top). The element renders into a throwaway
+   * child canvas so its markup can be extracted and positioned without
+   * disturbing the page canvas or the layout cursor.
+   */
+  private static renderPageSlot(
+    ctx: RenderContext,
+    canvas: SvgCanvas,
+    template: ((pageNumber: number) => IElement | undefined) | undefined,
+    pageIndex: number,
+    pageWidth: number,
+    isBackground: boolean
+  ): void {
+    if (!template) return;
+    const element = template(pageIndex + 1);
+    if (!element) return;
+
+    const slotCanvas = ctx.getCanvas(0, 0) as SvgCanvas;
+    const originalCanvas = ctx.canvas;
+    const originalX = ctx.currentX;
+    const originalY = ctx.currentY;
+
+    ctx.setCanvas(slotCanvas);
+    ctx.currentX = 0;
+    ctx.currentY = 0;
+    try {
+      element.render(ctx, pageWidth);
+    } finally {
+      ctx.setCanvas(originalCanvas);
+      ctx.currentX = originalX;
+      ctx.currentY = originalY;
+    }
+
+    const inner = slotCanvas.getInnerSvg();
+    if (!inner) return;
+    const markup = `<g>${inner}</g>`;
+    if (isBackground) canvas.prependRawMarkup(markup);
+    else canvas.appendRawMarkup(markup);
   }
 
   /**

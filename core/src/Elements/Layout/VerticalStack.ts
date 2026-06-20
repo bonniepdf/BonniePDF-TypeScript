@@ -167,11 +167,12 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     for (const child of this.children) {
       const token = beginChildTag(ctx, child);
       try {
-        if ('renderStateful' in child && typeof (child as any).renderStateful === 'function') {
-          (child as any).renderStateful(ctx, contentWidth);
-        } else {
-          child.render(ctx, contentWidth);
-        }
+        // Stateless (atomic) render of each child, matching the .NET reference
+        // (VerticalStack.cs RenderContent → child.Render). Only the top-level
+        // RenderStateful path drives stateful continuation; using it here would
+        // set one-shot flags on nested elements that nothing resets, collapsing
+        // content on a second export pass.
+        child.render(ctx, contentWidth);
       } finally {
         endChildTag(ctx, token);
       }

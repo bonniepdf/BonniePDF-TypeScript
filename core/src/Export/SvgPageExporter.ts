@@ -4,9 +4,22 @@ import { SvgRenderPipeline, SvgPageRenderOutput } from '../Rendering/SvgRenderPi
 import { PdfResourceRegistry } from '../Rendering/PdfResourceRegistry';
 import { collectEmbeddedFonts, collectImagesNeedingDecode } from '../Rendering/PdfDocumentSerializer';
 import { Image } from '../Elements/Media/Image';
-import { SvgCanvasOptions } from '../Drawing/SvgCanvas';
+import { SvgCanvas, SvgCanvasOptions, embeddedFontFamily, toBase64 } from '../Drawing/SvgCanvas';
+import { TtfFont } from '../Typography/TrueType/TtfFont';
+import { TtfSubsetter } from '../Typography/TrueType/TtfSubsetter';
 import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportOptions';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
+import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+
+/** A rendered SVG document: one standalone SVG string per page, plus `@font-face`
+ * CSS that embeds (as subsetted data URIs) the fonts the document used, so a host
+ * can render the pages with the exact fonts BonniePDF laid them out with. */
+export interface SvgDocumentExport {
+  pages: string[];
+  /** `<style>`-ready `@font-face` rules, or `''` when the document uses no
+   * embeddable fonts (e.g. only the viewer-supplied standard-14). */
+  fontFaceCss: string;
+}
 
 /**
  * Renders every laid-out page of a document to a standalone SVG string.
@@ -17,6 +30,19 @@ import { escapeXml, escapeAttr } from '../Core/XmlEscape';
  * match the generated PDF.
  */
 export async function exportSvgPagesAsync(document: Document, options?: SvgPageExportOptions): Promise<string[]> {
+  return (await exportSvgDocumentAsync(document, options)).pages;
+}
+
+/**
+ * Like {@link exportSvgPagesAsync}, but also returns `@font-face` CSS embedding a
+ * minimal subset (only the glyphs actually drawn) of each embedded font, so the
+ * preview renders with the exact fonts used for layout — independent of what the
+ * viewer has installed. Subsetting keeps the payload to a few KB per face.
+ */
+export async function exportSvgDocumentAsync(
+  document: Document,
+  options?: SvgPageExportOptions
+): Promise<SvgDocumentExport> {
   const opts = { ...SVG_PAGE_EXPORT_DEFAULTS, ...options };
 
   const settings = document.settings;
@@ -46,6 +72,9 @@ export async function exportSvgPagesAsync(document: Document, options?: SvgPageE
   // ── Phase 2: preload font bytes ─────────────────────────────────────────────
   const registry = new PdfResourceRegistry();
   (registry as any).conformance = settings.conformance;
+  // PDF/UA requires standard fonts to be embedded independently of PDF/A.
+  // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
+  registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
   for (const path of embeddedPaths) registry.registerFont(path);
   await registry.preloadAllFontsAsync();
 
@@ -85,7 +114,63 @@ export async function exportSvgPagesAsync(document: Document, options?: SvgPageE
   const limited = typeof limit === 'number' && limit >= 0 ? outputs.slice(0, limit) : outputs;
 
   const title = resolveTitle(document, opts.title);
-  return limited.map(o => assemblePageSvg(o, opts, title));
+  const pageSvgs = limited.map(o => assemblePageSvg(o, opts, title));
+
+  // ── Phase 4: embed @font-face subsets for the fonts actually drawn ───────────
+  // Merge per-font code-point usage across the emitted pages, then embed a
+  // minimal subset of each. Only fonts that resolved to real bytes appear here:
+  // custom/open fonts, plus standard-14 substitutes required by PDF/A or PDF/UA.
+  const usage = new Map<string, { font: TtfFont; codePoints: Set<number> }>();
+  for (const output of limited) {
+    const canvas = output.canvas as SvgCanvas;
+    for (const [name, used] of canvas.getEmbeddedFontUsage()) {
+      let entry = usage.get(name);
+      if (!entry) {
+        entry = { font: used.font, codePoints: new Set<number>() };
+        usage.set(name, entry);
+      }
+      for (const cp of used.codePoints) entry.codePoints.add(cp);
+    }
+  }
+
+  return { pages: pageSvgs, fontFaceCss: buildFontFaceCss(usage) };
+}
+
+/** Builds `@font-face` rules that embed a minimal subset (only the used glyphs)
+ * of each font as a base64 data URI, under its private {@link embeddedFontFamily}
+ * name. Falls back to the full font if subsetting fails, and skips fonts that
+ * yield no bytes. */
+function buildFontFaceCss(usage: ReadonlyMap<string, { font: TtfFont; codePoints: ReadonlySet<number> }>): string {
+  const rules: string[] = [];
+  for (const [fontFamily, { font, codePoints }] of usage) {
+    if (codePoints.size === 0) continue;
+
+    let bytes: Uint8Array | null = null;
+    try {
+      const subsetter = new TtfSubsetter(font);
+      const charToGlyph = new Map<number, number>();
+      const glyphIds = new Set<number>();
+      for (const cp of codePoints) {
+        const gid = font.getGlyphId(cp);
+        charToGlyph.set(cp, gid);
+        glyphIds.add(gid);
+      }
+      bytes = subsetter.createSubset(glyphIds, charToGlyph);
+    } catch {
+      // Subsetting failed - fall back to the full font so the face still renders.
+      const full = font.getRawFontData();
+      bytes = full.length > 0 ? full : null;
+    }
+    if (!bytes || bytes.length === 0) continue;
+
+    rules.push(
+      // A PDF preview should never flash a metrically different fallback face:
+      // wait briefly for the inline data font, then paint the exact glyphs.
+      `@font-face{font-family:'${embeddedFontFamily(fontFamily)}';font-display:block;` +
+        `src:url("data:font/ttf;base64,${toBase64(bytes)}") format("truetype");}`
+    );
+  }
+  return rules.join('');
 }
 
 function resolveTitle(document: Document, explicit?: string): string {

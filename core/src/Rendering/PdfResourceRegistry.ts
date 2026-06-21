@@ -106,6 +106,11 @@ export class PdfResourceRegistry {
   public registerFont(fontIdentifier: string): string {
     // (A) Direct TTF/OTF path
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
+      // Browser callers frequently preload URL fonts through FontManager. Reuse
+      // those exact bytes instead of fetching the same URL again; this also lets
+      // Node build-time preview generation resolve browser-rooted font URLs.
+      const registeredBytes = FontManager.getBytesForIdentifier(fontIdentifier);
+      if (registeredBytes) return this.registerEmbeddedFontFromBytes(registeredBytes, fontIdentifier);
       return this.registerEmbeddedFont(fontIdentifier);
     }
 
@@ -324,6 +329,7 @@ export class PdfResourceRegistry {
       try {
         font = TtfFont.loadFromBytes(bytes);
         tracker = new GlyphUsageTracker(font);
+        FontMetrics.registerFontInstance(key, font);
       } catch (err) {
         this.diagnostics.addWarning('font', `Could not parse font bytes: ${(err as Error).message}`, key, err);
       }

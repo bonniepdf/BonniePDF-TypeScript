@@ -80,9 +80,21 @@ export interface FallbackFont {
   font: TtfFont;
 }
 
+/** Optional names supplied when registering in-memory font bytes. `identifier`
+ * binds the bytes to the exact document font reference (commonly a browser URL)
+ * so export does not need to fetch that resource a second time. */
+export interface FontRegistrationOptions {
+  family?: string;
+  subfamily?: string;
+  identifier?: string;
+}
+
 export class FontManager {
   // Keys: `${family.toLowerCase()}:${normalizedWeight}`
   private static readonly registry = new Map<string, FontEntry>();
+
+  /** Exact document font identifier (URL/path) -> already loaded bytes. */
+  private static readonly identifierRegistry = new Map<string, Uint8Array>();
 
   /** Parsed-font cache for the fallback chain, keyed like {@link registry}. */
   private static readonly fallbackCache = new Map<string, TtfFont | null>();
@@ -96,12 +108,18 @@ export class FontManager {
    * FontManager.registerFont(new Uint8Array(bytes), { family: 'MyFont', subfamily: 'Bold' });
    * ```
    */
-  public static registerFont(bytes: Uint8Array, opts?: { family?: string; subfamily?: string }): void {
+  public static registerFont(bytes: Uint8Array, opts?: FontRegistrationOptions): void {
     const font = TtfFont.loadFromBytes(bytes);
     const family = (opts?.family ?? font.fontFamily).toLowerCase();
     const weight = normalizeWeight(opts?.subfamily ?? font.fontSubfamily ?? 'Regular');
     const key = `${family}:${weight}`;
     this.registry.set(key, { kind: 'bytes', bytes });
+    if (opts?.identifier) this.identifierRegistry.set(opts.identifier, bytes);
+  }
+
+  /** Returns bytes registered for an exact document font identifier. */
+  public static getBytesForIdentifier(identifier: string): Uint8Array | null {
+    return this.identifierRegistry.get(identifier) ?? null;
   }
 
   /**
@@ -207,6 +225,7 @@ export class FontManager {
   /** Removes all registered fonts (primarily for test isolation). */
   public static clear(): void {
     this.registry.clear();
+    this.identifierRegistry.clear();
     this.fallbackCache.clear();
   }
 

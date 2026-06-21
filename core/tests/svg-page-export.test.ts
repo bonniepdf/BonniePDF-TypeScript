@@ -270,8 +270,10 @@ describe('SVG page export — embedded font subsets', () => {
     doc.add(t);
 
     const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
-    // Text references the private embedded family; an @font-face data URI binds it.
-    expect(pages[0]).toContain('font-family="bpf-');
+    // Text references the private embedded family via an inline style (so a host
+    // `* { font-family: inherit }` reset can't override it); an @font-face data
+    // URI binds the name to the subset bytes.
+    expect(pages[0]).toContain('style="font-family:\'bpf-');
     expect(fontFaceCss).toContain('@font-face');
     expect(fontFaceCss).toContain('src:url("data:font/ttf;base64,');
     // The subset is a fraction of the full font (performance): full Liberation
@@ -288,7 +290,11 @@ describe('SVG page export — embedded font subsets', () => {
     doc.add(t);
 
     const { pages } = await doc.generateSvgDocumentAsync({ precision: 4 });
-    const positions = Array.from(pages[0].matchAll(/<tspan x="([\d.]+)"[^>]*>[AV]<\/tspan>/g), m => Number(m[1]));
+    // Glyphs are positioned via SVG's per-character `x`-list on a single <text>
+    // (one element per run, not a <tspan> per glyph), e.g. <text x="x0 x1" ...>AV</text>.
+    const xList = pages[0].match(/<text x="([\d.]+ [\d.]+)"[^>]*>AV<\/text>/)?.[1];
+    expect(xList).toBeDefined();
+    const positions = xList!.split(' ').map(Number);
     expect(positions).toHaveLength(2);
 
     // Liberation Serif's A advance is 1479 units at 2048 UPEM. The old SVG
@@ -305,8 +311,9 @@ describe('SVG page export — embedded font subsets', () => {
     doc.add(t);
 
     const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
-    expect(pages[0]).toContain('<tspan');
-    expect(pages[0]).toContain('font-family="bpf-fonts-liberation-liberationserif-regular-ttf"');
+    // Embedded text is a single <text> carrying a per-character x-list.
+    expect(pages[0]).toMatch(/<text x="[\d.]+ /);
+    expect(pages[0]).toContain("font-family:'bpf-fonts-liberation-liberationserif-regular-ttf'");
     expect(fontFaceCss).toContain('data:font/ttf;base64,');
   });
 });
@@ -342,7 +349,7 @@ describe('SVG page export — embedded standard-font alignment', () => {
     }
 
     const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
-    expect(pages[0]).toContain('font-family="bpf-times-roman"');
+    expect(pages[0]).toContain("font-family:'bpf-times-roman'");
     expect(pages[0]).not.toContain('font-family="\'Times New Roman\', Times, serif"');
     expect(fontFaceCss).toContain("font-family:'bpf-times-roman'");
   });
@@ -358,7 +365,7 @@ describe('SVG page export — embedded standard-font alignment', () => {
     doc.add(text);
 
     const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
-    expect(pages[0]).toContain('font-family="bpf-times-roman"');
+    expect(pages[0]).toContain("font-family:'bpf-times-roman'");
     expect(fontFaceCss).toContain("font-family:'bpf-times-roman'");
   });
 });

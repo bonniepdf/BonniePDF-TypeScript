@@ -55,6 +55,19 @@ export function embeddedFontFamily(fontFamily: string): string {
 }
 
 /**
+ * Picks a CSS generic family (`serif` / `monospace` / `sans-serif`) to append
+ * after an embedded face, derived from the font's PDF flags. It is only ever
+ * reached if the embedded `@font-face` subset fails to load; choosing a generic
+ * of the same broad class keeps that worst-case degradation as visually close as
+ * possible. (Flag bits: 1 = FixedPitch, 2 = Serif — see {@link TtfFont.flags}.)
+ */
+function genericFontFallback(font: TtfFont): string {
+  if ((font.flags & 1) !== 0) return 'monospace';
+  if ((font.flags & 2) !== 0) return 'serif';
+  return 'sans-serif';
+}
+
+/**
  * Low-level rendering options for {@link SvgCanvas}. These are a subset of the
  * public `SvgPageExportOptions` surface, threaded down to the canvas by the SVG
  * render pipeline.
@@ -509,10 +522,11 @@ export class SvgCanvas implements ICanvas {
   }
 
   /**
-   * Builds a `<text>` element whose glyphs are positioned individually with
-   * `<tspan x=...>` using the font's real hmtx advance widths. This deliberately
-   * mirrors PDF `Tj` output, which does not apply the TrueType `kern` table.
-   * `extraPerSpace` adds justification space after each U+0020.
+   * Builds a single `<text>` element whose glyphs are positioned individually
+   * via SVG's per-character `x`-list (`<text x="x0 x1 x2 …">`), using the font's
+   * real hmtx advance widths. This deliberately mirrors PDF `Tj` output, which
+   * does not apply the TrueType `kern` table. `extraPerSpace` adds justification
+   * space after each U+0020. Returns `''` when no drawable glyphs remain.
    */
   private glyphPositionedText(
     startX: number,
@@ -527,7 +541,15 @@ export class SvgCanvas implements ICanvas {
   ): string {
     const scale = fontSize / font.unitsPerEm;
     let cursor = startX;
-    const spans: string[] = [];
+    // Each glyph is positioned absolutely, but via SVG's `x`-list feature (one
+    // coordinate per addressable character on a single <text>) rather than a
+    // <tspan> per glyph. A <tspan>-per-glyph emits one DOM element per character,
+    // which explodes node counts on long documents (a ~50-page novel reaches
+    // hundreds of thousands of elements, and the previewer mounts every page as
+    // live SVG twice — full page + thumbnail — enough to OOM the browser). The
+    // `x`-list yields byte-identical positioning with one element per run.
+    const xs: string[] = [];
+    let chars = '';
 
     // Record this font + the code points it draws so the exporter can embed a
     // minimal subset under embeddedFontFamily(fontFamily) as an @font-face.
@@ -545,19 +567,36 @@ export class SvgCanvas implements ICanvas {
       }
       usage.codePoints.add(code);
       const gid = font.getGlyphId(code);
-      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${escapeXml(rune)}</tspan>`);
+      xs.push(this.n(cursor));
+      chars += rune;
       cursor += font.getGlyphWidth(gid) * scale;
       if (rune === ' ') cursor += extraPerSpace;
     }
 
+    if (xs.length === 0) return '';
+
     const transformAttr = transform ? ` transform="${transform}"` : '';
     // Reference the private embedded-face name (bound by the exporter's
     // @font-face) so the viewer renders the exact font BonniePDF laid out with.
+    //
+    // The family is emitted as an inline `style` rather than a `font-family`
+    // presentation attribute on purpose: glyphs here are positioned absolutely
+    // by hmtx advance, so if the host substitutes a different face the spacing
+    // collapses into visibly broken kerning. Presentation attributes lose to
+    // *any* selector in the CSS cascade — including a host's global
+    // `* { font-family: inherit }` reset — whereas an inline style wins, so the
+    // embedded subset is used wherever the SVG is inlined. A flag-derived
+    // generic only matters if the @font-face subset itself fails to load.
+    //
+    // `xml:space="preserve"` is required: every character is addressed by the
+    // `x`-list, so any whitespace the renderer would otherwise collapse must be
+    // kept, or the character→coordinate alignment shifts.
+    const familyStyle = `font-family:'${escapeAttr(embeddedFontFamily(fontFamily))}',${genericFontFallback(font)}`;
     return (
-      `<text fill="${fillHex}" font-size="${this.n(fontSize)}" font-family="${escapeAttr(
-        embeddedFontFamily(fontFamily)
-      )}" xml:space="preserve"${transformAttr}>` +
-      spans.join('') +
+      `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
+        fontSize
+      )}" style="${familyStyle}" xml:space="preserve"${transformAttr}>` +
+      escapeXml(chars) +
       '</text>'
     );
   }

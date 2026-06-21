@@ -1,3 +1,4 @@
+import { embeddedFontFamily } from '@bonniepdf/core';
 import { examples, type ExampleDef } from './index';
 
 /**
@@ -92,12 +93,16 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
   for (const def of defs) {
     try {
       const doc = def.generate();
-      const svgs = await doc.generateSvgPagesAsync({
+      const { pages: renderedPages, fontFaceCss } = await doc.generateSvgDocumentAsync({
         maxPages,
         precision,
         includeAccessibilityMetadata: true,
         title: def.name,
       });
+      // Gallery previews are loaded through <img>, so document-level CSS from
+      // the live preview cannot reach inside them. Inline embedded subsets and
+      // declare any browser-loadable TTF URLs to keep each asset standalone.
+      const svgs = renderedPages.map(svg => makeStandalonePreviewSvg(svg, fontFaceCss));
 
       const pages: SvgManifestPage[] = svgs.map((svg, i) => {
         const file = `${def.id}/page-${i + 1}.svg`;
@@ -127,4 +132,31 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
   files.push({ path: 'manifest.json', content: JSON.stringify(manifest, null, 2) });
 
   return { manifest, files, failures };
+}
+
+/** Makes a generated page self-contained for use through `<img src="...">`.
+ * Embedded subsets are inlined. URL-based TTF identifiers that could not be
+ * fetched by the Node build are bound to a real CSS family and left for the
+ * browser to load from the public site. */
+function makeStandalonePreviewSvg(svg: string, documentFontCss: string): string {
+  let css = documentFontCss;
+  const urlFonts = new Set<string>();
+
+  const page = svg.replace(/font-family="([^"]+\.ttf)"/gi, (_match, fontUrl: string) => {
+    urlFonts.add(fontUrl);
+    return `font-family="${embeddedFontFamily(fontUrl)}"`;
+  });
+
+  for (const fontUrl of urlFonts) {
+    const family = embeddedFontFamily(fontUrl);
+    const safeUrl = fontUrl.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    css += `@font-face{font-family:'${family}';font-display:block;src:url("${safeUrl}") format("truetype");}`;
+  }
+
+  if (!css) return page;
+  const style = `<style>${css}</style>`;
+  const titleEnd = page.indexOf('</title>');
+  if (titleEnd >= 0) return page.slice(0, titleEnd + 8) + style + page.slice(titleEnd + 8);
+  const rootEnd = page.indexOf('>');
+  return page.slice(0, rootEnd + 1) + style + page.slice(rootEnd + 1);
 }

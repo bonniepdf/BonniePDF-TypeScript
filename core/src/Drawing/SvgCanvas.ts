@@ -16,6 +16,45 @@ import { ImageFormat } from '../Rendering/Images/ImageInfo';
 export type SvgFontResolver = (fontFamily: string) => TtfFont | null;
 
 /**
+ * Maps a non-embedded standard-14 PDF font name (e.g. `Helvetica-BoldOblique`,
+ * `Times-Italic`) to the SVG attributes a viewer needs to pick the right face: a
+ * generic family stack plus explicit `font-weight` / `font-style`. The raw PDF
+ * name is not a CSS family, so emitting it verbatim makes browsers fall back to
+ * a regular default — losing bold and italic. This path is for fonts BonniePDF
+ * does NOT embed (the standard-14, which a PDF viewer supplies); the real OS font
+ * is preferred and never overridden. Unrecognised names pass through unchanged.
+ */
+function standardFontCssAttrs(fontFamily: string): string {
+  const lower = fontFamily.toLowerCase();
+  let stack: string;
+  if (lower.startsWith('times')) stack = "'Times New Roman', Times, serif";
+  else if (lower.startsWith('courier')) stack = "'Courier New', Courier, monospace";
+  else if (lower.startsWith('helvetica') || lower.startsWith('arial')) stack = 'Helvetica, Arial, sans-serif';
+  else return `font-family="${escapeAttr(fontFamily)}"`;
+
+  const weight = lower.includes('bold') ? ' font-weight="bold"' : '';
+  const style = lower.includes('oblique') || lower.includes('italic') ? ' font-style="italic"' : '';
+  return `font-family="${escapeAttr(stack)}"${weight}${style}`;
+}
+
+/**
+ * Private CSS family name for an embedded font subset. Namespaced (`bpf-…`) so it
+ * never collides with — or overrides — a real installed font: the SVG references
+ * this name, and {@link buildSvgFontFaceCss} declares an `@font-face` for it
+ * carrying the actual (subsetted) font bytes. Used for fonts BonniePDF embeds
+ * (custom/open/registered), where the embedded face *is* the intended font.
+ */
+export function embeddedFontFamily(fontFamily: string): string {
+  return (
+    'bpf-' +
+    fontFamily
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .toLowerCase()
+      .replace(/^-+|-+$/g, '')
+  );
+}
+
+/**
  * Low-level rendering options for {@link SvgCanvas}. These are a subset of the
  * public `SvgPageExportOptions` surface, threaded down to the canvas by the SVG
  * render pipeline.
@@ -66,8 +105,8 @@ interface FragmentEntry {
  *    original prototype, which keeps the standalone `chartToSvg` output stable.
  *  - When the SVG render pipeline supplies a {@link SvgFontResolver} and
  *    {@link SvgCanvasOptions}, the canvas emits per-glyph positioned text with
- *    real kerning, embeds images as data URIs, and rounds coordinates for
- *    deterministic, compact output.
+ *    the PDF's exact glyph advances, embeds images as data URIs, and rounds
+ *    coordinates for deterministic, compact output.
  */
 export class SvgCanvas implements ICanvas {
   public readonly width: number;
@@ -86,6 +125,10 @@ export class SvgCanvas implements ICanvas {
   private readonly options: SvgCanvasOptions;
   /** Tracks the open `<g>` nesting depth so unbalanced restores are ignored. */
   private groupDepth = 0;
+  /** Per embedded font: the resolved face plus every code point drawn with it,
+   * so the page exporter can embed a minimal subset (only used glyphs) as an
+   * `@font-face`. Keyed by the original PDF font name. */
+  private readonly embeddedFontUsage = new Map<string, { font: TtfFont; codePoints: Set<number> }>();
 
   /**
    * Module-wide counter for generating unique `<clipPath>` ids. Static so ids
@@ -204,10 +247,11 @@ export class SvgCanvas implements ICanvas {
     const font = this.resolveFont(fontFamily);
 
     if (font) {
-      // Faithful path: position each glyph explicitly using real advance widths
-      // and kern pairs, so SVG text matches the PDF layout exactly and does not
-      // depend on the viewer's own kerning.
-      const measured = FontMetrics.getKernedStringWidth(text, font, fontSize);
+      // Faithful path: position each glyph explicitly using the same hmtx
+      // advances as PdfCanvas. PDF's Tj operator does not apply the TrueType
+      // `kern` table, so applying it here would make the preview visibly tighter
+      // than the generated PDF.
+      const measured = this.getEmbeddedStringWidth(text, font, fontSize);
       let startX = x;
       if (align === TextAlignment.Center) startX = x - measured / 2;
       else if (align === TextAlignment.Right) startX = x - measured;
@@ -222,7 +266,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}"${fillOpacityAttr} font-size="${this.n(
         fontSize
-      )}" font-family="${escapeAttr(fontFamily)}" text-anchor="${anchor}">${escapeXml(text)}</text>`
+      )}" ${standardFontCssAttrs(fontFamily)} text-anchor="${anchor}">${escapeXml(text)}</text>`
     );
   }
 
@@ -252,7 +296,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
         fontSize
-      )}" font-family="${escapeAttr(fontFamily)}" transform="${transform}">${escapeXml(text)}</text>`
+      )}" ${standardFontCssAttrs(fontFamily)} transform="${transform}">${escapeXml(text)}</text>`
     );
   }
 
@@ -288,30 +332,24 @@ export class SvgCanvas implements ICanvas {
       return;
     }
 
-    // Without an embedded font, distribute the extra space by emitting one
-    // <tspan> per word with the computed word gap, so the line truly fills the
-    // available width instead of left-aligning.
-    const words = text.split(' ');
-    let cursor = x;
-    const spans: string[] = [];
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${escapeXml(word)}</tspan>`);
-      const wordWidth = FontMetrics.getStringWidth(word, fontFamily, fontSize);
-      const spaceWidth = FontMetrics.getStringWidth(' ', fontFamily, fontSize);
-      cursor += wordWidth + spaceWidth + extraPerSpace;
-    }
+    // Without an embedded font we must NOT hand-position each word from AFM
+    // metrics: the text actually renders in the viewer's own font, and the metric
+    // differences accumulate into colliding/gapping words. Emit a single <text>
+    // and let the viewer lay the line out, adding `word-spacing` for the
+    // justification stretch. Mirrors the .NET reference (DrawTextJustified).
     this.svgElements.push(
-      `<text fill="${hex}" font-size="${this.n(fontSize)}" font-family="${escapeAttr(
-        fontFamily
-      )}" xml:space="preserve">${spans.join('')}</text>`
+      `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
+        fontSize
+      )}" ${standardFontCssAttrs(fontFamily)} text-anchor="start" word-spacing="${this.n(
+        extraPerSpace
+      )}" xml:space="preserve">${escapeXml(text)}</text>`
     );
   }
 
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
     const font = this.resolveFont(fontFamily);
     const width = font
-      ? FontMetrics.getKernedStringWidth(text, font, fontSize)
+      ? this.getEmbeddedStringWidth(text, font, fontSize)
       : FontMetrics.getStringWidth(text, fontFamily, fontSize);
     return new Size(width, fontSize * 1.2);
   }
@@ -413,6 +451,12 @@ export class SvgCanvas implements ICanvas {
     return this.svgElements.join('\n');
   }
 
+  /** Per embedded font (keyed by original PDF font name): the resolved face and
+   * every code point drawn with it, for building minimal `@font-face` subsets. */
+  public getEmbeddedFontUsage(): ReadonlyMap<string, { font: TtfFont; codePoints: ReadonlySet<number> }> {
+    return this.embeddedFontUsage;
+  }
+
   /**
    * Appends raw SVG markup to this canvas. Used by the render context to
    * composite a positioned child canvas (e.g. a chart or header) into the page
@@ -466,7 +510,8 @@ export class SvgCanvas implements ICanvas {
 
   /**
    * Builds a `<text>` element whose glyphs are positioned individually with
-   * `<tspan x=...>` using the font's real advance widths plus kern pairs.
+   * `<tspan x=...>` using the font's real hmtx advance widths. This deliberately
+   * mirrors PDF `Tj` output, which does not apply the TrueType `kern` table.
    * `extraPerSpace` adds justification space after each U+0020.
    */
   private glyphPositionedText(
@@ -482,9 +527,15 @@ export class SvgCanvas implements ICanvas {
   ): string {
     const scale = fontSize / font.unitsPerEm;
     let cursor = startX;
-    let prevGid = 0;
-    let hasPrev = false;
     const spans: string[] = [];
+
+    // Record this font + the code points it draws so the exporter can embed a
+    // minimal subset under embeddedFontFamily(fontFamily) as an @font-face.
+    let usage = this.embeddedFontUsage.get(fontFamily);
+    if (!usage) {
+      usage = { font, codePoints: new Set<number>() };
+      this.embeddedFontUsage.set(fontFamily, usage);
+    }
 
     for (const rune of text) {
       const code = rune.codePointAt(0) ?? 0;
@@ -492,25 +543,38 @@ export class SvgCanvas implements ICanvas {
         // Control character (other than tab) - skip, mirroring measurement.
         continue;
       }
+      usage.codePoints.add(code);
       const gid = font.getGlyphId(code);
-      if (hasPrev && font.hasKerning) {
-        cursor += font.getKerning(prevGid, gid) * scale;
-      }
       spans.push(`<tspan x="${this.n(cursor)}" y="${this.n(baselineY)}">${escapeXml(rune)}</tspan>`);
       cursor += font.getGlyphWidth(gid) * scale;
       if (rune === ' ') cursor += extraPerSpace;
-      prevGid = gid;
-      hasPrev = true;
     }
 
     const transformAttr = transform ? ` transform="${transform}"` : '';
+    // Reference the private embedded-face name (bound by the exporter's
+    // @font-face) so the viewer renders the exact font BonniePDF laid out with.
     return (
       `<text fill="${fillHex}" font-size="${this.n(fontSize)}" font-family="${escapeAttr(
-        fontFamily
+        embeddedFontFamily(fontFamily)
       )}" xml:space="preserve"${transformAttr}>` +
       spans.join('') +
       '</text>'
     );
+  }
+
+  /** Width used by embedded-font SVG text. PdfCanvas emits a plain `Tj`
+   * string, whose advance is the sum of hmtx widths; it does not consult the
+   * font's optional kerning tables. Keeping this calculation local prevents the
+   * preview path from accidentally adopting layout-only kerned measurements. */
+  private getEmbeddedStringWidth(text: string, font: TtfFont, fontSize: number): number {
+    const scale = fontSize / font.unitsPerEm;
+    let width = 0;
+    for (const rune of text) {
+      const code = rune.codePointAt(0) ?? 0;
+      if (code < 32 && code !== 9) continue;
+      width += font.getGlyphWidth(font.getGlyphId(code)) * scale;
+    }
+    return width;
   }
 
   private calculateBaselineY(y: number, fontSize: number, _fontFamily: string): number {
@@ -596,7 +660,7 @@ const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345
  * (Node-only) or `btoa` (browser-only) so the canvas works identically across
  * Node, Bun, Deno, and the browser.
  */
-function toBase64(bytes: Uint8Array): string {
+export function toBase64(bytes: Uint8Array): string {
   let out = '';
   const len = bytes.length;
   for (let i = 0; i < len; i += 3) {

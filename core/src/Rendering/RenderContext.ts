@@ -108,7 +108,15 @@ export class RenderContext {
     return new SvgCanvas(
       this.pageSize.width,
       this.pageSize.height,
-      family => this.resolveEmbeddedFont(family),
+      family => {
+        // PDF rendering registers a font before drawing it. SVG drawing has no
+        // resource operator of its own, so do the equivalent here before asking
+        // for the parsed face. This is particularly important for PDF/A and
+        // PDF/UA documents: their standard-14 names resolve lazily to embedded
+        // Liberation fonts, whose metrics must also drive the SVG preview.
+        this.resources.registerFont(family);
+        return this.resolveEmbeddedFont(family);
+      },
       this.svgOptions
     );
   }

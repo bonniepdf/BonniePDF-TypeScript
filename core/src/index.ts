@@ -164,7 +164,8 @@ export * from './Drawing/SvgCanvas';
 // SVG page export
 export * from './Export/SvgPageExportOptions';
 export * from './Rendering/SvgRenderPipeline';
-export { exportSvgPagesAsync } from './Export/SvgPageExporter';
+export { exportSvgPagesAsync, exportSvgDocumentAsync } from './Export/SvgPageExporter';
+export type { SvgDocumentExport } from './Export/SvgPageExporter';
 
 // Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
 export * from './Extensions/DocumentEncryptionExtensions';

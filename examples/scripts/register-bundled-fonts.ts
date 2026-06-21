@@ -35,7 +35,11 @@ export function registerBundledFonts(fontsDir?: string): void {
   for (const [file, family, subfamily] of BUNDLED) {
     try {
       const bytes = new Uint8Array(readFileSync(resolve(dir, `${file}.ttf`)));
-      FontManager.registerFont(bytes, { family, subfamily });
+      FontManager.registerFont(bytes, {
+        family,
+        subfamily,
+        identifier: `/fonts/liberation/${file}.ttf`,
+      });
     } catch {
       // font not present in this checkout - skip
     }

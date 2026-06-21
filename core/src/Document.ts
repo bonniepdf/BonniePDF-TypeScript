@@ -13,7 +13,7 @@ import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
 import { TextElementBase } from './Elements/Text/TextElementBase';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
-import { exportSvgPagesAsync } from './Export/SvgPageExporter';
+import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 
 /**
@@ -204,6 +204,17 @@ export class Document {
   public async generateSvgPagesAsync(options?: SvgPageExportOptions): Promise<string[]> {
     this.applyDefaultStyleToTree();
     return exportSvgPagesAsync(this, options);
+  }
+
+  /**
+   * Like {@link generateSvgPagesAsync}, but also returns `@font-face` CSS that
+   * embeds a minimal subset of the fonts the document uses. Inject the CSS once
+   * into the host page so the SVG renders with the exact fonts used for layout,
+   * independent of what the viewer has installed. See {@link SvgDocumentExport}.
+   */
+  public async generateSvgDocumentAsync(options?: SvgPageExportOptions): Promise<SvgDocumentExport> {
+    this.applyDefaultStyleToTree();
+    return exportSvgDocumentAsync(this, options);
   }
 
   /**

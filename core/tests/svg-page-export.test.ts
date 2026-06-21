@@ -1,4 +1,6 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { Document } from '../src/Document';
 import { TextBlock } from '../src/Elements/Text/TextBlock';
 import { TextAlignment } from '../src/Elements/Text/TextAlignment';
@@ -8,6 +10,10 @@ import { ChartElement } from '../src/Charts/ChartElement';
 import { BarChart } from '../src/Charts/BarChart';
 import { WatermarkSettings } from '../src/Configuration/WatermarkSettings';
 import { StandardFonts } from '../src/Typography/StandardFonts';
+import { FontManager } from '../src/Typography/FontManager';
+import { DocumentSettings } from '../src/Configuration/DocumentSettings';
+import { PdfAConformance } from '../src/Configuration/PdfAConformance';
+import { AccessibilityMode } from '../src/Configuration/AccessibilityMode';
 import { ColorPalette } from '../src/Core/ColorPalette';
 import { Color } from '../src/Core/Color';
 import { Container } from '../src/Elements/Layout/Container';
@@ -225,5 +231,134 @@ describe('SVG page export', () => {
     const svg = await doc.generateFirstPageSvgAsync();
     expect(svg).toContain('Centered');
     expect(svg).toContain('<svg');
+  });
+
+  it('maps non-embedded standard-14 bold/italic to CSS weight/style', async () => {
+    // The raw PDF name ("Helvetica-Bold") is not a CSS family; emitting it would
+    // render a regular default. Standard-14 fonts are viewer-supplied, so prefer
+    // the real OS font via a generic stack plus explicit weight/style.
+    doc = new Document();
+    const mk = (text: string, font: string) => {
+      const b = new TextBlock(text);
+      b.fontName = font;
+      return b;
+    };
+    doc.add(mk('Bold', StandardFonts.HelveticaBold));
+    doc.add(mk('Italic', StandardFonts.HelveticaOblique));
+    const svg = await doc.generateFirstPageSvgAsync();
+    expect(svg).not.toContain('font-family="Helvetica-Bold"');
+    expect(svg).toMatch(/font-family="Helvetica, Arial, sans-serif" font-weight="bold"/);
+    expect(svg).toMatch(/font-family="Helvetica, Arial, sans-serif" font-style="italic"/);
+    // Standard-14 are NOT embedded - left to the viewer.
+    const { fontFaceCss } = await new Document().generateSvgDocumentAsync();
+    expect(fontFaceCss).toBe('');
+  });
+});
+
+describe('SVG page export — embedded font subsets', () => {
+  const FONT = fileURLToPath(new URL('../assets/fonts/LiberationSerif-Regular.ttf', import.meta.url));
+  let doc: Document;
+  afterEach(() => {
+    doc?.dispose();
+    FontManager.clear();
+  });
+
+  it('embeds a subset @font-face for an embedded font, far smaller than the full font', async () => {
+    doc = new Document();
+    const t = new TextBlock('The quick brown fox jumps over the lazy dog 1234567890');
+    t.fontName = FONT;
+    doc.add(t);
+
+    const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
+    // Text references the private embedded family; an @font-face data URI binds it.
+    expect(pages[0]).toContain('font-family="bpf-');
+    expect(fontFaceCss).toContain('@font-face');
+    expect(fontFaceCss).toContain('src:url("data:font/ttf;base64,');
+    // The subset is a fraction of the full font (performance): full Liberation
+    // Serif is ~384 KB; the subset (a few dozen glyphs) must be far smaller.
+    const fullFontBytes = readFileSync(FONT).length;
+    expect(fontFaceCss.length).toBeLessThan(fullFontBytes / 2);
+  });
+
+  it('positions embedded glyphs with the same unkerned advances as PDF Tj text', async () => {
+    doc = new Document();
+    const t = new TextBlock('AV');
+    t.fontName = FONT;
+    t.fontSize = 11;
+    doc.add(t);
+
+    const { pages } = await doc.generateSvgDocumentAsync({ precision: 4 });
+    const positions = Array.from(pages[0].matchAll(/<tspan x="([\d.]+)"[^>]*>[AV]<\/tspan>/g), m => Number(m[1]));
+    expect(positions).toHaveLength(2);
+
+    // Liberation Serif's A advance is 1479 units at 2048 UPEM. The old SVG
+    // path subtracted the AV kern pair here, making previews tighter than PDF.
+    expect(positions[1] - positions[0]).toBeCloseTo((1479 * 11) / 2048, 4);
+  });
+
+  it('reuses preloaded bytes for a browser URL font identifier', async () => {
+    const url = '/fonts/liberation/LiberationSerif-Regular.ttf';
+    FontManager.registerFont(new Uint8Array(readFileSync(FONT)), { identifier: url });
+    doc = new Document();
+    const t = new TextBlock('URL font preview');
+    t.fontName = url;
+    doc.add(t);
+
+    const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
+    expect(pages[0]).toContain('<tspan');
+    expect(pages[0]).toContain('font-family="bpf-fonts-liberation-liberationserif-regular-ttf"');
+    expect(fontFaceCss).toContain('data:font/ttf;base64,');
+  });
+});
+
+describe('SVG page export — embedded standard-font alignment', () => {
+  const SERIF = fileURLToPath(new URL('../assets/fonts/LiberationSerif-Regular.ttf', import.meta.url));
+  let doc: Document;
+
+  beforeEach(() => {
+    FontManager.clear();
+    FontManager.registerFont(new Uint8Array(readFileSync(SERIF)), {
+      family: 'Liberation Serif',
+      subfamily: 'Regular',
+    });
+  });
+
+  afterEach(() => {
+    doc?.dispose();
+    FontManager.clear();
+  });
+
+  it('uses the embedded PDF/A substitute for centered and right-aligned Times text', async () => {
+    const settings = new DocumentSettings();
+    settings.conformance = PdfAConformance.PdfA2b;
+    doc = new Document(settings);
+
+    for (const alignment of [TextAlignment.Center, TextAlignment.Right]) {
+      const text = new TextBlock('A deliberately wide alignment sample');
+      text.fontName = StandardFonts.TimesRoman;
+      text.fontSize = 11;
+      text.alignment = alignment;
+      doc.add(text);
+    }
+
+    const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
+    expect(pages[0]).toContain('font-family="bpf-times-roman"');
+    expect(pages[0]).not.toContain('font-family="\'Times New Roman\', Times, serif"');
+    expect(fontFaceCss).toContain("font-family:'bpf-times-roman'");
+  });
+
+  it('also embeds standard fonts for PDF/UA without a PDF/A claim', async () => {
+    const settings = new DocumentSettings();
+    settings.accessibility = AccessibilityMode.PdfUa1;
+    doc = new Document(settings);
+    const text = new TextBlock('Accessible centered text');
+    text.fontName = StandardFonts.TimesRoman;
+    text.fontSize = 11;
+    text.alignment = TextAlignment.Center;
+    doc.add(text);
+
+    const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
+    expect(pages[0]).toContain('font-family="bpf-times-roman"');
+    expect(fontFaceCss).toContain("font-family:'bpf-times-roman'");
   });
 });

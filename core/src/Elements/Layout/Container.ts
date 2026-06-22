@@ -38,6 +38,18 @@ export class Container extends BorderedElementBase implements IContentContainer 
   public clipContent = false;
 
   /**
+   * When `true`, the container's subtree renders inside a crisp-edge region
+   *: on SVG page export it emits `<g shape-rendering="crispEdges">`, so
+   * thin axis-aligned strokes and rectangles (grid/table lines, dividers) snap
+   * to the device pixel grid instead of being antialiased into a soft blur. It
+   * is a no-op on PDF output (the bytes are unchanged; crispness there is the
+   * viewer's job). Only wrap axis-aligned content — rounded rects, circles,
+   * diagonals, and text want antialiasing and will look jagged inside a
+   * crisp-edge region.
+   */
+  public crispEdges = false;
+
+  /**
    * Horizontal alignment of the child within the container's available width
    * (`AlignCenter`/`AlignRight`/`AlignLeft`). When the child is
    * narrower than the container, it is positioned accordingly; otherwise it
@@ -100,19 +112,29 @@ export class Container extends BorderedElementBase implements IContentContainer 
       ctx.newPage();
     }
 
-    // Rounded-corner clipping: mask the background, border, and child to
-    // the rounded outline. Opened here and closed in the finally so the early
-    // childless return still balances the clip. The canvas methods are optional;
-    // a canvas that doesn't support clipping simply leaves the content un-masked.
-    const clip = this.clipContent && this.cornerRadius > 0;
-    if (clip) {
-      ctx.canvas.beginRoundedClip?.(ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.cornerRadius);
-    }
+    // Crisp-edge hint: render the subtree inside a crisp-edge region so
+    // axis-aligned strokes/rects snap to the pixel grid on SVG export. Outermost
+    // wrap; the clip and content render inside it. No-op on PDF/unsupported
+    // canvases.
+    if (this.crispEdges) ctx.canvas.beginCrispEdges?.();
 
     try {
-      this.renderClippedContent(ctx, effectiveWidth, containerHeight);
+      // Rounded-corner clipping: mask the background, border, and child to
+      // the rounded outline. Opened here and closed in the finally so the early
+      // childless return still balances the clip. The canvas methods are
+      // optional; a canvas that doesn't support clipping leaves content un-masked.
+      const clip = this.clipContent && this.cornerRadius > 0;
+      if (clip) {
+        ctx.canvas.beginRoundedClip?.(ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.cornerRadius);
+      }
+
+      try {
+        this.renderClippedContent(ctx, effectiveWidth, containerHeight);
+      } finally {
+        if (clip) ctx.canvas.endClip?.();
+      }
     } finally {
-      if (clip) ctx.canvas.endClip?.();
+      if (this.crispEdges) ctx.canvas.endCrispEdges?.();
     }
   }
 

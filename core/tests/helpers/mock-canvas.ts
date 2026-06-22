@@ -136,4 +136,12 @@ export class MockCanvas implements ICanvas {
   endClip(): void {
     this.operations.push('EndClip()');
   }
+
+  beginCrispEdges(): void {
+    this.operations.push('BeginCrispEdges()');
+  }
+
+  endCrispEdges(): void {
+    this.operations.push('EndCrispEdges()');
+  }
 }

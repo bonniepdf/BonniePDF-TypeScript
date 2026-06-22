@@ -24,6 +24,7 @@ import {
 const INK = Color.fromHex('#0f172a'); // slate-900  headings
 const BODY = Color.fromHex('#334155'); // slate-700  month pills
 const MUTE = Color.fromHex('#64748b'); // slate-500  captions
+const GRID = Color.fromHex('#cbd5e1'); // slate-300  grid lines
 const STRIPE = Color.fromHex('#f1f5f9'); // slate-100  alternating column shade
 const TINT = Color.fromHex('#f8fafc'); // slate-50   page tint
 
@@ -37,6 +38,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 const LABEL_WEIGHT = 2.4; // left column width, in "month units" (months are weight 1)
 const ROW_HEIGHT = 26;
 const BAR_HEIGHT = 18;
+const LINE = 0.6; // hairline grid-line / bar-border width
 
 // ── A timeline segment: a bar from month `start` to month `end` (1..6) ───────
 interface Seg {
@@ -61,38 +63,50 @@ function tb(
   return t;
 }
 
-// A fixed-height cell with an optional background, used to build the striped
-// column grid behind the bars.
-function cell(height: number, color?: Color): Container {
+// One cell of the column grid: a fixed-height box that draws crisp hairline grid
+// lines on its right and bottom edges (and optionally its top/left for the outer
+// frame), with an optional column shade.
+function gridCell(height: number, opts: { shade?: boolean; top?: boolean; left?: boolean } = {}): Container {
   const c = new Container();
   c.height = height;
-  if (color) c.backgroundColor = color;
+  if (opts.shade) c.backgroundColor = STRIPE;
+  c.border = new Border(opts.left ? LINE : 0, opts.top ? LINE : 0, LINE, LINE);
+  c.borderColors = new BorderColors(GRID);
   return c;
 }
 
 // The alternating-column grid: a white label gutter, then six month columns
-// shaded on alternate months. Used both as the per-row background (behind the
-// bars) and as the slim band drawn between swimlanes, so the columns read as one
-// continuous grid. Same weights as a bar row, so the stripes line up under the
-// month header and behind every bar.
-function stripeBand(height: number): HorizontalStack {
+// shaded on alternate months, all wired with hairline grid lines. Used both as
+// the per-row background (behind the bars) and as the slim band drawn between
+// swimlanes, so the columns read as one continuous grid. Same weights as a bar
+// row, so the lines stay aligned under the month header and behind every bar.
+// The whole grid is wrapped in a crisp-edge region so the hairlines snap
+// to the pixel grid on SVG export instead of blurring; the rounded bars (a
+// separate Layers foreground) keep their antialiasing.
+function stripeBand(height: number, top = false): Container {
   const band = new HorizontalStack();
   band.spacing = 0;
   band.widthDistribution = WidthDistribution.Weighted;
-  band.addChild(cell(height), LABEL_WEIGHT); // label gutter stays white
-  for (let m = 1; m <= MONTHS.length; m++) band.addChild(cell(height, m % 2 === 0 ? STRIPE : undefined), 1);
-  return band;
+  band.addChild(gridCell(height, { top, left: true }), LABEL_WEIGHT); // label gutter stays white
+  for (let m = 1; m <= MONTHS.length; m++) band.addChild(gridCell(height, { shade: m % 2 === 0, top }), 1);
+
+  const crisp = new Container();
+  crisp.crispEdges = true;
+  crisp.child = band;
+  return crisp;
 }
 
-// A rounded "pill" bar carrying a short task label. Uses clipContent so a
-// label that runs longer than its month span is masked to the rounded bar rather
-// than overflowing.
-function bar(label: string, color: Color): Container {
+// A rounded "pill" bar carrying a short task label, outlined in the team's darker
+// shade. Uses clipContent so a label that runs longer than its month span
+// is masked to the rounded bar rather than overflowing.
+function bar(label: string, fill: Color, outline: Color): Container {
   const c = new Container();
-  c.backgroundColor = color;
+  c.backgroundColor = fill;
   c.cornerRadius = 5;
   c.clipContent = true;
   c.height = BAR_HEIGHT;
+  c.border = new Border(LINE);
+  c.borderColors = new BorderColors(outline);
   c.padding = new Thickness(8, 4, 8, 4);
   c.child = tb(label, 6.5, Color.white, { bold: true, align: TextAlignment.Center });
   return c;
@@ -112,7 +126,7 @@ function barLayer(labelCell: IElement, segs: Seg[], shades: [Color, Color]): Hor
   let cursor = 1;
   segs.forEach((seg, i) => {
     if (seg.start > cursor) row.addChild(new Spacer(BAR_HEIGHT), seg.start - cursor);
-    row.addChild(bar(seg.label, shades[i % 2]), seg.end - seg.start + 1);
+    row.addChild(bar(seg.label, shades[i % 2], shades[0]), seg.end - seg.start + 1);
     cursor = seg.end + 1;
   });
   if (cursor <= MONTHS.length) row.addChild(new Spacer(BAR_HEIGHT), MONTHS.length - cursor + 1);
@@ -122,10 +136,10 @@ function barLayer(labelCell: IElement, segs: Seg[], shades: [Color, Color]): Hor
 
 // One roadmap row: the striped column grid (background) with the bars floating on
 // top (this feature Layers). Both layers share the same weights, so the bars sit exactly
-// over their month columns and the stripes run continuously behind them.
-function roadmapRow(labelCell: IElement, segs: Seg[], shades: [Color, Color]): Container {
+// over their month columns and the grid runs continuously behind them.
+function roadmapRow(labelCell: IElement, segs: Seg[], shades: [Color, Color], top = false): Container {
   const c = new Container();
-  c.layers(l => l.background(stripeBand(ROW_HEIGHT)).primaryLayer(barLayer(labelCell, segs, shades)));
+  c.layers(l => l.background(stripeBand(ROW_HEIGHT, top)).primaryLayer(barLayer(labelCell, segs, shades)));
   return c;
 }
 
@@ -248,11 +262,13 @@ export function generate(): Document {
     },
   ];
 
+  let firstRow = true;
   teams.forEach((team, ti) => {
     if (ti > 0) doc.add(stripeBand(12)); // continuous striped band between swimlanes
     team.rows.forEach((segs, ri) => {
       const label = ri === 0 ? teamLabel(team.name, team.sub, team.accent) : new Container();
-      doc.add(roadmapRow(label, segs, team.shades));
+      doc.add(roadmapRow(label, segs, team.shades, firstRow));
+      firstRow = false;
     });
   });
 

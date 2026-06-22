@@ -320,6 +320,33 @@ describe('Container — background and border drawing', () => {
     expect(canvas.clips).toHaveLength(0);
   });
 
+  it('wraps content in a crisp-edge region when crispEdges is set', () => {
+    const { ctx, canvas } = makeContext();
+    const c = new Container();
+    c.child = new Probe(10);
+    c.backgroundColor = ColorPalette.amber[400];
+    c.crispEdges = true;
+    c.render(ctx, 500);
+
+    const begins = canvas.operations.filter(o => o === 'BeginCrispEdges()');
+    const ends = canvas.operations.filter(o => o === 'EndCrispEdges()');
+    expect(begins).toHaveLength(1);
+    expect(ends).toHaveLength(1);
+    // Balanced: begins before the fill, ends after.
+    const bi = canvas.operations.indexOf('BeginCrispEdges()');
+    const ei = canvas.operations.indexOf('EndCrispEdges()');
+    expect(bi).toBeLessThan(ei);
+  });
+
+  it('does not open a crisp-edge region by default', () => {
+    const { ctx, canvas } = makeContext();
+    const c = new Container();
+    c.child = new Probe(10);
+    c.render(ctx, 500);
+
+    expect(canvas.operations.some(o => o === 'BeginCrispEdges()')).toBe(false);
+  });
+
   it('draws each border side as a stroke around the box', () => {
     const { ctx, canvas } = makeContext();
     const c = new Container();

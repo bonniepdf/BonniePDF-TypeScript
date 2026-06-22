@@ -37,8 +37,7 @@ export class PdfRenderPipeline {
       ctx.pageSize = page.size;
       ctx.margin = pageMargin;
 
-      ctx.switchToPage(currentOutputIndex);
-      ctx.tagging?.resetPage(currentOutputIndex);
+      ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
       ctx.currentX = pageMargin;
       ctx.currentY = pageMargin;
 
@@ -160,8 +159,7 @@ export class PdfRenderPipeline {
       ctx.pageSize = page.size;
       ctx.margin = page.margin;
 
-      ctx.switchToPage(currentOutputIndex);
-      ctx.tagging?.resetPage(currentOutputIndex);
+      ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
       ctx.currentX = page.margin;
       ctx.currentY = page.margin;
 

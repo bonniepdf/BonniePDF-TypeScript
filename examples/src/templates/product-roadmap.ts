@@ -17,8 +17,8 @@ import {
   Border,
   BorderColors,
   StandardFonts,
-  IElement,
 } from '@bonniepdf/core';
+import type { IElement } from '@bonniepdf/core';
 
 // ── Palette (Slate neutrals + per-team accent ramps) ─────────────────────────
 const INK = Color.fromHex('#0f172a'); // slate-900  headings

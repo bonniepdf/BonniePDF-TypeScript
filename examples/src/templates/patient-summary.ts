@@ -15,8 +15,8 @@ import {
   Border,
   BorderColors,
   StandardFonts,
-  IElement,
 } from '@bonniepdf/core';
+import type { IElement } from '@bonniepdf/core';
 
 // ── Healthcare palette (Slate neutrals + Teal/Indigo/Rose accents) ───────────
 const INK = Color.fromHex('#0f172a'); // slate-900  headings / values

@@ -334,6 +334,15 @@ export class RenderContext {
     }
     this.flushCanvasToPage(); // save current canvas before switching
     this.currentPageIndex = index;
+    // Keep the tagging context's page tracking in lock-step with the
+    // physical page. newPage() does this for automatic overflow breaks;
+    // switchToPage handles the boundaries between explicit input Page
+    // objects. Without it, MCIDs allocated on the new page keep the
+    // previous page's index and counter, so the structure tree's /Pg and
+    // /ParentTree point at the wrong page - veraPDF then reports the
+    // content as untagged real content (PDF/UA 7.1). MCIDs restart at 0
+    // per page (ISO 32000-1 §14.7.4).
+    this.tagging?.resetPage(index);
     this.updateCanvas();
   }
 

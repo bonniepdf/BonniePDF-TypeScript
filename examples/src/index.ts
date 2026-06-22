@@ -56,6 +56,9 @@ import { generate as financialDashboard } from './templates/financial-dashboard'
 import { generate as annualReport } from './templates/annual-report';
 import { generate as patientSummary } from './templates/patient-summary';
 import { generate as productRoadmap } from './templates/product-roadmap';
+import { generate as saasInvoice } from './templates/saas-invoice';
+import { generate as shippingLabel } from './templates/shipping-label';
+import { generate as eventTicket } from './templates/event-ticket';
 
 export * from './svg';
 
@@ -724,5 +727,41 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
+  },
+  {
+    id: 'saas-invoice',
+    name: 'Accessible SaaS Invoice',
+    category: 'Templates',
+    description:
+      'Accessible (PDF/UA-1) and archival (PDF/A-2a) subscription invoice: tagged line-items table, totals, and a QR "pay by bank" code with alt text.',
+    filename: 'saas-invoice.pdf',
+    generate: saasInvoice,
+    dotnetClass: 'SaasInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'shipping-label',
+    name: 'Shipping Label',
+    category: 'Templates',
+    description:
+      'Carrier-style 4x6in shipping label (PDF/UA-1 + PDF/A-2a) with a Code 128 tracking barcode, an ITF-14 carton code, and a QR parcel link - native vector barcodes, exact label sizing.',
+    filename: 'shipping-label.pdf',
+    generate: shippingLabel,
+    dotnetClass: 'ShippingLabelExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'event-ticket',
+    name: 'Event Ticket',
+    category: 'Templates',
+    description:
+      'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
+    filename: 'event-ticket.pdf',
+    generate: eventTicket,
+    dotnetClass: 'EventTicketExample',
+    thumbnails: false,
+    pdfUa1: true,
   },
 ];

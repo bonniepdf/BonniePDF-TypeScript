@@ -1,4 +1,6 @@
 import { IElement } from '../Elements/IElement';
+import { Color } from '../Core/Color';
+import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';
 import { PdfRenderResult, PageRenderOutput } from './PageDimensions';
@@ -195,17 +197,20 @@ export class PdfRenderPipeline {
       ctx.margin = (dimensions?.margin || settings.margin) as any;
       ctx.switchToPage(i);
 
-      this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
-
-      // full-page background slot. Painted behind everything (even the
-      // watermark), ignoring margins. Prepended last so it ends up at the very
-      // back of the painter's-model stream.
+      // full-page background slot. Painted behind everything, ignoring
+      // margins. Prepended so it ends up at the very back of the
+      // painter's-model stream.
       this.renderPageSlot(ctx, settings.pageBackground, i, true);
 
       this.renderTemplate(ctx, settings, i);
 
+      // The watermark paints on top of the body content and header/footer so a
+      // "DRAFT" / "CONFIDENTIAL" overlay is always visible and never occluded by
+      // opaque page elements. Only the explicit foreground slot sits above it.
+      this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
+
       // full-page foreground slot. Painted on top of everything, ignoring
-      // margins (DRAFT / CONFIDENTIAL overlays and stamps).
+      // margins (explicit stamps / overlays).
       this.renderPageSlot(ctx, settings.pageForeground, i, false);
 
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
@@ -250,9 +255,18 @@ export class PdfRenderPipeline {
     PdfOperators.setFont(wmOps, fontResourceName, wm.fontSize);
 
     let fillColor = wm.textColor;
-    if (ctx.pdfAEnabled && wm.opacity < 1.0) {
-      // For PDF/A, blend opacity into color (no transparency allowed)
-      fillColor = fillColor.withAlpha(Math.round(wm.opacity * 255));
+    const isPdfA1 = settings.conformance === PdfAConformance.PdfA1b || settings.conformance === PdfAConformance.PdfA1a;
+    if (isPdfA1 && wm.opacity < 1.0) {
+      // PDF/A-1 forbids transparency (ISO 19005-1 §6.4), so its /ca alpha is forced
+      // to 1.0 and a real transparency would render as solid text. Simulate the
+      // faint watermark by blending the colour toward white instead. PDF/A-2/3/4
+      // keep their real /ca alpha, so no blending is needed there.
+      const o = wm.opacity;
+      fillColor = Color.fromScRgb(
+        o * fillColor.scR + (1 - o),
+        o * fillColor.scG + (1 - o),
+        o * fillColor.scB + (1 - o)
+      );
     }
 
     PdfOperators.setFillColor(wmOps, fillColor);
@@ -267,7 +281,9 @@ export class PdfRenderPipeline {
       wmOps.push('EMC\n');
     }
 
-    ctx.pages[pageIndex] = wmOps.join('') + ctx.pages[pageIndex];
+    // Append (not prepend): the watermark paints after the page body so it
+    // overlays the content rather than being hidden behind opaque elements.
+    ctx.pages[pageIndex] = ctx.pages[pageIndex] + wmOps.join('');
   }
 
   private static renderTemplate(ctx: RenderContext, settings: DocumentSettings, pageIndex: number): void {

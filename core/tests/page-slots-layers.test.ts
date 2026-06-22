@@ -78,6 +78,19 @@ describe('this feature page slots (DocumentSettings)', () => {
     expect(stream.indexOf('BACKGROUNDMARKER')).toBeLessThan(stream.indexOf('WMARK'));
   });
 
+  it('paints the watermark over body content but under the foreground slot', () => {
+    const doc = new Document();
+    doc.add(text('BODYMARKER'));
+    doc.settings.watermark = new WatermarkSettings('WMARK');
+    doc.settings.pageForeground = () => text('FOREGROUNDMARKER');
+
+    const stream = renderPageStream(doc.pages as Page[], doc.settings);
+    // Painter's model: body first, then the watermark on top, then the
+    // explicit foreground stamp above everything.
+    expect(stream.indexOf('BODYMARKER')).toBeLessThan(stream.indexOf('WMARK'));
+    expect(stream.indexOf('WMARK')).toBeLessThan(stream.indexOf('FOREGROUNDMARKER'));
+  });
+
   it('is a no-op when no slots are configured', () => {
     const doc = new Document();
     doc.add(text('BODYMARKER'));

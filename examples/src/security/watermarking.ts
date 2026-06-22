@@ -26,7 +26,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
 
-  // A tuned watermark: a large, faint diagonal DRAFT sits behind the content on
+  // A tuned watermark: a large, faint diagonal DRAFT sits over the content on
   // every page. WatermarkSettings exposes the font, size, colour, opacity and
   // rotation so the stamp can be matched to the document's palette.
   const watermark = new WatermarkSettings('DRAFT');

@@ -175,16 +175,16 @@ describe('SVG page export', () => {
     expect(svg).toContain('Cell B');
   });
 
-  it('draws the watermark behind content', async () => {
+  it('draws the watermark over content so it is never occluded', async () => {
     doc = simpleDoc();
     doc.settings.watermark = new WatermarkSettings('DRAFT');
     const svg = await doc.generateFirstPageSvgAsync();
     expect(svg).toContain('DRAFT');
     expect(svg).toContain('rotate(45'); // default -45deg negated for SVG
-    // Watermark is prepended (paints behind the body content text).
+    // Watermark is appended (paints on top of the body content text).
     const wmIndex = svg.indexOf('DRAFT');
     const bodyIndex = svg.indexOf('Hello, SVG world!');
-    expect(wmIndex).toBeLessThan(bodyIndex);
+    expect(wmIndex).toBeGreaterThan(bodyIndex);
   });
 
   it('renders header and footer templates on every page', async () => {

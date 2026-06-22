@@ -2,7 +2,7 @@ import { Color } from '../Core/Color';
 import { ColorPalette } from '../Core/ColorPalette';
 
 /**
- * Configuration for rendering a text watermark behind page content.
+ * Configuration for rendering a text watermark
  * The watermark is rendered at the specified opacity and rotation using
  * PDF ExtGState for transparency and the cm operator for rotation.
  */

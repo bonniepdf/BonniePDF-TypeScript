@@ -85,13 +85,14 @@ export class SvgRenderPipeline {
       const canvas = ctx.getSvgPage(i);
       if (!canvas) continue;
 
-      this.renderWatermark(canvas, settings, dim.width, dim.height);
       // this feature page slots, mirroring PdfRenderPipeline: the background is prepended
-      // so it paints behind everything (even the watermark, which was prepended
-      // just above), and the foreground is appended so it paints on top of all
-      // content. Both ignore margins and span the full page.
+      // so it paints behind everything, and the foreground is appended so it
+      // paints on top of all content. Both ignore margins and span the full page.
       this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true);
       this.renderTemplate(ctx, settings, i, dim.width, dim.height, dim.margin);
+      // The watermark is appended after the body content and header/footer so it
+      // overlays them and is never occluded; only the foreground slot sits above.
+      this.renderWatermark(canvas, settings, dim.width, dim.height);
       this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false);
 
       outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
@@ -101,9 +102,9 @@ export class SvgRenderPipeline {
   }
 
   /**
-   * Draws the document watermark behind page content. Mirrors
+   * Draws the document watermark over page content. Mirrors
    * {@link PdfRenderPipeline.renderWatermark}: centred, rotated, semi-transparent
-   * text - but emitted as an SVG group prepended to the page so it paints first.
+   * text - emitted as an SVG group appended to the page so it paints on top.
    */
   private static renderWatermark(
     canvas: SvgCanvas,
@@ -127,7 +128,7 @@ export class SvgRenderPipeline {
       `font-family="${escapeAttr(wm.fontName)}" text-anchor="middle" dominant-baseline="central">${text}</text>` +
       `</g>`;
 
-    canvas.prependRawMarkup(markup);
+    canvas.appendRawMarkup(markup);
   }
 
   /**

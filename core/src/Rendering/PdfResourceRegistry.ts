@@ -246,30 +246,30 @@ export class PdfResourceRegistry {
       });
     }
 
-    for (const alphaKey of this.requestedAlphaValues) {
-      const alpha = Number(alphaKey);
-      if (alpha < 1) {
-        issues.push({
-          code: 'alpha-graphics-state-flattened',
-          severity: this.pdfAEnabled ? 'mitigated' : 'blocking',
-          resource: alphaKey,
-          message: this.pdfAEnabled
-            ? `Requested alpha ${alphaKey} was replaced with an opaque graphics state for PDF/A output.`
-            : `Requested alpha ${alphaKey} would require a transparent graphics state.`,
-        });
+    // Transparency is only flattened for PDF/A-1 (ISO 19005-1 §6.4). PDF/A-2/3/4
+    // permit constant alpha and soft masks, so they keep their real transparency
+    // and raise no issue. Outside PDF/A there is nothing to report either.
+    if (this.requiresPdfA1TransparencyFallback()) {
+      for (const alphaKey of this.requestedAlphaValues) {
+        if (Number(alphaKey) < 1) {
+          issues.push({
+            code: 'alpha-graphics-state-flattened',
+            severity: 'mitigated',
+            resource: alphaKey,
+            message: `Requested alpha ${alphaKey} was replaced with an opaque graphics state for PDF/A-1 output.`,
+          });
+        }
       }
-    }
 
-    for (const [key, image] of this.loadedImages) {
-      if (image.format === ImageFormat.Png && image.hasAlpha && image.alphaData.length > 0) {
-        issues.push({
-          code: 'png-soft-mask-flattened',
-          severity: this.pdfAEnabled ? 'mitigated' : 'blocking',
-          resource: key,
-          message: this.pdfAEnabled
-            ? `PNG image ${key} has alpha data that will be flattened for PDF/A output.`
-            : `PNG image ${key} has alpha data that would be emitted as a soft mask.`,
-        });
+      for (const [key, image] of this.loadedImages) {
+        if (image.format === ImageFormat.Png && image.hasAlpha && image.alphaData.length > 0) {
+          issues.push({
+            code: 'png-soft-mask-flattened',
+            severity: 'mitigated',
+            resource: key,
+            message: `PNG image ${key} has alpha data that will be flattened for PDF/A-1 output.`,
+          });
+        }
       }
     }
 
@@ -680,9 +680,11 @@ export class PdfResourceRegistry {
     const graphicsStateRefs: string[] = [];
     for (const { resourceName, alpha } of this.alphaGraphicsStates.values()) {
       const objectId = writer.getNewId();
-      // When PDF/A is enabled, rewrite alpha graphics states to be fully opaque
-      // (mitigated issue: the original transparency was flattened to a background).
-      const alphaValue = this.pdfAEnabled ? 1.0 : alpha;
+      // `alpha` is already conformance-aware: registerAlphaGraphicsState() forces
+      // it to 1.0 only for PDF/A-1 (ISO 19005-1 §6.4 forbids transparency).
+      // PDF/A-2/3/4 permit constant alpha (ISO 19005-2 §6.2.4), so they keep
+      // their real opacity - mirroring how image soft masks are already handled.
+      const alphaValue = alpha;
       writer.writeObject(
         objectId,
         new Map<string, string>([

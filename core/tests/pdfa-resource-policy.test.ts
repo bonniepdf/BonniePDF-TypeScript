@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ImageFormat, ImageInfo } from '../src/Rendering/Images/ImageInfo';
+import { PdfAConformance } from '../src/Configuration/PdfAConformance';
 import { PdfResourceRegistry } from '../src/Rendering/PdfResourceRegistry';
 import { IPdfWriter } from '../src/Rendering/Writers/PdfWriter';
 
@@ -69,9 +70,9 @@ describe('PDF/A resource policy audit', () => {
     );
   });
 
-  it('reports PDF/A alpha graphics states as mitigated and writes opaque ExtGState', () => {
+  it('flattens alpha graphics states to opaque for PDF/A-1 (which forbids transparency)', () => {
     const registry = new PdfResourceRegistry();
-    registry.pdfAEnabled = true;
+    registry.conformance = PdfAConformance.PdfA1b;
     registry.registerAlphaGraphicsState(0.25);
 
     const issues = registry.getPdfAResourceIssues();
@@ -91,23 +92,49 @@ describe('PDF/A resource policy audit', () => {
     expect(extGState?.dict.get('/CA')).toBe('1.0000');
   });
 
-  it('reports PNG alpha data as mitigated when PDF/A image flattening is enabled', () => {
+  it('preserves real alpha transparency for PDF/A-2 (which permits constant alpha)', () => {
     const registry = new PdfResourceRegistry();
-    registry.pdfAEnabled = true;
-    const image = new ImageInfo();
-    image.format = ImageFormat.Png;
-    image.hasAlpha = true;
-    image.alphaData = new Uint8Array([0, 128, 255, 255]);
-    registry.loadedImages.set('png-alpha', image);
+    registry.conformance = PdfAConformance.PdfA2b;
+    registry.registerAlphaGraphicsState(0.25);
 
+    // No flattening issue is raised: PDF/A-2/3/4 allow constant alpha.
     const issues = registry.getPdfAResourceIssues();
+    expect(issues.some(i => i.code === 'alpha-graphics-state-flattened')).toBe(false);
 
-    expect(issues).toContainEqual(
+    const writer = new MockPdfWriter();
+    const resources = registry.writeResources(writer, 1);
+    const extGState = writer.objects.find(obj => obj.dict.get('/Type') === '/ExtGState');
+    expect(resources).toContain('/ExtGState');
+    expect(extGState?.dict.get('/ca')).toBe('0.2500');
+    expect(extGState?.dict.get('/CA')).toBe('0.2500');
+  });
+
+  it('reports PNG alpha as mitigated for PDF/A-1, but preserved for PDF/A-2', () => {
+    const makeRegistry = (conformance: PdfAConformance): PdfResourceRegistry => {
+      const registry = new PdfResourceRegistry();
+      registry.conformance = conformance;
+      const image = new ImageInfo();
+      image.format = ImageFormat.Png;
+      image.hasAlpha = true;
+      image.alphaData = new Uint8Array([0, 128, 255, 255]);
+      registry.loadedImages.set('png-alpha', image);
+      return registry;
+    };
+
+    // PDF/A-1 forbids transparency -> the soft mask is flattened (mitigated).
+    expect(makeRegistry(PdfAConformance.PdfA1b).getPdfAResourceIssues()).toContainEqual(
       expect.objectContaining({
         code: 'png-soft-mask-flattened',
         severity: 'mitigated',
         resource: 'png-alpha',
       })
     );
+
+    // PDF/A-2 keeps the soft mask -> no flattening issue.
+    expect(
+      makeRegistry(PdfAConformance.PdfA2b)
+        .getPdfAResourceIssues()
+        .some(i => i.code === 'png-soft-mask-flattened')
+    ).toBe(false);
   });
 });

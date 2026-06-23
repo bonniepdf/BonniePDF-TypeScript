@@ -5,6 +5,7 @@ import {
   PdfSize,
   PageOrientation,
   TextBlock,
+  TextAlignment,
   TextStyle,
   VerticalStack,
   Line,
@@ -48,6 +49,7 @@ export function generate(): Document {
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.textColor = ColorPalette.slate[400];
+    b.alignment = TextAlignment.Center;
     return b;
   };
 

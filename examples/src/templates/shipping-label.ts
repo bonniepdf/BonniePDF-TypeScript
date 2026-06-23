@@ -22,6 +22,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  HorizontalAlignment,
 } from '@bonniepdf/core';
 
 const INK = ColorPalette.slate[900];
@@ -173,7 +174,7 @@ export function generate(): Document {
   const qrStack = new VerticalStack();
   qrStack.addChild(tb('SCAN', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Right }));
   const qrInner = new Container();
-  qrInner.horizontalAlignment = undefined;
+  qrInner.horizontalAlignment = HorizontalAlignment.End;
   qrInner.child = qr;
   qrStack.addChild(qrInner);
 

@@ -251,7 +251,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnails: false,
-    dotnetClass: null,
+    dotnetClass: 'TextAlignmentExample',
     pdfUa1: true,
   },
   {
@@ -275,7 +275,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-alignment-liberation.pdf',
     generate: textAlignmentLiberation,
     thumbnails: false,
-    dotnetClass: null,
+    dotnetClass: 'TextAlignmentLiberationExample',
     pdfUa1: true,
   },
   {
@@ -425,7 +425,7 @@ export const examples: ExampleDef[] = [
       'PDF/UA-1 tagged ordered and unordered lists - each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
     filename: 'lists-tagged.pdf',
     generate: listsTagged,
-    dotnetClass: null,
+    dotnetClass: 'ListsTaggedExample',
     pdfUa1: true,
   },
   {
@@ -515,7 +515,7 @@ export const examples: ExampleDef[] = [
       'PDF/UA-1 tagged image example - an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
     filename: 'images-tagged.pdf',
     generate: imagesTagged,
-    dotnetClass: null,
+    dotnetClass: 'ImagesTaggedExample',
     pdfUa1: true,
   },
   // Charting
@@ -614,8 +614,7 @@ export const examples: ExampleDef[] = [
     description: 'Two overlapping line series comparing year-over-year revenue on a shared axis with a legend.',
     filename: 'multi-series-line-chart.pdf',
     generate: multiSeriesLineChart,
-    // .NET implements this as a private method inside ChartShowcaseExample
-    dotnetClass: null,
+    dotnetClass: 'MultiSeriesLineChartExample',
     thumbnails: false,
     pdfUa1: true,
   },
@@ -688,7 +687,7 @@ export const examples: ExampleDef[] = [
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
-    dotnetClass: null,
+    dotnetClass: 'FinancialDashboardExample',
     thumbnails: false,
     pdfUa1: true,
   },

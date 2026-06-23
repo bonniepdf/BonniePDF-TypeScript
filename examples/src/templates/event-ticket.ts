@@ -23,6 +23,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  HorizontalAlignment,
 } from '@bonniepdf/core';
 
 const INK = ColorPalette.slate[900];
@@ -138,10 +139,10 @@ export function generate(): Document {
   qrCard.cornerRadius = 6;
   qrCard.clipContent = true;
   qrCard.padding = new Thickness(6);
-  qrCard.horizontalAlignment = undefined;
+  qrCard.horizontalAlignment = HorizontalAlignment.Center;
   qrCard.child = qr;
   const qrWrap = new Container();
-  qrWrap.horizontalAlignment = undefined;
+  qrWrap.horizontalAlignment = HorizontalAlignment.Center;
   qrWrap.margin = new Thickness(0, 0, 0, 10);
   qrWrap.child = qrCard;
   stub.addChild(qrWrap);

@@ -57,6 +57,7 @@ import { generate as annualReport } from './templates/annual-report';
 import { generate as annualReportGradientCover } from './templates/annual-report-gradient-cover';
 import { generate as annualReportMaskedCover } from './templates/annual-report-masked-cover';
 import { generate as annualReportGeometricCover } from './templates/annual-report-geometric-cover';
+import { generate as eventTicket } from './templates/event-ticket';
 import { generate as patientSummary } from './templates/patient-summary';
 import { generate as productRoadmap } from './templates/product-roadmap';
 
@@ -743,6 +744,19 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportGeometricCoverExample',
     thumbnails: false,
     pdfUa1: false,
+  },
+  {
+    id: 'event-ticket',
+    name: 'Event Ticket',
+    category: 'Templates',
+    description:
+      'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
+    filename: 'event-ticket.pdf',
+    generate: eventTicket,
+    requiredAssets: ['images/danny-howe-bn-D2bCvpik-unsplash.jpg'],
+    dotnetClass: 'EventTicketExample',
+    thumbnails: false,
+    pdfUa1: true,
   },
   {
     id: 'patient-summary',

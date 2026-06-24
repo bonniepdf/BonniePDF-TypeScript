@@ -68,7 +68,9 @@ export interface ExampleDef {
   category: string;
   description: string;
   filename: string;
-  generate: () => Document;
+  generate: (assets?: ReadonlyMap<string, Uint8Array>) => Document;
+  /** Asset paths (relative to examples/assets/) that must be pre-loaded before generate() is called. */
+  requiredAssets?: string[];
   /** Should the associated viewer show thumbnails by default */
   thumbnails?: boolean;
   /** Corresponding .NET class name in BonniePDF-NET/Examples/. null = TypeScript-only. */
@@ -697,9 +699,10 @@ export const examples: ExampleDef[] = [
     name: 'Annual Report',
     category: 'Templates',
     description:
-      'A4 portrait annual-report template: a full-bleed navy front cover, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
+      'A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
     filename: 'annual-report.pdf',
     generate: annualReport,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
     pdfUa1: false,
@@ -721,9 +724,10 @@ export const examples: ExampleDef[] = [
     name: 'Annual Report Cover - Masked Image',
     category: 'Templates',
     description:
-      'The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam. The image is a vector placeholder - swap in canvas.DrawImage(...) for a real photo.',
+      'The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam.',
     filename: 'annual-report-masked-cover.pdf',
     generate: annualReportMaskedCover,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportMaskedCoverExample',
     thumbnails: false,
     pdfUa1: false,

@@ -13,6 +13,7 @@ import { QRCode } from '../../Elements/Shapes/QRCode';
 import { Barcode } from '../../Elements/Shapes/Barcode';
 import { BarcodeSymbology } from '../../Elements/Shapes/BarcodeSymbology';
 import { DataMatrix } from '../../Elements/Shapes/DataMatrix';
+import { CanvasElement, CanvasDrawHandler } from '../../Elements/Drawing/CanvasElement';
 import { TextBlock } from '../../Elements/Text/TextBlock';
 import { RichText } from '../../Elements/Text/RichText';
 import { IContentContainer } from '../IContentContainer';
@@ -210,6 +211,16 @@ export class ContainerElementExtensions {
   /**
    * Composes a reusable component into this container.
    */
+  /**
+   * Adds a canvas drawing element that exposes the raw ICanvas drawing surface.
+   */
+  static canvas(c: IContentContainer, width: number, height: number, handler: CanvasDrawHandler): CanvasElement {
+    const el = new CanvasElement(handler);
+    el.drawWidth = width;
+    el.drawHeight = height;
+    return ContainerBridgeExtensions.elementTyped(c, el);
+  }
+
   static component(c: IContentContainer, comp: IComponent): void {
     comp.compose(c);
   }
@@ -288,4 +299,8 @@ export function rawElement(c: IContentContainer, element: IElement): void {
 
 export function component(c: IContentContainer, comp: IComponent): void {
   ContainerElementExtensions.component(c, comp);
+}
+
+export function canvas(c: IContentContainer, width: number, height: number, handler: CanvasDrawHandler): CanvasElement {
+  return ContainerElementExtensions.canvas(c, width, height, handler);
 }

@@ -2,6 +2,8 @@ import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { Size } from '../Core/Size';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
+import type { Paint } from './Paint/Paint';
+import type { FillRule, StrokeStyle } from './StrokeStyle';
 
 export interface ICanvas {
   readonly width: number;
@@ -59,81 +61,48 @@ export interface ICanvas {
   drawImage(image: any, x: number, y: number, width: number, height: number): void;
   drawFormXObject(resourceName: string, x: number, y: number): void;
 
-  // ── Marked content (PDF/UA tagging) ──────────────────────────────
+  // -- Path construction -------------------------------------------
 
-  /**
-   * Begin a marked-content sequence tagged with a PDF structure role
-   * (e.g. `"H1"`, `"P"`, `"Figure"`). On PDF this emits
-   * `/<role> << /MCID n >> BDC`; on SVG it is a no-op (SVG-out doesn't
-   * carry PDF structure). The MCID is auto-allocated and attached to
-   * the currently-open structure element via the tagging context.
-   *
-   * When the canvas has no tagging context (the document is not opted
-   * into PDF/UA), this method is a no-op so renderer code can call it
-   * unconditionally.
-   */
+  beginPath(): void;
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  cubicBezierTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): void;
+  quadraticBezierTo(cx: number, cy: number, x: number, y: number): void;
+  addRect(x: number, y: number, width: number, height: number): void;
+  closePath(): void;
+
+  // -- Painting the current path -----------------------------------
+
+  fillCurrentPath(paint: Paint | Color, rule?: FillRule): void;
+  strokeCurrentPath(style: StrokeStyle): void;
+
+  // -- Affine transforms -------------------------------------------
+
+  translate(tx: number, ty: number): void;
+  scale(sx: number, sy: number): void;
+  rotate(angleDegrees: number): void;
+  transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+
+  // -- Clipping + compositing --------------------------------------
+
+  clipToCurrentPath(rule?: FillRule): void;
+  setGlobalAlpha(alpha: number): void;
+
+  // -- Marked content (PDF/UA tagging) ------------------------------------
+
   beginMarkedContent(role: string): void;
-
-  /**
-   * Begin a grouping/container marked-content sequence without allocating
-   * an MCID. Emits `/<role> BMC` on PDF. Use for structure-tree container
-   * roles (Table, TR, THead, TBody, TFoot, Sect, …) whose content is
-   * referenced by child structure elements rather than directly by an MCID.
-   * Prevents "Nested MCID" warnings when container BDC blocks would
-   * otherwise enclose leaf BDC blocks.
-   */
   beginContainerContent(role: string): void;
-
-  /**
-   * End the most recent marked-content sequence opened by
-   * {@link beginMarkedContent} or {@link beginContainerContent}.
-   * Emits `EMC` on PDF; no-op on SVG and when tagging is disabled.
-   */
   endMarkedContent(): void;
-
-  /**
-   * Begin an artifact (decorative/navigational) marked-content region.
-   * Emits `/Artifact BMC` on PDF. Unlike {@link beginMarkedContent},
-   * artifact regions are not registered in the structure tree and do not
-   * allocate an MCID. No-op when the document is not tagged or when using
-   * SVG output.
-   */
   beginArtifact(): void;
-
-  /**
-   * End the artifact region opened by {@link beginArtifact}. Emits `EMC`
-   * on PDF; no-op on SVG.
-   */
   endArtifact(): void;
 
-  // ── Crisp-edge region (SVG only) ─────────────────────────────────
+  // -- Crisp-edge region (SVG only) ---------------------------------------
 
-  /**
-   * Begin a region whose shapes should render with `shape-rendering="crispEdges"`
-   * (axis-aligned lines/rects snapped to the device pixel grid, no antialiasing
-   * seams or blur). Used for chart axis lines so they stay sharp even when the
-   * chart as a whole keeps default antialiasing for diagonals/arcs. On SVG this
-   * opens a `<g shape-rendering="crispEdges">`; on PDF (and other canvases) it is
-   * an optional no-op. Must be paired with {@link endCrispEdges}.
-   */
   beginCrispEdges?(): void;
-
-  /** End the region opened by {@link beginCrispEdges}. */
   endCrispEdges?(): void;
 
-  // ── Clipping ─────────────────────────────────────────────────────
+  // -- Clipping (legacy) --------------------------------------------------
 
-  /**
-   * Begin a rounded-rectangle clipping region: subsequent drawing is masked to
-   * the rounded rectangle at (`x`, `y`) sized `width`×`height` with the given
-   * corner `radius` (top-left origin, like every other canvas coordinate). On
-   * PDF this pushes the graphics state and emits a rounded-rect clip path
-   * (`W n`); on SVG it opens a `<g clip-path>` referencing a generated
-   * `<clipPath>`. Optional: canvases that don't implement it simply leave the
-   * content un-masked. Must be paired with {@link endClip}.
-   */
   beginRoundedClip?(x: number, y: number, width: number, height: number, radius: number): void;
-
-  /** End the clipping region opened by {@link beginRoundedClip}. */
   endClip?(): void;
 }

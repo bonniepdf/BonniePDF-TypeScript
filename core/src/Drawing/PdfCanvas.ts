@@ -8,6 +8,8 @@ import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfDrawing } from '../Rendering/Pdf/PdfDrawing';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
+import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint/Paint';
+import type { FillRule, StrokeStyle } from './StrokeStyle';
 
 /** A maximal substring that renders with one font, after glyph-fallback resolution. */
 interface TextRun {
@@ -15,6 +17,11 @@ interface TextRun {
   embeddedFont: any;
   fontIdentifier: string;
   text: string;
+}
+
+interface PathCmd {
+  type: 'm' | 'l' | 'c' | 'h';
+  args: number[];
 }
 
 export class PdfCanvas implements ICanvas {
@@ -35,6 +42,11 @@ export class PdfCanvas implements ICanvas {
   private artifactEmitStack: boolean[] = [];
   /** Logical nesting depth of /Artifact regions (whether or not each emitted a BMC). */
   private artifactDepth = 0;
+
+  // -- this feature path + transform state ----------------------------------------
+  private currentPath: PathCmd[] = [];
+  private ctm: number[] = [1, 0, 0, 1, 0, 0];
+  private ctmStack: number[][] = [];
 
   private readonly _fontResolver: (fontFamily: string) => string;
   private readonly _imageResolver: (image: any) => string;
@@ -80,12 +92,16 @@ export class PdfCanvas implements ICanvas {
   public saveState(): void {
     PdfOperators.saveState(this.stream);
     this.stateDepth++;
+    this.ctmStack.push([...this.ctm]);
   }
 
   public restoreState(): void {
     if (this.stateDepth > 0) {
       PdfOperators.restoreState(this.stream);
       this.stateDepth--;
+      if (this.ctmStack.length > 0) {
+        this.ctm = this.ctmStack.pop()!;
+      }
     }
   }
 
@@ -303,13 +319,132 @@ export class PdfCanvas implements ICanvas {
     }, this._reportUntaggedImage);
   }
 
-  /**
-   * Sets the tagging context that governs marked-content emission.
-   * When non-undefined, {@link beginMarkedContent} /
-   * {@link endMarkedContent} emit PDF marked-content operators and
-   * register MCIDs with the structure tree; when undefined, both are
-   * no-ops and the canvas behaves exactly as it did pre-G-1.
-   */
+  // -- Path construction --------------------------------------------
+
+  public beginPath(): void {
+    this.currentPath = [];
+  }
+
+  public moveTo(x: number, y: number): void {
+    this.currentPath.push({ type: 'm', args: [x, y] });
+  }
+
+  public lineTo(x: number, y: number): void {
+    this.currentPath.push({ type: 'l', args: [x, y] });
+  }
+
+  public cubicBezierTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): void {
+    this.currentPath.push({ type: 'c', args: [c1x, c1y, c2x, c2y, x, y] });
+  }
+
+  public quadraticBezierTo(cx: number, cy: number, x: number, y: number): void {
+    // Promote quadratic to cubic: Q(cx,cy,x,y) -> C(c1,c2,end)
+    const last = this.getLastPoint();
+    const c1x = last.x + (2 / 3) * (cx - last.x);
+    const c1y = last.y + (2 / 3) * (cy - last.y);
+    const c2x = x + (2 / 3) * (cx - x);
+    const c2y = y + (2 / 3) * (cy - y);
+    this.currentPath.push({ type: 'c', args: [c1x, c1y, c2x, c2y, x, y] });
+  }
+
+  public addRect(x: number, y: number, w: number, h: number): void {
+    this.currentPath.push({ type: 'm', args: [x, y] });
+    this.currentPath.push({ type: 'l', args: [x + w, y] });
+    this.currentPath.push({ type: 'l', args: [x + w, y + h] });
+    this.currentPath.push({ type: 'l', args: [x, y + h] });
+    this.currentPath.push({ type: 'h', args: [] });
+  }
+
+  public closePath(): void {
+    this.currentPath.push({ type: 'h', args: [] });
+  }
+
+  // -- Painting the current path ------------------------------------
+
+  public fillCurrentPath(paint: Paint | Color, rule: FillRule = 'nonzero'): void {
+    const p = toPaint(paint);
+    this.drawAsArtifactFallback(() => {
+      if (p instanceof SolidPaint) {
+        this.beginColorAlpha(p.color);
+        PdfOperators.setFillColor(this.stream, p.color);
+        this.emitCurrentPath();
+        this.stream.push(rule === 'evenodd' ? 'f*\n' : 'f\n');
+        this.endColorAlpha(p.color);
+      } else {
+        // Gradient fill: clip to path, then render gradient strips
+        PdfOperators.saveState(this.stream);
+        this.emitCurrentPath();
+        this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
+        this.emitGradientFill(p as LinearGradientPaint | RadialGradientPaint);
+        PdfOperators.restoreState(this.stream);
+      }
+    });
+  }
+
+  public strokeCurrentPath(style: StrokeStyle): void {
+    const p = toPaint(style.paint);
+    this.drawAsArtifactFallback(() => {
+      PdfOperators.saveState(this.stream);
+      PdfOperators.setLineWidth(this.stream, style.width);
+      const cap = style.lineCap === 'round' ? 1 : style.lineCap === 'square' ? 2 : 0;
+      this.stream.push(`${cap} J\n`);
+      const join = style.lineJoin === 'round' ? 1 : style.lineJoin === 'bevel' ? 2 : 0;
+      PdfOperators.setLineJoin(this.stream, join);
+      if (style.miterLimit !== undefined) PdfOperators.setMiterLimit(this.stream, style.miterLimit);
+      if (style.dashPattern && style.dashPattern.length > 0) {
+        const d = style.dashPattern.map(v => PdfSyntax.formatDecimal(v)).join(' ');
+        this.stream.push(`[${d}] ${PdfSyntax.formatDecimal(style.dashOffset ?? 0)} d\n`);
+      }
+      if (p instanceof SolidPaint) {
+        this.applyColorAlpha(p.color);
+        PdfOperators.setStrokeColor(this.stream, p.color);
+        this.emitCurrentPath();
+        PdfOperators.stroke(this.stream);
+      } else {
+        // Gradient stroke: linearize path, draw coloured segments
+        this.emitGradientStroke(p as LinearGradientPaint | RadialGradientPaint, style);
+      }
+      PdfOperators.restoreState(this.stream);
+    });
+  }
+
+  // -- Affine transforms --------------------------------------------
+  // Transforms are tracked in a screen-space CTM and applied to path points
+  // at emit time. This avoids complex PDF-space/screen-space conjugation.
+
+  public translate(tx: number, ty: number): void {
+    this.multiplyCtm(1, 0, 0, 1, tx, ty);
+  }
+
+  public scale(sx: number, sy: number): void {
+    this.multiplyCtm(sx, 0, 0, sy, 0, 0);
+  }
+
+  public rotate(angleDegrees: number): void {
+    const rad = (angleDegrees * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    // Clockwise rotation in screen space (Y-down)
+    this.multiplyCtm(cos, sin, -sin, cos, 0, 0);
+  }
+
+  public transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this.multiplyCtm(a, b, c, d, e, f);
+  }
+
+  // -- Clipping + compositing ---------------------------------------
+
+  public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
+    this.emitCurrentPath();
+    this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
+  }
+
+  public setGlobalAlpha(alpha: number): void {
+    PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(alpha));
+  }
+
+  // -- Tagging ------------------------------------------------------------
+
   public setTaggingContext(tagging: TaggingContext | undefined): void {
     this.tagging = tagging;
   }
@@ -319,15 +454,12 @@ export class PdfCanvas implements ICanvas {
     if (!this.tagging) return;
     let tagged = false;
     if (this.openTaggedCount === 0) {
-      // No outer BDC is open - this sequence can carry its own MCID.
       const mcid = this.tagging.allocateMcid();
       this.tagging.tree.addMcid(mcid, this.tagging.currentPageIndex);
       PdfOperators.beginMarkedContentTagged(this.stream, role, mcid);
       this.openTaggedCount++;
       tagged = true;
     } else {
-      // Already inside a BDC - emit BMC to prevent nested MCIDs.
-      // The content is covered by the ancestor BDC's MCID.
       PdfOperators.beginMarkedContentBmc(this.stream, role);
     }
     this.markedContentTagged.push(tagged);
@@ -338,8 +470,6 @@ export class PdfCanvas implements ICanvas {
   /** @inheritdoc */
   public beginContainerContent(role: string): void {
     if (!this.tagging) return;
-    // BMC - no MCID. Container StructElems (Table, TR, …) reference content
-    // via child StructElems, not directly. Never increments openTaggedCount.
     PdfOperators.beginMarkedContentBmc(this.stream, role);
     this.markedContentTagged.push(false);
     this.tagging.pushOpenRole(role);
@@ -349,7 +479,7 @@ export class PdfCanvas implements ICanvas {
   /** @inheritdoc */
   public endMarkedContent(): void {
     if (!this.tagging) return;
-    if (this.openMarkedContent <= 0) return; // tolerate unbalanced End
+    if (this.openMarkedContent <= 0) return;
     PdfOperators.endMarkedContent(this.stream);
     if (this.markedContentTagged.pop()) this.openTaggedCount--;
     this.tagging.popOpenRole();
@@ -358,13 +488,6 @@ export class PdfCanvas implements ICanvas {
 
   /** @inheritdoc */
   public beginArtifact(): void {
-    // Emit an /Artifact wrapper only for tagged documents and only when not
-    // already inside a tagged marked-content sequence. Content drawn inside a
-    // structure element (e.g. a table cell's /TD) is already enclosed real
-    // content (satisfies PDF/UA 7.1), and nesting an artifact inside a tag is
-    // invalid. The emit decision is recorded so endArtifact() stays balanced.
-    // Only emit a BMC at the outermost artifact level: a nested /Artifact is
-    // redundant, and emitting one inside an open structure scope is invalid.
     const emit = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
     if (emit) PdfOperators.beginArtifact(this.stream);
     this.artifactEmitStack.push(emit);
@@ -378,31 +501,17 @@ export class PdfCanvas implements ICanvas {
     if (emit) PdfOperators.endMarkedContent(this.stream);
   }
 
-  /**
-   * True when drawing currently sits inside an /Artifact region. Structure
-   * tagging must be suppressed here: PDF/UA 7.1-2 forbids tagged (real) content
-   * inside an artifact, so role-bearing children of a decorative subtree
-   * (header/footer/slot/chart) stay artifact content rather than getting their
-   * own BDC.
-   */
   public isInsideArtifact(): boolean {
     return this.artifactDepth > 0;
   }
 
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
-    // Measure per glyph-fallback run so the width matches what is actually
-    // emitted (including any fallback-font glyphs and excluding dropped
-    // default-ignorable code points). When the primary font covers the whole
-    // string this collapses to a single run and is identical to before.
     const width = this.measureRuns(this.resolveRuns(text, fontFamily), fontSize);
     return new Size(width, fontSize * 1.2);
   }
 
-  /**
-   * Resolves `text` into per-font runs via the injected run resolver
-   * (glyph fallback). Without a resolver, returns a single legacy run using
-   * the primary font resolvers, preserving standalone-canvas behaviour.
-   */
+  // -- Private: text rendering helpers ------------------------------------
+
   private resolveRuns(text: string, fontFamily: string): TextRun[] {
     if (this._textRunResolver) return this._textRunResolver(fontFamily, text);
     return [
@@ -415,7 +524,6 @@ export class PdfCanvas implements ICanvas {
     ];
   }
 
-  /** Sums the rendered width of `runs` at `fontSize`, each run in its own font. */
   private measureRuns(runs: TextRun[], fontSize: number): number {
     let total = 0;
     for (const run of runs) {
@@ -423,7 +531,7 @@ export class PdfCanvas implements ICanvas {
       if (font && typeof font.getCharWidthInPoints === 'function') {
         for (const char of run.text) {
           const cp = char.codePointAt(0)!;
-          if (cp < 32) continue; // matches toGlyphIdHexString
+          if (cp < 32) continue;
           total += font.getCharWidthInPoints(cp, fontSize) as number;
         }
       } else {
@@ -433,12 +541,6 @@ export class PdfCanvas implements ICanvas {
     return total;
   }
 
-  /**
-   * Emits the font-selection (`Tf`) and show-text (`Tj`) operators for the
-   * resolved runs. The caller must have positioned the text matrix and set the
-   * fill colour first; each `Tj` advances the text point by its glyph widths,
-   * so consecutive runs flow on naturally.
-   */
   private emitShowText(runs: TextRun[], fontSize: number): void {
     for (const run of runs) {
       if (run.text.length === 0) continue;
@@ -456,6 +558,8 @@ export class PdfCanvas implements ICanvas {
     return `/${fontFamily}`;
   }
 
+  // -- Private: color alpha helpers ---------------------------------------
+
   private drawWithColorAlpha(color: Color, draw: () => void): void {
     this.drawAsArtifactFallback(() => {
       this.beginColorAlpha(color);
@@ -464,16 +568,6 @@ export class PdfCanvas implements ICanvas {
     });
   }
 
-  /**
-   * Wraps unscoped drawing in an /Artifact BMC for tagged documents, so the
-   * marks aren't left as bare (untagged) real content (PDF/UA 7.1). Skips the
-   * wrapper when already inside a structure scope or an explicit /Artifact
-   * region, so decorative content in headers/footers/slots isn't double-marked.
-   *
-   * `onAutoArtifact` runs only when the fallback actually fires, letting image
-   * callers surface a diagnostic rather than silently demoting meaningful
-   * content to an artifact.
-   */
   private drawAsArtifactFallback(draw: () => void, onAutoArtifact?: () => void): void {
     const needsFallbackArtifact = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
     if (needsFallbackArtifact) {
@@ -502,22 +596,273 @@ export class PdfCanvas implements ICanvas {
     if (color.scA >= 1) return;
     PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(color.scA));
   }
+
+  // -- Private: this feature path helpers -----------------------------------------
+
+  private getLastPoint(): { x: number; y: number } {
+    for (let i = this.currentPath.length - 1; i >= 0; i--) {
+      const cmd = this.currentPath[i];
+      if (cmd.type === 'h') continue;
+      const a = cmd.args;
+      return { x: a[a.length - 2], y: a[a.length - 1] };
+    }
+    return { x: 0, y: 0 };
+  }
+
+  private transformPoint(x: number, y: number): { x: number; y: number } {
+    const [a, b, c, d, e, f] = this.ctm;
+    return {
+      x: a * x + c * y + e,
+      y: b * x + d * y + f,
+    };
+  }
+
+  private toPdfPoint(sx: number, sy: number): { x: number; y: number } {
+    const t = this.transformPoint(sx, sy);
+    return {
+      x: t.x + this.xOffset,
+      y: this.height - (t.y + this.yOffset),
+    };
+  }
+
+  private emitCurrentPath(): void {
+    for (const cmd of this.currentPath) {
+      switch (cmd.type) {
+        case 'm': {
+          const p = this.toPdfPoint(cmd.args[0], cmd.args[1]);
+          PdfOperators.moveTo(this.stream, p.x, p.y);
+          break;
+        }
+        case 'l': {
+          const p = this.toPdfPoint(cmd.args[0], cmd.args[1]);
+          PdfOperators.lineTo(this.stream, p.x, p.y);
+          break;
+        }
+        case 'c': {
+          const p1 = this.toPdfPoint(cmd.args[0], cmd.args[1]);
+          const p2 = this.toPdfPoint(cmd.args[2], cmd.args[3]);
+          const p3 = this.toPdfPoint(cmd.args[4], cmd.args[5]);
+          PdfOperators.curveTo(this.stream, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+          break;
+        }
+        case 'h':
+          PdfOperators.closePath(this.stream);
+          break;
+      }
+    }
+  }
+
+  private multiplyCtm(a2: number, b2: number, c2: number, d2: number, e2: number, f2: number): void {
+    const [a1, b1, c1, d1, e1, f1] = this.ctm;
+    this.ctm = [
+      a1 * a2 + c1 * b2,
+      b1 * a2 + d1 * b2,
+      a1 * c2 + c1 * d2,
+      b1 * c2 + d1 * d2,
+      a1 * e2 + c1 * f2 + e1,
+      b1 * e2 + d1 * f2 + f1,
+    ];
+  }
+
+  // -- Private: gradient helpers ------------------------------------------
+
+  private interpolateGradient(stops: readonly GradientStop[], t: number): Color {
+    if (stops.length === 0) return Color.black;
+    if (stops.length === 1) return stops[0].color;
+    const tc = Math.max(0, Math.min(1, t));
+    if (tc <= stops[0].offset) return stops[0].color;
+    if (tc >= stops[stops.length - 1].offset) return stops[stops.length - 1].color;
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (tc >= stops[i].offset && tc <= stops[i + 1].offset) {
+        const range = stops[i + 1].offset - stops[i].offset;
+        const f = range === 0 ? 0 : (tc - stops[i].offset) / range;
+        const c0 = stops[i].color;
+        const c1 = stops[i + 1].color;
+        return Color.fromScRgb(
+          c0.scR + (c1.scR - c0.scR) * f,
+          c0.scG + (c1.scG - c0.scG) * f,
+          c0.scB + (c1.scB - c0.scB) * f,
+          c0.scA + (c1.scA - c0.scA) * f
+        );
+      }
+    }
+    return stops[stops.length - 1].color;
+  }
+
+  private emitGradientFill(paint: LinearGradientPaint | RadialGradientPaint): void {
+    if (paint instanceof LinearGradientPaint) {
+      this.emitLinearGradientFill(paint);
+    } else {
+      this.emitRadialGradientFill(paint);
+    }
+  }
+
+  private emitLinearGradientFill(paint: LinearGradientPaint): void {
+    const steps = 100;
+    const dx = paint.end.x - paint.start.x;
+    const dy = paint.end.y - paint.start.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len === 0) return;
+
+    const perpX = -dy / len;
+    const perpY = dx / len;
+    // Generous span to cover the clipped region
+    const halfSpan = len * 2;
+
+    for (let i = 0; i < steps; i++) {
+      const t0 = i / steps;
+      const t1 = (i + 1) / steps;
+      const color = this.interpolateGradient(paint.stops, (t0 + t1) / 2);
+
+      const x0 = paint.start.x + dx * t0;
+      const y0 = paint.start.y + dy * t0;
+      const x1 = paint.start.x + dx * t1;
+      const y1 = paint.start.y + dy * t1;
+
+      // Quad corners perpendicular to gradient axis
+      const corners = [
+        this.toPdfPoint(x0 + perpX * halfSpan, y0 + perpY * halfSpan),
+        this.toPdfPoint(x0 - perpX * halfSpan, y0 - perpY * halfSpan),
+        this.toPdfPoint(x1 - perpX * halfSpan, y1 - perpY * halfSpan),
+        this.toPdfPoint(x1 + perpX * halfSpan, y1 + perpY * halfSpan),
+      ];
+
+      if (color.scA < 1) this.applyColorAlpha(color);
+      PdfOperators.setFillColor(this.stream, color);
+      PdfOperators.moveTo(this.stream, corners[0].x, corners[0].y);
+      PdfOperators.lineTo(this.stream, corners[1].x, corners[1].y);
+      PdfOperators.lineTo(this.stream, corners[2].x, corners[2].y);
+      PdfOperators.lineTo(this.stream, corners[3].x, corners[3].y);
+      PdfOperators.closePath(this.stream);
+      PdfOperators.fill(this.stream);
+    }
+  }
+
+  private emitRadialGradientFill(paint: RadialGradientPaint): void {
+    // Approximate as concentric rings from outside in
+    const steps = 100;
+    for (let i = steps - 1; i >= 0; i--) {
+      const t = (i + 0.5) / steps;
+      const color = this.interpolateGradient(paint.stops, t);
+      const r = paint.radius * ((i + 1) / steps);
+
+      // Draw a circle at the center with this radius using Bezier approximation
+      const cx = paint.center.x;
+      const cy = paint.center.y;
+      const k = 0.5522847498;
+      const kx = r * k;
+
+      if (color.scA < 1) this.applyColorAlpha(color);
+      PdfOperators.setFillColor(this.stream, color);
+
+      const p0 = this.toPdfPoint(cx + r, cy);
+      const c1a = this.toPdfPoint(cx + r, cy + kx);
+      const c1b = this.toPdfPoint(cx + kx, cy + r);
+      const p1 = this.toPdfPoint(cx, cy + r);
+
+      const c2a = this.toPdfPoint(cx - kx, cy + r);
+      const c2b = this.toPdfPoint(cx - r, cy + kx);
+      const p2 = this.toPdfPoint(cx - r, cy);
+
+      const c3a = this.toPdfPoint(cx - r, cy - kx);
+      const c3b = this.toPdfPoint(cx - kx, cy - r);
+      const p3 = this.toPdfPoint(cx, cy - r);
+
+      const c4a = this.toPdfPoint(cx + kx, cy - r);
+      const c4b = this.toPdfPoint(cx + r, cy - kx);
+
+      PdfOperators.moveTo(this.stream, p0.x, p0.y);
+      PdfOperators.curveTo(this.stream, c1a.x, c1a.y, c1b.x, c1b.y, p1.x, p1.y);
+      PdfOperators.curveTo(this.stream, c2a.x, c2a.y, c2b.x, c2b.y, p2.x, p2.y);
+      PdfOperators.curveTo(this.stream, c3a.x, c3a.y, c3b.x, c3b.y, p3.x, p3.y);
+      PdfOperators.curveTo(this.stream, c4a.x, c4a.y, c4b.x, c4b.y, p0.x, p0.y);
+      PdfOperators.closePath(this.stream);
+      PdfOperators.fill(this.stream);
+    }
+  }
+
+  private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint, style: StrokeStyle): void {
+    // Linearize path into points and draw individually-colored segments
+    const points = this.linearizeCurrentPath(200);
+    if (points.length < 2) return;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const mid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+      const t = this.projectOntoGradient(mid, paint);
+      const color = this.interpolateGradient(paint.stops, t);
+      if (color.scA < 1) this.applyColorAlpha(color);
+      PdfOperators.setStrokeColor(this.stream, color);
+      const s = this.toPdfPoint(p0.x, p0.y);
+      const e = this.toPdfPoint(p1.x, p1.y);
+      PdfOperators.strokeLine(this.stream, s.x, s.y, e.x, e.y);
+    }
+  }
+
+  private projectOntoGradient(pt: { x: number; y: number }, paint: LinearGradientPaint | RadialGradientPaint): number {
+    if (paint instanceof LinearGradientPaint) {
+      const dx = paint.end.x - paint.start.x;
+      const dy = paint.end.y - paint.start.y;
+      const lenSq = dx * dx + dy * dy;
+      if (lenSq === 0) return 0;
+      return ((pt.x - paint.start.x) * dx + (pt.y - paint.start.y) * dy) / lenSq;
+    }
+    // Radial: distance from center / radius
+    const dx = pt.x - paint.center.x;
+    const dy = pt.y - paint.center.y;
+    return Math.sqrt(dx * dx + dy * dy) / paint.radius;
+  }
+
+  private linearizeCurrentPath(totalSegments: number): { x: number; y: number }[] {
+    // Collect line endpoints; subdivide curves
+    const result: { x: number; y: number }[] = [];
+    let cx = 0,
+      cy = 0;
+    let subpathStart = { x: 0, y: 0 };
+
+    for (const cmd of this.currentPath) {
+      switch (cmd.type) {
+        case 'm':
+          cx = cmd.args[0];
+          cy = cmd.args[1];
+          subpathStart = { x: cx, y: cy };
+          result.push({ x: cx, y: cy });
+          break;
+        case 'l':
+          cx = cmd.args[0];
+          cy = cmd.args[1];
+          result.push({ x: cx, y: cy });
+          break;
+        case 'c': {
+          const [c1x, c1y, c2x, c2y, ex, ey] = cmd.args;
+          const segs = Math.max(4, Math.ceil(totalSegments / Math.max(1, this.currentPath.length)));
+          for (let i = 1; i <= segs; i++) {
+            const t = i / segs;
+            const u = 1 - t;
+            const x = u * u * u * cx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex;
+            const y = u * u * u * cy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey;
+            result.push({ x, y });
+          }
+          cx = ex;
+          cy = ey;
+          break;
+        }
+        case 'h':
+          if (result.length > 0) {
+            result.push({ x: subpathStart.x, y: subpathStart.y });
+          }
+          cx = subpathStart.x;
+          cy = subpathStart.y;
+          break;
+      }
+    }
+    return result;
+  }
 }
 
 /**
- * Combined "EXIF-orient + scale-to-display-box" affine matrix.  The image
- * XObject is painted into the PDF unit square with its stored top edge at
- * y=1; this matrix transforms that unit square so the visually-correct
- * image fills the requested `width × height` display box.
- *
- * The eight EXIF orientations (per TIFF tag 0x0112) are:
- *   1 = normal      5 = transpose
- *   2 = flip-H      6 = rotate 90° CW
- *   3 = rotate 180° 7 = transverse
- *   4 = flip-V      8 = rotate 90° CCW
- *
- * `width` and `height` are the post-rotation display dimensions, so for
- * orientations 5–8 the caller has already swapped the natural aspect ratio.
+ * Combined "EXIF-orient + scale-to-display-box" affine matrix.
  */
 function orientationMatrix(
   orientation: number,

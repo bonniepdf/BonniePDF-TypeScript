@@ -34,6 +34,12 @@ export class DataMatrixExtensions {
     dm.quietZone = modules;
     return dm;
   }
+
+  /** Sets the alternate text for accessibility (PDF/UA-1). */
+  static altText(dm: DataMatrix, altText: string): DataMatrix {
+    dm.altText = altText;
+    return dm;
+  }
 }
 
 /**
@@ -57,4 +63,8 @@ export function dataMatrixRectangular(dm: DataMatrix, rectangular: boolean): Dat
 
 export function dataMatrixQuietZone(dm: DataMatrix, modules: number): DataMatrix {
   return DataMatrixExtensions.quietZone(dm, modules);
+}
+
+export function dataMatrixAltText(dm: DataMatrix, altText: string): DataMatrix {
+  return DataMatrixExtensions.altText(dm, altText);
 }

@@ -14,6 +14,7 @@ import { FontMetrics } from '../Typography/FontMetrics';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
+import { ShadingRequest, buildColorShadingDict, buildAlphaShadingDict } from './Pdf/GradientShading';
 
 /** Identifier prefix for glyph-fallback fonts registered on demand. */
 const FALLBACK_PREFIX = 'virtual:fallback:';
@@ -102,6 +103,9 @@ export class PdfResourceRegistry {
   public deferredXObjects: Map<string, DeferredXObjectInfo> = new Map();
   private alphaGraphicsStates: Map<string, { resourceName: string; alpha: number }> = new Map();
   private requestedAlphaValues: Set<string> = new Set();
+  private shadings: { shadingName: string; softMaskGsName: string | null; request: ShadingRequest }[] = [];
+  private shadingCounter = 0;
+  private softMaskGsCounter = 0;
 
   public registerFont(fontIdentifier: string): string {
     // (A) Direct TTF/OTF path
@@ -552,6 +556,32 @@ export class PdfResourceRegistry {
     return this._conformance === PdfAConformance.PdfA1b || this._conformance === PdfAConformance.PdfA1a;
   }
 
+  /**
+   * Registers a native gradient shading (axial Type-2 / radial Type-3) and, for
+   * translucent gradients, the luminosity soft mask that carries its alpha.
+   * Returns the resource names the content stream should reference, or `null`
+   * when the gradient can't be represented as a shading under the active
+   * conformance — specifically a translucent gradient under PDF/A-1, which
+   * forbids transparency (ISO 19005-1 §6.4). The caller falls back to the
+   * strip/disc approximation in that case.
+   *
+   * Opaque gradients are always emitted as shadings (smooth shadings are valid
+   * in every PDF/A level); only the soft mask is gated on transparency support.
+   */
+  public registerShading(request: ShadingRequest): { shadingName: string; softMaskGs: string | null } | null {
+    if (request.hasAlpha && this.requiresPdfA1TransparencyFallback()) return null;
+
+    this.shadingCounter++;
+    const shadingName = `/Sh${this.shadingCounter}`;
+    let softMaskGsName: string | null = null;
+    if (request.hasAlpha) {
+      this.softMaskGsCounter++;
+      softMaskGsName = `/GSsm${this.softMaskGsCounter}`;
+    }
+    this.shadings.push({ shadingName, softMaskGsName, request });
+    return { shadingName, softMaskGs: softMaskGsName };
+  }
+
   private mapToStandardFontName(fontIdentifier: string): string {
     const lower = fontIdentifier.toLowerCase();
     if (lower.includes('arial') || lower.includes('helvetica')) return StandardFonts.Helvetica;
@@ -695,10 +725,51 @@ export class PdfResourceRegistry {
       );
       graphicsStateRefs.push(`${resourceName} ${objectId} 0 R`);
     }
+
+    // 6. Gradient shadings (native axial/radial) and their luminosity soft masks.
+    //    The colour shading is an inline dict in the /Shading resources; a
+    //    translucent gradient additionally needs a form XObject carrying the
+    //    grayscale alpha shading, wrapped by an /SMask ExtGState that joins the
+    //    page's /ExtGState dict alongside the constant-alpha states above.
+    const fmt = (v: number): string => Number(v.toFixed(4)).toString();
+    const shadingRefs: string[] = [];
+    for (const { shadingName, softMaskGsName, request } of this.shadings) {
+      shadingRefs.push(`${shadingName} ${buildColorShadingDict(request)}`);
+      if (!softMaskGsName) continue;
+
+      const [x0, y0, x1, y1] = request.bbox;
+      const formId = writer.getNewId();
+      writer.writeObject(
+        formId,
+        new Map<string, string>([
+          ['/Type', '/XObject'],
+          ['/Subtype', '/Form'],
+          ['/FormType', '1'],
+          ['/BBox', `[${fmt(x0)} ${fmt(y0)} ${fmt(x1)} ${fmt(y1)}]`],
+          ['/Group', '<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>'],
+          ['/Resources', `<< /Shading << /ShM ${buildAlphaShadingDict(request)} >> >>`],
+        ]),
+        '/ShM sh\n'
+      );
+
+      const gsId = writer.getNewId();
+      writer.writeObject(
+        gsId,
+        new Map<string, string>([
+          ['/Type', '/ExtGState'],
+          ['/SMask', `<< /Type /Mask /S /Luminosity /G ${formId} 0 R >>`],
+          ['/ca', '1'],
+          ['/CA', '1'],
+        ])
+      );
+      graphicsStateRefs.push(`${softMaskGsName} ${gsId} 0 R`);
+    }
+    const shadingResources = shadingRefs.length > 0 ? `<< /Shading << ${shadingRefs.join(' ')} >> >>` : '';
+
     const graphicsStateResources =
       graphicsStateRefs.length > 0 ? `<< /ExtGState << ${graphicsStateRefs.join(' ')} >> >>` : '';
 
-    return this.combineResources(fontResources, imageResources, graphicsStateResources);
+    return this.combineResources(fontResources, imageResources, graphicsStateResources, shadingResources);
   }
 
   private combineResources(...resources: string[]): string {

@@ -1,4 +1,5 @@
 import { PdfResourceRegistry, ResolvedTextRun } from './PdfResourceRegistry';
+import type { ShadingRequest } from './Pdf/GradientShading';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
 import { PdfCanvas } from '../Drawing/PdfCanvas';
@@ -172,7 +173,8 @@ export class RenderContext {
         this.trackGlyphUsage.bind(this),
         this.registerAlphaGraphicsState.bind(this),
         this.resolveTextRuns.bind(this),
-        this.reportUntaggedImage.bind(this)
+        this.reportUntaggedImage.bind(this),
+        this.registerShading.bind(this)
       );
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
@@ -197,7 +199,10 @@ export class RenderContext {
       this.resolveImageResource.bind(this),
       this.resolveEmbeddedFont.bind(this),
       this.trackGlyphUsage.bind(this),
-      this.registerAlphaGraphicsState.bind(this)
+      this.registerAlphaGraphicsState.bind(this),
+      undefined,
+      undefined,
+      this.registerShading.bind(this)
     );
     if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
     return pdfCanvas;
@@ -241,6 +246,10 @@ export class RenderContext {
 
   public registerAlphaGraphicsState(alpha: number): string {
     return this.resources.registerAlphaGraphicsState(alpha);
+  }
+
+  public registerShading(request: ShadingRequest): { shadingName: string; softMaskGs: string | null } | null {
+    return this.resources.registerShading(request);
   }
 
   public static isEmbeddedFont(fontIdentifier: string): boolean {

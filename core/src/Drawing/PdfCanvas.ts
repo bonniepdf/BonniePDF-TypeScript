@@ -10,6 +10,10 @@ import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
+import type { ShadingRequest, ShadingStop } from '../Rendering/Pdf/GradientShading';
+
+/** Resolves a gradient to native shading resources, or `null` to fall back to strips/discs. */
+type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softMaskGs: string | null } | null;
 
 /** A maximal substring that renders with one font, after glyph-fallback resolution. */
 interface TextRun {
@@ -43,6 +47,9 @@ export class PdfCanvas implements ICanvas {
   /** Logical nesting depth of /Artifact regions (whether or not each emitted a BMC). */
   private artifactDepth = 0;
 
+  /** Fully transparent black; the implicit backdrop beyond a radial gradient's rim. */
+  private static readonly TRANSPARENT = Color.fromScRgb(0, 0, 0, 0);
+
   // -- this feature path + transform state ----------------------------------------
   private currentPath: PathCmd[] = [];
   private ctm: number[] = [1, 0, 0, 1, 0, 0];
@@ -55,6 +62,7 @@ export class PdfCanvas implements ICanvas {
   private readonly _alphaGraphicsStateResolver: (alpha: number) => string;
   private readonly _textRunResolver?: (fontFamily: string, text: string) => TextRun[];
   private readonly _reportUntaggedImage?: () => void;
+  private readonly _shadingResolver?: ShadingResolver;
 
   constructor(
     pageHeight: number,
@@ -66,7 +74,8 @@ export class PdfCanvas implements ICanvas {
     glyphTracker?: (fontIdentifier: string, text: string) => void,
     alphaGraphicsStateResolver?: (alpha: number) => string,
     textRunResolver?: (fontFamily: string, text: string) => TextRun[],
-    reportUntaggedImage?: () => void
+    reportUntaggedImage?: () => void,
+    shadingResolver?: ShadingResolver
   ) {
     this.height = pageHeight;
     this.xOffset = xOffset;
@@ -83,6 +92,7 @@ export class PdfCanvas implements ICanvas {
       alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
     this._textRunResolver = textRunResolver;
     this._reportUntaggedImage = reportUntaggedImage;
+    this._shadingResolver = shadingResolver;
   }
 
   public getStream(): string[] {
@@ -698,6 +708,30 @@ export class PdfCanvas implements ICanvas {
   }
 
   private emitLinearGradientFill(paint: LinearGradientPaint): void {
+    // Prefer a native PDF Type-2 axial shading (see emitShading). Falls back to
+    // the perpendicular-strip approximation when shadings can't be used
+    // (translucent gradient under PDF/A-1, which forbids transparency).
+    const dx0 = paint.end.x - paint.start.x;
+    const dy0 = paint.end.y - paint.start.y;
+    if (dx0 === 0 && dy0 === 0) return; // degenerate axis — nothing to paint
+
+    const request: ShadingRequest = {
+      shadingType: 2,
+      coords: [paint.start.x, paint.start.y, paint.end.x, paint.end.y],
+      stops: this.normalizeShadingStops(paint.stops),
+      extend: [true, true],
+      bbox: this.currentPathBBoxCanvas(),
+      hasAlpha: paint.stops.some(s => s.color.scA < 1),
+    };
+    const resolved = this._shadingResolver?.(request);
+    if (resolved) {
+      this.emitShading(resolved);
+      return;
+    }
+    this.emitLinearGradientStrips(paint);
+  }
+
+  private emitLinearGradientStrips(paint: LinearGradientPaint): void {
     const steps = 100;
     const dx = paint.end.x - paint.start.x;
     const dy = paint.end.y - paint.start.y;
@@ -739,46 +773,147 @@ export class PdfCanvas implements ICanvas {
   }
 
   private emitRadialGradientFill(paint: RadialGradientPaint): void {
-    // Approximate as concentric rings from outside in
-    const steps = 100;
-    for (let i = steps - 1; i >= 0; i--) {
-      const t = (i + 0.5) / steps;
-      const color = this.interpolateGradient(paint.stops, t);
-      const r = paint.radius * ((i + 1) / steps);
+    // Prefer a native PDF Type-3 radial shading (see emitShading). Falls back to
+    // the disc approximation when shadings can't be used (translucent gradient
+    // under PDF/A-1, which forbids transparency).
+    const inner = paint.focal ?? paint.center;
+    const request: ShadingRequest = {
+      shadingType: 3,
+      coords: [inner.x, inner.y, 0, paint.center.x, paint.center.y, paint.radius],
+      stops: this.normalizeShadingStops(paint.stops),
+      extend: [true, true],
+      bbox: this.currentPathBBoxCanvas(),
+      hasAlpha: paint.stops.some(s => s.color.scA < 1),
+    };
+    const resolved = this._shadingResolver?.(request);
+    if (resolved) this.emitShading(resolved);
+    else this.emitRadialGradientDiscs(paint);
+  }
 
-      // Draw a circle at the center with this radius using Bezier approximation
-      const cx = paint.center.x;
-      const cy = paint.center.y;
-      const k = 0.5522847498;
-      const kx = r * k;
+  /**
+   * Paints a resolved shading across the (already-clipped) region. A `cm` maps
+   * the shading's canvas-space coordinates into PDF page space — PdfCanvas bakes
+   * its own transform into each emitted point and runs with an identity stream
+   * CTM, so the shading needs that matrix re-applied here. For a translucent
+   * gradient the soft-mask ExtGState is set first (under the same CTM, so the
+   * mask's group aligns with the colour shading).
+   */
+  private emitShading(resolved: { shadingName: string; softMaskGs: string | null }): void {
+    PdfOperators.saveState(this.stream);
+    const [a, b, c, d, e, f] = this.ctm;
+    PdfOperators.concatMatrix(this.stream, a, -b, c, -d, e + this.xOffset, this.height - this.yOffset - f);
+    if (resolved.softMaskGs) PdfOperators.setGraphicsState(this.stream, resolved.softMaskGs);
+    this.stream.push(`${resolved.shadingName} sh\n`);
+    PdfOperators.restoreState(this.stream);
+  }
 
-      if (color.scA < 1) this.applyColorAlpha(color);
-      PdfOperators.setFillColor(this.stream, color);
+  /** Sorts/clamps stops and pads them so the run spans the full [0, 1] domain. */
+  private normalizeShadingStops(stops: readonly GradientStop[]): ShadingStop[] {
+    const mapped: ShadingStop[] = stops
+      .map(s => ({
+        offset: Math.max(0, Math.min(1, s.offset)),
+        r: s.color.scR,
+        g: s.color.scG,
+        b: s.color.scB,
+        a: s.color.scA,
+      }))
+      .sort((p, q) => p.offset - q.offset);
 
-      const p0 = this.toPdfPoint(cx + r, cy);
-      const c1a = this.toPdfPoint(cx + r, cy + kx);
-      const c1b = this.toPdfPoint(cx + kx, cy + r);
-      const p1 = this.toPdfPoint(cx, cy + r);
-
-      const c2a = this.toPdfPoint(cx - kx, cy + r);
-      const c2b = this.toPdfPoint(cx - r, cy + kx);
-      const p2 = this.toPdfPoint(cx - r, cy);
-
-      const c3a = this.toPdfPoint(cx - r, cy - kx);
-      const c3b = this.toPdfPoint(cx - kx, cy - r);
-      const p3 = this.toPdfPoint(cx, cy - r);
-
-      const c4a = this.toPdfPoint(cx + kx, cy - r);
-      const c4b = this.toPdfPoint(cx + r, cy - kx);
-
-      PdfOperators.moveTo(this.stream, p0.x, p0.y);
-      PdfOperators.curveTo(this.stream, c1a.x, c1a.y, c1b.x, c1b.y, p1.x, p1.y);
-      PdfOperators.curveTo(this.stream, c2a.x, c2a.y, c2b.x, c2b.y, p2.x, p2.y);
-      PdfOperators.curveTo(this.stream, c3a.x, c3a.y, c3b.x, c3b.y, p3.x, p3.y);
-      PdfOperators.curveTo(this.stream, c4a.x, c4a.y, c4b.x, c4b.y, p0.x, p0.y);
-      PdfOperators.closePath(this.stream);
-      PdfOperators.fill(this.stream);
+    if (mapped.length === 0) {
+      return [
+        { offset: 0, r: 0, g: 0, b: 0, a: 1 },
+        { offset: 1, r: 0, g: 0, b: 0, a: 1 },
+      ];
     }
+    if (mapped.length === 1) {
+      return [
+        { ...mapped[0], offset: 0 },
+        { ...mapped[0], offset: 1 },
+      ];
+    }
+    if (mapped[0].offset > 0) mapped.unshift({ ...mapped[0], offset: 0 });
+    if (mapped[mapped.length - 1].offset < 1) mapped.push({ ...mapped[mapped.length - 1], offset: 1 });
+    return mapped;
+  }
+
+  /** Bounding box of the current path in canvas space (control points included). */
+  private currentPathBBoxCanvas(): [number, number, number, number] {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const cmd of this.currentPath) {
+      const a = cmd.args;
+      for (let i = 0; i + 1 < a.length; i += 2) {
+        if (a[i] < minX) minX = a[i];
+        if (a[i] > maxX) maxX = a[i];
+        if (a[i + 1] < minY) minY = a[i + 1];
+        if (a[i + 1] > maxY) maxY = a[i + 1];
+      }
+    }
+    if (!Number.isFinite(minX)) return [0, 0, 0, 0];
+    return [minX, minY, maxX, maxY];
+  }
+
+  private emitRadialGradientDiscs(paint: RadialGradientPaint): void {
+    // Approximate the radial gradient as a stack of overlapping filled discs,
+    // largest first. Overlapping (rather than abutting annuli) is what keeps the
+    // result smooth: each disc paints over the previous disc's antialiased edge,
+    // so no hairline seam is left between bands.
+    //
+    // The catch is translucency. Naively painting each disc at its raw
+    // interpolated alpha composites the overlapping discs (source-over) and
+    // compounds the opacity far past the intended value. So instead each disc's
+    // alpha *and* colour are pre-corrected: given the colour/alpha already laid
+    // down by the larger discs beneath it, we solve for the (colour, alpha) that,
+    // composited over that backdrop, yields the target gradient sample exactly.
+    // For an opaque gradient this collapses to "paint the target colour"; for a
+    // constant-colour fade (the common glow) it reproduces the alpha ramp
+    // precisely. The net effect matches SVG's native <radialGradient>.
+    const steps = 100;
+    const cx = paint.center.x;
+    const cy = paint.center.y;
+
+    for (let i = steps - 1; i >= 0; i--) {
+      const target = this.interpolateGradient(paint.stops, (i + 0.5) / steps);
+      // Whatever the larger discs already painted at this radius equals the
+      // gradient sample one band further out (fully transparent past the rim).
+      const below = i + 1 < steps ? this.interpolateGradient(paint.stops, (i + 1.5) / steps) : PdfCanvas.TRANSPARENT;
+
+      const disc = correctOverDisc(target, below);
+      if (disc === null) continue; // nothing visible to add at this band
+
+      const r = paint.radius * ((i + 1) / steps);
+      PdfOperators.saveState(this.stream);
+      if (disc.scA < 1) this.applyColorAlpha(disc);
+      PdfOperators.setFillColor(this.stream, disc);
+      this.emitCirclePath(cx, cy, r);
+      PdfOperators.fill(this.stream);
+      PdfOperators.restoreState(this.stream);
+    }
+  }
+
+  /** Emits a closed circle path (4 cubic-bezier quadrants) in PDF user space. */
+  private emitCirclePath(cx: number, cy: number, r: number): void {
+    const kr = r * 0.5522847498;
+    const p0 = this.toPdfPoint(cx + r, cy);
+    const c1a = this.toPdfPoint(cx + r, cy + kr);
+    const c1b = this.toPdfPoint(cx + kr, cy + r);
+    const p1 = this.toPdfPoint(cx, cy + r);
+    const c2a = this.toPdfPoint(cx - kr, cy + r);
+    const c2b = this.toPdfPoint(cx - r, cy + kr);
+    const p2 = this.toPdfPoint(cx - r, cy);
+    const c3a = this.toPdfPoint(cx - r, cy - kr);
+    const c3b = this.toPdfPoint(cx - kr, cy - r);
+    const p3 = this.toPdfPoint(cx, cy - r);
+    const c4a = this.toPdfPoint(cx + kr, cy - r);
+    const c4b = this.toPdfPoint(cx + r, cy - kr);
+    PdfOperators.moveTo(this.stream, p0.x, p0.y);
+    PdfOperators.curveTo(this.stream, c1a.x, c1a.y, c1b.x, c1b.y, p1.x, p1.y);
+    PdfOperators.curveTo(this.stream, c2a.x, c2a.y, c2b.x, c2b.y, p2.x, p2.y);
+    PdfOperators.curveTo(this.stream, c3a.x, c3a.y, c3b.x, c3b.y, p3.x, p3.y);
+    PdfOperators.curveTo(this.stream, c4a.x, c4a.y, c4b.x, c4b.y, p0.x, p0.y);
+    PdfOperators.closePath(this.stream);
   }
 
   private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint, style: StrokeStyle): void {
@@ -859,6 +994,40 @@ export class PdfCanvas implements ICanvas {
     }
     return result;
   }
+}
+
+/**
+ * Solves the (colour, alpha) a disc must be painted with so that, composited
+ * with the source-over operator on top of a backdrop `below`, the visible
+ * result equals `target`. Returns `null` when the disc would add nothing (the
+ * backdrop already meets or exceeds the target opacity at that radius).
+ *
+ * Derivation (premultiplied source-over, target = disc over below):
+ *   Aout = a + Ab(1 - a)              ⇒  a = (At - Ab) / (1 - Ab)
+ *   Aout·Cout = a·C + Ab·B(1 - a)     ⇒  C = (At·T - Ab·B(1 - a)) / a
+ * where (T, At) is `target`, (B, Ab) is `below`, and (C, a) is the disc.
+ */
+function correctOverDisc(target: Color, below: Color): Color | null {
+  const at = target.scA;
+  const ab = below.scA;
+
+  // Backdrop is already opaque: can't composite under it, so just lay the
+  // opaque target colour on top (covers the realistic opaque-gradient case).
+  if (1 - ab < 1e-6) {
+    return Color.fromScRgb(target.scR, target.scG, target.scB, 1);
+  }
+
+  const a = (at - ab) / (1 - ab);
+  // a <= 0 means the target is *less* opaque than the backdrop — unreachable by
+  // stacking another disc on top, so skip it (e.g. a fully transparent rim).
+  if (a <= 1e-6) return null;
+
+  const inv = 1 - a;
+  const r = (at * target.scR - ab * below.scR * inv) / a;
+  const g = (at * target.scG - ab * below.scG * inv) / a;
+  const b = (at * target.scB - ab * below.scB * inv) / a;
+  // fromScRgb clamps each channel (and alpha) back into [0, 1].
+  return Color.fromScRgb(r, g, b, Math.min(1, a));
 }
 
 /**

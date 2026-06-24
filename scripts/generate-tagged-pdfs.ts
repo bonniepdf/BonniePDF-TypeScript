@@ -11,10 +11,10 @@
 // prefix to the bundled example fonts (examples/assets/fonts) and generate via
 // the async path so the fonts are preloaded before serialisation. These fonts
 // ship only with the private @bonniepdf/examples package - never with @bonniepdf/core.
-import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { configurePlatform, NodePlatformIO, FontManager } from '@bonniepdf/core';
-import { examples } from '../examples/src/index.ts';
+import { examples, type ExampleDef } from '../examples/src/index.ts';
 
 // Map the browser-style asset URLs the examples use to on-disk font files:
 //   /fonts/liberation/<f>  -> core/assets/fonts/<f>   (the bundled Liberation set)
@@ -53,6 +53,16 @@ for (const [file, family] of FALLBACK_FONTS) {
   }
 }
 
+const exampleAssetsDir = resolve(import.meta.dirname, '..', 'examples', 'assets');
+function loadAssets(def: ExampleDef): ReadonlyMap<string, Uint8Array> {
+  const map = new Map<string, Uint8Array>();
+  for (const path of def.requiredAssets ?? []) {
+    const fullPath = resolve(exampleAssetsDir, path);
+    if (existsSync(fullPath)) map.set(path, new Uint8Array(readFileSync(fullPath)));
+  }
+  return map;
+}
+
 const outDir = resolve(import.meta.dirname, '..', 'generated-pdfs');
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
@@ -61,9 +71,9 @@ const taggedExamples = examples.filter(e => e.pdfUa1 && !e.password);
 
 async function main(): Promise<void> {
   console.log(`Generating ${taggedExamples.length} PDF/UA-1 examples to ${outDir}`);
-  for (const { filename, generate } of taggedExamples) {
-    const doc = generate();
-    const outPath = resolve(outDir, filename);
+  for (const def of taggedExamples) {
+    const doc = def.generate(loadAssets(def));
+    const outPath = resolve(outDir, def.filename);
     // Async path so embedded TrueType fonts are loaded (via the IO above) first.
     writeFileSync(outPath, await doc.generateBytesAsync());
     // The synchronous font-collection pass logs a "Could not load embedded font"
@@ -74,7 +84,7 @@ async function main(): Promise<void> {
       d => !(d.category === 'font' && d.message.startsWith('Could not load embedded font'))
     );
     for (const d of issues) console.warn(`[BonniePDF/${d.category}] ${d.severity}: ${d.message}`);
-    console.log(`  ✓ ${filename}`);
+    console.log(`  ✓ ${def.filename}`);
   }
 }
 

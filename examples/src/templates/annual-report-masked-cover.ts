@@ -10,6 +10,7 @@ import {
   StandardFonts,
   TextAlignment,
   CanvasElement,
+  ImageLoader,
   LinearGradientPaint,
   type ICanvas,
 } from '@bonniepdf/core';
@@ -30,12 +31,9 @@ import {
 //   ├──────────────────╱    │
 //   │   BRAND BAND + TITLE  │
 //   └───────────────────────┘  ← page bottom
-//
-// The "image" here is a vector placeholder so the example is self-contained.
-// To drop in a real cover photo, replace the PLACEHOLDER block with a single
-//   canvas.drawImage(image, 0, 0, w, photoBottom);
-// call - the clip mask set up immediately above still applies to it.
 // ─────────────────────────────────────────────────────────────────────────────
+
+const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
 
 const PAGE = PdfSize.a4;
 
@@ -104,7 +102,7 @@ function drawPlaceholderImage(canvas: ICanvas, w: number, photoBottom: number): 
   );
 }
 
-function drawCover(canvas: ICanvas, size: Size): void {
+function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof ImageLoader.loadFromBytes>): void {
   const w = size.width;
   const h = size.height;
 
@@ -112,7 +110,7 @@ function drawCover(canvas: ICanvas, size: Size): void {
   // down to 0.62·H on the right. The mask polygon is everything above that line.
   const cutLeft = h * 0.52;
   const cutRight = h * 0.62;
-  const photoBottom = h * 0.66; // draw the placeholder a little past the seam
+  const photoBottom = h * 0.66;
 
   // 1. Brand band fills the whole page; the masked image overpaints the top.
   canvas.beginPath();
@@ -129,11 +127,11 @@ function drawCover(canvas: ICanvas, size: Size): void {
   canvas.closePath();
   canvas.clipToCurrentPath();
 
-  // ── PLACEHOLDER ──────────────────────────────────────────────────────────
-  // Replace this single call with `canvas.drawImage(image, 0, 0, w, photoBottom)`
-  // to use a real cover photograph; the angled clip above still masks it.
-  drawPlaceholderImage(canvas, w, photoBottom);
-  // ─────────────────────────────────────────────────────────────────────────
+  if (heroImage) {
+    canvas.drawImage(heroImage, 0, 0, w, photoBottom);
+  } else {
+    drawPlaceholderImage(canvas, w, photoBottom);
+  }
 
   canvas.restoreState();
 
@@ -182,7 +180,7 @@ function drawCover(canvas: ICanvas, size: Size): void {
   );
 }
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PAGE, 0); // zero margin - full-bleed cover
   settings.language = 'en-GB';
 
@@ -193,7 +191,10 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
 
-  const cover = new CanvasElement(drawCover);
+  const heroData = assets?.get(HERO_IMAGE);
+  const heroImage = heroData ? ImageLoader.loadFromBytes(heroData) : undefined;
+
+  const cover = new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage));
   cover.drawWidth = PAGE.width;
   cover.drawHeight = PAGE.height;
   cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a hero landscape image clipped to an angled mask above a green title band.`;

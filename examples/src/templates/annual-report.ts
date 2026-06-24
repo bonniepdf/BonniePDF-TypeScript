@@ -9,6 +9,8 @@ import {
   HorizontalStack,
   VerticalStack,
   Container,
+  Image,
+  ImageFitMode,
   Spacer,
   Color,
   ColorPalette,
@@ -40,6 +42,8 @@ const HEADING = ColorPalette.blue[800]; // section headings
 const PAGE = PdfSize.a4;
 const MARGIN = 72;
 
+const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
+
 const COMPANY = 'Horizon Ventures';
 const YEAR = 2025;
 const REPORT_TITLE = `Annual Report ${YEAR}`;
@@ -53,7 +57,7 @@ const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
   minute: '2-digit',
 }).format(new Date())}`;
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PAGE, MARGIN);
   settings.conformance = PdfAConformance.PdfA2b;
   settings.language = 'en-GB';
@@ -83,14 +87,28 @@ export function generate(): Document {
   // ════════════════════════════════════════════════════════════════════════
   //  Page 1 - front cover (overlaid on the deep-blue background slot)
   // ════════════════════════════════════════════════════════════════════════
-  doc.add(new Spacer(150));
+  const heroData = assets?.get(HERO_IMAGE);
+  if (heroData) {
+    const hero = new Image();
+    hero.imageData = heroData;
+    hero.width = PAGE.width - MARGIN * 2;
+    hero.height = 220;
+    hero.fitMode = ImageFitMode.Cover;
+    hero.isDecorative = true;
+    doc.add(new Spacer(24));
+    doc.add(hero);
+    doc.add(new Spacer(24));
+  } else {
+    doc.add(new Spacer(150));
+  }
   doc.add(brandMark());
   doc.add(new Spacer(26));
   doc.add(coverLabel('ANNUAL REPORT'));
   doc.add(coverTitle(COMPANY));
   doc.add(triColourRule());
   doc.add(coverSubtitle(`Fiscal Year ${YEAR}`));
-  doc.add(new Spacer(210));
+  if (!heroData) doc.add(new Spacer(210));
+  else doc.add(new Spacer(40));
   doc.add(coverCredit('Prepared with BonniePDF'));
   doc.add(coverCredit(GENERATED));
 

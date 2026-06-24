@@ -106,6 +106,7 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
     }
 
     // 2. Dark modules, coalescing adjacent modules in a row into one rectangle.
+    ctx.canvas.beginCrispEdges?.();
     for (let row = 0; row < matrix.height; row++) {
       let startCol = -1;
       for (let col = 0; col <= matrix.width; col++) {
@@ -120,6 +121,7 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
         }
       }
     }
+    ctx.canvas.endCrispEdges?.();
 
     // 3. Advance the Y position.
     ctx.currentY += symbolHeight;

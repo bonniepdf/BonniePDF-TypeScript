@@ -161,6 +161,12 @@ export * from './Drawing/ICanvas';
 export * from './Drawing/PdfCanvas';
 export * from './Drawing/SvgCanvas';
 
+// Vector drawing surface
+export * from './Drawing/Paint/Paint';
+export * from './Drawing/StrokeStyle';
+export * from './Drawing/Shapes';
+export * from './Elements/Drawing/CanvasElement';
+
 // SVG page export
 export * from './Export/SvgPageExportOptions';
 export * from './Rendering/SvgRenderPipeline';

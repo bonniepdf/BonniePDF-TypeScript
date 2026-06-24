@@ -54,11 +54,12 @@ import { generate as userDirectory } from './templates/user-directory';
 import { generate as movieCatalog } from './templates/movie-catalog';
 import { generate as financialDashboard } from './templates/financial-dashboard';
 import { generate as annualReport } from './templates/annual-report';
+import { generate as annualReportGradientCover } from './templates/annual-report-gradient-cover';
+import { generate as annualReportMaskedCover } from './templates/annual-report-masked-cover';
+import { generate as annualReportGeometricCover } from './templates/annual-report-geometric-cover';
+import { generate as eventTicket } from './templates/event-ticket';
 import { generate as patientSummary } from './templates/patient-summary';
 import { generate as productRoadmap } from './templates/product-roadmap';
-import { generate as saasInvoice } from './templates/saas-invoice';
-import { generate as shippingLabel } from './templates/shipping-label';
-import { generate as eventTicket } from './templates/event-ticket';
 
 export * from './svg';
 
@@ -68,7 +69,9 @@ export interface ExampleDef {
   category: string;
   description: string;
   filename: string;
-  generate: () => Document;
+  generate: (assets?: ReadonlyMap<string, Uint8Array>) => Document;
+  /** Asset paths (relative to examples/assets/) that must be pre-loaded before generate() is called. */
+  requiredAssets?: string[];
   /** Should the associated viewer show thumbnails by default */
   thumbnails?: boolean;
   /** Corresponding .NET class name in BonniePDF-NET/Examples/. null = TypeScript-only. */
@@ -251,7 +254,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnails: false,
-    dotnetClass: 'TextAlignmentExample',
+    dotnetClass: null,
     pdfUa1: true,
   },
   {
@@ -275,7 +278,7 @@ export const examples: ExampleDef[] = [
     filename: 'text-alignment-liberation.pdf',
     generate: textAlignmentLiberation,
     thumbnails: false,
-    dotnetClass: 'TextAlignmentLiberationExample',
+    dotnetClass: null,
     pdfUa1: true,
   },
   {
@@ -425,7 +428,7 @@ export const examples: ExampleDef[] = [
       'PDF/UA-1 tagged ordered and unordered lists - each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
     filename: 'lists-tagged.pdf',
     generate: listsTagged,
-    dotnetClass: 'ListsTaggedExample',
+    dotnetClass: null,
     pdfUa1: true,
   },
   {
@@ -515,7 +518,7 @@ export const examples: ExampleDef[] = [
       'PDF/UA-1 tagged image example - an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
     filename: 'images-tagged.pdf',
     generate: imagesTagged,
-    dotnetClass: 'ImagesTaggedExample',
+    dotnetClass: null,
     pdfUa1: true,
   },
   // Charting
@@ -614,7 +617,8 @@ export const examples: ExampleDef[] = [
     description: 'Two overlapping line series comparing year-over-year revenue on a shared axis with a legend.',
     filename: 'multi-series-line-chart.pdf',
     generate: multiSeriesLineChart,
-    dotnetClass: 'MultiSeriesLineChartExample',
+    // .NET implements this as a private method inside ChartShowcaseExample
+    dotnetClass: null,
     thumbnails: false,
     pdfUa1: true,
   },
@@ -687,7 +691,7 @@ export const examples: ExampleDef[] = [
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
-    dotnetClass: 'FinancialDashboardExample',
+    dotnetClass: null,
     thumbnails: false,
     pdfUa1: true,
   },
@@ -696,12 +700,63 @@ export const examples: ExampleDef[] = [
     name: 'Annual Report',
     category: 'Templates',
     description:
-      'A4 portrait annual-report template: a full-bleed navy front cover, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
+      'A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
     filename: 'annual-report.pdf',
     generate: annualReport,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
     pdfUa1: false,
+  },
+  {
+    id: 'annual-report-gradient-cover',
+    name: 'Annual Report Cover - Gradient',
+    category: 'Templates',
+    description:
+      'A full-bleed annual-report front cover drawn entirely on the vector surface: a vertical indigo-to-fuchsia linear gradient, a radial glow that fades to transparent, diagonal accent rules, a rotated brand mark, and canvas-drawn cover type.',
+    filename: 'annual-report-gradient-cover.pdf',
+    generate: annualReportGradientCover,
+    dotnetClass: 'AnnualReportGradientCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+  },
+  {
+    id: 'annual-report-masked-cover',
+    name: 'Annual Report Cover - Masked Image',
+    category: 'Templates',
+    description:
+      'The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam.',
+    filename: 'annual-report-masked-cover.pdf',
+    generate: annualReportMaskedCover,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
+    dotnetClass: 'AnnualReportMaskedCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+  },
+  {
+    id: 'annual-report-geometric-cover',
+    name: 'Annual Report Cover - Geometric',
+    category: 'Templates',
+    description:
+      'A light, modern cover built from vector primitives: a radial sun bleeding off the corner, translucent rotated polygons and a star placed with affine transforms, and a circular masked image badge ringed in gold (a photo cropped to a circle - placeholder for now).',
+    filename: 'annual-report-geometric-cover.pdf',
+    generate: annualReportGeometricCover,
+    dotnetClass: 'AnnualReportGeometricCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+  },
+  {
+    id: 'event-ticket',
+    name: 'Event Ticket',
+    category: 'Templates',
+    description:
+      'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
+    filename: 'event-ticket.pdf',
+    generate: eventTicket,
+    requiredAssets: ['images/danny-howe-bn-D2bCvpik-unsplash.jpg'],
+    dotnetClass: 'EventTicketExample',
+    thumbnails: false,
+    pdfUa1: true,
   },
   {
     id: 'patient-summary',
@@ -726,41 +781,5 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
-  },
-  {
-    id: 'saas-invoice',
-    name: 'Accessible SaaS Invoice',
-    category: 'Templates',
-    description:
-      'Accessible (PDF/UA-1) and archival (PDF/A-2a) subscription invoice: tagged line-items table, totals, and a QR "pay by bank" code with alt text.',
-    filename: 'saas-invoice.pdf',
-    generate: saasInvoice,
-    dotnetClass: 'SaasInvoiceExample',
-    thumbnails: false,
-    pdfUa1: true,
-  },
-  {
-    id: 'shipping-label',
-    name: 'Shipping Label',
-    category: 'Templates',
-    description:
-      'Carrier-style 4x6in shipping label (PDF/UA-1 + PDF/A-2a) with a Code 128 tracking barcode, an ITF-14 carton code, and a QR parcel link - native vector barcodes, exact label sizing.',
-    filename: 'shipping-label.pdf',
-    generate: shippingLabel,
-    dotnetClass: 'ShippingLabelExample',
-    thumbnails: false,
-    pdfUa1: true,
-  },
-  {
-    id: 'event-ticket',
-    name: 'Event Ticket',
-    category: 'Templates',
-    description:
-      'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
-    filename: 'event-ticket.pdf',
-    generate: eventTicket,
-    dotnetClass: 'EventTicketExample',
-    thumbnails: false,
-    pdfUa1: true,
   },
 ];

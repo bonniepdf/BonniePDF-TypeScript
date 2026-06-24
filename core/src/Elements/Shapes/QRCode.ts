@@ -94,6 +94,7 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
     }
 
     // 3. Draw the foreground modules with horizontal run coalescing
+    ctx.canvas.beginCrispEdges?.();
     for (let row = 0; row < moduleCount; row++) {
       let startCol = -1;
 
@@ -112,6 +113,7 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
         }
       }
     }
+    ctx.canvas.endCrispEdges?.();
 
     // 4. Advance the Y position
     ctx.currentY += this.size;

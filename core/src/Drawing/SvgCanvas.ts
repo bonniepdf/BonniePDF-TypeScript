@@ -7,6 +7,8 @@ import { Size } from '../Core/Size';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { ImageFormat } from '../Rendering/Images/ImageInfo';
+import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint/Paint';
+import type { FillRule, StrokeStyle } from './StrokeStyle';
 
 /**
  * Resolves a logical font family (as passed to {@link SvgCanvas.drawText}) to a
@@ -39,10 +41,7 @@ function standardFontCssAttrs(fontFamily: string): string {
 
 /**
  * Private CSS family name for an embedded font subset. Namespaced (`bpf-…`) so it
- * never collides with — or overrides — a real installed font: the SVG references
- * this name, and {@link buildSvgFontFaceCss} declares an `@font-face` for it
- * carrying the actual (subsetted) font bytes. Used for fonts BonniePDF embeds
- * (custom/open/registered), where the embedded face *is* the intended font.
+ * never collides with — or overrides — a real installed font.
  */
 export function embeddedFontFamily(fontFamily: string): string {
   return (
@@ -54,13 +53,6 @@ export function embeddedFontFamily(fontFamily: string): string {
   );
 }
 
-/**
- * Picks a CSS generic family (`serif` / `monospace` / `sans-serif`) to append
- * after an embedded face, derived from the font's PDF flags. It is only ever
- * reached if the embedded `@font-face` subset fails to load; choosing a generic
- * of the same broad class keeps that worst-case degradation as visually close as
- * possible. (Flag bits: 1 = FixedPitch, 2 = Serif — see {@link TtfFont.flags}.)
- */
 function genericFontFallback(font: TtfFont): string {
   if ((font.flags & 1) !== 0) return 'monospace';
   if ((font.flags & 2) !== 0) return 'serif';
@@ -68,36 +60,12 @@ function genericFontFallback(font: TtfFont): string {
 }
 
 /**
- * Low-level rendering options for {@link SvgCanvas}. These are a subset of the
- * public `SvgPageExportOptions` surface, threaded down to the canvas by the SVG
- * render pipeline.
+ * Low-level rendering options for {@link SvgCanvas}.
  */
 export interface SvgCanvasOptions {
-  /**
-   * Decimal places used when formatting generated coordinates. When omitted,
-   * coordinates are emitted verbatim. The standalone chart export path leaves
-   * this undefined to keep byte-for-byte compatible output.
-   */
   precision?: number;
-
-  /** How raster images are represented. Defaults to `data-uri`. */
   embedImages?: 'data-uri' | 'external-ref' | 'omit';
-
-  /**
-   * When true, text baselines are placed a full em below the top of the line
-   * box (`y + fontSize`), matching the PDF render pipeline exactly. When false
-   * (the default for the legacy chart path) the historical `y + fontSize*0.8`
-   * approximation is used.
-   */
   pdfBaseline?: boolean;
-
-  /**
-   * Value for the root `shape-rendering` attribute. Set to `'crispEdges'` for
-   * pixel-grid symbologies (barcodes, QR, Data Matrix) so abutting module
-   * rectangles snap to the device pixel grid and don't leave faint
-   * anti-aliasing seams ("1px lines") between modules. Omitted for charts and
-   * page export, which rely on the default antialiased rendering.
-   */
   shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
@@ -106,49 +74,27 @@ interface FragmentEntry {
   markup: string;
 }
 
-/**
- * An {@link ICanvas} that emits SVG markup instead of PDF operators.
- *
- * The canvas works in the same top-left coordinate space as the rest of the
- * layout engine (unlike {@link PdfCanvas}, which flips to PDF's bottom-up
- * space), so element coordinates map directly onto SVG user units.
- *
- * Two fidelity tiers exist:
- *  - With no font resolver and no options the canvas behaves exactly as the
- *    original prototype, which keeps the standalone `chartToSvg` output stable.
- *  - When the SVG render pipeline supplies a {@link SvgFontResolver} and
- *    {@link SvgCanvasOptions}, the canvas emits per-glyph positioned text with
- *    the PDF's exact glyph advances, embeds images as data URIs, and rounds
- *    coordinates for deterministic, compact output.
- */
 export class SvgCanvas implements ICanvas {
   public readonly width: number;
   public readonly height: number;
 
-  /**
-   * Translation applied to every coordinate. Used by {@link RenderContext}
-   * when a positioned child canvas is requested via `getCanvas(x, y)` so that
-   * chart/header content composes into the page at the right origin.
-   */
   public offsetX = 0;
   public offsetY = 0;
 
   private readonly svgElements: string[] = [];
   private readonly fontResolver: SvgFontResolver | undefined;
   private readonly options: SvgCanvasOptions;
-  /** Tracks the open `<g>` nesting depth so unbalanced restores are ignored. */
   private groupDepth = 0;
-  /** Per embedded font: the resolved face plus every code point drawn with it,
-   * so the page exporter can embed a minimal subset (only used glyphs) as an
-   * `@font-face`. Keyed by the original PDF font name. */
   private readonly embeddedFontUsage = new Map<string, { font: TtfFont; codePoints: Set<number> }>();
 
-  /**
-   * Module-wide counter for generating unique `<clipPath>` ids. Static so ids
-   * stay unique even when several canvases compose into one document (page export
-   * appends positioned child canvases into the same surface).
-   */
   private static clipIdCounter = 0;
+  private static gradIdCounter = 0;
+
+  // track save depths so restoreState closes transform groups too
+  private saveDepths: number[] = [];
+
+  // path construction
+  private currentPathData: string[] = [];
 
   constructor(width: number, height: number, fontResolver?: SvgFontResolver, options?: SvgCanvasOptions) {
     this.width = width;
@@ -157,23 +103,31 @@ export class SvgCanvas implements ICanvas {
     this.options = options ?? {};
   }
 
-  // ── Graphics state ─────────────────────────────────────────────────────────
+  // -- Graphics state -----------------------------------------------------
 
   public saveState(): void {
-    // Each save opens a nested group. Scoped styling, clipping, and transforms
-    // attach to these groups as the canvas surface grows.
+    this.saveDepths.push(this.groupDepth);
     this.svgElements.push('<g>');
     this.groupDepth++;
   }
 
   public restoreState(): void {
-    if (this.groupDepth > 0) {
+    const targetDepth = this.saveDepths.pop();
+    if (targetDepth === undefined) {
+      // Legacy fallback: close one group
+      if (this.groupDepth > 0) {
+        this.svgElements.push('</g>');
+        this.groupDepth--;
+      }
+      return;
+    }
+    while (this.groupDepth > targetDepth) {
       this.svgElements.push('</g>');
       this.groupDepth--;
     }
   }
 
-  // ── Shapes ───────────────────────────────────────────────────────────────
+  // -- Shapes -------------------------------------------------------------
 
   public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
     this.svgElements.push(
@@ -243,7 +197,7 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  // ── Text ───────────────────────────────────────────────────────────────────
+  // -- Text ---------------------------------------------------------------
 
   public drawText(
     x: number,
@@ -260,10 +214,6 @@ export class SvgCanvas implements ICanvas {
     const font = this.resolveFont(fontFamily);
 
     if (font) {
-      // Faithful path: position each glyph explicitly using the same hmtx
-      // advances as PdfCanvas. PDF's Tj operator does not apply the TrueType
-      // `kern` table, so applying it here would make the preview visibly tighter
-      // than the generated PDF.
       const measured = this.getEmbeddedStringWidth(text, font, fontSize);
       let startX = x;
       if (align === TextAlignment.Center) startX = x - measured / 2;
@@ -272,7 +222,6 @@ export class SvgCanvas implements ICanvas {
       return;
     }
 
-    // Fallback: a single <text> element rendered by the viewer's font engine.
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
     const opacity = this.formatOpacity(color.scA);
     const fillOpacityAttr = opacity < 1 ? ` fill-opacity="${opacity}"` : '';
@@ -296,8 +245,6 @@ export class SvgCanvas implements ICanvas {
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
     const font = this.resolveFont(fontFamily);
-    // SVG rotates clockwise for positive angles; the layout model uses
-    // counter-clockwise positive (matching the PDF rotate operator), so negate.
     const transform = `rotate(${this.n(-angleDegrees)} ${this.n(x)} ${this.n(baselineY)})`;
 
     if (font) {
@@ -345,11 +292,6 @@ export class SvgCanvas implements ICanvas {
       return;
     }
 
-    // Without an embedded font we must NOT hand-position each word from AFM
-    // metrics: the text actually renders in the viewer's own font, and the metric
-    // differences accumulate into colliding/gapping words. Emit a single <text>
-    // and let the viewer lay the line out, adding `word-spacing` for the
-    // justification stretch. Mirrors the .NET reference (DrawTextJustified).
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
         fontSize
@@ -367,7 +309,7 @@ export class SvgCanvas implements ICanvas {
     return new Size(width, fontSize * 1.2);
   }
 
-  // ── Images ───────────────────────────────────────────────────────────────
+  // -- Images -------------------------------------------------------------
 
   public drawImage(image: any, x: number, y: number, width: number, height: number): void {
     const mode = this.options.embedImages ?? 'data-uri';
@@ -384,8 +326,6 @@ export class SvgCanvas implements ICanvas {
     const transform = svgOrientationTransform(orientation, x, y, width, height);
 
     if (transform) {
-      // Non-default EXIF orientation: draw the un-rotated pixels into a unit-ish
-      // box and let the transform place them in their visual orientation.
       const [bw, bh] = orientation >= 5 && orientation <= 8 ? [height, width] : [width, height];
       this.svgElements.push(
         `<g transform="${transform}"><image width="${this.n(bw)}" height="${this.n(
@@ -402,40 +342,28 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public drawFormXObject(_resourceName: string, _x: number, _y: number): void {
-    // Deferred PDF form XObjects (glyph forms, reusable content) have no direct
-    // SVG analogue. Page export renders the underlying content directly, so this
-    // is intentionally a no-op rather than a lost-content path.
-  }
+  public drawFormXObject(_resourceName: string, _x: number, _y: number): void {}
 
-  // ── Marked content (PDF/UA tagging) - not represented in SVG ───────────────
+  // -- Marked content (no-ops in SVG) -------------------------------------
 
-  /** @inheritdoc */
   public beginMarkedContent(_role: string): void {}
-  /** @inheritdoc */
   public beginContainerContent(_role: string): void {}
-  /** @inheritdoc */
   public endMarkedContent(): void {}
-  /** @inheritdoc */
   public beginArtifact(): void {}
-  /** @inheritdoc */
   public endArtifact(): void {}
 
-  // ── Crisp-edge region ──────────────────────────────────────────────────────
+  // -- Crisp-edge region --------------------------------------------------
 
-  /** @inheritdoc */
   public beginCrispEdges(): void {
     this.svgElements.push('<g shape-rendering="crispEdges">');
   }
 
-  /** @inheritdoc */
   public endCrispEdges(): void {
     this.svgElements.push('</g>');
   }
 
-  // ── Clipping ───────────────────────────────────────────────────────────────
+  // -- Clipping (legacy) --------------------------------------------------
 
-  /** @inheritdoc */
   public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
     const id = `clip${SvgCanvas.clipIdCounter++}`;
     this.svgElements.push(
@@ -447,7 +375,6 @@ export class SvgCanvas implements ICanvas {
     this.groupDepth++;
   }
 
-  /** @inheritdoc */
   public endClip(): void {
     if (this.groupDepth > 0) {
       this.svgElements.push('</g>');
@@ -455,35 +382,137 @@ export class SvgCanvas implements ICanvas {
     }
   }
 
-  // ── Output ─────────────────────────────────────────────────────────────────
+  // -- Path construction --------------------------------------------
 
-  /** Returns the inner SVG markup without the enclosing `<svg>` element. */
+  public beginPath(): void {
+    this.currentPathData = [];
+  }
+
+  public moveTo(x: number, y: number): void {
+    this.currentPathData.push(`M ${this.n(x)} ${this.n(y)}`);
+  }
+
+  public lineTo(x: number, y: number): void {
+    this.currentPathData.push(`L ${this.n(x)} ${this.n(y)}`);
+  }
+
+  public cubicBezierTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): void {
+    this.currentPathData.push(
+      `C ${this.n(c1x)} ${this.n(c1y)} ${this.n(c2x)} ${this.n(c2y)} ${this.n(x)} ${this.n(y)}`
+    );
+  }
+
+  public quadraticBezierTo(cx: number, cy: number, x: number, y: number): void {
+    this.currentPathData.push(`Q ${this.n(cx)} ${this.n(cy)} ${this.n(x)} ${this.n(y)}`);
+  }
+
+  public addRect(x: number, y: number, w: number, h: number): void {
+    this.currentPathData.push(
+      `M ${this.n(x)} ${this.n(y)} L ${this.n(x + w)} ${this.n(y)} L ${this.n(x + w)} ${this.n(y + h)} L ${this.n(
+        x
+      )} ${this.n(y + h)} Z`
+    );
+  }
+
+  public closePath(): void {
+    this.currentPathData.push('Z');
+  }
+
+  // -- Painting the current path ------------------------------------
+
+  public fillCurrentPath(paint: Paint | Color, rule: FillRule = 'nonzero'): void {
+    const d = this.currentPathData.join(' ');
+    if (!d) return;
+    const p = toPaint(paint);
+    const ruleAttr = rule === 'evenodd' ? ' fill-rule="evenodd"' : '';
+    if (p instanceof SolidPaint) {
+      this.svgElements.push(`<path d="${d}" ${this.getFillAttributes(p.color)}${ruleAttr}/>`);
+    } else {
+      const gradId = this.emitGradientDef(p as LinearGradientPaint | RadialGradientPaint);
+      this.svgElements.push(`<path d="${d}" fill="url(#${gradId})"${ruleAttr}/>`);
+    }
+  }
+
+  public strokeCurrentPath(style: StrokeStyle): void {
+    const d = this.currentPathData.join(' ');
+    if (!d) return;
+    const p = toPaint(style.paint);
+    const attrs: string[] = [];
+    attrs.push(`stroke-width="${this.n(style.width)}"`);
+    if (style.lineCap && style.lineCap !== 'butt') attrs.push(`stroke-linecap="${style.lineCap}"`);
+    if (style.lineJoin && style.lineJoin !== 'miter') attrs.push(`stroke-linejoin="${style.lineJoin}"`);
+    if (style.miterLimit !== undefined && style.miterLimit !== 4)
+      attrs.push(`stroke-miterlimit="${this.n(style.miterLimit)}"`);
+    if (style.dashPattern && style.dashPattern.length > 0) {
+      attrs.push(`stroke-dasharray="${style.dashPattern.map(v => this.n(v)).join(' ')}"`);
+      if (style.dashOffset) attrs.push(`stroke-dashoffset="${this.n(style.dashOffset)}"`);
+    }
+
+    if (p instanceof SolidPaint) {
+      attrs.push(this.getStrokeAttributes(p.color));
+      this.svgElements.push(`<path d="${d}" fill="none" ${attrs.join(' ')}/>`);
+    } else {
+      const gradId = this.emitGradientDef(p as LinearGradientPaint | RadialGradientPaint);
+      attrs.push(`stroke="url(#${gradId})"`);
+      this.svgElements.push(`<path d="${d}" fill="none" ${attrs.join(' ')}/>`);
+    }
+  }
+
+  // -- Affine transforms --------------------------------------------
+
+  public translate(tx: number, ty: number): void {
+    this.svgElements.push(`<g transform="translate(${this.n(tx)} ${this.n(ty)})">`);
+    this.groupDepth++;
+  }
+
+  public scale(sx: number, sy: number): void {
+    this.svgElements.push(`<g transform="scale(${this.n(sx)} ${this.n(sy)})">`);
+    this.groupDepth++;
+  }
+
+  public rotate(angleDegrees: number): void {
+    this.svgElements.push(`<g transform="rotate(${this.n(angleDegrees)})">`);
+    this.groupDepth++;
+  }
+
+  public transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this.svgElements.push(
+      `<g transform="matrix(${this.n(a)} ${this.n(b)} ${this.n(c)} ${this.n(d)} ${this.n(e)} ${this.n(f)})">`
+    );
+    this.groupDepth++;
+  }
+
+  // -- Clipping + compositing ---------------------------------------
+
+  public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
+    const d = this.currentPathData.join(' ');
+    if (!d) return;
+    const id = `clip${SvgCanvas.clipIdCounter++}`;
+    const ruleAttr = rule === 'evenodd' ? ' clip-rule="evenodd"' : '';
+    this.svgElements.push(`<defs><clipPath id="${id}"><path d="${d}"${ruleAttr}/></clipPath></defs>`);
+    this.svgElements.push(`<g clip-path="url(#${id})">`);
+    this.groupDepth++;
+  }
+
+  public setGlobalAlpha(alpha: number): void {
+    this.svgElements.push(`<g opacity="${this.formatOpacity(alpha)}">`);
+    this.groupDepth++;
+  }
+
+  // -- Output -------------------------------------------------------------
+
   public getInnerSvg(): string {
-    // Newline-separated to match the .NET reference's per-element line output and to
-    // keep all three accessors (getInnerSvg/toSvg/getSvg) consistent.
     return this.svgElements.join('\n');
   }
 
-  /** Per embedded font (keyed by original PDF font name): the resolved face and
-   * every code point drawn with it, for building minimal `@font-face` subsets. */
   public getEmbeddedFontUsage(): ReadonlyMap<string, { font: TtfFont; codePoints: ReadonlySet<number> }> {
     return this.embeddedFontUsage;
   }
 
-  /**
-   * Appends raw SVG markup to this canvas. Used by the render context to
-   * composite a positioned child canvas (e.g. a chart or header) into the page
-   * surface via a translate group.
-   */
   public appendRawMarkup(markup: string): void {
     if (markup) this.svgElements.push(markup);
   }
 
-  /**
-   * Inserts raw SVG markup at the start of the canvas, so it paints behind all
-   * existing content. Used for watermarks, which the PDF pipeline prepends to
-   * the page content stream.
-   */
   public prependRawMarkup(markup: string): void {
     if (markup) this.svgElements.unshift(markup);
   }
@@ -501,16 +530,11 @@ export class SvgCanvas implements ICanvas {
     )}"${this.shapeRenderingAttr()}>\n${inner}\n</svg>`;
   }
 
-  /**
-   * Emits the root `shape-rendering` attribute when configured (e.g. for
-   * barcodes/QR/Data Matrix), otherwise nothing so charts and page export keep
-   * their byte-stable antialiased output.
-   */
   private shapeRenderingAttr(): string {
     return this.options.shapeRendering ? ` shape-rendering="${this.options.shapeRendering}"` : '';
   }
 
-  // ── Internals ────────────────────────────────────────────────────────────
+  // -- Internals ----------------------------------------------------------
 
   private resolveFont(fontFamily: string): TtfFont | null {
     if (!this.fontResolver) return null;
@@ -521,13 +545,6 @@ export class SvgCanvas implements ICanvas {
     }
   }
 
-  /**
-   * Builds a single `<text>` element whose glyphs are positioned individually
-   * via SVG's per-character `x`-list (`<text x="x0 x1 x2 …">`), using the font's
-   * real hmtx advance widths. This deliberately mirrors PDF `Tj` output, which
-   * does not apply the TrueType `kern` table. `extraPerSpace` adds justification
-   * space after each U+0020. Returns `''` when no drawable glyphs remain.
-   */
   private glyphPositionedText(
     startX: number,
     baselineY: number,
@@ -541,18 +558,9 @@ export class SvgCanvas implements ICanvas {
   ): string {
     const scale = fontSize / font.unitsPerEm;
     let cursor = startX;
-    // Each glyph is positioned absolutely, but via SVG's `x`-list feature (one
-    // coordinate per addressable character on a single <text>) rather than a
-    // <tspan> per glyph. A <tspan>-per-glyph emits one DOM element per character,
-    // which explodes node counts on long documents (a ~50-page novel reaches
-    // hundreds of thousands of elements, and the previewer mounts every page as
-    // live SVG twice — full page + thumbnail — enough to OOM the browser). The
-    // `x`-list yields byte-identical positioning with one element per run.
     const xs: string[] = [];
     let chars = '';
 
-    // Record this font + the code points it draws so the exporter can embed a
-    // minimal subset under embeddedFontFamily(fontFamily) as an @font-face.
     let usage = this.embeddedFontUsage.get(fontFamily);
     if (!usage) {
       usage = { font, codePoints: new Set<number>() };
@@ -562,7 +570,6 @@ export class SvgCanvas implements ICanvas {
     for (const rune of text) {
       const code = rune.codePointAt(0) ?? 0;
       if (code < 32 && code !== 9) {
-        // Control character (other than tab) - skip, mirroring measurement.
         continue;
       }
       usage.codePoints.add(code);
@@ -576,21 +583,6 @@ export class SvgCanvas implements ICanvas {
     if (xs.length === 0) return '';
 
     const transformAttr = transform ? ` transform="${transform}"` : '';
-    // Reference the private embedded-face name (bound by the exporter's
-    // @font-face) so the viewer renders the exact font BonniePDF laid out with.
-    //
-    // The family is emitted as an inline `style` rather than a `font-family`
-    // presentation attribute on purpose: glyphs here are positioned absolutely
-    // by hmtx advance, so if the host substitutes a different face the spacing
-    // collapses into visibly broken kerning. Presentation attributes lose to
-    // *any* selector in the CSS cascade — including a host's global
-    // `* { font-family: inherit }` reset — whereas an inline style wins, so the
-    // embedded subset is used wherever the SVG is inlined. A flag-derived
-    // generic only matters if the @font-face subset itself fails to load.
-    //
-    // `xml:space="preserve"` is required: every character is addressed by the
-    // `x`-list, so any whitespace the renderer would otherwise collapse must be
-    // kept, or the character→coordinate alignment shifts.
     const familyStyle = `font-family:'${escapeAttr(embeddedFontFamily(fontFamily))}',${genericFontFallback(font)}`;
     return (
       `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
@@ -601,10 +593,6 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  /** Width used by embedded-font SVG text. PdfCanvas emits a plain `Tj`
-   * string, whose advance is the sum of hmtx widths; it does not consult the
-   * font's optional kerning tables. Keeping this calculation local prevents the
-   * preview path from accidentally adopting layout-only kerned measurements. */
   private getEmbeddedStringWidth(text: string, font: TtfFont, fontSize: number): number {
     const scale = fontSize / font.unitsPerEm;
     let width = 0;
@@ -617,9 +605,6 @@ export class SvgCanvas implements ICanvas {
   }
 
   private calculateBaselineY(y: number, fontSize: number, _fontFamily: string): number {
-    // PDF parity mode places the baseline a full em below the top of the line
-    // box, identical to PdfCanvas (`height - (y + fontSize)`). The legacy chart
-    // path keeps the historical 0.8 approximation so its golden output is stable.
     return this.options.pdfBaseline ? y + fontSize : y + fontSize * 0.8;
   }
 
@@ -639,27 +624,50 @@ export class SvgCanvas implements ICanvas {
     return Number(opacity.toFixed(4));
   }
 
-  /**
-   * Formats a coordinate. When `precision` is configured the value is rounded
-   * to that many decimals (trailing zeros stripped) for compact, deterministic
-   * output; otherwise it is emitted verbatim to preserve the legacy chart
-   * golden output.
-   */
   private n(value: number): string {
     if (this.options.precision === undefined) return `${value}`;
     if (!Number.isFinite(value)) return '0';
     return `${Number(value.toFixed(this.options.precision))}`;
   }
+
+  private emitGradientDef(paint: LinearGradientPaint | RadialGradientPaint): string {
+    const id = `grad${SvgCanvas.gradIdCounter++}`;
+    if (paint instanceof LinearGradientPaint) {
+      const stops = paint.stops
+        .map(
+          s =>
+            `<stop offset="${s.offset}" stop-color="${s.color.toHexString()}"${
+              s.color.scA < 1 ? ` stop-opacity="${this.formatOpacity(s.color.scA)}"` : ''
+            }/>`
+        )
+        .join('');
+      this.svgElements.push(
+        `<defs><linearGradient id="${id}" x1="${this.n(paint.start.x)}" y1="${this.n(
+          paint.start.y
+        )}" x2="${this.n(paint.end.x)}" y2="${this.n(
+          paint.end.y
+        )}" gradientUnits="userSpaceOnUse">${stops}</linearGradient></defs>`
+      );
+    } else {
+      const stops = paint.stops
+        .map(
+          s =>
+            `<stop offset="${s.offset}" stop-color="${s.color.toHexString()}"${
+              s.color.scA < 1 ? ` stop-opacity="${this.formatOpacity(s.color.scA)}"` : ''
+            }/>`
+        )
+        .join('');
+      const focalAttrs = paint.focal ? ` fx="${this.n(paint.focal.x)}" fy="${this.n(paint.focal.y)}"` : '';
+      this.svgElements.push(
+        `<defs><radialGradient id="${id}" cx="${this.n(paint.center.x)}" cy="${this.n(
+          paint.center.y
+        )}" r="${this.n(paint.radius)}"${focalAttrs} gradientUnits="userSpaceOnUse">${stops}</radialGradient></defs>`
+      );
+    }
+    return id;
+  }
 }
 
-/**
- * Returns an SVG `transform` value mapping un-rotated image pixels into their
- * visual EXIF orientation within the display box at (x, y) sized width×height,
- * or `null` for the natural orientation (1) where the image is placed directly.
- *
- * The eight orientations follow TIFF tag 0x0112; this mirrors the matrix used
- * by {@link PdfCanvas} but in SVG's top-left coordinate space.
- */
 function svgOrientationTransform(
   orientation: number,
   x: number,
@@ -667,24 +675,22 @@ function svgOrientationTransform(
   width: number,
   height: number
 ): string | null {
-  // For orientations 5-8 the display box is rotated 90°, so the un-rotated
-  // image box is height×width.
   const matrix = (a: number, b: number, c: number, d: number, e: number, f: number): string =>
     `matrix(${a} ${b} ${c} ${d} ${e + x} ${f + y})`;
   switch (orientation) {
-    case 2: // flip horizontal
+    case 2:
       return matrix(-1, 0, 0, 1, width, 0);
-    case 3: // rotate 180
+    case 3:
       return matrix(-1, 0, 0, -1, width, height);
-    case 4: // flip vertical
+    case 4:
       return matrix(1, 0, 0, -1, 0, height);
-    case 5: // transpose
+    case 5:
       return matrix(0, 1, 1, 0, 0, 0);
-    case 6: // rotate 90 CW
+    case 6:
       return matrix(0, 1, -1, 0, width, 0);
-    case 7: // transverse
+    case 7:
       return matrix(0, -1, -1, 0, width, height);
-    case 8: // rotate 90 CCW
+    case 8:
       return matrix(0, -1, 1, 0, 0, height);
     case 1:
     default:
@@ -694,11 +700,6 @@ function svgOrientationTransform(
 
 const BASE64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-/**
- * Runtime-agnostic base64 encoder for image bytes. Avoids depending on `Buffer`
- * (Node-only) or `btoa` (browser-only) so the canvas works identically across
- * Node, Bun, Deno, and the browser.
- */
 export function toBase64(bytes: Uint8Array): string {
   let out = '';
   const len = bytes.length;

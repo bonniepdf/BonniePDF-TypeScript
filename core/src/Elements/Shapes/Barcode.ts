@@ -83,7 +83,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
     return this.height + this.labelArea;
   }
 
-  protected override renderContent(ctx: RenderContext, _contentWidth: number): void {
+  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
     if (!this.value) {
       ctx.currentY += this.height + this.labelArea;
       return;
@@ -97,8 +97,11 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
     const quietZone = this.effectiveQuietZone;
     const totalModules = modules.length + quietZone * 2;
-    const width = totalModules * this.moduleWidth;
-    const qzOffset = quietZone * this.moduleWidth;
+    const naturalWidth = totalModules * this.moduleWidth;
+    const effectiveModuleWidth =
+      contentWidth > 0 && naturalWidth > contentWidth ? contentWidth / totalModules : this.moduleWidth;
+    const width = totalModules * effectiveModuleWidth;
+    const qzOffset = quietZone * effectiveModuleWidth;
 
     // 1. Background (covers bars + quiet zones so the quiet zone is genuinely light).
     if (this.drawBackground) {
@@ -106,14 +109,15 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
     }
 
     // 2. Bars, coalescing adjacent dark modules into a single rectangle.
+    ctx.canvas.beginCrispEdges?.();
     let startCol = -1;
     for (let col = 0; col <= modules.length; col++) {
       const isDark = col < modules.length && modules[col];
       if (isDark) {
         if (startCol === -1) startCol = col;
       } else if (startCol !== -1) {
-        const rectX = x + qzOffset + startCol * this.moduleWidth;
-        const rectWidth = (col - startCol) * this.moduleWidth;
+        const rectX = x + qzOffset + startCol * effectiveModuleWidth;
+        const rectWidth = (col - startCol) * effectiveModuleWidth;
         ctx.canvas.fillRect(rectX, y, rectWidth, this.height, this.foregroundColor);
         startCol = -1;
       }
@@ -121,7 +125,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
     // 3. ITF-14 bearer bars (a heavy box that frames the symbol per GS1 spec).
     if (this.symbology === BarcodeSymbology.Itf14) {
-      const bearer = Math.max(this.moduleWidth * 2, 2);
+      const bearer = Math.max(effectiveModuleWidth * 2, 2);
       ctx.canvas.strokeRect(
         x + bearer / 2,
         y + bearer / 2,
@@ -131,6 +135,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
         bearer
       );
     }
+    ctx.canvas.endCrispEdges?.();
 
     // 4. Human-readable text label, centred beneath the bars.
     if (this.includeTextLabel) {

@@ -20,7 +20,10 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  settings.defaultTextStyle = new TextStyle()
+    .withFamily(StandardFonts.TimesRoman)
+    .withSize(11)
+    .withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Justified Text Alignment';
@@ -54,7 +57,7 @@ export function generate(): Document {
   const leftSample = new TextBlock(sampleText);
   leftSample.fontName = StandardFonts.TimesRoman;
   leftSample.fontSize = 11;
-  leftSample.textColor = ColorPalette.slate[700];
+  leftSample.textColor = ColorPalette.slate[600];
   leftSample.margin = new Thickness(0, 0, 0, 20);
   doc.add(leftSample);
 
@@ -69,7 +72,7 @@ export function generate(): Document {
   const centerSample = new TextBlock(sampleText);
   centerSample.fontName = StandardFonts.TimesRoman;
   centerSample.fontSize = 11;
-  centerSample.textColor = ColorPalette.slate[700];
+  centerSample.textColor = ColorPalette.slate[600];
   centerSample.margin = new Thickness(0, 0, 0, 20);
   centerSample.alignment = TextAlignment.Center;
   doc.add(centerSample);
@@ -85,7 +88,7 @@ export function generate(): Document {
   const rightSample = new TextBlock(sampleText);
   rightSample.fontName = StandardFonts.TimesRoman;
   rightSample.fontSize = 11;
-  rightSample.textColor = ColorPalette.slate[700];
+  rightSample.textColor = ColorPalette.slate[600];
   rightSample.margin = new Thickness(0, 0, 0, 20);
   rightSample.alignment = TextAlignment.Right;
   doc.add(rightSample);
@@ -101,7 +104,7 @@ export function generate(): Document {
   const justifiedSample = new TextBlock(sampleText);
   justifiedSample.fontName = StandardFonts.TimesRoman;
   justifiedSample.fontSize = 11;
-  justifiedSample.textColor = ColorPalette.slate[700];
+  justifiedSample.textColor = ColorPalette.slate[600];
   justifiedSample.margin = new Thickness(0, 0, 0, 20);
   justifiedSample.alignment = TextAlignment.Justify;
   doc.add(justifiedSample);

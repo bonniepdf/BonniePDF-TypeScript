@@ -45,6 +45,14 @@ export class QRCodeExtensions {
     qr.quietZone = modules;
     return qr;
   }
+
+  /**
+   * Sets the alternate text for accessibility (PDF/UA-1).
+   */
+  static altText(qr: QRCode, altText: string): QRCode {
+    qr.altText = altText;
+    return qr;
+  }
 }
 
 /**
@@ -68,4 +76,8 @@ export function qrErrorCorrection(qr: QRCode, level: QrEcc): QRCode {
 
 export function qrQuietZone(qr: QRCode, modules: number): QRCode {
   return QRCodeExtensions.quietZone(qr, modules);
+}
+
+export function qrAltText(qr: QRCode, altText: string): QRCode {
+  return QRCodeExtensions.altText(qr, altText);
 }

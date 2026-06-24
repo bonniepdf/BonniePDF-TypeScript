@@ -43,7 +43,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily(SANS).withSize(11).withColor(ColorPalette.slate[700]);
+  settings.defaultTextStyle = new TextStyle().withFamily(SANS).withSize(11).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Alignment - Liberation Sans (PDF/UA-1)';

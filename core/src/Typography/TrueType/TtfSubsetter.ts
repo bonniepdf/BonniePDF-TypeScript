@@ -231,8 +231,10 @@ export class TtfSubsetter {
 
     if (numberOfContours >= 0) return components; // Simple glyph, no components
 
-    // Composite glyph - skip bounding box (8 bytes)
-    let offset = glyfInfo.offset + glyphOffset + 8;
+    // Composite glyph - skip the glyph header: numberOfContours (2 bytes) + the
+    // bounding box xMin/yMin/xMax/yMax (8 bytes) = 10 bytes before the first
+    // component record. (remapCompositeGlyph uses the same offset 10.)
+    let offset = glyfInfo.offset + glyphOffset + 10;
 
     const ARG_1_AND_2_ARE_WORDS = 0x0001;
     const MORE_COMPONENTS = 0x0020;
@@ -636,8 +638,11 @@ export class TtfSubsetter {
         glyfInfo.offset + glyphOffset + glyphLength
       );
 
-      // Check if composite and remap component GIDs
-      const numberOfContours = (glyphData[0] << 8) | glyphData[1];
+      // Check if composite and remap component GIDs. numberOfContours is a SIGNED
+      // int16: composite glyphs use -1 (0xFFFF), so it must be sign-extended -
+      // an unsigned read yields 65535 (>= 0) and the composite would never be
+      // remapped, leaving its component GIDs pointing outside the subset.
+      const numberOfContours = (((glyphData[0] << 8) | glyphData[1]) << 16) >> 16;
       let finalGlyphData = glyphData;
 
       if (numberOfContours < 0) {
@@ -806,7 +811,43 @@ export class TtfSubsetter {
       }
     }
 
-    return new Uint8Array(result);
+    const fontData = new Uint8Array(result);
+
+    // Recalculate checkSumAdjustment for the head table
+    // The head table offset is stored in the table directory.
+    // The table directory entries are 16 bytes each, starting at offset 12.
+    let headTableOffset = 0;
+    let offsetDir = 12;
+    for (let i = 0; i < numTables; i++) {
+      const tagStr = String.fromCharCode(
+        fontData[offsetDir],
+        fontData[offsetDir + 1],
+        fontData[offsetDir + 2],
+        fontData[offsetDir + 3]
+      );
+      if (tagStr === 'head') {
+        headTableOffset =
+          (fontData[offsetDir + 8] << 24) |
+          (fontData[offsetDir + 9] << 16) |
+          (fontData[offsetDir + 10] << 8) |
+          fontData[offsetDir + 11];
+        break;
+      }
+      offsetDir += 16;
+    }
+
+    if (headTableOffset > 0) {
+      const checksum = this.calculateChecksum(fontData);
+      // checkSumAdjustment = 0xB1B0AFBA - (checksum of the whole font). The magic
+      // constant is fixed by the OpenType spec (head table).
+      const adjustment = (0xb1b0afba - checksum) >>> 0;
+      fontData[headTableOffset + 8] = (adjustment >>> 24) & 0xff;
+      fontData[headTableOffset + 9] = (adjustment >>> 16) & 0xff;
+      fontData[headTableOffset + 10] = (adjustment >>> 8) & 0xff;
+      fontData[headTableOffset + 11] = adjustment & 0xff;
+    }
+
+    return fontData;
   }
 
   private calculateChecksum(data: Uint8Array): number {
@@ -814,9 +855,12 @@ export class TtfSubsetter {
     const length = Math.ceil(data.length / 4) * 4; // Round up to 4-byte boundary
 
     for (let i = 0; i < length; i += 4) {
+      // A trailing partial word is zero-padded on the right (the present bytes are
+      // the most-significant ones), so always shift in four bytes, substituting 0
+      // past the end of the data.
       let value = 0;
-      for (let j = 0; j < 4 && i + j < data.length; j++) {
-        value = (value << 8) | data[i + j];
+      for (let j = 0; j < 4; j++) {
+        value = (value << 8) | (i + j < data.length ? data[i + j] : 0);
       }
       sum += value;
     }

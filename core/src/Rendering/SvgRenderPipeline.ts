@@ -1,6 +1,7 @@
 import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';
 import { IElement } from '../Elements/IElement';
+import { Color } from '../Core/Color';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { SvgCanvas } from '../Drawing/SvgCanvas';
@@ -41,7 +42,17 @@ export class SvgRenderPipeline {
       throw new Error('SvgRenderPipeline requires a RenderContext created with isSvgMode = true');
     }
 
-    const pageDimensions = new Map<number, { width: number; height: number; margin: number }>();
+    const pageDimensions = new Map<
+      number,
+      {
+        width: number;
+        height: number;
+        margin: number;
+        pageColor?: Color;
+        pageBackground?: IElement;
+        pageForeground?: IElement;
+      }
+    >();
 
     // ── Pass 1: lay out content, allowing elements to overflow onto new pages ──
     let currentOutputIndex = 0;
@@ -57,12 +68,26 @@ export class SvgRenderPipeline {
       ctx.currentY = page.margin;
 
       const contentWidth = page.width - page.margin * 2;
-      pageDimensions.set(currentOutputIndex, { width: page.width, height: page.height, margin: page.margin });
+      pageDimensions.set(currentOutputIndex, {
+        width: page.width,
+        height: page.height,
+        margin: page.margin,
+        pageColor: page.pageColor,
+        pageBackground: page.pageBackground,
+        pageForeground: page.pageForeground,
+      });
 
       PdfRenderPipeline.layoutElements(page.getElements() as IElement[], ctx, contentWidth);
 
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
-        pageDimensions.set(i, { width: page.width, height: page.height, margin: page.margin });
+        pageDimensions.set(i, {
+          width: page.width,
+          height: page.height,
+          margin: page.margin,
+          pageColor: page.pageColor,
+          pageBackground: page.pageBackground,
+          pageForeground: page.pageForeground,
+        });
       }
 
       currentOutputIndex = ctx.currentPageIndex + 1;
@@ -88,12 +113,26 @@ export class SvgRenderPipeline {
       // this feature page slots, mirroring PdfRenderPipeline: the background is prepended
       // so it paints behind everything, and the foreground is appended so it
       // paints on top of all content. Both ignore margins and span the full page.
-      this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true);
+      // A per-page Page.pageBackground/pageForeground element overrides the
+      // document-level template for this page.
+      if (dim.pageBackground) {
+        this.renderPageSlotElement(ctx, canvas, dim.pageBackground, dim.width, true);
+      } else {
+        this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true);
+      }
+      // Solid page colour: prepended last so it lands at the very front of the
+      // SVG (the backmost paint layer), behind the pageBackground slot. A
+      // per-page Page.pageColor overrides the document-level setting.
+      this.renderPageColor(canvas, dim.pageColor ?? settings.pageColor, dim.width, dim.height);
       this.renderTemplate(ctx, settings, i, dim.width, dim.height, dim.margin);
       // The watermark is appended after the body content and header/footer so it
       // overlays them and is never occluded; only the foreground slot sits above.
       this.renderWatermark(canvas, settings, dim.width, dim.height);
-      this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false);
+      if (dim.pageForeground) {
+        this.renderPageSlotElement(ctx, canvas, dim.pageForeground, dim.width, false);
+      } else {
+        this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false);
+      }
 
       outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
     }
@@ -151,7 +190,24 @@ export class SvgRenderPipeline {
     if (!template) return;
     const element = template(pageIndex + 1);
     if (!element) return;
+    this.renderPageSlotElement(ctx, canvas, element, pageWidth, isBackground);
+  }
 
+  /**
+   * Renders a single element as a full-page background/foreground slot,
+   * mirroring {@link PdfRenderPipeline.renderPageSlotElement}. The element
+   * ignores margins (origin at the page's top-left, full page width) and is
+   * composited as a single SVG group: prepended for backgrounds (behind all
+   * content) and appended for foregrounds (on top). Shared by the document-level
+   * template path and the per-page element override path.
+   */
+  private static renderPageSlotElement(
+    ctx: RenderContext,
+    canvas: SvgCanvas,
+    element: IElement,
+    pageWidth: number,
+    isBackground: boolean
+  ): void {
     const slotCanvas = ctx.getCanvas(0, 0) as SvgCanvas;
     const originalCanvas = ctx.canvas;
     const originalX = ctx.currentX;
@@ -173,6 +229,22 @@ export class SvgRenderPipeline {
     const markup = `<g>${inner}</g>`;
     if (isBackground) canvas.prependRawMarkup(markup);
     else canvas.appendRawMarkup(markup);
+  }
+
+  /**
+   * Paints a solid full-page background colour (ignoring margins), prepended so
+   * it sits behind everything else on the page - mirroring
+   * {@link PdfRenderPipeline.renderPageColor}. No-op when pageColor is unset.
+   */
+  private static renderPageColor(
+    canvas: SvgCanvas,
+    color: Color | undefined,
+    pageWidth: number,
+    pageHeight: number
+  ): void {
+    if (!color) return;
+    const markup = `<rect x="0" y="0" width="${pageWidth}" height="${pageHeight}" fill="${color.toHexString()}"/>`;
+    canvas.prependRawMarkup(markup);
   }
 
   /**

@@ -1,5 +1,6 @@
 import { IElement } from '../IElement';
 import { PdfSize } from '../../Configuration/PdfSize';
+import { Color } from '../../Core/Color';
 
 /**
  * Represents a single page in a PDF document
@@ -8,6 +9,35 @@ export class Page {
   private readonly elements: IElement[] = [];
   public readonly size: PdfSize;
   public readonly margin: number;
+
+  /**
+   * Background colour for this page only. When set, the render pipeline fills
+   * the entire page (ignoring margins) with this colour behind everything else,
+   * overriding {@link DocumentSettings.pageColor} for this page. When undefined,
+   * the document-level `pageColor` (if any) is used. Leave both undefined for a
+   * transparent (viewer-default) background.
+   */
+  public pageColor?: Color;
+
+  /**
+   * Full-page background element for this page only (drawn behind all content,
+   * ignoring margins). When set, the pipeline renders this element instead of
+   * calling {@link DocumentSettings.pageBackground} for this page (and any
+   * continuation pages its content overflows onto). Useful for per-page
+   * letterhead, cover images, or section dividers. Leave undefined to fall back
+   * to the document-level `pageBackground` template.
+   */
+  public pageBackground?: IElement;
+
+  /**
+   * Full-page foreground element for this page only (drawn on top of all
+   * content, ignoring margins). When set, the pipeline renders this element
+   * instead of calling {@link DocumentSettings.pageForeground} for this page
+   * (and any continuation pages). Useful for per-page "DRAFT"/"CONFIDENTIAL"
+   * overlays. Leave undefined to fall back to the document-level `pageForeground`
+   * template.
+   */
+  public pageForeground?: IElement;
 
   /**
    * Creates a new instance of Page with the specified dimensions and margin

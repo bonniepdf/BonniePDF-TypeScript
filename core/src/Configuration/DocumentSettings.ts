@@ -1,5 +1,6 @@
 import { PdfSize } from './PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
+import { Color } from '../Core/Color';
 import { ZoomLevel } from './ZoomLevel';
 import { PageMode, PageModeEnum } from './PageMode';
 import { PdfVersion } from './PdfVersion';
@@ -55,6 +56,18 @@ export class DocumentSettings {
    * The page size for the document (default: A4)
    */
   public pageSize: PdfSize;
+  /**
+   * Background colour painted behind every page. When set, the render pipeline
+   * fills the entire page (origin 0,0, full width and height, ignoring margins)
+   * with this colour before anything else is drawn, so it sits behind the
+   * {@link pageBackground} slot, headers, body content, and footers. Leave
+   * undefined for a transparent (viewer-default, usually white) background.
+   *
+   * This is the simple "page colour" shortcut; for textured or image
+   * backgrounds use {@link pageBackground} instead (or both — pageColor fills,
+   * pageBackground layers on top).
+   */
+  public pageColor?: Color;
   /**
    * The page orientation for the document (default: Portrait)
    */

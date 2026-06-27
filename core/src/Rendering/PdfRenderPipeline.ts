@@ -148,7 +148,10 @@ export class PdfRenderPipeline {
     }
 
     const orientedPageSize = settings.getOrientedPageSize();
-    const pageDimensions = new Map<number, { size: any; margin: number }>();
+    const pageDimensions = new Map<
+      number,
+      { size: any; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
+    >();
 
     let currentOutputIndex = 0;
     for (const page of pages) {
@@ -168,6 +171,9 @@ export class PdfRenderPipeline {
       pageDimensions.set(currentOutputIndex, {
         size: page.size,
         margin: page.margin,
+        pageColor: page.pageColor,
+        pageBackground: page.pageBackground,
+        pageForeground: page.pageForeground,
       });
 
       this.renderElementsWithOverflow(page.getElements() as IElement[], ctx, contentWidth);
@@ -176,6 +182,9 @@ export class PdfRenderPipeline {
         pageDimensions.set(i, {
           size: page.size,
           margin: page.margin,
+          pageColor: page.pageColor,
+          pageBackground: page.pageBackground,
+          pageForeground: page.pageForeground,
         });
       }
 
@@ -197,8 +206,21 @@ export class PdfRenderPipeline {
 
       // full-page background slot. Painted behind everything, ignoring
       // margins. Prepended so it ends up at the very back of the
-      // painter's-model stream.
-      this.renderPageSlot(ctx, settings.pageBackground, i, true);
+      // painter's-model stream. A per-page Page.pageBackground element overrides
+      // the document-level template for this page.
+      if (dimensions?.pageBackground) {
+        this.renderPageSlotElement(ctx, dimensions.pageBackground, i, true);
+      } else {
+        this.renderPageSlot(ctx, settings.pageBackground, i, true);
+      }
+
+      // Solid page colour: prepended last so it lands at the very front of the
+      // stream (the backmost position in the painter's model), behind the
+      // pageBackground slot, headers, body content, and footers. A per-page
+      // Page.pageColor overrides the document-level setting. Ignored when
+      // neither is set.
+      const pageColor = dimensions?.pageColor ?? settings.pageColor;
+      this.renderPageColor(ctx, pageColor, i, pageSize.width, pageSize.height);
 
       this.renderTemplate(ctx, settings, i);
 
@@ -208,8 +230,13 @@ export class PdfRenderPipeline {
       this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
 
       // full-page foreground slot. Painted on top of everything, ignoring
-      // margins (explicit stamps / overlays).
-      this.renderPageSlot(ctx, settings.pageForeground, i, false);
+      // margins (explicit stamps / overlays). A per-page Page.pageForeground
+      // element overrides the document-level template for this page.
+      if (dimensions?.pageForeground) {
+        this.renderPageSlotElement(ctx, dimensions.pageForeground, i, false);
+      } else {
+        this.renderPageSlot(ctx, settings.pageForeground, i, false);
+      }
 
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
 
@@ -362,6 +389,22 @@ export class PdfRenderPipeline {
     const element = template(pageIndex + 1);
     if (!element) return;
 
+    this.renderPageSlotElement(ctx, element, pageIndex, isBackground);
+  }
+
+  /**
+   * Renders a single element as a full-page background/foreground slot
+   * (ignoring margins, origin at the top-left, full page width). Backgrounds are
+   * prepended so they paint behind everything; foregrounds are appended so they
+   * paint on top. Shared by the document-level template path
+   * ({@link renderPageSlot}) and the per-page element override path.
+   */
+  private static renderPageSlotElement(
+    ctx: RenderContext,
+    element: IElement,
+    pageIndex: number,
+    isBackground: boolean
+  ): void {
     const originalCanvas = ctx.canvas;
     const originalX = ctx.currentX;
     const originalY = ctx.currentY;
@@ -397,5 +440,50 @@ export class PdfRenderPipeline {
     ctx.pages[pageIndex] = isBackground
       ? slotOps + (ctx.pages[pageIndex] ?? '')
       : (ctx.pages[pageIndex] ?? '') + slotOps;
+  }
+
+  /**
+   * Paints a solid full-page background colour (ignoring margins) and prepends
+   * it to the page stream so it lands at the very front (the backmost position
+   * in the painter's model) — behind the {@link DocumentSettings.pageBackground}
+   * slot, headers, body, and footers. Call after the background slot so the
+   * colour ends up behind it. No-op when {@link DocumentSettings.pageColor} is
+   * unset.
+   */
+  private static renderPageColor(
+    ctx: RenderContext,
+    color: Color | undefined,
+    pageIndex: number,
+    pageWidth: number,
+    pageHeight: number
+  ): void {
+    if (!color) return;
+
+    const originalCanvas = ctx.canvas;
+    const originalX = ctx.currentX;
+    const originalY = ctx.currentY;
+
+    ctx.setCanvas(ctx.getFixedCanvas());
+    let ops = '';
+    try {
+      ctx.currentX = 0;
+      ctx.currentY = 0;
+      // Decorative fill - keep it out of the structure tree (PDF/UA).
+      if (ctx.tagging) ctx.canvas.beginArtifact();
+      ctx.canvas.fillRect(0, 0, pageWidth, pageHeight, color);
+      if (ctx.tagging) ctx.canvas.endArtifact();
+
+      const fixedCanvas = ctx.canvas as any;
+      if (typeof fixedCanvas.getStream === 'function') {
+        ops = (fixedCanvas.getStream() as string[]).join('');
+      }
+    } finally {
+      ctx.setCanvas(originalCanvas);
+      ctx.currentX = originalX;
+      ctx.currentY = originalY;
+    }
+
+    if (!ops) return;
+    ctx.pages[pageIndex] = ops + (ctx.pages[pageIndex] ?? '');
   }
 }

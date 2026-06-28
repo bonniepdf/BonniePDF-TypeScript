@@ -70,83 +70,49 @@ export class Table extends BorderedElementBase implements IRoleProvider {
    */
   public rowTextColor?: Color;
 
-  /**
-   * Adds a header row to the table
-   * @param cells - The cells for the header row
-   */
-  public addHeader(...cells: IElement[]): void {
-    const row = TableRow.fromElements(...cells);
-    row.asHeader();
-    for (const c of row.cells) c.isHeader = true;
-    this.headers.push(row);
-  }
-
-  /**
-   * Adds a header row to the table with custom TableCells
-   * @param cells - The table cells for the header row
-   */
-  public addHeaderFromCells(...cells: TableCell[]): void {
-    for (const c of cells) c.isHeader = true;
-    const row = TableRow.fromCells(...cells);
-    row.asHeader();
-    this.headers.push(row);
-  }
-
-  /**
-   * Adds a header row to the table from a TableRow
-   * @param row - The table row to add as a header
-   */
-  public addHeaderRow(row: TableRow): void {
+  /** Adds a header row to the table. */
+  public addHeader(...elements: IElement[]): void;
+  public addHeader(cells: TableCell[]): void;
+  public addHeader(row: TableRow): void;
+  public addHeader(...args: Array<IElement | TableCell[] | TableRow>): void {
+    const row = this.createRowFromArgs(args);
     row.isHeader = true;
     // Propagate to cells so each cell's PDF/UA role resolves to TH.
     for (const c of row.cells) c.isHeader = true;
     this.headers.push(row);
   }
 
-  /**
-   * Adds a footer row to the table
-   * @param cells - The cells for the footer row
-   */
-  public addFooter(...cells: IElement[]): void {
-    const row = TableRow.fromElements(...cells);
-    row.asFooter();
-    this.footers.push(row);
-  }
-
-  /**
-   * Adds a footer row to the table with custom TableCells
-   * @param cells - The table cells for the footer row
-   */
-  public addFooterFromCells(...cells: TableCell[]): void {
-    const row = TableRow.fromCells(...cells);
-    row.asFooter();
-    this.footers.push(row);
-  }
-
-  /**
-   * Adds a footer row to the table from a TableRow
-   * @param row - The table row to add as a footer
-   */
-  public addFooterRow(row: TableRow): void {
+  /** Adds a footer row to the table. */
+  public addFooter(...elements: IElement[]): void;
+  public addFooter(cells: TableCell[]): void;
+  public addFooter(row: TableRow): void;
+  public addFooter(...args: Array<IElement | TableCell[] | TableRow>): void {
+    const row = this.createRowFromArgs(args);
     row.isFooter = true;
     this.footers.push(row);
   }
 
-  /**
-   * Adds a data row to the table
-   * @param cells - The cells for the data row
-   */
-  public addRow(...cells: IElement[]): void {
-    const row = TableRow.fromElements(...cells);
+  /** Adds a data row to the table. */
+  public addRow(...elements: IElement[]): void;
+  public addRow(cells: TableCell[]): void;
+  public addRow(row: TableRow): void;
+  public addRow(...args: Array<IElement | TableCell[] | TableRow>): void {
+    const row = this.createRowFromArgs(args);
     this.rows.push(row);
   }
 
-  /**
-   * Adds a data row to the table from a TableRow
-   * @param row - The table row to add
-   */
-  public addRowRow(row: TableRow): void {
-    this.rows.push(row);
+  private createRowFromArgs(args: Array<IElement | TableCell[] | TableRow>): TableRow {
+    if (args.length === 1) {
+      const first = args[0];
+      if (first instanceof TableRow) {
+        return first;
+      }
+      if (Array.isArray(first) && first.every(cell => cell instanceof TableCell)) {
+        return TableRow.fromCells(...first);
+      }
+    }
+
+    return TableRow.fromElements(...(args as IElement[]));
   }
 
   /** Returns all rows (headers + data rows + footers) for tree-walking. */

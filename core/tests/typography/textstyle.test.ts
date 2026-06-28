@@ -45,23 +45,23 @@ describe('TextStyle.mergeWith — size and colour inheritance', () => {
 
 describe('TextStyle.mergeWith — weight precedence', () => {
   it('an explicit non-normal weight wins', () => {
-    const span = base(s => (s.weight = FontWeight.Bold));
+    const span = base(s => (s.fontWeight = FontWeight.Bold));
     const merged = span.mergeWith(new TextStyle());
-    expect(merged.weight).toBe(FontWeight.Bold);
+    expect(merged.fontWeight).toBe(FontWeight.Bold);
   });
 
   it('a normal weight with no family inherits the base weight', () => {
     // span is "unstyled" for weight => should pick up the base's bold.
-    const merged = new TextStyle().mergeWith(base(s => (s.weight = FontWeight.Bold)));
-    expect(merged.weight).toBe(FontWeight.Bold);
+    const merged = new TextStyle().mergeWith(base(s => (s.fontWeight = FontWeight.Bold)));
+    expect(merged.fontWeight).toBe(FontWeight.Bold);
   });
 
   it('setting a family pins the span weight and blocks weight inheritance', () => {
     // Specifying a family means "use my own weight" — even if it is Normal —
     // so a bold base must NOT bleed into a span that picked a different family.
     const span = base(s => (s.fontFamily = 'Times'));
-    const merged = span.mergeWith(base(s => (s.weight = FontWeight.Bold)));
-    expect(merged.weight).toBe(FontWeight.Normal);
+    const merged = span.mergeWith(base(s => (s.fontWeight = FontWeight.Bold)));
+    expect(merged.fontWeight).toBe(FontWeight.Normal);
   });
 });
 
@@ -115,11 +115,11 @@ describe('TextStyle — effective getters and font resolution', () => {
   });
 
   it('weight and italic map to the standard-14 variant names even with no family', () => {
-    expect(base(s => (s.weight = FontWeight.Bold)).effectiveFontName).toBe('Helvetica-Bold');
+    expect(base(s => (s.fontWeight = FontWeight.Bold)).effectiveFontName).toBe('Helvetica-Bold');
     expect(base(s => (s.italic = true)).effectiveFontName).toBe('Helvetica-Oblique');
     expect(
       base(s => {
-        s.weight = FontWeight.Bold;
+        s.fontWeight = FontWeight.Bold;
         s.italic = true;
       }).effectiveFontName
     ).toBe('Helvetica-BoldOblique');
@@ -133,9 +133,9 @@ describe('TextStyle — effective getters and font resolution', () => {
 
 describe('TextStyle — fluent setters', () => {
   it('weight shortcuts set the corresponding weight', () => {
-    expect(new TextStyle().bold().weight).toBe(FontWeight.Bold);
-    expect(new TextStyle().light().weight).toBe(FontWeight.Light);
-    expect(new TextStyle().thin().weight).toBe(FontWeight.Thin);
+    expect(new TextStyle().bold().fontWeight).toBe(FontWeight.Bold);
+    expect(new TextStyle().light().fontWeight).toBe(FontWeight.Light);
+    expect(new TextStyle().thin().fontWeight).toBe(FontWeight.Thin);
   });
 
   it('value setters assign their field', () => {
@@ -143,7 +143,7 @@ describe('TextStyle — fluent setters', () => {
     expect(new TextStyle().withSize(18).fontSize).toBe(18);
     expect(new TextStyle().withColor(Color.red).color).toBe(Color.red);
     expect(new TextStyle().withBackground(ColorPalette.amber[400]).backgroundColor).toBe(ColorPalette.amber[400]);
-    expect(new TextStyle().withWeight(FontWeight.Bold).weight).toBe(FontWeight.Bold);
+    expect(new TextStyle().withWeight(FontWeight.Bold).fontWeight).toBe(FontWeight.Bold);
     expect(new TextStyle().withFamily('Times').fontFamily).toBe('Times');
     expect(new TextStyle().withLineHeight(1.5).lineHeightMultiplier).toBe(1.5);
   });

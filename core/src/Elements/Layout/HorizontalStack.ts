@@ -8,7 +8,7 @@ import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging
  * A layout element that arranges children horizontally with spacing and alignment options
  */
 export class HorizontalStack extends ElementBase implements IStatefulElement {
-  private readonly children: IElement[] = [];
+  private readonly _children: IElement[] = [];
   private readonly widths: (number | null)[] = [];
   private rendered: boolean = false;
 
@@ -32,8 +32,8 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * The children elements in this stack (exposed for collection initializer syntax)
    */
-  public get Children(): IElement[] {
-    return this.children;
+  public get children(): IElement[] {
+    return this._children;
   }
 
   /**
@@ -45,7 +45,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
    */
   public addChild(child: IElement, width: number | null): void;
   public addChild(child: IElement, width?: number | null): void {
-    this.children.push(child);
+    this._children.push(child);
     this.widths.push(width ?? null);
   }
 
@@ -82,7 +82,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
    */
   public resetState(): void {
     this.rendered = false;
-    for (const child of this.children) {
+    for (const child of this._children) {
       if ('resetState' in child) {
         (child as IStatefulElement).resetState();
       }
@@ -90,7 +90,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   }
 
   protected getPreferredContentWidth(): number {
-    if (this.children.length === 0) return 0;
+    if (this._children.length === 0) return 0;
 
     if (this.widthDistribution === WidthDistribution.Equal) {
       // For equal distribution, return 0 to indicate flexible sizing
@@ -99,7 +99,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
 
     // Sum up fixed widths where specified
     let totalFixedWidth = 0;
-    for (let i = 0; i < this.children.length; i++) {
+    for (let i = 0; i < this._children.length; i++) {
       const w = this.widths[i];
       if (w !== null) {
         totalFixedWidth += w;
@@ -111,7 +111,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     }
 
     // Fallback: sum of preferred widths
-    return this.children.reduce((sum, child) => sum + child.getPreferredWidth(), 0);
+    return this._children.reduce((sum, child) => sum + child.getPreferredWidth(), 0);
   }
 
   protected measureContentHeight(contentWidth: number): number {
@@ -121,8 +121,8 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
 
     const [childWidths] = this.calculateChildWidths(contentWidth);
     let maxHeight = 0;
-    for (let i = 0; i < this.children.length; i++) {
-      const childHeight = this.children[i].measureHeight(childWidths[i]);
+    for (let i = 0; i < this._children.length; i++) {
+      const childHeight = this._children[i].measureHeight(childWidths[i]);
       if (childHeight > maxHeight) {
         maxHeight = childHeight;
       }
@@ -135,10 +135,10 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
 
     // Calculate maximum height for alignment
     let maxHeight = this.height ?? 0;
-    const childHeights: number[] = new Array(this.children.length);
+    const childHeights: number[] = new Array(this._children.length);
 
-    for (let i = 0; i < this.children.length; i++) {
-      childHeights[i] = this.children[i].measureHeight(childWidths[i]);
+    for (let i = 0; i < this._children.length; i++) {
+      childHeights[i] = this._children[i].measureHeight(childWidths[i]);
       if (!this.height && childHeights[i] > maxHeight) {
         maxHeight = childHeights[i];
       }
@@ -147,8 +147,8 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     const originalX = ctx.currentX;
 
     // Render each child
-    for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i];
+    for (let i = 0; i < this._children.length; i++) {
+      const child = this._children[i];
       const childWidth = childWidths[i];
       const childHeight = childHeights[i];
 
@@ -186,17 +186,17 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
 
   private calculateChildWidths(availableWidth: number): [number[], number] {
     const childWidths: number[] = [];
-    const totalSpacing = this.children.length > 0 ? (this.children.length - 1) * this.spacing : 0;
+    const totalSpacing = this._children.length > 0 ? (this._children.length - 1) * this.spacing : 0;
     const availableForChildren = availableWidth - totalSpacing;
 
-    if (this.children.length === 0) {
+    if (this._children.length === 0) {
       return [childWidths, totalSpacing];
     }
 
     switch (this.widthDistribution) {
       case WidthDistribution.Equal: {
-        const equalWidth = availableForChildren / this.children.length;
-        for (let i = 0; i < this.children.length; i++) {
+        const equalWidth = availableForChildren / this._children.length;
+        for (let i = 0; i < this._children.length; i++) {
           childWidths.push(equalWidth);
         }
         break;
@@ -205,18 +205,18 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       case WidthDistribution.Weighted: {
         let usedSpace = 0;
         let totalWeight = 0;
-        const calculatedWidths: number[] = new Array(this.children.length);
-        const isWeighted: boolean[] = new Array(this.children.length);
+        const calculatedWidths: number[] = new Array(this._children.length);
+        const isWeighted: boolean[] = new Array(this._children.length);
 
         // Pass 1: Measure Auto/Fixed elements (null weight) and sum weights
-        for (let i = 0; i < this.children.length; i++) {
+        for (let i = 0; i < this._children.length; i++) {
           const weight = this.widths[i];
           if (weight !== null && weight > 0) {
             totalWeight += weight;
             isWeighted[i] = true;
           } else {
             // Auto size (weight is null or 0)
-            const w = this.children[i].getPreferredWidth();
+            const w = this._children[i].getPreferredWidth();
             calculatedWidths[i] = w;
             usedSpace += w;
             isWeighted[i] = false;
@@ -227,7 +227,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
         if (remainingSpace < 0) remainingSpace = 0;
 
         // Pass 2: Distribute remaining space to weighted children
-        for (let i = 0; i < this.children.length; i++) {
+        for (let i = 0; i < this._children.length; i++) {
           if (isWeighted[i]) {
             const weight = this.widths[i]!;
             calculatedWidths[i] = (weight / totalWeight) * remainingSpace;
@@ -241,13 +241,13 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       case WidthDistribution.Auto:
       default: {
         let totalPreferredWidth = 0;
-        const preferredWidths: number[] = new Array(this.children.length);
+        const preferredWidths: number[] = new Array(this._children.length);
 
-        for (let i = 0; i < this.children.length; i++) {
-          preferredWidths[i] = this.children[i].getPreferredWidth();
+        for (let i = 0; i < this._children.length; i++) {
+          preferredWidths[i] = this._children[i].getPreferredWidth();
           if (preferredWidths[i] === 0) {
             // Fallback for elements that don't report width
-            preferredWidths[i] = availableForChildren / this.children.length;
+            preferredWidths[i] = availableForChildren / this._children.length;
           }
           totalPreferredWidth += preferredWidths[i];
         }
@@ -256,7 +256,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
           childWidths.push(...preferredWidths);
         } else {
           const scale = availableForChildren / totalPreferredWidth;
-          for (let i = 0; i < this.children.length; i++) {
+          for (let i = 0; i < this._children.length; i++) {
             childWidths.push(preferredWidths[i] * scale);
           }
         }

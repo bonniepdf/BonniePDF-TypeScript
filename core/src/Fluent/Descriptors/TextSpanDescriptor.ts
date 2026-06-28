@@ -79,7 +79,7 @@ export class TextSpanDescriptor {
   /**
    * Sets the font weight.
    */
-  weight(weight: FontWeight): TextSpanDescriptor {
+  fontWeight(weight: FontWeight): TextSpanDescriptor {
     this.style.withWeight(weight);
     return this;
   }

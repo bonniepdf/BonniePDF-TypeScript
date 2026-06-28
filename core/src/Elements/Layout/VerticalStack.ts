@@ -9,7 +9,7 @@ import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging
  * Implements IStatefulElement to support rendering children that overflow across pages.
  */
 export class VerticalStack extends ElementBase implements IStatefulElement {
-  private readonly children: IElement[] = [];
+  private readonly _children: IElement[] = [];
   private lastChildRendered: number = -1;
 
   /**
@@ -20,12 +20,12 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   /**
    * The children elements in this stack (exposed for collection initializer syntax)
    */
-  public get Children(): IElement[] {
-    return this.children;
+  public get children(): IElement[] {
+    return this._children;
   }
 
   public addChild(child: IElement): void {
-    this.children.push(child);
+    this._children.push(child);
   }
 
   /**
@@ -43,14 +43,14 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
     const startChild = this.lastChildRendered + 1;
 
-    if (startChild >= this.children.length) {
+    if (startChild >= this._children.length) {
       ctx.currentX = originalX;
       ctx.currentY += this.margin.bottom;
       return RenderStatus.Complete;
     }
 
-    for (let i = startChild; i < this.children.length; i++) {
-      const child = this.children[i];
+    for (let i = startChild; i < this._children.length; i++) {
+      const child = this._children[i];
 
       // Tag children that declare a semantic role. Uses the same try/finally
       // pattern as PdfRenderPipeline so tagging is closed before
@@ -87,11 +87,11 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
           this.lastChildRendered = i;
 
-          if (this.spacing > 0 && i < this.children.length - 1) {
+          if (this.spacing > 0 && i < this._children.length - 1) {
             ctx.currentY += this.spacing;
           }
 
-          if (i < this.children.length - 1 && ctx.currentY >= ctx.maxY) {
+          if (i < this._children.length - 1 && ctx.currentY >= ctx.maxY) {
             ctx.currentX = originalX;
             return RenderStatus.Overflow;
           }
@@ -114,7 +114,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
           this.lastChildRendered = i;
 
-          if (this.spacing > 0 && i < this.children.length - 1) {
+          if (this.spacing > 0 && i < this._children.length - 1) {
             ctx.currentY += this.spacing;
           }
         }
@@ -125,7 +125,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
     ctx.currentX = originalX;
     ctx.currentY += this.margin.bottom;
-    this.lastChildRendered = this.children.length - 1;
+    this.lastChildRendered = this._children.length - 1;
     return RenderStatus.Complete;
   }
 
@@ -135,7 +135,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
    */
   public resetState(): void {
     this.lastChildRendered = -1;
-    for (const child of this.children) {
+    for (const child of this._children) {
       if ('resetState' in child) {
         (child as IStatefulElement).resetState();
       }
@@ -143,17 +143,17 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   }
 
   protected getPreferredContentWidth(): number {
-    if (this.children.length === 0) return 0;
-    return Math.max(...this.children.map(c => c.getPreferredWidth()));
+    if (this._children.length === 0) return 0;
+    return Math.max(...this._children.map(c => c.getPreferredWidth()));
   }
 
   protected measureContentHeight(contentWidth: number): number {
     let totalHeight = 0;
-    for (const child of this.children) {
+    for (const child of this._children) {
       totalHeight += child.measureHeight(contentWidth);
     }
-    if (this.children.length > 1 && this.spacing > 0) {
-      totalHeight += (this.children.length - 1) * this.spacing;
+    if (this._children.length > 1 && this.spacing > 0) {
+      totalHeight += (this._children.length - 1) * this.spacing;
     }
     return totalHeight;
   }
@@ -164,7 +164,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     // that calls child.render() directly. Children are still tagged so a
     // role-bearing leaf nested under a non-paginating container is not left
     // as untagged content (PDF/UA 7.1).
-    for (const child of this.children) {
+    for (const child of this._children) {
       const token = beginChildTag(ctx, child);
       try {
         // Stateless (atomic) render of each child, matching the .NET reference

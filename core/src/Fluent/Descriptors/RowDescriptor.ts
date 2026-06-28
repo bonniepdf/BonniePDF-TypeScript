@@ -52,7 +52,7 @@ export class RowDescriptor {
     const container = new Container();
     container.width = width;
     container.child = slot;
-    this.stack.addChild(container, 0); // Weight 0 = uses preferred width (the fixed Width)
+    this.stack.addChild(container, 0); // weight 0 = uses preferred width (the fixed width)
     return slot;
   }
 

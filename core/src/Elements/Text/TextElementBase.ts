@@ -25,9 +25,9 @@ export abstract class TextElementBase extends ElementBase {
 
   // ── Font properties (backing fields + explicit-set tracking) ─────────────
 
-  public fontFamily?: string;
-  public weight: FontWeight = FontWeight.Normal;
-  public isItalic = false;
+  private _fontFamily?: string;
+  private _fontWeight: FontWeight = FontWeight.Normal;
+  private _italic = false;
 
   private _fontName: string = StandardFonts.Helvetica;
 
@@ -41,7 +41,7 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set fontName(value: string) {
     this._fontName = value;
-    this.fontFamily = undefined;
+    this._fontFamily = undefined;
     this._fontExplicit = true;
   }
 
@@ -106,15 +106,15 @@ export abstract class TextElementBase extends ElementBase {
 
   /**
    * Font family name (e.g. "Helvetica", "Times", "Arial") for weight/italic resolution.
-   * When set, FontName is automatically resolved via FontFamilyResolver using
-   * the current Weight and IsItalic values.
+   * When set, fontName is automatically resolved via FontFamilyResolver using
+   * the current fontWeight and italic values.
    */
-  public get FontFamily(): string | undefined {
-    return this.fontFamily;
+  public get fontFamily(): string | undefined {
+    return this._fontFamily;
   }
 
-  public set FontFamily(value: string | undefined) {
-    this.fontFamily = value;
+  public set fontFamily(value: string | undefined) {
+    this._fontFamily = value;
     this._fontExplicit = true;
     if (value !== undefined) {
       this.resolveFontName();
@@ -123,48 +123,32 @@ export abstract class TextElementBase extends ElementBase {
 
   /**
    * Font weight (100-900). Normal = 400, Bold = 700.
-   * When FontFamily is set, triggers automatic resolution.
-   * When FontFamily is not set, uses the current FontName as the base family for resolution.
+   * When fontFamily is set, triggers automatic resolution.
+   * When fontFamily is not set, uses the current fontName as the base family for resolution.
    */
-  public get Weight(): FontWeight {
-    return this.weight;
+  public get fontWeight(): FontWeight {
+    return this._fontWeight;
   }
 
-  public set Weight(value: FontWeight) {
-    this.weight = value;
+  public set fontWeight(value: FontWeight) {
+    this._fontWeight = value;
     this._fontExplicit = true;
     this.resolveFontName();
   }
 
   /**
    * Whether the text should be rendered in italic/oblique style.
-   * When FontFamily is set, triggers automatic resolution.
-   * When FontFamily is not set, uses the current FontName as the base family for resolution.
+   * When fontFamily is set, triggers automatic resolution.
+   * When fontFamily is not set, uses the current fontName as the base family for resolution.
    */
-  public get IsItalic(): boolean {
-    return this.isItalic;
+  public get italic(): boolean {
+    return this._italic;
   }
 
-  public set IsItalic(value: boolean) {
-    this.isItalic = value;
+  public set italic(value: boolean) {
+    this._italic = value;
     this._fontExplicit = true;
     this.resolveFontName();
-  }
-
-  /**
-   * The resolved PDF font name used for rendering.
-   * Can be set directly (e.g. "Helvetica-Bold") for backward compatibility,
-   * or resolved automatically from FontFamily + Weight + IsItalic.
-   * Setting this directly clears FontFamily.
-   */
-  public get FontName(): string {
-    return this._fontName;
-  }
-
-  public set FontName(value: string) {
-    this._fontName = value;
-    this.fontFamily = undefined;
-    this._fontExplicit = true;
   }
 
   // ── Cascade application ───────────────────────────────────────────────────
@@ -182,9 +166,9 @@ export abstract class TextElementBase extends ElementBase {
     // Font: only apply if user hasn't touched any font property
     if (!this._fontExplicit) {
       if (style.fontFamily !== undefined) {
-        this.fontFamily = style.fontFamily;
-        if (style.weight !== FontWeight.Normal) this.weight = style.weight;
-        if (style.italic) this.isItalic = true;
+        this._fontFamily = style.fontFamily;
+        if (style.fontWeight !== FontWeight.Normal) this._fontWeight = style.fontWeight;
+        if (style.italic) this._italic = true;
         this.resolveFontName();
       }
     }
@@ -208,13 +192,13 @@ export abstract class TextElementBase extends ElementBase {
    */
   protected applyDefaultStyle(style: TextStyle): void {
     if (style.fontFamily !== undefined) {
-      this.FontFamily = style.fontFamily; // goes through setter → _fontExplicit = true
+      this.fontFamily = style.fontFamily;
     }
-    if (style.weight !== FontWeight.Normal) {
-      this.Weight = style.weight;
+    if (style.fontWeight !== FontWeight.Normal) {
+      this.fontWeight = style.fontWeight;
     }
     if (style.italic) {
-      this.IsItalic = true;
+      this.italic = true;
     }
     if (style.fontSize !== undefined) {
       this.fontSize = style.fontSize;
@@ -230,16 +214,16 @@ export abstract class TextElementBase extends ElementBase {
   // ── Font resolution ───────────────────────────────────────────────────────
 
   /**
-   * Resolves FontName from FontFamily + Weight + IsItalic via FontFamilyResolver.
-   * Falls back to the current FontName as the base family when FontFamily is not set,
+   * Resolves fontName from fontFamily + fontWeight + italic via FontFamilyResolver.
+   * Falls back to the current fontName as the base family when fontFamily is not set,
    * enabling .Bold() and .Italic() to work without an explicit .Font() call.
    */
   private resolveFontName(): void {
-    const family = this.fontFamily ?? this._fontName;
+    const family = this._fontFamily ?? this._fontName;
     // Write to the backing field directly so the default-style cascade
     // (which calls resolveFontName via applyDefaultStyleIfNotSet) does not
     // mark the font as explicitly set.
-    this._fontName = FontFamilyResolver.resolve(family, this.weight, this.isItalic);
+    this._fontName = FontFamilyResolver.resolve(family, this._fontWeight, this._italic);
   }
 
   // ── Line height ───────────────────────────────────────────────────────────

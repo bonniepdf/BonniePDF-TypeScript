@@ -105,12 +105,12 @@ describe('Table — height measurement', () => {
   it('row minHeight is a floor, not an override of taller content', () => {
     const shortRow = TableRow.fromCells(TableCell.from(new Probe(10))).withMinHeight(100);
     const t1 = new Table(1);
-    t1.addRowRow(shortRow);
+    t1.addRow(shortRow);
     expect(t1.measureHeight(500)).toBeCloseTo(100, 4); // floored up
 
     const tallRow = TableRow.fromCells(TableCell.from(new Probe(200))).withMinHeight(100);
     const t2 = new Table(1);
-    t2.addRowRow(tallRow);
+    t2.addRow(tallRow);
     expect(t2.measureHeight(500)).toBeCloseTo(200 + 2 * PAD, 4); // content wins
   });
 });
@@ -154,7 +154,7 @@ describe('Table — cell background styling precedence', () => {
       TableCell.from(new Probe(20)).withBackground(Color.red), // cell override
       TableCell.from(new Probe(20)) // inherits row
     ).withBackground(ColorPalette.amber[400]); // row override (beats table default)
-    t.addRowRow(row);
+    t.addRow(row);
     t.render(ctx, 500);
 
     const rowHeight = 20 + 2 * PAD;

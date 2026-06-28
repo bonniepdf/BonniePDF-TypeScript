@@ -166,7 +166,7 @@ export class FontFamilyResolver {
    * Checks whether a font name is already a fully-qualified standard font variant name
    * (e.g. "Helvetica-Bold", "Times-Italic") that should be passed through as-is.
    * Base family names ("Helvetica", "Times-Roman", "Courier") are intentionally excluded
-   * so that Weight and Italic parameters are still applied when resolving them.
+   * so that weight and italic parameters are still applied when resolving them.
    */
   private static isStandardFontName(name: string): boolean {
     return (

@@ -123,14 +123,14 @@ export class TableDescriptor {
     for (const headerAction of this.headerActions) {
       const rowDesc = new TableRowDescriptor();
       headerAction(rowDesc);
-      table.addHeaderRow(rowDesc.build());
+      table.addHeader(rowDesc.build());
     }
 
     // Build footer rows
     for (const footerAction of this.footerActions) {
       const rowDesc = new TableRowDescriptor();
       footerAction(rowDesc);
-      table.addFooterRow(rowDesc.build());
+      table.addFooter(rowDesc.build());
     }
 
     // Build data rows from cell slots and explicit rows
@@ -166,12 +166,12 @@ export class TableDescriptor {
         item.handler(rowDesc);
         const row = rowDesc.build();
         row.withBackground(item.background);
-        table.addRowRow(row);
+        table.addRow(row);
       } else if (typeof item === 'function') {
         flushCells();
         const rowDesc = new TableRowDescriptor();
         item(rowDesc);
-        table.addRowRow(rowDesc.build());
+        table.addRow(rowDesc.build());
       }
     }
 

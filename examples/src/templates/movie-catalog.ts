@@ -486,7 +486,7 @@ export function generate(): Document {
 
     const row = TableRow.fromElements(yearText, titleCell, directorText, genreText, ratingCell, durText);
     row.withBackground(rowBg);
-    moviesTable.addRowRow(row);
+    moviesTable.addRow(row);
   });
 
   // ── Statistics section ──

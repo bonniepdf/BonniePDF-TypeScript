@@ -5,14 +5,14 @@ import { TextDecoration } from './TextDecoration';
 
 /**
  * Defines the visual style for text rendering. Properties set to null inherit
- * from the parent RichText element's DefaultStyle.
+ * from the parent RichText element's defaultStyle.
  */
 export class TextStyle {
   /** Font family name (e.g. "Helvetica") or TTF file path. Null = inherit from parent. */
   public fontFamily?: string;
 
   /** Font weight (100-900). Normal = 400, Bold = 700. */
-  public weight: FontWeight = FontWeight.Normal;
+  public fontWeight: FontWeight = FontWeight.Normal;
 
   /** Whether the text should be rendered in italic/oblique style. */
   public italic = false;
@@ -36,12 +36,12 @@ export class TextStyle {
   public lineHeightMultiplier?: number;
 
   /**
-   * Resolves the actual PDF font name by combining FontFamily + Weight + Italic
+   * Resolves the actual PDF font name by combining fontFamily + weight + italic
    * through the FontFamilyResolver.
    */
   public get resolvedFontName(): string | undefined {
     if (this.fontFamily !== undefined) {
-      return FontFamilyResolver.resolve(this.fontFamily, this.weight, this.italic);
+      return FontFamilyResolver.resolve(this.fontFamily, this.fontWeight, this.italic);
     }
     return undefined;
   }
@@ -55,7 +55,8 @@ export class TextStyle {
 
     const merged = new TextStyle();
     merged.fontFamily = this.fontFamily ?? baseStyle.fontFamily;
-    merged.weight = this.weight !== FontWeight.Normal || this.fontFamily !== undefined ? this.weight : baseStyle.weight;
+    merged.fontWeight =
+      this.fontWeight !== FontWeight.Normal || this.fontFamily !== undefined ? this.fontWeight : baseStyle.fontWeight;
     merged.italic = this.italic || (this.fontFamily === undefined && baseStyle.italic);
     merged.fontSize = this.fontSize ?? baseStyle.fontSize;
     merged.color = this.color ?? baseStyle.color;
@@ -82,30 +83,30 @@ export class TextStyle {
 
   /**
    * Returns the effective font name, resolving family+weight+italic or defaulting to Helvetica.
-   * When FontFamily is null, uses Helvetica as the base family so that Weight/Italic are still applied
+   * When fontFamily is null, uses Helvetica as the base family so that weight/italic are still applied
    * (e.g. Bold with no family → "Helvetica-Bold", not plain "Helvetica").
    */
   public get effectiveFontName(): string {
-    return FontFamilyResolver.resolve(this.fontFamily ?? 'Helvetica', this.weight, this.italic);
+    return FontFamilyResolver.resolve(this.fontFamily ?? 'Helvetica', this.fontWeight, this.italic);
   }
 
   // --- Fluent API ---
 
   /** Sets font weight to Bold (700) */
   public bold(): TextStyle {
-    this.weight = FontWeight.Bold;
+    this.fontWeight = FontWeight.Bold;
     return this;
   }
 
   /** Sets font weight to Light (300) */
   public light(): TextStyle {
-    this.weight = FontWeight.Light;
+    this.fontWeight = FontWeight.Light;
     return this;
   }
 
   /** Sets font weight to Thin (100) */
   public thin(): TextStyle {
-    this.weight = FontWeight.Thin;
+    this.fontWeight = FontWeight.Thin;
     return this;
   }
 
@@ -135,7 +136,7 @@ export class TextStyle {
 
   /** Sets the font weight */
   public withWeight(weight: FontWeight): TextStyle {
-    this.weight = weight;
+    this.fontWeight = weight;
     return this;
   }
 

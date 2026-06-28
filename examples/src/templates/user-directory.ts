@@ -180,7 +180,7 @@ export function generate(): Document {
 
     const row = TableRow.fromElements(idCell, nameCell, emailCell, deptCell, roleCell, locCell, statusCell);
     row.backgroundColor = rowBgColor;
-    usersTable.addRowRow(row);
+    usersTable.addRow(row);
   });
 
   const footerNote = new TextBlock('* This is a confidential document. For internal use only.');

@@ -104,7 +104,7 @@ export function generate(): Document {
   doc.add(h2BoldItalic);
 
   const boldItalic = new TextStyle();
-  boldItalic.weight = FontWeight.Bold;
+  boldItalic.fontWeight = FontWeight.Bold;
   boldItalic.italic = true;
   const rt3 = new RichText();
   rt3.margin = new Thickness(0, 0, 0, 10);

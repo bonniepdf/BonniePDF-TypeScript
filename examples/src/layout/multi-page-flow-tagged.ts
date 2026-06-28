@@ -131,7 +131,7 @@ export function generate(): Document {
     const roleCell = new TextBlock(role);
     roleCell.fontSize = 10;
     roleCell.textColor = ColorPalette.slate[600];
-    table.addRowRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
+    table.addRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
   }
 
   doc.add(table);

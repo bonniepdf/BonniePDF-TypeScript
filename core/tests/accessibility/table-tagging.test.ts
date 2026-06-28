@@ -83,7 +83,7 @@ describe('Table tagging', () => {
         t.addRow(tb('a'), tb('b'), tb('c'));
         t.addRow(tb('a'), tb('b'), tb('c'));
       },
-      t => t.addHeaderFromCells(textCell('A', true), textCell('B', true), textCell('C', true))
+      t => t.addHeader([textCell('A', true), textCell('B', true), textCell('C', true)])
     );
 
     expect(text).toContain('/S /Table');
@@ -97,7 +97,7 @@ describe('Table tagging', () => {
       t => {
         t.addRow(tb('a'), tb('b'), tb('c'));
       },
-      t => t.addHeaderFromCells(textCell('A', true), textCell('B', true), textCell('C', true))
+      t => t.addHeader([textCell('A', true), textCell('B', true), textCell('C', true)])
     );
 
     // Match the trailing newline so '/S /TH' doesn't also count '/S /THead'.
@@ -183,7 +183,7 @@ describe('Table tagging', () => {
           t.addRow(tb(`r${i}a`), tb(`r${i}b`), tb(`r${i}c`));
         }
       },
-      t => t.addHeaderFromCells(textCell('A', true), textCell('B', true), textCell('C', true))
+      t => t.addHeader([textCell('A', true), textCell('B', true), textCell('C', true)])
     );
 
     const streams = splitPageContentStreams(text);

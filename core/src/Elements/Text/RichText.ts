@@ -40,24 +40,6 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
    */
   public defaultStyle: TextStyle = new TextStyle();
 
-  public get DefaultStyle(): TextStyle {
-    return this.defaultStyle;
-  }
-
-  public set DefaultStyle(value: TextStyle) {
-    this.defaultStyle = value || new TextStyle();
-    // Set default values
-    if (!this.defaultStyle.fontFamily) {
-      this.defaultStyle.fontFamily = 'Helvetica';
-    }
-    if (!this.defaultStyle.fontSize) {
-      this.defaultStyle.fontSize = 12;
-    }
-    if (!this.defaultStyle.color) {
-      this.defaultStyle.color = Color.black;
-    }
-  }
-
   /** Minimum number of lines to render before a page break (orphan control). */
   public minLinesBeforeBreak = 2;
 

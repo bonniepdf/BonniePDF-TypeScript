@@ -423,7 +423,6 @@ function hasViewerPreferences(settings: any): boolean {
  *
  * Container elements are traversed via common child-collection shapes:
  *   • `.children` (VerticalStack, HorizontalStack)
- *   • `.Children`
  *   • `.getChildren()`
  *   • `.content` / `.getElements()` (Container, Page)
  *   • `.rows` → `.cells` → `.content` (Table)
@@ -448,7 +447,6 @@ export function collectImagesNeedingDecode(element: any, out: Image[]): void {
 
 function forEachChild(element: any, visit: (child: any) => void): void {
   if (Array.isArray(element.children)) for (const c of element.children) visit(c);
-  if (Array.isArray(element.Children)) for (const c of element.Children) visit(c);
   if (typeof element.getChildren === 'function') {
     const c = element.getChildren();
     if (Array.isArray(c)) for (const ch of c) visit(ch);
@@ -515,7 +513,6 @@ export function collectEmbeddedFonts(element: any, paths: Set<string>): void {
 
   // VerticalStack / HorizontalStack style
   if (Array.isArray(element.children)) childCollections.push(element.children);
-  if (Array.isArray(element.Children)) childCollections.push(element.Children);
   if (typeof element.getChildren === 'function') {
     const c = element.getChildren();
     if (Array.isArray(c)) childCollections.push(c);

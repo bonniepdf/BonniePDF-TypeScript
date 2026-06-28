@@ -189,7 +189,7 @@ describe('RichText — run merging', () => {
 
   it('keeps spans with differing styles as separate runs', () => {
     const bold = new TextStyle();
-    bold.weight = FontWeight.Bold;
+    bold.fontWeight = FontWeight.Bold;
     const { ctx, canvas } = makeContext();
     new RichText().span('Hello', bold).span('World').render(ctx, 500);
     expect(canvas.texts.map(t => t.text)).toEqual(['Hello', 'World']);

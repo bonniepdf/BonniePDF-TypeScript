@@ -8,7 +8,7 @@ export class TextSpan {
   /** The text content of this span. */
   public text?: string;
 
-  /** The style for this span. Properties set to null inherit from the parent RichText's DefaultStyle. */
+  /** The style for this span. Properties set to null inherit from the parent RichText's defaultStyle. */
   public style?: TextStyle;
 
   /** When true, a line break is inserted after this span's text. */

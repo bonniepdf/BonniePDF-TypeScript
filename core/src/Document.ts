@@ -291,9 +291,9 @@ export class Document {
     if (el instanceof TextElementBase) {
       el.applyDefaultStyleIfNotSet(style);
     }
-    // Walk VerticalStack / HorizontalStack children (exposed as .Children)
-    if (Array.isArray(el.Children)) {
-      for (const child of el.Children) {
+    // Walk VerticalStack / HorizontalStack children (exposed as .children)
+    if (Array.isArray(el.children)) {
+      for (const child of el.children) {
         Document.applyStyleToElement(child, style);
       }
     }

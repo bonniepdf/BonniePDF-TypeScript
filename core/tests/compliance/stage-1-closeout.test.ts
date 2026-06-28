@@ -59,12 +59,7 @@ describe('Stage 1 closeout - TS', () => {
     d.add(intro);
 
     const items = new Table(220, 80, 90, 100);
-    items.addHeaderFromCells(
-      headerCell('Description'),
-      headerCell('Qty'),
-      headerCell('Unit price'),
-      headerCell('Total')
-    );
+    items.addHeader([headerCell('Description'), headerCell('Qty'), headerCell('Unit price'), headerCell('Total')]);
     items.addRow(tb('Roadrunner trap'), tb('2'), tb('£25.00'), tb('£50.00'));
     items.addRow(tb('Rocket-powered skates'), tb('1'), tb('£99.00'), tb('£99.00'));
     items.addRow(tb('Anvil (assorted)'), tb('3'), tb('£14.00'), tb('£42.00'));
@@ -89,7 +84,7 @@ describe('Stage 1 closeout - TS', () => {
     d.settings.language = 'en-GB';
 
     const table = new Table(60, 240, 100);
-    table.addHeaderFromCells(headerCell('#'), headerCell('Item'), headerCell('Amount'));
+    table.addHeader([headerCell('#'), headerCell('Item'), headerCell('Amount')]);
     for (let i = 1; i <= 80; i++) {
       table.addRow(
         tb(String(i)),

@@ -228,7 +228,7 @@ export function generate(): Document {
     date.fontSize = 9;
     date.textColor = ColorPalette.slate[500];
 
-    table.addRowRow(TableRow.fromElements(id, name, dept, pos, date).withBackground(rowBg));
+    table.addRow(TableRow.fromElements(id, name, dept, pos, date).withBackground(rowBg));
   }
 
   doc.add(table);

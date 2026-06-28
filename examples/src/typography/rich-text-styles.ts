@@ -82,7 +82,7 @@ export function generate(): Document {
   sectionHeader3.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader3);
   const boldItalic = new TextStyle();
-  boldItalic.weight = FontWeight.Bold;
+  boldItalic.fontWeight = FontWeight.Bold;
   boldItalic.italic = true;
   const rt3 = new RichText();
   rt3.margin = new Thickness(0, 0, 0, 16);
@@ -187,7 +187,7 @@ export function generate(): Document {
 
   const labelStyle = new TextStyle();
   labelStyle.fontFamily = 'Helvetica';
-  labelStyle.weight = FontWeight.Bold;
+  labelStyle.fontWeight = FontWeight.Bold;
   labelStyle.color = ColorPalette.slate[800];
 
   const valueStyle = new TextStyle();
@@ -222,9 +222,9 @@ export function generate(): Document {
   sectionHeader9.margin = new Thickness(0, 12, 0, 6);
   doc.add(sectionHeader9);
   const normalStyle = new TextStyle();
-  normalStyle.weight = FontWeight.Normal;
+  normalStyle.fontWeight = FontWeight.Normal;
   const boldStyle = new TextStyle();
-  boldStyle.weight = FontWeight.Bold;
+  boldStyle.fontWeight = FontWeight.Bold;
   const rt9 = new RichText();
   rt9.margin = new Thickness(0, 0, 0, 16);
   rt9

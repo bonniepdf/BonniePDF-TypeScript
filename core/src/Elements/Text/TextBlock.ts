@@ -312,7 +312,12 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
         const tokenWidth = this.measureTextWidth('00'); // Matches TextElementBase substitution
 
         if (ctx.isSvgMode) {
-          ctx.canvas.drawText(currentX, y, '??', this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+          const svgCanvas = ctx.canvas as any;
+          if (typeof svgCanvas.drawDeferredTotalPages === 'function') {
+            svgCanvas.drawDeferredTotalPages(currentX, y, this.textColor, this.fontSize, this.fontName);
+          } else {
+            ctx.canvas.drawText(currentX, y, '00', this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+          }
         } else {
           const resourceName = ctx.registerDeferredXObject(this.fontName, this.fontSize, this.textColor);
           // DrawFormXObject draws at x, y (top-left of form)

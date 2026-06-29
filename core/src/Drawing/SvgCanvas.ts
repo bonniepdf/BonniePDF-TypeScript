@@ -232,6 +232,35 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
+  public drawDeferredTotalPages(x: number, y: number, color: Color, fontSize: number, fontFamily: string): void {
+    const placeholder = '00';
+    const hex = color.toHexString();
+    const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
+    const font = this.resolveFont(fontFamily);
+    const attr = ' data-bonniepdf-total-pages="true"';
+
+    if (font) {
+      let usage = this.embeddedFontUsage.get(fontFamily);
+      if (!usage) {
+        usage = { font, codePoints: new Set<number>() };
+        this.embeddedFontUsage.set(fontFamily, usage);
+      }
+      for (let cp = 48; cp <= 57; cp++) usage.codePoints.add(cp);
+      this.svgElements.push(
+        this.glyphPositionedText(x, baselineY, placeholder, hex, fontSize, fontFamily, font, 0, attr)
+      );
+      return;
+    }
+
+    const opacity = this.formatOpacity(color.scA);
+    const fillOpacityAttr = opacity < 1 ? ` fill-opacity="${opacity}"` : '';
+    this.svgElements.push(
+      `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}"${fillOpacityAttr} font-size="${this.n(
+        fontSize
+      )}" ${standardFontCssAttrs(fontFamily)} text-anchor="start"${attr}>${placeholder}</text>`
+    );
+  }
+
   public drawTextRotated(
     x: number,
     y: number,
@@ -248,7 +277,7 @@ export class SvgCanvas implements ICanvas {
     const transform = `rotate(${this.n(-angleDegrees)} ${this.n(x)} ${this.n(baselineY)})`;
 
     if (font) {
-      const inner = this.glyphPositionedText(x, baselineY, text, hex, fontSize, fontFamily, font, 0, transform);
+      const inner = this.glyphPositionedText(x, baselineY, text, hex, fontSize, fontFamily, font, 0, '', transform);
       this.svgElements.push(inner);
       return;
     }
@@ -517,6 +546,16 @@ export class SvgCanvas implements ICanvas {
     if (markup) this.svgElements.unshift(markup);
   }
 
+  public resolveTotalPages(totalPages: number): void {
+    const value = escapeXml(totalPages.toString());
+    for (let i = 0; i < this.svgElements.length; i++) {
+      this.svgElements[i] = this.svgElements[i].replace(
+        /(<text\b[^>]*\bdata-bonniepdf-total-pages="true"[^>]*>)([\s\S]*?)(<\/text>)/g,
+        `$1${value}$3`
+      );
+    }
+  }
+
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
@@ -554,6 +593,7 @@ export class SvgCanvas implements ICanvas {
     fontFamily: string,
     font: TtfFont,
     extraPerSpace: number,
+    extraAttributes = '',
     transform?: string
   ): string {
     const scale = fontSize / font.unitsPerEm;
@@ -587,7 +627,7 @@ export class SvgCanvas implements ICanvas {
     return (
       `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
         fontSize
-      )}" style="${familyStyle}" xml:space="preserve"${transformAttr}>` +
+      )}" style="${familyStyle}" xml:space="preserve"${extraAttributes}${transformAttr}>` +
       escapeXml(chars) +
       '</text>'
     );

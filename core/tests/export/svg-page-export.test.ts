@@ -209,6 +209,30 @@ describe('SVG page export', () => {
     expect(svg).toContain('Footer 1');
   });
 
+  it('resolves total-page tokens in SVG output, even when maxPages limits serialization', async () => {
+    doc = new Document();
+    for (let i = 0; i < 3; i++) {
+      if (i > 0) doc.addPage();
+      doc.add(new TextBlock(`Body ${i + 1}`, 12, StandardFonts.Helvetica));
+    }
+    doc.settings.footerTemplate = pageNum => {
+      const tb = new TextBlock();
+      tb.text = `Page ${pageNum} of {{TotalPages}}`;
+      tb.fontSize = 9;
+      return tb;
+    };
+
+    const pages = await doc.generateSvgPagesAsync({ maxPages: 2 });
+    expect(pages).toHaveLength(2);
+    expect(pages[0]).toContain('Page 1 of ');
+    expect(pages[1]).toContain('Page 2 of ');
+    for (const page of pages) {
+      expect(page).toContain('data-bonniepdf-total-pages="true">3</text>');
+      expect(page).not.toContain('??');
+      expect(page).not.toContain('>{{TotalPages}}</text>');
+    }
+  });
+
   it('throws on out-of-range page index', async () => {
     doc = simpleDoc();
     await expect(doc.generateSvgPageAsync(5)).rejects.toThrow(/out of range/);

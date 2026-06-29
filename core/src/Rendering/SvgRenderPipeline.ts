@@ -116,9 +116,9 @@ export class SvgRenderPipeline {
       // A per-page Page.pageBackground/pageForeground element overrides the
       // document-level template for this page.
       if (dim.pageBackground) {
-        this.renderPageSlotElement(ctx, canvas, dim.pageBackground, dim.width, true);
+        this.renderPageSlotElement(ctx, canvas, dim.pageBackground, dim.width, true, totalPages);
       } else {
-        this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true);
+        this.renderPageSlot(ctx, canvas, settings.pageBackground, i, dim.width, true, totalPages);
       }
       // Solid page colour: prepended last so it lands at the very front of the
       // SVG (the backmost paint layer), behind the pageBackground slot. A
@@ -129,11 +129,12 @@ export class SvgRenderPipeline {
       // overlays them and is never occluded; only the foreground slot sits above.
       this.renderWatermark(canvas, settings, dim.width, dim.height);
       if (dim.pageForeground) {
-        this.renderPageSlotElement(ctx, canvas, dim.pageForeground, dim.width, false);
+        this.renderPageSlotElement(ctx, canvas, dim.pageForeground, dim.width, false, totalPages);
       } else {
-        this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false);
+        this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false, totalPages);
       }
 
+      canvas.resolveTotalPages(totalPages);
       outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
     }
 
@@ -185,12 +186,13 @@ export class SvgRenderPipeline {
     template: ((pageNumber: number) => IElement | undefined) | undefined,
     pageIndex: number,
     pageWidth: number,
-    isBackground: boolean
+    isBackground: boolean,
+    totalPages: number
   ): void {
     if (!template) return;
     const element = template(pageIndex + 1);
     if (!element) return;
-    this.renderPageSlotElement(ctx, canvas, element, pageWidth, isBackground);
+    this.renderPageSlotElement(ctx, canvas, element, pageWidth, isBackground, totalPages);
   }
 
   /**
@@ -206,7 +208,8 @@ export class SvgRenderPipeline {
     canvas: SvgCanvas,
     element: IElement,
     pageWidth: number,
-    isBackground: boolean
+    isBackground: boolean,
+    totalPages: number
   ): void {
     const slotCanvas = ctx.getCanvas(0, 0) as SvgCanvas;
     const originalCanvas = ctx.canvas;
@@ -224,6 +227,7 @@ export class SvgRenderPipeline {
       ctx.currentY = originalY;
     }
 
+    slotCanvas.resolveTotalPages(totalPages);
     const inner = slotCanvas.getInnerSvg();
     if (!inner) return;
     const markup = `<g>${inner}</g>`;

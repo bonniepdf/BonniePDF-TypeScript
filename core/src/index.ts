@@ -172,6 +172,8 @@ export * from './Export/SvgPageExportOptions';
 export * from './Rendering/SvgRenderPipeline';
 export { exportSvgPagesAsync, exportSvgDocumentAsync } from './Export/SvgPageExporter';
 export type { SvgDocumentExport } from './Export/SvgPageExporter';
+export type { LayoutSnapshot, LayoutNode, LayoutRect } from './Rendering/LayoutRecorder';
+export { LAYOUT_SNAPSHOT_VERSION } from './Rendering/LayoutRecorder';
 
 // Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
 export * from './Extensions/DocumentEncryptionExtensions';

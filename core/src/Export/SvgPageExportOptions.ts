@@ -63,10 +63,19 @@ export interface SvgPageExportOptions {
    * `text-rendering`, so it is unaffected either way.
    */
   shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
+
+  /**
+   * Capture a {@link LayoutSnapshot} of the rendered element tree (types, parent
+   * relationships, and per-page rectangles) and return it on the export result.
+   * Off by default and zero-cost when off: with no recorder attached, the layout
+   * pass is byte-identical to normal output. Used by the previewer's structure
+   * view to highlight where each element landed.
+   */
+  captureLayout?: boolean;
 }
 
 /** Default values applied when an option is omitted. */
-export const SVG_PAGE_EXPORT_DEFAULTS: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages'>> = {
+export const SVG_PAGE_EXPORT_DEFAULTS: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout'>> = {
   precision: 3,
   embedImages: 'data-uri',
   textMode: 'text',

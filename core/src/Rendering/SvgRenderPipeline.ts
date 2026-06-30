@@ -77,7 +77,12 @@ export class SvgRenderPipeline {
         pageForeground: page.pageForeground,
       });
 
+      // Layout capture: wrap each input page's body content in a Page node so
+      // the snapshot tree reads Document → Page → content. Overflow onto further
+      // physical pages splits the Page node's rect via ctx.newPage().
+      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, page.margin, page.margin, contentWidth);
       PdfRenderPipeline.layoutElements(page.getElements() as IElement[], ctx, contentWidth);
+      ctx.layoutRecorder?.closeNode(page, ctx.currentPageIndex, ctx.currentY, true);
 
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         pageDimensions.set(i, {
@@ -94,6 +99,8 @@ export class SvgRenderPipeline {
     }
 
     // ── Pass 2: finalise each page (watermark + header/footer) and collect ─────
+    // Page chrome is not body content, so stop recording the layout tree here.
+    if (ctx.layoutRecorder) ctx.layoutRecorder.capturing = false;
     const totalPages = ctx.pages.length;
     const outputs: SvgPageRenderOutput[] = [];
     for (let i = 0; i < totalPages; i++) {

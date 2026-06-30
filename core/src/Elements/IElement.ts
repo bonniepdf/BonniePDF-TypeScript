@@ -1,4 +1,5 @@
 import { RenderStatus } from './RenderStatus';
+import type { LayoutRecorder } from '../Rendering/LayoutRecorder';
 export { RenderStatus };
 
 export interface RenderContext {
@@ -7,6 +8,13 @@ export interface RenderContext {
   canvas?: any;
   currentY: number;
   currentX: number;
+  /** Index of the page currently being rendered (0-based). */
+  currentPageIndex: number;
+  /**
+   * Optional layout-snapshot recorder; present only under opt-in `captureLayout`.
+   * Typed via the concrete recorder; capture is a no-op when undefined.
+   */
+  layoutRecorder?: LayoutRecorder;
   pageSize: { width: number; height: number };
   currentStream: any;
   registerFont(fontName: string): string;

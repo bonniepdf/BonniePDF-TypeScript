@@ -14,6 +14,7 @@ import {
   LinearGradientPaint,
   type ICanvas,
 } from '@bonniepdf/core';
+import { addCapabilitiesPage } from './_capabilities-page';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #3 - "Geometric badge".
@@ -209,6 +210,16 @@ export function generate(): Document {
   cover.drawHeight = PAGE.height;
   cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a geometric layout with a circular cropped photo badge and the company name.`;
   doc.add(cover);
+
+  // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+  addCapabilitiesPage(doc, {
+    company: COMPANY,
+    year: YEAR,
+    primary: ColorPalette.sky[700],
+    accent: ColorPalette.amber[500],
+    tint: ColorPalette.sky[50],
+    segmentColors: ['#0369a1', '#4f46e5', '#f59e0b', '#059669'],
+  });
 
   return doc;
 }

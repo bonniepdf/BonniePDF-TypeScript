@@ -1,73 +1,88 @@
 import { Document } from '@bonniepdf/core';
-import { generate as simpleDocument } from './basic/simple-document';
-import { generate as simpleDocumentTagged } from './basic/simple-document-tagged';
-import { generate as pdfa2aCompliant } from './basic/pdfa2a-compliant';
-import { generate as margins } from './basic/margins';
-import { generate as pageSettings } from './basic/page-settings';
-import { generate as headersFooters } from './layout/headers-footers';
-import { generate as headersFootersTagged } from './layout/headers-footers-tagged';
-import { generate as horizontalStacks } from './layout/horizontal-stacks';
-import { generate as horizontalStacksTagged } from './layout/horizontal-stacks-tagged';
-import { generate as textBlockOverflow } from './layout/text-block-overflow';
-import { generate as textBlockOverflowTagged } from './layout/text-block-overflow-tagged';
-import { generate as verticalStackOverflow } from './layout/vertical-stack-overflow';
-import { generate as verticalStackOverflowTagged } from './layout/vertical-stack-overflow-tagged';
-import { generate as multiPageFlow } from './layout/multi-page-flow';
-import { generate as multiPageFlowTagged } from './layout/multi-page-flow-tagged';
-import { generate as textAlignment } from './typography/text-alignment';
-import { generate as textAlignmentTagged } from './typography/text-alignment-tagged';
-import { generate as textAlignmentLiberation } from './typography/text-alignment-liberation';
-import { generate as bookPageLayout } from './typography/book-page-layout';
-import { generate as bookPageLayoutTagged } from './typography/book-page-layout-tagged';
-import { generate as richTextStyles } from './typography/rich-text-styles';
-import { generate as richTextStylesTagged } from './typography/rich-text-styles-tagged';
-import { generate as textDecorations } from './typography/text-decorations';
-import { generate as textDecorationsTagged } from './typography/text-decorations-tagged';
-import { generate as customFonts } from './typography/custom-fonts';
-import { generate as customFontsTagged } from './typography/custom-fonts-tagged';
-import { generate as emojisAndUnicode } from './typography/emojis-and-unicode';
-import { generate as emojisAndUnicodeTagged } from './typography/emojis-and-unicode-tagged';
-import { generate as dickensNovel } from './typography/dickens-novel';
-import { generate as lists } from './elements/lists';
-import { generate as listsTagged } from './elements/lists-tagged';
-import { generate as imagesTagged } from './elements/images-tagged';
-import { generate as hyperlinks } from './elements/hyperlinks';
-import { generate as shapesAndBorders } from './elements/shapes-and-borders';
-import { generate as colorPalette } from './elements/color-palette';
-import { generate as qrCodes } from './elements/qr-codes';
-import { generate as barcodes } from './elements/barcodes';
-import { generate as dataMatrix } from './elements/data-matrix';
-import { generate as images } from './elements/images';
-import { generate as chartShowcase } from './charting/chart-showcase';
-import { generate as barChart } from './charting/bar-chart';
-import { generate as groupedBarChart } from './charting/grouped-bar-chart';
-import { generate as lineChart } from './charting/line-chart';
-import { generate as areaChart } from './charting/area-chart';
-import { generate as lollipopChart } from './charting/lollipop-chart';
-import { generate as dotPlotChart } from './charting/dot-plot-chart';
-import { generate as pieChart } from './charting/pie-chart';
-import { generate as multiSeriesLineChart } from './charting/multi-series-line-chart';
-import { generate as watermarking } from './security/watermarking';
-import { generate as encryption } from './security/encryption';
-import { generate as businessInvoice } from './templates/business-invoice';
-import { generate as userDirectory } from './templates/user-directory';
-import { generate as movieCatalog } from './templates/movie-catalog';
-import { generate as financialDashboard } from './templates/financial-dashboard';
-import { generate as annualReport } from './templates/annual-report';
-import { generate as annualReportGradientCover } from './templates/annual-report-gradient-cover';
-import { generate as annualReportMaskedCover } from './templates/annual-report-masked-cover';
-import { generate as annualReportGeometricCover } from './templates/annual-report-geometric-cover';
-import { generate as eventTicket } from './templates/event-ticket';
-import { generate as patientSummary } from './templates/patient-summary';
-import { generate as productRoadmap } from './templates/product-roadmap';
+// ── Recipes (technical primitives) ──────────────────────────────────────────
+import { generate as simpleDocument } from './recipes/basics/simple-document';
+import { generate as simpleDocumentTagged } from './recipes/basics/simple-document-tagged';
+import { generate as pdfa2aCompliant } from './recipes/basics/pdfa2a-compliant';
+import { generate as margins } from './recipes/basics/margins';
+import { generate as pageSettings } from './recipes/basics/page-settings';
+import { generate as headersFooters } from './recipes/layout/headers-footers';
+import { generate as headersFootersTagged } from './recipes/layout/headers-footers-tagged';
+import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
+import { generate as horizontalStacksTagged } from './recipes/layout/horizontal-stacks-tagged';
+import { generate as textBlockOverflow } from './recipes/layout/text-block-overflow';
+import { generate as textBlockOverflowTagged } from './recipes/layout/text-block-overflow-tagged';
+import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
+import { generate as verticalStackOverflowTagged } from './recipes/layout/vertical-stack-overflow-tagged';
+import { generate as multiPageFlow } from './recipes/layout/multi-page-flow';
+import { generate as multiPageFlowTagged } from './recipes/layout/multi-page-flow-tagged';
+import { generate as textAlignment } from './recipes/typography/text-alignment';
+import { generate as textAlignmentTagged } from './recipes/typography/text-alignment-tagged';
+import { generate as textAlignmentLiberation } from './recipes/typography/text-alignment-liberation';
+import { generate as bookPageLayout } from './recipes/typography/book-page-layout';
+import { generate as bookPageLayoutTagged } from './recipes/typography/book-page-layout-tagged';
+import { generate as richTextStyles } from './recipes/typography/rich-text-styles';
+import { generate as richTextStylesTagged } from './recipes/typography/rich-text-styles-tagged';
+import { generate as textDecorations } from './recipes/typography/text-decorations';
+import { generate as textDecorationsTagged } from './recipes/typography/text-decorations-tagged';
+import { generate as customFonts } from './recipes/typography/custom-fonts';
+import { generate as customFontsTagged } from './recipes/typography/custom-fonts-tagged';
+import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
+import { generate as emojisAndUnicodeTagged } from './recipes/typography/emojis-and-unicode-tagged';
+import { generate as dickensNovel } from './recipes/typography/dickens-novel';
+import { generate as lists } from './recipes/elements/lists';
+import { generate as listsTagged } from './recipes/elements/lists-tagged';
+import { generate as imagesTagged } from './recipes/elements/images-tagged';
+import { generate as hyperlinks } from './recipes/elements/hyperlinks';
+import { generate as shapesAndBorders } from './recipes/elements/shapes-and-borders';
+import { generate as colorPalette } from './recipes/elements/color-palette';
+import { generate as qrCodes } from './recipes/elements/qr-codes';
+import { generate as barcodes } from './recipes/elements/barcodes';
+import { generate as dataMatrix } from './recipes/elements/data-matrix';
+import { generate as images } from './recipes/elements/images';
+import { generate as chartShowcase } from './recipes/charting/chart-showcase';
+import { generate as barChart } from './recipes/charting/bar-chart';
+import { generate as groupedBarChart } from './recipes/charting/grouped-bar-chart';
+import { generate as lineChart } from './recipes/charting/line-chart';
+import { generate as areaChart } from './recipes/charting/area-chart';
+import { generate as lollipopChart } from './recipes/charting/lollipop-chart';
+import { generate as dotPlotChart } from './recipes/charting/dot-plot-chart';
+import { generate as pieChart } from './recipes/charting/pie-chart';
+import { generate as multiSeriesLineChart } from './recipes/charting/multi-series-line-chart';
+import { generate as watermarking } from './recipes/security/watermarking';
+import { generate as encryption } from './recipes/security/encryption';
+// ── Showcases (industry / vertical-market documents) ────────────────────────
+import { generate as businessInvoice } from './showcases/invoices/business-invoice';
+import { generate as usSalesInvoice } from './showcases/invoices/us-sales-invoice';
+import { generate as ukVatInvoice } from './showcases/invoices/uk-vat-invoice';
+import { generate as euEInvoice } from './showcases/invoices/eu-einvoice';
+import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
+import { generate as userDirectory } from './showcases/catalogs/user-directory';
+import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
+import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
+import { generate as annualReport } from './showcases/reports/annual-report';
+import { generate as annualReportGradientCover } from './showcases/reports/annual-report-gradient-cover';
+import { generate as annualReportMaskedCover } from './showcases/reports/annual-report-masked-cover';
+import { generate as annualReportGeometricCover } from './showcases/reports/annual-report-geometric-cover';
+import { generate as eventTicket } from './showcases/operations/event-ticket';
+import { generate as patientSummary } from './showcases/healthcare/patient-summary';
+import { generate as productRoadmap } from './showcases/operations/product-roadmap';
 
-export * from './svg';
+export * from './recipes/svg';
 
 export interface ExampleDef {
   id: string;
   name: string;
   category: string;
   description: string;
+  /**
+   * Which layer of the gallery this belongs to (see the example-gallery revenue
+   * strategy in BonniePDF). `'showcase'` = a finished industry/vertical
+   * document for the public gallery; `'recipe'` = a technical primitive demo for
+   * the docs cookbook. Defaults to `'recipe'` when omitted.
+   */
+  tier?: 'showcase' | 'recipe';
+  /** Target market for market-specific showcases (e.g. 'US', 'UK', 'EU', 'India'). */
+  region?: string;
   filename: string;
   generate: (assets?: ReadonlyMap<string, Uint8Array>) => Document;
   /** Asset paths (relative to examples/assets/) that must be pre-loaded before generate() is called. */
@@ -647,11 +662,12 @@ export const examples: ExampleDef[] = [
     // .NET has three variants; Password is canonical
     dotnetClass: 'EncryptionPasswordExample',
   },
-  // Templates
+  // Showcases - Invoices (vertical: billing; region-specific tax/e-invoicing)
   {
     id: 'business-invoice',
     name: 'Business Invoice',
-    category: 'Templates',
+    category: 'Invoices',
+    tier: 'showcase',
     description:
       'Professional PDF/UA-1 tagged invoice with company branding, line-items table, totals, and payment details.',
     filename: 'business-invoice.pdf',
@@ -661,9 +677,66 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
+    id: 'us-sales-invoice',
+    name: 'US Sales-Tax Invoice',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'US',
+    description:
+      'A US commercial invoice: destination-based state + county sales-tax breakdown, a purchase-order reference, USD amounts, and an ACH/check remittance line. PDF/A-2a + PDF/UA-1.',
+    filename: 'us-sales-invoice.pdf',
+    generate: usSalesInvoice,
+    dotnetClass: 'UsSalesInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'uk-vat-invoice',
+    name: 'UK VAT Invoice',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A HMRC-style VAT invoice: supplier VAT registration number, tax point, mixed standard/reduced/zero-rated lines, and a per-rate VAT summary (net / VAT / gross) in GBP. PDF/A-2a + PDF/UA-1.',
+    filename: 'uk-vat-invoice.pdf',
+    generate: ukVatInvoice,
+    dotnetClass: 'UkVatInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'eu-einvoice',
+    name: 'EU E-Invoice (PDF/A-3, EN 16931)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'EU',
+    description:
+      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a PDF/A-3b container, both parties’ VAT IDs, an intra-Community reverse-charge notice, IBAN/BIC, and EUR amounts. The structured XML half is shown as a placeholder pending an embedded-file API.',
+    filename: 'eu-einvoice.pdf',
+    generate: euEInvoice,
+    dotnetClass: 'EuEInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'india-gst-invoice',
+    name: 'India GST E-Invoice',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'India',
+    description:
+      'An India GST e-invoice: GSTIN for both parties, HSN/SAC codes, an intra-state CGST + SGST split, the IRN and acknowledgement details, and a signed QR generated with BonniePDF’s native vector QR. INR amounts. PDF/A-2a + PDF/UA-1.',
+    filename: 'india-gst-invoice.pdf',
+    generate: indiaGstInvoice,
+    dotnetClass: 'IndiaGstInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
     id: 'user-directory',
     name: 'User Directory',
-    category: 'Templates',
+    category: 'Catalogs',
+    tier: 'showcase',
     description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
     filename: 'user-directory.pdf',
     generate: userDirectory,
@@ -674,7 +747,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'movie-catalog',
     name: 'Movie Catalog',
-    category: 'Templates',
+    category: 'Catalogs',
+    tier: 'showcase',
     description:
       'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
     filename: 'movie-catalog.pdf',
@@ -686,7 +760,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'financial-dashboard',
     name: 'Financial Dashboard',
-    category: 'Templates',
+    category: 'Reports',
+    tier: 'showcase',
     description:
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
@@ -698,7 +773,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'annual-report',
     name: 'Annual Report',
-    category: 'Templates',
+    category: 'Reports',
+    tier: 'showcase',
     description:
       'A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
     filename: 'annual-report.pdf',
@@ -711,9 +787,10 @@ export const examples: ExampleDef[] = [
   {
     id: 'annual-report-gradient-cover',
     name: 'Annual Report Cover - Gradient',
-    category: 'Templates',
+    category: 'Reports',
+    tier: 'showcase',
     description:
-      'A full-bleed annual-report front cover drawn entirely on the vector surface: a vertical indigo-to-fuchsia linear gradient, a radial glow that fades to transparent, diagonal accent rules, a rotated brand mark, and canvas-drawn cover type.',
+      'A two-page annual report. Page 1 is a full-bleed cover drawn entirely on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-gradient-cover.pdf',
     generate: annualReportGradientCover,
     dotnetClass: 'AnnualReportGradientCoverExample',
@@ -723,9 +800,10 @@ export const examples: ExampleDef[] = [
   {
     id: 'annual-report-masked-cover',
     name: 'Annual Report Cover - Masked Image',
-    category: 'Templates',
+    category: 'Reports',
+    tier: 'showcase',
     description:
-      'The classic photographic report cover: a full-width hero image clipped to an angled mask whose lower edge cuts diagonally into a green title band, joined by a gold seam.',
+      'A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-masked-cover.pdf',
     generate: annualReportMaskedCover,
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
@@ -736,9 +814,10 @@ export const examples: ExampleDef[] = [
   {
     id: 'annual-report-geometric-cover',
     name: 'Annual Report Cover - Geometric',
-    category: 'Templates',
+    category: 'Reports',
+    tier: 'showcase',
     description:
-      'A light, modern cover built from vector primitives: a radial sun bleeding off the corner, translucent rotated polygons and a star placed with affine transforms, and a circular masked image badge ringed in gold (a photo cropped to a circle - placeholder for now).',
+      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-geometric-cover.pdf',
     generate: annualReportGeometricCover,
     dotnetClass: 'AnnualReportGeometricCoverExample',
@@ -748,7 +827,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'event-ticket',
     name: 'Event Ticket',
-    category: 'Templates',
+    category: 'Operations',
+    tier: 'showcase',
     description:
       'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
     filename: 'event-ticket.pdf',
@@ -761,7 +841,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'patient-summary',
     name: 'Patient Summary',
-    category: 'Templates',
+    category: 'Healthcare',
+    tier: 'showcase',
     description:
       'A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.',
     filename: 'patient-summary.pdf',
@@ -773,7 +854,8 @@ export const examples: ExampleDef[] = [
   {
     id: 'product-roadmap',
     name: 'Product Roadmap',
-    category: 'Templates',
+    category: 'Operations',
+    tier: 'showcase',
     description:
       'Landscape A4 Gantt-style product roadmap: a six-month timeline header over team swimlanes (Development, Design, Marketing), with rounded task bars positioned by month using weighted horizontal stacks.',
     filename: 'product-roadmap.pdf',

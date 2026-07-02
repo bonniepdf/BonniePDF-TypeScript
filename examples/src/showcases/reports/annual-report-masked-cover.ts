@@ -14,6 +14,7 @@ import {
   LinearGradientPaint,
   type ICanvas,
 } from '@bonniepdf/core';
+import { addCapabilitiesPage } from './_capabilities-page';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #2 - "Masked hero image".
@@ -199,6 +200,16 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   cover.drawHeight = PAGE.height;
   cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a hero landscape image clipped to an angled mask above a green title band.`;
   doc.add(cover);
+
+  // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+  addCapabilitiesPage(doc, {
+    company: COMPANY,
+    year: YEAR,
+    primary: ColorPalette.emerald[800],
+    accent: ColorPalette.amber[600],
+    tint: ColorPalette.emerald[50],
+    segmentColors: ['#047857', '#0d9488', '#f59e0b', '#0284c7'],
+  });
 
   return doc;
 }

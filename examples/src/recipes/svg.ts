@@ -1,5 +1,5 @@
 import { embeddedFontFamily } from '@bonniepdf/core';
-import { examples, type ExampleDef } from './index';
+import { examples, type ExampleDef } from '../index';
 
 /**
  * One generated SVG file: a path relative to the output root and its contents.

@@ -14,6 +14,7 @@ import {
   RadialGradientPaint,
   type ICanvas,
 } from '@bonniepdf/core';
+import { addCapabilitiesPage } from './_capabilities-page';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #1 - "Gradient field".
@@ -159,6 +160,16 @@ export function generate(): Document {
   cover.drawHeight = PAGE.height;
   cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a deep indigo-to-fuchsia gradient with the company name and report year.`;
   doc.add(cover);
+
+  // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+  addCapabilitiesPage(doc, {
+    company: COMPANY,
+    year: YEAR,
+    primary: ColorPalette.indigo[700],
+    accent: ColorPalette.fuchsia[600],
+    tint: ColorPalette.indigo[50],
+    segmentColors: ['#4f46e5', '#7c3aed', '#c026d3', '#f59e0b'],
+  });
 
   return doc;
 }

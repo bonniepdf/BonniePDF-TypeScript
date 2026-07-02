@@ -22,6 +22,10 @@ export default defineConfig({
   minifyIdentifiers: true,
   minifySyntax: true,
   minifyWhitespace: true,
+  // Preserve class names through minification: the layout snapshot's node
+  // `type` comes from `constructor.name`, and must match the .NET side's
+  // `GetType().Name` (which is never minified) for cross-language parity.
+  keepNames: true,
   clean: true,
   outDir: 'dist',
 });

@@ -5,6 +5,7 @@ import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';
 import { PdfRenderResult, PageRenderOutput } from './PageDimensions';
 import { RenderContext } from './RenderContext';
+import { captureTypeOf, captureNameOf } from './LayoutRecorder';
 import { PdfSyntax } from './Pdf/PdfSyntax';
 import { PdfOperators } from './Pdf/PdfOperators';
 import { FontMetrics } from '../Typography/FontMetrics';
@@ -106,6 +107,17 @@ export class PdfRenderPipeline {
     // and track their own continuation state so they can resume across page breaks.
     if ('renderStateful' in element && typeof (element as any).renderStateful === 'function') {
       const stateful = element as any;
+      // Layout capture: open one node around the whole element; the overflow
+      // loop drives it to completion and ctx.newPage() splits its rect per page.
+      ctx.layoutRecorder?.openNode(
+        element,
+        captureTypeOf(element),
+        captureNameOf(element),
+        ctx.currentPageIndex,
+        ctx.currentX,
+        ctx.currentY,
+        contentWidth
+      );
       let guard = 0;
       let status: RenderStatus;
       do {
@@ -120,6 +132,8 @@ export class PdfRenderPipeline {
         }
         guard++;
       } while (status !== RenderStatus.Complete && guard < this.maxPageGuard);
+
+      ctx.layoutRecorder?.closeNode(element, ctx.currentPageIndex, ctx.currentY, true);
 
       // Clear continuation state once the element has finished so the document
       // tree returns to its pristine state. Without this a second export pass

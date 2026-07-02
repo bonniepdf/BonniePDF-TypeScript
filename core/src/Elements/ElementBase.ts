@@ -59,6 +59,19 @@ export abstract class ElementBase implements IElement, IMargin {
     this.startingY = ctx.currentY;
     const originalX = ctx.currentX;
 
+    // Layout capture (opt-in, no-op without a recorder): record this element's
+    // full margin box. The atomic render path renders in one shot, so the node
+    // opens and closes (complete) around renderContent.
+    ctx.layoutRecorder?.openNode(
+      this,
+      this.captureType(),
+      this.captureName,
+      ctx.currentPageIndex,
+      originalX,
+      this.startingY,
+      width
+    );
+
     // Apply top margin
     ctx.currentY += this.margin.top;
     ctx.currentX += this.margin.left;
@@ -75,7 +88,23 @@ export abstract class ElementBase implements IElement, IMargin {
 
     // Apply bottom margin
     ctx.currentY += this.margin.bottom;
+
+    ctx.layoutRecorder?.closeNode(this, ctx.currentPageIndex, ctx.currentY, true);
   }
+
+  /**
+   * Canonical element type name used for the layout snapshot tree. Defaults to
+   * the runtime class name; subclasses may override for a stable spec name.
+   */
+  public captureType(): string {
+    return this.constructor.name;
+  }
+
+  /**
+   * Optional author-supplied name/key surfaced in the layout snapshot. Unset by
+   * default; a future capture API can populate it.
+   */
+  public captureName?: string;
 
   /**
    * Gets the content width after accounting for margins

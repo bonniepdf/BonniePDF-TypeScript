@@ -3,6 +3,7 @@ import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IEle
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
+import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
@@ -71,7 +72,22 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
             return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
           }
 
+          // Layout capture: open the child node before rendering its segment.
+          // Coalesced across page-resumptions by element identity; closed only
+          // when the child reports Complete.
+          ctx.layoutRecorder?.openNode(
+            child,
+            captureTypeOf(child),
+            captureNameOf(child),
+            ctx.currentPageIndex,
+            ctx.currentX,
+            ctx.currentY,
+            contentWidth
+          );
+
           const status = statefulChild.renderStateful(ctx, contentWidth);
+
+          ctx.layoutRecorder?.closeNode(child, ctx.currentPageIndex, ctx.currentY, status === RenderStatus.Complete);
 
           if (status === RenderStatus.Overflow) {
             this.lastChildRendered = i - 1;

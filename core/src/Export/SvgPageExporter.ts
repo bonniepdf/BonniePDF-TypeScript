@@ -10,6 +10,7 @@ import { TtfSubsetter } from '../Typography/TrueType/TtfSubsetter';
 import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportOptions';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { LayoutRecorder, LayoutSnapshot } from '../Rendering/LayoutRecorder';
 
 /** A rendered SVG document: one standalone SVG string per page, plus `@font-face`
  * CSS that embeds (as subsetted data URIs) the fonts the document used, so a host
@@ -19,6 +20,12 @@ export interface SvgDocumentExport {
   /** `<style>`-ready `@font-face` rules, or `''` when the document uses no
    * embeddable fonts (e.g. only the viewer-supplied standard-14). */
   fontFaceCss: string;
+  /**
+   * The captured layout tree, present only when {@link SvgPageExportOptions.captureLayout}
+   * was set. Its `pages`/rectangles are index-aligned with {@link pages} and use
+   * the same top-left, points coordinate space as the SVG.
+   */
+  snapshot?: LayoutSnapshot;
 }
 
 /**
@@ -106,6 +113,12 @@ export async function exportSvgDocumentAsync(
   const orientedSize = settings.getOrientedPageSize();
   const ctx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
 
+  // Opt-in layout capture. Attached before rendering so the pipeline's
+  // openNode/closeNode/pageBreak hooks populate it; left undefined otherwise so
+  // capture is a guarded no-op and output is unchanged.
+  const recorder = opts.captureLayout ? new LayoutRecorder() : undefined;
+  if (recorder) ctx.layoutRecorder = recorder;
+
   const outputs = SvgRenderPipeline.renderPages(pages as any, settings, ctx);
 
   // The full document is laid out above (so pagination is correct); only the
@@ -133,7 +146,14 @@ export async function exportSvgDocumentAsync(
     }
   }
 
-  return { pages: pageSvgs, fontFaceCss: buildFontFaceCss(usage) };
+  let snapshot: LayoutSnapshot | undefined;
+  if (recorder) {
+    // Page sizes align with the emitted SVG pages.
+    recorder.setPages(limited.map(o => ({ width: o.width, height: o.height })));
+    snapshot = recorder.snapshot();
+  }
+
+  return { pages: pageSvgs, fontFaceCss: buildFontFaceCss(usage), snapshot };
 }
 
 /** Builds `@font-face` rules that embed a minimal subset (only the used glyphs)
@@ -183,7 +203,7 @@ function resolveTitle(document: Document, explicit?: string): string {
 /** Wraps a rendered page surface in a standalone, deterministic `<svg>` root. */
 function assemblePageSvg(
   output: SvgPageRenderOutput,
-  opts: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages'>>,
+  opts: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout'>>,
   title: string
 ): string {
   const w = round(output.width, opts.precision);

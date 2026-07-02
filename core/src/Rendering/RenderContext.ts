@@ -9,6 +9,7 @@ import { ImageInfo } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import type { TaggingContext } from './Tagging/TaggingContext';
+import type { LayoutRecorder } from './LayoutRecorder';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
 const CONTAINER_ROLE_TAGS = new Set([
@@ -71,6 +72,13 @@ export class RenderContext {
    * so each per-page PdfCanvas gets it via updateCanvas.
    */
   public tagging?: TaggingContext;
+
+  /**
+   * Optional layout-snapshot recorder. Attached only when a caller opted into
+   * `captureLayout` (currently the SVG exporter). When undefined, all capture is
+   * a guarded no-op and output is byte-identical to the un-instrumented path.
+   */
+  public layoutRecorder?: LayoutRecorder;
 
   /**
    * @param size            Page size for the first page.
@@ -261,6 +269,10 @@ export class RenderContext {
   }
 
   public newPage(): void {
+    // Layout capture: the Y where content stopped on the outgoing page, taken
+    // before the reset below so open nodes can close their rect at the boundary.
+    const outgoingBottomY = this.currentY;
+
     // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
     // cannot cross a page boundary per PDF spec, but structure
     // elements can. Snapshot any marked-content currently open, emit
@@ -286,6 +298,9 @@ export class RenderContext {
     // page for /Pg + /ParentTree emission later.
     this.tagging?.resetPage(this.currentPageIndex);
     this.updateCanvas();
+
+    // Layout capture: split every open node's rect across the page boundary.
+    this.layoutRecorder?.pageBreak(outgoingBottomY, this.currentPageIndex, this.currentY);
 
     if (reopenRoles) {
       for (const role of reopenRoles) {

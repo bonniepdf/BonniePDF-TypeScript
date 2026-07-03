@@ -1,16 +1,12 @@
 import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
 import { generate as simpleDocument } from './recipes/basics/simple-document';
-import { generate as simpleDocumentTagged } from './recipes/basics/simple-document-tagged';
-import { generate as pdfa2aCompliant } from './recipes/basics/pdfa2a-compliant';
+import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
 import { generate as margins } from './recipes/basics/margins';
 import { generate as pageSettings } from './recipes/basics/page-settings';
 import { generate as headersFooters } from './recipes/layout/headers-footers';
-import { generate as headersFootersTagged } from './recipes/layout/headers-footers-tagged';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
-import { generate as horizontalStacksTagged } from './recipes/layout/horizontal-stacks-tagged';
 import { generate as textBlockOverflow } from './recipes/layout/text-block-overflow';
-import { generate as textBlockOverflowTagged } from './recipes/layout/text-block-overflow-tagged';
 import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
 import { generate as verticalStackOverflowTagged } from './recipes/layout/vertical-stack-overflow-tagged';
 import { generate as multiPageFlow } from './recipes/layout/multi-page-flow';
@@ -103,32 +99,22 @@ export const examples: ExampleDef[] = [
     id: 'simple-document',
     name: 'Simple Document',
     category: 'Basic',
-    description: '3-page document demonstrating the core Document API - text, spacers, and custom page sizes.',
+    description:
+      'A 3-page PDF/UA-1 tagged document demonstrating the core Document API - semantic headings, text, spacers, a custom square page, and a QR Figure with alt-text.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
     dotnetClass: 'SimpleDocumentExample',
     pdfUa1: true,
   },
   {
-    id: 'simple-document-tagged',
-    name: 'Simple Document (PDF/UA-1)',
+    id: 'pdf-compliance',
+    name: 'PDF/A + PDF/UA',
     category: 'Basic',
     description:
-      'PDF/UA-1 tagged variant of Simple Document - screen-reader friendly with headings, paragraphs, and a Figure with alt-text.',
-    filename: 'simple-document-tagged.pdf',
-    generate: simpleDocumentTagged,
-    dotnetClass: 'SimpleDocumentTaggedExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'pdfa2a-compliant',
-    name: 'PDF/A-2a + PDF/UA-1',
-    category: 'Basic',
-    description:
-      'The modern archival + accessible baseline. Sets settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 - validated by veraPDF against profile 2a.',
-    filename: 'pdfa2a-compliant.pdf',
-    generate: pdfa2aCompliant,
-    dotnetClass: 'PdfA2aCompliantExample',
+      'The modern archival + accessible baseline every example in this gallery uses, explained: settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 - validated by veraPDF against profile 2a.',
+    filename: 'pdf-compliance.pdf',
+    generate: pdfCompliance,
+    dotnetClass: 'PdfComplianceExample',
     pdfUa1: true,
   },
   {
@@ -156,28 +142,19 @@ export const examples: ExampleDef[] = [
     id: 'headers-footers',
     name: 'Headers & Footers',
     category: 'Layout',
-    description: 'Page templates with dynamic header and footer content on every page.',
+    description:
+      'Dynamic running header and footer templates on every page. The templates are tagged as Artifacts (skipped by screen readers) while the numbered body sections use /H2 headings and /P paragraphs.',
     filename: 'headers-footers.pdf',
     generate: headersFooters,
     dotnetClass: 'HeadersFootersExample',
     pdfUa1: true,
   },
   {
-    id: 'headers-footers-tagged',
-    name: 'Headers & Footers (PDF/UA-1)',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged variant - running header and footer are Artifacts; body sections use /H2 headings and /P paragraphs.',
-    filename: 'headers-footers-tagged.pdf',
-    generate: headersFootersTagged,
-    dotnetClass: 'HeadersFootersTaggedExample',
-    pdfUa1: true,
-  },
-  {
     id: 'horizontal-stacks',
     name: 'Horizontal Stacks',
     category: 'Layout',
-    description: 'Flex-like horizontal layout with equal, weighted, and centre-aligned distributions.',
+    description:
+      'Flex-like horizontal layout - equal and weighted width distribution, cross-axis (vertical) alignment, key-value pairs, and two-column text, all with /H2 section headings.',
     filename: 'horizontal-stacks.pdf',
     generate: horizontalStacks,
     thumbnails: false,
@@ -185,36 +162,14 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
-    id: 'horizontal-stacks-tagged',
-    name: 'Horizontal Stacks (PDF/UA-1)',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged variant - equal-width, weighted, key-value pair, and two-column stack layouts, all with /H2 section headings.',
-    filename: 'horizontal-stacks-tagged.pdf',
-    generate: horizontalStacksTagged,
-    thumbnails: false,
-    dotnetClass: 'HorizontalStacksTaggedExample',
-    pdfUa1: true,
-  },
-  {
     id: 'text-block-overflow',
     name: 'TextBlock Overflow',
     category: 'Layout',
-    description: 'Long text content flowing automatically across multiple pages with a page-count footer.',
+    description:
+      'Long-form text flowing automatically across page boundaries. Three self-documenting /H2 sections stay tagged as they paginate, with an Artifact "Page N of M" footer on every page.',
     filename: 'text-block-overflow.pdf',
     generate: textBlockOverflow,
     dotnetClass: 'TextBlockOverflowExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'text-block-overflow-tagged',
-    name: 'TextBlock Overflow (PDF/UA-1)',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged variant - twenty /H2-headed sections of body text flowing across pages with an Artifact page-number footer.',
-    filename: 'text-block-overflow-tagged.pdf',
-    generate: textBlockOverflowTagged,
-    dotnetClass: 'TextBlockOverflowTaggedExample',
     pdfUa1: true,
   },
   {

@@ -6,11 +6,13 @@ import {
   ZoomLevel,
   PageModeEnum,
   TextBlock,
+  Heading,
+  QRCode,
+  Line,
   TextStyle,
   TextAlignment,
   VerticalStack,
   Spacer,
-  Color,
   ColorPalette,
   Thickness,
   StandardFonts,
@@ -18,6 +20,14 @@ import {
   AccessibilityMode,
 } from '@bonniepdf/core';
 
+/**
+ * The core Document API - three pages of text, spacers, and a custom
+ * square page - authored as an accessible, archival PDF by default:
+ * `conformance = PdfA2a` + `accessibility = PdfUa1`. Headings use the
+ * semantic `Heading` element so they surface as `/H1`../`H2` in the
+ * structure tree; body copy picks up implicit `/P` tagging from
+ * `TextBlock`; the QR code becomes a `/Figure` with alt-text.
+ */
 export function generate(): Document {
   const HEADING = StandardFonts.HelveticaBold;
 
@@ -34,12 +44,14 @@ export function generate(): Document {
   metadata.title = 'Simple Document Example';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Demonstrating the Document API - TypeScript / Browser';
-  metadata.keywords = 'pdf, document, example, BonniePDF';
+  metadata.keywords = 'pdf, document, example, accessibility, BonniePDF';
 
   const doc = new Document(settings, metadata);
 
   // ── Page 1 ──
-  const h1 = new TextBlock('Hello, Document API!');
+  const h1 = new Heading('Hello, Document API!');
+  h1.tocIdentifier = 'intro';
+  h1.level = 1;
   h1.fontName = HEADING;
   h1.fontSize = 24;
   h1.textColor = ColorPalette.slate[800];
@@ -49,7 +61,9 @@ export function generate(): Document {
   doc.add(new TextBlock('This PDF was generated entirely in the browser using the TypeScript port of BonniePDF.'));
   doc.add(new Spacer(16));
 
-  const keyFeatures = new TextBlock('Key Features:');
+  const keyFeatures = new Heading('Key Features');
+  keyFeatures.tocIdentifier = 'features';
+  keyFeatures.level = 2;
   keyFeatures.fontName = HEADING;
   keyFeatures.fontSize = 14;
   keyFeatures.textColor = ColorPalette.slate[700];
@@ -71,9 +85,41 @@ export function generate(): Document {
   }
   doc.add(features);
 
+  // ── Divider, then the accessibility note ──
+  doc.add(new Spacer(16));
+  const divider = new Line();
+  divider.thickness = 1;
+  divider.color = ColorPalette.slate[300];
+  doc.add(divider);
+  doc.add(new Spacer(16));
+
+  doc.add(
+    new TextBlock(
+      'Existing elements (Heading, TextBlock, Image, QRCode) tag themselves automatically - no semantic verbs required.'
+    )
+  );
+  doc.add(new Spacer(16));
+
+  const scan = new Heading('Scan to verify');
+  scan.tocIdentifier = 'verify';
+  scan.level = 2;
+  scan.fontName = HEADING;
+  scan.fontSize = 14;
+  scan.textColor = ColorPalette.slate[700];
+  scan.margin = new Thickness(0, 0, 0, 6);
+  doc.add(scan);
+
+  const qr = new QRCode();
+  qr.data = 'https://bonniepdf.dev';
+  qr.size = 100;
+  qr.altText = 'QR code linking to https://bonniepdf.dev';
+  doc.add(qr);
+
   // ── Page 2 ──
   doc.addPage();
-  const page2 = new TextBlock('Page 2');
+  const page2 = new Heading('Page 2');
+  page2.tocIdentifier = 'page2';
+  page2.level = 1;
   page2.fontName = HEADING;
   page2.fontSize = 20;
   page2.textColor = ColorPalette.slate[800];
@@ -85,7 +131,9 @@ export function generate(): Document {
   const squareSize = new PdfSize(300, 300, 'Square Card');
   doc.addPage(squareSize);
 
-  const p3title = new TextBlock(`Page 3: ${squareSize.name}`);
+  const p3title = new Heading(`Page 3: ${squareSize.name}`);
+  p3title.tocIdentifier = 'square';
+  p3title.level = 1;
   p3title.fontName = HEADING;
   p3title.fontSize = 16;
   p3title.textColor = ColorPalette.slate[800];

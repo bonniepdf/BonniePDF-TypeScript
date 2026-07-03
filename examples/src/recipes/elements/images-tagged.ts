@@ -20,7 +20,7 @@ import {
  *   - an informative Image with alt text  -> Figure structure element + /Alt
  *   - a decorative Image (isDecorative)    -> Artifact (excluded from reading order)
  *
- * This complements simple-document-tagged (which tags a vector QRCode as a
+ * This complements simple-document (which tags a vector QRCode as a
  * Figure) by validating the embedded raster-image XObject + colour-space path
  * under both flavours. Wired into scripts/generate-tagged-pdfs.ts and gated by
  * tools/verapdf/validate.sh.

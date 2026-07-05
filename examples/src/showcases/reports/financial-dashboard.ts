@@ -11,7 +11,6 @@ import {
   VerticalStack,
   Container,
   Table,
-  Spacer,
   Color,
   ColorPalette,
   Thickness,
@@ -45,6 +44,7 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(ColorPalette.slate[600]);
+  settings.pageColor = CREAM;
 
   const today = new Date();
   const currentQuarter = Math.floor(today.getMonth() / 3) + 1;
@@ -136,7 +136,6 @@ export function generate(): Document {
   totalRevenueStack.addChild(totalRevenueDeltaText);
   const totalRevenueCell = new Container();
   totalRevenueCell.child = totalRevenueStack;
-  totalRevenueCell.backgroundColor = CREAM;
   totalRevenueCell.padding = new Thickness(20, 16, 20, 16);
 
   const grossProfitStack = new VerticalStack();
@@ -159,7 +158,6 @@ export function generate(): Document {
   grossProfitStack.addChild(grossProfitDeltaText);
   const grossProfitCell = new Container();
   grossProfitCell.child = grossProfitStack;
-  grossProfitCell.backgroundColor = CREAM;
   grossProfitCell.padding = new Thickness(20, 16, 20, 16);
   grossProfitCell.border = Border.leftOnly(0.75);
   grossProfitCell.borderColors = BorderColors.leftOnly(SAND);
@@ -184,7 +182,6 @@ export function generate(): Document {
   newCustomersStack.addChild(newCustomersDeltaText);
   const newCustomersCell = new Container();
   newCustomersCell.child = newCustomersStack;
-  newCustomersCell.backgroundColor = CREAM;
   newCustomersCell.padding = new Thickness(20, 16, 20, 16);
   newCustomersCell.border = Border.leftOnly(0.75);
   newCustomersCell.borderColors = BorderColors.leftOnly(SAND);
@@ -209,7 +206,6 @@ export function generate(): Document {
   satisfactionStack.addChild(satisfactionDeltaText);
   const satisfactionCell = new Container();
   satisfactionCell.child = satisfactionStack;
-  satisfactionCell.backgroundColor = CREAM;
   satisfactionCell.padding = new Thickness(20, 16, 20, 16);
   satisfactionCell.border = Border.leftOnly(0.75);
   satisfactionCell.borderColors = BorderColors.leftOnly(SAND);
@@ -235,7 +231,6 @@ export function generate(): Document {
   // ════════════════════════════════════════════════════════════════════════════
 
   const chartTitleCell = new Container();
-  chartTitleCell.backgroundColor = CREAM;
   chartTitleCell.padding = new Thickness(24, 14, 24, 6);
   const monthlyRevenueTitleText = new TextBlock('MONTHLY REVENUE  (£000s)');
   monthlyRevenueTitleText.fontName = StandardFonts.HelveticaBold;
@@ -268,7 +263,6 @@ export function generate(): Document {
   barChart.barColor = TERRA;
   barChart.fontFamily = StandardFonts.Helvetica;
   barChart.labelFontSize = 8;
-  barChart.backgroundColor = CREAM;
 
   // Direct doc.add - the only way ChartElement resolves its available width
   doc.add(
@@ -292,7 +286,6 @@ export function generate(): Document {
   doc.add(productRule);
 
   const tableTitleCell = new Container();
-  tableTitleCell.backgroundColor = CREAM;
   tableTitleCell.padding = new Thickness(24, 14, 24, 6);
   const topProductsText = new TextBlock('TOP PRODUCTS');
   topProductsText.fontName = StandardFonts.HelveticaBold;
@@ -362,18 +355,9 @@ export function generate(): Document {
   }
 
   const tableCell = new Container();
-  tableCell.backgroundColor = CREAM;
   tableCell.padding = new Thickness(24, 0, 24, 20);
   tableCell.child = productTable;
   doc.add(tableCell);
-
-  // CREAM background flood-fill to the page bottom.
-  // Container is non-stateful so it renders once without overflow detection;
-  // any excess beyond the MediaBox is clipped by the PDF viewer.
-  const pageFill = new Container();
-  pageFill.backgroundColor = CREAM;
-  pageFill.child = new Spacer(500);
-  doc.add(pageFill);
 
   return doc;
 }

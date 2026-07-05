@@ -29,4 +29,10 @@ export class CatalogOptions {
    * emitted as `/Lang` on the catalog. Required by PDF/UA-1.
    */
   public language?: string;
+
+  /**
+   * The /PageLabels number-tree object ID (0 or undefined if none).
+   * When set, the catalog emits `/PageLabels N 0 R`.
+   */
+  public pageLabelsId?: number;
 }

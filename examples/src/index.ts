@@ -6,28 +6,18 @@ import { generate as margins } from './recipes/basics/margins';
 import { generate as pageSettings } from './recipes/basics/page-settings';
 import { generate as headersFooters } from './recipes/layout/headers-footers';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
-import { generate as textBlockOverflow } from './recipes/layout/text-block-overflow';
+import { generate as textBlockOverflow } from './conformance/text-block-overflow';
 import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
-import { generate as verticalStackOverflowTagged } from './recipes/layout/vertical-stack-overflow-tagged';
-import { generate as multiPageFlow } from './recipes/layout/multi-page-flow';
-import { generate as multiPageFlowTagged } from './recipes/layout/multi-page-flow-tagged';
+import { generate as tables } from './recipes/elements/tables';
 import { generate as textAlignment } from './recipes/typography/text-alignment';
-import { generate as textAlignmentTagged } from './recipes/typography/text-alignment-tagged';
-import { generate as textAlignmentLiberation } from './recipes/typography/text-alignment-liberation';
+import { generate as embeddedFontMetrics } from './recipes/typography/embedded-font-metrics';
 import { generate as bookPageLayout } from './recipes/typography/book-page-layout';
-import { generate as bookPageLayoutTagged } from './recipes/typography/book-page-layout-tagged';
 import { generate as richTextStyles } from './recipes/typography/rich-text-styles';
-import { generate as richTextStylesTagged } from './recipes/typography/rich-text-styles-tagged';
 import { generate as textDecorations } from './recipes/typography/text-decorations';
-import { generate as textDecorationsTagged } from './recipes/typography/text-decorations-tagged';
 import { generate as customFonts } from './recipes/typography/custom-fonts';
-import { generate as customFontsTagged } from './recipes/typography/custom-fonts-tagged';
 import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
-import { generate as emojisAndUnicodeTagged } from './recipes/typography/emojis-and-unicode-tagged';
 import { generate as dickensNovel } from './recipes/typography/dickens-novel';
 import { generate as lists } from './recipes/elements/lists';
-import { generate as listsTagged } from './recipes/elements/lists-tagged';
-import { generate as imagesTagged } from './recipes/elements/images-tagged';
 import { generate as hyperlinks } from './recipes/elements/hyperlinks';
 import { generate as shapesAndBorders } from './recipes/elements/shapes-and-borders';
 import { generate as colorPalette } from './recipes/elements/color-palette';
@@ -54,7 +44,9 @@ import { generate as euEInvoice } from './showcases/invoices/eu-einvoice';
 import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
 import { generate as userDirectory } from './showcases/catalogs/user-directory';
 import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
+import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
 import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
+import { generate as complianceFindingsRegister } from './showcases/reports/compliance-findings-register';
 import { generate as annualReport } from './showcases/reports/annual-report';
 import { generate as annualReportGradientCover } from './showcases/reports/annual-report-gradient-cover';
 import { generate as annualReportMaskedCover } from './showcases/reports/annual-report-masked-cover';
@@ -89,6 +81,16 @@ export interface ExampleDef {
   dotnetClass?: string | null;
   /** PDF/UA-1 tagged document - validated by VeraPDF in CI. */
   pdfUa1?: boolean;
+  /**
+   * Whether this example appears on the public website gallery / docs. Defaults
+   * to `true`. Set `false` for conformance-corpus documents: PDFs kept purely to
+   * exercise the engine and pass veraPDF (and future validators) in CI, but which
+   * aren't relevant as marketing/documentation. They still generate and validate
+   * like any other example; they just don't surface in the sidebar, gallery grid,
+   * per-example pages, or playground. Live in `src/conformance/`.
+   * See {@link galleryExamples}.
+   */
+  gallery?: boolean;
   /** User password for encrypted PDFs - passed to the viewer so it can open the document. */
   password?: string;
 }
@@ -171,48 +173,19 @@ export const examples: ExampleDef[] = [
     generate: textBlockOverflow,
     dotnetClass: 'TextBlockOverflowExample',
     pdfUa1: true,
+    // Conformance corpus: automatic pagination is baseline library behaviour, not
+    // a feature to teach, so this is validated in CI but kept off the website.
+    gallery: false,
   },
   {
     id: 'vertical-stack-overflow',
     name: 'VerticalStack Overflow',
     category: 'Layout',
-    description: '75-item card list inside a VerticalStack that paginates automatically.',
+    description:
+      'A warehouse asset-label sheet: a column of Code 128 barcodes inside a VerticalStack. Barcodes (like images and QR codes) have no pagination of their own, so the VerticalStack is what carries each label that would fall off the page onto the next one - drop the same list straight onto the document and the overflow is lost off the bottom edge.',
     filename: 'vertical-stack-overflow.pdf',
     generate: verticalStackOverflow,
     dotnetClass: 'VerticalStackOverflowExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'vertical-stack-overflow-tagged',
-    name: 'VerticalStack Overflow (PDF/UA-1)',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged variant - 75-item catalogue, each item with a /H3 heading and /P description inside a paginating VerticalStack.',
-    filename: 'vertical-stack-overflow-tagged.pdf',
-    generate: verticalStackOverflowTagged,
-    dotnetClass: 'VerticalStackOverflowTaggedExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'multi-page-flow',
-    name: 'Multi-Page Flow',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged landscape document combining a 150-row table with repeating headers and multi-page text sections.',
-    filename: 'multi-page-flow.pdf',
-    generate: multiPageFlow,
-    dotnetClass: 'MultiPageFlowExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'multi-page-flow-tagged',
-    name: 'Multi-Page Flow (PDF/UA-1)',
-    category: 'Layout',
-    description:
-      'PDF/UA-1 tagged document with a 30-row employee table (repeating /TH headers) followed by /H2-headed company overview sections.',
-    filename: 'multi-page-flow-tagged.pdf',
-    generate: multiPageFlowTagged,
-    dotnetClass: 'MultiPageFlowTaggedExample',
     pdfUa1: true,
   },
   // Typography
@@ -220,42 +193,32 @@ export const examples: ExampleDef[] = [
     id: 'text-alignment',
     name: 'Text Alignment',
     category: 'Typography',
-    description: 'Left, center, right and justified text alignment including book-style paragraphs.',
+    description:
+      'Left, centre, right, and justified text alignment including book-style paragraphs, tagged as /H2 headings and /P paragraphs. PDF/A-2a + PDF/UA-1.',
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnails: false,
-    dotnetClass: null,
+    dotnetClass: 'TextAlignmentExample',
     pdfUa1: true,
   },
   {
-    id: 'text-alignment-tagged',
-    name: 'Text Alignment (PDF/UA-1)',
+    id: 'embedded-font-metrics',
+    name: 'Embedded-Font Metrics',
     category: 'Typography',
     description:
-      'PDF/UA-1 tagged variant - all four alignments demonstrated with /H2 section headings and /P paragraphs.',
-    filename: 'text-alignment-tagged.pdf',
-    generate: textAlignmentTagged,
+      "Why an embedded TrueType font makes alignment edges exact: BonniePDF measures from the font's own hmtx advance widths rather than the approximate standard-14 width tables. The four alignments are rendered in embedded Liberation Sans. PDF/A-2a + PDF/UA-1.",
+    filename: 'embedded-font-metrics.pdf',
+    generate: embeddedFontMetrics,
     thumbnails: false,
-    dotnetClass: 'TextAlignmentTaggedExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'text-alignment-liberation',
-    name: 'Text Alignment (Liberation Sans)',
-    category: 'Typography',
-    description:
-      "PDF/UA-1 tagged variant rendered entirely in embedded Liberation Sans - alignment is measured from the font's own glyph metrics, so right/centre/justified edges are exact.",
-    filename: 'text-alignment-liberation.pdf',
-    generate: textAlignmentLiberation,
-    thumbnails: false,
-    dotnetClass: null,
+    dotnetClass: 'EmbeddedFontMetricsExample',
     pdfUa1: true,
   },
   {
     id: 'book-page-layout',
     name: 'Book Page Layout',
     category: 'Typography',
-    description: 'Advanced book-style typography with Times family fonts, pull-quote block, and a chapter footer.',
+    description:
+      'A typeset chapter page in the style of an academic monograph: Times family fonts throughout, justified body text, a bordered pull-quote block inset from the text column, a mixed bold/italic emphasis break, and a chapter footer with page number and imprint. Chapter title is /H1; all body paragraphs are /P. PDF/A-2a + PDF/UA-1.',
     filename: 'book-page-layout.pdf',
     generate: bookPageLayout,
     thumbnails: false,
@@ -263,37 +226,14 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
-    id: 'book-page-layout-tagged',
-    name: 'Book Page Layout (PDF/UA-1)',
-    category: 'Typography',
-    description:
-      'PDF/UA-1 tagged variant - chapter title as /H1, body paragraphs as /P, and a pull-quote block with bordered container.',
-    filename: 'book-page-layout-tagged.pdf',
-    generate: bookPageLayoutTagged,
-    thumbnails: false,
-    dotnetClass: 'BookPageLayoutTaggedExample',
-    pdfUa1: true,
-  },
-  {
     id: 'rich-text-styles',
     name: 'Rich Text Styles',
     category: 'Typography',
     description:
-      'Mixed inline formatting - bold, italic, colored, highlighted, underlined, and sized spans within flowing paragraphs.',
+      'Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer. PDF/A-2a + PDF/UA-1.',
     filename: 'rich-text-styles.pdf',
     generate: richTextStyles,
     dotnetClass: 'RichTextExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'rich-text-styles-tagged',
-    name: 'Rich Text Styles (PDF/UA-1)',
-    category: 'Typography',
-    description:
-      'PDF/UA-1 tagged variant - bold, italic, coloured, underlined, and strikethrough spans with /H2 section headings.',
-    filename: 'rich-text-styles-tagged.pdf',
-    generate: richTextStylesTagged,
-    dotnetClass: 'RichTextTaggedExample',
     pdfUa1: true,
   },
   {
@@ -301,7 +241,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Decorations',
     category: 'Typography',
     description:
-      'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes.',
+      'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes, with a practical price-list example. PDF/A-2a + PDF/UA-1.',
     filename: 'text-decorations.pdf',
     generate: textDecorations,
     thumbnails: false,
@@ -309,23 +249,11 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
-    id: 'text-decorations-tagged',
-    name: 'Text Decorations (PDF/UA-1)',
-    category: 'Typography',
-    description:
-      'PDF/UA-1 tagged variant - underline, strikethrough, and combined decorations with /H2 section headings and /P paragraphs.',
-    filename: 'text-decorations-tagged.pdf',
-    generate: textDecorationsTagged,
-    thumbnails: false,
-    dotnetClass: 'TextDecorationTaggedExample',
-    pdfUa1: true,
-  },
-  {
     id: 'custom-fonts',
     name: 'Custom Fonts',
     category: 'Typography',
     description:
-      'TrueType font embedding with full Unicode symbol coverage - currency, Greek, mathematical, and arrow characters.',
+      'TrueType font embedding with Unicode coverage — symbols, currency, arrows, maths, dingbats, and Greek across NotoSans, NotoSansMath, and NotoSansSymbols2. PDF/A-2a + PDF/UA-1.',
     filename: 'custom-fonts.pdf',
     generate: customFonts,
     thumbnails: false,
@@ -333,38 +261,15 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
-    id: 'custom-fonts-tagged',
-    name: 'Custom Fonts (PDF/UA-1)',
-    category: 'Typography',
-    description:
-      'PDF/UA-1 tagged variant - TrueType Unicode coverage (symbols, currency, math, Greek) with /H2 section headings.',
-    filename: 'custom-fonts-tagged.pdf',
-    generate: customFontsTagged,
-    thumbnails: false,
-    dotnetClass: 'CustomFontTaggedExample',
-    pdfUa1: true,
-  },
-  {
     id: 'emojis-and-unicode',
     name: 'Emojis & Unicode',
     category: 'Typography',
-    description: 'Supplementary Unicode plane support with emoji sections and mixed text/emoji status lines.',
+    description:
+      'Full Unicode range — BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts, with a mixed text/emoji status-line example. PDF/UA-1.',
     filename: 'emojis-and-unicode.pdf',
     generate: emojisAndUnicode,
     thumbnails: false,
     dotnetClass: 'EmojiExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'emojis-and-unicode-tagged',
-    name: 'Emojis & Unicode (PDF/UA-1)',
-    category: 'Typography',
-    description:
-      'PDF/UA-1 tagged variant - emoji and supplementary Unicode sections with /H2 headings. PDF/A disabled; PDF/UA-1 enabled.',
-    filename: 'emojis-and-unicode-tagged.pdf',
-    generate: emojisAndUnicodeTagged,
-    thumbnails: false,
-    dotnetClass: 'EmojiTaggedExample',
     pdfUa1: true,
   },
   {
@@ -380,25 +285,25 @@ export const examples: ExampleDef[] = [
   },
   // Elements
   {
+    id: 'tables',
+    name: 'Tables',
+    category: 'Elements',
+    description:
+      'A 45-row employee table with repeating /TH column headers across pages, alternating row colours, and a "Page N of M" footer — all tagged /TH and /TD within the /Table structure tree. PDF/A-2a + PDF/UA-1.',
+    filename: 'tables.pdf',
+    generate: tables,
+    dotnetClass: 'TablesExample',
+    pdfUa1: true,
+  },
+  {
     id: 'lists',
     name: 'Lists',
     category: 'Elements',
     description:
-      'Ordered (decimal, roman, alpha) and unordered (disc, circle, square, dash, custom) lists including nested lists.',
+      'Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, custom, coloured) lists including nested sub-lists. Each item is tagged as L > LI > Lbl + LBody. PDF/A-2a + PDF/UA-1.',
     filename: 'lists.pdf',
     generate: lists,
     dotnetClass: 'ListsExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'lists-tagged',
-    name: 'Lists (PDF/UA-1)',
-    category: 'Elements',
-    description:
-      'PDF/UA-1 tagged ordered and unordered lists - each item is structured as L > LI > Lbl + LBody for full screen-reader compatibility.',
-    filename: 'lists-tagged.pdf',
-    generate: listsTagged,
-    dotnetClass: null,
     pdfUa1: true,
   },
   {
@@ -474,21 +379,11 @@ export const examples: ExampleDef[] = [
     id: 'images',
     name: 'Images',
     category: 'Elements',
-    description: 'PNG embedding with contain, cover, and fill fit modes, plus alpha transparency support.',
+    description:
+      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Every informative image carries alt text (Figure + /Alt) and a decorative divider is marked as an artifact. PDF/A-2a + PDF/UA-1.',
     filename: 'images.pdf',
     generate: images,
     dotnetClass: 'ImagesExample',
-    pdfUa1: true,
-  },
-  {
-    id: 'images-tagged',
-    name: 'Images (PDF/UA-1)',
-    category: 'Elements',
-    description:
-      'PDF/UA-1 tagged image example - an informative image with alt text becomes a Figure structure element; a decorative image is marked as an artifact.',
-    filename: 'images-tagged.pdf',
-    generate: imagesTagged,
-    dotnetClass: null,
     pdfUa1: true,
   },
   // Charting
@@ -713,6 +608,43 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
   },
   {
+    id: 'product-photo-gallery',
+    name: 'Product Photo Gallery',
+    category: 'Catalogs',
+    tier: 'showcase',
+    description:
+      'A retail look-book: products laid out two-per-row as photo cards with name, SKU, price, and blurb, paginating automatically. PDF/A-2a + PDF/UA-1. Product photographs are pending - cards show a labelled placeholder until the images are supplied.',
+    filename: 'product-photo-gallery.pdf',
+    generate: productPhotoGallery,
+    requiredAssets: [
+      'images/products/terracotta-planter.jpg',
+      'images/products/linen-throw.jpg',
+      'images/products/brass-reading-lamp.jpg',
+      'images/products/ceramic-pour-over.jpg',
+      'images/products/wool-floor-cushion.jpg',
+      'images/products/smoked-glass-carafe.jpg',
+      'images/products/oak-wall-shelf.jpg',
+      'images/products/rattan-pendant-shade.jpg',
+    ],
+    // TypeScript-only for now; .NET port + real product photos are follow-ups.
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'compliance-findings-register',
+    name: 'Compliance Findings Register',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A GRC / audit findings register: 18 severity-coloured finding cards (badge + heading + remediation) paginating across pages. PDF/A-2a + PDF/UA-1.',
+    filename: 'compliance-findings-register.pdf',
+    generate: complianceFindingsRegister,
+    dotnetClass: 'ComplianceFindingsRegisterExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
     id: 'financial-dashboard',
     name: 'Financial Dashboard',
     category: 'Reports',
@@ -820,3 +752,12 @@ export const examples: ExampleDef[] = [
     pdfUa1: false,
   },
 ];
+
+/**
+ * The subset of {@link examples} that is public-facing - shown on the website
+ * sidebar, gallery grid, per-example pages, and playground. Excludes
+ * conformance-corpus entries (`gallery: false`), which are still generated and
+ * validated in CI but are not marketing/documentation. Website consumers should
+ * enumerate this; CI/validation/smoke tooling should use the full {@link examples}.
+ */
+export const galleryExamples: ExampleDef[] = examples.filter(e => e.gallery !== false);

@@ -265,14 +265,32 @@ export class PdfDocumentSerializer {
       catalogOptions.language = settings.language;
     }
 
-    // 12. Write /Catalog
+    // 12. Write /PageLabels number tree if configured (PDF §12.4.2).
+    if (settings.pageLabel) {
+      const label = settings.pageLabel;
+      const styleMap: Record<string, string> = {
+        decimal: '/D',
+        'lowercase-roman': '/r',
+        'uppercase-roman': '/R',
+        'lowercase-alpha': '/a',
+        'uppercase-alpha': '/A',
+      };
+      const parts: string[] = [`/S ${styleMap[label.style ?? 'decimal']}`];
+      if (label.prefix) parts.push(`/P (${label.prefix})`);
+      if (label.startAt != null && label.startAt !== 1) parts.push(`/St ${label.startAt}`);
+      const pageLabelsId = writer.getNewId();
+      writer.writeObject(pageLabelsId, new Map([['/Nums', `[ 0 << ${parts.join(' ')} >> ]`]]));
+      catalogOptions.pageLabelsId = pageLabelsId;
+    }
+
+    // 13. Write /Catalog
     if (pageIds.length === 0) throw new Error('Document has no pages');
     writer.writeCatalog(catalogId, pagesId, pageIds[0], settings, catalogOptions);
 
-    // 13. Write encryption dictionary if encrypted
+    // 14. Write encryption dictionary if encrypted
     if (encryptId > 0) writer.writeEncryptDictionary(encryptId);
 
-    // 14. Finalize: xref table + trailer + %%EOF
+    // 15. Finalize: xref table + trailer + %%EOF
     writer.close(catalogId, infoId);
   }
 

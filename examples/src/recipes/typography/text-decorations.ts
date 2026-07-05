@@ -2,18 +2,18 @@ import {
   Document,
   DocumentSettings,
   DocumentMetadata,
+  AccessibilityMode,
   TextBlock,
   TextStyle,
   TextAlignment,
   TextDecoration,
-  VerticalStack,
+  Heading,
   Line,
   Color,
   ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
-  AccessibilityMode,
 } from '@bonniepdf/core';
 
 export function generate(): Document {
@@ -21,181 +21,137 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
   settings.margin = 60;
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Text Decorations';
   metadata.author = 'BonniePDF';
+  metadata.subject = 'Underline and strikethrough decorations across alignments and sizes. PDF/A-2a + PDF/UA-1.';
+  metadata.keywords = 'pdf, text, underline, strikethrough, decorations, pdf/ua, pdf/a, BonniePDF';
 
   const doc = new Document(settings, metadata);
 
-  const title = new TextBlock('Text Decorations');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 20);
-  doc.add(title);
+  // ── Title ─────────────────────────────────────────────────────────────────────
 
-  // ── Underline ────────────────────────────────────────────────────────────
-  const sectionHeader1 = new TextBlock('Underline');
-  sectionHeader1.fontName = StandardFonts.HelveticaBold;
-  sectionHeader1.fontSize = 14;
-  sectionHeader1.textColor = ColorPalette.indigo[600];
-  sectionHeader1.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader1);
+  const h1 = new Heading('Text Decorations');
+  h1.tocIdentifier = 'intro';
+  h1.level = 1;
+  h1.fontName = StandardFonts.HelveticaBold;
+  h1.fontSize = 22;
+  h1.textColor = ColorPalette.slate[800];
+  h1.margin = new Thickness(0, 0, 0, 10);
+  doc.add(h1);
 
-  const u1 = new TextBlock('This text has an underline decoration applied.');
-  u1.fontName = StandardFonts.Helvetica;
-  u1.fontSize = 12;
-  u1.textColor = ColorPalette.slate[700];
-  u1.textDecoration = TextDecoration.Underline;
-  u1.margin = new Thickness(0, 0, 0, 12);
-  doc.add(u1);
-
-  const u2 = new TextBlock('This underline was applied by setting textDecoration = TextDecoration.Underline.');
-  u2.fontName = StandardFonts.Helvetica;
-  u2.fontSize = 12;
-  u2.textColor = ColorPalette.slate[700];
-  u2.textDecoration = TextDecoration.Underline;
-  u2.margin = new Thickness(0, 0, 0, 12);
-  doc.add(u2);
-
-  // ── Strikethrough ────────────────────────────────────────────────────────
-  const sectionHeader2 = new TextBlock('Strikethrough');
-  sectionHeader2.fontName = StandardFonts.HelveticaBold;
-  sectionHeader2.fontSize = 14;
-  sectionHeader2.textColor = ColorPalette.indigo[600];
-  sectionHeader2.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader2);
-
-  const s1 = new TextBlock(
-    'This text has a strikethrough decoration, useful for showing deleted or superseded content.'
+  const intro = new TextBlock(
+    'Underline and strikethrough are presentational properties on TextBlock. ' +
+      'They do not change the structure-tree role — all decorated paragraphs remain /P elements.'
   );
-  s1.fontName = StandardFonts.Helvetica;
-  s1.fontSize = 12;
-  s1.textColor = ColorPalette.slate[700];
-  s1.textDecoration = TextDecoration.Strikethrough;
-  s1.margin = new Thickness(0, 0, 0, 12);
-  doc.add(s1);
+  intro.margin = new Thickness(0, 0, 0, 14);
+  doc.add(intro);
 
-  const s2 = new TextBlock('A second strikethrough line demonstrating consistent decoration thickness.');
-  s2.fontName = StandardFonts.Helvetica;
-  s2.fontSize = 12;
-  s2.textColor = ColorPalette.slate[700];
-  s2.textDecoration = TextDecoration.Strikethrough;
-  s2.margin = new Thickness(0, 0, 0, 12);
-  doc.add(s2);
+  // ── 1. Underline ──────────────────────────────────────────────────────────────
 
-  // ── Combined ─────────────────────────────────────────────────────────────
-  const sectionHeader3 = new TextBlock('Combined Decorations');
-  sectionHeader3.fontName = StandardFonts.HelveticaBold;
-  sectionHeader3.fontSize = 14;
-  sectionHeader3.textColor = ColorPalette.indigo[600];
-  sectionHeader3.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader3);
+  section(doc, 'Underline', 's-underline');
 
-  const c1 = new TextBlock('This text has both underline and strikethrough applied simultaneously.');
-  c1.fontName = StandardFonts.Helvetica;
-  c1.fontSize = 12;
-  c1.textColor = ColorPalette.slate[700];
-  c1.textDecoration = TextDecoration.Underline | TextDecoration.Strikethrough;
-  c1.margin = new Thickness(0, 0, 0, 12);
-  doc.add(c1);
+  const u = new TextBlock(
+    'This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.'
+  );
+  u.textDecoration = TextDecoration.Underline;
+  u.margin = new Thickness(0, 0, 0, 10);
+  doc.add(u);
 
-  const c2 = new TextBlock('Decorations are bitwise flags - combine them with the | operator.');
-  c2.fontName = StandardFonts.Helvetica;
-  c2.fontSize = 12;
-  c2.textColor = ColorPalette.slate[700];
-  c2.textDecoration = TextDecoration.Underline | TextDecoration.Strikethrough;
-  c2.margin = new Thickness(0, 0, 0, 12);
-  doc.add(c2);
+  // ── 2. Strikethrough ──────────────────────────────────────────────────────────
 
-  // ── Different alignments ──────────────────────────────────────────────────
-  const divider1 = new Line();
-  divider1.color = ColorPalette.slate[300];
-  divider1.thickness = 1;
-  doc.add(divider1);
-  const sectionHeader4 = new TextBlock('Decorations with Different Alignments');
-  sectionHeader4.fontName = StandardFonts.HelveticaBold;
-  sectionHeader4.fontSize = 14;
-  sectionHeader4.textColor = ColorPalette.indigo[600];
-  sectionHeader4.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader4);
+  section(doc, 'Strikethrough', 's-strike');
 
-  for (const [text, align] of [
-    ['Left-aligned underlined text', TextAlignment.Left],
-    ['Center-aligned underlined text', TextAlignment.Center],
-    ['Right-aligned underlined text', TextAlignment.Right],
+  const s = new TextBlock(
+    'This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.'
+  );
+  s.textDecoration = TextDecoration.Strikethrough;
+  s.margin = new Thickness(0, 0, 0, 10);
+  doc.add(s);
+
+  // ── 3. Combined ───────────────────────────────────────────────────────────────
+
+  section(doc, 'Combined Decorations', 's-combined');
+
+  const c = new TextBlock(
+    'Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: ' +
+      'TextDecoration.Underline | TextDecoration.Strikethrough.'
+  );
+  c.textDecoration = TextDecoration.Underline | TextDecoration.Strikethrough;
+  c.margin = new Thickness(0, 0, 0, 10);
+  doc.add(c);
+
+  // ── 4. Alignment ──────────────────────────────────────────────────────────────
+
+  section(doc, 'Alignment', 's-alignment');
+
+  for (const [label, align] of [
+    ['Left-aligned underlined text.', TextAlignment.Left],
+    ['Centre-aligned underlined text.', TextAlignment.Center],
+    ['Right-aligned underlined text.', TextAlignment.Right],
   ] as [string, TextAlignment][]) {
-    const b = new TextBlock(text);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 12;
-    b.textColor = ColorPalette.slate[700];
+    const b = new TextBlock(label);
     b.textDecoration = TextDecoration.Underline;
     b.alignment = align;
     b.margin = new Thickness(0, 0, 0, 8);
     doc.add(b);
   }
 
-  // ── Scales with font size ─────────────────────────────────────────────────
-  const divider2 = new Line();
-  divider2.color = ColorPalette.slate[300];
-  divider2.thickness = 1;
-  doc.add(divider2);
-  const sectionHeader5 = new TextBlock('Decoration Thickness Scales with Font Size');
-  sectionHeader5.fontName = StandardFonts.HelveticaBold;
-  sectionHeader5.fontSize = 14;
-  sectionHeader5.textColor = ColorPalette.indigo[600];
-  sectionHeader5.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader5);
+  // ── 5. Scales with font size ──────────────────────────────────────────────────
+
+  section(doc, 'Scales with Font Size', 's-sizes');
 
   for (const size of [8, 12, 18, 24, 36]) {
     const b = new TextBlock(`Underline at ${size}pt`);
-    b.fontName = StandardFonts.Helvetica;
     b.fontSize = size;
-    b.textColor = ColorPalette.slate[700];
     b.textDecoration = TextDecoration.Underline;
     b.margin = new Thickness(0, 0, 0, 6);
     doc.add(b);
   }
 
-  // ── Practical: price list ─────────────────────────────────────────────────
-  const divider3 = new Line();
-  divider3.color = ColorPalette.slate[300];
-  divider3.thickness = 1;
-  doc.add(divider3);
-  const sectionHeader6 = new TextBlock('Practical Example: Price List');
-  sectionHeader6.fontName = StandardFonts.HelveticaBold;
-  sectionHeader6.fontSize = 14;
-  sectionHeader6.textColor = ColorPalette.indigo[600];
-  sectionHeader6.margin = new Thickness(0, 12, 0, 6);
-  doc.add(sectionHeader6);
+  // ── Practical Example ─────────────────────────────────────────────────────────
 
-  const priceList = new VerticalStack();
+  const divider = new Line();
+  divider.color = ColorPalette.slate[300];
+  divider.thickness = 1;
+  divider.margin = new Thickness(0, 12, 0, 0);
+  doc.add(divider);
 
-  const original = new TextBlock('Original Price: $199.99');
-  original.fontName = StandardFonts.Helvetica;
+  section(doc, 'Practical Example: Price List', 's-prices');
+
+  const original = new TextBlock('Original Price: £199.99');
   original.fontSize = 14;
   original.textColor = ColorPalette.slate[400];
   original.textDecoration = TextDecoration.Strikethrough;
   original.margin = new Thickness(0, 0, 0, 4);
-  priceList.addChild(original);
+  doc.add(original);
 
-  const sale = new TextBlock('Sale Price: $149.99');
+  const sale = new TextBlock('Sale Price: £149.99');
   sale.fontName = StandardFonts.HelveticaBold;
   sale.fontSize = 18;
   sale.textColor = Color.red;
   sale.textDecoration = TextDecoration.Underline;
   sale.margin = new Thickness(0, 0, 0, 4);
-  priceList.addChild(sale);
+  doc.add(sale);
 
-  const saving = new TextBlock('You save $50.00!');
-  saving.fontName = StandardFonts.Helvetica;
+  const saving = new TextBlock('You save £50.00!');
   saving.fontSize = 11;
   saving.textColor = ColorPalette.green[600];
-  priceList.addChild(saving);
+  doc.add(saving);
 
-  doc.add(priceList);
   return doc;
+}
+
+function section(doc: Document, title: string, tocId: string): void {
+  const h = new Heading(title);
+  h.tocIdentifier = tocId;
+  h.level = 2;
+  h.fontName = StandardFonts.HelveticaBold;
+  h.fontSize = 14;
+  h.textColor = ColorPalette.indigo[600];
+  h.margin = new Thickness(0, 12, 0, 6);
+  doc.add(h);
 }

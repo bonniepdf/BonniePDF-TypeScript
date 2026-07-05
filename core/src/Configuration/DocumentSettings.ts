@@ -10,6 +10,7 @@ import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
 import type { TextStyle } from '../Elements/Text/TextStyle';
 import { AccessibilityMode } from './AccessibilityMode';
 import { PdfAConformance } from './PdfAConformance';
+import { PageLabel } from './PageLabel';
 
 interface _LocalIElement {
   getPreferredWidth(): number;
@@ -213,6 +214,27 @@ export class DocumentSettings {
    * When null, the document is not encrypted.
    */
   public encryption?: EncryptionSettings;
+  /**
+   * Page labelling configuration written as `/PageLabels` in the document
+   * catalog (PDF §12.4.2). Controls the number shown in the viewer's page
+   * counter and "go to page" dialog — not the printed text on the page itself.
+   *
+   * Use when the document represents a subset of a larger work and the viewer
+   * counter should reflect the logical page numbering rather than the physical
+   * 1-based sheet count.
+   *
+   * ```typescript
+   * const label = new PageLabel()
+   * label.startAt = 42
+   * settings.pageLabel = label
+   * // → viewer shows "42" on page 1, "43" on page 2, etc.
+   * ```
+   *
+   * Note: the footer template still receives the physical page number. Offset
+   * it manually if you want the printed number to match:
+   * `footerTemplate = (n) => new TextBlock(String(n + 41))`
+   */
+  public pageLabel?: PageLabel;
   /**
    * Gets whether encryption is enabled for this document.
    */

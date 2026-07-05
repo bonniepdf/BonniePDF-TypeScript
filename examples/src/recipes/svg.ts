@@ -84,7 +84,12 @@ const VIEWBOX_RE = /viewBox="0 0 ([\d.]+) ([\d.]+)"/;
 export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {}): Promise<BuildSvgAssetsResult> {
   const maxPages = options.maxPages ?? 2;
   const precision = options.precision ?? 2;
-  const defs: ExampleDef[] = options.ids ? examples.filter(e => options.ids!.includes(e.id)) : examples;
+  // Preview SVGs are a website/marketing asset, so default to the gallery subset.
+  // An explicit `ids` list still resolves against the full set (e.g. to render a
+  // conformance-corpus example on demand).
+  const defs: ExampleDef[] = options.ids
+    ? examples.filter(e => options.ids!.includes(e.id))
+    : examples.filter(e => e.gallery !== false);
 
   const files: SvgAssetFile[] = [];
   const manifestExamples: SvgManifestExample[] = [];

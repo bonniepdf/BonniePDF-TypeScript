@@ -4,7 +4,9 @@ import {
   DocumentMetadata,
   AccessibilityMode,
   TextBlock,
+  TextElementBase,
   TextStyle,
+  TextAlignment,
   Table,
   TableRow,
   Heading,
@@ -46,6 +48,21 @@ const EMPLOYEES: [string, string, string][] = [
   ['Brian Adams', 'Operations', 'Logistics Manager'],
   ['Chloe Baker', 'R&D', 'UX Researcher'],
   ['Dylan Carter', 'Engineering', 'Mobile Developer'],
+  ['Eleanor Price', 'Marketing', 'Events Manager'],
+  ['Felix Nguyen', 'Engineering', 'Cloud Architect'],
+  ['Georgia Moss', 'Finance', 'Treasury Analyst'],
+  ['Hugo Reyes', 'R&D', 'AI Researcher'],
+  ['Iris Chambers', 'Legal', 'Contract Specialist'],
+  ['Jordan Holt', 'Sales', 'Sales Engineer'],
+  ['Kira Okafor', 'Operations', 'Process Analyst'],
+  ['Leo Novak', 'IT', 'Network Engineer'],
+  ['Maya Singh', 'Customer Support', 'Escalations Lead'],
+  ['Nate Callahan', 'Engineering', 'Site Reliability Engineer'],
+  ['Ophelia Dunn', 'Human Resources', 'L&D Manager'],
+  ['Patrick Stern', 'Finance', 'Risk Analyst'],
+  ['Rosa Tanaka', 'Marketing', 'SEO Specialist'],
+  ['Stefan Mehta', 'Engineering', 'Data Engineer'],
+  ['Talia Burns', 'Operations', 'Fleet Coordinator'],
 ];
 
 const OVERVIEW_SECTIONS: [string, string][] = [
@@ -67,7 +84,7 @@ const OVERVIEW_SECTIONS: [string, string][] = [
   ],
   [
     'Conclusion',
-    'This document demonstrates the pagination capabilities of BonniePDF. The table automatically spans multiple pages with headers repeating on each page, while text sections flow naturally across page boundaries.',
+    'This document demonstrates the pagination capabilities of BonniePDF. The table automatically spans multiple pages with column headers repeating on each page, while text sections flow naturally across page boundaries.',
   ],
 ];
 
@@ -77,12 +94,19 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  settings.footerTemplate = (pageNumber: number): TextBlock => {
+    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+    b.fontSize = 9;
+    b.textColor = ColorPalette.slate[400];
+    b.alignment = TextAlignment.Right;
+    return b;
+  };
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Employee Directory - Tagged (PDF/UA-1)';
+  metadata.title = 'Employee Directory';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Multi-page flow demonstration with tagged table and prose sections.';
-  metadata.keywords = 'pdf, pdf/ua, accessibility, table, multi-page';
+  metadata.subject = 'Table with repeating headers spanning multiple pages. PDF/A-2a + PDF/UA-1.';
+  metadata.keywords = 'pdf, table, accessibility, pdf/ua, pdf/a, multi-page, BonniePDF';
 
   const doc = new Document(settings, metadata);
 
@@ -108,20 +132,20 @@ export function generate(): Document {
   table.headerBackgroundColor = ColorPalette.blue[600];
   table.headerTextColor = Color.white;
 
-  const departmentText = new TextBlock('Department');
-  departmentText.fontName = StandardFonts.HelveticaBold;
-  departmentText.fontSize = 10;
-  const nameText = new TextBlock('Name');
-  nameText.fontName = StandardFonts.HelveticaBold;
-  nameText.fontSize = 10;
-  const roleText = new TextBlock('Role');
-  roleText.fontName = StandardFonts.HelveticaBold;
-  roleText.fontSize = 10;
-  table.addHeader(departmentText, nameText, roleText);
+  const deptHeader = new TextBlock('Department');
+  deptHeader.fontName = StandardFonts.HelveticaBold;
+  deptHeader.fontSize = 10;
+  const nameHeader = new TextBlock('Name');
+  nameHeader.fontName = StandardFonts.HelveticaBold;
+  nameHeader.fontSize = 10;
+  const roleHeader = new TextBlock('Role');
+  roleHeader.fontName = StandardFonts.HelveticaBold;
+  roleHeader.fontSize = 10;
+  table.addHeader(deptHeader, nameHeader, roleHeader);
 
-  let row = 0;
+  let rowIndex = 0;
   for (const [name, dept, role] of EMPLOYEES) {
-    const bg = row++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
+    const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
     const deptCell = new TextBlock(dept);
     deptCell.fontSize = 10;
     deptCell.textColor = ColorPalette.slate[600];

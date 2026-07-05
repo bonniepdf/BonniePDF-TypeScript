@@ -531,7 +531,7 @@ export class SvgCanvas implements ICanvas {
   // -- Output -------------------------------------------------------------
 
   public getInnerSvg(): string {
-    return this.svgElements.join('\n');
+    return this.getBalancedElements().join('\n');
   }
 
   public getEmbeddedFontUsage(): ReadonlyMap<string, { font: TtfFont; codePoints: ReadonlySet<number> }> {
@@ -559,11 +559,11 @@ export class SvgCanvas implements ICanvas {
   public toSvg(): string {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
-    )}"${this.shapeRenderingAttr()}>${this.svgElements.join('\n')}</svg>`;
+    )}"${this.shapeRenderingAttr()}>${this.getBalancedElements().join('\n')}</svg>`;
   }
 
   public getSvg(): string {
-    const inner = this.svgElements.join('\n');
+    const inner = this.getBalancedElements().join('\n');
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${this.n(this.width)}" height="${this.n(
       this.height
     )}"${this.shapeRenderingAttr()}>\n${inner}\n</svg>`;
@@ -571,6 +571,11 @@ export class SvgCanvas implements ICanvas {
 
   private shapeRenderingAttr(): string {
     return this.options.shapeRendering ? ` shape-rendering="${this.options.shapeRendering}"` : '';
+  }
+
+  private getBalancedElements(): string[] {
+    if (this.groupDepth <= 0) return this.svgElements;
+    return [...this.svgElements, ...Array(this.groupDepth).fill('</g>')];
   }
 
   // -- Internals ----------------------------------------------------------

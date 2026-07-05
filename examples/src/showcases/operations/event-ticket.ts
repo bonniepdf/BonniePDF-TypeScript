@@ -128,8 +128,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   ticketBarcode.symbology = BarcodeSymbology.Code128;
   ticketBarcode.height = 36;
   ticketBarcode.moduleWidth = 1.2;
-  ticketBarcode.foregroundColor = CREAM;
-  ticketBarcode.backgroundColor = INK;
+  // Dark bars on a light strip: scanners read the dark elements, so an inverted
+  // (light-on-dark) barcode will not decode. The background also paints the
+  // quiet zone the symbology requires.
+  ticketBarcode.foregroundColor = INK;
+  ticketBarcode.backgroundColor = CREAM;
   ticketBarcode.textLabelFontSize = 7;
   ticketBarcode.altText = 'Ticket barcode (Code 128): ASF26-4471-XK';
   const barcodeWrap = new Container();

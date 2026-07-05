@@ -17,6 +17,7 @@ import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { ColorPalette } from '../../src/Core/ColorPalette';
 import { Color } from '../../src/Core/Color';
 import { Container } from '../../src/Elements/Layout/Container';
+import { Hyperlink } from '../../src/Core/Hyperlink';
 import { createMinimalJpeg, createTestChartData } from '../helpers/test-base';
 
 function simpleDoc(): Document {
@@ -391,5 +392,36 @@ describe('SVG page export — embedded standard-font alignment', () => {
     const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
     expect(pages[0]).toContain("font-family:'bpf-times-roman'");
     expect(fontFaceCss).toContain("font-family:'bpf-times-roman'");
+  });
+
+  it('emits an SVG <a> overlay for external hyperlinks, mirroring the PDF /Link annotation', async () => {
+    doc = new Document();
+    doc.add(new Hyperlink('Visit the docs', 'https://www.bonniepdf.dev/docs'));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    expect(svg).toContain('<a href="https://www.bonniepdf.dev/docs" target="_blank" rel="noopener">');
+    // The clickable area paints nothing but hit-tests across the link's bounds.
+    expect(svg).toMatch(/<a [^>]*><rect [^>]*fill="none" pointer-events="all"\/><\/a>/);
+  });
+
+  it('escapes hyperlink URIs in the overlay markup', async () => {
+    doc = new Document();
+    doc.add(new Hyperlink('Search', 'https://example.com/?a=1&b="two"'));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    expect(svg).toContain('href="https://example.com/?a=1&amp;b=&quot;two&quot;"');
+  });
+
+  it('emits a data-bp-link-page rect for internal links instead of an <a>', async () => {
+    doc = new Document();
+    const link = new Hyperlink('Go to appendix');
+    link.targetPageIndex = 1; // 0-based target -> 1-based in the marker
+    doc.add(link);
+    doc.addPage();
+    doc.add(new TextBlock('Appendix', 11, StandardFonts.Helvetica));
+
+    const pages = await doc.generateSvgPagesAsync();
+    expect(pages[0]).toContain('data-bp-link-page="2"');
+    expect(pages[0]).not.toContain('<a href');
   });
 });

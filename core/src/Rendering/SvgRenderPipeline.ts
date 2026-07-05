@@ -140,12 +140,45 @@ export class SvgRenderPipeline {
       } else {
         this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false, totalPages);
       }
+      // Link overlays go last so they sit above every painted layer and stay
+      // clickable in an SVG host (e.g. @bonniepdf/previewer).
+      this.renderLinkOverlays(canvas, ctx.pageHyperlinks.get(i) ?? [], dim.height);
 
       canvas.resolveTotalPages(totalPages);
       outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
     }
 
     return outputs;
+  }
+
+  /**
+   * Emits clickable link overlays for the hyperlinks registered on this page,
+   * mirroring the /Link annotations the PDF pipeline writes. External links
+   * (`uri`) become SVG `<a>` elements, so they are live links in any SVG host;
+   * internal links (`targetPageIndex`, e.g. VisualToc entries) become rects
+   * carrying `data-bp-link-page="N"` (1-based) that a host such as
+   * @bonniepdf/previewer wires to page navigation. The rects paint nothing
+   * (`fill="none"`) but hit-test (`pointer-events="all"`). Hyperlink render
+   * bounds are PDF coordinates (bottom-left origin), so Y is flipped here.
+   */
+  private static renderLinkOverlays(canvas: SvgCanvas, links: any[], pageHeight: number): void {
+    for (const link of links) {
+      const w = link.renderWidth;
+      const h = link.renderHeight;
+      if (!(w > 0) || !(h > 0)) continue;
+
+      const rect =
+        `x="${fmtNum(link.renderX)}" y="${fmtNum(pageHeight - link.renderY - h)}" ` +
+        `width="${fmtNum(w)}" height="${fmtNum(h)}" fill="none" pointer-events="all"`;
+
+      if (typeof link.uri === 'string' && link.uri.length > 0) {
+        canvas.appendRawMarkup(`<a href="${escapeAttr(link.uri)}" target="_blank" rel="noopener"><rect ${rect}/></a>`);
+      } else if (typeof link.targetPageIndex === 'number' && link.targetPageIndex >= 0) {
+        canvas.appendRawMarkup(
+          `<rect ${rect} data-bp-link-page="${link.targetPageIndex + 1}" style="cursor:pointer"/>`
+        );
+      }
+    }
   }
 
   /**
@@ -306,4 +339,10 @@ export class SvgRenderPipeline {
       ctx.currentY = originalY;
     }
   }
+}
+
+/** Formats a coordinate for link-overlay markup (2 dp, no trailing zeros). */
+function fmtNum(value: number): string {
+  if (!Number.isFinite(value)) return '0';
+  return `${Number(value.toFixed(2))}`;
 }

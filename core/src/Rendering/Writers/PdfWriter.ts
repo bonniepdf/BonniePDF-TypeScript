@@ -277,6 +277,10 @@ export class PdfWriter implements IPdfWriter {
 
     if (options?.destsId != null && options.destsId > 0) dict.set('/Dests', `${options.destsId} 0 R`);
 
+    if (options?.pageLabelsId != null && options.pageLabelsId > 0) {
+      dict.set('/PageLabels', `${options.pageLabelsId} 0 R`);
+    }
+
     this.writeObject(id, dict);
   }
 

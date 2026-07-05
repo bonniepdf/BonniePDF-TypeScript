@@ -37,6 +37,20 @@ describe('SvgExport', () => {
     expect(canvas.getSvg()).toContain('y="28"');
   });
 
+  it('SvgCanvas_Serialization_ClosesOpenTransformGroups', () => {
+    const canvas = new SvgCanvas(100, 50);
+
+    canvas.translate(10, 12);
+    canvas.fillRect(0, 0, 20, 10, Color.fromHex('#000000'));
+
+    const svg = canvas.getSvg();
+    const openGroups = (svg.match(/<g(\s|>)/g) ?? []).length;
+    const closeGroups = (svg.match(/<\/g>/g) ?? []).length;
+
+    expect(openGroups).toBe(closeGroups);
+    expect(svg).toContain('</g>\n</svg>');
+  });
+
   it('BarChart_ToSvg_RootUsesCrispEdges', () => {
     // Bars + gridlines are axis-aligned: the whole bar chart renders crisp.
     const svg = chartToSvg(new BarChart(), createSampleData());

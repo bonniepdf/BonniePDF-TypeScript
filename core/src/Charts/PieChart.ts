@@ -117,7 +117,7 @@ export class PieChart extends ChartBase {
     const total = dataPoints.reduce((sum, dp) => sum + dp.value, 0);
 
     // Calculate dynamic layout
-    const layout = this.calculateLayout(dataPoints.length);
+    const layout = this.calculateLayout(dataPoints.length, data.title !== '');
 
     // Calculate start angle for each slice
     const angles = this.calculateSliceAngles(dataPoints, total);
@@ -136,10 +136,16 @@ export class PieChart extends ChartBase {
 
   /**
    * Computes all layout metrics from the current Width and Height.
+   *
+   * The title band is only reserved when a title is actually drawn; a titleless
+   * pie centres symmetrically in the box instead of being pushed down by the
+   * empty title gap.
    */
-  private calculateLayout(dataPointCount: number): PieLayout {
+  private calculateLayout(dataPointCount: number, hasTitle: boolean): PieLayout {
+    const titleBand = hasTitle ? PieChart.TITLE_AREA_HEIGHT : 0;
+
     // Available vertical space for the pie (between title and bottom padding)
-    const availableHeight = this.height - PieChart.TITLE_AREA_HEIGHT - PieChart.TOP_PADDING - PieChart.BOTTOM_PADDING;
+    const availableHeight = this.height - titleBand - PieChart.TOP_PADDING - PieChart.BOTTOM_PADDING;
 
     // Estimate legend width when legend is shown
     let legendWidth = 0;
@@ -162,7 +168,7 @@ export class PieChart extends ChartBase {
     pieRadius = Math.max(pieRadius, 20); // minimum viable radius
 
     // Center the pie vertically in the available area
-    const pieCenterY = PieChart.TITLE_AREA_HEIGHT + PieChart.TOP_PADDING + availableHeight / 2;
+    const pieCenterY = titleBand + PieChart.TOP_PADDING + availableHeight / 2;
 
     // Center the pie horizontally in its allocated space
     const pieAreaWidth =

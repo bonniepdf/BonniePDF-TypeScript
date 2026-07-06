@@ -18,6 +18,20 @@ export abstract class CartesianChartBase extends ChartBase {
   // Layout constants (relative to chart height)
   protected static readonly TITLE_AREA_HEIGHT = 60;
   protected static readonly BOTTOM_PADDING = 70;
+  /**
+   * Top band reserved when {@link ChartData.title} is empty. Just enough
+   * headroom for value labels sitting above the tallest data point, so a
+   * titleless chart's plot area stretches up instead of leaving the title
+   * gap empty.
+   */
+  protected static readonly TOP_PADDING = 20;
+  /**
+   * Bottom band reserved when no legend is drawn there. Holds only the
+   * category/value tick labels ({@link drawXAxisLabels} at `baselineY + 15`,
+   * font {@link AXIS_LABEL_FONT_SIZE}), so a legend-free chart's plot area
+   * stretches down instead of reserving the full {@link BOTTOM_PADDING} band.
+   */
+  protected static readonly AXIS_LABEL_BAND = 30;
   protected static readonly LEFT_PADDING = 80;
   protected static readonly RIGHT_PADDING = 40;
   protected static readonly AXIS_LINE_WIDTH = 1;
@@ -63,7 +77,7 @@ export abstract class CartesianChartBase extends ChartBase {
   protected override drawContent(canvas: ICanvas, data: ChartData): void {
     if (data.series.length === 0) return;
 
-    const layout = this.calculateLayout();
+    const layout = this.calculateLayout(data);
 
     // 1. Draw grid lines first (behind everything)
     if (data.yAxis.showGridLines) {
@@ -538,18 +552,45 @@ export abstract class CartesianChartBase extends ChartBase {
   }
 
   /**
-   * Calculates the chart layout dimensions.
+   * Reports whether a legend occupies the bottom band for this chart+data, which
+   * requires reserving the full {@link BOTTOM_PADDING}. Mirrors where each legend
+   * is actually drawn: the multi-series legend sits at `height - 40`; in
+   * horizontal mode the value-axis legend runs along the bottom; in vertical mode
+   * the category-axis legend sits below the tick labels. (A vertical-mode
+   * value-axis legend is drawn on the left, so it does not reserve bottom space.)
    */
-  protected calculateLayout(): {
+  protected reservesBottomLegendBand(data: ChartData): boolean {
+    if (this.showLegend && data.series.length > 1) return true;
+    if (this.orientation === ChartOrientation.Horizontal) return data.yAxis.legend !== '';
+    return data.xAxis.legend !== '';
+  }
+
+  /**
+   * Calculates the chart layout dimensions.
+   *
+   * The top and bottom bands are content-aware so a chart's plot area fills the
+   * available box instead of reserving space for absent decorations. The title
+   * band collapses to {@link TOP_PADDING} when there is no title, and the bottom
+   * band collapses to {@link AXIS_LABEL_BAND} when no legend is drawn there.
+   * `baselineY` (and therefore the axis, tick labels, and legends) depends only
+   * on the bottom band, so collapsing the title band shifts nothing below it — it
+   * only lets the bars/series grow taller.
+   */
+  protected calculateLayout(data: ChartData): {
     chartAreaWidth: number;
     chartAreaHeight: number;
     baselineY: number;
     topY: number;
   } {
+    const topBand = data.title !== '' ? CartesianChartBase.TITLE_AREA_HEIGHT : CartesianChartBase.TOP_PADDING;
+    const bottomBand = this.reservesBottomLegendBand(data)
+      ? CartesianChartBase.BOTTOM_PADDING
+      : CartesianChartBase.AXIS_LABEL_BAND;
+
     const chartAreaWidth = this.width - CartesianChartBase.LEFT_PADDING - CartesianChartBase.RIGHT_PADDING;
-    const chartAreaHeight = this.height - CartesianChartBase.TITLE_AREA_HEIGHT - CartesianChartBase.BOTTOM_PADDING;
-    const baselineY = CartesianChartBase.TITLE_AREA_HEIGHT + chartAreaHeight;
-    const topY = CartesianChartBase.TITLE_AREA_HEIGHT;
+    const chartAreaHeight = this.height - topBand - bottomBand;
+    const baselineY = topBand + chartAreaHeight;
+    const topY = topBand;
 
     return { chartAreaWidth, chartAreaHeight, baselineY, topY };
   }

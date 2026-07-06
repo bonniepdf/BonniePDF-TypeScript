@@ -79,26 +79,18 @@ export function generate(): Document {
 
   // ── Fit modes ───────────────────────────────────────────────────────────────
 
-  section(doc, 'Fit Modes', 's-fit');
-  fitModeSample(
-    doc,
-    gradientPng,
-    ImageFitMode.Contain,
-    'Contain',
-    'scaled to fit within the box, preserving aspect ratio'
-  );
-  fitModeSample(
-    doc,
-    gradientPng,
-    ImageFitMode.Cover,
-    'Cover',
-    'scaled to fill the box, preserving aspect ratio (may crop)'
-  );
-  fitModeSample(doc, gradientPng, ImageFitMode.Fill, 'Fill', 'stretched to fill the box, ignoring aspect ratio');
+  renderSection(doc, 'Fit Modes', 's-fit', [
+    fitModeBlock(gradientPng, ImageFitMode.Contain, 'Contain', 'scaled to fit within the box, preserving aspect ratio'),
+    fitModeBlock(
+      gradientPng,
+      ImageFitMode.Cover,
+      'Cover',
+      'scaled to fill the box, preserving aspect ratio (may crop)'
+    ),
+    fitModeBlock(gradientPng, ImageFitMode.Fill, 'Fill', 'stretched to fill the box, ignoring aspect ratio'),
+  ]);
 
   // ── Alpha transparency ────────────────────────────────────────────────────────
-
-  section(doc, 'Alpha Transparency', 's-alpha');
 
   const alphaPlain = new Image();
   alphaPlain.imageData = alphaPng;
@@ -106,11 +98,6 @@ export function generate(): Document {
   alphaPlain.fitMode = ImageFitMode.Contain;
   alphaPlain.altText = 'A circular blue-to-red gradient fading to transparent at the edges, on the page background.';
   alphaPlain.margin = new Thickness(0, 0, 0, 10);
-  keepTogether(
-    doc,
-    caption('PNG images can carry an alpha channel (a PDF soft mask), letting the background show through.'),
-    alphaPlain
-  );
 
   const alphaInContainer = new Image();
   alphaInContainer.imageData = alphaPng;
@@ -122,15 +109,17 @@ export function generate(): Document {
   tinted.backgroundColor = ColorPalette.emerald[100];
   tinted.padding = new Thickness(10);
   tinted.child = alphaInContainer;
-  keepTogether(
-    doc,
-    caption('The same image inside a tinted container — the alpha reveals the container colour.'),
-    tinted
-  );
+
+  renderSection(doc, 'Alpha Transparency', 's-alpha', [
+    [
+      caption('PNG images can carry an alpha channel (a PDF soft mask), letting the background show through.'),
+      alphaPlain,
+    ],
+    [caption('The same image inside a tinted container — the alpha reveals the container colour.'), tinted],
+  ]);
 
   // ── Image in a bordered container ─────────────────────────────────────────────
 
-  section(doc, 'Image in a Bordered Container', 's-container');
   const containerImage = new Image();
   containerImage.imageData = gradientPng;
   containerImage.width = 250;
@@ -141,34 +130,46 @@ export function generate(): Document {
   bordered.border = new Border(2);
   bordered.borderColors = new BorderColors(ColorPalette.slate[600]);
   bordered.child = containerImage;
-  keepTogether(doc, caption('A bordered, padded container wraps the image.'), bordered);
+
+  renderSection(doc, 'Image in a Bordered Container', 's-container', [
+    [caption('A bordered, padded container wraps the image.'), bordered],
+  ]);
 
   // ── Decorative image ───────────────────────────────────────────────────────────
 
-  section(doc, 'Decorative Images', 's-decorative');
   const divider = new Image();
   divider.imageData = dividerPng;
   divider.width = 360;
   divider.height = 12;
   divider.fitMode = ImageFitMode.Fill;
   divider.isDecorative = true;
-  keepTogether(
-    doc,
-    caption('The light grey bar below is decorative; it is tagged as an artifact and carries no alt text.'),
-    divider
-  );
+
+  renderSection(doc, 'Decorative Images', 's-decorative', [
+    [caption('The light grey bar below is decorative; it is tagged as an artifact and carries no alt text.'), divider],
+  ]);
 
   return doc;
 }
 
+/** A caption + its content (image or container), kept together on one page. */
+type Block = IElement[];
+
 /**
- * Adds a caption + content pair wrapped in a Container so they page-break as
- * one unit. A bare Image (or TextBlock) added directly to the document has no
- * pagination of its own and would be clipped at the page edge; a Container
- * measures its full height first and moves to the next page when it does not
- * fit (keeping the caption with its image).
+ * Renders a section as a heading followed by one or more blocks. Each block is
+ * wrapped in a Container so a bare Image (which has no pagination of its own and
+ * would be clipped at the page edge) breaks to the next page as a whole unit
+ * with its caption. The heading is grouped with the first block so it never
+ * dangles alone at the bottom of a page while its content flows over.
  */
-function keepTogether(doc: Document, ...elements: IElement[]): void {
+function renderSection(doc: Document, title: string, tocId: string, blocks: Block[]): void {
+  const heading = sectionHeading(title, tocId);
+  blocks.forEach((block, i) => {
+    group(doc, ...(i === 0 ? [heading, ...block] : block));
+  });
+}
+
+/** Wraps elements in a Container so they measure and page-break as one unit. */
+function group(doc: Document, ...elements: IElement[]): void {
   const stack = new VerticalStack();
   for (const el of elements) stack.addChild(el);
   const unit = new Container();
@@ -176,7 +177,7 @@ function keepTogether(doc: Document, ...elements: IElement[]): void {
   doc.add(unit);
 }
 
-function section(doc: Document, title: string, tocId: string): void {
+function sectionHeading(title: string, tocId: string): Heading {
   const h = new Heading(title);
   h.tocIdentifier = tocId;
   h.level = 2;
@@ -184,7 +185,7 @@ function section(doc: Document, title: string, tocId: string): void {
   h.fontSize = 15;
   h.textColor = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 14, 0, 6);
-  doc.add(h);
+  return h;
 }
 
 function caption(text: string): TextBlock {
@@ -195,13 +196,7 @@ function caption(text: string): TextBlock {
   return c;
 }
 
-function fitModeSample(
-  doc: Document,
-  png: Uint8Array,
-  fitMode: ImageFitMode,
-  label: string,
-  description: string
-): void {
+function fitModeBlock(png: Uint8Array, fitMode: ImageFitMode, label: string, description: string): Block {
   const img = new Image();
   img.imageData = png;
   img.width = 300;
@@ -209,7 +204,7 @@ function fitModeSample(
   img.fitMode = fitMode;
   img.altText = `Colour gradient shown in ${label.toLowerCase()} fit mode.`;
   img.margin = new Thickness(0, 0, 0, 10);
-  keepTogether(doc, caption(`${label}: ${description}.`), img);
+  return [caption(`${label}: ${description}.`), img];
 }
 
 // ── In-memory PNG builder (single stored zlib block; no external deps) ──────────

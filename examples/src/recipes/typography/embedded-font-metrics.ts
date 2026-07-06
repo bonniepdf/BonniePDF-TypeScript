@@ -92,8 +92,6 @@ export function generate(): Document {
   for (const text of BOOK_PARAS) {
     const p = new TextBlock(text);
     p.fontName = SANS;
-    p.fontSize = 11;
-    p.textColor = ColorPalette.slate[800];
     p.alignment = TextAlignment.Justify;
     p.margin = new Thickness(0, 0, 0, 8);
     doc.add(p);
@@ -102,7 +100,7 @@ export function generate(): Document {
   return doc;
 }
 
-function section(doc: Document, title: string, tocId: string): void {
+function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
   const h = new Heading(title);
   h.tocIdentifier = tocId;
   h.level = 2;
@@ -110,11 +108,12 @@ function section(doc: Document, title: string, tocId: string): void {
   h.fontSize = 13;
   h.textColor = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 0, 0, 6);
+  h.alignment = alignment;
   doc.add(h);
 }
 
 function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment): void {
-  section(doc, title, tocId);
+  section(doc, title, tocId, alignment);
   const p = new TextBlock(SAMPLE_TEXT);
   p.alignment = alignment;
   p.margin = new Thickness(0, 0, 0, 14);

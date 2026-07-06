@@ -58,7 +58,7 @@ export function generate(): Document {
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
-  doc.add(new TextBlock('This PDF was generated entirely in the browser using the TypeScript port of BonniePDF.'));
+  doc.add(new TextBlock('This PDF was generated entirely in the browser using @bonniepdf/core.'));
   doc.add(new Spacer(16));
 
   const keyFeatures = new Heading('Key Features');

@@ -6,9 +6,11 @@ import { Document } from '../Document';
 import { PdfSize } from '../Configuration/PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
 import { IElement } from '../Elements/IElement';
+import { FileAttachment } from '../Attachments/FileAttachment';
 
 export class PdfBuilder {
   private readonly pageDescriptors: PageDescriptor[] = [];
+  private readonly attachments: FileAttachment[] = [];
   private metadataAction?: (metadata: DocumentMetadata) => void;
   private settingsAction?: (settings: DocumentSettings) => void;
   private documentDefaultStyle?: TextStyle;
@@ -32,6 +34,16 @@ export class PdfBuilder {
 
   public withSettings(configure: (settings: DocumentSettings) => void): PdfBuilder {
     this.settingsAction = configure;
+    return this;
+  }
+
+  /**
+   * Embeds a file into the document as an associated file (PDF/A-3 /
+   * ZUGFeRD). See {@link Document.attachments} for the conformance rules that
+   * govern when the file is actually written.
+   */
+  public attach(attachment: FileAttachment): PdfBuilder {
+    this.attachments.push(attachment);
     return this;
   }
 
@@ -84,6 +96,10 @@ export class PdfBuilder {
     const doc = new Document(settings);
 
     this.metadataAction?.(doc.metadata);
+
+    for (const attachment of this.attachments) {
+      doc.attach(attachment);
+    }
 
     if (firstPage.contentSlot.child) {
       doc.add(firstPage.contentSlot.child);

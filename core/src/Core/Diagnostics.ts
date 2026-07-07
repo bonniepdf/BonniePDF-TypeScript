@@ -16,7 +16,8 @@ export type DiagnosticCategory =
   | 'compression'
   | 'tagging'
   | 'platform'
-  | 'render';
+  | 'render'
+  | 'attachment';
 
 export interface IDiagnostic {
   severity: DiagnosticSeverity;

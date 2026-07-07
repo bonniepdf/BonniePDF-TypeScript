@@ -8,6 +8,9 @@ import { MetadataWriter } from './Writers/MetadataWriter';
 import { NavigationWriter } from './Writers/NavigationWriter';
 import { ComplianceWriter } from './Writers/ComplianceWriter';
 import { CatalogOptions } from './Writers/CatalogOptions';
+import { AttachmentWriter } from './Writers/AttachmentWriter';
+import { FileAttachment } from '../Attachments/FileAttachment';
+import { allowsEmbeddedFiles } from '../Attachments/AttachmentRules';
 import { IPdfWriter } from './Writers/IPdfWriter';
 import { IAsyncPdfWriter } from './Writers/IAsyncPdfWriter';
 import { StructureTreeWriter } from './Writers/StructureTreeWriter';
@@ -283,6 +286,16 @@ export class PdfDocumentSerializer {
       catalogOptions.pageLabelsId = pageLabelsId;
     }
 
+    // 12b. Write document attachments (embedded files) subject to the
+    // conformance guard. Populates /Names /EmbeddedFiles and /AF.
+    const attachmentsToWrite = this.resolveAttachments();
+    if (attachmentsToWrite) {
+      const attachmentWriter = new AttachmentWriter(writer);
+      const result = attachmentWriter.writeAttachments(attachmentsToWrite);
+      catalogOptions.namesEmbeddedFilesId = result.namesEmbeddedFilesId;
+      catalogOptions.associatedFileIds = result.associatedFileIds;
+    }
+
     // 13. Write /Catalog
     if (pageIds.length === 0) throw new Error('Document has no pages');
     writer.writeCatalog(catalogId, pagesId, pageIds[0], settings, catalogOptions);
@@ -292,6 +305,30 @@ export class PdfDocumentSerializer {
 
     // 15. Finalize: xref table + trailer + %%EOF
     writer.close(catalogId, infoId);
+  }
+
+  /**
+   * Applies the embedded-file conformance guard ({@link allowsEmbeddedFiles})
+   * and returns the attachments to write, or `undefined` when there is
+   * nothing to embed. Under a PDF/A level that forbids embedded files the
+   * attachments are dropped and a warning diagnostic recorded, keeping the
+   * emitted PDF's conformance claim honest.
+   */
+  private resolveAttachments(): readonly FileAttachment[] | undefined {
+    const attachments = this.document.attachments;
+    if (!attachments || attachments.length === 0) return undefined;
+
+    if (!allowsEmbeddedFiles(this.document.settings.conformance)) {
+      this.diagnostics.addWarning(
+        'attachment',
+        `${this.document.settings.conformance} does not permit embedded files; ` +
+          `${attachments.length} attachment(s) were dropped. Use PdfAConformance.PdfA3b ` +
+          'for e-invoicing (ZUGFeRD / Factur-X).'
+      );
+      return undefined;
+    }
+
+    return attachments;
   }
 
   /**

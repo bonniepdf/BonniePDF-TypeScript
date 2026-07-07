@@ -15,6 +15,8 @@ import { TextElementBase } from './Elements/Text/TextElementBase';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
+import { FileAttachment } from './Attachments/FileAttachment';
+import { AttachmentRelationship } from './Attachments/AttachmentRelationship';
 
 /**
  * High-level entry point for creating PDF documents.
@@ -22,6 +24,7 @@ import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
  */
 export class Document {
   private readonly _pages: Page[] = [];
+  private readonly _attachments: FileAttachment[] = [];
   private _disposed = false;
   private readonly _diagnostics: DiagnosticsCollector = new DiagnosticsCollector();
 
@@ -71,6 +74,49 @@ export class Document {
   /** Gets the pages in this document (read-only). */
   public get pages(): ReadonlyArray<Page> {
     return this._pages;
+  }
+
+  // ─── Attachments ─────────────────────────────────────────────────────────────
+
+  /**
+   * Files embedded into the generated PDF as associated files (PDF/A-3 /
+   * ZUGFeRD). Embedded files are honoured under `None`, PDF/A-3, and
+   * PDF/A-4; under levels that forbid them (PDF/A-1, PDF/A-2) they are
+   * dropped at generation time with a diagnostic, keeping the conformance
+   * claim honest.
+   */
+  public get attachments(): ReadonlyArray<FileAttachment> {
+    return this._attachments;
+  }
+
+  /** Embeds a file into the document. Returns this document for chaining. */
+  public attach(attachment: FileAttachment): this;
+  /**
+   * Embeds a file into the document from a name and bytes. Returns this
+   * document for chaining.
+   */
+  public attach(
+    fileName: string,
+    content: Uint8Array,
+    options?: { relationship?: AttachmentRelationship; mediaType?: string }
+  ): this;
+  public attach(
+    attachmentOrName: FileAttachment | string,
+    content?: Uint8Array,
+    options?: { relationship?: AttachmentRelationship; mediaType?: string }
+  ): this {
+    if (this._disposed) throw new Error('Document has been disposed.');
+    if (typeof attachmentOrName === 'string') {
+      this._attachments.push({
+        fileName: attachmentOrName,
+        content: content!,
+        relationship: options?.relationship,
+        mediaType: options?.mediaType,
+      });
+    } else {
+      this._attachments.push(attachmentOrName);
+    }
+    return this;
   }
 
   // ─── Element helpers ─────────────────────────────────────────────────────────

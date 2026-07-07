@@ -1,6 +1,7 @@
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { DocumentSettings } from '../../Configuration/DocumentSettings';
 import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
+import { PdfAConformance } from '../../Configuration/PdfAConformance';
 import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
 import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
 import { IPdfWriter } from './IPdfWriter';
@@ -88,6 +89,18 @@ export class MetadataWriter {
     const pdfA = XmpConformanceBlock.forPdfA(settings.conformance);
     if (pdfA) blocks.push(pdfA);
     if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
+
+    // ZUGFeRD / Factur-X: only claim it on a PDF/A-3 document. Gating on the
+    // (possibly guard-reset) conformance means a suppressed PDF/A claim also
+    // suppresses the fx block - Factur-X without PDF/A-3 is meaningless, so
+    // the honest-claim guard cascades for free.
+    if (
+      settings.facturX &&
+      (settings.conformance === PdfAConformance.PdfA3b || settings.conformance === PdfAConformance.PdfA3a)
+    ) {
+      blocks.push(XmpConformanceBlock.facturX(settings.facturX));
+    }
+
     return blocks;
   }
 }

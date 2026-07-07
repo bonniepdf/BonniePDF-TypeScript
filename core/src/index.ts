@@ -26,6 +26,14 @@ export * from './Configuration/PdfAConformance';
 export * from './Configuration/PageLabel';
 export * from './Configuration/InternalConfiguration';
 
+export * from './Attachments/FileAttachment';
+export * from './Attachments/AttachmentRelationship';
+export * from './Attachments/AttachmentRules';
+
+export * from './EInvoice/FacturX';
+export * from './EInvoice/FacturXProfile';
+export * from './EInvoice/FacturXMetadata';
+
 export * from './Rendering/Tagging/SemanticRole';
 export * from './Rendering/Tagging/StructureElement';
 export * from './Rendering/Tagging/IStructureVisitor';

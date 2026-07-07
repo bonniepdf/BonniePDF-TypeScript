@@ -281,6 +281,15 @@ export class PdfWriter implements IPdfWriter {
       dict.set('/PageLabels', `${options.pageLabelsId} 0 R`);
     }
 
+    // /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
+    if (options?.namesEmbeddedFilesId != null && options.namesEmbeddedFilesId > 0) {
+      dict.set('/Names', `<< /EmbeddedFiles ${options.namesEmbeddedFilesId} 0 R >>`);
+    }
+    if (options?.associatedFileIds?.length > 0) {
+      const afRefs = options.associatedFileIds.map(fid => `${fid} 0 R`).join(' ');
+      dict.set('/AF', `[ ${afRefs} ]`);
+    }
+
     this.writeObject(id, dict);
   }
 

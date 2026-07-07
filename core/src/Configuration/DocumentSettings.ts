@@ -11,6 +11,7 @@ import type { TextStyle } from '../Elements/Text/TextStyle';
 import { AccessibilityMode } from './AccessibilityMode';
 import { PdfAConformance } from './PdfAConformance';
 import { PageLabel } from './PageLabel';
+import { FacturXMetadata } from '../EInvoice/FacturXMetadata';
 
 interface _LocalIElement {
   getPreferredWidth(): number;
@@ -169,6 +170,13 @@ export class DocumentSettings {
    * `the specification`.
    */
   public accessibility: AccessibilityMode;
+  /**
+   * ZUGFeRD / Factur-X e-invoice metadata. When set (and the document is a
+   * PDF/A-3 level), the XMP writer emits the `fx:*` conformance block.
+   * Normally set via {@link applyFacturX} rather than directly — that helper
+   * also attaches the XML and forces PDF/A-3. Default `undefined`.
+   */
+  public facturX?: FacturXMetadata;
   /**
    * Document natural language as a BCP-47 tag (e.g. `"en-GB"`,
    * `"de-DE"`, `"fr"`). Written to the catalog as `/Lang` when set;

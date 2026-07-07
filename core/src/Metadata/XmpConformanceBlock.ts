@@ -1,5 +1,6 @@
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { XmpExtensionSchema, XmpExtensionSchemaProperty } from './XmpExtensionSchema';
+import { FacturXMetadata, FACTUR_X_NAMESPACE_URI, FACTUR_X_PREFIX } from '../EInvoice/FacturXMetadata';
 
 /**
  * A conformance-namespace block emitted inside the document-level
@@ -129,6 +130,41 @@ export class XmpConformanceBlock {
           'Integer',
           'internal',
           'Indicates, which part of ISO 14289 standard is followed'
+        ),
+      ])
+    );
+  }
+
+  /**
+   * ZUGFeRD / Factur-X 2.x conformance claim. Emits the four `fx:*`
+   * properties (DocumentType, DocumentFileName, Version, ConformanceLevel)
+   * the Factur-X technical specification requires, plus the
+   * `pdfaExtension:schemas` descriptor for the non-predefined `fx` namespace
+   * (ISO 19005-3 §6.6.2.3).
+   *
+   * Factur-X is only meaningful on a PDF/A-3 document; the caller enforces
+   * that, and the writer only includes this block when a PDF/A claim survives
+   * the honest-claim guard.
+   */
+  static facturX(meta: FacturXMetadata): XmpConformanceBlock {
+    return new XmpConformanceBlock(
+      FACTUR_X_PREFIX,
+      FACTUR_X_NAMESPACE_URI,
+      [
+        ['DocumentType', meta.documentType],
+        ['DocumentFileName', meta.documentFileName],
+        ['Version', meta.version],
+        ['ConformanceLevel', meta.conformanceLevel],
+      ],
+      new XmpExtensionSchema(FACTUR_X_NAMESPACE_URI, FACTUR_X_PREFIX, 'Factur-X PDFA Extension Schema', [
+        new XmpExtensionSchemaProperty('DocumentType', 'Text', 'external', 'INVOICE'),
+        new XmpExtensionSchemaProperty('DocumentFileName', 'Text', 'external', 'Factur-X, ZUGFeRD'),
+        new XmpExtensionSchemaProperty('Version', 'Text', 'external', 'The actual version of the Factur-X XML schema'),
+        new XmpExtensionSchemaProperty(
+          'ConformanceLevel',
+          'Text',
+          'external',
+          'The conformance level of the embedded Factur-X data'
         ),
       ])
     );

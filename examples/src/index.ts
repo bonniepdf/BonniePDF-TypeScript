@@ -54,6 +54,20 @@ import { generate as annualReportGeometricCover } from './showcases/reports/annu
 import { generate as eventTicket } from './showcases/operations/event-ticket';
 import { generate as patientSummary } from './showcases/healthcare/patient-summary';
 import { generate as productRoadmap } from './showcases/operations/product-roadmap';
+// ── Vertical-market gallery follow-up (registrations + new showcases) ────────
+import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
+import { generate as shippingLabel } from './showcases/operations/shipping-label';
+import { generate as horizontalBarChart } from './recipes/charting/horizontal-bar-chart';
+import { generate as horizontalGroupedBarChart } from './recipes/charting/horizontal-grouped-bar-chart';
+import { generate as horizontalLollipopChart } from './recipes/charting/horizontal-lollipop-chart';
+import { generate as watermarkingConfidential } from './recipes/security/watermarking-confidential';
+import { generate as edgeReceipt } from './showcases/edge/edge-receipt';
+import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
+import { generate as auditReport } from './showcases/compliance/audit-report';
+import { generate as shelfLabel } from './showcases/retail/shelf-label';
+import { generate as ukDegreeTranscript } from './showcases/education/uk-degree-transcript';
+import { generate as financialStatement } from './showcases/reports/financial-statement';
+import { generate as labReport } from './showcases/healthcare/lab-report';
 
 export * from './recipes/svg';
 
@@ -126,7 +140,7 @@ export const examples: ExampleDef[] = [
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
     filename: 'margins.pdf',
     generate: margins,
-    dotnetClass: 'MarginExample',
+    dotnetClass: 'MarginsExample',
     pdfUa1: true,
   },
   {
@@ -482,8 +496,7 @@ export const examples: ExampleDef[] = [
     description: 'Two overlapping line series comparing year-over-year revenue on a shared axis with a legend.',
     filename: 'multi-series-line-chart.pdf',
     generate: multiSeriesLineChart,
-    // .NET implements this as a private method inside ChartShowcaseExample
-    dotnetClass: null,
+    dotnetClass: 'MultiSeriesLineChartExample',
     thumbnails: false,
     pdfUa1: true,
   },
@@ -626,8 +639,7 @@ export const examples: ExampleDef[] = [
       'images/products/oak-wall-shelf.jpg',
       'images/products/rattan-pendant-shade.jpg',
     ],
-    // TypeScript-only for now; .NET port + real product photos are follow-ups.
-    dotnetClass: null,
+    dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
   },
@@ -653,7 +665,7 @@ export const examples: ExampleDef[] = [
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
-    dotnetClass: null,
+    dotnetClass: 'FinancialDashboardExample',
     thumbnails: false,
     pdfUa1: true,
   },
@@ -750,6 +762,176 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
+  },
+  // ── Vertical-market gallery follow-up ─────────────────────────────────────
+  {
+    id: 'saas-invoice',
+    name: 'SaaS Invoice',
+    category: 'Invoices',
+    tier: 'showcase',
+    description:
+      'An accessible subscription-billing invoice: plan/seat line items, proration, a QR payment code, and totals. PDF/A-2a + PDF/UA-1.',
+    filename: 'saas-invoice.pdf',
+    generate: saasInvoice,
+    dotnetClass: 'SaasInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'shipping-label',
+    name: 'Shipping Label',
+    category: 'Operations',
+    tier: 'showcase',
+    description:
+      'A 4x6" carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link. PDF/A-2a + PDF/UA-1.',
+    filename: 'shipping-label.pdf',
+    generate: shippingLabel,
+    dotnetClass: 'ShippingLabelExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'horizontal-bar-chart',
+    name: 'Horizontal Bar Chart',
+    category: 'Charting',
+    description: 'Horizontal bars with value labels - the readable choice when category names are long.',
+    filename: 'horizontal-bar-chart.pdf',
+    generate: horizontalBarChart,
+    dotnetClass: 'HorizontalBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'horizontal-grouped-bar-chart',
+    name: 'Horizontal Grouped Bar Chart',
+    category: 'Charting',
+    description: 'Grouped horizontal bars comparing multiple series per category with a colour legend.',
+    filename: 'horizontal-grouped-bar-chart.pdf',
+    generate: horizontalGroupedBarChart,
+    dotnetClass: 'HorizontalGroupedBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'horizontal-lollipop-chart',
+    name: 'Horizontal Lollipop Chart',
+    category: 'Charting',
+    description: 'Horizontal stems with circular heads - a minimal, low-ink alternative to horizontal bars.',
+    filename: 'horizontal-lollipop-chart.pdf',
+    generate: horizontalLollipopChart,
+    dotnetClass: 'HorizontalLollipopChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'watermarking-confidential',
+    name: 'Watermarking - Confidential',
+    category: 'Security',
+    description:
+      'A CONFIDENTIAL variant of the diagonal watermark, tinted red and repeated behind a multi-section report body.',
+    filename: 'watermarking-confidential.pdf',
+    generate: watermarkingConfidential,
+    dotnetClass: 'WatermarkConfidentialExample',
+    pdfUa1: true,
+  },
+  {
+    id: 'edge-receipt',
+    name: 'Edge Receipt (Cloudflare Worker)',
+    category: 'Edge',
+    tier: 'showcase',
+    description:
+      'The browser/edge flagship: a point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. Zero dependencies, no WASM - a few KB, generated client-side or in a Cloudflare Worker via generateBytesAsync(). PDF/A-2a + PDF/UA-1.',
+    filename: 'edge-receipt.pdf',
+    generate: edgeReceipt,
+    // Intentionally TypeScript-only: proves the browser/edge, no-WASM story
+    // (Rule of engagement #7 - browser/edge examples default to TS).
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'public-library-membership-letter',
+    name: 'Public Library Membership Letter',
+    category: 'Community',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A fictional UK public-library membership confirmation: local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. Accessibility-first PDF/A-2a + PDF/UA-1. .NET port pending.',
+    filename: 'public-library-membership-letter.pdf',
+    generate: publicLibraryMembershipLetter,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'audit-report',
+    name: 'Compliance Audit Report (GDPR / ISO 27001)',
+    category: 'Compliance',
+    tier: 'showcase',
+    region: 'EU/UK',
+    description:
+      'An enterprise data-protection & security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. Archival PDF/A-2a + PDF/UA-1. .NET port pending.',
+    filename: 'audit-report.pdf',
+    generate: auditReport,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'shelf-label',
+    name: 'Retail Shelf Label (EU/UK)',
+    category: 'Retail',
+    tier: 'showcase',
+    region: 'EU/UK',
+    description:
+      'An EU/UK retail shelf-edge label on a custom 110x75mm card: brand, pack size, a promotional "was" price, the selling price, a mandatory unit price (per UK Price Marking Order / EU Directive 98/6/EC), and an EAN-13 (GS1) barcode. PDF/A-2a + PDF/UA-1. .NET port pending.',
+    filename: 'shelf-label.pdf',
+    generate: shelfLabel,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'uk-degree-transcript',
+    name: 'UK Degree Transcript',
+    category: 'Education',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'An official UK university degree transcript: institution header, student details, a UK honours classification banner (2:1), a module register grouped by FHEQ level with credits and marks that flows across pages, and a QR verification link. PDF/A-2a + PDF/UA-1. .NET port pending.',
+    filename: 'uk-degree-transcript.pdf',
+    generate: ukDegreeTranscript,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'financial-statement',
+    name: 'Statutory Financial Statements (IFRS)',
+    category: 'Reports',
+    tier: 'showcase',
+    region: 'UK/EU',
+    description:
+      'A UK/EU statutory financial statement in the IFRS / Companies House idiom: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
+    filename: 'financial-statement.pdf',
+    generate: financialStatement,
+    dotnetClass: 'FinancialStatementExample',
+    thumbnails: false,
+    pdfUa1: true,
+  },
+  {
+    id: 'lab-report',
+    name: 'Pathology Lab Report',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. Privacy-sensitive and client-side-generated. PDF/A-2a + PDF/UA-1. .NET port pending.',
+    filename: 'lab-report.pdf',
+    generate: labReport,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
   },
 ];
 

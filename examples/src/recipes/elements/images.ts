@@ -16,8 +16,8 @@ import {
   Border,
   BorderColors,
   StandardFonts,
-  IElement,
 } from '@bonniepdf/core';
+import type { IElement } from '@bonniepdf/core';
 
 /**
  * Raster images — fit modes, containers, alpha transparency, and accessible

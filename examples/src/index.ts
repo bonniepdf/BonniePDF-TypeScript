@@ -36,11 +36,12 @@ import { generate as pieChart } from './recipes/charting/pie-chart';
 import { generate as multiSeriesLineChart } from './recipes/charting/multi-series-line-chart';
 import { generate as watermarking } from './recipes/security/watermarking';
 import { generate as encryption } from './recipes/security/encryption';
+import { generate as attachedData } from './recipes/security/attached-data';
 // ── Showcases (industry / vertical-market documents) ────────────────────────
 import { generate as businessInvoice } from './showcases/invoices/business-invoice';
 import { generate as usSalesInvoice } from './showcases/invoices/us-sales-invoice';
 import { generate as ukVatInvoice } from './showcases/invoices/uk-vat-invoice';
-import { generate as euEInvoice } from './showcases/invoices/eu-einvoice';
+import { generate as facturXInvoice } from './showcases/invoices/factur-x-invoice';
 import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
 import { generate as userDirectory } from './showcases/catalogs/user-directory';
 import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
@@ -525,6 +526,17 @@ export const examples: ExampleDef[] = [
     // .NET has three variants; Password is canonical
     dotnetClass: 'EncryptionPasswordExample',
   },
+  {
+    id: 'attached-data',
+    name: 'Report with Embedded Source Data',
+    category: 'Security',
+    description:
+      'A PDF/A-3 report that embeds its underlying CSV data as an associated file (/AFRelationship /Source) for reproducibility, using the generic file-attachment API.',
+    filename: 'attached-data.pdf',
+    generate: attachedData,
+    dotnetClass: 'AttachedDataExample',
+    pdfUa1: false,
+  },
   // Showcases - Invoices (vertical: billing; region-specific tax/e-invoicing)
   {
     id: 'business-invoice',
@@ -568,18 +580,19 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
   },
   {
-    id: 'eu-einvoice',
-    name: 'EU E-Invoice (PDF/A-3, EN 16931)',
+    id: 'factur-x-invoice',
+    name: 'EU E-Invoice (Factur-X / ZUGFeRD, EN 16931)',
     category: 'Invoices',
     tier: 'showcase',
     region: 'EU',
     description:
-      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a PDF/A-3b container, both parties’ VAT IDs, an intra-Community reverse-charge notice, IBAN/BIC, and EUR amounts. The structured XML half is shown as a placeholder pending an embedded-file API.',
-    filename: 'eu-einvoice.pdf',
-    generate: euEInvoice,
-    dotnetClass: 'EuEInvoiceExample',
+      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice - both parties, EUR amounts, IBAN/BIC - carrying the machine-readable CII invoice XML embedded as an associated file (/AFRelationship /Data) with the fx: XMP metadata. The visible totals mirror the embedded XML exactly. Validated in CI with veraPDF (PDF/A-3b) and the Mustang project (ZUGFeRD / EN 16931).',
+    filename: 'factur-x_invoice.pdf',
+    generate: facturXInvoice,
+    requiredAssets: ['factur-x/en16931-invoice.xml'],
+    dotnetClass: 'FacturXInvoiceExample',
     thumbnails: false,
-    pdfUa1: true,
+    pdfUa1: false,
   },
   {
     id: 'india-gst-invoice',

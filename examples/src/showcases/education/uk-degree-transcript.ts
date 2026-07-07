@@ -166,11 +166,10 @@ export function generate(): Document {
   blabel.fontSize = 8;
   blabel.textColor = MUTED;
   bstack.addChild(blabel);
-  const bval = new TextBlock('Upper Second-Class Honours (2:1)');
-  bval.fontName = StandardFonts.HelveticaBold;
-  bval.fontSize = 16;
-  bval.textColor = NAVY;
-  bval.margin = new Thickness(0, 2, 0, 2);
+  // The award is the transcript's primary heading (H1). Tagging it as the
+  // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2); the
+  // section headings below are H2. Styling is unchanged.
+  const bval = h1('Upper Second-Class Honours (2:1)');
   bstack.addChild(bval);
   const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`);
   bmeta.fontSize = 9;
@@ -242,6 +241,16 @@ export function generate(): Document {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+function h1(text: string): Heading {
+  const h = new Heading(text);
+  h.level = 1;
+  h.fontName = StandardFonts.HelveticaBold;
+  h.fontSize = 16;
+  h.textColor = NAVY;
+  h.margin = new Thickness(0, 2, 0, 2);
+  return h;
+}
 
 function h2(text: string): Heading {
   const h = new Heading(text);

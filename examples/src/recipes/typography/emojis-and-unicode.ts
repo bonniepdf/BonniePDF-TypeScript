@@ -25,6 +25,7 @@ import {
   ColorPalette,
   Thickness,
   PdfAConformance,
+  PdfVersion,
 } from '@bonniepdf/core';
 
 const TEXT_FONT = '/fonts/NotoSans-Regular.ttf';
@@ -35,7 +36,10 @@ const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
 export function generate(): Document {
   const settings = new DocumentSettings();
   // PDF/A intentionally not claimed — emoji fonts include COLR/CBDT tables
-  // that archival validators reject.
+  // that archival validators reject. PDF/UA-1 is still applied, and it is a
+  // PDF 1.7 standard: set the version explicitly so the pdfuaid XMP claim is
+  // emitted (PDF/A levels auto-upgrade to 1.7, but conformance is None here).
+  settings.version = PdfVersion.Pdf17;
   settings.conformance = PdfAConformance.None;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

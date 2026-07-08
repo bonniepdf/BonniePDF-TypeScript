@@ -12,6 +12,14 @@ export interface IPlatformIO {
   /** Writes binary data to a file. */
   writeFile(path: string, data: Uint8Array): Promise<void>;
   /**
+   * Reads a file synchronously. Only implemented on platforms with sync file
+   * IO (Node.js). Callers must check for presence and fall back to the async
+   * path (or throw a helpful error) when absent.
+   */
+  readFileSync?(path: string): Uint8Array;
+  /** Writes binary data to a file synchronously. Node.js only - see {@link readFileSync}. */
+  writeFileSync?(path: string, data: Uint8Array): void;
+  /**
    * Compresses data using DEFLATE (zlib / RFC 1950 wrapping).
    * The output is suitable for PDF's /FlateDecode stream filter.
    */

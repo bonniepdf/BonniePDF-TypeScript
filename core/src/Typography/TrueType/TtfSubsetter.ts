@@ -110,7 +110,7 @@ export class TtfSubsetter {
       );
       offset += 4;
 
-      const checkSum = view.getUint32(offset);
+      const _checkSum = view.getUint32(offset);
       offset += 4;
 
       const tableOffset = view.getUint32(offset);

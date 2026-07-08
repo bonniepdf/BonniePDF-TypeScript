@@ -23,7 +23,7 @@ export class Line extends ElementBase {
    */
   public length?: number;
 
-  protected override measureContentHeight(contentWidth: number): number {
+  protected override measureContentHeight(_contentWidth: number): number {
     if (this.orientation === LineOrientation.Horizontal) {
       return this.thickness;
     } else {

@@ -3,7 +3,6 @@ import { Color } from '../Core/Color';
 import { Point, Size } from '../Core';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { FontMetrics } from '../Typography/FontMetrics';
-import { StandardFonts } from '../Typography/StandardFonts';
 import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfDrawing } from '../Rendering/Pdf/PdfDrawing';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
@@ -918,7 +917,7 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.closePath(this.stream);
   }
 
-  private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint, style: StrokeStyle): void {
+  private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint, _style: StrokeStyle): void {
     // Linearize path into points and draw individually-colored segments
     const points = this.linearizeCurrentPath(200);
     if (points.length < 2) return;

@@ -201,7 +201,7 @@ export class PdfEncryptionKey {
       // Algorithm 3.5: More complex for revision 3+
       // Step a: Create hash of padding + document ID
       const toHash = PdfEncryptionKey.concatenate(PdfEncryptionKey.PADDING_BYTES, documentId);
-      let hash = Md5Hash.compute(toHash);
+      const hash = Md5Hash.compute(toHash);
 
       // Step b: Encrypt with RC4
       const cipher = new RC4Cipher(encryptionKey);

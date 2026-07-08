@@ -9,7 +9,7 @@ import { PdfSize } from '../../src/Configuration/PdfSize';
 import { PageOrientation } from '../../src/Core/PageOrientation';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { asPdf17 } from '../../src/Extensions/DocumentSettingsExtensions';
-import { assertValidPdf, assertPdfHasFonts, assertPdfHasPages, createMinimalJpeg } from '../helpers/test-base';
+import { assertValidPdf, assertPdfHasFonts, assertPdfHasPages } from '../helpers/test-base';
 
 describe('MultiPage integration', () => {
   let doc: Document;

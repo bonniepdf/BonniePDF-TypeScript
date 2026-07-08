@@ -62,7 +62,7 @@ export class UnorderedList extends ListElementBase {
 
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
     const itemWidth = contentWidth - this.indent;
-    const startY = ctx.currentY;
+    const _startY = ctx.currentY;
 
     // Render regular items
     for (const item of this.items) {

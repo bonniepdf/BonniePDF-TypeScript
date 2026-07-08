@@ -202,7 +202,7 @@ export abstract class CartesianChartBase extends ChartBase {
     chartAreaWidth: number,
     chartAreaHeight: number,
     baselineY: number,
-    topY: number
+    _topY: number
   ): void {
     if (!this.showValueLabels) return;
 
@@ -244,14 +244,14 @@ export abstract class CartesianChartBase extends ChartBase {
   /**
    * Gets the offset (in points) to apply when positioning value labels near data points.
    */
-  protected getLabelVerticalOffset(series: ChartSeries): number {
+  protected getLabelVerticalOffset(_series: ChartSeries): number {
     return 7;
   }
 
   /**
    * Draws the legend showing all series names and colors.
    */
-  protected drawLegend(canvas: ICanvas, data: ChartData, chartAreaWidth: number): void {
+  protected drawLegend(canvas: ICanvas, data: ChartData, _chartAreaWidth: number): void {
     const legendY = this.height - 40;
     const legendStartX = CartesianChartBase.LEFT_PADDING;
     const legendItemWidth = 150;
@@ -346,7 +346,7 @@ export abstract class CartesianChartBase extends ChartBase {
     data: ChartData,
     chartAreaHeight: number,
     baselineY: number,
-    topY: number
+    _topY: number
   ): void {
     let stepCount = data.yAxis.stepCount;
     if (stepCount <= 0) stepCount = 5;
@@ -403,7 +403,7 @@ export abstract class CartesianChartBase extends ChartBase {
     chartAreaWidth: number,
     chartAreaHeight: number,
     topY: number,
-    baselineY: number
+    _baselineY: number
   ): void {
     if (this.orientation === ChartOrientation.Horizontal) {
       const x = CartesianChartBase.LEFT_PADDING + chartAreaWidth / 2;

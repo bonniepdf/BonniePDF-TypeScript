@@ -121,7 +121,7 @@ export class SRgbIccProfile {
     // Tag table
     const tagTable = new Uint8Array(tagTableSize);
     writeUInt32BE(tagTable, 0, tagCount);
-    let idx = { value: 4 };
+    const idx = { value: 4 };
     writeTagEntry(tagTable, idx, IccSignatures.Desc, descOffset, descData.length);
     writeTagEntry(tagTable, idx, IccSignatures.Copyright, copyrightOffset, copyrightData.length);
     writeTagEntry(tagTable, idx, IccSignatures.WhitePoint, whitePointOffset, whitePointData.length);

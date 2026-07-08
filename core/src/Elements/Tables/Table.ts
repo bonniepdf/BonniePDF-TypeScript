@@ -347,7 +347,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     }
   }
 
-  private renderRow(ctx: RenderContext, row: TableRow, widths: number[], isFirstPage: boolean): void {
+  private renderRow(ctx: RenderContext, row: TableRow, widths: number[], _isFirstPage: boolean): void {
     // For footers, only show on last page if ShowFootersOnAllPages is false
     if (row.isFooter && !this.showFootersOnAllPages && !this.isLastPage(ctx)) {
       return;
@@ -454,8 +454,8 @@ export class Table extends BorderedElementBase implements IRoleProvider {
 
     const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
 
-    let cellBorder = cell.border;
-    let cellBorderColors = cell.borderColors;
+    const cellBorder = cell.border;
+    const cellBorderColors = cell.borderColors;
 
     // Apply text color to TextBlock content if specified
     let content = cell.content;

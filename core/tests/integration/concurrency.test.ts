@@ -3,7 +3,7 @@ import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { withPassword } from '../../src/Extensions/DocumentEncryptionExtensions';
-import { assertValidPdf, assertPdfHasFonts, createTestChartData, createMinimalJpeg } from '../helpers/test-base';
+import { assertValidPdf, assertPdfHasFonts } from '../helpers/test-base';
 
 async function generateDocumentBytes(text: string): Promise<Uint8Array> {
   const doc = new Document();

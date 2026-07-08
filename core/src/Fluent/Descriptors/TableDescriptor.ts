@@ -3,7 +3,6 @@ import { Border } from '../../Core/Border';
 import { BorderColors } from '../../Core/BorderColors';
 import { IElement } from '../../Elements/IElement';
 import { Table } from '../../Elements/Tables/Table';
-import { TableRow } from '../../Elements/Tables/TableRow';
 import { TextBlock } from '../../Elements/Text/TextBlock';
 import { TableRowDescriptor } from './TableRowDescriptor';
 import { ContentSlot } from '../ContentSlot';

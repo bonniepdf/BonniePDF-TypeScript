@@ -203,14 +203,14 @@ export class TtfFont {
     const reader = new BigEndianReader(this.rawData);
 
     // 1. Read offset table
-    const version = reader.readFixed();
+    const _version = reader.readFixed();
     const numTables = reader.readUInt16();
     reader.skip(6); // searchRange, entrySelector, rangeShift
 
     // 2. Read table directory
     for (let i = 0; i < numTables; i++) {
       const tag = reader.readTag();
-      const checkSum = reader.readUInt32();
+      const _checkSum = reader.readUInt32();
       const offset = reader.readUInt32();
       const length = reader.readUInt32();
       this.tables.set(tag, { offset, length });
@@ -370,8 +370,8 @@ export class TtfFont {
     const format = reader.readUInt16();
     if (format !== 4) return;
 
-    const length = reader.readUInt16();
-    const language = reader.readUInt16();
+    const _length = reader.readUInt16();
+    const _language = reader.readUInt16();
     const segCountX2 = reader.readUInt16();
     const segCount = segCountX2 / 2;
     reader.skip(6); // searchRange, entrySelector, rangeShift
@@ -434,8 +434,8 @@ export class TtfFont {
     if (format !== 12) return;
 
     reader.readUInt16(); // reserved
-    const length = reader.readUInt32();
-    const language = reader.readUInt32();
+    const _length = reader.readUInt32();
+    const _language = reader.readUInt32();
     const numGroups = reader.readUInt32();
 
     for (let i = 0; i < numGroups; i++) {
@@ -454,7 +454,7 @@ export class TtfFont {
     const info = this.tables.get('name')!;
     reader.seek(info.offset);
 
-    const format = reader.readUInt16();
+    const _format = reader.readUInt16();
     const count = reader.readUInt16();
     const stringOffset = reader.readUInt16();
     const storageStart = info.offset + stringOffset;
@@ -462,7 +462,7 @@ export class TtfFont {
     for (let i = 0; i < count; i++) {
       const platformId = reader.readUInt16();
       const encodingId = reader.readUInt16();
-      const languageId = reader.readUInt16();
+      const _languageId = reader.readUInt16();
       const nameId = reader.readUInt16();
       const length = reader.readUInt16();
       const offset = reader.readUInt16();
@@ -522,8 +522,8 @@ export class TtfFont {
     const version = reader.readUInt16();
     reader.skip(2); // xAvgCharWidth
     const usWeightClass = reader.readUInt16();
-    const usWidthClass = reader.readUInt16();
-    const fsType = reader.readUInt16();
+    const _usWidthClass = reader.readUInt16();
+    const _fsType = reader.readUInt16();
 
     reader.skip(16); // subscript (8) + superscript (8) metrics
 
@@ -541,9 +541,9 @@ export class TtfFont {
 
     reader.skip(4); // usFirstCharIndex, usLastCharIndex
 
-    const sTypoAscender = reader.readInt16();
-    const sTypoDescender = reader.readInt16();
-    const sTypoLineGap = reader.readInt16();
+    const _sTypoAscender = reader.readInt16();
+    const _sTypoDescender = reader.readInt16();
+    const _sTypoLineGap = reader.readInt16();
 
     reader.skip(4); // usWinAscent, usWinDescent
 

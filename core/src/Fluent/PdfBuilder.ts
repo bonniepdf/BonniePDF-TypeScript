@@ -3,9 +3,6 @@ import { DocumentMetadata } from '../Configuration/DocumentMetadata';
 import { PageDescriptor } from './Descriptors/PageDescriptor';
 import { TextStyle } from '../Elements/Text/TextStyle';
 import { Document } from '../Document';
-import { PdfSize } from '../Configuration/PdfSize';
-import { PageOrientation } from '../Core/PageOrientation';
-import { IElement } from '../Elements/IElement';
 import { FileAttachment } from '../Attachments/FileAttachment';
 
 export class PdfBuilder {

@@ -70,7 +70,7 @@ export interface SvgCanvasOptions {
   shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
-interface FragmentEntry {
+interface _FragmentEntry {
   /** Raw SVG markup. */
   markup: string;
 }

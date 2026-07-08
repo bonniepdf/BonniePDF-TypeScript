@@ -1,7 +1,5 @@
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
-import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
-import { WidthDistribution } from './WidthDistribution';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
 

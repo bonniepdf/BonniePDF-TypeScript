@@ -78,7 +78,7 @@ export class ImageWriter {
   /**
    * Writes a JPEG image as an XObject
    */
-  public writeJpegImage(id: number, image: ImageInfo, resourceName: string): number {
+  public writeJpegImage(id: number, image: ImageInfo, _resourceName: string): number {
     const dict = new Map<string, string>();
     dict.set('/Type', '/XObject');
     dict.set('/Subtype', '/Image');
@@ -100,7 +100,7 @@ export class ImageWriter {
   /**
    * Writes a PNG image as an XObject (using FlateDecode)
    */
-  public writePngImage(id: number, image: ImageInfo, resourceName: string): number {
+  public writePngImage(id: number, image: ImageInfo, _resourceName: string): number {
     // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
     let pixelData = image.data;
     let writeSmask = image.hasAlpha && image.alphaData.length > 0;
@@ -285,7 +285,7 @@ export class ImageWriter {
   /**
    * Gets the PDF color space string for an image
    */
-  private getColorSpaceString(colorSpace: ImageColorSpace, palette: Uint8Array): string {
+  private getColorSpaceString(colorSpace: ImageColorSpace, _palette: Uint8Array): string {
     switch (colorSpace) {
       case ImageColorSpace.DeviceRGB:
         return '/DeviceRGB';
@@ -327,8 +327,8 @@ export class ImageWriter {
   public async writeJpegImageAsync(
     id: number,
     image: ImageInfo,
-    resourceName: string,
-    cancellationToken?: AbortSignal
+    _resourceName: string,
+    _cancellationToken?: AbortSignal
   ): Promise<number> {
     if (!this.asyncWriter) {
       throw new Error('Async writer not configured');
@@ -371,7 +371,7 @@ export class ImageWriter {
     }
 
     // Compress pixel data
-    const compressedData = this.compressData(pixelData);
+    const _compressedData = this.compressData(pixelData);
 
     const dict = new Map<string, string>();
     dict.set('/Type', '/XObject');
@@ -399,12 +399,12 @@ export class ImageWriter {
   /**
    * Writes a soft mask (alpha channel) for transparency asynchronously
    */
-  private async writeSoftMaskAsync(id: number, image: ImageInfo, cancellationToken?: AbortSignal): Promise<void> {
+  private async writeSoftMaskAsync(id: number, image: ImageInfo, _cancellationToken?: AbortSignal): Promise<void> {
     if (!this.asyncWriter) {
       throw new Error('Async writer not configured');
     }
 
-    const compressedAlpha = this.compressData(image.alphaData);
+    const _compressedAlpha = this.compressData(image.alphaData);
 
     const dict = new Map<string, string>();
     dict.set('/Type', '/XObject');

@@ -12,11 +12,11 @@ export class Circle extends ElementBase {
   /** Fill color of the circle */
   public fillColor: Color = Color.black;
 
-  protected override measureContentHeight(contentWidth: number): number {
+  protected override measureContentHeight(_contentWidth: number): number {
     return this.diameter;
   }
 
-  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+  protected override renderContent(ctx: RenderContext, _contentWidth: number): void {
     const radius = this.diameter / 2;
 
     // Calculate center position

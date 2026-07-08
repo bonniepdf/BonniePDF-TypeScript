@@ -608,7 +608,7 @@ export class PdfResourceRegistry {
     imageWriter.conformance = this._conformance;
 
     // 1. Write fonts
-    for (const [fontIdentifier, resourceName] of this.fontNameMap) {
+    for (const [fontIdentifier, _resourceName] of this.fontNameMap) {
       // Skip aliased entries (they're written under their canonical TTF path)
       if (this.fontAliasMap.has(fontIdentifier)) continue;
 

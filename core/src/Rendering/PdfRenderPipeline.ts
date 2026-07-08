@@ -39,7 +39,7 @@ export class PdfRenderPipeline {
       }
 
       const pageWidth = page.width;
-      const pageHeight = page.height;
+      const _pageHeight = page.height;
       const pageMargin = page.margin;
 
       ctx.pageSize = page.size;
@@ -172,7 +172,7 @@ export class PdfRenderPipeline {
       throw new Error('Pages and context cannot be null');
     }
 
-    const orientedPageSize = settings.getOrientedPageSize();
+    const _orientedPageSize = settings.getOrientedPageSize();
     const pageDimensions = new Map<
       number,
       { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }

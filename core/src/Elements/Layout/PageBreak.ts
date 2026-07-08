@@ -4,7 +4,7 @@ import { RenderContext, RenderStatus } from '../IElement';
 export class PageBreak extends ElementBase {
   private triggered: boolean = false;
 
-  public renderStateful(ctx: RenderContext, width: number): RenderStatus {
+  public renderStateful(ctx: RenderContext, _width: number): RenderStatus {
     if (!this.triggered) {
       this.triggered = true;
       if (ctx.currentY > ctx.margin) {

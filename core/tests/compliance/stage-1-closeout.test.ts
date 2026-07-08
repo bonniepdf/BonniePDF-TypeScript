@@ -139,7 +139,7 @@ describe('Stage 1 closeout - TS', () => {
     return cell;
   }
 
-  function makeChapter(id: string, heading: string, body: string): Heading {
+  function makeChapter(id: string, heading: string, _body: string): Heading {
     const h = new Heading(heading);
     h.tocIdentifier = id;
     h.level = 1;

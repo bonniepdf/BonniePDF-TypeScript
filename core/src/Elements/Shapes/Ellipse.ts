@@ -7,11 +7,11 @@ export class Ellipse extends ElementBase {
   public height = 8;
   public fillColor: Color = Color.black;
 
-  protected override measureContentHeight(contentWidth: number): number {
+  protected override measureContentHeight(_contentWidth: number): number {
     return this.height;
   }
 
-  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+  protected override renderContent(ctx: RenderContext, _contentWidth: number): void {
     const rx = this.width / 2;
     const ry = this.height / 2;
     const centerX = ctx.currentX + rx;

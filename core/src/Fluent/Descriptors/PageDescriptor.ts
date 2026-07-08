@@ -1,7 +1,6 @@
 import { PdfSize } from '../../Configuration/PdfSize';
 import { PageOrientation } from '../../Core/PageOrientation';
 import { TextStyle } from '../../Elements/Text/TextStyle';
-import { TextElementBase } from '../../Elements/Text/TextElementBase';
 import { ContentSlot } from '../ContentSlot';
 import { IContentContainer } from '../IContentContainer';
 

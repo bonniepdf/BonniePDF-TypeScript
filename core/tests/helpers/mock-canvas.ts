@@ -57,7 +57,7 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`DrawTextJustified(${x},${y},'${text}',${fontSize},${fontFamily},${availableWidth})`);
   }
 
-  measureText(text: string, fontSize: number, fontFamily: string): Size {
+  measureText(text: string, fontSize: number, _fontFamily: string): Size {
     return new Size(text.length * fontSize * 0.6, fontSize);
   }
 
@@ -65,7 +65,7 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`DrawLine(${x1},${y1},${x2},${y2},${lineWidth})`);
   }
 
-  fillRect(x: number, y: number, width: number, height: number, color: Color): void {
+  fillRect(x: number, y: number, width: number, height: number, _color: Color): void {
     this.operations.push(`FillRect(${x},${y},${width},${height})`);
   }
 
@@ -73,15 +73,15 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`StrokeRect(${x},${y},${width},${height},${strokeWidth})`);
   }
 
-  fillCircle(cx: number, cy: number, radius: number, color: Color): void {
+  fillCircle(cx: number, cy: number, radius: number, _color: Color): void {
     this.operations.push(`FillCircle(${cx},${cy},${radius})`);
   }
 
-  fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+  fillEllipse(cx: number, cy: number, rx: number, ry: number, _color: Color): void {
     this.operations.push(`FillEllipse(${cx},${cy},${rx},${ry})`);
   }
 
-  fillPath(points: Point[], color: Color): void {
+  fillPath(points: Point[], _color: Color): void {
     this.operations.push(`FillPath(${points.length} points)`);
   }
 
@@ -93,7 +93,7 @@ export class MockCanvas implements ICanvas {
     this.operations.push(`DrawFormXObject(${resourceName},${x},${y})`);
   }
 
-  fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+  fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, _color: Color): void {
     this.operations.push(`FillRoundedRect(${x},${y},${width},${height},${radius})`);
   }
 

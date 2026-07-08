@@ -135,7 +135,6 @@ async function algorithm2B(password: Uint8Array, salt: Uint8Array, userKey: Uint
   let K = new Uint8Array(await crypto.subtle.digest('SHA-256', asBuffer(concat(password, salt, userKey))));
 
   let round = 0;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     // K1 = (password + K + userKey) repeated 64 times
     const sequence = concat(password, K, userKey);

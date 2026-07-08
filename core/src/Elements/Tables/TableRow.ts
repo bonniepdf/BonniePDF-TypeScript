@@ -124,7 +124,7 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
     return this;
   }
 
-  public measureHeight(availableWidth: number): number {
+  public measureHeight(_availableWidth: number): number {
     return 0;
   }
   public getPreferredWidth(): number {

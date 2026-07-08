@@ -1,6 +1,5 @@
 import { QrCodeEncoder } from './QrCodeEncoder';
 import { QrEcc } from './QrEcc';
-import { QrSegment } from './QrSegment';
 import { ElementBase } from '../ElementBase';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
@@ -64,11 +63,11 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
     return this.size;
   }
 
-  protected override measureContentHeight(contentWidth: number): number {
+  protected override measureContentHeight(_contentWidth: number): number {
     return this.size;
   }
 
-  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+  protected override renderContent(ctx: RenderContext, _contentWidth: number): void {
     if (!this.data) {
       ctx.currentY += this.size;
       return;

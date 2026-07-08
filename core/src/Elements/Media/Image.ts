@@ -75,7 +75,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   }
 
   protected override measureContentHeight(contentWidth: number): number {
-    const info = this.getImageInfo();
+    const _info = this.getImageInfo();
     this.calculateDimensions(contentWidth, this.displayWidth, this.displayHeight);
     return this.displayHeight.value;
   }
@@ -171,8 +171,8 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
     const aspectRatio = nativeWidth / nativeHeight;
 
     // Use specified width or available width
-    let targetWidth = this.width ?? availableWidth;
-    let targetHeight = this.height ?? (this.maintainAspectRatio ? targetWidth / aspectRatio : nativeHeight);
+    const targetWidth = this.width ?? availableWidth;
+    const targetHeight = this.height ?? (this.maintainAspectRatio ? targetWidth / aspectRatio : nativeHeight);
 
     let displayWidth = targetWidth;
     let displayHeight = targetHeight;

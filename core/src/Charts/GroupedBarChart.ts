@@ -82,7 +82,7 @@ export class GroupedBarChart extends CartesianChartBase {
   /**
    * Gets the offset for value labels (simple spacing above/beside bars).
    */
-  protected override getLabelVerticalOffset(series: ChartSeries): number {
+  protected override getLabelVerticalOffset(_series: ChartSeries): number {
     return 7;
   }
 

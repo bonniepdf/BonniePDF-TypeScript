@@ -55,7 +55,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
   /**
    * Measures the total height required to render all TOC entries at the configured font size.
    */
-  protected override measureContentHeight(contentWidth: number): number {
+  protected override measureContentHeight(_contentWidth: number): number {
     return this.headingIdentifiers.length * (this.fontSize * 1.2);
   }
 

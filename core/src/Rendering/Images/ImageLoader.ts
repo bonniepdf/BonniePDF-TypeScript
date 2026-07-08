@@ -1,7 +1,7 @@
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
 
 export class ImageLoader {
-  public static load(filePath: string): ImageInfo {
+  public static load(_filePath: string): ImageInfo {
     // Stub: would load from file system
     throw new Error('ImageLoader.load not implemented - use loadFromBytes instead');
   }
@@ -455,10 +455,11 @@ export class ImageLoader {
           palette.set(data.subarray(pos, pos + chunkLength));
           break;
 
-        case 'IDAT':
+        case 'IDAT': {
           const chunk = data.subarray(pos, pos + chunkLength);
           idatChunks.push(chunk);
           break;
+        }
 
         case 'pHYs':
           // 4 bytes X pixels per unit, 4 bytes Y, 1 byte unit (0=unknown, 1=metre).

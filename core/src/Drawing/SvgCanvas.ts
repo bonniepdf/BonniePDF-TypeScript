@@ -7,6 +7,7 @@ import { Size } from '../Core/Size';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { ImageFormat } from '../Rendering/Images/ImageInfo';
+import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 
@@ -340,7 +341,7 @@ export class SvgCanvas implements ICanvas {
 
   // -- Images -------------------------------------------------------------
 
-  public drawImage(image: any, x: number, y: number, width: number, height: number): void {
+  public drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void {
     const mode = this.options.embedImages ?? 'data-uri';
     if (mode === 'omit') return;
     if (!image) return;

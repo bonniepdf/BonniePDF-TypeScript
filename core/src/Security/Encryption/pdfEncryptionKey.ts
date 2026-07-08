@@ -271,8 +271,8 @@ export class PdfEncryptionKey {
    */
   public static generateDocumentId(): Uint8Array {
     // Use Web Crypto if available, otherwise fallback to Math.random
-    if (typeof globalThis !== 'undefined' && (globalThis as any).crypto && (globalThis as any).crypto.getRandomValues) {
-      return (globalThis as any).crypto.getRandomValues(new Uint8Array(16));
+    if (typeof globalThis !== 'undefined' && globalThis.crypto?.getRandomValues) {
+      return globalThis.crypto.getRandomValues(new Uint8Array(16));
     }
 
     // Fallback for environments without crypto

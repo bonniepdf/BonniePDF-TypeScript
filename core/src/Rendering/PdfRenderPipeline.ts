@@ -1,5 +1,7 @@
-import { IElement } from '../Elements/IElement';
+import { IElement, IStatefulElement } from '../Elements/IElement';
 import { Color } from '../Core/Color';
+import { PdfSize } from '../Configuration/PdfSize';
+import type { PdfCanvas } from '../Drawing/PdfCanvas';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';
@@ -13,8 +15,13 @@ import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
 import { beginChildTag, endChildTag } from './Tagging/ChildTagging';
 
+/** True when the element supports stateful rendering across page boundaries. */
+function isStatefulElement(element: IElement): element is IStatefulElement {
+  return typeof (element as Partial<IStatefulElement>).renderStateful === 'function';
+}
+
 export class PdfRenderPipeline {
-  public static renderPages(pages: Page[], settings: DocumentSettings): PdfRenderResult {
+  public static renderPages(pages: readonly Page[], settings: DocumentSettings): PdfRenderResult {
     if (!pages || pages.length === 0) {
       throw new Error('Document must have at least one page');
     }
@@ -49,7 +56,7 @@ export class PdfRenderPipeline {
         margin: pageMargin,
       });
 
-      this.renderElementsWithOverflow(page.getElements() as IElement[], ctx, contentWidth);
+      this.renderElementsWithOverflow(page.getElements(), ctx, contentWidth);
 
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         result.pageDimensions.set(i, {
@@ -74,11 +81,15 @@ export class PdfRenderPipeline {
    * render pipeline shares the exact pagination decisions (page breaks,
    * stateful continuation) rather than re-implementing them and drifting.
    */
-  public static layoutElements(elements: IElement[], ctx: RenderContext, contentWidth: number): void {
+  public static layoutElements(elements: readonly IElement[], ctx: RenderContext, contentWidth: number): void {
     this.renderElementsWithOverflow(elements, ctx, contentWidth);
   }
 
-  private static renderElementsWithOverflow(elements: IElement[], ctx: RenderContext, contentWidth: number): void {
+  private static renderElementsWithOverflow(
+    elements: readonly IElement[],
+    ctx: RenderContext,
+    contentWidth: number
+  ): void {
     for (const element of elements) {
       this.renderElementWithOverflow(element, ctx, contentWidth);
     }
@@ -105,8 +116,8 @@ export class PdfRenderPipeline {
   private static renderElementWithOverflowCore(element: IElement, ctx: RenderContext, contentWidth: number): void {
     // Stateful elements (VerticalStack, Table, TextBlock, etc.) implement renderStateful
     // and track their own continuation state so they can resume across page breaks.
-    if ('renderStateful' in element && typeof (element as any).renderStateful === 'function') {
-      const stateful = element as any;
+    if (isStatefulElement(element)) {
+      const stateful = element;
       // Layout capture: open one node around the whole element; the overflow
       // loop drives it to completion and ctx.newPage() splits its rect per page.
       ctx.layoutRecorder?.openNode(
@@ -123,7 +134,7 @@ export class PdfRenderPipeline {
       do {
         try {
           ctx.canvas.saveState();
-          status = stateful.renderStateful(ctx, contentWidth) as RenderStatus;
+          status = stateful.renderStateful(ctx, contentWidth);
         } finally {
           ctx.canvas.restoreState();
         }
@@ -153,7 +164,7 @@ export class PdfRenderPipeline {
   }
 
   public static *renderPagesStreaming(
-    pages: Page[],
+    pages: readonly Page[],
     settings: DocumentSettings,
     ctx: RenderContext
   ): Generator<PageRenderOutput> {
@@ -164,7 +175,7 @@ export class PdfRenderPipeline {
     const orientedPageSize = settings.getOrientedPageSize();
     const pageDimensions = new Map<
       number,
-      { size: any; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
+      { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
     >();
 
     let currentOutputIndex = 0;
@@ -190,7 +201,7 @@ export class PdfRenderPipeline {
         pageForeground: page.pageForeground,
       });
 
-      this.renderElementsWithOverflow(page.getElements() as IElement[], ctx, contentWidth);
+      this.renderElementsWithOverflow(page.getElements(), ctx, contentWidth);
 
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         pageDimensions.set(i, {
@@ -215,7 +226,7 @@ export class PdfRenderPipeline {
       }
 
       ctx.pageSize = pageSize;
-      ctx.margin = (dimensions?.margin || settings.margin) as any;
+      ctx.margin = dimensions?.margin || settings.margin;
       ctx.switchToPage(i);
 
       // full-page background slot. Painted behind everything, ignoring
@@ -369,9 +380,9 @@ export class PdfRenderPipeline {
       }
 
       // Flush the template canvas stream into the page before restoring
-      const fixedCanvas = ctx.canvas as any;
+      const fixedCanvas = ctx.canvas as PdfCanvas;
       if (typeof fixedCanvas.getStream === 'function') {
-        const templateOps: string[] = fixedCanvas.getStream();
+        const templateOps = fixedCanvas.getStream();
         if (templateOps.length > 0) {
           ctx.pages[pageIndex] = (ctx.pages[pageIndex] ?? '') + templateOps.join('');
         }
@@ -440,9 +451,9 @@ export class PdfRenderPipeline {
       element.render(ctx, fullWidth);
       if (ctx.tagging) ctx.canvas.endArtifact();
 
-      const fixedCanvas = ctx.canvas as any;
+      const fixedCanvas = ctx.canvas as PdfCanvas;
       if (typeof fixedCanvas.getStream === 'function') {
-        slotOps = (fixedCanvas.getStream() as string[]).join('');
+        slotOps = fixedCanvas.getStream().join('');
       }
     } finally {
       ctx.setCanvas(originalCanvas);
@@ -487,9 +498,9 @@ export class PdfRenderPipeline {
       ctx.canvas.fillRect(0, 0, pageWidth, pageHeight, color);
       if (ctx.tagging) ctx.canvas.endArtifact();
 
-      const fixedCanvas = ctx.canvas as any;
+      const fixedCanvas = ctx.canvas as PdfCanvas;
       if (typeof fixedCanvas.getStream === 'function') {
-        ops = (fixedCanvas.getStream() as string[]).join('');
+        ops = fixedCanvas.getStream().join('');
       }
     } finally {
       ctx.setCanvas(originalCanvas);

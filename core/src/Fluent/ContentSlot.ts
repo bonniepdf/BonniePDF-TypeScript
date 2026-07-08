@@ -5,11 +5,16 @@ import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../Elem
 export class ContentSlot extends ElementBase implements IContentContainer, IStatefulElement {
   public child?: IElement;
 
+  /** @inheritdoc */
+  public getChildren(): readonly IElement[] {
+    return this.child ? [this.child] : [];
+  }
+
   protected measureContentHeight(contentWidth: number): number {
     return this.child?.measureHeight(contentWidth) ?? 0;
   }
 
-  protected renderContent(_ctx: any, _contentWidth: number): void {
+  protected renderContent(_ctx: RenderContext, _contentWidth: number): void {
     // Implementation
   }
 

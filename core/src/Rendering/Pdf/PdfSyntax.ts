@@ -1,3 +1,5 @@
+import type { TtfFont } from '../../Typography/TrueType/TtfFont';
+
 export class PdfSyntax {
   public static encodeMetadataString(input: string): string {
     if (!input) return '()';
@@ -96,7 +98,7 @@ export class PdfSyntax {
     return `${this.formatDecimal(c.scR)} ${this.formatDecimal(c.scG)} ${this.formatDecimal(c.scB)}`;
   }
 
-  public static toGlyphIdHexString(text: string, font: any): string {
+  public static toGlyphIdHexString(text: string, font: TtfFont | null): string {
     if (!text) return '<>';
 
     let result = '<';

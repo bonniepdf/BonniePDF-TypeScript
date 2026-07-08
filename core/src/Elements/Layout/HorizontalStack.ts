@@ -36,6 +36,11 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     return this._children;
   }
 
+  /** @inheritdoc */
+  public getChildren(): readonly IElement[] {
+    return this._children;
+  }
+
   /**
    * Adds a child element to this stack with auto width
    */

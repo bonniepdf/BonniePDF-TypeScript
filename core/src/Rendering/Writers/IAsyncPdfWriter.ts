@@ -1,10 +1,14 @@
 import { CatalogOptions } from './CatalogOptions';
+import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
+import type { DocumentSettings } from '../../Configuration/DocumentSettings';
+import type { RegisteredLink } from '../RegisteredLink';
+import type { ViewerPreferencesSettings } from './IPdfWriter';
 
 /**
  * Interface for async PDF writers.
  */
 export interface IAsyncPdfWriter {
-  encryptor?: any;
+  encryptor?: PdfEncryptor | null;
   getNewId(): number;
   writeObjectAsync(id: number, dictionary: Map<string, string>, stream?: string): Promise<void>;
   writeRawObjectAsync(id: number, body: string): Promise<void>;
@@ -14,22 +18,27 @@ export interface IAsyncPdfWriter {
     dictionary: Map<string, string>,
     bytes: Uint8Array,
     length?: number,
-    ct?: any
+    ct?: unknown
   ): Promise<void>;
   writeCompressedBinaryObjectAsync(
     id: number,
     dictionary: Map<string, string>,
     bytes: Uint8Array,
     length?: number,
-    ct?: any
+    ct?: unknown
   ): Promise<void>;
-  writeLinkAnnotationAsync(id: number, link: any, pageIds: number[], structParentKey?: number): Promise<void>;
-  writeViewerPreferencesAsync(id: number, settings: any): Promise<number>;
+  writeLinkAnnotationAsync(
+    id: number,
+    link: RegisteredLink,
+    pageIds: number[],
+    structParentKey?: number
+  ): Promise<void>;
+  writeViewerPreferencesAsync(id: number, settings: ViewerPreferencesSettings): Promise<number>;
   writeCatalogAsync(
     id: number,
     pagesId: number,
     firstPageId: number,
-    settings: any,
+    settings: DocumentSettings,
     options: CatalogOptions
   ): Promise<void>;
   writeEncryptDictionaryAsync(id: number): Promise<number>;

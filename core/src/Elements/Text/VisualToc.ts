@@ -3,6 +3,7 @@ import { ElementBase } from '../ElementBase';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
+import type { RegisteredLink } from '../../Rendering/RegisteredLink';
 import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
@@ -195,7 +196,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     const pdfY = ctx.pageSize.height - (y + lineHeight); // PDF coordinate is bottom-up
 
     const targetPage = ctx.tocEntries.get(identifier) ?? 0;
-    const link = {
+    const link: RegisteredLink = {
       identifier,
       targetPageIndex: targetPage,
       renderX: pdfX,
@@ -208,7 +209,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
         this.renderWidth = rw;
         this.renderHeight = rh;
       },
-    } as any;
+    };
     ctx.registerHyperlink(link);
   }
 

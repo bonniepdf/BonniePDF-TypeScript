@@ -120,6 +120,17 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     return [...this.headers, ...this.rows, ...this.footers];
   }
 
+  /** @inheritdoc - every cell's content across headers, body rows, and footers. */
+  public getChildren(): readonly IElement[] {
+    const children: IElement[] = [];
+    for (const row of this.getAllRows()) {
+      for (const cell of row.cells) {
+        if (cell?.content) children.push(cell.content);
+      }
+    }
+    return children;
+  }
+
   /**
    * Renders this table with state tracking for pagination.
    * Rows that don't fit on the current page will be continued on the next page.

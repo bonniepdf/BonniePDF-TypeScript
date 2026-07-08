@@ -4,6 +4,7 @@ import { Size } from '../Core/Size';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import type { Paint } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
+import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 
 export interface ICanvas {
   readonly width: number;
@@ -58,7 +59,7 @@ export interface ICanvas {
   ): void;
   measureText(text: string, fontSize: number, fontFamily: string): Size;
 
-  drawImage(image: any, x: number, y: number, width: number, height: number): void;
+  drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void;
   drawFormXObject(resourceName: string, x: number, y: number): void;
 
   // -- Path construction -------------------------------------------
@@ -95,6 +96,8 @@ export interface ICanvas {
   endMarkedContent(): void;
   beginArtifact(): void;
   endArtifact(): void;
+  /** True while inside an /Artifact region (PDF canvas only). */
+  isInsideArtifact?(): boolean;
 
   // -- Crisp-edge region (SVG only) ---------------------------------------
 

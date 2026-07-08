@@ -2,6 +2,7 @@ import { TextElementBase } from './TextElementBase';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
+import type { SvgCanvas } from '../../Drawing/SvgCanvas';
 import { TextAlignment } from './TextAlignment';
 import { TextDecoration } from './TextDecoration';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
@@ -43,10 +44,6 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * to push more lines forward. Set to 1 to disable widow control. Default is 2.
    */
   public minLinesAfterBreak = 2;
-
-  constructor();
-
-  constructor(text: string);
 
   constructor(text?: string) {
     super();
@@ -312,7 +309,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
         const tokenWidth = this.measureTextWidth('00'); // Matches TextElementBase substitution
 
         if (ctx.isSvgMode) {
-          const svgCanvas = ctx.canvas as any;
+          const svgCanvas = ctx.canvas as SvgCanvas;
           if (typeof svgCanvas.drawDeferredTotalPages === 'function') {
             svgCanvas.drawDeferredTotalPages(currentX, y, this.textColor, this.fontSize, this.fontName);
           } else {

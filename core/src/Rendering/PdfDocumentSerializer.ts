@@ -22,6 +22,7 @@ import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { ConformancePlan } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
+import type { DocumentSettings } from '../Configuration/DocumentSettings';
 
 export class PdfDocumentSerializer {
   constructor(
@@ -109,11 +110,7 @@ export class PdfDocumentSerializer {
     const pageIds: number[] = [];
     let pageIndex = 0;
 
-    for (const pageOutput of PdfRenderPipeline.renderPagesStreaming(
-      (this.document as any).pages ?? [],
-      settings,
-      ctx
-    )) {
+    for (const pageOutput of PdfRenderPipeline.renderPagesStreaming(this.document.pages, settings, ctx)) {
       let pageId: number;
       if (pageIndex < pageIds.length) {
         pageId = pageIds[pageIndex];
@@ -148,7 +145,7 @@ export class PdfDocumentSerializer {
       }
 
       // Write link annotations if present
-      if (pageOutput.hyperlinks?.length > 0) {
+      if (pageOutput.hyperlinks.length > 0) {
         const annotIds: number[] = [];
         for (const link of pageOutput.hyperlinks) {
           const annotId = writer.getNewId();
@@ -175,14 +172,13 @@ export class PdfDocumentSerializer {
     }
 
     // 4. Write global resource dictionary (fonts, images)
-    let globalResources: string = (ctx as any).resources?.writeResources?.(writer, pageIds.length) ?? '<< >>';
+    const globalResources: string = ctx.resources.writeResources(writer, pageIds.length) ?? '<< >>';
 
     // ── Honest PDF/A claim ──────────────────────────────────────
     // PDF/A is an opt-in claim. Once resources have been written, ask the
     // conformance plan whether that claim can still be emitted honestly
     // (currently: no non-embedded standard-14 font references).
-    const registry: PdfResourceRegistry | undefined = (ctx as any).resources;
-    conformancePlan = conformancePlan.withResourceRegistry(registry);
+    conformancePlan = conformancePlan.withResourceRegistry(ctx.resources);
 
     // 6a. Write the global Resources object every page references.
     // PDF/A-2b clause 6.2.2.2 - see page-dict comment above.
@@ -357,17 +353,15 @@ export class PdfDocumentSerializer {
    */
   public async serializeAsync(writer: IPdfWriter | IAsyncPdfWriter): Promise<void> {
     // Resolve to a synchronous IPdfWriter regardless of which variant was passed.
-    const syncWriter: IPdfWriter =
-      writer instanceof AsyncPdfWriter ? ((writer as any)['_inner'] as IPdfWriter) : (writer as unknown as IPdfWriter);
+    const syncWriter: IPdfWriter = writer instanceof AsyncPdfWriter ? writer.syncWriter : (writer as IPdfWriter);
 
     const settings = this.document.settings;
 
     // ── Phase 1: Scan element tree for embedded font paths ───────────────────
     const embeddedPaths = new Set<string>();
-    const pages: any[] = (this.document as any).pages ?? [];
+    const pages = this.document.pages;
     for (const page of pages) {
-      const elements: any[] = typeof page.getElements === 'function' ? page.getElements() : (page.elements ?? []);
-      for (const el of elements) {
+      for (const el of page.getElements()) {
         collectEmbeddedFonts(el, embeddedPaths);
       }
     }
@@ -386,7 +380,7 @@ export class PdfDocumentSerializer {
     }
 
     // Watermark font
-    const wmFont = (settings as any).watermark?.fontName;
+    const wmFont = settings.watermark?.fontName;
     if (wmFont && PdfResourceRegistry.isEmbeddedFont(wmFont)) {
       embeddedPaths.add(wmFont);
     }
@@ -408,8 +402,7 @@ export class PdfDocumentSerializer {
     // read the cached ImageInfo on each Image directly.
     const imagesToDecode: Image[] = [];
     for (const page of pages) {
-      const elements: any[] = typeof page.getElements === 'function' ? page.getElements() : (page.elements ?? []);
-      for (const el of elements) {
+      for (const el of page.getElements()) {
         collectImagesNeedingDecode(el, imagesToDecode);
       }
     }
@@ -457,7 +450,7 @@ export class PdfDocumentSerializer {
  * Returns true if any non-default viewer preferences are configured,
  * indicating that a /ViewerPreferences dictionary should be written.
  */
-function hasViewerPreferences(settings: any): boolean {
+function hasViewerPreferences(settings: DocumentSettings): boolean {
   return (
     settings.hideToolbar ||
     settings.hideMenubar ||
@@ -490,17 +483,69 @@ function hasViewerPreferences(settings: any): boolean {
  * an async decode step (i.e. a PNG that hasn't been prepared yet).  Uses the
  * same child-resolution rules as {@link collectEmbeddedFonts}.
  */
-export function collectImagesNeedingDecode(element: any, out: Image[]): void {
+export function collectImagesNeedingDecode(element: unknown, out: Image[]): void {
   if (!element || typeof element !== 'object') return;
 
-  if (element instanceof Image && element.needsAsyncDecode()) {
+  // Guard against duplicates: containers can be reached through more than one
+  // probe shape (e.g. `.children` and `getChildren()`), and each image must be
+  // prepared exactly once.
+  if (element instanceof Image && element.needsAsyncDecode() && !out.includes(element)) {
     out.push(element);
   }
 
   forEachChild(element, child => collectImagesNeedingDecode(child, out));
 }
 
-function forEachChild(element: any, visit: (child: any) => void): void {
+/**
+ * Structural probe for the duck-typed element-tree walk: the child-collection
+ * shapes exposed by the various container elements. Every member is optional -
+ * an element exposes whichever shapes apply to it.
+ */
+interface WalkableElement {
+  fontName?: unknown;
+  defaultStyle?: { fontName?: unknown };
+  style?: { fontName?: unknown };
+  children?: unknown;
+  getChildren?(): unknown;
+  content?: unknown;
+  getElements?(): unknown;
+  spans?: unknown;
+  getSpans?(): unknown;
+  rows?: unknown;
+  getRows?(): unknown;
+}
+
+interface WalkableRow {
+  cells?: unknown;
+  getCells?(): unknown;
+}
+
+interface WalkableCell {
+  content?: unknown;
+}
+
+/** Resolves a Table-style row collection from `.rows` / `.getRows()`. */
+function resolveRows(element: WalkableElement): unknown[] {
+  if (Array.isArray(element.rows)) return element.rows;
+  if (typeof element.getRows === 'function') {
+    const r = element.getRows();
+    if (Array.isArray(r)) return r;
+  }
+  return [];
+}
+
+/** Resolves a row's cell collection from `.cells` / `.getCells()`. */
+function resolveCells(row: WalkableRow): unknown[] {
+  if (Array.isArray(row.cells)) return row.cells;
+  if (typeof row.getCells === 'function') {
+    const c = row.getCells();
+    if (Array.isArray(c)) return c;
+  }
+  return [];
+}
+
+function forEachChild(value: object, visit: (child: unknown) => void): void {
+  const element = value as WalkableElement;
   if (Array.isArray(element.children)) for (const c of element.children) visit(c);
   if (typeof element.getChildren === 'function') {
     const c = element.getChildren();
@@ -516,106 +561,42 @@ function forEachChild(element: any, visit: (child: any) => void): void {
     const s = element.getSpans();
     if (Array.isArray(s)) for (const sp of s) visit(sp);
   }
-  const rows: any[] = Array.isArray(element.rows)
-    ? element.rows
-    : typeof element.getRows === 'function'
-      ? (element.getRows() ?? [])
-      : [];
-  for (const row of rows) {
-    if (!row) continue;
-    const cells: any[] = Array.isArray(row.cells)
-      ? row.cells
-      : typeof row.getCells === 'function'
-        ? (row.getCells() ?? [])
-        : [];
-    for (const cell of cells) {
-      if (!cell) continue;
-      if (Array.isArray(cell.content)) for (const el of cell.content) visit(el);
-      else visit(cell.content);
+  for (const row of resolveRows(element)) {
+    if (!row || typeof row !== 'object') continue;
+    for (const cell of resolveCells(row as WalkableRow)) {
+      if (!cell || typeof cell !== 'object') continue;
+      const content = (cell as WalkableCell).content;
+      if (Array.isArray(content)) for (const el of content) visit(el);
+      else visit(content);
       visit(cell);
     }
   }
 }
 
-export function collectEmbeddedFonts(element: any, paths: Set<string>): void {
+export function collectEmbeddedFonts(element: unknown, paths: Set<string>): void {
   if (!element || typeof element !== 'object') return;
+  const el = element as WalkableElement;
 
   // ── fontName on the element itself ────────────────────────────────────────
-  if (typeof element.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(element.fontName)) {
-    paths.add(element.fontName);
+  if (typeof el.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(el.fontName)) {
+    paths.add(el.fontName);
   }
 
   // ── defaultStyle (RichText) ───────────────────────────────────────────────
   if (
-    element.defaultStyle &&
-    typeof element.defaultStyle.fontName === 'string' &&
-    PdfResourceRegistry.isEmbeddedFont(element.defaultStyle.fontName)
+    el.defaultStyle &&
+    typeof el.defaultStyle.fontName === 'string' &&
+    PdfResourceRegistry.isEmbeddedFont(el.defaultStyle.fontName)
   ) {
-    paths.add(element.defaultStyle.fontName);
+    paths.add(el.defaultStyle.fontName);
   }
 
   // ── style (TextSpan) ─────────────────────────────────────────────────────
-  if (
-    element.style &&
-    typeof element.style.fontName === 'string' &&
-    PdfResourceRegistry.isEmbeddedFont(element.style.fontName)
-  ) {
-    paths.add(element.style.fontName);
+  if (el.style && typeof el.style.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(el.style.fontName)) {
+    paths.add(el.style.fontName);
   }
 
-  // ── Resolve child collections ─────────────────────────────────────────────
-  const childCollections: any[][] = [];
-
-  // VerticalStack / HorizontalStack style
-  if (Array.isArray(element.children)) childCollections.push(element.children);
-  if (typeof element.getChildren === 'function') {
-    const c = element.getChildren();
-    if (Array.isArray(c)) childCollections.push(c);
-  }
-
-  // Container / Page style
-  if (Array.isArray(element.content)) childCollections.push(element.content);
-  if (typeof element.getElements === 'function') {
-    const e = element.getElements();
-    if (Array.isArray(e)) childCollections.push(e);
-  }
-
-  // RichText spans
-  if (Array.isArray(element.spans)) childCollections.push(element.spans);
-  if (typeof element.getSpans === 'function') {
-    const s = element.getSpans();
-    if (Array.isArray(s)) childCollections.push(s);
-  }
-
-  // Table rows → cells → cell content
-  const rows: any[] = Array.isArray(element.rows)
-    ? element.rows
-    : typeof element.getRows === 'function'
-      ? (element.getRows() ?? [])
-      : [];
-  for (const row of rows) {
-    if (!row) continue;
-    const cells: any[] = Array.isArray(row.cells)
-      ? row.cells
-      : typeof row.getCells === 'function'
-        ? (row.getCells() ?? [])
-        : [];
-    for (const cell of cells) {
-      if (!cell) continue;
-      if (Array.isArray(cell.content)) {
-        for (const el of cell.content) collectEmbeddedFonts(el, paths);
-      } else {
-        collectEmbeddedFonts(cell.content, paths);
-      }
-      // Cell may itself have a fontName (header cells etc.)
-      collectEmbeddedFonts(cell, paths);
-    }
-  }
-
-  // Recurse into all resolved child collections
-  for (const col of childCollections) {
-    for (const child of col) {
-      collectEmbeddedFonts(child, paths);
-    }
-  }
+  // ── Recurse into every child-collection shape (stacks, Container/Page,
+  // RichText spans, and Table rows → cells → cell content) ─────────────────
+  forEachChild(element, child => collectEmbeddedFonts(child, paths));
 }

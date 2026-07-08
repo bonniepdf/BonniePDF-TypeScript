@@ -46,8 +46,8 @@ export class ContainerBridgeExtensions {
     return child;
   }
 
-  private static isContentContainer(obj: any): obj is IContentContainer {
-    return obj && typeof obj.addChild === 'function';
+  private static isContentContainer(obj: unknown): obj is IContentContainer {
+    return !!obj && typeof (obj as { addChild?: unknown }).addChild === 'function';
   }
 }
 

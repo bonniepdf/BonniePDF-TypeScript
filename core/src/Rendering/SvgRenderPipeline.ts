@@ -6,6 +6,7 @@ import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
 import { SvgCanvas } from '../Drawing/SvgCanvas';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
+import type { RegisteredLink } from './RegisteredLink';
 
 /** A single laid-out page rendered to an SVG surface. */
 export interface SvgPageRenderOutput {
@@ -34,7 +35,11 @@ export class SvgRenderPipeline {
    * finalisation (watermark, header, footer), and returns one render output per
    * final page.
    */
-  public static renderPages(pages: Page[], settings: DocumentSettings, ctx: RenderContext): SvgPageRenderOutput[] {
+  public static renderPages(
+    pages: readonly Page[],
+    settings: DocumentSettings,
+    ctx: RenderContext
+  ): SvgPageRenderOutput[] {
     if (!pages || pages.length === 0) {
       throw new Error('Document must have at least one page');
     }
@@ -81,7 +86,7 @@ export class SvgRenderPipeline {
       // the snapshot tree reads Document → Page → content. Overflow onto further
       // physical pages splits the Page node's rect via ctx.newPage().
       ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, page.margin, page.margin, contentWidth);
-      PdfRenderPipeline.layoutElements(page.getElements() as IElement[], ctx, contentWidth);
+      PdfRenderPipeline.layoutElements(page.getElements(), ctx, contentWidth);
       ctx.layoutRecorder?.closeNode(page, ctx.currentPageIndex, ctx.currentY, true);
 
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
@@ -161,7 +166,7 @@ export class SvgRenderPipeline {
    * (`fill="none"`) but hit-test (`pointer-events="all"`). Hyperlink render
    * bounds are PDF coordinates (bottom-left origin), so Y is flipped here.
    */
-  private static renderLinkOverlays(canvas: SvgCanvas, links: any[], pageHeight: number): void {
+  private static renderLinkOverlays(canvas: SvgCanvas, links: readonly RegisteredLink[], pageHeight: number): void {
     for (const link of links) {
       const w = link.renderWidth;
       const h = link.renderHeight;
@@ -315,7 +320,7 @@ export class SvgRenderPipeline {
 
     try {
       if (hasHeader) {
-        const headerElement = settings.headerTemplate!(pageNumber) as unknown as IElement | undefined;
+        const headerElement = settings.headerTemplate!(pageNumber);
         if (headerElement) {
           const headerHeight = headerElement.measureHeight(contentWidth);
           ctx.currentX = startX;
@@ -325,7 +330,7 @@ export class SvgRenderPipeline {
       }
 
       if (hasFooter) {
-        const footerElement = settings.footerTemplate!(pageNumber) as unknown as IElement | undefined;
+        const footerElement = settings.footerTemplate!(pageNumber);
         if (footerElement) {
           const footerHeight = footerElement.measureHeight(contentWidth);
           const bandTop = pageHeight - margin;

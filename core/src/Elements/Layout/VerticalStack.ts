@@ -25,6 +25,11 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     return this._children;
   }
 
+  /** @inheritdoc */
+  public getChildren(): readonly IElement[] {
+    return this._children;
+  }
+
   public addChild(child: IElement): void {
     this._children.push(child);
   }

@@ -84,7 +84,9 @@ export function cellTextColor(c: TableCell, color: Color): TableCell {
 export function cellPadding(c: TableCell, padding: number): TableCell;
 export function cellPadding(c: TableCell, left: number, top: number, right: number, bottom: number): TableCell;
 export function cellPadding(c: TableCell, arg1: number, arg2?: number, arg3?: number, arg4?: number): TableCell {
-  return TableCellExtensions.padding(c, arg1, arg2, arg3, arg4);
+  return arg2 === undefined
+    ? TableCellExtensions.padding(c, arg1)
+    : TableCellExtensions.padding(c, arg1, arg2, arg3!, arg4!);
 }
 
 export function cellBorder(c: TableCell, color: Color, width?: number): TableCell {

@@ -5,7 +5,7 @@ export abstract class StatefulElementBase extends ElementBase {
   protected hasPendingContent: boolean = false;
 
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
-    (this as any).startingY = ctx.currentY;
+    this.startingY = ctx.currentY;
     const originalX = ctx.currentX;
 
     if (!this.hasPendingContent) {

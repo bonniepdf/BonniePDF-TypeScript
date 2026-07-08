@@ -2,16 +2,32 @@ import { PdfVersion } from '../../Configuration/PdfVersion';
 import { PdfWriter } from './PdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
 import { CatalogOptions } from './CatalogOptions';
+import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
+import type { DocumentSettings } from '../../Configuration/DocumentSettings';
+import type { RegisteredLink } from '../RegisteredLink';
+import type { ViewerPreferencesSettings } from './IPdfWriter';
 
 // Full async implementation is out of scope (see SESSION_PLAN.md Session 4).
 // Methods delegate to synchronous equivalents wrapped in Promise.resolve().
 
 export class AsyncPdfWriter implements IAsyncPdfWriter {
   private readonly _inner: PdfWriter;
-  public encryptor: any = null;
 
   constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
     this._inner = new PdfWriter(version);
+  }
+
+  /** The synchronous writer this async facade delegates to. */
+  public get syncWriter(): PdfWriter {
+    return this._inner;
+  }
+
+  /** Delegates to the inner writer so encryption applies to delegated writes. */
+  public get encryptor(): PdfEncryptor | null {
+    return this._inner.encryptor;
+  }
+  public set encryptor(value: PdfEncryptor | null) {
+    this._inner.encryptor = value;
   }
 
   public getNewId(): number {
@@ -47,7 +63,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     dictionary: Map<string, string>,
     bytes: Uint8Array,
     length?: number,
-    _ct?: any
+    _ct?: unknown
   ): Promise<void> {
     const slice = length != null ? bytes.slice(0, length) : bytes;
     this._inner.writeBinaryObject(id, dictionary, slice);
@@ -58,7 +74,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     dictionary: Map<string, string>,
     bytes: Uint8Array,
     length?: number,
-    _ct?: any
+    _ct?: unknown
   ): Promise<void> {
     const slice = length != null ? bytes.slice(0, length) : bytes;
     const { deflate } = await import('../../Platform/PlatformIO');
@@ -70,14 +86,14 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
 
   public async writeLinkAnnotationAsync(
     id: number,
-    link: any,
+    link: RegisteredLink,
     pageIds: number[],
     structParentKey?: number
   ): Promise<void> {
     this._inner.writeLinkAnnotation(id, link, pageIds, structParentKey);
   }
 
-  public async writeViewerPreferencesAsync(id: number, settings: any): Promise<number> {
+  public async writeViewerPreferencesAsync(id: number, settings: ViewerPreferencesSettings): Promise<number> {
     return this._inner.writeViewerPreferences(id, settings);
   }
 
@@ -85,7 +101,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     id: number,
     pagesId: number,
     firstPageId: number,
-    settings: any,
+    settings: DocumentSettings,
     options: CatalogOptions
   ): Promise<void> {
     this._inner.writeCatalog(id, pagesId, firstPageId, settings, options);

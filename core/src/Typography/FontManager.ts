@@ -239,13 +239,13 @@ export class FontManager {
     const io = getPlatformIO();
     if (!io.readFileSync) return; // sync IO unavailable (browser) - nothing to register
     for (const [file, family, weight] of BUNDLED_FONTS) {
-      try {
-        // Forward slashes are valid path separators on every Node platform.
-        const bytes = io.readFileSync(`${fontsDir}/${file}.ttf`);
-        this.registerFont(bytes, { family, subfamily: weight });
-      } catch {
-        // Missing or unreadable file - skip silently.
-      }
+      // Forward slashes are valid path separators on every Node platform.
+      const path = `${fontsDir}/${file}.ttf`;
+      // Cheap existence check so missing variants are skipped
+      // then register the *path* only - bytes are read and parsed lazily on
+      // first use, keeping package import time flat.
+      if (io.fileExistsSync && !io.fileExistsSync(path)) continue;
+      this.registerFontFilePath(`${family}:${weight}`, path);
     }
   }
 

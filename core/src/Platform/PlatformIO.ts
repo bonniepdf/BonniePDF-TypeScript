@@ -19,6 +19,8 @@ export interface IPlatformIO {
   readFileSync?(path: string): Uint8Array;
   /** Writes binary data to a file synchronously. Node.js only - see {@link readFileSync}. */
   writeFileSync?(path: string, data: Uint8Array): void;
+  /** Returns true when the file exists (cheap stat, no read). Node.js only - see {@link readFileSync}. */
+  fileExistsSync?(path: string): boolean;
   /**
    * Compresses data using DEFLATE (zlib / RFC 1950 wrapping).
    * The output is suitable for PDF's /FlateDecode stream filter.

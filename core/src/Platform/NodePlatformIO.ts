@@ -35,6 +35,10 @@ export class NodePlatformIO implements IPlatformIO {
     fs.writeFileSync(path, data);
   }
 
+  fileExistsSync(path: string): boolean {
+    return fs.existsSync(path);
+  }
+
   async deflate(data: Uint8Array): Promise<Uint8Array> {
     const { promisify } = await import('node:util');
     const { deflate: zlibDeflate } = await import('node:zlib');

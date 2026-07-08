@@ -13,6 +13,11 @@ import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging
  */
 export class Container extends BorderedElementBase implements IContentContainer {
   public child?: IElement;
+
+  /** @inheritdoc */
+  public getChildren(): readonly IElement[] {
+    return this.child ? [this.child] : [];
+  }
   /**
    * Padding inside the container, inside the border
    */

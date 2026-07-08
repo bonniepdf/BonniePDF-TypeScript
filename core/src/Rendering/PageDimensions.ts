@@ -1,5 +1,6 @@
 import { PdfSize } from '../Configuration/PdfSize';
 import { RenderContext } from './RenderContext';
+import type { RegisteredLink } from './RegisteredLink';
 
 export class PageDimensions {
   public size: PdfSize;
@@ -14,9 +15,9 @@ export class PageDimensions {
 export class PageRenderOutput {
   public contentStream: string;
   public size: PdfSize;
-  public hyperlinks: any[];
+  public hyperlinks: RegisteredLink[];
 
-  constructor(contentStream: string, size: PdfSize, hyperlinks: any[] = []) {
+  constructor(contentStream: string, size: PdfSize, hyperlinks: RegisteredLink[] = []) {
     this.contentStream = contentStream;
     this.size = size;
     this.hyperlinks = hyperlinks;

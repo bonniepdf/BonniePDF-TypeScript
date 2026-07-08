@@ -6,9 +6,10 @@ import { FontWeight } from './FontWeight';
  */
 export class FontFamilyDefinition {
   /**
-   * Regular (Normal weight, non-italic) variant path
+   * Regular (Normal weight, non-italic) variant path. Required — every
+   * family definition must provide at least the regular variant.
    */
-  public regular: string;
+  public regular!: string;
   /**
    * Bold variant path. Falls back to Regular if not set.
    */

@@ -1,4 +1,4 @@
-import { IElement } from '../IElement';
+import { IElement, RenderContext } from '../IElement';
 import { IBackgroundColor } from '../Layout/IBackgroundColor';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
@@ -130,7 +130,7 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   public getPreferredWidth(): number {
     return 0;
   }
-  public render(ctx: any, width: number): void {}
+  public render(_ctx: RenderContext, _width: number): void {}
 }
 
 import { TableCell } from './TableCell';

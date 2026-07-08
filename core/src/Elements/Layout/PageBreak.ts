@@ -22,7 +22,7 @@ export class PageBreak extends ElementBase {
     return 0;
   }
 
-  protected renderContent(_ctx: any, _contentWidth: number): void {
+  protected renderContent(_ctx: RenderContext, _contentWidth: number): void {
     // No-op
   }
 }

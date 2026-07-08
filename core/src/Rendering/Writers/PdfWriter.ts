@@ -2,8 +2,11 @@ import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { PdfVersion } from '../../Configuration/PdfVersion';
 import { ZoomLevel } from '../../Configuration/ZoomLevel';
 import { PageModeEnum } from '../../Configuration/PageMode';
-import { IPdfWriter } from './IPdfWriter';
+import { IPdfWriter, ViewerPreferencesSettings } from './IPdfWriter';
 import { CatalogOptions } from './CatalogOptions';
+import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
+import type { DocumentSettings } from '../../Configuration/DocumentSettings';
+import type { RegisteredLink } from '../RegisteredLink';
 
 // ─── Encoding helper ─────────────────────────────────────────────────────────
 
@@ -73,7 +76,7 @@ export class PdfWriter implements IPdfWriter {
   private readonly _offsets = new Map<number, number>();
   private _currentObjId = 0;
   private _encryptId = 0;
-  public encryptor: any = null;
+  public encryptor: PdfEncryptor | null = null;
 
   constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
     const header =
@@ -179,7 +182,7 @@ export class PdfWriter implements IPdfWriter {
   /**
    * Writes a link annotation object (URI or in-document GoTo).
    */
-  public writeLinkAnnotation(id: number, link: any, pageIds: number[], structParentKey?: number): number {
+  public writeLinkAnnotation(id: number, link: RegisteredLink, pageIds: number[], structParentKey?: number): number {
     const dict = new Map<string, string>([
       ['/Type', '/Annot'],
       ['/Subtype', '/Link'],
@@ -224,7 +227,7 @@ export class PdfWriter implements IPdfWriter {
    * Writes a /ViewerPreferences dictionary if any preferences are set.
    * Returns the object ID written, or 0 if no preferences needed.
    */
-  public writeViewerPreferences(id: number, settings: any): number {
+  public writeViewerPreferences(id: number, settings: ViewerPreferencesSettings): number {
     const dict = new Map<string, string>();
     if (settings.hideToolbar) dict.set('/HideToolbar', 'true');
     if (settings.hideMenubar) dict.set('/HideMenubar', 'true');
@@ -241,20 +244,26 @@ export class PdfWriter implements IPdfWriter {
    * Writes the PDF /Catalog object with OpenAction, PageMode, ViewerPreferences,
    * Outlines, XMP Metadata, OutputIntents, and MarkInfo as applicable.
    */
-  public writeCatalog(id: number, pagesId: number, firstPageId: number, settings: any, options: CatalogOptions): void {
+  public writeCatalog(
+    id: number,
+    pagesId: number,
+    firstPageId: number,
+    settings: DocumentSettings,
+    options: CatalogOptions
+  ): void {
     const dict = new Map<string, string>([
       ['/Type', '/Catalog'],
       ['/Pages', `${pagesId} 0 R`],
       ['/OpenAction', this.getOpenActionString(firstPageId, settings)],
     ]);
 
-    if (options?.outlinesId > 0) dict.set('/PageMode', '/UseOutlines');
+    if (options?.outlinesId) dict.set('/PageMode', '/UseOutlines');
     else if (settings.pageMode && settings.pageMode !== PageModeEnum.UseNone)
       dict.set('/PageMode', `/${settings.pageMode}`);
 
-    if (options?.viewerPrefsId > 0) dict.set('/ViewerPreferences', `${options.viewerPrefsId} 0 R`);
-    if (options?.outlinesId > 0) dict.set('/Outlines', `${options.outlinesId} 0 R`);
-    if (options?.xmpMetadataId > 0) dict.set('/Metadata', `${options.xmpMetadataId} 0 R`);
+    if (options?.viewerPrefsId) dict.set('/ViewerPreferences', `${options.viewerPrefsId} 0 R`);
+    if (options?.outlinesId) dict.set('/Outlines', `${options.outlinesId} 0 R`);
+    if (options?.xmpMetadataId) dict.set('/Metadata', `${options.xmpMetadataId} 0 R`);
     if (options?.outputIntentIds?.length > 0) {
       const refs = options.outputIntentIds.map(oid => `${oid} 0 R`).join(' ');
       dict.set('/OutputIntents', `[ ${refs} ]`);
@@ -339,7 +348,7 @@ export class PdfWriter implements IPdfWriter {
     this._output.writeString(`startxref\n${xrefPos}\n%%EOF`);
   }
 
-  private getOpenActionString(firstPageId: number, settings: any): string {
+  private getOpenActionString(firstPageId: number, settings: DocumentSettings): string {
     switch (settings.defaultZoom) {
       case ZoomLevel.FitPage:
         return `[ ${firstPageId} 0 R /Fit ]`;

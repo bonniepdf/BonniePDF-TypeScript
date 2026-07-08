@@ -1,6 +1,7 @@
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { IPdfWriter } from './IPdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
+import type { BookmarkItem } from '../../Configuration/BookmarkItem';
 
 /**
  * Writes PDF navigation objects (Outlines/Bookmarks) to PDF.
@@ -11,16 +12,16 @@ export class NavigationWriter {
     private asyncWriter?: IAsyncPdfWriter
   ) {}
 
-  public writeOutlineTree(rootId: number, bookmarks: any[], pageIds: number[]): number {
+  public writeOutlineTree(rootId: number, bookmarks: BookmarkItem[], pageIds: number[]): number {
     if (!bookmarks || bookmarks.length === 0) return 0;
 
-    const flatList: Array<{ item: any; id: number; parentId: number; depth: number }> = [];
+    const flatList: Array<{ item: BookmarkItem; id: number; parentId: number; depth: number }> = [];
 
-    const flatten = (items: any[], parentId: number, depth: number): void => {
+    const flatten = (items: BookmarkItem[], parentId: number, depth: number): void => {
       for (const item of items) {
         const itemId = this.writer.getNewId();
         flatList.push({ item, id: itemId, parentId, depth });
-        if (item.children?.length > 0) flatten(item.children, itemId, depth + 1);
+        if (item.children.length > 0) flatten(item.children, itemId, depth + 1);
       }
     };
     flatten(bookmarks, rootId, 0);
@@ -68,7 +69,7 @@ export class NavigationWriter {
       if (siblingIdx < siblings.length - 1) dict.set('/Next', `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
 
       const myChildren = childrenByParent.get(itemId);
-      if (myChildren?.length > 0) {
+      if (myChildren && myChildren.length > 0) {
         dict.set('/Count', countVisible(itemId).toString());
         dict.set('/First', `${flatList[myChildren[0]].id} 0 R`);
         dict.set('/Last', `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
@@ -78,7 +79,7 @@ export class NavigationWriter {
     return rootId;
   }
 
-  public async writeOutlineTreeAsync(rootId: number, bookmarks: any[], pageIds: number[]): Promise<number> {
+  public async writeOutlineTreeAsync(rootId: number, bookmarks: BookmarkItem[], pageIds: number[]): Promise<number> {
     // Delegate synchronously - async path is out of scope
     return this.writeOutlineTree(rootId, bookmarks, pageIds);
   }

@@ -3,10 +3,12 @@
  * Internally stores values as floats (0.0 to 1.0) for high-precision PDF operations.
  */
 export class Color {
-  private readonly r: number;
-  private readonly g: number;
-  private readonly b: number;
-  private readonly a: number;
+  // Not `readonly` so fromScRgb can overwrite the byte-normalised values with
+  // raw scRGB floats after construction; never mutated once a Color escapes.
+  private r: number;
+  private g: number;
+  private b: number;
+  private a: number;
 
   /**
    * Creates a new Color from byte values (0-255).
@@ -33,10 +35,10 @@ export class Color {
    */
   static fromScRgb(r: number, g: number, b: number, a: number = 1.0): Color {
     const color = new Color(0, 0, 0);
-    (color as any).r = Math.max(0, Math.min(1, r));
-    (color as any).g = Math.max(0, Math.min(1, g));
-    (color as any).b = Math.max(0, Math.min(1, b));
-    (color as any).a = Math.max(0, Math.min(1, a));
+    color.r = Math.max(0, Math.min(1, r));
+    color.g = Math.max(0, Math.min(1, g));
+    color.b = Math.max(0, Math.min(1, b));
+    color.a = Math.max(0, Math.min(1, a));
     return color;
   }
 

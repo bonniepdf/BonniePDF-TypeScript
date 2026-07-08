@@ -53,7 +53,7 @@ export async function exportSvgDocumentAsync(
   const opts = { ...SVG_PAGE_EXPORT_DEFAULTS, ...options };
 
   const settings = document.settings;
-  const pages = document.pages as any[];
+  const pages = document.pages;
   if (!pages || pages.length === 0) {
     throw new Error('Document must have at least one page');
   }
@@ -73,12 +73,12 @@ export async function exportSvgDocumentAsync(
       if (el) collectEmbeddedFonts(el, embeddedPaths);
     }
   }
-  const wmFont = (settings as any).watermark?.fontName;
+  const wmFont = settings.watermark?.fontName;
   if (wmFont && PdfResourceRegistry.isEmbeddedFont(wmFont)) embeddedPaths.add(wmFont);
 
   // ── Phase 2: preload font bytes ─────────────────────────────────────────────
   const registry = new PdfResourceRegistry();
-  (registry as any).conformance = settings.conformance;
+  registry.conformance = settings.conformance;
   // PDF/UA requires standard fonts to be embedded independently of PDF/A.
   // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
   registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
@@ -119,7 +119,7 @@ export async function exportSvgDocumentAsync(
   const recorder = opts.captureLayout ? new LayoutRecorder() : undefined;
   if (recorder) ctx.layoutRecorder = recorder;
 
-  const outputs = SvgRenderPipeline.renderPages(pages as any, settings, ctx);
+  const outputs = SvgRenderPipeline.renderPages(pages, settings, ctx);
 
   // The full document is laid out above (so pagination is correct); only the
   // first maxPages pages are serialized when a limit is requested.
@@ -195,7 +195,7 @@ function buildFontFaceCss(usage: ReadonlyMap<string, { font: TtfFont; codePoints
 
 function resolveTitle(document: Document, explicit?: string): string {
   if (explicit) return explicit;
-  const metaTitle = (document as any).metadata?.title;
+  const metaTitle = document.metadata?.title;
   if (typeof metaTitle === 'string' && metaTitle.length > 0) return metaTitle;
   return 'BonniePDF document';
 }

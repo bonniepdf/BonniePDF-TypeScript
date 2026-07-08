@@ -10,6 +10,8 @@ import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import type { TaggingContext } from './Tagging/TaggingContext';
 import type { LayoutRecorder } from './LayoutRecorder';
+import type { RegisteredLink } from './RegisteredLink';
+import type { RenderContext as RenderContextContract } from '../Elements/IElement';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
 const CONTAINER_ROLE_TAGS = new Set([
@@ -35,13 +37,15 @@ export class DeferredXObjectInfo {
   public color!: Color;
 }
 
-export class RenderContext {
+// `implements` the structural contract elements program against
+// (Elements/IElement.ts) so any drift between the two is a compile error.
+export class RenderContext implements RenderContextContract {
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];
-  public readonly pageHyperlinks: Map<number, any[]> = new Map();
+  public readonly pageHyperlinks: Map<number, RegisteredLink[]> = new Map();
   public readonly tocEntries: Map<string, number> = new Map();
 
-  public canvas: ICanvas;
+  public canvas!: ICanvas;
   public readonly isSvgMode: boolean;
 
   /**
@@ -382,7 +386,7 @@ export class RenderContext {
     return this.resources.getImageResourceName(imageId);
   }
 
-  public registerHyperlink(hyperlink: any): void {
+  public registerHyperlink(hyperlink: RegisteredLink): void {
     if (!this.pageHyperlinks.has(this.currentPageIndex)) {
       this.pageHyperlinks.set(this.currentPageIndex, []);
     }

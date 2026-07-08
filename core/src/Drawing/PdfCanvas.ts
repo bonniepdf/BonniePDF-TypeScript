@@ -11,6 +11,8 @@ import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 import type { ShadingRequest, ShadingStop } from '../Rendering/Pdf/GradientShading';
+import type { ImageInfo } from '../Rendering/Images/ImageInfo';
+import type { TtfFont } from '../Typography/TrueType/TtfFont';
 
 /** Resolves a gradient to native shading resources, or `null` to fall back to strips/discs. */
 type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softMaskGs: string | null } | null;
@@ -18,7 +20,7 @@ type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softM
 /** A maximal substring that renders with one font, after glyph-fallback resolution. */
 interface TextRun {
   resourceName: string;
-  embeddedFont: any;
+  embeddedFont: TtfFont | null;
   fontIdentifier: string;
   text: string;
 }
@@ -56,8 +58,8 @@ export class PdfCanvas implements ICanvas {
   private ctmStack: number[][] = [];
 
   private readonly _fontResolver: (fontFamily: string) => string;
-  private readonly _imageResolver: (image: any) => string;
-  private readonly _embeddedFontResolver: (fontFamily: string) => any;
+  private readonly _imageResolver: (image: ImageInfo) => string;
+  private readonly _embeddedFontResolver: (fontFamily: string) => TtfFont | null;
   private readonly _glyphTracker: (fontIdentifier: string, text: string) => void;
   private readonly _alphaGraphicsStateResolver: (alpha: number) => string;
   private readonly _textRunResolver?: (fontFamily: string, text: string) => TextRun[];
@@ -69,8 +71,8 @@ export class PdfCanvas implements ICanvas {
     xOffset = 0,
     yOffset = 0,
     fontResolver?: (fontFamily: string) => string,
-    imageResolver?: (image: any) => string,
-    embeddedFontResolver?: (fontFamily: string) => any,
+    imageResolver?: (image: ImageInfo) => string,
+    embeddedFontResolver?: (fontFamily: string) => TtfFont | null,
     glyphTracker?: (fontIdentifier: string, text: string) => void,
     alphaGraphicsStateResolver?: (alpha: number) => string,
     textRunResolver?: (fontFamily: string, text: string) => TextRun[],
@@ -298,7 +300,7 @@ export class PdfCanvas implements ICanvas {
     this.endColorAlpha(color);
   }
 
-  public drawImage(image: any, x: number, y: number, width: number, height: number): void {
+  public drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void {
     const imageName = this._imageResolver(image);
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);

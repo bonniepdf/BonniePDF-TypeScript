@@ -369,10 +369,10 @@ export class PdfResourceRegistry {
     return result;
   }
 
-  public resolveEmbeddedFont(fontIdentifier: string): any {
+  public resolveEmbeddedFont(fontIdentifier: string): TtfFont | null {
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
       const fontInfo = this.getEmbeddedFont(fontIdentifier);
-      return fontInfo?.font;
+      return fontInfo?.font ?? null;
     }
 
     // Check for virtual (bytes-based) font
@@ -384,7 +384,7 @@ export class PdfResourceRegistry {
     if (this.fontAliasMap.has(fontIdentifier)) {
       const ttfPath = this.fontAliasMap.get(fontIdentifier)!;
       const fontInfo = this.getEmbeddedFont(ttfPath);
-      return fontInfo?.font;
+      return fontInfo?.font ?? null;
     }
 
     return null;

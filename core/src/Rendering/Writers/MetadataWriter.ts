@@ -6,6 +6,7 @@ import { XmpMetadataWriter } from '../../Metadata/XmpMetadataWriter';
 import { XmpConformanceBlock } from '../../Metadata/XmpConformanceBlock';
 import { IPdfWriter } from './IPdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
+import type { DocumentMetadata } from '../../Configuration/DocumentMetadata';
 
 /**
  * Writes metadata objects (DocumentInfo and XMP) to PDF.
@@ -16,12 +17,12 @@ export class MetadataWriter {
     private asyncWriter?: IAsyncPdfWriter
   ) {}
 
-  public writeDocumentInfo(id: number, metadata: any): number {
+  public writeDocumentInfo(id: number, metadata: DocumentMetadata): number {
     this.writer.writeObject(id, MetadataWriter.buildDocumentInfoDict(metadata));
     return id;
   }
 
-  public writeXmpMetadata(id: number, metadata: any, settings: DocumentSettings): void {
+  public writeXmpMetadata(id: number, metadata: DocumentMetadata, settings: DocumentSettings): void {
     // XMP metadata is written unencrypted and uncompressed (PDF/A requirement).
     const dict = new Map<string, string>([
       ['/Type', '/Metadata'],
@@ -34,13 +35,17 @@ export class MetadataWriter {
     this.writer.writeUnencryptedBinaryObject(id, dict, bytes);
   }
 
-  public async writeDocumentInfoAsync(id: number, metadata: any): Promise<number> {
+  public async writeDocumentInfoAsync(id: number, metadata: DocumentMetadata): Promise<number> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     await this.asyncWriter.writeObjectAsync(id, MetadataWriter.buildDocumentInfoDict(metadata));
     return id;
   }
 
-  public async writeXmpMetadataAsync(id: number, metadata: any, settings: DocumentSettings): Promise<void> {
+  public async writeXmpMetadataAsync(
+    id: number,
+    metadata: DocumentMetadata,
+    settings: DocumentSettings
+  ): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     const dict = new Map<string, string>([
       ['/Type', '/Metadata'],
@@ -59,7 +64,7 @@ export class MetadataWriter {
   }
 
   /** Builds the /Info dictionary shared by the sync and async paths. */
-  private static buildDocumentInfoDict(metadata: any): Map<string, string> {
+  private static buildDocumentInfoDict(metadata: DocumentMetadata): Map<string, string> {
     const dict = new Map<string, string>();
     if (metadata.title) dict.set('/Title', PdfSyntax.encodeMetadataString(metadata.title));
     if (metadata.author) dict.set('/Author', PdfSyntax.encodeMetadataString(metadata.author));
@@ -71,8 +76,10 @@ export class MetadataWriter {
     if (metadata.modifiedDate) dict.set('/ModDate', `(${PdfSyntax.formatDate(metadata.modifiedDate)})`);
     if (metadata.trapped !== undefined) dict.set('/Trapped', metadata.trapped ? '/True' : '/False');
     if (metadata.customProperties) {
-      for (const [key, value] of Object.entries(metadata.customProperties)) {
-        dict.set(`/${PdfSyntax.escape(key)}`, PdfSyntax.encodeMetadataString(value as string));
+      // customProperties is a Map; Object.entries() on a Map yields nothing,
+      // which silently dropped every custom property before this was typed.
+      for (const [key, value] of metadata.customProperties) {
+        dict.set(`/${PdfSyntax.escape(key)}`, PdfSyntax.encodeMetadataString(value));
       }
     }
     return dict;

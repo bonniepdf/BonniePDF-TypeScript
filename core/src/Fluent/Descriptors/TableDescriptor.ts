@@ -117,7 +117,7 @@ export class TableDescriptor {
     table.headerBackgroundColor = this._headerBackgroundColor;
     table.headerTextColor = this._headerTextColor;
     table.border = this._border;
-    table.borderColors = this._borderColors;
+    if (this._borderColors) table.borderColors = this._borderColors;
 
     // Build header rows
     for (const headerAction of this.headerActions) {

@@ -18,6 +18,11 @@ export abstract class ListElementBase extends TextElementBase {
     return [];
   }
 
+  /** @inheritdoc */
+  public getChildren(): readonly ListElementBase[] {
+    return this.getNestedLists();
+  }
+
   /**
    * Wraps the subclass item rendering in an `L` structure element when tagging is
    * active, so the outer container is present in the structure tree for both

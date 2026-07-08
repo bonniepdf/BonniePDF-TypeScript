@@ -48,11 +48,14 @@ export class ImageWriter {
    */
   constructor(asyncWriter: IAsyncPdfWriter);
   constructor(writerOrAsync: IPdfWriter | IAsyncPdfWriter) {
-    if ('getNewId' in writerOrAsync && 'writeObjectAsync' in writerOrAsync) {
-      this.asyncWriter = writerOrAsync as IAsyncPdfWriter;
-      this.writer = writerOrAsync as any;
+    if ('writeObjectAsync' in writerOrAsync) {
+      this.asyncWriter = writerOrAsync;
+      // The sync-writer slot is only used for members both interfaces share
+      // (getNewId) when constructed with an async writer; the sync write
+      // methods are never reached on the async path.
+      this.writer = writerOrAsync as unknown as IPdfWriter;
     } else {
-      this.writer = writerOrAsync as IPdfWriter;
+      this.writer = writerOrAsync;
       this.asyncWriter = undefined;
     }
   }

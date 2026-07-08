@@ -1,11 +1,15 @@
 import { RenderStatus } from './RenderStatus';
 import type { LayoutRecorder } from '../Rendering/LayoutRecorder';
+import type { ICanvas } from '../Drawing/ICanvas';
+import type { TtfFont } from '../Typography/TrueType/TtfFont';
+import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
+import type { RegisteredLink } from '../Rendering/RegisteredLink';
 export { RenderStatus };
 
 export interface RenderContext {
   maxY: number;
   margin: number;
-  canvas?: any;
+  canvas: ICanvas;
   currentY: number;
   currentX: number;
   /** Index of the page currently being rendered (0-based). */
@@ -16,20 +20,18 @@ export interface RenderContext {
    */
   layoutRecorder?: LayoutRecorder;
   pageSize: { width: number; height: number };
-  currentStream: any;
+  currentStream: string;
   registerFont(fontName: string): string;
-  resolveEmbeddedFont(fontName: string): any;
+  resolveEmbeddedFont(fontName: string): TtfFont | null;
   trackGlyphUsage(fontName: string, text: string): void;
-  registerHyperlink(hyperlink: any): void;
+  registerHyperlink(hyperlink: RegisteredLink): void;
   newPage(): void;
   isLastPage: boolean;
   /**
    * PDF/UA tagging context, set by the concrete `Rendering/RenderContext`
-   * when accessibility is on. Typed loosely here to avoid cross-module
-   * cycles; elements that need it (currently Table) cast to the concrete
-   * `TaggingContext` shape they actually use.
+   * when accessibility is on (type-only import, so no runtime cycle).
    */
-  tagging?: any;
+  tagging?: TaggingContext;
 }
 
 /**
@@ -50,6 +52,13 @@ export interface IElement {
    * Renders this element to the PDF context
    */
   render(ctx: RenderContext, width: number): void;
+  /**
+   * Canonical child traversal for engine tree walks (the default-style
+   * cascade, font/image discovery). Container elements return their direct
+   * renderable children; leaf elements omit it. Optional so existing custom
+   * IElement implementations remain source-compatible.
+   */
+  getChildren?(): readonly IElement[];
 }
 
 /**

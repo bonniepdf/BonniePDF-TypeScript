@@ -42,20 +42,17 @@ export * from './Rendering/Tagging/StructureTreeException';
 export * from './Rendering/Tagging/TaggingContext';
 export * from './Rendering/Tagging/IRoleProvider';
 export * from './Rendering/Tagging/IAltTextProvider';
-export * from './Rendering/Writers/StructureTreeWriter';
+export type { RegisteredLink } from './Rendering/RegisteredLink';
 export * from './Metadata/XmpConformanceBlock';
 
+// User-facing encryption configuration. The cipher/key-derivation internals
+// (md5, rc4Cipher, aesCipher, pdfEncryptionKey, PdfEncryptor, …) are
+// deliberately NOT part of the main surface; import them from the
+// '@bonniepdf/core/security' subpath if you genuinely need the primitives.
 export * from './Security/Models/EncryptionAlgorithm';
 export * from './Security/Models/EncryptionSettings';
 export * from './Security/Models/EncryptionOptions';
 export * from './Security/Permissions/PdfPermissions';
-export * from './Security/Permissions/PermissionEncoder';
-export * from './Security/Encryption/md5';
-export * from './Security/Encryption/rc4Cipher';
-export * from './Security/Encryption/aesCipher';
-export * from './Security/Encryption/pdfEncryptionKey';
-export * from './Security/Encryption/aes256EncryptionKey';
-export * from './Security/Encryption/pdfEncryptor';
 
 export type { IElement, IStatefulElement } from './Elements/IElement';
 export { RenderStatus } from './Elements/IElement';

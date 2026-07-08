@@ -1,4 +1,9 @@
 import { IPlatformIO } from './PlatformIO';
+// Static import per the repo invariant: dynamic require() is compiled by tsup
+// to a shim that throws under Node ESM. This module is Node-only and never
+// enters the browser graph (only index.node.ts and explicit configurePlatform
+// callers import it).
+import * as fs from 'node:fs';
 
 /**
  * Node.js platform I/O implementation.
@@ -19,6 +24,15 @@ export class NodePlatformIO implements IPlatformIO {
   async writeFile(path: string, data: Uint8Array): Promise<void> {
     const { writeFile } = await import('node:fs/promises');
     await writeFile(path, data);
+  }
+
+  readFileSync(path: string): Uint8Array {
+    const buffer = fs.readFileSync(path);
+    return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  }
+
+  writeFileSync(path: string, data: Uint8Array): void {
+    fs.writeFileSync(path, data);
   }
 
   async deflate(data: Uint8Array): Promise<Uint8Array> {

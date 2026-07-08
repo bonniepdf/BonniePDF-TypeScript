@@ -1,4 +1,5 @@
 import { TtfFont } from './TrueType/TtfFont';
+import { getPlatformIO } from '../Platform/PlatformIO';
 
 /**
  * Standard PDF font identifier → Liberation family+weight lookup.
@@ -235,28 +236,22 @@ export class FontManager {
    * `LiberationSerif-Bold.ttf`, etc. Missing or unreadable files are skipped silently.
    */
   public static autoRegisterBundledFonts(fontsDir: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs: typeof import('fs') = require('fs');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const path: typeof import('path') = require('path');
+    const io = getPlatformIO();
+    if (!io.readFileSync) return; // sync IO unavailable (browser) - nothing to register
     for (const [file, family, weight] of BUNDLED_FONTS) {
-      const fullPath = path.join(fontsDir, `${file}.ttf`);
-      if (!fs.existsSync(fullPath)) continue;
       try {
-        const bytes = Uint8Array.from(fs.readFileSync(fullPath));
+        // Forward slashes are valid path separators on every Node platform.
+        const bytes = io.readFileSync(`${fontsDir}/${file}.ttf`);
         this.registerFont(bytes, { family, subfamily: weight });
       } catch {
-        // skip
+        // Missing or unreadable file - skip silently.
       }
     }
   }
 
   private static loadFileBytes(filePath: string): Uint8Array | undefined {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs: typeof import('fs') = require('fs');
-      const buf = fs.readFileSync(filePath);
-      return Uint8Array.from(buf);
+      return getPlatformIO().readFileSync?.(filePath);
     } catch {
       return undefined;
     }

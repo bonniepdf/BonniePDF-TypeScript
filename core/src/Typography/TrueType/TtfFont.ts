@@ -1,4 +1,5 @@
 import { BigEndianReader } from '../../Rendering/Images/BigEndianReader';
+import { getPlatformIO } from '../../Platform/PlatformIO';
 
 /**
  * TrueType font parser for PDF embedding.
@@ -24,16 +25,12 @@ export class TtfFont {
   // CONSTRUCTOR
   // =====================================================
 
-  constructor(public readonly filePath: string) {
-    // In Node.js, we'd read from file system
-    // For browser/agnostic, we'll accept raw data in a real implementation
-    // This is a simplified version
-    this.rawData = new Uint8Array(0);
-
-    // TODO: Load font data from file path
-    // This would require fs.readFileSync in Node.js
-    // For now, this is a placeholder
-    throw new Error('TtfFont from file path not yet implemented - use loadFromBytes instead');
+  private constructor(
+    public readonly filePath: string,
+    data: Uint8Array
+  ) {
+    this.rawData = data;
+    this.parse();
   }
 
   /**
@@ -41,55 +38,32 @@ export class TtfFont {
    * Must be called after configurePlatform() has been invoked.
    */
   public static async fromFile(path: string): Promise<TtfFont> {
-    const { getPlatformIO } = await import('../../Platform/PlatformIO');
     const data = await getPlatformIO().readFile(path);
     return TtfFont.loadFromBytes(data);
   }
 
   /**
    * Loads a TtfFont synchronously from a file path.
-   * Only works in Node.js environments - throws in browser contexts.
+   * Requires a platform with synchronous file IO (Node.js via the node entry
+   * point or `configurePlatform(new NodePlatformIO())`); throws in browser
+   * contexts.
    */
   public static fromFileSync(filePath: string): TtfFont {
-    if (typeof process === 'undefined' || !process.versions?.node) {
+    const io = getPlatformIO();
+    if (!io.readFileSync) {
       throw new Error(
         'TtfFont.fromFileSync() is only available in Node.js. ' +
           'Use TtfFont.fromFile(url) with BrowserPlatformIO in browser environments.'
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs: typeof import('fs') = require('fs');
-    const nodeBuffer = fs.readFileSync(filePath);
-    return TtfFont.loadFromBytes(Uint8Array.from(nodeBuffer));
+    return TtfFont.loadFromBytes(io.readFileSync(filePath));
   }
 
   /**
    * Creates a TtfFont from raw font data.
    */
   public static loadFromBytes(data: Uint8Array): TtfFont {
-    const font = Object.create(TtfFont.prototype) as TtfFont;
-    (font as any).charToGlyph = new Map<number, number>();
-    (font as any).glyphWidths = new Map<number, number>();
-    (font as any).tables = new Map<string, { offset: number; length: number }>();
-    (font as any).kernPairs = new Map<string, number>();
-    (font as any).rawData = data;
-    (font as any).filePath = '<from bytes>';
-    (font as any).numberOfHMetrics = 0;
-    font.postScriptName = 'Unknown';
-    font.fontFamily = 'Unknown';
-    font.fontSubfamily = 'Regular';
-    font.unitsPerEm = 1000;
-    font.ascender = 0;
-    font.descender = 0;
-    font.capHeight = 0;
-    font.xHeight = 0;
-    (font as any).bBox = [0, 0, 0, 0] as [number, number, number, number];
-    font.italicAngle = 0;
-    font.stemV = 80;
-    font.flags = 32;
-    font.numberOfGlyphs = 0;
-    (font as any).parse();
-    return font;
+    return new TtfFont('<from bytes>', data);
   }
 
   // =====================================================

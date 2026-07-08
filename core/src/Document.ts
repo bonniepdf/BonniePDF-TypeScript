@@ -12,11 +12,33 @@ import { PdfWriter } from './Rendering/Writers/PdfWriter';
 import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
 import { TextElementBase } from './Elements/Text/TextElementBase';
+import type { TextStyle } from './Elements/Text/TextStyle';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 import { FileAttachment } from './Attachments/FileAttachment';
 import { AttachmentRelationship } from './Attachments/AttachmentRelationship';
+
+/** Options for creating a {@link Document}. */
+export interface DocumentOptions {
+  /** Document settings; a default instance is created when omitted. */
+  settings?: DocumentSettings;
+  /** Document metadata; a default instance is created when omitted. */
+  metadata?: DocumentMetadata;
+}
+
+/** Options for {@link Document.addPage}. */
+export interface AddPageOptions {
+  /** Page size; defaults to the document's configured page size. */
+  size?: PdfSize;
+  /**
+   * Page orientation. When set, it is applied to `size` (or the document's
+   * page size). When omitted with no `size`, the document orientation applies.
+   */
+  orientation?: PageOrientation;
+  /** Page margin in points; defaults to the document's margin. */
+  margin?: number;
+}
 
 /**
  * High-level entry point for creating PDF documents.
@@ -53,19 +75,27 @@ export class Document {
 
   /** Creates a new document with default settings and an empty first page. */
   constructor();
-  /** Creates a new document with the given settings and an empty first page. */
+  /**
+   * Creates a new document from an options object (the primary form).
+   * @example new Document({ settings, metadata })
+   */
+  constructor(options: DocumentOptions);
+  /** Convenience: creates a new document with the given settings. */
   constructor(settings: DocumentSettings);
-  /** Creates a new document with the given metadata and an empty first page. */
+  /** Convenience: creates a new document with the given metadata. */
   constructor(metadata: DocumentMetadata);
-  /** Creates a new document with the given settings and metadata. */
+  /** Convenience: creates a new document with the given settings and metadata. */
   constructor(settings: DocumentSettings, metadata: DocumentMetadata);
-  constructor(settingsOrMetadata?: DocumentSettings | DocumentMetadata, metadata?: DocumentMetadata) {
-    if (settingsOrMetadata instanceof DocumentMetadata) {
+  constructor(arg?: DocumentOptions | DocumentSettings | DocumentMetadata, metadata?: DocumentMetadata) {
+    if (arg instanceof DocumentMetadata) {
       this.settings = new DocumentSettings();
-      this.metadata = settingsOrMetadata;
-    } else {
-      this.settings = (settingsOrMetadata as DocumentSettings) ?? new DocumentSettings();
+      this.metadata = arg;
+    } else if (arg instanceof DocumentSettings) {
+      this.settings = arg;
       this.metadata = metadata ?? new DocumentMetadata();
+    } else {
+      this.settings = arg?.settings ?? new DocumentSettings();
+      this.metadata = arg?.metadata ?? new DocumentMetadata();
     }
     // Auto-create the first page (mirrors C# behaviour)
     this.addPage();
@@ -138,15 +168,28 @@ export class Document {
 
   /** Adds a new page using the document's default size and margin. */
   public addPage(): Page;
-  /** Adds a new page with the given size and the document's default margin. */
+  /**
+   * Adds a new page configured by an options object (the primary form).
+   * @example doc.addPage({ orientation: PageOrientation.Landscape, margin: 30 })
+   */
+  public addPage(options: AddPageOptions): Page;
+  /** Convenience: adds a new page with the given size and the document's default margin. */
   public addPage(pageSize: PdfSize): Page;
-  /** Adds a new page with the given size and margin. */
+  /** Convenience: adds a new page with the given size and margin. */
   public addPage(pageSize: PdfSize, margin: number): Page;
-  /** Adds a new page with the given size and orientation (document margin). */
+  /** Convenience: adds a new page with the given size and orientation (document margin). */
   public addPage(pageSize: PdfSize, orientation: PageOrientation): Page;
-  /** Adds a new page with the given size, orientation, and margin. */
+  /** Convenience: adds a new page with the given size, orientation, and margin. */
   public addPage(pageSize: PdfSize, orientation: PageOrientation, margin: number): Page;
-  public addPage(pageSize?: PdfSize, orientationOrMargin?: PageOrientation | number, margin?: number): Page {
+  public addPage(
+    pageSize?: PdfSize | AddPageOptions,
+    orientationOrMargin?: PageOrientation | number,
+    margin?: number
+  ): Page {
+    if (pageSize && !(pageSize instanceof PdfSize)) {
+      return this.addPageFromOptions(pageSize);
+    }
+
     if (!pageSize) {
       // Default: use document settings
       const size = this.settings.getOrientedPageSize();
@@ -173,6 +216,23 @@ export class Document {
 
     // addPage(size) - document margin
     const page = new Page(pageSize, this.settings.margin);
+    this._pages.push(page);
+    return page;
+  }
+
+  /** Resolves an {@link AddPageOptions} object with the same defaults as the positional forms. */
+  private addPageFromOptions(options: AddPageOptions): Page {
+    const margin = options.margin ?? this.settings.margin;
+    let size: PdfSize;
+    if (options.size) {
+      size = options.orientation !== undefined ? options.size.getOrientedSize(options.orientation) : options.size;
+    } else {
+      size =
+        options.orientation !== undefined
+          ? this.settings.pageSize.getOrientedSize(options.orientation)
+          : this.settings.getOrientedPageSize();
+    }
+    const page = new Page(size, margin);
     this._pages.push(page);
     return page;
   }
@@ -282,15 +342,18 @@ export class Document {
     return this.generateSvgPageAsync(0, options);
   }
 
-  /** Alias for generateBytes() - matches the C# ToByteArray() name. */
+  /**
+   * @deprecated Use {@link generateBytes} instead. This alias exists only to
+   * mirror the C# `ToByteArray()` name and will be removed in a future major.
+   */
   public toByteArray(): Uint8Array {
     return this.generateBytes();
   }
 
   /**
-   * Async alias for generateBytesAsync().
-   * Prefer `generateBytesAsync()` for clarity; this overload exists for
-   * compatibility with code that already calls `toByteArrayAsync()`.
+   * @deprecated Use {@link generateBytesAsync} instead. This alias exists only
+   * to mirror the C# `ToByteArrayAsync()` name and will be removed in a future
+   * major.
    */
   public async toByteArrayAsync(): Promise<Uint8Array> {
     return this.generateBytesAsync();
@@ -298,26 +361,30 @@ export class Document {
 
   /**
    * Saves the document to the given file path synchronously.
-   * Requires a Node.js environment; throws in browser contexts - use saveAsync instead.
+   * Requires a platform with synchronous file IO (Node.js via the node entry
+   * point); throws in browser contexts - use saveAsync instead.
    */
   public save(path: string): void {
     if (!path) throw new Error('path cannot be null or empty.');
-    const bytes = this.generateBytes();
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const fs: typeof import('fs') = require('fs');
-      fs.writeFileSync(path, bytes);
-    } catch (err) {
-      throw new Error(`Document.save() requires Node.js. Use saveAsync() in browser environments. (${err})`);
+    const io = getPlatformIO();
+    if (!io.writeFileSync) {
+      throw new Error(
+        'Document.save() requires synchronous file IO, which is only available in Node.js. ' +
+          'Use saveAsync() in browser environments.'
+      );
     }
+    const bytes = this.generateBytes();
+    io.writeFileSync(path, bytes);
   }
 
   /**
-   * Saves the document to the given file path asynchronously via the configured platform I/O.
+   * Saves the document to the given file path asynchronously via the configured
+   * platform I/O. Uses the async generation path, so embedded fonts are
+   * preloaded (browser-safe) and AES-256 encryption is supported.
    */
   public async saveAsync(path: string): Promise<void> {
     if (!path) throw new Error('path cannot be null or empty.');
-    const bytes = this.generateBytes();
+    const bytes = await this.generateBytesAsync();
     await getPlatformIO().writeFile(path, bytes);
   }
 
@@ -333,37 +400,14 @@ export class Document {
     }
   }
 
-  private static applyStyleToElement(el: any, style: any): void {
+  private static applyStyleToElement(el: IElement, style: TextStyle): void {
     if (el instanceof TextElementBase) {
       el.applyDefaultStyleIfNotSet(style);
     }
-    // Walk VerticalStack / HorizontalStack children (exposed as .children)
-    if (Array.isArray(el.children)) {
-      for (const child of el.children) {
-        Document.applyStyleToElement(child, style);
-      }
-    }
-    // Walk Container.child (singular)
-    if (el.child && typeof el.child.render === 'function') {
-      Document.applyStyleToElement(el.child, style);
-    }
-    // Walk nested OrderedList / UnorderedList children.
-    if (typeof el.getNestedLists === 'function') {
-      for (const child of el.getNestedLists()) {
-        Document.applyStyleToElement(child, style);
-      }
-    }
-    // Walk Table rows via getAllRows()
-    if (typeof el.getAllRows === 'function') {
-      for (const row of el.getAllRows()) {
-        if (Array.isArray(row.cells)) {
-          for (const cell of row.cells) {
-            if (cell?.content && typeof cell.content.render === 'function') {
-              Document.applyStyleToElement(cell.content, style);
-            }
-          }
-        }
-      }
+    // Canonical traversal: containers expose their renderable children via
+    // IElement.getChildren() (stacks, Container, ContentSlot, lists, Table).
+    for (const child of el.getChildren?.() ?? []) {
+      Document.applyStyleToElement(child, style);
     }
   }
 

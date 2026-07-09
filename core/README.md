@@ -206,4 +206,4 @@ a competing PDF library or PDF-generation service.
 
 Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for Commercial license details.
 
-© 2024-present BonniePDF Contributors
+© 2026-present BonniePDF Contributors

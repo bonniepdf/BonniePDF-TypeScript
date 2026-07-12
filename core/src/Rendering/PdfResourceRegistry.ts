@@ -33,9 +33,7 @@ export interface ResolvedTextRun {
 }
 
 export type PdfAResourceIssueCode =
-  | 'non-embedded-standard-font'
-  | 'alpha-graphics-state-flattened'
-  | 'png-soft-mask-flattened';
+  'non-embedded-standard-font' | 'alpha-graphics-state-flattened' | 'png-soft-mask-flattened';
 
 export type PdfAResourceIssueSeverity = 'blocking' | 'mitigated';
 

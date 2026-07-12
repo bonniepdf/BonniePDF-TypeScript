@@ -44,62 +44,15 @@ const YEAR = 2025;
 const BAND = ColorPalette.emerald[900]; // brand band behind the title
 const SEAM = ColorPalette.amber[400]; // gold seam along the diagonal cut
 
-/** Draws the vector stand-in for the hero photograph (sky, sun, hills, label). */
+/** Neutral fallback fill for the hero region when no photograph is supplied. */
 function drawPlaceholderImage(canvas: ICanvas, w: number, photoBottom: number): void {
-  // Sky gradient.
   canvas.beginPath();
   canvas.addRect(0, 0, w, photoBottom);
   canvas.fillCurrentPath(
     new LinearGradientPaint(new Point(0, 0), new Point(0, photoBottom), [
-      { offset: 0, color: ColorPalette.sky[400] },
-      { offset: 1, color: ColorPalette.sky[100] },
+      { offset: 0, color: ColorPalette.emerald[700] },
+      { offset: 1, color: ColorPalette.emerald[900] },
     ])
-  );
-
-  // Sun.
-  const sx = w * 0.74;
-  const sy = photoBottom * 0.32;
-  const r = 46;
-  const k = r * 0.5522847498;
-  canvas.beginPath();
-  canvas.moveTo(sx + r, sy);
-  canvas.cubicBezierTo(sx + r, sy + k, sx + k, sy + r, sx, sy + r);
-  canvas.cubicBezierTo(sx - k, sy + r, sx - r, sy + k, sx - r, sy);
-  canvas.cubicBezierTo(sx - r, sy - k, sx - k, sy - r, sx, sy - r);
-  canvas.cubicBezierTo(sx + k, sy - r, sx + r, sy - k, sx + r, sy);
-  canvas.closePath();
-  canvas.fillCurrentPath(ColorPalette.amber[200]);
-
-  // Back hill.
-  canvas.beginPath();
-  canvas.moveTo(0, photoBottom);
-  canvas.lineTo(0, photoBottom * 0.72);
-  canvas.lineTo(w * 0.42, photoBottom * 0.52);
-  canvas.lineTo(w * 0.78, photoBottom * 0.78);
-  canvas.lineTo(w, photoBottom * 0.66);
-  canvas.lineTo(w, photoBottom);
-  canvas.closePath();
-  canvas.fillCurrentPath(ColorPalette.emerald[400]);
-
-  // Front hill.
-  canvas.beginPath();
-  canvas.moveTo(0, photoBottom);
-  canvas.lineTo(0, photoBottom * 0.86);
-  canvas.lineTo(w * 0.55, photoBottom * 0.66);
-  canvas.lineTo(w, photoBottom * 0.84);
-  canvas.lineTo(w, photoBottom);
-  canvas.closePath();
-  canvas.fillCurrentPath(ColorPalette.emerald[600]);
-
-  // Centred "placeholder" caption so the swap-in point is obvious.
-  canvas.drawText(
-    w / 2,
-    photoBottom * 0.14,
-    'PLACEHOLDER IMAGE — swap in canvas.drawImage(...)',
-    Color.white.withAlpha(0.85),
-    11,
-    StandardFonts.HelveticaBold,
-    TextAlignment.Center
   );
 }
 

@@ -124,31 +124,48 @@ export class Container extends BorderedElementBase implements IContentContainer 
     if (this.crispEdges) ctx.canvas.beginCrispEdges?.();
 
     try {
-      // Rounded-corner clipping: mask the background, border, and child to
-      // the rounded outline. Opened here and closed in the finally so the early
+      // Rounded-corner clipping: mask the background and child to the
+      // rounded outline. Opened here and closed in the finally so the early
       // childless return still balances the clip. The canvas methods are
       // optional; a canvas that doesn't support clipping leaves content un-masked.
+      //
+      // The border is deliberately drawn AFTER the clip ends: strokes paint
+      // centred on the path, so stroking inside a clip on the same path would
+      // shave off the outer half of the stroke - most visibly on the corner
+      // arcs, which render as broken/thinned. Drawing it outside the clip keeps
+      // the full stroke width, matching how un-clipped rounded containers render.
       const clip = this.clipContent && this.cornerRadius > 0;
+      const boxX = ctx.currentX;
+      const boxY = ctx.currentY;
       if (clip) {
-        ctx.canvas.beginRoundedClip?.(ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.cornerRadius);
+        ctx.canvas.beginRoundedClip?.(boxX, boxY, effectiveWidth, containerHeight, this.cornerRadius);
       }
 
       try {
-        this.renderClippedContent(ctx, effectiveWidth, containerHeight);
+        this.renderClippedContent(ctx, effectiveWidth, containerHeight, !clip);
       } finally {
         if (clip) ctx.canvas.endClip?.();
+      }
+
+      if (clip && this.border.hasAnyBorder) {
+        this.drawBorder(ctx, boxX, boxY, effectiveWidth, containerHeight);
       }
     } finally {
       if (this.crispEdges) ctx.canvas.endCrispEdges?.();
     }
   }
 
-  private renderClippedContent(ctx: RenderContext, effectiveWidth: number, containerHeight: number): void {
+  private renderClippedContent(
+    ctx: RenderContext,
+    effectiveWidth: number,
+    containerHeight: number,
+    drawBorderInline: boolean
+  ): void {
     if (this.backgroundColor) {
       this.drawBackground(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.backgroundColor);
     }
 
-    if (this.border.hasAnyBorder) {
+    if (drawBorderInline && this.border.hasAnyBorder) {
       this.drawBorder(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight);
     }
 
@@ -160,8 +177,13 @@ export class Container extends BorderedElementBase implements IContentContainer 
     const originalX = ctx.currentX;
     const yBeforePadding = ctx.currentY;
 
-    ctx.currentX += this.padding.left;
-    ctx.currentY += this.padding.top;
+    // The child renders inside the border box: measureContentHeight and the
+    // width below both reserve the border widths, so the origin must be offset
+    // by border.left/top as well - otherwise the child hugs the outer top-left
+    // edge and the reserved space piles up as a visible gap at the right and
+    // bottom edges (the border no longer "lines up" with the content).
+    ctx.currentX += this.border.left + this.padding.left;
+    ctx.currentY += this.border.top + this.padding.top;
     let childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
 
     const align = this.horizontalAlignment;
@@ -184,7 +206,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
     // by its measured height instead.
     if (yAfterChildRender === yBeforeChildRender) {
       const childHeight = this.child.measureHeight(childWidth);
-      ctx.currentY = yBeforePadding + this.padding.top + childHeight;
+      ctx.currentY = yBeforePadding + this.border.top + this.padding.top + childHeight;
     }
 
     ctx.currentY += this.padding.bottom;

@@ -2,6 +2,17 @@ import { embeddedFontFamily } from '@bonniepdf/core';
 import { examples, type ExampleDef } from '../index';
 
 /**
+ * Resolves the pre-loaded asset bytes an example needs before `generate()` runs
+ * (keyed by the paths in {@link ExampleDef.requiredAssets}). Supplied by the
+ * caller so this module stays filesystem-free: the Node build reads the bytes
+ * off disk, the browser fetches them. When omitted, examples render with their
+ * built-in placeholders. May be async.
+ */
+export type ExampleAssetLoader = (
+  def: ExampleDef
+) => ReadonlyMap<string, Uint8Array> | Promise<ReadonlyMap<string, Uint8Array>>;
+
+/**
  * One generated SVG file: a path relative to the output root and its contents.
  */
 export interface SvgAssetFile {
@@ -64,6 +75,13 @@ export interface BuildSvgAssetsOptions {
    * is byte-stable across runs (useful for CI diffing / committed artifacts).
    */
   deterministic?: boolean;
+  /**
+   * Supplies the pre-loaded assets (images, embedded data) each example needs.
+   * Without it, examples that require external assets render their built-in
+   * placeholder instead of the real artwork - so the gallery previews would
+   * diverge from the live viewer. See {@link ExampleAssetLoader}.
+   */
+  loadAssets?: ExampleAssetLoader;
 }
 
 const VIEWBOX_RE = /viewBox="0 0 ([\d.]+) ([\d.]+)"/;
@@ -97,7 +115,8 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
 
   for (const def of defs) {
     try {
-      const doc = def.generate();
+      const assets = options.loadAssets ? await options.loadAssets(def) : undefined;
+      const doc = def.generate(assets);
       const { pages: renderedPages, fontFaceCss } = await doc.generateSvgDocumentAsync({
         maxPages,
         precision,

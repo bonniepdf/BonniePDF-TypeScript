@@ -174,8 +174,12 @@ describe('Container — child positioning on render', () => {
     const startY = ctx.currentY;
     c.render(ctx, 500);
 
-    expect(probe.renderedX).toBeCloseTo(5, 4); // currentX + padding.left
-    expect(probe.renderedAtY).toBeCloseTo(startY + 10, 4); // + padding.top
+    // The child renders inside the border box: origin offset by border + padding
+    // on each leading edge, width reduced by both paddings and both borders.
+    // (Offsetting by padding alone while shrinking by the border too was the
+    // historical bug that left a border-width gap at the right/bottom edges.)
+    expect(probe.renderedX).toBeCloseTo(2 + 5, 4); // currentX + border.left + padding.left
+    expect(probe.renderedAtY).toBeCloseTo(startY + 2 + 10, 4); // + border.top + padding.top
     expect(probe.renderedWidth).toBeCloseTo(500 - 5 - 15 - 4, 4); // - padding - border
     // Y advanced by the full box: padTop + child + padBottom + border vertical.
     expect(ctx.currentY - startY).toBeCloseTo(10 + 10 + 20 + 4, 4);

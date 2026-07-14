@@ -57,7 +57,8 @@ export function lines(items: string[], o: CellOpts = {}): VerticalStack {
   return stack;
 }
 
-/** A labelled block: a bold eyebrow label over a body stack. */
+/** A labelled block: a bold eyebrow label over a body stack, returned in a
+ * Container so callers can add padding/background to the block. */
 export function labelled(label: string, body: IElement, accent: Color): Container {
   const stack = new VerticalStack();
   stack.addChild(cell(label, { bold: true, size: 8, color: accent, margin: new Thickness(0, 0, 0, 5) }));

@@ -19,6 +19,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   Color,
   ColorPalette,
   Thickness,
@@ -80,7 +81,7 @@ export function generate(): Document {
   root.addChild(accentBar(ACCENT));
 
   // ── Header: seller | INVOICE ────────────────────────────────────────────
-  const header = new Table(1.3, 1);
+  const header = new Grid(1.3, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
@@ -97,20 +98,16 @@ export function generate(): Document {
   title.fontSize = 26;
   title.textColor = ACCENT;
   title.alignment = TextAlignment.Right;
-  const titleCell = new Container();
   const titleStack = new VerticalStack();
   titleStack.addChild(title);
   titleStack.addChild(
     cell(`INV-US-${year}-0148`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
   );
-  titleCell.child = titleStack;
-  const sellerCell = new Container();
-  sellerCell.child = seller;
-  header.addRow(sellerCell, titleCell);
+  header.addRow(seller, titleStack);
   root.addChild(header);
 
   // ── Bill-to + details ────────────────────────────────────────────────────
-  const meta = new Table(1, 1);
+  const meta = new Grid(1, 1);
   meta.cellPadding = 12;
   meta.border = new Border(0.5);
   meta.borderColors = new BorderColors(RULE);
@@ -147,10 +144,8 @@ export function generate(): Document {
     const desc = new VerticalStack();
     desc.addChild(cell(it.description));
     if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
-    const descCell = new Container();
-    descCell.child = desc;
     table.addRow(
-      descCell,
+      desc,
       cell(String(it.qty), { align: TextAlignment.Center }),
       cell(money(it.unitPrice, USD), { align: TextAlignment.Right }),
       cell(money(amount, USD), { align: TextAlignment.Right })

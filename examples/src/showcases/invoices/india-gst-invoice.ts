@@ -20,6 +20,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   QRCode,
   QrEcc,
   Color,
@@ -77,7 +78,7 @@ export function generate(): Document {
   root.addChild(accentBar(ACCENT, 4));
 
   // ── Header: seller | e-invoice signed QR ──────────────────────────────────
-  const header = new Table(1.5, 1);
+  const header = new Grid(1.5, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 14, 0, 14);
@@ -110,23 +111,18 @@ export function generate(): Document {
   qr.errorCorrection = QrEcc.Medium;
   qr.foregroundColor = INK;
   qr.backgroundColor = Color.white;
+  qr.altText = `IRP-signed QR code for GST e-invoice INV-IN-${year}-0771`;
   const qrStack = new VerticalStack();
   const qrWrap = new HorizontalStack();
   qrWrap.widthDistribution = WidthDistribution.Weighted;
   qrWrap.addChild(new Container(), 1);
-  const qrBox = new Container();
-  qrBox.child = qr;
-  qrWrap.addChild(qrBox);
+  qrWrap.addChild(qr);
   qrStack.addChild(qrWrap);
   qrStack.addChild(
     cell('Signed QR (IRP)', { size: 8, color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0) })
   );
 
-  const sellerCell = new Container();
-  sellerCell.child = seller;
-  const qrCell = new Container();
-  qrCell.child = qrStack;
-  header.addRow(sellerCell, qrCell);
+  header.addRow(seller, qrStack);
   root.addChild(header);
 
   // ── IRN band ────────────────────────────────────────────────────────────
@@ -151,7 +147,7 @@ export function generate(): Document {
   root.addChild(irnBox);
 
   // ── Buyer + invoice details ────────────────────────────────────────────
-  const meta = new Table(1, 1);
+  const meta = new Grid(1, 1);
   meta.cellPadding = 12;
   meta.border = new Border(0.5);
   meta.borderColors = new BorderColors(RULE);

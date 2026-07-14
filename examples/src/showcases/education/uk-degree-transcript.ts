@@ -23,6 +23,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   QRCode,
   QrEcc,
   Color,
@@ -95,7 +96,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Institution header ────────────────────────────────────────────────────
-  const header = new Table(2.4, 1);
+  const header = new Grid(2.4, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 0, 0, 6);
@@ -115,11 +116,7 @@ export function generate(): Document {
   doctype.fontSize = 12;
   doctype.textColor = GOLD;
   doctype.alignment = TextAlignment.Right;
-  const uniCell = new Container();
-  uniCell.child = uni;
-  const typeCell = new Container();
-  typeCell.child = doctype;
-  header.addRow(uniCell, typeCell);
+  header.addRow(uni, doctype);
   doc.add(header);
 
   const navyRule = new Container();
@@ -130,7 +127,7 @@ export function generate(): Document {
   doc.add(navyRule);
 
   // ── Student details ───────────────────────────────────────────────────────
-  const details = new Table(1, 1);
+  const details = new Grid(1, 1);
   details.cellPadding = 0;
   details.border = Border.none;
   details.margin = new Thickness(0, 0, 0, 18);
@@ -142,11 +139,7 @@ export function generate(): Document {
   right.addChild(kv('Programme', 'BSc (Hons) Computer Science'));
   right.addChild(kv('Awarding body', 'University of Wessexbridge'));
   right.addChild(kv('Date conferred', '15 July 2026'));
-  const leftCell = new Container();
-  leftCell.child = left;
-  const rightCell = new Container();
-  rightCell.child = right;
-  details.addRow(leftCell, rightCell);
+  details.addRow(left, right);
   doc.add(details);
 
   // ── Award classification banner ───────────────────────────────────────────
@@ -218,9 +211,6 @@ export function generate(): Document {
         'University Academic Regulations.'
     )
   );
-  const vtextCell = new Container();
-  vtextCell.child = vtext;
-
   const qr = new QRCode();
   qr.data = 'https://verify.wessexbridge.ac.uk/t/20458812';
   qr.size = 92;
@@ -230,11 +220,9 @@ export function generate(): Document {
   const qrWrap = new Container();
   qrWrap.child = qr;
   qrWrap.horizontalAlignment = HorizontalAlignment.End;
-  const qrCell = new Container();
-  qrCell.child = qrWrap;
 
-  verify.addChild(vtextCell, 3);
-  verify.addChild(qrCell, 1);
+  verify.addChild(vtext, 3);
+  verify.addChild(qrWrap, 1);
   doc.add(verify);
 
   return doc;

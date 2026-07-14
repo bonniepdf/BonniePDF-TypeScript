@@ -150,6 +150,14 @@ export async function exportSvgDocumentAsync(
   if (recorder) {
     // Page sizes align with the emitted SVG pages.
     recorder.setPages(limited.map(o => ({ width: o.width, height: o.height })));
+    // Document-level accessibility/compliance context for the evaluator.
+    const metaTitle = document.metadata?.title;
+    recorder.setMeta({
+      accessibilityMode: settings.accessibility,
+      conformance: settings.conformance,
+      language: settings.language,
+      title: typeof metaTitle === 'string' && metaTitle.length > 0 ? metaTitle : undefined,
+    });
     snapshot = recorder.snapshot();
   }
 

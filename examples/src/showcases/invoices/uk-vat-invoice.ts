@@ -19,6 +19,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   ColorPalette,
   Thickness,
   Border,
@@ -69,7 +70,7 @@ export function generate(): Document {
   root.addChild(accentBar(ACCENT));
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Table(1.3, 1);
+  const header = new Grid(1.3, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
@@ -95,15 +96,11 @@ export function generate(): Document {
   titleStack.addChild(
     cell(`INV-UK-${year}-0311`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
   );
-  const sellerCell = new Container();
-  sellerCell.child = seller;
-  const titleCell = new Container();
-  titleCell.child = titleStack;
-  header.addRow(sellerCell, titleCell);
+  header.addRow(seller, titleStack);
   root.addChild(header);
 
   // ── Customer + tax point ──────────────────────────────────────────────────
-  const meta = new Table(1, 1);
+  const meta = new Grid(1, 1);
   meta.cellPadding = 12;
   meta.border = new Border(0.5);
   meta.borderColors = new BorderColors(RULE);

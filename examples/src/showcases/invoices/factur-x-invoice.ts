@@ -26,6 +26,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   Thickness,
   Border,
   BorderColors,
@@ -78,7 +79,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   root.addChild(accentBar(ACCENT));
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Table(1.3, 1);
+  const header = new Grid(1.3, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
@@ -97,15 +98,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     })
   );
   titleStack.addChild(cell('INV-2026-1001', { color: MUTED, align: TextAlignment.Right }));
-  const sellerCell = new Container();
-  sellerCell.child = seller;
-  const titleCell = new Container();
-  titleCell.child = titleStack;
-  header.addRow(sellerCell, titleCell);
+  header.addRow(seller, titleStack);
   root.addChild(header);
 
   // ── Buyer + details ─────────────────────────────────────────────────────
-  const meta = new Table(1, 1);
+  const meta = new Grid(1, 1);
   meta.cellPadding = 12;
   meta.border = new Border(0.5);
   meta.borderColors = new BorderColors(RULE);
@@ -142,10 +139,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     const desc = new VerticalStack();
     desc.addChild(cell(it.description));
     if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
-    const descCell = new Container();
-    descCell.child = desc;
     table.addRow(
-      descCell,
+      desc,
       cell(String(it.qty), { align: TextAlignment.Center }),
       cell(money(it.unitPrice, EUR, LOCALE), { align: TextAlignment.Right }),
       cell(money(amount, EUR, LOCALE), { align: TextAlignment.Right })
@@ -174,7 +169,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   root.addChild(totalsRow);
 
   // ── Remittance + embedded-XML panel ───────────────────────────────────────
-  const bottom = new Table(1.1, 1);
+  const bottom = new Grid(1.1, 1);
   bottom.cellPadding = 0;
   bottom.border = Border.none;
   bottom.margin = new Thickness(0, 20, 0, 0);

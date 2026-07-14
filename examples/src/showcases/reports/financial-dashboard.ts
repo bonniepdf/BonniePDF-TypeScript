@@ -11,6 +11,7 @@ import {
   VerticalStack,
   Container,
   Table,
+  Grid,
   Color,
   ColorPalette,
   Thickness,
@@ -95,15 +96,11 @@ export function generate(): Document {
   reportStack.addChild(reportTitle);
   reportStack.addChild(reportDate);
 
-  const headerLayout = new Table(1, 1);
+  const headerLayout = new Grid(1, 1);
   headerLayout.border = Border.none;
   headerLayout.cellPadding = 0;
 
-  const leftHeaderCell = new Container();
-  leftHeaderCell.child = companyStack;
-  const rightHeaderCell = new Container();
-  rightHeaderCell.child = reportStack;
-  headerLayout.addRow(leftHeaderCell, rightHeaderCell);
+  headerLayout.addRow(companyStack, reportStack);
 
   const header = new Container();
   header.backgroundColor = ESPRESSO;
@@ -210,7 +207,7 @@ export function generate(): Document {
   satisfactionCell.border = Border.leftOnly(0.75);
   satisfactionCell.borderColors = BorderColors.leftOnly(SAND);
 
-  const kpiTable = new Table(1, 1, 1, 1);
+  const kpiTable = new Grid(1, 1, 1, 1);
   kpiTable.border = Border.none;
   kpiTable.cellPadding = 0;
   kpiTable.addRow(totalRevenueCell, grossProfitCell, newCustomersCell, satisfactionCell);

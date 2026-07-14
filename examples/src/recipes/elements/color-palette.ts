@@ -58,18 +58,15 @@ function rowLabel(name: PaletteName): Container {
 }
 
 /** A centred header cell carrying a shade number (50, 100, … 950). */
-function headerCell(label: string): Container {
+function headerCell(label: string): TextBlock {
   const text = new TextBlock(label);
   text.fontName = StandardFonts.Helvetica;
   text.fontSize = 7;
   text.textColor = ColorPalette.slate[500];
+  // Centred via alignment; no wrapping Container needed — the cell it lands in
+  // already stretches with its column so the number stays centred over the swatch.
   text.alignment = TextAlignment.Center;
-
-  // No fixed width: the header cells stretch with their columns so the numbers stay centred
-  // above the swatches.
-  const box = new Container();
-  box.child = text;
-  return box;
+  return text;
 }
 
 export function generate(): Document {

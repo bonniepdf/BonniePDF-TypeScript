@@ -25,6 +25,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   Color,
   ColorPalette,
   Thickness,
@@ -108,7 +109,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Table(2.4, 1);
+  const header = new Grid(2.4, 1);
   header.cellPadding = 0;
   header.border = Border.none;
   const org = new VerticalStack();
@@ -133,11 +134,7 @@ export function generate(): Document {
   title.fontSize = 13;
   title.textColor = INK;
   title.alignment = TextAlignment.Right;
-  const orgCell = new Container();
-  orgCell.child = org;
-  const titleCell = new Container();
-  titleCell.child = title;
-  header.addRow(orgCell, titleCell);
+  header.addRow(org, title);
   doc.add(header);
 
   const blueRule = new Container();
@@ -150,7 +147,7 @@ export function generate(): Document {
   doc.add(blueRule);
 
   // ── Patient + specimen block ──────────────────────────────────────────────
-  const info = new Table(1, 1);
+  const info = new Grid(1, 1);
   info.cellPadding = 12;
   info.border = new Border(0.5);
   info.borderColors = new BorderColors(RULE);
@@ -169,11 +166,7 @@ export function generate(): Document {
   specimen.addChild(kv('Received', '06 Jul 2026 09:02'));
   specimen.addChild(kv('Reported', '06 Jul 2026 11:37'));
   specimen.addChild(kv('Requested by', 'Dr A. Kaur, Ward 12'));
-  const pCell = new Container();
-  pCell.child = patient;
-  const sCell = new Container();
-  sCell.child = specimen;
-  info.addRow(pCell, sCell);
+  info.addRow(patient, specimen);
   doc.add(info);
 
   // ── Result panels ─────────────────────────────────────────────────────────

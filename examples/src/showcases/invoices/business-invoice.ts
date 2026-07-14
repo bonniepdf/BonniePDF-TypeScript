@@ -9,8 +9,11 @@ import {
   TextAlignment,
   Heading,
   VerticalStack,
+  HorizontalStack,
+  WidthDistribution,
   Container,
   Table,
+  Grid,
   Color,
   Thickness,
   Border,
@@ -59,10 +62,13 @@ export function generate(): Document {
   mainStack.addChild(accentBar);
 
   // ── Header: Company | Invoice title ──────────────────────────────────────
-  const headerTable = new Table(1.2, 1);
-  headerTable.cellPadding = 0;
-  headerTable.border = Border.none;
-  headerTable.margin = new Thickness(0, 16, 0, 16);
+  // A single row of two proportional columns → HorizontalStack (weighted). It is
+  // a pure layout container, so its children tag themselves in reading order (no
+  // table structure), which is exactly right for a header band.
+  const headerRow = new HorizontalStack();
+  headerRow.widthDistribution = WidthDistribution.Weighted;
+  headerRow.spacing = 0;
+  headerRow.margin = new Thickness(0, 16, 0, 16);
 
   const companyStack = new VerticalStack();
   const studioElevenText = new TextBlock('STUDIO ELEVEN');
@@ -104,15 +110,14 @@ export function generate(): Document {
   const titleStack = new VerticalStack();
   titleStack.addChild(invoiceTitle);
 
-  const companyCell = new Container();
-  companyCell.child = companyStack;
-  const titleCell = new Container();
-  titleCell.child = titleStack;
-  headerTable.addRow(companyCell, titleCell);
-  mainStack.addChild(headerTable);
+  // A VerticalStack is itself an element, so it goes straight into the row — no
+  // wrapping Container needed (an unstyled Container is a pure passthrough).
+  headerRow.addChild(companyStack, 1.2);
+  headerRow.addChild(titleStack, 1);
+  mainStack.addChild(headerRow);
 
   // ── Bill To / Ship To / Details ───────────────────────────────────────────
-  const addressTable = new Table(1, 1, 1.1);
+  const addressTable = new Grid(1, 1, 1.1);
   addressTable.cellPadding = 10;
   addressTable.border = new Border(0.5);
   addressTable.borderColors = new BorderColors(BORDER_GRAY);
@@ -182,7 +187,7 @@ export function generate(): Document {
   detailsText.margin = new Thickness(0, 0, 0, 4);
   detailsStack.addChild(detailsText);
 
-  const invoiceNumberRow = new Table(0.9, 1);
+  const invoiceNumberRow = new Grid(0.9, 1);
   invoiceNumberRow.cellPadding = 0;
   invoiceNumberRow.border = Border.none;
   const invoiceText = new TextBlock('Invoice #');
@@ -198,7 +203,7 @@ export function generate(): Document {
   invoiceNumberRow.addRow(invoiceText, yearText);
   detailsStack.addChild(invoiceNumberRow);
 
-  const invoiceDateRow = new Table(0.9, 1);
+  const invoiceDateRow = new Grid(0.9, 1);
   invoiceDateRow.cellPadding = 0;
   invoiceDateRow.border = Border.none;
   const invoiceDateText = new TextBlock('Invoice date');
@@ -214,7 +219,7 @@ export function generate(): Document {
   invoiceDateRow.addRow(invoiceDateText, datestrText);
   detailsStack.addChild(invoiceDateRow);
 
-  const termsRow = new Table(0.9, 1);
+  const termsRow = new Grid(0.9, 1);
   termsRow.cellPadding = 0;
   termsRow.border = Border.none;
   const termsText = new TextBlock('Terms');
@@ -230,7 +235,7 @@ export function generate(): Document {
   termsRow.addRow(termsText, netText);
   detailsStack.addChild(termsRow);
 
-  const dueDateRow = new Table(0.9, 1);
+  const dueDateRow = new Grid(0.9, 1);
   dueDateRow.cellPadding = 0;
   dueDateRow.border = Border.none;
   const dueDateText = new TextBlock('Due date');
@@ -246,13 +251,9 @@ export function generate(): Document {
   dueDateRow.addRow(dueDateText, duedatestrText);
   detailsStack.addChild(dueDateRow);
 
-  const billCell = new Container();
-  billCell.child = billToStack;
-  const shipCell = new Container();
-  shipCell.child = shipToStack;
-  const detailsCell = new Container();
-  detailsCell.child = detailsStack;
-  addressTable.addRow(billCell, shipCell, detailsCell);
+  // The stacks drop straight into the grid cells; the cell supplies the padding,
+  // so the extra Container wrappers would add a redundant node for no effect.
+  addressTable.addRow(billToStack, shipToStack, detailsStack);
   mainStack.addChild(addressTable);
 
   // ── Line Items Table ──────────────────────────────────────────────────────
@@ -356,7 +357,7 @@ export function generate(): Document {
   const total = subtotal + tax;
   const totalDue = total - 1400;
 
-  const footerTable = new Table(1.3, 1);
+  const footerTable = new Grid(1.3, 1);
   footerTable.cellPadding = 0;
   footerTable.border = Border.none;
 
@@ -391,7 +392,7 @@ export function generate(): Document {
 
   const totalsStack = new VerticalStack();
 
-  const subtotalRow = new Table(1, 1);
+  const subtotalRow = new Grid(1, 1);
   subtotalRow.cellPadding = 6;
   subtotalRow.border = Border.none;
   const subtotalText = new TextBlock('Subtotal');
@@ -409,7 +410,7 @@ export function generate(): Document {
   subtotalRow.addRow(subtotalText, subtotalTolocalestringEnUsMinimumfractiondigitsText);
   totalsStack.addChild(subtotalRow);
 
-  const taxRow = new Table(1, 1);
+  const taxRow = new Grid(1, 1);
   taxRow.cellPadding = 6;
   taxRow.border = Border.none;
   const salesTaxText = new TextBlock('Sales tax (8.25%)');
@@ -427,7 +428,7 @@ export function generate(): Document {
   taxRow.addRow(salesTaxText, taxTolocalestringEnUsMinimumfractiondigitsText);
   totalsStack.addChild(taxRow);
 
-  const discountRow = new Table(1, 1);
+  const discountRow = new Grid(1, 1);
   discountRow.cellPadding = 6;
   discountRow.border = Border.none;
   const discountEarlyPaymentText = new TextBlock('Discount (early payment)');
@@ -452,7 +453,7 @@ export function generate(): Document {
   (totalDivider.child as TextBlock).fontSize = 1;
   totalsStack.addChild(totalDivider);
 
-  const totalRow = new Table(1, 1);
+  const totalRow = new Grid(1, 1);
   totalRow.cellPadding = 6;
   totalRow.border = Border.none;
   const totalText = new TextBlock('Total');
@@ -470,18 +471,17 @@ export function generate(): Document {
   totalRow.addRow(totalText, totaldueTolocalestringEnUsMinimumfractiondigitsText);
   totalsStack.addChild(totalRow);
 
+  // messageStack keeps its Container: the right-padding is real styling. totalsStack
+  // drops straight into the grid cell — no wrapper needed.
   const msgContainer = new Container();
   msgContainer.child = messageStack;
   msgContainer.padding = new Thickness(0, 0, 40, 0);
 
-  const totContainer = new Container();
-  totContainer.child = totalsStack;
-
-  footerTable.addRow(msgContainer, totContainer);
+  footerTable.addRow(msgContainer, totalsStack);
   mainStack.addChild(footerTable);
 
   // ── Payment details ───────────────────────────────────────────────────────
-  const paymentTable = new Table(1, 1, 1);
+  const paymentTable = new Grid(1, 1, 1);
   paymentTable.cellPadding = 0;
   paymentTable.border = Border.none;
 
@@ -547,13 +547,8 @@ export function generate(): Document {
   numberPaymentText.textColor = TEXT_MEDIUM;
   refStack.addChild(numberPaymentText);
 
-  const bankContainer = new Container();
-  bankContainer.child = bankStack;
-  const otherContainer = new Container();
-  otherContainer.child = otherStack;
-  const refContainer = new Container();
-  refContainer.child = refStack;
-  paymentTable.addRow(bankContainer, otherContainer, refContainer);
+  // The three payment-method stacks go straight into the grid cells.
+  paymentTable.addRow(bankStack, otherStack, refStack);
 
   const paymentSection = new Container();
   paymentSection.backgroundColor = ACCENT_GREEN_LIGHT;

@@ -89,6 +89,7 @@ export * from './Elements/Text/VisualToc';
 export * from './Elements/Tables/TableCell';
 export * from './Elements/Tables/TableRow';
 export * from './Elements/Tables/Table';
+export * from './Elements/Tables/Grid';
 
 export * from './Elements/Lists/BulletStyle';
 export * from './Elements/Lists/ListElementBase';
@@ -178,8 +179,19 @@ export * from './Export/SvgPageExportOptions';
 export * from './Rendering/SvgRenderPipeline';
 export { exportSvgPagesAsync, exportSvgDocumentAsync } from './Export/SvgPageExporter';
 export type { SvgDocumentExport } from './Export/SvgPageExporter';
-export type { LayoutSnapshot, LayoutNode, LayoutRect } from './Rendering/LayoutRecorder';
-export { LAYOUT_SNAPSHOT_VERSION } from './Rendering/LayoutRecorder';
+export type {
+  LayoutSnapshot,
+  LayoutNode,
+  LayoutRect,
+  NodeAccessibility,
+  SnapshotMeta,
+} from './Rendering/LayoutRecorder';
+export { LAYOUT_SNAPSHOT_VERSION, accessibilityOf } from './Rendering/LayoutRecorder';
+
+// Accessibility / compliance preflight — evaluates the layout snapshot against
+// PDF/UA-1 rules at authoring time and reports per-element findings.
+export { evaluateCompliance, ComplianceSeverity } from './Compliance/ComplianceEvaluator';
+export type { ComplianceFinding, ComplianceReport } from './Compliance/ComplianceEvaluator';
 
 // Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
 export * from './Extensions/DocumentEncryptionExtensions';

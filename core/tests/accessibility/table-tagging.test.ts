@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../../src/Document';
 import { Table } from '../../src/Elements/Tables/Table';
+import { Grid } from '../../src/Elements/Tables/Grid';
 import { TableRow } from '../../src/Elements/Tables/TableRow';
 import { TableCell } from '../../src/Elements/Tables/TableCell';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
@@ -90,6 +91,60 @@ describe('Table tagging', () => {
     expect(text).toContain('/S /TR');
     expect(text).toContain('/S /TH');
     expect(text).toContain('/S /TD');
+  });
+
+  it('presentation (layout) table => Div grouping with P content, no Table/TR/TH/TD', () => {
+    // A layout table must NOT emit table structure (ISO 14289-1 §7.5 / Matterhorn
+    // checkpoint 15); its content is tagged in reading order under a Div.
+    const text = generateTagged(
+      t => {
+        t.presentation = true;
+        t.addRow(tb('Bill to'), tb('Ship to'));
+        t.addRow(tb('Acme Inc'), tb('Acme Inc'));
+      },
+      t => t.addHeader([textCell('A', true), textCell('B', true)])
+    );
+
+    expect(text).toContain('/S /Div');
+    expect(text).toContain('/S /P');
+    expect(text).not.toContain('/S /Table');
+    expect(text).not.toContain('/S /TR');
+    expect(text).not.toContain('/S /TH');
+    expect(text).not.toContain('/S /TD');
+  });
+
+  it('presentation flag flips the semantic role to Div', () => {
+    const t = new Table(100);
+    expect(t.semanticRole).toBe(SemanticRole.Table);
+    t.presentation = true;
+    expect(t.semanticRole).toBe(SemanticRole.Div);
+  });
+
+  it('Grid is a layout element: Div role, pinned even if presentation is unset', () => {
+    const g = new Grid(1, 1);
+    expect(g.semanticRole).toBe(SemanticRole.Div);
+    // Pinned: the escape-hatch flag can't turn a Grid back into a data table.
+    g.presentation = false;
+    expect(g.semanticRole).toBe(SemanticRole.Div);
+  });
+
+  it('Grid tags as Div with P content, never Table/TR/TH/TD', () => {
+    doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+    const grid = new Grid(0.9, 1);
+    grid.addRow(tb('Invoice #'), tb('2026-001'));
+    grid.addRow(tb('Terms'), tb('Net 14'));
+    doc.add(grid);
+    const text = pdfToText(doc.generateBytes());
+
+    expect(text).toContain('/S /Div');
+    expect(text).toContain('/S /P');
+    expect(text).not.toContain('/S /Table');
+    expect(text).not.toContain('/S /TR');
+    expect(text).not.toContain('/S /TH');
+    expect(text).not.toContain('/S /TD');
   });
 
   it('header cells => TH, body cells => TD', () => {

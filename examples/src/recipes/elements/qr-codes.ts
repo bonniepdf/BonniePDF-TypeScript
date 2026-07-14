@@ -68,6 +68,7 @@ export function generate(): Document {
   basicQr.data = 'https://bonniepdf.com';
   basicQr.size = 130;
   basicQr.quietZone = 2;
+  basicQr.altText = 'QR code linking to bonniepdf.com';
 
   const basicQrWrap = new Container();
   basicQrWrap.padding = new Thickness(10);
@@ -127,6 +128,7 @@ export function generate(): Document {
     qr.size = 100;
     qr.errorCorrection = ecc;
     qr.quietZone = 1;
+    qr.altText = `QR code linking to github.com/bonniepdf ( error correction)`;
 
     const qrWrap = new Container();
     qrWrap.backgroundColor = ColorPalette.slate[50];
@@ -189,6 +191,7 @@ export function generate(): Document {
   fgQr.size = 120;
   fgQr.foregroundColor = ColorPalette.blue[700];
   fgQr.quietZone = 2;
+  fgQr.altText = 'QR code that dials the phone number +1 234 567 890';
   const fgWrap = new Container();
   fgWrap.border = new Border(1);
   fgWrap.borderColors = new BorderColors(ColorPalette.blue[200]);
@@ -215,6 +218,7 @@ export function generate(): Document {
   bgQr.foregroundColor = ColorPalette.rose[900];
   bgQr.backgroundColor = ColorPalette.rose[50];
   bgQr.quietZone = 2;
+  bgQr.altText = 'QR code that composes an email to hello@example.com';
   const bgWrap = new Container();
   bgWrap.border = new Border(1);
   bgWrap.borderColors = new BorderColors(ColorPalette.rose[200]);
@@ -241,6 +245,7 @@ export function generate(): Document {
   transQr.foregroundColor = ColorPalette.amber[900];
   transQr.drawBackground = false;
   transQr.quietZone = 2;
+  transQr.altText = 'QR code to join the MyNetwork Wi-Fi network';
   const transWrap = new Container();
   transWrap.backgroundColor = ColorPalette.amber[100];
   transWrap.border = new Border(1);

@@ -15,6 +15,7 @@ import {
   Image,
   ImageFitMode,
   Table,
+  Grid,
   Barcode,
   BarcodeSymbology,
   QRCode,
@@ -110,16 +111,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   info.addChild(tb('Main Stage, Victoria Park, London', 10, BODY, { mb: 12 }));
 
-  const facts = new Table(1, 1, 1);
+  const facts = new Grid(1, 1, 1);
   facts.border = Border.none;
   facts.cellPadding = 0;
-  const f1 = new Container();
-  f1.child = field('DATE', '18 Jul 2026', CREAM, MUTE);
-  const f2 = new Container();
-  f2.child = field('GATES', '16:00', CREAM, MUTE);
-  const f3 = new Container();
-  f3.child = field('ADMITS', 'One', CREAM, MUTE);
-  facts.addRow(f1, f2, f3);
+  facts.addRow(
+    field('DATE', '18 Jul 2026', CREAM, MUTE),
+    field('GATES', '16:00', CREAM, MUTE),
+    field('ADMITS', 'One', CREAM, MUTE)
+  );
   info.addChild(facts);
 
   // Ticket-id barcode runs along the full width of the body.
@@ -184,14 +183,10 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   stubBox.child = stub;
 
   // ── Compose body | stub ─────────────────────────────────────────────────────
-  const ticket = new Table(2.5, 1.1);
+  const ticket = new Grid(2.5, 1.1);
   ticket.border = Border.none;
   ticket.cellPadding = 0;
-  const tc1 = new Container();
-  tc1.child = body;
-  const tc2 = new Container();
-  tc2.child = stubBox;
-  ticket.addRow(tc1, tc2);
+  ticket.addRow(body, stubBox);
   doc.add(ticket);
 
   return doc;

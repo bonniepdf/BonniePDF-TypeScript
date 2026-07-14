@@ -12,6 +12,7 @@ import {
   VerticalStack,
   Container,
   Table,
+  Grid,
   Barcode,
   BarcodeSymbology,
   QRCode,
@@ -96,14 +97,13 @@ export function generate(): Document {
   const svc = new Container();
   svc.backgroundColor = ColorPalette.slate[800];
   svc.padding = new Thickness(10, 4, 10, 4);
-  const svcRow = new Table(1, 1);
+  const svcRow = new Grid(1, 1);
   svcRow.border = Border.none;
   svcRow.cellPadding = 0;
-  const sc1 = new Container();
-  sc1.child = tb('EXPRESS - NEXT DAY', 10, Color.white, { bold: true });
-  const sc2 = new Container();
-  sc2.child = tb('1.4 kg', 10, Color.white, { bold: true, align: TextAlignment.Right });
-  svcRow.addRow(sc1, sc2);
+  svcRow.addRow(
+    tb('EXPRESS - NEXT DAY', 10, Color.white, { bold: true }),
+    tb('1.4 kg', 10, Color.white, { bold: true, align: TextAlignment.Right })
+  );
   svc.child = svcRow;
   doc.add(svc);
 
@@ -161,9 +161,7 @@ export function generate(): Document {
   carton.altText = 'Carton code (ITF-14): 1540141253721';
   const cartonStack = new VerticalStack();
   cartonStack.addChild(tb('CARTON (ITF-14)', 7, MUTE, { bold: true, mb: 2 }));
-  const cartonWrap = new Container();
-  cartonWrap.child = carton;
-  cartonStack.addChild(cartonWrap);
+  cartonStack.addChild(carton);
 
   const qr = new QRCode();
   qr.data = 'https://track.acme.example/p/1Z999AA10123456784';
@@ -178,14 +176,10 @@ export function generate(): Document {
   qrInner.child = qr;
   qrStack.addChild(qrInner);
 
-  const bottom = new Table(2, 1);
+  const bottom = new Grid(2, 1);
   bottom.border = Border.none;
   bottom.cellPadding = 0;
-  const bc1 = new Container();
-  bc1.child = cartonStack;
-  const bc2 = new Container();
-  bc2.child = qrStack;
-  bottom.addRow(bc1, bc2);
+  bottom.addRow(cartonStack, qrStack);
   doc.add(bottom);
 
   return doc;

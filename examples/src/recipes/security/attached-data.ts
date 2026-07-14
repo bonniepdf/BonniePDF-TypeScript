@@ -55,7 +55,8 @@ export function generate(): Document {
   const table = new Table(2, 2, 2);
   table.border = Border.none;
   table.cellPadding = 6;
-  table.addRow(
+  // Real tabular data → a proper header row (emits TH cells for assistive tech).
+  table.addHeader(
     tb('Quarter', 8, MUTE, true),
     tb('Revenue (EUR)', 8, MUTE, true, TextAlignment.Right),
     tb('Customers', 8, MUTE, true, TextAlignment.Right)

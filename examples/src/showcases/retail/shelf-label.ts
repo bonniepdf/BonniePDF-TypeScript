@@ -21,6 +21,7 @@ import {
   HorizontalStack,
   Container,
   Table,
+  Grid,
   Barcode,
   BarcodeSymbology,
   Color,
@@ -133,14 +134,11 @@ function mainOffer(): Table {
   price.addChild(text(gbp(PRODUCT.nowPrice), 30, INK, true, TextAlignment.Right, 0, -1));
   price.addChild(unitPriceBadge());
 
-  const priceCell = new Container();
-  priceCell.child = price;
-
-  const row = new Table(1.75, 1);
+  const row = new Grid(1.75, 1);
   row.border = Border.none;
   row.cellPadding = 8;
   row.margin = new Thickness(0, 0, 0, 0);
-  row.addRow(leftCell, priceCell);
+  row.addRow(leftCell, price);
   return row;
 }
 
@@ -156,7 +154,7 @@ function unitPriceBadge(): Container {
 }
 
 function detailRow(): Table {
-  const table = new Table(1, 1, 1);
+  const table = new Grid(1, 1, 1);
   table.border = Border.none;
   table.cellPadding = 0;
   table.margin = new Thickness(8, 0, 8, 6);

@@ -21,6 +21,7 @@ import {
   VerticalStack,
   Container,
   Table,
+  Grid,
   Color,
   Thickness,
   Border,
@@ -110,7 +111,7 @@ export function generate(): Document {
   rule.child = spacerLine();
   doc.add(rule);
 
-  const top = new Table(1, 1);
+  const top = new Grid(1, 1);
   top.cellPadding = 0;
   top.border = Border.none;
   top.margin = new Thickness(0, 0, 0, 24);
@@ -131,11 +132,7 @@ export function generate(): Document {
     })
   );
 
-  const addrCell = new Container();
-  addrCell.child = addr;
-  const metaCell = new Container();
-  metaCell.child = meta;
-  top.addRow(addrCell, metaCell);
+  top.addRow(addr, meta);
   doc.add(top);
 
   doc.add(h1('Your public library membership'));

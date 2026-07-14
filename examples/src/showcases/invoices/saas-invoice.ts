@@ -12,6 +12,7 @@ import {
   VerticalStack,
   Container,
   Table,
+  Grid,
   QRCode,
   QrEcc,
   Color,
@@ -78,14 +79,10 @@ export function generate(): Document {
   meta.addChild(tb('Issued  18 Jun 2026', 9, MUTE, { align: TextAlignment.Right }));
   meta.addChild(tb('Due  02 Jul 2026', 9, MUTE, { align: TextAlignment.Right }));
 
-  const headerTable = new Table(1, 1);
+  const headerTable = new Grid(1, 1);
   headerTable.border = Border.none;
   headerTable.cellPadding = 0;
-  const bl = new Container();
-  bl.child = brand;
-  const br = new Container();
-  br.child = meta;
-  headerTable.addRow(bl, br);
+  headerTable.addRow(brand, meta);
   doc.add(headerTable);
 
   doc.add(rule(14));
@@ -106,15 +103,11 @@ export function generate(): Document {
   from.addChild(tb('4 Tenter Ground, London E1 7NH', 9, BODY, { align: TextAlignment.Right }));
   from.addChild(tb('VAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
 
-  const addr = new Table(1, 1);
+  const addr = new Grid(1, 1);
   addr.border = Border.none;
   addr.cellPadding = 0;
   addr.margin = new Thickness(0, 8, 0, 16);
-  const ac = new Container();
-  ac.child = billTo;
-  const fc = new Container();
-  fc.child = from;
-  addr.addRow(ac, fc);
+  addr.addRow(billTo, from);
   doc.add(addr);
 
   // ── Line items (tagged table) ──────────────────────────────────────────────
@@ -154,7 +147,7 @@ export function generate(): Document {
   // ── Totals ─────────────────────────────────────────────────────────────────
   const vat = subtotal * 0.2;
   const total = subtotal + vat;
-  const totals = new Table(2.4, 1);
+  const totals = new Grid(2.4, 1);
   totals.border = Border.none;
   totals.cellPadding = 5;
   totals.margin = new Thickness(0, 4, 0, 0);
@@ -191,15 +184,10 @@ export function generate(): Document {
   qrWrap.child = qr;
   qrWrap.padding = new Thickness(6);
 
-  const payTable = new Table(2.2, 1);
+  const payTable = new Grid(2.2, 1);
   payTable.border = Border.none;
   payTable.cellPadding = 0;
-  const pc = new Container();
-  pc.child = payInfo;
-  const qc = new Container();
-  qc.child = qrWrap;
-  qc.horizontalAlignment = undefined;
-  payTable.addRow(pc, qc);
+  payTable.addRow(payInfo, qrWrap);
 
   const panel = new Container();
   panel.backgroundColor = PANEL;

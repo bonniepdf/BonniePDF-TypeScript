@@ -366,7 +366,7 @@ function body(text: string, opts: { color?: Color; mb?: number } = {}): TextBloc
   return b;
 }
 
-function metaItem(label: string, value: string): Container {
+function metaItem(label: string, value: string): VerticalStack {
   const stack = new VerticalStack();
   const l = new TextBlock(label.toUpperCase());
   l.fontName = StandardFonts.HelveticaBold;
@@ -379,9 +379,7 @@ function metaItem(label: string, value: string): Container {
   v.fontSize = 10;
   v.textColor = INK;
   stack.addChild(v);
-  const c = new Container();
-  c.child = stack;
-  return c;
+  return stack;
 }
 
 function kpi(value: string, label: string, accent: Color): Container {

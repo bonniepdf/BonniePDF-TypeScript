@@ -19,8 +19,10 @@
 // mirrors it; both are verified against the shared conformance fixtures.
 // ---------------------------------------------------------------------------
 
-/** Schema version emitted in every snapshot, so consumers can feature-detect. */
-export const LAYOUT_SNAPSHOT_VERSION = 1;
+/** Schema version emitted in every snapshot, so consumers can feature-detect.
+ * v2 adds per-node {@link NodeAccessibility} (`a11y`) and {@link SnapshotMeta}
+ * (`meta`); v1 consumers that ignore unknown fields remain compatible. */
+export const LAYOUT_SNAPSHOT_VERSION = 2;
 
 /** Reads an element's canonical capture type without depending on ElementBase. */
 export function captureTypeOf(element: object): string {
@@ -32,6 +34,67 @@ export function captureTypeOf(element: object): string {
 /** Reads an element's optional author capture name. */
 export function captureNameOf(element: object): string | undefined {
   return (element as { captureName?: string }).captureName;
+}
+
+/**
+ * Accessibility facts captured for a layout node, mirroring what the tagging
+ * pipeline would write into the PDF structure tree for the same element. Present
+ * only when the element exposes a role (implements `IRoleProvider`); geometry-only
+ * nodes (bare containers, pages) omit it.
+ *
+ * These are the element's *intrinsic* semantics, read directly off the element —
+ * they do not depend on `AccessibilityMode` being enabled, so the compliance
+ * evaluator can answer "would this be accessible?" even for untagged documents.
+ */
+export interface NodeAccessibility {
+  /** Resolved PDF structure tag, e.g. `"H1"`, `"P"`, `"Figure"`, `"TH"`. */
+  role: string;
+  /** True when the element contributes real content to the structure tree. */
+  tagged: boolean;
+  /** True when the element renders as an `/Artifact` (out of reading order). */
+  artifact: boolean;
+  /** `/Alt` alternate text, when the element supplies non-empty alt text. */
+  alt?: string;
+  /** Author explicitly marked the element decorative (artifact by intent). */
+  decorative?: boolean;
+  /** Heading level 1–6 for `H1`…`H6` roles; omitted otherwise. */
+  headingLevel?: number;
+  /**
+   * True when the element is image-like (a figure candidate): an Image, QR code,
+   * barcode, data matrix, or canvas drawing. Lets the evaluator flag image-like
+   * content that fell back to `/Artifact` for want of alt text — a case external
+   * validators pass silently.
+   */
+  imageLike?: boolean;
+}
+
+const HEADING_LEVELS: Record<string, number> = { H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6 };
+const IMAGE_LIKE_TYPES = new Set(['Image', 'QRCode', 'Barcode', 'DataMatrix', 'CanvasElement']);
+
+/**
+ * Derives {@link NodeAccessibility} from an element instance by reading its
+ * intrinsic `semanticRole` / `altText` (the same properties the tagging pipeline
+ * consumes via `IRoleProvider` / `IAltTextProvider`). Returns `undefined` for
+ * elements that declare no role, so geometry-only nodes stay unannotated.
+ */
+export function accessibilityOf(element: object, type: string): NodeAccessibility | undefined {
+  const roleValue = (element as { semanticRole?: string }).semanticRole;
+  if (typeof roleValue !== 'string') return undefined;
+
+  const artifact = roleValue === 'Artifact';
+  const a11y: NodeAccessibility = { role: roleValue, tagged: !artifact, artifact };
+
+  const level = HEADING_LEVELS[roleValue];
+  if (level) a11y.headingLevel = level;
+
+  if (IMAGE_LIKE_TYPES.has(type)) a11y.imageLike = true;
+
+  const altText = (element as { altText?: string }).altText;
+  if (typeof altText === 'string' && altText.length > 0) a11y.alt = altText;
+  const decorative = (element as { isDecorative?: boolean }).isDecorative;
+  if (decorative === true) a11y.decorative = true;
+
+  return a11y;
 }
 
 /** A single rectangle an element occupied on one page (top-left origin, points). */
@@ -54,7 +117,25 @@ export interface LayoutNode {
   name?: string;
   /** The rectangles this node occupied — one per page it touched (may be empty). */
   rects: LayoutRect[];
+  /** Intrinsic accessibility facts, when the element declares a role. */
+  a11y?: NodeAccessibility;
   children: LayoutNode[];
+}
+
+/**
+ * Document-level accessibility/compliance context, captured alongside the tree so
+ * the compliance evaluator can raise document-scoped findings (missing language,
+ * missing title, untagged document) without a second source of truth.
+ */
+export interface SnapshotMeta {
+  /** The document's declared {@link AccessibilityMode} as a number (0 = None, 1 = PdfUa1). */
+  accessibilityMode: number;
+  /** The document's declared PDF/A conformance string (e.g. `"None"`, `"PdfA2b"`). */
+  conformance: string;
+  /** BCP-47 document language (`/Lang`), when declared. */
+  language?: string;
+  /** Document title, when declared. */
+  title?: string;
 }
 
 /** The captured layout of a whole document. */
@@ -64,6 +145,8 @@ export interface LayoutSnapshot {
   pages: { width: number; height: number }[];
   /** Root node (the Document). Its children form the element tree in render order. */
   root: LayoutNode;
+  /** Document-level accessibility/compliance context. */
+  meta?: SnapshotMeta;
 }
 
 /** Internal mutable frame backing an open {@link LayoutNode}. */
@@ -106,10 +189,16 @@ export class LayoutRecorder {
   private readonly open = new Map<object, OpenFrame>();
   private nextId = 1;
   private pageSizes: { width: number; height: number }[] = [];
+  private meta: SnapshotMeta | undefined;
 
   /** Records the page sizes (index-aligned with rendered pages). */
   public setPages(pages: { width: number; height: number }[]): void {
     this.pageSizes = pages.map(p => ({ width: p.width, height: p.height }));
+  }
+
+  /** Records the document-level accessibility/compliance context. */
+  public setMeta(meta: SnapshotMeta): void {
+    this.meta = { ...meta };
   }
 
   /** Opens (or resumes) a node for `element`. */
@@ -128,6 +217,8 @@ export class LayoutRecorder {
 
     const node: LayoutNode = { id: `n${this.nextId++}`, type, rects: [], children: [] };
     if (name) node.name = name;
+    const a11y = accessibilityOf(element, type);
+    if (a11y) node.a11y = a11y;
     const parent = this.stack[this.stack.length - 1];
     parent.node.children.push(node);
 
@@ -173,6 +264,8 @@ export class LayoutRecorder {
 
   /** Produces the immutable snapshot. Safe to call once rendering has finished. */
   public snapshot(): LayoutSnapshot {
-    return { version: LAYOUT_SNAPSHOT_VERSION, pages: this.pageSizes, root: this.root };
+    const snap: LayoutSnapshot = { version: LAYOUT_SNAPSHOT_VERSION, pages: this.pageSizes, root: this.root };
+    if (this.meta) snap.meta = this.meta;
+    return snap;
   }
 }

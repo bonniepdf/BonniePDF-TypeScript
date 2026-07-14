@@ -9,6 +9,7 @@ import {
   VerticalStack,
   Container,
   Table,
+  Grid,
   Spacer,
   Color,
   Thickness,
@@ -79,7 +80,7 @@ function card(bandColor: Color, bandTitle: string, body: TextBlock | VerticalSta
 
 // A label/value pair as one borderless 2-column row.
 function detailRow(label: string, value: string): Table {
-  const row = new Table(1, 1.6);
+  const row = new Grid(1, 1.6);
   row.border = Border.none;
   row.cellPadding = 3;
   row.addRow(tb(label.toUpperCase(), 7.5, MUTE), tb(value, 10, BODY, { bold: true }));
@@ -106,14 +107,10 @@ export function generate(): Document {
   issued.addChild(tb('Confidential', 8, CREAM, { align: TextAlignment.Right }));
   issued.addChild(tb('Generated 18 June 2026', 8, CREAM, { align: TextAlignment.Right, top: 4 }));
 
-  const headerGrid = new Table(1, 1);
+  const headerGrid = new Grid(1, 1);
   headerGrid.border = Border.none;
   headerGrid.cellPadding = 0;
-  const lc = new Container();
-  lc.child = brand;
-  const rc = new Container();
-  rc.child = issued;
-  headerGrid.addRow(lc, rc);
+  headerGrid.addRow(brand, issued);
 
   const header = new Container();
   header.backgroundColor = INK;
@@ -153,14 +150,10 @@ export function generate(): Document {
   detailsRight.addChild(detailRow('Ward', 'Cardiology - 4B'));
   detailsRight.addChild(detailRow('Admitted', '16 Jun 2026'));
 
-  const detailsGrid = new Table(1, 1);
+  const detailsGrid = new Grid(1, 1);
   detailsGrid.border = Border.none;
   detailsGrid.cellPadding = 0;
-  const dlc = new Container();
-  dlc.child = detailsLeft;
-  const drc = new Container();
-  drc.child = detailsRight;
-  detailsGrid.addRow(dlc, drc);
+  detailsGrid.addRow(detailsLeft, detailsRight);
 
   const detailsBody = new Container();
   detailsBody.backgroundColor = CARD;
@@ -192,19 +185,14 @@ export function generate(): Document {
     return v;
   };
 
-  const vitalsGrid = new Table(1, 1, 1, 1);
+  const vitalsGrid = new Grid(1, 1, 1, 1);
   vitalsGrid.border = Border.none;
   vitalsGrid.cellPadding = 6;
-  const mk = (s: VerticalStack): Container => {
-    const c = new Container();
-    c.child = s;
-    return c;
-  };
   vitalsGrid.addRow(
-    mk(vital('128/82', 'mmHg', 'Blood pressure', 'Normal', TEAL)),
-    mk(vital('72', 'bpm', 'Heart rate', 'Normal', TEAL)),
-    mk(vital('37.1', '°C', 'Temperature', 'Normal', TEAL)),
-    mk(vital('97', '% SpO2', 'Oxygen', 'Watch', ROSE))
+    vital('128/82', 'mmHg', 'Blood pressure', 'Normal', TEAL),
+    vital('72', 'bpm', 'Heart rate', 'Normal', TEAL),
+    vital('37.1', '°C', 'Temperature', 'Normal', TEAL),
+    vital('97', '% SpO2', 'Oxygen', 'Watch', ROSE)
   );
 
   doc.add(pad(card(INDIGO, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid)));
@@ -214,7 +202,7 @@ export function generate(): Document {
   // ── 3. Allergies & alerts card (rose bleed band) ─────────────────────────
   const alerts = new VerticalStack();
   const alert = (name: string, detail: string, top: number): void => {
-    const row = new Table(1, 2.4);
+    const row = new Grid(1, 2.4);
     row.border = Border.none;
     row.cellPadding = 3;
     row.addRow(tb(name, 10, ROSE, { bold: true }), tb(detail, 9.5, BODY));

@@ -2,7 +2,7 @@ import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
 import { generate as simpleDocument } from './recipes/basics/simple-document';
 import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
-import { generate as margins } from './recipes/basics/margins';
+import { generate as margins } from './recipes/basics/margins-and-padding';
 import { generate as pageSettings } from './recipes/basics/page-settings';
 import { generate as headersFooters } from './recipes/layout/headers-footers';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
@@ -136,12 +136,12 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'margins',
-    name: 'Margins & Units',
+    name: 'Margins and Padding',
     category: 'Basic',
     description: 'How to apply margins and padding to text, containers, tables, and stacks.',
     filename: 'margins.pdf',
     generate: margins,
-    dotnetClass: 'MarginsExample',
+    dotnetClass: 'MarginsAndPadding',
     pdfUa1: true,
   },
   {

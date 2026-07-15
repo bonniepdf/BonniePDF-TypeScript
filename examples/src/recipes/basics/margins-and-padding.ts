@@ -95,7 +95,9 @@ export function generate(): Document {
   // H2 - margin on an image placeholder.
   doc.add(sectionHeading('Image with margin'));
 
-  const imgDesc = new TextBlock('Images can also have margins. The 100x60 placeholder below has a 20pt margin on all sides:');
+  const imgDesc = new TextBlock(
+    'Images can also have margins. The 100x60 placeholder below has a 20pt margin on all sides:'
+  );
   imgDesc.fontSize = 11;
   imgDesc.margin = new Thickness(0, 0, 0, 8);
   doc.add(imgDesc);

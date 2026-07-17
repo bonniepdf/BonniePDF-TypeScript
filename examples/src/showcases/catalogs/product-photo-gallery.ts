@@ -104,6 +104,7 @@ const PRODUCTS: Product[] = [
 
 const ACCENT = ColorPalette.emerald[700];
 const CARD_HEIGHT_IMAGE = 128;
+const CARD_IMAGE_RADIUS = 6;
 
 function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>): IElement {
   const data = assets?.get(product.image);
@@ -113,21 +114,29 @@ function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>
     img.height = CARD_HEIGHT_IMAGE;
     img.fitMode = ImageFitMode.Cover;
     img.altText = `Product photograph of the ${product.name}`;
-    return img;
+
+    const imageMask = new Container();
+    imageMask.height = CARD_HEIGHT_IMAGE;
+    imageMask.cornerRadius = CARD_IMAGE_RADIUS;
+    imageMask.clipContent = true;
+    imageMask.child = img;
+    return imageMask;
   }
 
-  // Placeholder until the real photograph is supplied.
-  const placeholder = new Container();
-  placeholder.height = CARD_HEIGHT_IMAGE;
-  placeholder.backgroundColor = ColorPalette.slate[100];
-  placeholder.cornerRadius = 6;
   const label = new TextBlock(product.name);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 10;
   label.textColor = ColorPalette.slate[400];
   label.alignment = TextAlignment.Center;
   label.margin = new Thickness(0, CARD_HEIGHT_IMAGE / 2 - 14, 0, 0);
+
+  // Placeholder until the real photograph is supplied.
+  const placeholder = new Container();
+  placeholder.height = CARD_HEIGHT_IMAGE;
+  placeholder.backgroundColor = ColorPalette.slate[100];
+  placeholder.cornerRadius = CARD_IMAGE_RADIUS;
   placeholder.child = label;
+
   return placeholder;
 }
 
@@ -151,6 +160,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   const sku = new TextBlock(product.sku);
   sku.fontSize = 9;
   sku.textColor = ColorPalette.slate[500];
+
   const price = new TextBlock(product.price);
   price.fontName = StandardFonts.HelveticaBold;
   price.fontSize = 12;

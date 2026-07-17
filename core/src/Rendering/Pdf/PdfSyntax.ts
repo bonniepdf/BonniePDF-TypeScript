@@ -114,4 +114,51 @@ export class PdfSyntax {
     }
     return result + '>';
   }
+
+  /**
+   * Converts a string into a `TJ` array operand of glyph-ID hex runs with
+   * kern-pair advance adjustments between adjacent glyphs, e.g.
+   * `[<0024> 80 <0057>]`. Adjustments are in thousandths of an em and are
+   * *subtracted* from the position by `TJ`, so a tightening kern of -80
+   * font units becomes a positive `80` array element.
+   *
+   * Returns `null` when no adjacent pair produces a non-zero adjustment;
+   * callers then keep the plain `Tj` path so unkerned strings stay
+   * byte-identical to the previous output.
+   */
+  public static toKernedGlyphArray(text: string, font: TtfFont): string | null {
+    if (!text) return null;
+
+    let result = '[<';
+    let hex = '';
+    let anyKern = false;
+    let prevGid = 0;
+    let hasPrev = false;
+
+    for (const char of text) {
+      const code = char.codePointAt(0)!;
+      if (code < 32) continue; // Skip control characters
+
+      const gid = font.getGlyphId(code);
+
+      if (hasPrev) {
+        const kern = font.getKerning(prevGid, gid);
+        // TJ subtracts its numbers from the displacement, so negate; scale
+        // font units to thousandths of an em.
+        const adjustment = Math.round((-kern * 1000) / font.unitsPerEm);
+        if (adjustment !== 0) {
+          result += `${hex}> ${adjustment} <`;
+          hex = '';
+          anyKern = true;
+        }
+      }
+
+      hex += gid.toString(16).toUpperCase().padStart(4, '0');
+      prevGid = gid;
+      hasPrev = true;
+    }
+
+    if (!anyKern) return null;
+    return `${result}${hex}>]`;
+  }
 }

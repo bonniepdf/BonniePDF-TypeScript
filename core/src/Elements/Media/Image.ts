@@ -75,7 +75,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   }
 
   protected override measureContentHeight(contentWidth: number): number {
-    const _info = this.getImageInfo();
+    this.getImageInfo();
     this.calculateDimensions(contentWidth, this.displayWidth, this.displayHeight);
     return this.displayHeight.value;
   }

@@ -23,7 +23,7 @@ export class SvgExportExtensions {
     // Mimic the layout loop from PdfRenderPipeline
     for (const element of page.getElements()) {
       // Measure height to ensure consistent layout behavior (some elements might cache calculations)
-      const _elementHeight = element.measureHeight(page.contentWidth);
+      element.measureHeight(page.contentWidth);
 
       // Render the element
       element.render(ctx, page.contentWidth);

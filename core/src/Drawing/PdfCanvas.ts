@@ -561,7 +561,15 @@ export class PdfCanvas implements ICanvas {
       this._glyphTracker(run.fontIdentifier, run.text);
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       if (run.embeddedFont != null) {
-        PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(run.text, run.embeddedFont));
+        // embedded fonts with kern pairs paint with `TJ` so the PDF
+        // matches the kerned widths the layout engine reserved (and the
+        // kerned this feature SVG export). Unkerned strings keep the `Tj` path.
+        const kerned = run.embeddedFont.hasKerning ? PdfSyntax.toKernedGlyphArray(run.text, run.embeddedFont) : null;
+        if (kerned != null) {
+          PdfOperators.showTextPositioned(this.stream, kerned);
+        } else {
+          PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(run.text, run.embeddedFont));
+        }
       } else {
         PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
       }

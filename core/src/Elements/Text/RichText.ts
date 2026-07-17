@@ -436,7 +436,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
       // Draw each word segment separately when justified (to apply extra spacing)
       if (useJustify && extraWordSpacing > 0 && run.text.includes(' ')) {
-        currentX = this.drawJustifiedRun(ctx, run, currentX, y, line.height, extraWordSpacing);
+        currentX = this.drawJustifiedRun(ctx, run, currentX, y, extraWordSpacing);
       } else {
         // Draw the run as a single text call
         ctx.canvas.drawText(currentX, y, run.text, color, fontSize, fontName, TextAlignment.Left);
@@ -461,7 +461,6 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     run: StyledRun,
     startX: number,
     y: number,
-    lineHeight: number,
     extraWordSpacing: number
   ): number {
     const style = run.style;

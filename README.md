@@ -32,7 +32,7 @@ pnpm, bun, and yarn work the same way.
 ## Quick start
 
 ```typescript
-import { Document, TextBlock, StandardFonts, Color } from '@bonniepdf/core';
+import { Document, TextBlock, StandardFonts, ColorPalette } from '@bonniepdf/core';
 
 // A new Document comes with its first page ready to use.
 const doc = new Document();
@@ -67,7 +67,7 @@ writeFileSync('hello.pdf', bytes);
 Styled text with a document-wide default:
 
 ```typescript
-import { Document, TextBlock, TextStyle, Color, Thickness } from '@bonniepdf/core';
+import { Document, TextBlock, TextStyle, ColorPalette, Thickness } from '@bonniepdf/core';
 
 const doc = new Document();
 

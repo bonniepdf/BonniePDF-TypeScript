@@ -27,24 +27,26 @@ yarn add @bonniepdf/core
 ## Quick start
 
 ```typescript
-import { Document, TextBlock, PdfSize } from '@bonniepdf/core';
+import { Document, Heading, TextBlock, StandardFonts } from '@bonniepdf/core';
 
-const bytes = await new Document()
-  .addPage(page =>
-    page
-      .add(new TextBlock('Hello, BonniePDF!').fontSize(24).bold())
-      .add(new TextBlock('Generated entirely in TypeScript - no server required.'))
-  )
-  .generateAsync();
+const doc = new Document();
+
+const title = new Heading('Hello, BonniePDF!');
+title.level = 1;
+title.fontName = StandardFonts.HelveticaBold;
+title.fontSize = 24;
+doc.add(title);
+
+doc.add(new TextBlock('Generated entirely in TypeScript - no server required.'));
+
+const bytes = await doc.generateBytesAsync();
 
 // Browser: trigger a download
 const blob = new Blob([bytes], { type: 'application/pdf' });
 window.open(URL.createObjectURL(blob));
 
 // Node.js: write to disk
-import { configurePlatform, NodePlatformIO } from '@bonniepdf/core';
 import { writeFileSync } from 'fs';
-configurePlatform(new NodePlatformIO());
 writeFileSync('output.pdf', bytes);
 ```
 
@@ -90,86 +92,123 @@ No native addons. No WASM. No server.
 ### Document
 
 ```typescript
-import { Document, PdfSize } from '@bonniepdf/core';
+import { Document, DocumentSettings, DocumentMetadata, PdfSize } from '@bonniepdf/core';
 
-const bytes = await new Document()
-  .metadata({ title: 'My Report', author: 'ACME Corp' })
-  .addPage(page => page.size(PdfSize.A4).add(...elements))
-  .generateAsync();
+const settings = new DocumentSettings(PdfSize.a4);
+
+const metadata = new DocumentMetadata();
+metadata.title = 'My Report';
+metadata.author = 'ACME Corp';
+
+const doc = new Document(settings, metadata);
+doc.add(/* elements */);
+doc.addPage(); // start a new page; elements added after this land on it
+
+const bytes = await doc.generateBytesAsync();
 ```
 
 ### Text
 
 ```typescript
-import { TextBlock, RichText } from '@bonniepdf/core';
+import { TextBlock, RichText, StandardFonts, Color, ColorPalette } from '@bonniepdf/core';
 
-// Simple
-new TextBlock('Hello world').fontSize(14).bold().color('#1a1a1a');
+// Simple - style via properties. Colours are Color instances or palette tokens.
+const heading = new TextBlock('Hello world');
+heading.fontName = StandardFonts.HelveticaBold;
+heading.fontSize = 14;
+heading.textColor = Color.fromHex('#1a1a1a');
 
-// Rich text with mixed styles
-new RichText()
-  .add('Normal ')
-  .add('bold', t => t.bold())
-  .add(' and ')
-  .add('coloured', t => t.color('#2196F3'));
+// Rich text with mixed styles - one span per run
+const rich = new RichText();
+rich.span('Normal ');
+rich.spanWithConfigure('bold', s => {
+  s.bold = true;
+});
+rich.span(' and ');
+rich.spanWithConfigure('coloured', s => {
+  s.color = ColorPalette.blue[500];
+});
 ```
 
 ### Tables
 
 ```typescript
-import { Table, TableRow, TableCell } from '@bonniepdf/core';
+import { Table, TextBlock, StandardFonts } from '@bonniepdf/core';
 
-new Table()
-  .columns([150, 100, '*']) // px widths; '*' fills remaining space
-  .addRow(row =>
-    row
-      .addCell(cell => cell.text('Product'))
-      .addCell(cell => cell.text('Qty'))
-      .addCell(cell => cell.text('Total'))
-  );
+// Constructor args are relative column weights (2 : 1 : 1 here).
+const table = new Table(2, 1, 1);
+
+const th = (s: string) => {
+  const c = new TextBlock(s);
+  c.fontName = StandardFonts.HelveticaBold;
+  return c;
+};
+
+table.addHeader(th('Product'), th('Qty'), th('Total'));
+table.addRow(new TextBlock('Widget'), new TextBlock('3'), new TextBlock('£30.00'));
 ```
 
 ### Charts
 
 ```typescript
-import { BarChart } from '@bonniepdf/core';
+import { BarChart, ChartElement, ChartData, ChartSeries, ChartDataPoint, Color } from '@bonniepdf/core';
 
-new BarChart()
-  .title('Monthly Revenue')
-  .data([
-    { label: 'Jan', value: 42000 },
-    { label: 'Feb', value: 58000 },
-    { label: 'Mar', value: 51000 },
-  ])
-  .color('#2196F3')
-  .height(200);
+const points = [
+  { label: 'Jan', value: 42000 },
+  { label: 'Feb', value: 58000 },
+  { label: 'Mar', value: 51000 },
+].map(({ label, value }) => {
+  const p = new ChartDataPoint();
+  p.label = label;
+  p.value = value;
+  return p;
+});
+
+const series = new ChartSeries();
+series.color = Color.fromHex('#2196F3');
+series.dataPoints = points;
+
+const data = new ChartData();
+data.title = 'Monthly Revenue';
+data.series = [series];
+
+const chart = new BarChart();
+chart.height = 200;
+chart.barColor = Color.fromHex('#2196F3');
+
+// Add to the document with alt-text for accessibility.
+doc.add(new ChartElement(chart, data, 'Monthly revenue, Jan-Mar.'));
 ```
 
 ### Custom fonts
 
 ```typescript
-import { TtfFont, configurePlatform, BrowserPlatformIO } from '@bonniepdf/core';
+import { Document, TextBlock } from '@bonniepdf/core';
 
-configurePlatform(new BrowserPlatformIO());
+// Set `fontName` to a URL (browser) or an absolute file path (Node.js).
+// BonniePDF embeds a compact subset of only the glyphs you actually use.
+const text = new TextBlock('Custom font');
+text.fontName = '/fonts/Inter-Regular.ttf';
 
-const font = await TtfFont.fromFile('/fonts/Inter-Regular.ttf');
-
-new Document().addPage(page => page.add(new TextBlock('Custom font').fontFamily(font)));
+const doc = new Document();
+doc.add(text);
 ```
 
 ### Security
 
 ```typescript
-import { Document, EncryptionSettings, EncryptionAlgorithm } from '@bonniepdf/core'
+import { Document, DocumentSettings, PdfSize, PdfVersion, withEncryptionAes256 } from '@bonniepdf/core';
 
-new Document()
-  .encrypt(
-    new EncryptionSettings()
-      .algorithm(EncryptionAlgorithm.AES256)
-      .userPassword('viewer-pass')
-      .ownerPassword('admin-pass')
-  )
-  .addPage(...)
+const settings = new DocumentSettings(PdfSize.a4);
+settings.version = PdfVersion.Pdf17; // AES-256 requires PDF 1.7
+
+withEncryptionAes256(settings, opts =>
+  opts.withUserPassword('viewer-pass').withOwnerPassword('admin-pass').allowPrinting()
+);
+
+const doc = new Document(settings);
+// ...add content...
+const bytes = await doc.generateBytesAsync();
 ```
 
 ---

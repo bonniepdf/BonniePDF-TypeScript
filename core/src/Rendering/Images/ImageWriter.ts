@@ -1,5 +1,4 @@
 import { IPdfWriter } from '../Writers/IPdfWriter';
-import { IAsyncPdfWriter } from '../Writers/IAsyncPdfWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
 import { PdfAConformance } from '../../Configuration/PdfAConformance';
 
@@ -10,11 +9,11 @@ function _toHex(bytes: Uint8Array): string {
 }
 
 /**
- * Writes image XObjects to PDF
- * Supports both synchronous (IPdfWriter) and asynchronous (IAsyncPdfWriter) operations.
+ * Writes image XObjects to PDF. Always driven through the synchronous
+ * IPdfWriter - the async serialization path preloads/decodes images up front
+ * and then reuses this writer for the actual object emission.
  */
 export class ImageWriter {
-  private readonly asyncWriter?: IAsyncPdfWriter;
   private readonly writer: IPdfWriter;
   private _conformance = PdfAConformance.None;
 
@@ -39,25 +38,8 @@ export class ImageWriter {
     this._conformance = value ?? PdfAConformance.None;
   }
 
-  /**
-   * Creates an ImageWriter for synchronous operations
-   */
-  constructor(writer: IPdfWriter);
-  /**
-   * Creates an ImageWriter for asynchronous operations
-   */
-  constructor(asyncWriter: IAsyncPdfWriter);
-  constructor(writerOrAsync: IPdfWriter | IAsyncPdfWriter) {
-    if ('writeObjectAsync' in writerOrAsync) {
-      this.asyncWriter = writerOrAsync;
-      // The sync-writer slot is only used for members both interfaces share
-      // (getNewId) when constructed with an async writer; the sync write
-      // methods are never reached on the async path.
-      this.writer = writerOrAsync as unknown as IPdfWriter;
-    } else {
-      this.writer = writerOrAsync;
-      this.asyncWriter = undefined;
-    }
+  constructor(writer: IPdfWriter) {
+    this.writer = writer;
   }
 
   /**
@@ -298,125 +280,6 @@ export class ImageWriter {
       default:
         return '/DeviceRGB';
     }
-  }
-
-  // ========== ASYNC METHODS ==========
-
-  /**
-   * Writes an image as an XObject asynchronously, auto-detecting format
-   */
-  public async writeImageAsync(
-    id: number,
-    image: ImageInfo,
-    resourceName: string,
-    cancellationToken?: AbortSignal
-  ): Promise<number> {
-    switch (image.format) {
-      case ImageFormat.Jpeg:
-        return this.writeJpegImageAsync(id, image, resourceName, cancellationToken);
-      case ImageFormat.Png:
-        return this.writePngImageAsync(id, image, resourceName, cancellationToken);
-      default:
-        throw new Error(`Unsupported image format: ${image.format}`);
-    }
-  }
-
-  /**
-   * Writes a JPEG image as an XObject asynchronously
-   */
-  public async writeJpegImageAsync(
-    id: number,
-    image: ImageInfo,
-    _resourceName: string,
-    _cancellationToken?: AbortSignal
-  ): Promise<number> {
-    if (!this.asyncWriter) {
-      throw new Error('Async writer not configured');
-    }
-
-    const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', this.resolveColorSpace(image));
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/DCTDecode');
-
-    // TODO: Implement writeBinaryObjectAsync on IAsyncPdfWriter
-    // await this.asyncWriter.writeBinaryObjectAsync(id, dict, image.data, image.data.length, cancellationToken);
-    return id;
-  }
-
-  /**
-   * Writes a PNG image as an XObject asynchronously (using FlateDecode)
-   */
-  public async writePngImageAsync(
-    id: number,
-    image: ImageInfo,
-    resourceName: string,
-    cancellationToken?: AbortSignal
-  ): Promise<number> {
-    if (!this.asyncWriter) {
-      throw new Error('Async writer not configured');
-    }
-
-    // PDF/A-1 forbids SMask - flatten alpha by compositing against white.
-    let pixelData = image.data;
-    let writeSmask = image.hasAlpha && image.alphaData.length > 0;
-
-    if (writeSmask && this.requiresPdfA1TransparencyFallback()) {
-      pixelData = this.flattenAlpha(image.data, image.alphaData, image.components, image.bitsPerComponent);
-      writeSmask = false;
-    }
-
-    // Compress pixel data
-    const _compressedData = this.compressData(pixelData);
-
-    const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/FlateDecode');
-
-    // Handle color space - ICC profile (when present) overrides device space.
-    dict.set('/ColorSpace', this.resolveColorSpace(image));
-
-    // Handle alpha channel (soft mask)
-    if (writeSmask) {
-      const smaskId = this.asyncWriter.getNewId();
-      await this.writeSoftMaskAsync(smaskId, image, cancellationToken);
-      dict.set('/SMask', `${smaskId} 0 R`);
-    }
-
-    // TODO: Implement writeBinaryObjectAsync on IAsyncPdfWriter
-    // await this.asyncWriter.writeBinaryObjectAsync(id, dict, compressedData, compressedData.length, cancellationToken);
-    return id;
-  }
-
-  /**
-   * Writes a soft mask (alpha channel) for transparency asynchronously
-   */
-  private async writeSoftMaskAsync(id: number, image: ImageInfo, _cancellationToken?: AbortSignal): Promise<void> {
-    if (!this.asyncWriter) {
-      throw new Error('Async writer not configured');
-    }
-
-    const _compressedAlpha = this.compressData(image.alphaData);
-
-    const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', '/DeviceGray');
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/FlateDecode');
-
-    // TODO: Implement writeBinaryObjectAsync on IAsyncPdfWriter
-    // await this.asyncWriter.writeBinaryObjectAsync(id, dict, compressedAlpha, compressedAlpha.length, cancellationToken);
   }
 
   /**

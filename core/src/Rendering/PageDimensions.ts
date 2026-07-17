@@ -24,16 +24,6 @@ export class PageRenderOutput {
   }
 }
 
-export class RenderedPageDimensions {
-  public size: PdfSize;
-  public margin: number;
-
-  constructor(size: PdfSize, margin: number) {
-    this.size = size;
-    this.margin = margin;
-  }
-}
-
 export class PdfRenderResult {
   public pageContentStreams: string[] = [];
   public pageDimensions: Map<number, PageDimensions> = new Map();

@@ -55,13 +55,25 @@ describe('PdfCanvas — artifact fallback', () => {
     expect(count(out, 'EMC')).toBe(1);
   });
 
-  it('does not artifact an image already inside a structure scope (e.g. /Figure)', () => {
+  it('artifacts a draw inside a container BMC because it has no MCID', () => {
     const canvas = taggedCanvas();
-    canvas.beginContainerContent('Figure'); // opens a structure marked-content scope
+    canvas.beginContainerContent('Div');
+    canvas.fillRect(0, 0, 10, 10, Color.black);
+    canvas.endMarkedContent();
+
+    const out = canvas.getStream().join('');
+    expect(out).toContain('/Div BMC');
+    expect(out).toContain('/Artifact BMC');
+  });
+
+  it('does not artifact a draw already inside MCID-bearing content', () => {
+    const canvas = taggedCanvas();
+    canvas.beginMarkedContent('Figure');
     canvas.drawImage(imageInfo, 0, 0, 10, 10);
     canvas.endMarkedContent();
 
     const out = canvas.getStream().join('');
+    expect(out).toContain('/Figure << /MCID 0 >> BDC');
     expect(out).not.toContain('/Artifact BMC');
   });
 

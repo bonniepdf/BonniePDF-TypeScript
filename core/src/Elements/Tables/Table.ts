@@ -427,89 +427,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       ctx.newPage();
     }
 
-    // this feature tagging: push /TR around the row and /TH or /TD around each
-    // cell so the structure tree mirrors the visible table. ColumnSpan
-    // surfaces as /Attributes /ColSpan on the cell's StructElem.
-    // Header-ness inherited from the row when the cell doesn't already
-    // declare it. No-op when tagging is off.
-    const tagging = ctx.tagging;
-    // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
-    // content in reading order instead (no table structure). Exactly one applies.
-    const dataTagging = tagging != null && !this.isLayoutGrid;
-    const presTagging = tagging != null && this.isLayoutGrid;
-    if (dataTagging) {
-      tagging!.tree.begin(SemanticRole.TR);
-      ctx.canvas.beginContainerContent('TR');
-    }
-
-    const rowWidth = widths.reduce((a, b) => a + b, 0);
-    const capture = this.captureRow(ctx, row, ctx.currentX, ctx.currentY, rowWidth, rowHeight);
-
-    try {
-      const startX = ctx.currentX;
-      let currentX = startX;
-
-      for (let i = 0; i < row.cells.length; i++) {
-        const cell = row.cells[i];
-
-        // Defensive: cells added via fromElements() don't know their
-        // row's header-ness. Propagate at render time so the structure
-        // role resolves to TH instead of TD.
-        if (row.isHeader && !cell.isHeader) cell.isHeader = true;
-
-        let colWidth = widths[i];
-        if (cell.columnSpan > 1) {
-          for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
-            colWidth += widths[i + j];
-          }
-        }
-
-        capture.openCell(cell, currentX, colWidth);
-
-        let childTag: ChildTagToken | null = null;
-        if (dataTagging) {
-          const cellRole = cell.semanticRole;
-          tagging!.tree.begin(cellRole);
-          const cellAttrs: string[] = [];
-          if (cell.columnSpan > 1) cellAttrs.push(`/ColSpan ${cell.columnSpan}`);
-          // PDF/UA 7.5: TH cells need a Scope when the table isn't navigable via
-          // Headers/IDs. Our header rows are column headers → /Scope /Column.
-          if (cellRole === SemanticRole.TH) cellAttrs.push('/Scope /Column');
-          if (cellAttrs.length > 0) {
-            tagging!.tree.setAttributes(`<< /O /Table ${cellAttrs.join(' ')} >>`);
-          }
-          ctx.canvas.beginMarkedContent(toPdfTag(cellRole));
-        } else if (presTagging) {
-          // Layout cell: tag the content with its own natural role (P, Figure, …)
-          // in reading order, exactly as a stack tags a child.
-          childTag = beginChildTag(ctx, cell.content);
-        }
-
-        try {
-          this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
-        } finally {
-          if (dataTagging) {
-            ctx.canvas.endMarkedContent();
-            tagging!.tree.end();
-          } else if (childTag) {
-            endChildTag(ctx, childTag);
-          }
-          capture.closeCell(cell);
-        }
-
-        currentX += widths[i]; // Move by original column width (not spanned width)
-      }
-
-      // Move down by row height
-      ctx.currentX = startX;
-      ctx.currentY += rowHeight;
-    } finally {
-      if (dataTagging) {
-        ctx.canvas.endMarkedContent();
-        tagging!.tree.end();
-      }
-      capture.closeRow();
-    }
+    this.renderRowDirect(ctx, row, widths);
   }
 
   private renderCell(
@@ -587,15 +505,20 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   }
 
   /**
-   * Renders a row without internal pagination checks
+   * Renders a row without internal pagination checks. Shared body for
+   * renderRow (which adds the footer-visibility and pagination checks first).
    * @private
    */
   private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[]): void {
     const rowHeight = this.measureRowHeight(row, widths);
 
     // this feature tagging: pushes /TR around the row and /TH or /TD around each
-    // cell when the document opts into PDF/UA. Mirror of the same wrap
-    // in renderRow (the non-stateful twin). No-op when tagging is off.
+    // cell when the document opts into PDF/UA. ColumnSpan surfaces as
+    // /Attributes /ColSpan on the cell's StructElem; header-ness is
+    // inherited from the row when the cell doesn't already declare it.
+    // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
+    // content in reading order instead (no table structure). Exactly one
+    // applies. No-op when tagging is off.
     const tagging = ctx.tagging;
     const dataTagging = tagging != null && !this.isLayoutGrid;
     const presTagging = tagging != null && this.isLayoutGrid;

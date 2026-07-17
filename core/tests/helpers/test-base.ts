@@ -15,22 +15,8 @@ export function assertValidPdf(bytes: Uint8Array): void {
   expect(text).toContain('trailer');
 }
 
-export function assertPdfIsEncrypted(bytes: Uint8Array): void {
-  expect(pdfToText(bytes)).toContain('/Encrypt');
-}
-
 export function assertPdfHasFonts(bytes: Uint8Array): void {
   expect(pdfToText(bytes)).toContain('/Font');
-}
-
-export function assertPdfHasImages(bytes: Uint8Array, minCount = 1): void {
-  const text = pdfToText(bytes);
-  const count = (text.match(/\/Subtype \/Image/g) ?? []).length;
-  expect(count).toBeGreaterThanOrEqual(minCount);
-}
-
-export function assertMinimumSize(bytes: Uint8Array, minBytes: number): void {
-  expect(bytes.length).toBeGreaterThanOrEqual(minBytes);
 }
 
 export function assertPdfHasPages(bytes: Uint8Array, minPages: number): void {

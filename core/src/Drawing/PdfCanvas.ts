@@ -499,7 +499,10 @@ export class PdfCanvas implements ICanvas {
 
   /** @inheritdoc */
   public beginArtifact(): void {
-    const emit = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
+    // A container-only BMC does not associate paint operations with an MCID.
+    // Decorative marks inside one still require /Artifact; only an open BDC
+    // already qualifies the marks as real tagged content.
+    const emit = this.tagging != null && this.openTaggedCount === 0 && this.artifactDepth === 0;
     if (emit) PdfOperators.beginArtifact(this.stream);
     this.artifactEmitStack.push(emit);
     this.artifactDepth++;
@@ -580,7 +583,7 @@ export class PdfCanvas implements ICanvas {
   }
 
   private drawAsArtifactFallback(draw: () => void, onAutoArtifact?: () => void): void {
-    const needsFallbackArtifact = this.tagging != null && this.openMarkedContent === 0 && this.artifactDepth === 0;
+    const needsFallbackArtifact = this.tagging != null && this.openTaggedCount === 0 && this.artifactDepth === 0;
     if (needsFallbackArtifact) {
       PdfOperators.beginArtifact(this.stream);
       onAutoArtifact?.();

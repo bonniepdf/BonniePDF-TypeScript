@@ -136,6 +136,7 @@ function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof Im
 
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PAGE, 0); // zero margin - full-bleed cover
+  settings.pageColor = Color.white;
   settings.language = 'en-GB';
 
   const metadata = new DocumentMetadata();

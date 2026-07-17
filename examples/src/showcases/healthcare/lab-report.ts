@@ -86,6 +86,7 @@ const PANELS: Panel[] = [
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 50);
+  settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

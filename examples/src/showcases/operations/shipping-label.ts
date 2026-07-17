@@ -75,6 +75,7 @@ function hrule(mt: number, mb: number): Container {
 export function generate(): Document {
   // 4 x 6 inch label = 288 x 432 pt.
   const settings = new DocumentSettings(new PdfSize(288, 432, 'Shipping Label 4x6'), 12);
+  settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

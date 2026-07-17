@@ -30,6 +30,9 @@ const base = new NodePlatformIO();
 configurePlatform({
   readFile: (path: string) => base.readFile(mapFontUrl(path)),
   writeFile: (path: string, data: Uint8Array) => base.writeFile(path, data),
+  readFileSync: (path: string) => base.readFileSync(mapFontUrl(path)),
+  writeFileSync: (path: string, data: Uint8Array) => base.writeFileSync(path, data),
+  fileExistsSync: (path: string) => base.fileExistsSync(mapFontUrl(path)),
   deflate: (data: Uint8Array) => base.deflate(data),
 });
 

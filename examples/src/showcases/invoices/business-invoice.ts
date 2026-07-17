@@ -40,6 +40,7 @@ export function generate(): Document {
   const dueDateStr = `${String(dueDate.getMonth() + 1).padStart(2, '0')}/${String(dueDate.getDate()).padStart(2, '0')}/${dueDate.getFullYear()}`;
 
   const settings = new DocumentSettings(PdfSize.a4, 36);
+  settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-US';

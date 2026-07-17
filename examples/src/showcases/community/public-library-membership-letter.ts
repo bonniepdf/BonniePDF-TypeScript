@@ -66,6 +66,7 @@ export function generate(): Document {
   );
 
   const settings = new DocumentSettings(PAGE, MARGIN);
+  settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

@@ -37,8 +37,6 @@ export class PieChart extends ChartBase {
 
   // Styling constants
   private static readonly LEGEND_TEXT_COLOR = Color.fromHex('#333333');
-  private static readonly TOTAL_LABEL_COLOR = Color.fromHex('#666666');
-  private static readonly TOTAL_VALUE_COLOR = Color.fromHex('#333333');
 
   // Default colors matching the SVG
   private static readonly DEFAULT_COLORS = [
@@ -353,42 +351,6 @@ export class PieChart extends ChartBase {
       );
     }
   }
-
-  /**
-   * Holds all computed layout positions for a pie chart render pass.
-   */
-  private static readonly PieLayout = class {
-    constructor(
-      public centerX: number,
-      public centerY: number,
-      public radius: number,
-      public donutHoleRadius: number,
-      public legendX: number,
-      public legendStartY: number
-    ) {}
-
-    equals(other: PieLayout): boolean {
-      return (
-        Math.abs(this.centerX - other.centerX) < 0.0001 &&
-        Math.abs(this.centerY - other.centerY) < 0.0001 &&
-        Math.abs(this.radius - other.radius) < 0.0001 &&
-        Math.abs(this.donutHoleRadius - other.donutHoleRadius) < 0.0001 &&
-        Math.abs(this.legendX - other.legendX) < 0.0001 &&
-        Math.abs(this.legendStartY - other.legendStartY) < 0.0001
-      );
-    }
-
-    hashCode(): number {
-      let hash = 0;
-      hash = (hash * 31 + Math.floor(this.centerX * 10000)) | 0;
-      hash = (hash * 31 + Math.floor(this.centerY * 10000)) | 0;
-      hash = (hash * 31 + Math.floor(this.radius * 10000)) | 0;
-      hash = (hash * 31 + Math.floor(this.donutHoleRadius * 10000)) | 0;
-      hash = (hash * 31 + Math.floor(this.legendX * 10000)) | 0;
-      hash = (hash * 31 + Math.floor(this.legendStartY * 10000)) | 0;
-      return hash;
-    }
-  };
 }
 
 /**

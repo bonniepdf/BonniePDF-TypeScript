@@ -70,11 +70,6 @@ export interface SvgCanvasOptions {
   shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
-interface _FragmentEntry {
-  /** Raw SVG markup. */
-  markup: string;
-}
-
 export class SvgCanvas implements ICanvas {
   public readonly width: number;
   public readonly height: number;
@@ -613,6 +608,11 @@ export class SvgCanvas implements ICanvas {
       this.embeddedFontUsage.set(fontFamily, usage);
     }
 
+    // apply kern pairs between adjacent glyphs so the preview matches
+    // the kerned `TJ` output the PDF painter now emits (and the kerned widths
+    // the layout engine reserves).
+    let prevGid = 0;
+    let hasPrev = false;
     for (const rune of text) {
       const code = rune.codePointAt(0) ?? 0;
       if (code < 32 && code !== 9) {
@@ -620,10 +620,15 @@ export class SvgCanvas implements ICanvas {
       }
       usage.codePoints.add(code);
       const gid = font.getGlyphId(code);
+      if (hasPrev && font.hasKerning) {
+        cursor += font.getKerning(prevGid, gid) * scale;
+      }
       xs.push(this.n(cursor));
       chars += rune;
       cursor += font.getGlyphWidth(gid) * scale;
       if (rune === ' ') cursor += extraPerSpace;
+      prevGid = gid;
+      hasPrev = true;
     }
 
     if (xs.length === 0) return '';
@@ -640,12 +645,22 @@ export class SvgCanvas implements ICanvas {
   }
 
   private getEmbeddedStringWidth(text: string, font: TtfFont, fontSize: number): number {
+    // kerned, mirroring both the layout engine's reserved widths and the
+    // kerned glyph positions painted by glyphPositionedText / the PDF `TJ` path.
     const scale = fontSize / font.unitsPerEm;
     let width = 0;
+    let prevGid = 0;
+    let hasPrev = false;
     for (const rune of text) {
       const code = rune.codePointAt(0) ?? 0;
       if (code < 32 && code !== 9) continue;
-      width += font.getGlyphWidth(font.getGlyphId(code)) * scale;
+      const gid = font.getGlyphId(code);
+      if (hasPrev && font.hasKerning) {
+        width += font.getKerning(prevGid, gid) * scale;
+      }
+      width += font.getGlyphWidth(gid) * scale;
+      prevGid = gid;
+      hasPrev = true;
     }
     return width;
   }

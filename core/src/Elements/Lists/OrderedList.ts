@@ -50,7 +50,6 @@ export class OrderedList extends ListElementBase {
     const itemWidth = contentWidth - this.indent;
 
     let currentItemNumber = this.startNumber;
-    const _startY = ctx.currentY;
 
     // Render regular items
     for (const item of this.items) {

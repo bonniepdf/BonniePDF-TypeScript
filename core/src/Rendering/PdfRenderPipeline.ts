@@ -39,7 +39,6 @@ export class PdfRenderPipeline {
       }
 
       const pageWidth = page.width;
-      const _pageHeight = page.height;
       const pageMargin = page.margin;
 
       ctx.pageSize = page.size;
@@ -172,7 +171,6 @@ export class PdfRenderPipeline {
       throw new Error('Pages and context cannot be null');
     }
 
-    const _orientedPageSize = settings.getOrientedPageSize();
     const pageDimensions = new Map<
       number,
       { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
@@ -292,10 +290,15 @@ export class PdfRenderPipeline {
 
     const textWidth = FontMetrics.getStringWidth(wm.text, StandardFonts.Helvetica, wm.fontSize);
 
+    // kern the watermark like body text (the this feature SVG export already
+    // kerns it), falling back to a plain `Tj` operand when the font has no
+    // kern pairs for this string.
     const embeddedFont = ctx.resolveEmbeddedFont(wm.fontName);
-    const textOperand = embeddedFont
-      ? PdfSyntax.toGlyphIdHexString(wm.text, embeddedFont)
-      : `(${PdfSyntax.escape(wm.text)})`;
+    const kernedOperand =
+      embeddedFont && embeddedFont.hasKerning ? PdfSyntax.toKernedGlyphArray(wm.text, embeddedFont) : null;
+    const textOperand =
+      kernedOperand ??
+      (embeddedFont ? PdfSyntax.toGlyphIdHexString(wm.text, embeddedFont) : `(${PdfSyntax.escape(wm.text)})`);
 
     const wmOps: string[] = [];
     PdfOperators.saveState(wmOps);
@@ -321,7 +324,11 @@ export class PdfRenderPipeline {
 
     PdfOperators.setFillColor(wmOps, fillColor);
     PdfOperators.setTextPosition(wmOps, -textWidth / 2, 0);
-    PdfOperators.showText(wmOps, textOperand);
+    if (kernedOperand != null) {
+      PdfOperators.showTextPositioned(wmOps, kernedOperand);
+    } else {
+      PdfOperators.showText(wmOps, textOperand);
+    }
     PdfOperators.endText(wmOps);
     PdfOperators.restoreState(wmOps);
 

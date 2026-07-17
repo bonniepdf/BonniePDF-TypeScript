@@ -307,7 +307,7 @@ describe('SVG page export — embedded font subsets', () => {
     expect(fontFaceCss.length).toBeLessThan(fullFontBytes / 2);
   });
 
-  it('positions embedded glyphs with the same unkerned advances as PDF Tj text', async () => {
+  it('positions embedded glyphs with the same kerned advances as PDF TJ text', async () => {
     doc = new Document();
     const t = new TextBlock('AV');
     t.fontName = FONT;
@@ -322,9 +322,10 @@ describe('SVG page export — embedded font subsets', () => {
     const positions = xList!.split(' ').map(Number);
     expect(positions).toHaveLength(2);
 
-    // Liberation Serif's A advance is 1479 units at 2048 UPEM. The old SVG
-    // path subtracted the AV kern pair here, making previews tighter than PDF.
-    expect(positions[1] - positions[0]).toBeCloseTo((1479 * 11) / 2048, 4);
+    // Liberation Serif's A advance is 1479 units and the AV kern pair is
+    // -264 units at 2048 UPEM. The PDF painter now emits the same kern as a
+    // `TJ` adjustment, so the preview and the PDF stay in step.
+    expect(positions[1] - positions[0]).toBeCloseTo(((1479 - 264) * 11) / 2048, 4);
   });
 
   it('reuses preloaded bytes for a browser URL font identifier', async () => {

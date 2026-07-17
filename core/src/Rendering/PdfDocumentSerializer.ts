@@ -79,11 +79,6 @@ export class PdfDocumentSerializer {
     // the standard-14 references in tagged output too.
     ctx.resources.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
 
-    // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
-    // independently of any PDF/A claim - substitute embedded Liberation for
-    // the standard-14 references in tagged output too.
-    ctx.resources.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
-
     // PDF/UA tagging context - shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).
@@ -91,8 +86,6 @@ export class PdfDocumentSerializer {
       ? new TaggingContext(new StructureTreeBuilder())
       : undefined;
     ctx.tagging = taggingContext;
-
-    // Two-pass layout (VisualToc) is out of scope - requiresTwoPassLayout() always false.
 
     // annotation bindings for /StructParent + /OBJR wiring.
     // Keys start at 10_000 above page keys so the /ParentTree number tree
@@ -433,14 +426,6 @@ export class PdfDocumentSerializer {
     // Only pass the registry when there are actually embedded fonts to inject -
     // otherwise let serialize() create its own fresh registry (no-op optimisation).
     this.serialize(syncWriter, embeddedPaths.size > 0 ? preRegistry : undefined);
-  }
-
-  /**
-   * Returns true if the document contains a VisualToc element, requiring
-   * two-pass layout. Stubbed as false - VisualToc is out of scope.
-   */
-  private requiresTwoPassLayout(): boolean {
-    return false;
   }
 }
 

@@ -147,6 +147,16 @@ export class PdfOperators {
     s.push(`${operand} Tj\n`);
   }
 
+  /**
+   * `TJ` - show text with individual glyph positioning. The operand is a
+   * pre-built array, e.g. `[<0024> 80 <0057>]`, where numbers are advance
+   * adjustments in thousandths of an em, *subtracted* from the current
+   * position (so a tightening kern of -80 font units is emitted as `80`).
+   */
+  public static showTextPositioned(s: string[], arrayOperand: string): void {
+    s.push(`${arrayOperand} TJ\n`);
+  }
+
   public static paintXObject(s: string[], name: string): void {
     s.push(`${name} Do\n`);
   }

@@ -8,11 +8,11 @@
 
 [Live examples](https://www.bonniepdf.dev/examples) · [Documentation](https://www.bonniepdf.dev/docs/typescript/getting-started) · [npm](https://www.npmjs.com/package/@bonniepdf/core) · [.NET package](https://www.nuget.org/packages/BonniePDF)
 
-Create polished, accessible and archival-quality PDFs directly from TypeScript and JavaScript. BonniePDF is a pure TypeScript document engine that runs in browsers, Node.js, Bun, Deno and edge runtimes. Zero dependencies. BonniePDF does not require Chromium, a headless browser, a canvas dependency, native add-ons or a print server.
+Create polished, accessible and archival-ready PDFs directly from TypeScript and JavaScript. BonniePDF is a pure TypeScript document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A conformance. It runs in browsers, Node.js, Bun, Deno and edge runtimes with zero dependencies—and requires no Chromium, headless browser, canvas library, native add-ons or print server.
 
 BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, form filler or editor for existing files.
 
-## What it can produce
+## What you can build
 
 <table>
   <tr>
@@ -33,9 +33,9 @@ BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, f
     </td>
   </tr>
   <tr>
-    <td align="center"><strong>Annual reports</strong><br />Images, masks and vector composition</td>
-    <td align="center"><strong>Executive dashboards</strong><br />KPIs, charts and tables</td>
-    <td align="center"><strong>Business documents</strong><br />Automatic layout and pagination</td>
+    <td align="center"><strong>Annual reports</strong><br />Photography, clipping masks and vector composition</td>
+    <td align="center"><strong>Executive dashboards</strong><br />KPIs, charts and data-rich tables</td>
+    <td align="center"><strong>Business documents</strong><br />Automatic layout, flow and pagination</td>
   </tr>
   <tr>
     <td width="33%" align="center">
@@ -55,9 +55,9 @@ BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, f
     </td>
   </tr>
   <tr>
-    <td align="center"><strong>Shipping labels</strong><br />Barcodes, QR codes and custom page sizes</td>
-    <td align="center"><strong>Pathology reports</strong><br />Structured clinical data and accessible tables</td>
-    <td align="center"><strong>Public-service letters</strong><br />Multi-page typography and civic branding</td>
+    <td align="center"><strong>Shipping labels</strong><br />Barcodes, QR codes and precision page sizing</td>
+    <td align="center"><strong>Clinical reports</strong><br />Structured clinical data and accessible tables</td>
+    <td align="center"><strong>Public-service letters</strong><br />Multi-page typography and branded layouts</td>
   </tr>
 </table>
 

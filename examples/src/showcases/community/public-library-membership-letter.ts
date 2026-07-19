@@ -117,10 +117,9 @@ export function generate(): Document {
   top.border = Border.none;
   top.margin = new Thickness(0, 0, 0, 24);
 
-  const addr = new VerticalStack();
-  for (const line of ['Ms J. Okoro', '14 Elmfield Court', 'Northbridge', 'NB1 6QT']) {
-    addr.addChild(body(line, { mb: 0 }));
-  }
+  // One TextBlock with hard line breaks: the address tags as a single
+  // paragraph under PDF/UA instead of four.
+  const addr = body('Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT', { mb: 0 });
 
   const meta = new VerticalStack();
   meta.addChild(body(longDate, { align: TextAlignment.Right, mb: 0 }));

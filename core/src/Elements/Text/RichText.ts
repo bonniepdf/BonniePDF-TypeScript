@@ -289,8 +289,12 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       }
     }
 
-    // Add the final line
-    if (currentLine.runs.length > 0) {
+    // Add the final line. A paragraph that ends immediately after a raw
+    // text break ("a\n") keeps its trailing blank line, matching the
+    // TextBlock string rule; a structural line()/lineBreak() terminal
+    // break does not create one.
+    const lastWord = words.length > 0 ? words[words.length - 1] : undefined;
+    if (currentLine.runs.length > 0 || (lastWord?.isLineBreak && lastWord.isTextBreak)) {
       currentLine.totalWidth = currentWidth;
       this.updateLineHeight(currentLine);
       lines.push(currentLine);
@@ -308,6 +312,10 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
   /**
    * Breaks all spans into a flat list of styled words.
+   *
+   * Raw break characters in span text (`\n`, with `\r\n`/`\r` normalised)
+   * split the span into segments; each break becomes a text-break word and
+   * each segment flows like a mini-span.
    */
   private buildStyledWords(): StyledWord[] {
     const words: StyledWord[] = [];
@@ -316,9 +324,9 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
     for (const span of this.spans) {
       const resolved = this.resolveStyle(span.style);
-      const text = span.text ?? '';
+      const rawText = span.text ?? '';
 
-      if (!text) {
+      if (!rawText) {
         if (span.isLineBreak) {
           words.push(new StyledWord(resolved, '', true));
           prevSpanEndedWithSpace = false;
@@ -326,38 +334,55 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
         continue;
       }
 
-      // Split by spaces, preserving awareness of leading/trailing spaces
-      const parts = text.split(' ');
+      const segments = rawText.replace(/\r\n?/g, '\n').split('\n');
 
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (!part) continue;
+      for (let s = 0; s < segments.length; s++) {
+        if (s > 0) {
+          const brk = new StyledWord(resolved, '', true);
+          brk.isTextBreak = true;
+          words.push(brk);
+          // A break consumes any pending trailing space; the next word
+          // starts its line flush (the flow loop also drops leading spaces
+          // at line starts).
+          prevSpanEndedWithSpace = false;
+        }
 
-        const hasLeadingSpace = i > 0 || (words.length > 0 && (text.startsWith(' ') || prevSpanEndedWithSpace));
+        const text = segments[s];
+        if (!text) continue;
 
-        // Determine which style owns the leading space
-        const isInterSpanSpace = hasLeadingSpace && i === 0 && prevSpanEndedWithSpace && !text.startsWith(' ');
-        const spaceStyle = isInterSpanSpace && prevResolvedStyle ? prevResolvedStyle : resolved;
+        // Split by spaces, preserving awareness of leading/trailing spaces
+        const parts = text.split(' ');
 
-        const partWidth = FontMetrics.getStringWidth(part, resolved.effectiveFontName, resolved.effectiveFontSize);
-        const spaceWidth = hasLeadingSpace
-          ? FontMetrics.getStringWidth(' ', spaceStyle.effectiveFontName, spaceStyle.effectiveFontSize)
-          : 0;
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          if (!part) continue;
 
-        const word = new StyledWord(resolved, part, false);
-        word.width = partWidth;
-        word.hasLeadingSpace = hasLeadingSpace;
-        word.leadingSpaceWidth = spaceWidth;
-        word.leadingSpaceStyle = hasLeadingSpace ? spaceStyle : undefined;
-        words.push(word);
+          const hasLeadingSpace = i > 0 || (words.length > 0 && (text.startsWith(' ') || prevSpanEndedWithSpace));
+
+          // Determine which style owns the leading space
+          const isInterSpanSpace = hasLeadingSpace && i === 0 && prevSpanEndedWithSpace && !text.startsWith(' ');
+          const spaceStyle = isInterSpanSpace && prevResolvedStyle ? prevResolvedStyle : resolved;
+
+          const partWidth = FontMetrics.getStringWidth(part, resolved.effectiveFontName, resolved.effectiveFontSize);
+          const spaceWidth = hasLeadingSpace
+            ? FontMetrics.getStringWidth(' ', spaceStyle.effectiveFontName, spaceStyle.effectiveFontSize)
+            : 0;
+
+          const word = new StyledWord(resolved, part, false);
+          word.width = partWidth;
+          word.hasLeadingSpace = hasLeadingSpace;
+          word.leadingSpaceWidth = spaceWidth;
+          word.leadingSpaceStyle = hasLeadingSpace ? spaceStyle : undefined;
+          words.push(word);
+        }
+
+        prevSpanEndedWithSpace = text.endsWith(' ');
       }
 
       // Handle trailing line break from the span
       if (span.isLineBreak) {
         words.push(new StyledWord(resolved, '', true));
         prevSpanEndedWithSpace = false;
-      } else {
-        prevSpanEndedWithSpace = text.endsWith(' ');
       }
 
       prevResolvedStyle = resolved;
@@ -615,6 +640,14 @@ export class StyledWord {
   public leadingSpaceWidth = 0;
   public leadingSpaceStyle?: TextStyle;
   public isLineBreak = false;
+
+  /**
+   * True when this line break came from a raw break character (`\n`) inside
+   * span text rather than the structural `line()`/`lineBreak()` API. A
+   * paragraph-final text break yields a trailing blank line (matching the
+   * TextBlock string rule); a paragraph-final structural break does not.
+   */
+  public isTextBreak = false;
 
   constructor(style: TextStyle, text: string, isLineBreak: boolean) {
     this.style = style;

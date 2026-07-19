@@ -85,7 +85,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
   seller.addChild(cell('BonniePDF GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  for (const l of ['Musterstrasse 1', '10115 Berlin', 'Germany']) seller.addChild(cell(l, { color: MUTED }));
+  seller.addChild(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
   seller.addChild(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
   const titleStack = new VerticalStack();
   titleStack.addChild(cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: TextAlignment.Right }));

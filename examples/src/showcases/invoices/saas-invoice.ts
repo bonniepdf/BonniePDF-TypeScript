@@ -93,15 +93,12 @@ export function generate(): Document {
   const billTo = new VerticalStack();
   billTo.addChild(tb('BILLED TO', 8, MUTE, { bold: true, mb: 4 }));
   billTo.addChild(tb('Aperture Labs Inc.', 10, INK, { bold: true }));
-  billTo.addChild(tb('Accounts Payable', 9, BODY));
-  billTo.addChild(tb('19 Enfield Road, London N1 5BA', 9, BODY));
-  billTo.addChild(tb('billing@aperture.example', 9, BODY));
+  billTo.addChild(tb('Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@aperture.example', 9, BODY));
 
   const from = new VerticalStack();
   from.addChild(tb('FROM', 8, MUTE, { bold: true, mb: 4, align: TextAlignment.Right }));
   from.addChild(tb('Northwind Cloud Ltd', 10, INK, { bold: true, align: TextAlignment.Right }));
-  from.addChild(tb('4 Tenter Ground, London E1 7NH', 9, BODY, { align: TextAlignment.Right }));
-  from.addChild(tb('VAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
+  from.addChild(tb('4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
 
   const addr = new Grid(1, 1);
   addr.border = Border.none;

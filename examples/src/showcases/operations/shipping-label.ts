@@ -114,8 +114,7 @@ export function generate(): Document {
   const from = new VerticalStack();
   from.addChild(tb('FROM', 7, MUTE, { bold: true, mb: 2 }));
   from.addChild(tb('Northwind Supplies', 8, INK, { bold: true }));
-  from.addChild(tb('4 Tenter Ground', 8, BODY));
-  from.addChild(tb('London E1 7NH, UK', 8, BODY));
+  from.addChild(tb('4 Tenter Ground\nLondon E1 7NH, UK', 8, BODY));
   const fromWrap = new Container();
   fromWrap.child = from;
   fromWrap.margin = new Thickness(0, 0, 0, 4);
@@ -124,10 +123,7 @@ export function generate(): Document {
   const to = new VerticalStack();
   to.addChild(tb('SHIP TO', 8, MUTE, { bold: true, mb: 3 }));
   to.addChild(tb('Jordan Avery', 13, INK, { bold: true }));
-  to.addChild(tb('Aperture Labs Inc.', 10, INK));
-  to.addChild(tb('19 Enfield Road', 10, INK));
-  to.addChild(tb('London N1 5BA', 10, INK));
-  to.addChild(tb('United Kingdom', 10, INK));
+  to.addChild(tb('Aperture Labs Inc.\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom', 10, INK));
   const toWrap = new Container();
   toWrap.child = to;
   toWrap.border = new Border(1);

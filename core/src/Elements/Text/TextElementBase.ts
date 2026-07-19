@@ -238,12 +238,40 @@ export abstract class TextElementBase extends ElementBase {
   // ── Text measurement and wrapping ─────────────────────────────────────────
 
   /**
-   * Computes wrapped lines for text that exceeds the maximum width.
-   * Uses word wrapping to break lines at appropriate positions.
+   * Computes wrapped lines for text.
+   *
+   * Explicit line breaks (`\n`, `\r\n`, or a bare `\r`) are honoured first and
+   * split the text into segments; each segment is then word-wrapped to
+   * maxWidth. An empty segment (from consecutive breaks, or a leading/trailing
+   * break) yields one blank line, so `"a\n\nb"` produces `["a", "", "b"]`.
+   * Text containing no break characters wraps exactly as before.
    */
   protected computeLines(text: string, maxWidth: number): string[] {
+    if (!text) return [];
+
     const lines: string[] = [];
-    if (!text) return lines;
+    // Normalise CRLF / CR to LF, then split on hard breaks.
+    const segments = text.replace(/\r\n?/g, '\n').split('\n');
+
+    for (const segment of segments) {
+      const wrapped = this.wrapSegment(segment, maxWidth);
+      if (wrapped.length === 0) {
+        // Preserve the blank line represented by an empty segment.
+        lines.push('');
+      } else {
+        for (const line of wrapped) lines.push(line);
+      }
+    }
+
+    return lines;
+  }
+
+  /**
+   * Word-wraps a single break-free segment to maxWidth.
+   */
+  private wrapSegment(text: string, maxWidth: number): string[] {
+    const lines: string[] = [];
+    if (text === '') return lines;
 
     const words = text.split(' ');
     let currentLine = '';

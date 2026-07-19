@@ -22,6 +22,13 @@ import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { ConformancePlan } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
+import { VisualToc } from '../Elements/Text/VisualToc';
+import { VerticalStack } from '../Elements/Layout/VerticalStack';
+import { HorizontalStack } from '../Elements/Layout/HorizontalStack';
+import { Container } from '../Elements/Layout/Container';
+import { BookmarkItem } from '../Configuration/BookmarkItem';
+import type { IElement } from '../Elements/IElement';
+import type { IContentContainer } from '../Fluent/IContentContainer';
 import type { DocumentSettings } from '../Configuration/DocumentSettings';
 
 export class PdfDocumentSerializer {
@@ -79,6 +86,43 @@ export class PdfDocumentSerializer {
     // the standard-14 references in tagged output too.
     ctx.resources.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
 
+    // 2b. Two-pass TOC resolution.
+    // A VisualToc renders *before* the headings it references (it typically
+    // sits on page 2, ahead of the body), so on a single pass ctx.tocEntries
+    // is empty when the TOC draws - it would print "XX" for every page number
+    // and link every entry to page 1. Mirror PdfDocumentSerializer.cs: run a
+    // throw-away layout pass first to resolve every Heading's page number, then
+    // seed the real render context with the result. The dry-run context reuses
+    // the same resources/conformance as the real pass so pagination (and thus
+    // the resolved page numbers) is identical. Only paid for when the document
+    // actually contains a VisualToc.
+    let dryRunPageCount = 0;
+    if (PdfDocumentSerializer.requiresTwoPassLayout(this.document)) {
+      const dryRunCtx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
+      dryRunCtx.resources.conformance = settings.conformance;
+      dryRunCtx.resources.embedStandardFonts = ctx.resources.embedStandardFonts;
+
+      // Drive the streaming generator to completion; we only care about the
+      // side effect of populating dryRunCtx.tocEntries and the final page count.
+      for (const _ of PdfRenderPipeline.renderPagesStreaming(this.document.pages, settings, dryRunCtx)) {
+        // intentionally empty - discard the rendered output of the dry run
+      }
+
+      for (const [identifier, pageNumber] of dryRunCtx.tocEntries) {
+        ctx.tocEntries.set(identifier, pageNumber);
+      }
+      dryRunPageCount = dryRunCtx.pages.length;
+
+      // Auto-populate the PDF outline (bookmarks) from the resolved headings
+      // when the caller supplied none, so viewers show a navigable sidebar TOC
+      // that matches the on-page VisualToc. Page indices are 0-based.
+      if (settings.bookmarks.length === 0 && ctx.tocEntries.size > 0) {
+        for (const [title, pageNumber] of ctx.tocEntries) {
+          settings.bookmarks.push(new BookmarkItem(title, pageNumber - 1));
+        }
+      }
+    }
+
     // PDF/UA tagging context - shared between the render pipeline
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).
@@ -102,6 +146,16 @@ export class PdfDocumentSerializer {
     // 3. Stream pages (low-memory path)
     const pageIds: number[] = [];
     let pageIndex = 0;
+
+    // Pre-allocate page object IDs when a two-pass layout resolved the total
+    // page count up front. The TOC's link annotations are emitted while its
+    // (early) page is written, but they target *later* body pages; without the
+    // ids allocated ahead of time writeLinkAnnotation would clamp the target to
+    // the current page. Exactly `dryRunPageCount` ids are reserved so /Pages
+    // /Kids stays correct. Mirrors PdfDocumentSerializer.cs.
+    for (let i = 0; i < dryRunPageCount; i++) {
+      pageIds.push(writer.getNewId());
+    }
 
     for (const pageOutput of PdfRenderPipeline.renderPagesStreaming(this.document.pages, settings, ctx)) {
       let pageId: number;
@@ -318,6 +372,16 @@ export class PdfDocumentSerializer {
     }
 
     return attachments;
+  }
+
+  /**
+   * Returns true when the document contains a {@link VisualToc}, which needs a
+   * two-pass layout to resolve heading page numbers before the TOC is drawn.
+   * Delegates to the shared {@link documentRequiresTwoPassLayout} so the SVG
+   * export path can make the identical decision.
+   */
+  private static requiresTwoPassLayout(document: Document): boolean {
+    return documentRequiresTwoPassLayout(document);
   }
 
   /**
@@ -584,4 +648,32 @@ export function collectEmbeddedFonts(element: unknown, paths: Set<string>): void
   // ── Recurse into every child-collection shape (stacks, Container/Page,
   // RichText spans, and Table rows → cells → cell content) ─────────────────
   forEachChild(element, child => collectEmbeddedFonts(child, paths));
+}
+
+/**
+ * Returns true when the document contains a {@link VisualToc} anywhere in its
+ * element tree, which requires a two-pass layout to resolve heading page
+ * numbers before the TOC is drawn. Shared by the PDF serializer and the SVG
+ * exporter so both render paths make the same decision. Mirrors
+ * PdfDocumentSerializer.RequiresTwoPassLayout in the .NET source.
+ */
+export function documentRequiresTwoPassLayout(document: Document): boolean {
+  return document.pages.some(page => page.getElements().some(el => elementContainsVisualToc(el)));
+}
+
+/**
+ * Recursively checks whether an element tree contains a {@link VisualToc},
+ * descending through the layout containers (VerticalStack, HorizontalStack,
+ * Container) and single-child fluent content slots. Mirrors
+ * PdfDocumentSerializer.ContainsVisualToc in the .NET source.
+ */
+export function elementContainsVisualToc(element: IElement): boolean {
+  if (element instanceof VisualToc) return true;
+  if (element instanceof VerticalStack) return element.children.some(elementContainsVisualToc);
+  if (element instanceof HorizontalStack) return element.children.some(elementContainsVisualToc);
+  if (element instanceof Container && element.child != null) return elementContainsVisualToc(element.child);
+  // IContentContainer covers fluent API slots (ContentSlot) that wrap a single child.
+  const asContent = element as Partial<IContentContainer>;
+  if (asContent.child != null) return elementContainsVisualToc(asContent.child);
+  return false;
 }

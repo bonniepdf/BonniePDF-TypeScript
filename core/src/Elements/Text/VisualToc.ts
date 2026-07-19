@@ -195,7 +195,13 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     const pdfX = ctx.currentX;
     const pdfY = ctx.pageSize.height - (y + lineHeight); // PDF coordinate is bottom-up
 
-    const targetPage = ctx.tocEntries.get(identifier) ?? 0;
+    // tocEntries stores a 1-based page *number* (Heading records
+    // currentPageIndex + 1); the link annotation writer treats
+    // targetPageIndex as a 0-based index into the page-id table, so convert
+    // back. Mirrors VisualToc.cs (`p - 1`). Falls back to the first page when
+    // the identifier was never resolved (single-pass / missing heading).
+    const resolvedPageNumber = ctx.tocEntries.get(identifier);
+    const targetPage = resolvedPageNumber != null ? resolvedPageNumber - 1 : 0;
     const link: RegisteredLink = {
       identifier,
       targetPageIndex: targetPage,

@@ -2,7 +2,11 @@ import type { Document } from '../Document';
 import { RenderContext } from '../Rendering/RenderContext';
 import { SvgRenderPipeline, SvgPageRenderOutput } from '../Rendering/SvgRenderPipeline';
 import { PdfResourceRegistry } from '../Rendering/PdfResourceRegistry';
-import { collectEmbeddedFonts, collectImagesNeedingDecode } from '../Rendering/PdfDocumentSerializer';
+import {
+  collectEmbeddedFonts,
+  collectImagesNeedingDecode,
+  documentRequiresTwoPassLayout,
+} from '../Rendering/PdfDocumentSerializer';
 import { Image } from '../Elements/Media/Image';
 import { SvgCanvas, SvgCanvasOptions, embeddedFontFamily, toBase64 } from '../Drawing/SvgCanvas';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
@@ -111,7 +115,27 @@ export async function exportSvgDocumentAsync(
     pdfBaseline: true,
   };
   const orientedSize = settings.getOrientedPageSize();
+
+  // ── Two-pass TOC resolution ─────────────────────────────────────────────────
+  // A VisualToc renders before the headings it references, so on a single pass
+  // its page numbers resolve to "XX" and its links target page 1. Mirror the
+  // PDF serializer: run a throw-away layout pass first (through the same SVG
+  // pipeline, so pagination - and therefore the resolved page numbers - is
+  // identical) to populate tocEntries, then seed the real context with it. Only
+  // paid for when the document actually contains a VisualToc.
+  const resolvedTocEntries = new Map<string, number>();
+  if (documentRequiresTwoPassLayout(document)) {
+    const dryRunCtx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
+    SvgRenderPipeline.renderPages(pages, settings, dryRunCtx);
+    for (const [identifier, pageNumber] of dryRunCtx.tocEntries) {
+      resolvedTocEntries.set(identifier, pageNumber);
+    }
+  }
+
   const ctx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
+  for (const [identifier, pageNumber] of resolvedTocEntries) {
+    ctx.tocEntries.set(identifier, pageNumber);
+  }
 
   // Opt-in layout capture. Attached before rendering so the pipeline's
   // openNode/closeNode/pageBreak hooks populate it; left undefined otherwise so

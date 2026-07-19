@@ -208,7 +208,11 @@ class PlaceholderSource {
   }
 
   private next(max: number): number {
-    this.index = (this.index * 1103515245 + 12345) & 0x7fffffff;
+    // Math.imul reproduces .NET's 32-bit signed integer multiply (low 32 bits,
+    // overflow wraps). A plain `this.index * 1103515245` is a float64 multiply
+    // whose product exceeds Number.MAX_SAFE_INTEGER, dropping low bits before
+    // the mask and diverging from the .NET sequence. Keep this in lockstep.
+    this.index = (Math.imul(this.index, 1103515245) + 12345) & 0x7fffffff;
     return this.index % max;
   }
 

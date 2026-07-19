@@ -89,9 +89,9 @@ export function generate(): Document {
   seller.addChild(
     cell('Redwood Systems Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) })
   );
-  for (const l of ['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288']) {
-    seller.addChild(cell(l, { color: MUTED }));
-  }
+  seller.addChild(
+    lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED })
+  );
   const title = new Heading('INVOICE');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;

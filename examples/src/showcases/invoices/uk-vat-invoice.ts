@@ -78,9 +78,7 @@ export function generate(): Document {
   seller.addChild(
     cell('Thornbury & Vale Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) })
   );
-  for (const l of ['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom']) {
-    seller.addChild(cell(l, { color: MUTED }));
-  }
+  seller.addChild(lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }));
   seller.addChild(
     cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) })
   );

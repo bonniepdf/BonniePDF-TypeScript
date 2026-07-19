@@ -50,11 +50,10 @@ export function money(value: number, symbol: string, locale = 'en-US'): string {
   return symbol + value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/** Vertical stack of plain text lines, e.g. a postal address block. */
-export function lines(items: string[], o: CellOpts = {}): VerticalStack {
-  const stack = new VerticalStack();
-  for (const text of items) stack.addChild(cell(text, o));
-  return stack;
+/** A block of plain text lines, e.g. a postal address. A single TextBlock
+ * using hard `\n` breaks, so the block tags as one paragraph under PDF/UA. */
+export function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
 }
 
 /** A labelled block: a bold eyebrow label over a body stack, returned in a

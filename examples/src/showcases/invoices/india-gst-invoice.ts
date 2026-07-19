@@ -90,9 +90,9 @@ export function generate(): Document {
   seller.addChild(
     cell('Ashwin Technologies Pvt Ltd', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) })
   );
-  for (const l of ['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India']) {
-    seller.addChild(cell(l, { color: MUTED }));
-  }
+  seller.addChild(
+    lines(['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India'], { color: MUTED })
+  );
   seller.addChild(cell('GSTIN: 29ABCDE1234F1Z5', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
   seller.addChild(cell('State: Karnataka (29)  ·  PAN: ABCDE1234F', { size: 8, color: MUTED }));
 

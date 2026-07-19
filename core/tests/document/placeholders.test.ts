@@ -154,6 +154,28 @@ describe('Placeholders', () => {
     });
   });
 
+  // The seeded RNG is a 32-bit integer LCG that MUST produce an identical
+  // sequence in the .NET implementation (BonniePDF.Tests PlaceholderParityTests
+  // asserts the same golden values). If either side drifts — e.g. TS falls back
+  // to a float64 multiply that overflows Number.MAX_SAFE_INTEGER — these break.
+  describe('cross-language parity (32-bit LCG)', () => {
+    it('invoiceLines(5) with seed 42 matches the canonical sequence', () => {
+      const items = Placeholders.withSeed(42).invoiceLines(5);
+      expect(items.map(i => [i.service, i.quantity, i.unitPrice, i.total])).toEqual([
+        ['Brand Guidelines', 5, 3000, 15000],
+        ['SEO Audit', 1, 500, 500],
+        ['Development', 2, 6000, 12000],
+        ['Website Design', 1, 3500, 3500],
+        ['Development', 2, 5000, 10000],
+      ]);
+    });
+
+    it('produces the canonical integer sequence for seed 7', () => {
+      const p = Placeholders.withSeed(7);
+      expect([0, 0, 0, 0, 0].map(() => p.integer(0, 99))).toEqual([16, 33, 38, 71, 40]);
+    });
+  });
+
   describe('seeded source', () => {
     it('produces deterministic output', () => {
       const a = Placeholders.withSeed(123);

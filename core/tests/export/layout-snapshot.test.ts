@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { VerticalStack } from '../../src/Elements/Layout/VerticalStack';
+import { Hyperlink } from '../../src/Core/Hyperlink';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { LAYOUT_SNAPSHOT_VERSION, LayoutNode } from '../../src/Rendering/LayoutRecorder';
 
@@ -78,6 +79,22 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     const vstack = collect(snapshot!.root).find(n => n.type === 'VerticalStack');
     expect(vstack).toBeDefined();
     expect(vstack!.children.map(c => c.type)).toEqual(['TextBlock', 'TextBlock']);
+  });
+
+  it('captures Hyperlink nodes with the Link role', async () => {
+    // Hyperlink implements IElement directly (not ElementBase), so it records
+    // its own snapshot node - a regression here makes links invisible to the
+    // previewer's structure and accessibility views.
+    doc = new Document();
+    doc.add(new TextBlock('Before', 12, StandardFonts.Helvetica));
+    doc.add(new Hyperlink('Visit example', 'https://example.com'));
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    const link = collect(snapshot!.root).find(n => n.type === 'Hyperlink');
+    expect(link).toBeDefined();
+    expect(link!.a11y?.role).toBe('Link');
+    expect(link!.a11y?.tagged).toBe(true);
+    expect(link!.rects.length).toBeGreaterThan(0);
   });
 
   it('splits a paginating element into one rect per page', async () => {

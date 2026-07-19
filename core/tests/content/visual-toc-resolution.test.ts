@@ -69,6 +69,20 @@ describe('VisualToc page-number + link resolution (TOC before headings)', () => 
     expect(gotoCount).toBe(3);
   });
 
+  it('gives each TOC link a non-zero clickable rectangle', () => {
+    doc = buildDoc();
+    const text = pdfToText(doc.generateBytes());
+    // Every /Link annotation must have a real /Rect, not the [0 0 0 0] fallback.
+    const rects = [...text.matchAll(/\/Subtype \/Link[\s\S]*?\/Rect \[([^\]]+)\]/g)].map(m => m[1].trim());
+    expect(rects.length).toBe(3);
+    for (const rect of rects) {
+      expect(rect).not.toBe('0 0 0 0');
+      const [x1, y1, x2, y2] = rect.split(/\s+/).map(Number);
+      expect(x2).toBeGreaterThan(x1);
+      expect(y2).toBeGreaterThan(y1);
+    }
+  });
+
   it('links target distinct pages, not all page 1', () => {
     doc = buildDoc();
     const text = pdfToText(doc.generateBytes());

@@ -4,6 +4,7 @@ import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import type { RegisteredLink } from '../../Rendering/RegisteredLink';
+import { PdfSyntax } from '../../Rendering/Pdf/PdfSyntax';
 import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
@@ -204,6 +205,9 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     const targetPage = resolvedPageNumber != null ? resolvedPageNumber - 1 : 0;
     const link: RegisteredLink = {
       identifier,
+      // Mirror the visible entry text into the annotation /Contents (PDF/UA 7-18),
+      // matching the .NET TOC link which is a Hyperlink(identifier).
+      text: identifier,
       targetPageIndex: targetPage,
       renderX: pdfX,
       renderY: pdfY,
@@ -214,6 +218,15 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
         this.renderY = ry;
         this.renderWidth = rw;
         this.renderHeight = rh;
+      },
+      // Without this the annotation writer falls back to `[0 0 0 0]` and the
+      // link has no clickable area. Byte-identical to Hyperlink.getRectangleString
+      // so TOC links match inline links (and the .NET output).
+      getRectangleString(): string {
+        return (
+          `[${PdfSyntax.formatDecimal(this.renderX)} ${PdfSyntax.formatDecimal(this.renderY)} ` +
+          `${PdfSyntax.formatDecimal(this.renderX + this.renderWidth)} ${PdfSyntax.formatDecimal(this.renderY + this.renderHeight)}]`
+        );
       },
     };
     ctx.registerHyperlink(link);

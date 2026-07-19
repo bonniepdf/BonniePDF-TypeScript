@@ -140,6 +140,15 @@ export class Hyperlink implements IElement, IRoleProvider {
     // Save starting Y position for correct advancement
     const startY = ctx.currentY;
 
+    // Layout capture (opt-in, no-op without a recorder): Hyperlink implements
+    // IElement directly rather than extending ElementBase, so it must record its
+    // own node — otherwise links never appear in the layout snapshot and the
+    // previewer's structure/accessibility views cannot show them. Mirrors
+    // ElementBase.render: the full margin box, opened and closed (complete)
+    // around the atomic render. The recorder derives the Link role via
+    // accessibilityOf(this) from semanticRole.
+    ctx.layoutRecorder?.openNode(this, 'Hyperlink', undefined, ctx.currentPageIndex, ctx.currentX, startY, width);
+
     // Apply top margin
     ctx.currentY += this.margin.top;
 
@@ -187,6 +196,8 @@ export class Hyperlink implements IElement, IRoleProvider {
 
     // Advance Y by the total height (margins + content)
     ctx.currentY = startY + this.margin.top + contentHeight + this.margin.bottom;
+
+    ctx.layoutRecorder?.closeNode(this, ctx.currentPageIndex, ctx.currentY, true);
   }
 
   /**

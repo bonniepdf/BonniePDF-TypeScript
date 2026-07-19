@@ -5,6 +5,7 @@ import {
   ZoomLevel,
   TextBlock,
   TextStyle,
+  Heading,
   Hyperlink,
   Color,
   ColorPalette,
@@ -31,7 +32,9 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Title ──
-  const title = new TextBlock('Hyperlink Support Demo');
+  // A real Heading (H1), not a big TextBlock: PDF/UA preflight requires the
+  // outline to start at H1, and headings give AT users document structure.
+  const title = new Heading('Hyperlink Support Demo');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
   title.textColor = ColorPalette.slate[800];
@@ -39,7 +42,8 @@ export function generate(): Document {
   doc.add(title);
 
   // ── Basic links ──
-  const basicLabel = new TextBlock('Basic Links:');
+  const basicLabel = new Heading('Basic Links');
+  basicLabel.level = 2;
   basicLabel.fontName = StandardFonts.HelveticaBold;
   basicLabel.fontSize = 14;
   basicLabel.textColor = ColorPalette.slate[700];
@@ -58,7 +62,8 @@ export function generate(): Document {
   }
 
   // ── Styled links ──
-  const styledLabel = new TextBlock('Styled Links:');
+  const styledLabel = new Heading('Styled Links');
+  styledLabel.level = 2;
   styledLabel.fontName = StandardFonts.HelveticaBold;
   styledLabel.fontSize = 14;
   styledLabel.textColor = ColorPalette.slate[700];
@@ -92,7 +97,8 @@ export function generate(): Document {
   doc.add(redLink);
 
   // ── Links with margins ──
-  const marginLabel = new TextBlock('Links with Margins:');
+  const marginLabel = new Heading('Links with Margins');
+  marginLabel.level = 2;
   marginLabel.fontName = StandardFonts.HelveticaBold;
   marginLabel.fontSize = 14;
   marginLabel.textColor = ColorPalette.slate[700];

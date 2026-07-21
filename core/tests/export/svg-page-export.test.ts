@@ -19,6 +19,7 @@ import { Color } from '../../src/Core/Color';
 import { Container } from '../../src/Elements/Layout/Container';
 import { Hyperlink } from '../../src/Core/Hyperlink';
 import { createMinimalJpeg, createTestChartData } from '../helpers/test-base';
+import { embeddedFontFamily } from '../../src/Drawing/SvgCanvas';
 
 function simpleDoc(): Document {
   const doc = new Document();
@@ -424,5 +425,107 @@ describe('SVG page export — embedded standard-font alignment', () => {
     const pages = await doc.generateSvgPagesAsync();
     expect(pages[0]).toContain('data-bp-link-page="2"');
     expect(pages[0]).not.toContain('<a href');
+  });
+});
+
+describe('SVG page export — glyph fallback parity with the PDF painter', () => {
+  // NotoSansSymbols2 deliberately omits code points whose default presentation
+  // is emoji (Google delegates those to NotoEmoji), so this pair reproduces the
+  // real emojis-and-unicode example: symbols the primary font cannot draw, with
+  // a registered font that can.
+  const SYMBOLS = fileURLToPath(
+    new URL('../../../examples/assets/fonts/NotoSansSymbols2-Regular.ttf', import.meta.url)
+  );
+  const EMOJI = fileURLToPath(new URL('../../../examples/assets/fonts/NotoEmoji-Regular.ttf', import.meta.url));
+  let doc: Document;
+
+  beforeEach(() => {
+    FontManager.clear();
+    FontManager.registerFont(new Uint8Array(readFileSync(SYMBOLS)), {
+      family: 'Noto Sans Symbols 2',
+      subfamily: 'Regular',
+    });
+    FontManager.registerFont(new Uint8Array(readFileSync(EMOJI)), {
+      family: 'Noto Emoji',
+      subfamily: 'Regular',
+    });
+  });
+
+  afterEach(() => {
+    doc?.dispose();
+    FontManager.clear();
+  });
+
+  function symbolsDoc(text: string): Document {
+    const d = new Document();
+    const block = new TextBlock(text);
+    block.fontName = SYMBOLS;
+    block.fontSize = 20;
+    d.add(block);
+    return d;
+  }
+
+  it('routes code points missing from the primary font to a fallback face', async () => {
+    // U+26EA, U+26FD and U+270A are absent from NotoSansSymbols2; U+2605 is present.
+    doc = symbolsDoc('★⛪⛽✊');
+
+    const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync();
+    const primary = embeddedFontFamily(SYMBOLS);
+
+    // Two faces are embedded: the primary and the fallback that covers the rest.
+    const families = [...fontFaceCss.matchAll(/font-family:'(bpf-[^']+)'/g)].map(m => m[1]);
+    expect(families).toContain(primary);
+    expect(families.length).toBe(2);
+    const fallback = families.find(f => f !== primary)!;
+
+    // Each face paints its own <text> run, and every drawn character belongs to
+    // a run whose font actually has the glyph.
+    expect(pages[0]).toContain(`font-family:'${primary}'`);
+    expect(pages[0]).toContain(`font-family:'${fallback}'`);
+  });
+
+  it('never leaves an uncovered code point for the viewer to substitute a system font for', async () => {
+    // With no fallback registered the emoji-presentation code points cannot be
+    // drawn at all. They must be dropped, exactly as the PDF encoder drops them
+    // rather than referencing .notdef — not emitted against a face lacking them.
+    FontManager.clear();
+    FontManager.registerFont(new Uint8Array(readFileSync(SYMBOLS)), {
+      family: 'Noto Sans Symbols 2',
+      subfamily: 'Regular',
+    });
+    doc = symbolsDoc('★⛪⛽✊');
+
+    const pages = await doc.generateSvgPagesAsync();
+    for (const ch of ['⛪', '⛽', '✊']) {
+      expect(pages[0]).not.toContain(ch);
+    }
+    expect(pages[0]).toContain('★');
+  });
+
+  it('advances the shared cursor across runs so a fallback glyph is not overprinted', async () => {
+    doc = symbolsDoc('★⛪');
+
+    const pages = await doc.generateSvgPagesAsync();
+    const xs = [...pages[0].matchAll(/<text x="([\d.\- ]+)"/g)].flatMap(m => m[1].trim().split(' ').map(Number));
+    expect(xs.length).toBe(2);
+    // Strictly increasing: the fallback run continues where the primary stopped.
+    expect(xs[1]).toBeGreaterThan(xs[0]);
+  });
+
+  it('measures fallback runs against the face that draws them', async () => {
+    // Right-aligned text is positioned from its measured width, so a wrong
+    // measurement moves the whole line. Both glyphs must contribute.
+    const wide = symbolsDoc('⛪⛽✊');
+    const narrow = symbolsDoc('⛪');
+    try {
+      const wideSvg = (await wide.generateSvgPagesAsync())[0];
+      const narrowSvg = (await narrow.generateSvgPagesAsync())[0];
+      const lastX = (svg: string) =>
+        Math.max(...[...svg.matchAll(/<text x="([\d.\- ]+)"/g)].flatMap(m => m[1].trim().split(' ').map(Number)));
+      expect(lastX(wideSvg)).toBeGreaterThan(lastX(narrowSvg));
+    } finally {
+      wide.dispose();
+      narrow.dispose();
+    }
   });
 });

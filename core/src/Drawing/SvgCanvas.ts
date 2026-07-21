@@ -6,17 +6,50 @@ import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { Size } from '../Core/Size';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
+import { shapeTextRuns } from '../Typography/TextRunShaper';
 import { ImageFormat } from '../Rendering/Images/ImageInfo';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 
 /**
- * Resolves a logical font family (as passed to {@link SvgCanvas.drawText}) to a
- * parsed embedded {@link TtfFont}, or `null` when the family is a non-embedded
- * standard-14 font that the SVG viewer renders itself.
+ * A maximal substring of a draw call renderable by one embedded font, as
+ * resolved by {@link SvgFontResolver.resolveRuns}. `fontFamily` is the logical
+ * identifier the run's face is keyed by — the family passed to `drawText` for
+ * the primary font, or a synthetic fallback identifier — and is what
+ * {@link embeddedFontFamily} turns into the `@font-face` name.
  */
-export type SvgFontResolver = (fontFamily: string) => TtfFont | null;
+export interface SvgTextRun {
+  fontFamily: string;
+  font: TtfFont;
+  text: string;
+}
+
+/**
+ * Resolves the fonts a draw call needs.
+ *
+ * `resolveFont` maps a logical font family to its parsed embedded
+ * {@link TtfFont}, or `null` when the family is a non-embedded standard-14 font
+ * that the SVG viewer renders itself.
+ *
+ * `resolveRuns` splits text into per-font runs, routing code points the primary
+ * font lacks to a fallback font that covers them. This is the SVG side of the
+ * `.notdef` guard: a code point no font can render must be *dropped*, never
+ * emitted against a face that lacks it. Leaving it in place would let the
+ * viewer substitute an arbitrary system font (typically a colour emoji face),
+ * painting a glyph that does not exist in the PDF and whose advance width the
+ * layout engine never reserved.
+ */
+export interface SvgFontResolver {
+  resolveFont(fontFamily: string): TtfFont | null;
+  resolveRuns(fontFamily: string, text: string): SvgTextRun[];
+}
+
+/**
+ * Legacy single-font resolver. Accepted for compatibility; text drawn through
+ * one gets no glyph fallback, so prefer the full {@link SvgFontResolver}.
+ */
+export type SvgFontLookup = (fontFamily: string) => TtfFont | null;
 
 /**
  * Maps a non-embedded standard-14 PDF font name (e.g. `Helvetica-BoldOblique`,
@@ -52,6 +85,28 @@ export function embeddedFontFamily(fontFamily: string): string {
       .toLowerCase()
       .replace(/^-+|-+$/g, '')
   );
+}
+
+/**
+ * Adapts a bare font lookup to the full resolver contract. Without a real run
+ * resolver the best available behaviour is a single run in the primary font,
+ * minus code points it cannot render — dropping them still beats handing them
+ * to the viewer's own fallback chain.
+ */
+function normalizeFontResolver(resolver: SvgFontResolver | SvgFontLookup): SvgFontResolver {
+  if (typeof resolver !== 'function') return resolver;
+  return {
+    resolveFont: resolver,
+    resolveRuns(fontFamily, text) {
+      const font = resolver(fontFamily);
+      if (!font) return [];
+      return shapeTextRuns(text, [{ fontIdentifier: fontFamily, font }]).runs.map(run => ({
+        fontFamily,
+        font,
+        text: run.text,
+      }));
+    },
+  };
 }
 
 function genericFontFallback(font: TtfFont): string {
@@ -92,10 +147,15 @@ export class SvgCanvas implements ICanvas {
   // path construction
   private currentPathData: string[] = [];
 
-  constructor(width: number, height: number, fontResolver?: SvgFontResolver, options?: SvgCanvasOptions) {
+  constructor(
+    width: number,
+    height: number,
+    fontResolver?: SvgFontResolver | SvgFontLookup,
+    options?: SvgCanvasOptions
+  ) {
     this.width = width;
     this.height = height;
-    this.fontResolver = fontResolver;
+    this.fontResolver = fontResolver ? normalizeFontResolver(fontResolver) : undefined;
     this.options = options ?? {};
   }
 
@@ -207,16 +267,21 @@ export class SvgCanvas implements ICanvas {
     if (text.length === 0) return;
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
-    const font = this.resolveFont(fontFamily);
+    const runs = this.resolveRuns(fontFamily, text);
 
-    if (font) {
-      const measured = this.getEmbeddedStringWidth(text, font, fontSize);
+    if (runs.length > 0) {
+      const measured = this.getRunsWidth(runs, fontSize);
       let startX = x;
       if (align === TextAlignment.Center) startX = x - measured / 2;
       else if (align === TextAlignment.Right) startX = x - measured;
-      this.svgElements.push(this.glyphPositionedText(startX, baselineY, text, hex, fontSize, fontFamily, font, 0));
+      this.svgElements.push(this.glyphPositionedRuns(startX, baselineY, runs, hex, fontSize, 0));
       return;
     }
+
+    // An embedded family whose every code point was dropped produces no runs
+    // and must not fall through to the standard-14 path, which would hand the
+    // text to the viewer's own fonts.
+    if (this.resolveFont(fontFamily)) return;
 
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
     const opacity = this.formatOpacity(color.scA);
@@ -241,10 +306,11 @@ export class SvgCanvas implements ICanvas {
         usage = { font, codePoints: new Set<number>() };
         this.embeddedFontUsage.set(fontFamily, usage);
       }
+      // The placeholder is substituted with the real total at view time, so the
+      // subset must carry every digit, not just those in "00".
       for (let cp = 48; cp <= 57; cp++) usage.codePoints.add(cp);
-      this.svgElements.push(
-        this.glyphPositionedText(x, baselineY, placeholder, hex, fontSize, fontFamily, font, 0, attr)
-      );
+      const runs: SvgTextRun[] = [{ fontFamily, font, text: placeholder }];
+      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, attr));
       return;
     }
 
@@ -269,14 +335,14 @@ export class SvgCanvas implements ICanvas {
     if (text.length === 0) return;
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
-    const font = this.resolveFont(fontFamily);
+    const runs = this.resolveRuns(fontFamily, text);
     const transform = `rotate(${this.n(-angleDegrees)} ${this.n(x)} ${this.n(baselineY)})`;
 
-    if (font) {
-      const inner = this.glyphPositionedText(x, baselineY, text, hex, fontSize, fontFamily, font, 0, '', transform);
-      this.svgElements.push(inner);
+    if (runs.length > 0) {
+      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, '', transform));
       return;
     }
+    if (this.resolveFont(fontFamily)) return;
 
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
@@ -308,14 +374,13 @@ export class SvgCanvas implements ICanvas {
     const extraPerSpace = (availableWidth - naturalWidth) / spaceCount;
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
-    const font = this.resolveFont(fontFamily);
+    const runs = this.resolveRuns(fontFamily, text);
 
-    if (font) {
-      this.svgElements.push(
-        this.glyphPositionedText(x, baselineY, text, hex, fontSize, fontFamily, font, extraPerSpace)
-      );
+    if (runs.length > 0) {
+      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, extraPerSpace));
       return;
     }
+    if (this.resolveFont(fontFamily)) return;
 
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}" font-size="${this.n(
@@ -327,11 +392,12 @@ export class SvgCanvas implements ICanvas {
   }
 
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
-    const font = this.resolveFont(fontFamily);
-    const width = font
-      ? this.getEmbeddedStringWidth(text, font, fontSize)
-      : FontMetrics.getStringWidth(text, fontFamily, fontSize);
-    return new Size(width, fontSize * 1.2);
+    // Measured over the same runs that get painted, so a fallback glyph's
+    // advance comes from the face that actually draws it.
+    const runs = this.resolveRuns(fontFamily, text);
+    if (runs.length > 0) return new Size(this.getRunsWidth(runs, fontSize), fontSize * 1.2);
+    if (this.resolveFont(fontFamily)) return new Size(0, fontSize * 1.2);
+    return new Size(FontMetrics.getStringWidth(text, fontFamily, fontSize), fontSize * 1.2);
   }
 
   // -- Images -------------------------------------------------------------
@@ -579,88 +645,124 @@ export class SvgCanvas implements ICanvas {
   private resolveFont(fontFamily: string): TtfFont | null {
     if (!this.fontResolver) return null;
     try {
-      return this.fontResolver(fontFamily);
+      return this.fontResolver.resolveFont(fontFamily);
     } catch {
       return null;
     }
   }
 
-  private glyphPositionedText(
+  /**
+   * Splits text into per-font runs. Returns `[]` when the family renders
+   * through the viewer's own standard-14 faces (no embedded font), which is the
+   * signal for callers to take the plain `<text>` path.
+   */
+  private resolveRuns(fontFamily: string, text: string): SvgTextRun[] {
+    if (!this.fontResolver) return [];
+    try {
+      return this.fontResolver.resolveRuns(fontFamily, text);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Paints text as explicitly positioned glyphs, one `<text>` element per font
+   * run. Runs share a single advance cursor and baseline, so a fallback run is
+   * indistinguishable from the surrounding text apart from the face it uses.
+   *
+   * Kerning applies within a run but is reset at each boundary, mirroring the
+   * PDF painter, where every run is its own `TJ` array.
+   */
+  private glyphPositionedRuns(
     startX: number,
     baselineY: number,
-    text: string,
+    runs: readonly SvgTextRun[],
     fillHex: string,
     fontSize: number,
-    fontFamily: string,
-    font: TtfFont,
     extraPerSpace: number,
     extraAttributes = '',
     transform?: string
   ): string {
-    const scale = fontSize / font.unitsPerEm;
-    let cursor = startX;
-    const xs: string[] = [];
-    let chars = '';
-
-    let usage = this.embeddedFontUsage.get(fontFamily);
-    if (!usage) {
-      usage = { font, codePoints: new Set<number>() };
-      this.embeddedFontUsage.set(fontFamily, usage);
-    }
-
-    // apply kern pairs between adjacent glyphs so the preview matches
-    // the kerned `TJ` output the PDF painter now emits (and the kerned widths
-    // the layout engine reserves).
-    let prevGid = 0;
-    let hasPrev = false;
-    for (const rune of text) {
-      const code = rune.codePointAt(0) ?? 0;
-      if (code < 32 && code !== 9) {
-        continue;
-      }
-      usage.codePoints.add(code);
-      const gid = font.getGlyphId(code);
-      if (hasPrev && font.hasKerning) {
-        cursor += font.getKerning(prevGid, gid) * scale;
-      }
-      xs.push(this.n(cursor));
-      chars += rune;
-      cursor += font.getGlyphWidth(gid) * scale;
-      if (rune === ' ') cursor += extraPerSpace;
-      prevGid = gid;
-      hasPrev = true;
-    }
-
-    if (xs.length === 0) return '';
-
     const transformAttr = transform ? ` transform="${transform}"` : '';
-    const familyStyle = `font-family:'${escapeAttr(embeddedFontFamily(fontFamily))}',${genericFontFallback(font)}`;
-    return (
-      `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
-        fontSize
-      )}" style="${familyStyle}" xml:space="preserve"${extraAttributes}${transformAttr}>` +
-      escapeXml(chars) +
-      '</text>'
-    );
+    const elements: string[] = [];
+    let cursor = startX;
+
+    for (const run of runs) {
+      const { font } = run;
+      const scale = fontSize / font.unitsPerEm;
+      const xs: string[] = [];
+      let chars = '';
+
+      let usage = this.embeddedFontUsage.get(run.fontFamily);
+      if (!usage) {
+        usage = { font, codePoints: new Set<number>() };
+        this.embeddedFontUsage.set(run.fontFamily, usage);
+      }
+
+      // apply kern pairs between adjacent glyphs so the preview matches
+      // the kerned `TJ` output the PDF painter now emits (and the kerned widths
+      // the layout engine reserves).
+      let prevGid = 0;
+      let hasPrev = false;
+      for (const rune of run.text) {
+        const code = rune.codePointAt(0) ?? 0;
+        const gid = font.getGlyphId(code);
+        // The run resolver already dropped anything unrenderable; a zero GID
+        // here would mean a face changed under us. Skip rather than emit a
+        // character the embedded subset cannot draw.
+        if (gid === 0) continue;
+        usage.codePoints.add(code);
+        if (hasPrev && font.hasKerning) {
+          cursor += font.getKerning(prevGid, gid) * scale;
+        }
+        xs.push(this.n(cursor));
+        chars += rune;
+        cursor += font.getGlyphWidth(gid) * scale;
+        if (rune === ' ') cursor += extraPerSpace;
+        prevGid = gid;
+        hasPrev = true;
+      }
+
+      if (xs.length === 0) continue;
+
+      const familyStyle = `font-family:'${escapeAttr(embeddedFontFamily(run.fontFamily))}',${genericFontFallback(
+        font
+      )}`;
+      elements.push(
+        `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
+          fontSize
+        )}" style="${familyStyle}" xml:space="preserve"${extraAttributes}${transformAttr}>` +
+          escapeXml(chars) +
+          '</text>'
+      );
+    }
+
+    return elements.join('');
   }
 
-  private getEmbeddedStringWidth(text: string, font: TtfFont, fontSize: number): number {
+  /** Total advance width of a resolved run list, matching what
+   * {@link glyphPositionedRuns} paints. */
+  private getRunsWidth(runs: readonly SvgTextRun[], fontSize: number, extraPerSpace = 0): number {
     // kerned, mirroring both the layout engine's reserved widths and the
-    // kerned glyph positions painted by glyphPositionedText / the PDF `TJ` path.
-    const scale = fontSize / font.unitsPerEm;
+    // kerned glyph positions painted by glyphPositionedRuns / the PDF `TJ` path.
     let width = 0;
-    let prevGid = 0;
-    let hasPrev = false;
-    for (const rune of text) {
-      const code = rune.codePointAt(0) ?? 0;
-      if (code < 32 && code !== 9) continue;
-      const gid = font.getGlyphId(code);
-      if (hasPrev && font.hasKerning) {
-        width += font.getKerning(prevGid, gid) * scale;
+    for (const run of runs) {
+      const { font } = run;
+      const scale = fontSize / font.unitsPerEm;
+      let prevGid = 0;
+      let hasPrev = false;
+      for (const rune of run.text) {
+        const code = rune.codePointAt(0) ?? 0;
+        const gid = font.getGlyphId(code);
+        if (gid === 0) continue;
+        if (hasPrev && font.hasKerning) {
+          width += font.getKerning(prevGid, gid) * scale;
+        }
+        width += font.getGlyphWidth(gid) * scale;
+        if (rune === ' ') width += extraPerSpace;
+        prevGid = gid;
+        hasPrev = true;
       }
-      width += font.getGlyphWidth(gid) * scale;
-      prevGid = gid;
-      hasPrev = true;
     }
     return width;
   }

@@ -121,14 +121,23 @@ export class RenderContext implements RenderContextContract {
     return new SvgCanvas(
       this.pageSize.width,
       this.pageSize.height,
-      family => {
-        // PDF rendering registers a font before drawing it. SVG drawing has no
-        // resource operator of its own, so do the equivalent here before asking
-        // for the parsed face. This is particularly important for PDF/A and
-        // PDF/UA documents: their standard-14 names resolve lazily to embedded
-        // Liberation fonts, whose metrics must also drive the SVG preview.
-        this.resources.registerFont(family);
-        return this.resolveEmbeddedFont(family);
+      {
+        resolveFont: family => {
+          // PDF rendering registers a font before drawing it. SVG drawing has no
+          // resource operator of its own, so do the equivalent here before asking
+          // for the parsed face. This is particularly important for PDF/A and
+          // PDF/UA documents: their standard-14 names resolve lazily to embedded
+          // Liberation fonts, whose metrics must also drive the SVG preview.
+          this.resources.registerFont(family);
+          return this.resolveEmbeddedFont(family);
+        },
+        // Both render paths share one run resolver, so the SVG preview cannot
+        // drift from the PDF in which font draws which code point — and the
+        // preview inherits the same `font` diagnostics for dropped glyphs.
+        resolveRuns: (family, text) =>
+          this.resolveTextRuns(family, text)
+            .filter((run): run is ResolvedTextRun & { embeddedFont: TtfFont } => run.embeddedFont !== null)
+            .map(run => ({ fontFamily: run.fontIdentifier, font: run.embeddedFont, text: run.text })),
       },
       this.svgOptions
     );

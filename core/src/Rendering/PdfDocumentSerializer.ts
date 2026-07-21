@@ -17,6 +17,7 @@ import { StructureTreeWriter } from './Writers/StructureTreeWriter';
 import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';
 import { PdfVersion } from '../Configuration/PdfVersion';
+import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { ConformancePlan } from './ConformancePlan';
@@ -244,9 +245,12 @@ export class PdfDocumentSerializer {
       ])
     );
 
-    // 7. Write document info (/Info)
+    // 7. Write document info (/Info). ISO 19005-4 clauses 6.1.3-4/5
+    // prohibit the legacy dictionary (except for a narrow PieceInfo/ModDate
+    // case), so PDF/A-4 metadata is carried exclusively by XMP.
     const metadataWriter = new MetadataWriter(writer);
-    metadataWriter.writeDocumentInfo(infoId, this.document.metadata);
+    const documentInfoId = conformancePlan.effectivePdfA === PdfAConformance.PdfA4 ? 0 : infoId;
+    if (documentInfoId > 0) metadataWriter.writeDocumentInfo(documentInfoId, this.document.metadata);
 
     const catalogOptions = new CatalogOptions();
 
@@ -349,7 +353,7 @@ export class PdfDocumentSerializer {
     if (encryptId > 0) writer.writeEncryptDictionary(encryptId);
 
     // 15. Finalize: xref table + trailer + %%EOF
-    writer.close(catalogId, infoId);
+    writer.close(catalogId, documentInfoId);
   }
 
   /**

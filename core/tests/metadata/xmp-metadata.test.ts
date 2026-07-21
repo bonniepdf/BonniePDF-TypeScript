@@ -49,6 +49,16 @@ describe('XmpMetadata', () => {
     expect(text).toContain('/OutputIntents');
   });
 
+  it('PdfA4_OmitsLegacyInfoDictionary', () => {
+    doc = new Document();
+    asPdfA4(doc.settings);
+    doc.metadata.title = 'XMP-only PDF/A-4 metadata';
+
+    const text = pdfToText(doc.generateBytes());
+    expect(text).not.toContain('/Info ');
+    expect(text).toContain('XMP-only PDF/A-4 metadata');
+  });
+
   it('PdfA4_HonestClaimGuardSuppressesXmpAndOutputIntentForNonEmbeddedStandardFonts', () => {
     FontManager.clear();
     doc = new Document();

@@ -11,6 +11,7 @@ export * from './Core/BorderColors';
 export * from './Core/Thickness';
 export * from './Core/HorizontalAlignment';
 export * from './Core/Hyperlink';
+export * from './Core/SectionLink';
 
 export * from './Configuration/PdfSize';
 export * from './Core/PageOrientation';
@@ -86,6 +87,8 @@ export * from './Elements/Text/TextSpan';
 export * from './Elements/Text/TextBlock';
 export * from './Elements/Text/RichText';
 export * from './Elements/Text/Heading';
+export * from './Elements/Text/Section';
+export * from './Elements/Text/PageNumberOf';
 export * from './Elements/Text/VisualToc';
 
 export * from './Elements/Tables/TableCell';

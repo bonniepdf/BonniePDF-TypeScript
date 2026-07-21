@@ -20,6 +20,7 @@ import { generate as advancedTypography } from './recipes/typography/advanced-ty
 import { generate as dickensNovel } from './recipes/typography/dickens-novel';
 import { generate as lists } from './recipes/elements/lists';
 import { generate as hyperlinks } from './recipes/elements/hyperlinks';
+import { generate as crossReferences } from './recipes/elements/cross-references';
 import { generate as shapesAndBorders } from './recipes/elements/shapes-and-borders';
 import { generate as colorPalette } from './recipes/elements/color-palette';
 import { generate as qrCodes } from './recipes/elements/qr-codes';
@@ -343,6 +344,18 @@ export const examples: ExampleDef[] = [
     generate: hyperlinks,
     thumbnails: false,
     dotnetClass: 'HyperlinksExample',
+    pdfUa1: true,
+  },
+  {
+    id: 'cross-references',
+    name: 'Cross-References',
+    category: 'Elements',
+    description:
+      'Section anchors, SectionLink internal jumps, and PageNumberOf "see page N" references, resolved automatically by two-pass layout.',
+    filename: 'cross-references.pdf',
+    generate: crossReferences,
+    thumbnails: false,
+    dotnetClass: 'CrossReferencesExample',
     pdfUa1: true,
   },
   {

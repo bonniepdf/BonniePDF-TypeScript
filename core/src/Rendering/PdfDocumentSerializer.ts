@@ -23,6 +23,8 @@ import { ConformancePlan } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
 import { VisualToc } from '../Elements/Text/VisualToc';
+import { PageNumberOf } from '../Elements/Text/PageNumberOf';
+import { SectionLink } from '../Core/SectionLink';
 import { VerticalStack } from '../Elements/Layout/VerticalStack';
 import { HorizontalStack } from '../Elements/Layout/HorizontalStack';
 import { Container } from '../Elements/Layout/Container';
@@ -651,29 +653,44 @@ export function collectEmbeddedFonts(element: unknown, paths: Set<string>): void
 }
 
 /**
- * Returns true when the document contains a {@link VisualToc} anywhere in its
- * element tree, which requires a two-pass layout to resolve heading page
- * numbers before the TOC is drawn. Shared by the PDF serializer and the SVG
- * exporter so both render paths make the same decision. Mirrors
- * PdfDocumentSerializer.RequiresTwoPassLayout in the .NET source.
+ * Returns true when the document contains any element whose page-number
+ * resolution depends on a completed layout - a {@link VisualToc}, a
+ * {@link SectionLink}, or a {@link PageNumberOf} - and therefore needs a
+ * throw-away first pass to seed `ctx.tocEntries` before the real render. Shared
+ * by the PDF serializer and the SVG exporter so both render paths make the same
+ * decision. Mirrors PdfDocumentSerializer.RequiresTwoPassLayout in the .NET
+ * source.
  */
 export function documentRequiresTwoPassLayout(document: Document): boolean {
-  return document.pages.some(page => page.getElements().some(el => elementContainsVisualToc(el)));
+  return document.pages.some(page => page.getElements().some(el => elementRequiresTwoPassLayout(el)));
 }
 
 /**
- * Recursively checks whether an element tree contains a {@link VisualToc},
- * descending through the layout containers (VerticalStack, HorizontalStack,
- * Container) and single-child fluent content slots. Mirrors
- * PdfDocumentSerializer.ContainsVisualToc in the .NET source.
+ * Recursively checks whether an element tree contains an element that needs
+ * two-pass layout (a {@link VisualToc}, {@link SectionLink}, or
+ * {@link PageNumberOf}), descending through the layout containers
+ * (VerticalStack, HorizontalStack, Container) and single-child fluent content
+ * slots. Mirrors PdfDocumentSerializer.ContainsTwoPassElement in the .NET
+ * source.
  */
-export function elementContainsVisualToc(element: IElement): boolean {
-  if (element instanceof VisualToc) return true;
-  if (element instanceof VerticalStack) return element.children.some(elementContainsVisualToc);
-  if (element instanceof HorizontalStack) return element.children.some(elementContainsVisualToc);
-  if (element instanceof Container && element.child != null) return elementContainsVisualToc(element.child);
+export function elementRequiresTwoPassLayout(element: IElement): boolean {
+  if (element instanceof VisualToc || element instanceof SectionLink || element instanceof PageNumberOf) {
+    return true;
+  }
+  if (element instanceof VerticalStack) return element.children.some(elementRequiresTwoPassLayout);
+  if (element instanceof HorizontalStack) return element.children.some(elementRequiresTwoPassLayout);
+  if (element instanceof Container && element.child != null) return elementRequiresTwoPassLayout(element.child);
   // IContentContainer covers fluent API slots (ContentSlot) that wrap a single child.
   const asContent = element as Partial<IContentContainer>;
-  if (asContent.child != null) return elementContainsVisualToc(asContent.child);
+  if (asContent.child != null) return elementRequiresTwoPassLayout(asContent.child);
   return false;
+}
+
+/**
+ * @deprecated Retained for backward compatibility; use
+ * {@link elementRequiresTwoPassLayout}. Now returns true for any element that
+ * forces two-pass layout, not only {@link VisualToc}.
+ */
+export function elementContainsVisualToc(element: IElement): boolean {
+  return elementRequiresTwoPassLayout(element);
 }

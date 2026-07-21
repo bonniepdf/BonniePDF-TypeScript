@@ -11,6 +11,8 @@ import {
   HorizontalStack,
   Container,
   Heading,
+  SectionLink,
+  PageNumberOf,
   Color,
   ColorPalette,
   Border,
@@ -34,6 +36,8 @@ interface Finding {
   severity: Severity;
   title: string;
   description: string;
+  /** Optional related finding id, rendered as a clickable "see F-XXX (page N)" cross-reference. */
+  related?: string;
 }
 
 type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved';
@@ -82,6 +86,7 @@ const FINDINGS: Finding[] = [
     title: 'Unencrypted database backups',
     description:
       'Nightly database backups are written to object storage without server-side encryption. Recommend enabling encryption at rest and rotating the affected snapshots.',
+    related: 'F-011',
   },
   {
     id: 'F-003',
@@ -154,6 +159,7 @@ const FINDINGS: Finding[] = [
     title: 'Deletion requests not propagating to backups',
     description:
       'Right-to-erasure requests are honoured in the primary database but not in long-term backup archives. Recommend extending the deletion workflow to cover archived snapshots.',
+    related: 'F-002',
   },
   {
     id: 'F-012',
@@ -162,6 +168,7 @@ const FINDINGS: Finding[] = [
     title: 'Quarterly access review overdue',
     description:
       'The Q2 access review for the billing system was not completed; twelve accounts with elevated privileges have not been re-certified. Recommend closing the backlog before Q3 begins.',
+    related: 'F-001',
   },
   {
     id: 'F-013',
@@ -194,6 +201,7 @@ const FINDINGS: Finding[] = [
     title: 'Vendor risk assessments twelve months stale',
     description:
       'Risk assessments for three critical vendors have not been refreshed in over a year. Recommend prioritising re-assessment for vendors with direct production access.',
+    related: 'F-006',
   },
   {
     id: 'F-017',
@@ -212,6 +220,11 @@ const FINDINGS: Finding[] = [
       'The endpoint-protection agent was found disabled on two finance-team workstations for eleven days. Recommend re-enabling immediately and reviewing the tamper-protection policy.',
   },
 ];
+
+/** Normalises a finding id (e.g. "F-011") into its anchor/toc key ("f-011"). */
+function anchorFor(id: string): string {
+  return id.toLowerCase();
+}
 
 function findingCard(finding: Finding): Container {
   const style = SEVERITY_STYLE[finding.severity];
@@ -232,7 +245,11 @@ function findingCard(finding: Finding): Container {
   body.spacing = 3;
 
   const heading = new Heading(`${finding.id} - ${finding.title}`);
-  heading.tocIdentifier = finding.id.toLowerCase();
+  heading.tocIdentifier = anchorFor(finding.id);
+  // anchorId makes this finding a cross-reference target for the Priority Actions
+  // summary and any "Related" links - resolved to a live page number by two-pass
+  // layout, independent of tocIdentifier's table-of-contents role.
+  heading.anchorId = anchorFor(finding.id);
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 12;
@@ -250,6 +267,39 @@ function findingCard(finding: Finding): Container {
   description.textColor = ColorPalette.slate[700];
   body.addChild(description);
 
+  // Optional "Related: F-XXX (page N)" cross-reference - a clickable SectionLink
+  // to the related finding plus its resolved page number, on one row.
+  if (finding.related != null) {
+    const relatedRow = new HorizontalStack();
+    relatedRow.spacing = 4;
+    relatedRow.margin = new Thickness(0, 4, 0, 0);
+
+    const relatedLabel = new TextBlock('Related:');
+    relatedLabel.fontName = StandardFonts.HelveticaBold;
+    relatedLabel.fontSize = 9;
+    relatedLabel.textColor = ColorPalette.slate[500];
+    relatedRow.addChild(relatedLabel, relatedLabel.getPreferredWidth());
+
+    const relatedLink = new SectionLink(finding.related, anchorFor(finding.related));
+    relatedLink.fontName = StandardFonts.HelveticaBold;
+    relatedLink.fontSize = 9;
+    relatedLink.textColor = ColorPalette.blue[700];
+    relatedRow.addChild(relatedLink, relatedLink.getPreferredWidth());
+
+    const onPage = new TextBlock('on page');
+    onPage.fontSize = 9;
+    onPage.textColor = ColorPalette.slate[500];
+    relatedRow.addChild(onPage, onPage.getPreferredWidth());
+
+    const relatedPage = new PageNumberOf(anchorFor(finding.related));
+    relatedPage.fontName = StandardFonts.HelveticaBold;
+    relatedPage.fontSize = 9;
+    relatedPage.textColor = ColorPalette.slate[600];
+    relatedRow.addChild(relatedPage);
+
+    body.addChild(relatedRow);
+  }
+
   const row = new HorizontalStack();
   row.spacing = 12;
   row.widthDistribution = WidthDistribution.Weighted;
@@ -264,6 +314,68 @@ function findingCard(finding: Finding): Container {
   card.border = new Border(1);
   card.borderColors = new BorderColors(style.border);
   card.margin = new Thickness(0, 0, 0, 10);
+  return card;
+}
+
+/**
+ * Builds the "Priority Actions" callout: a bordered card listing every Critical
+ * finding as a clickable {@link SectionLink} to its detail card, followed by the
+ * page it lands on via {@link PageNumberOf}. Both resolve during two-pass layout,
+ * so the summary stays correct no matter how the cards paginate.
+ */
+function priorityActions(critical: Finding[]): Container {
+  const inner = new VerticalStack();
+  inner.spacing = 4;
+
+  const heading = new Heading('Priority Actions');
+  heading.tocIdentifier = 'priority-actions';
+  heading.anchorId = 'priority-actions';
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 13;
+  heading.textColor = ColorPalette.red[800];
+  heading.margin = new Thickness(0, 0, 0, 2);
+  inner.addChild(heading);
+
+  const lead = new TextBlock(`${critical.length} critical findings require immediate remediation:`);
+  lead.fontSize = 10;
+  lead.textColor = ColorPalette.slate[600];
+  lead.margin = new Thickness(0, 0, 0, 4);
+  inner.addChild(lead);
+
+  for (const finding of critical) {
+    const row = new HorizontalStack();
+    row.spacing = 4;
+    row.margin = new Thickness(0, 0, 0, 2);
+
+    const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id));
+    link.fontName = StandardFonts.HelveticaBold;
+    link.fontSize = 10.5;
+    link.textColor = ColorPalette.blue[700];
+    row.addChild(link, link.getPreferredWidth());
+
+    const onPage = new TextBlock('page');
+    onPage.fontSize = 10;
+    onPage.textColor = ColorPalette.slate[500];
+    row.addChild(onPage, onPage.getPreferredWidth());
+
+    const page = new PageNumberOf(anchorFor(finding.id));
+    page.fontName = StandardFonts.HelveticaBold;
+    page.fontSize = 10;
+    page.textColor = ColorPalette.slate[700];
+    row.addChild(page);
+
+    inner.addChild(row);
+  }
+
+  const card = new Container();
+  card.child = inner;
+  card.padding = new Thickness(12);
+  card.backgroundColor = ColorPalette.red[50];
+  card.cornerRadius = 8;
+  card.border = new Border(1);
+  card.borderColors = new BorderColors(ColorPalette.red[200]);
+  card.margin = new Thickness(0, 0, 0, 16);
   return card;
 }
 
@@ -305,6 +417,12 @@ export function generate(): Document {
   );
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
+
+  // Executive summary: a clickable index of the Critical findings, each showing
+  // the live page number where the detail card lands (resolved by two-pass
+  // layout). This is the "jump to detail" pattern real audit reports lead with.
+  const critical = FINDINGS.filter(f => f.severity === 'Critical');
+  doc.add(priorityActions(critical));
 
   const register = new VerticalStack();
   for (const finding of FINDINGS) {

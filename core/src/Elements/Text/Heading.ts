@@ -18,6 +18,15 @@ export class Heading extends TextBlock implements IStatefulElement {
   public tocIdentifier!: string;
 
   /**
+   * Optional named-anchor id. When set, this heading doubles as a cross-reference
+   * target: it records its page number against `anchorId` in the shared TOC
+   * registry so a {@link SectionLink} can jump to it and a {@link PageNumberOf}
+   * can print its page. Independent of {@link tocIdentifier} (which drives the
+   * on-page {@link VisualToc}); a heading may carry either, both, or neither.
+   */
+  public anchorId?: string;
+
+  /**
    * Heading level (1–6). Maps to PDF/UA structure roles `H1`…`H6` when
    * the document opts into tagging via `DocumentSettings.accessibility`.
    * Default `1`. Values outside 1–6 are clamped.
@@ -62,11 +71,24 @@ export class Heading extends TextBlock implements IStatefulElement {
    * @returns The render status indicating whether the element is complete or overflowed
    */
   public override renderStateful(ctx: RenderContext, width: number): RenderStatus {
-    if (!this.tocRegistered) {
-      ctx.tocEntries.set(this.tocIdentifier, ctx.currentPageIndex + 1);
-      this.tocRegistered = true;
-    }
+    this.registerToc(ctx);
     return super.renderStateful(ctx, width);
+  }
+
+  /**
+   * Records this heading's page number against its {@link tocIdentifier} and,
+   * when present, its {@link anchorId}, on the first render pass only.
+   */
+  private registerToc(ctx: RenderContext): void {
+    if (this.tocRegistered) return;
+    const pageNumber = ctx.currentPageIndex + 1;
+    if (this.tocIdentifier) {
+      ctx.tocEntries.set(this.tocIdentifier, pageNumber);
+    }
+    if (this.anchorId) {
+      ctx.tocEntries.set(this.anchorId, pageNumber);
+    }
+    this.tocRegistered = true;
   }
 
   /**
@@ -85,10 +107,7 @@ export class Heading extends TextBlock implements IStatefulElement {
    * @param contentWidth - The available content width after margins
    */
   protected override renderContent(ctx: RenderContext, contentWidth: number): void {
-    if (!this.tocRegistered) {
-      ctx.tocEntries.set(this.tocIdentifier, ctx.currentPageIndex + 1);
-      this.tocRegistered = true;
-    }
+    this.registerToc(ctx);
     super.renderContent(ctx, contentWidth);
   }
 }

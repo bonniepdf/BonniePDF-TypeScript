@@ -219,6 +219,7 @@ export class PdfCanvas implements ICanvas {
     // glyph tracking and width measurement.
     const runs = this.resolveRuns(text, fontFamily);
     PdfOperators.setFillColor(this.stream, color);
+    this.beginTextSpacing();
 
     let xOff = 0;
     if (align === TextAlignment.Center || align === TextAlignment.Right) {
@@ -231,8 +232,26 @@ export class PdfCanvas implements ICanvas {
 
     this.emitShowText(runs, fontSize);
 
+    this.endTextSpacing();
     PdfOperators.endText(this.stream);
     this.endColorAlpha(color);
+  }
+
+  /**
+   * Emits the `Tc`/`Tw` text-state operators for the pending letter/word
+   * spacing. `Tc` is universal; `Tw` only affects single-byte fonts, so
+   * word spacing for embedded (composite) fonts is injected into the `TJ` array
+   * by {@link emitShowText}. No-op (byte-identical) when both are zero.
+   */
+  private beginTextSpacing(): void {
+    if (this._letterSpacing !== 0) PdfOperators.setCharacterSpacing(this.stream, this._letterSpacing);
+    if (this._wordSpacing !== 0) PdfOperators.setWordSpacing(this.stream, this._wordSpacing);
+  }
+
+  /** Resets `Tc`/`Tw` to zero after a spaced text object so state does not leak. */
+  private endTextSpacing(): void {
+    if (this._letterSpacing !== 0) PdfOperators.setCharacterSpacing(this.stream, 0);
+    if (this._wordSpacing !== 0) PdfOperators.setWordSpacing(this.stream, 0);
   }
 
   public drawTextRotated(
@@ -255,10 +274,12 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.beginText(this.stream);
     const runs = this.resolveRuns(text, fontFamily);
     PdfOperators.setFillColor(this.stream, color);
+    this.beginTextSpacing();
     PdfOperators.setTextPosition(this.stream, 0, 0);
 
     this.emitShowText(runs, fontSize);
 
+    this.endTextSpacing();
     PdfOperators.endText(this.stream);
     PdfOperators.restoreState(this.stream);
   }
@@ -454,6 +475,17 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(alpha));
   }
 
+  /** Pending letter spacing in points, applied by the next drawText. */
+  private _letterSpacing = 0;
+  /** Pending word spacing in points, applied by the next drawText. */
+  private _wordSpacing = 0;
+
+  /** @inheritdoc */
+  public setTextSpacing(letterSpacing: number, wordSpacing: number): void {
+    this._letterSpacing = letterSpacing;
+    this._wordSpacing = wordSpacing;
+  }
+
   // -- Tagging ------------------------------------------------------------
 
   public setTaggingContext(tagging: TaggingContext | undefined): void {
@@ -551,8 +583,28 @@ export class PdfCanvas implements ICanvas {
       } else {
         total += FontMetrics.getStringWidth(run.text, run.fontIdentifier, fontSize);
       }
+      total += this.spacingWidth(run.text);
     }
     return total;
+  }
+
+  /**
+   * Extra advance contributed by the pending letter/word spacing for a
+   * run's text: `letterSpacing` after every rendered glyph plus `wordSpacing`
+   * after every space. Matches what the PDF `Tc`/`Tw`/`TJ` output advances by,
+   * and what the layout engine reserves. Zero when no spacing is set.
+   */
+  private spacingWidth(text: string): number {
+    if (this._letterSpacing === 0 && this._wordSpacing === 0) return 0;
+    let glyphs = 0;
+    let spaces = 0;
+    for (const char of text) {
+      const cp = char.codePointAt(0)!;
+      if (cp < 32) continue;
+      glyphs++;
+      if (char === ' ') spaces++;
+    }
+    return glyphs * this._letterSpacing + spaces * this._wordSpacing;
   }
 
   private emitShowText(runs: TextRun[], fontSize: number): void {
@@ -561,6 +613,16 @@ export class PdfCanvas implements ICanvas {
       this._glyphTracker(run.fontIdentifier, run.text);
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       if (run.embeddedFont != null) {
+        // word spacing (Tw) does not apply to composite fonts, so when it
+        // is set, inject it into the TJ array (combined with any kerning).
+        // Letter spacing is handled universally by Tc, above.
+        if (this._wordSpacing !== 0 && run.text.includes(' ')) {
+          PdfOperators.showTextPositioned(
+            this.stream,
+            PdfSyntax.toSpacedGlyphArray(run.text, run.embeddedFont, fontSize, this._wordSpacing)
+          );
+          continue;
+        }
         // embedded fonts with kern pairs paint with `TJ` so the PDF
         // matches the kerned widths the layout engine reserved (and the
         // kerned this feature SVG export). Unkerned strings keep the `Tj` path.

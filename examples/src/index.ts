@@ -16,6 +16,7 @@ import { generate as richTextStyles } from './recipes/typography/rich-text-style
 import { generate as textDecorations } from './recipes/typography/text-decorations';
 import { generate as customFonts } from './recipes/typography/custom-fonts';
 import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
+import { generate as advancedTypography } from './recipes/typography/advanced-typography';
 import { generate as dickensNovel } from './recipes/typography/dickens-novel';
 import { generate as lists } from './recipes/elements/lists';
 import { generate as hyperlinks } from './recipes/elements/hyperlinks';
@@ -285,6 +286,18 @@ export const examples: ExampleDef[] = [
     generate: emojisAndUnicode,
     thumbnails: false,
     dotnetClass: 'EmojiExample',
+    pdfUa1: true,
+  },
+  {
+    id: 'advanced-typography',
+    name: 'Advanced Typography',
+    category: 'Typography',
+    description:
+      'Super/subscript baseline shift (H₂O, E=mc²) and decoration styling — overline plus coloured/thick underline and strikethrough. PDF/UA-1.',
+    filename: 'advanced-typography.pdf',
+    generate: advancedTypography,
+    thumbnails: false,
+    dotnetClass: 'AdvancedTypographyExample',
     pdfUa1: true,
   },
   {

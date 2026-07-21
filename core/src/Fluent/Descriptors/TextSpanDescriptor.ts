@@ -1,5 +1,6 @@
 import { Color } from '../../Core/Color';
 import { TextStyle } from '../../Elements/Text/TextStyle';
+import { DecorationStyle } from '../../Elements/Text/DecorationStyle';
 import { FontWeight } from '../../Typography/FontWeight';
 
 /**
@@ -65,6 +66,86 @@ export class TextSpanDescriptor {
    */
   strikethrough(): TextSpanDescriptor {
     this.style.strikethrough();
+    return this;
+  }
+
+  /**
+   * Adds overline decoration (a line above the text).
+   */
+  overline(): TextSpanDescriptor {
+    this.style.overline();
+    return this;
+  }
+
+  /**
+   * Sets the decoration line colour (underline/strikethrough/overline).
+   */
+  decorationColor(color: Color): TextSpanDescriptor {
+    this.style.withDecorationColor(color);
+    return this;
+  }
+
+  /**
+   * Sets the decoration line thickness in points.
+   */
+  decorationThickness(thickness: number): TextSpanDescriptor {
+    this.style.withDecorationThickness(thickness);
+    return this;
+  }
+
+  /**
+   * Raises the span above the baseline (superscript).
+   */
+  superscript(): TextSpanDescriptor {
+    this.style.superscript();
+    return this;
+  }
+
+  /**
+   * Lowers the span below the baseline (subscript).
+   */
+  subscript(): TextSpanDescriptor {
+    this.style.subscript();
+    return this;
+  }
+
+  /**
+   * Sets an explicit baseline shift in points (positive = up).
+   */
+  baselineShift(points: number): TextSpanDescriptor {
+    this.style.withBaselineShift(points);
+    return this;
+  }
+
+  /**
+   * Sets letter spacing (tracking) in points, added after every glyph.
+   */
+  letterSpacing(points: number): TextSpanDescriptor {
+    this.style.withLetterSpacing(points);
+    return this;
+  }
+
+  /**
+   * Sets word spacing in points, added after every space.
+   */
+  wordSpacing(points: number): TextSpanDescriptor {
+    this.style.withWordSpacing(points);
+    return this;
+  }
+
+  /**
+   * Sets the decoration line style (solid/wavy/dashed/dotted).
+   */
+  decorationStyle(style: DecorationStyle): TextSpanDescriptor {
+    this.style.withDecorationStyle(style);
+    return this;
+  }
+
+  /**
+   * Adds a wavy underline (spell-check style).
+   */
+  wavyUnderline(): TextSpanDescriptor {
+    this.style.wavyUnderline();
     return this;
   }
 

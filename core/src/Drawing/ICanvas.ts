@@ -59,6 +59,14 @@ export interface ICanvas {
   ): void;
   measureText(text: string, fontSize: number, fontFamily: string): Size;
 
+  /**
+   * Sets the pending text-spacing state applied by subsequent
+   * {@link drawText} calls: `letterSpacing` points are added after every glyph
+   * and `wordSpacing` points after every space. Callers set the state before
+   * drawing and reset it to `(0, 0)` afterwards. Both default to 0.
+   */
+  setTextSpacing(letterSpacing: number, wordSpacing: number): void;
+
   drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void;
   drawFormXObject(resourceName: string, x: number, y: number): void;
 

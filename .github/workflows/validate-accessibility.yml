@@ -1,6 +1,6 @@
 name: PDF Conformance Validation
 
-# Compliance gate: builds the library, generates the tagged example PDFs, and
+# Compliance gate: builds the library, generates the conformance fixtures, and
 # validates every claimed PDF/A and PDF/UA conformance level with veraPDF. The job fails if any PDF
 # is non-compliant (tools/verapdf/validate.sh exits non-zero), so a regression
 # cannot reach master. See docs/ci/pdf-validation.md.
@@ -75,10 +75,13 @@ jobs:
         run: pnpm turbo build
 
       # The example set is derived from the shared registry (examples/src/index.ts):
-      # every example with `pdfUa1: true` (and no password) is generated and
-      # validated, so new examples are picked up automatically — no edit here.
-      - name: Generate tagged example PDFs
+      # every example with `pdfUa1: true` (and no password) is generated, along
+      # with the mandatory PDF/A-4 baseline fixture.
+      - name: Generate conformance PDFs
         run: pnpm generate-tagged
+
+      - name: Verify PDF/A-4 fixture is present
+        run: test -s generated-pdfs/pdfa4_baseline.pdf
 
       # Fail fast with a clear message if validate.sh lost its executable bit
       # (mode 100644 instead of 100755) - otherwise the validate step below

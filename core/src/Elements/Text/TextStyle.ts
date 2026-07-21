@@ -2,6 +2,8 @@ import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
 import { FontWeight } from '../../Typography/FontWeight';
 import { Color } from '../../Core/Color';
 import { TextDecoration } from './TextDecoration';
+import { BaselineAlignment } from './BaselineAlignment';
+import { DecorationStyle } from './DecorationStyle';
 
 /**
  * Defines the visual style for text rendering. Properties set to null inherit
@@ -26,8 +28,48 @@ export class TextStyle {
   /** Background highlight color behind the text. Null = no highlight. */
   public backgroundColor?: Color;
 
-  /** Text decoration (underline, strikethrough, or both). */
+  /** Text decoration (underline, strikethrough, overline, or a combination). */
   public decoration: TextDecoration = TextDecoration.None;
+
+  /**
+   * Colour of the decoration lines (underline/strikethrough/overline). Null =
+   * use the text {@link color}, matching the pre-G-39 behaviour.
+   */
+  public decorationColor?: Color;
+
+  /**
+   * Thickness of the decoration lines in points. Null = the default derived from
+   * font size (`max(0.5, fontSize / 18)`).
+   */
+  public decorationThickness?: number;
+
+  /** Line style for decorations (solid/wavy/dashed/dotted). Default solid. */
+  public decorationStyle: DecorationStyle = DecorationStyle.Solid;
+
+  /**
+   * Semantic vertical alignment (super/subscript). See {@link BaselineAlignment}.
+   * The shift magnitude derives from {@link effectiveFontSize} unless
+   * {@link baselineShift} is set explicitly.
+   */
+  public baselineAlignment: BaselineAlignment = BaselineAlignment.Baseline;
+
+  /**
+   * Explicit baseline shift in points (positive = up). Overrides the magnitude
+   * implied by {@link baselineAlignment}. Null = derive from the alignment.
+   */
+  public baselineShift?: number;
+
+  /**
+   * Extra spacing in points added after every glyph (tracking). Null = 0.
+   * Changes advances, so it flows through measurement, PDF (`Tc`), and SVG.
+   */
+  public letterSpacing?: number;
+
+  /**
+   * Extra spacing in points added after every space (word spacing). Null = 0.
+   * Changes advances, so it flows through measurement, PDF, and SVG.
+   */
+  public wordSpacing?: number;
 
   /**
    * Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).
@@ -62,6 +104,15 @@ export class TextStyle {
     merged.color = this.color ?? baseStyle.color;
     merged.backgroundColor = this.backgroundColor ?? baseStyle.backgroundColor;
     merged.decoration = this.decoration !== TextDecoration.None ? this.decoration : baseStyle.decoration;
+    merged.decorationColor = this.decorationColor ?? baseStyle.decorationColor;
+    merged.decorationThickness = this.decorationThickness ?? baseStyle.decorationThickness;
+    merged.decorationStyle =
+      this.decorationStyle !== DecorationStyle.Solid ? this.decorationStyle : baseStyle.decorationStyle;
+    merged.baselineAlignment =
+      this.baselineAlignment !== BaselineAlignment.Baseline ? this.baselineAlignment : baseStyle.baselineAlignment;
+    merged.baselineShift = this.baselineShift ?? baseStyle.baselineShift;
+    merged.letterSpacing = this.letterSpacing ?? baseStyle.letterSpacing;
+    merged.wordSpacing = this.wordSpacing ?? baseStyle.wordSpacing;
     merged.lineHeightMultiplier = this.lineHeightMultiplier ?? baseStyle.lineHeightMultiplier;
 
     return merged;
@@ -161,6 +212,67 @@ export class TextStyle {
   /** Adds strikethrough decoration */
   public strikethrough(): TextStyle {
     this.decoration |= TextDecoration.Strikethrough;
+    return this;
+  }
+
+  /** Adds overline decoration (a line above the text) */
+  public overline(): TextStyle {
+    this.decoration |= TextDecoration.Overline;
+    return this;
+  }
+
+  /** Sets the decoration line colour (underline/strikethrough/overline) */
+  public withDecorationColor(color: Color): TextStyle {
+    this.decorationColor = color;
+    return this;
+  }
+
+  /** Sets the decoration line thickness in points */
+  public withDecorationThickness(thickness: number): TextStyle {
+    this.decorationThickness = thickness;
+    return this;
+  }
+
+  /** Sets the decoration line style (solid/wavy/dashed/dotted) */
+  public withDecorationStyle(style: DecorationStyle): TextStyle {
+    this.decorationStyle = style;
+    return this;
+  }
+
+  /** Adds a wavy underline (spell-check style) */
+  public wavyUnderline(): TextStyle {
+    this.decoration |= TextDecoration.Underline;
+    this.decorationStyle = DecorationStyle.Wavy;
+    return this;
+  }
+
+  /** Raises the text above the baseline (superscript) */
+  public superscript(): TextStyle {
+    this.baselineAlignment = BaselineAlignment.Superscript;
+    return this;
+  }
+
+  /** Lowers the text below the baseline (subscript) */
+  public subscript(): TextStyle {
+    this.baselineAlignment = BaselineAlignment.Subscript;
+    return this;
+  }
+
+  /** Sets an explicit baseline shift in points (positive = up) */
+  public withBaselineShift(points: number): TextStyle {
+    this.baselineShift = points;
+    return this;
+  }
+
+  /** Sets letter spacing (tracking) in points, added after every glyph */
+  public withLetterSpacing(points: number): TextStyle {
+    this.letterSpacing = points;
+    return this;
+  }
+
+  /** Sets word spacing in points, added after every space */
+  public withWordSpacing(points: number): TextStyle {
+    this.wordSpacing = points;
     return this;
   }
 }

@@ -6,6 +6,8 @@ import { TextAlignment } from './TextAlignment';
 import { TextStyle } from './TextStyle';
 import { TextSpan } from './TextSpan';
 import { TextDecoration } from './TextDecoration';
+import { resolveBaselineShift } from './BaselineAlignment';
+import { paintDecorationLine } from './DecorationStyle';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
@@ -190,7 +192,9 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     let totalWidth = 0;
     for (const span of this.spans) {
       const resolved = this.resolveStyle(span.style);
-      totalWidth += FontMetrics.getStringWidth(span.text ?? '', resolved.effectiveFontName, resolved.effectiveFontSize);
+      totalWidth +=
+        FontMetrics.getStringWidth(span.text ?? '', resolved.effectiveFontName, resolved.effectiveFontSize) +
+        RichText.styleSpacing(span.text ?? '', resolved);
     }
 
     return totalWidth;
@@ -363,9 +367,12 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
           const isInterSpanSpace = hasLeadingSpace && i === 0 && prevSpanEndedWithSpace && !text.startsWith(' ');
           const spaceStyle = isInterSpanSpace && prevResolvedStyle ? prevResolvedStyle : resolved;
 
-          const partWidth = FontMetrics.getStringWidth(part, resolved.effectiveFontName, resolved.effectiveFontSize);
+          const partWidth =
+            FontMetrics.getStringWidth(part, resolved.effectiveFontName, resolved.effectiveFontSize) +
+            RichText.styleSpacing(part, resolved);
           const spaceWidth = hasLeadingSpace
-            ? FontMetrics.getStringWidth(' ', spaceStyle.effectiveFontName, spaceStyle.effectiveFontSize)
+            ? FontMetrics.getStringWidth(' ', spaceStyle.effectiveFontName, spaceStyle.effectiveFontSize) +
+              RichText.styleSpacing(' ', spaceStyle)
             : 0;
 
           const word = new StyledWord(resolved, part, false);
@@ -459,22 +466,37 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
         ctx.canvas.fillRect(currentX, y, runWidth, line.height, style.backgroundColor);
       }
 
+      // Baseline shift (super/subscript) moves the glyphs vertically without
+      // affecting the run's advance width, so `currentX` and measurement are
+      // untouched. Positive shift = up, so subtract from the top-down y.
+      const shift = resolveBaselineShift(style.baselineAlignment, style.baselineShift, fontSize);
+      const runY = y - shift;
+
+      // letter/word spacing as canvas state for this run.
+      const ls = style.letterSpacing ?? 0;
+      const ws = style.wordSpacing ?? 0;
+      const spaced = ls !== 0 || ws !== 0;
+      if (spaced) ctx.canvas.setTextSpacing(ls, ws);
+
       // Draw each word segment separately when justified (to apply extra spacing)
       if (useJustify && extraWordSpacing > 0 && run.text.includes(' ')) {
-        currentX = this.drawJustifiedRun(ctx, run, currentX, y, extraWordSpacing);
+        currentX = this.drawJustifiedRun(ctx, run, currentX, runY, extraWordSpacing);
       } else {
         // Draw the run as a single text call
-        ctx.canvas.drawText(currentX, y, run.text, color, fontSize, fontName, TextAlignment.Left);
+        ctx.canvas.drawText(currentX, runY, run.text, color, fontSize, fontName, TextAlignment.Left);
 
-        const runWidth = FontMetrics.getStringWidth(run.text, fontName, fontSize);
+        const runWidth =
+          FontMetrics.getStringWidth(run.text, fontName, fontSize) + RichText.styleSpacing(run.text, style);
 
         // Draw decorations
         if (style.decoration !== TextDecoration.None) {
-          this.drawRunDecorations(ctx, style, currentX, y, runWidth, fontSize);
+          this.drawRunDecorations(ctx, style, currentX, runY, runWidth, fontSize);
         }
 
         currentX += runWidth;
       }
+
+      if (spaced) ctx.canvas.setTextSpacing(0, 0);
     }
   }
 
@@ -499,15 +521,16 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     for (let i = 0; i < words.length; i++) {
       const word = words[i];
 
-      // Add space before word (except first)
+      // Add space before word (except first). The space glyph carries its own
+      // letter/word spacing in addition to the justification spread.
       if (i > 0) {
-        const spaceWidth = FontMetrics.getStringWidth(' ', fontName, fontSize);
+        const spaceWidth = FontMetrics.getStringWidth(' ', fontName, fontSize) + RichText.styleSpacing(' ', style);
         currentX += spaceWidth + extraWordSpacing;
       }
 
       if (word !== '') {
         ctx.canvas.drawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
-        const wordWidth = FontMetrics.getStringWidth(word, fontName, fontSize);
+        const wordWidth = FontMetrics.getStringWidth(word, fontName, fontSize) + RichText.styleSpacing(word, style);
 
         if (style.decoration !== TextDecoration.None) {
           this.drawRunDecorations(ctx, style, currentX, y, wordWidth, fontSize);
@@ -531,16 +554,20 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     width: number,
     fontSize: number
   ): void {
-    const thickness = Math.max(0.5, fontSize / 18);
+    const thickness = style.decorationThickness ?? Math.max(0.5, fontSize / 18);
+    const color = style.decorationColor ?? style.effectiveColor;
+    const lineStyle = style.decorationStyle;
+
+    if ((style.decoration & TextDecoration.Overline) !== 0) {
+      paintDecorationLine(ctx.canvas, x, y + fontSize * 0.15, width, color, thickness, lineStyle);
+    }
 
     if ((style.decoration & TextDecoration.Underline) !== 0) {
-      const underlineY = y + fontSize + fontSize / 7;
-      ctx.canvas.drawLine(x, underlineY, x + width, underlineY, style.effectiveColor, thickness);
+      paintDecorationLine(ctx.canvas, x, y + fontSize + fontSize / 7, width, color, thickness, lineStyle);
     }
 
     if ((style.decoration & TextDecoration.Strikethrough) !== 0) {
-      const strikeY = y + fontSize * 0.55;
-      ctx.canvas.drawLine(x, strikeY, x + width, strikeY, style.effectiveColor, thickness);
+      paintDecorationLine(ctx.canvas, x, y + fontSize * 0.55, width, color, thickness, lineStyle);
     }
   }
 
@@ -554,7 +581,9 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   }
 
   private measureRunWidth(run: StyledRun, extraWordSpacing: number): number {
-    let baseWidth = FontMetrics.getStringWidth(run.text, run.style.effectiveFontName, run.style.effectiveFontSize);
+    let baseWidth =
+      FontMetrics.getStringWidth(run.text, run.style.effectiveFontName, run.style.effectiveFontSize) +
+      RichText.styleSpacing(run.text, run.style);
 
     if (extraWordSpacing > 0) {
       let spaceCount = 0;
@@ -565,6 +594,26 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     }
 
     return baseWidth;
+  }
+
+  /**
+   * Extra advance from a style's {@link TextStyle.letterSpacing}/
+   * {@link TextStyle.wordSpacing} for a string: letter spacing after
+   * every glyph plus word spacing after every space. Zero when neither is set.
+   */
+  private static styleSpacing(text: string, style: TextStyle): number {
+    const ls = style.letterSpacing ?? 0;
+    const ws = style.wordSpacing ?? 0;
+    if (ls === 0 && ws === 0) return 0;
+    let glyphs = 0;
+    let spaces = 0;
+    for (const rune of text) {
+      const cp = rune.codePointAt(0) ?? 0;
+      if (cp < 32) continue;
+      glyphs++;
+      if (rune === ' ') spaces++;
+    }
+    return glyphs * ls + spaces * ws;
   }
 
   private stylesEqual(a: TextStyle, b: TextStyle): boolean {

@@ -5,6 +5,7 @@ import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 import { TextDecoration } from './TextDecoration';
+import { DecorationStyle } from './DecorationStyle';
 import { TextStyle } from './TextStyle';
 
 /**
@@ -82,7 +83,8 @@ export abstract class TextElementBase extends ElementBase {
   }
 
   /**
-   * Text decoration (underline, strikethrough, or both). Defaults to None if not set.
+   * Text decoration (underline, strikethrough, overline, or a combination).
+   * Defaults to None if not set.
    */
   public get textDecoration(): TextDecoration {
     return this._textDecoration ?? TextDecoration.None;
@@ -90,6 +92,34 @@ export abstract class TextElementBase extends ElementBase {
   public set textDecoration(value: TextDecoration) {
     this._textDecoration = value;
   }
+
+  /**
+   * Colour of the decoration lines. Null = use {@link textColor} (pre-G-39 behaviour).
+   */
+  public decorationColor?: Color;
+
+  /**
+   * Thickness of the decoration lines in points. Null = the default derived from
+   * font size (`max(0.5, fontSize / 18)`).
+   */
+  public decorationThickness?: number;
+
+  /**
+   * Letter spacing (tracking) in points, added after every glyph.
+   * Default 0. Changes advances, so it is reflected in measurement and both
+   * PDF and SVG output.
+   */
+  public letterSpacing = 0;
+
+  /**
+   * Word spacing in points, added after every space. Default 0.
+   */
+  public wordSpacing = 0;
+
+  /**
+   * Line style for decorations (solid/wavy/dashed/dotted) - this feature. Default solid.
+   */
+  public decorationStyle: DecorationStyle = DecorationStyle.Solid;
 
   /**
    * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
@@ -311,6 +341,25 @@ export abstract class TextElementBase extends ElementBase {
     const measuredText = text
       .replace(TextElementBase.TotalPagesToken, '00')
       .replace(TextElementBase.CurrentPageToken, '00');
-    return FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize);
+    return FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize) + this.spacingWidth(measuredText);
+  }
+
+  /**
+   * Extra advance contributed by {@link letterSpacing}/{@link wordSpacing} for a
+   * string: letter spacing after every glyph plus word spacing after
+   * every space. Matches the PDF/SVG painters and the reserved layout width.
+   * Zero when no spacing is set.
+   */
+  protected spacingWidth(text: string): number {
+    if (this.letterSpacing === 0 && this.wordSpacing === 0) return 0;
+    let glyphs = 0;
+    let spaces = 0;
+    for (const rune of text) {
+      const cp = rune.codePointAt(0) ?? 0;
+      if (cp < 32) continue;
+      glyphs++;
+      if (rune === ' ') spaces++;
+    }
+    return glyphs * this.letterSpacing + spaces * this.wordSpacing;
   }
 }

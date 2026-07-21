@@ -270,11 +270,23 @@ export class SvgCanvas implements ICanvas {
     const runs = this.resolveRuns(fontFamily, text);
 
     if (runs.length > 0) {
-      const measured = this.getRunsWidth(runs, fontSize);
+      const measured = this.getRunsWidth(runs, fontSize, this.wordSpacing, this.letterSpacing);
       let startX = x;
       if (align === TextAlignment.Center) startX = x - measured / 2;
       else if (align === TextAlignment.Right) startX = x - measured;
-      this.svgElements.push(this.glyphPositionedRuns(startX, baselineY, runs, hex, fontSize, 0));
+      this.svgElements.push(
+        this.glyphPositionedRuns(
+          startX,
+          baselineY,
+          runs,
+          hex,
+          fontSize,
+          this.wordSpacing,
+          '',
+          undefined,
+          this.letterSpacing
+        )
+      );
       return;
     }
 
@@ -286,10 +298,15 @@ export class SvgCanvas implements ICanvas {
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
     const opacity = this.formatOpacity(color.scA);
     const fillOpacityAttr = opacity < 1 ? ` fill-opacity="${opacity}"` : '';
+    // letter/word spacing map directly onto the SVG presentation
+    // attributes for the standard-14 (viewer-font) path.
+    const spacingAttr =
+      (this.letterSpacing !== 0 ? ` letter-spacing="${this.n(this.letterSpacing)}"` : '') +
+      (this.wordSpacing !== 0 ? ` word-spacing="${this.n(this.wordSpacing)}"` : '');
     this.svgElements.push(
       `<text x="${this.n(x)}" y="${this.n(baselineY)}" fill="${hex}"${fillOpacityAttr} font-size="${this.n(
         fontSize
-      )}" ${standardFontCssAttrs(fontFamily)} text-anchor="${anchor}">${escapeXml(text)}</text>`
+      )}" ${standardFontCssAttrs(fontFamily)} text-anchor="${anchor}"${spacingAttr}>${escapeXml(text)}</text>`
     );
   }
 
@@ -395,9 +412,29 @@ export class SvgCanvas implements ICanvas {
     // Measured over the same runs that get painted, so a fallback glyph's
     // advance comes from the face that actually draws it.
     const runs = this.resolveRuns(fontFamily, text);
-    if (runs.length > 0) return new Size(this.getRunsWidth(runs, fontSize), fontSize * 1.2);
+    if (runs.length > 0) {
+      return new Size(this.getRunsWidth(runs, fontSize, this.wordSpacing, this.letterSpacing), fontSize * 1.2);
+    }
     if (this.resolveFont(fontFamily)) return new Size(0, fontSize * 1.2);
-    return new Size(FontMetrics.getStringWidth(text, fontFamily, fontSize), fontSize * 1.2);
+    const base = FontMetrics.getStringWidth(text, fontFamily, fontSize);
+    return new Size(base + this.standardSpacingWidth(text), fontSize * 1.2);
+  }
+
+  /**
+   * Extra advance from the pending letter/word spacing for a plain (standard-14)
+   * string, matching {@link getRunsWidth}'s per-glyph and per-space additions.
+   */
+  private standardSpacingWidth(text: string): number {
+    if (this.letterSpacing === 0 && this.wordSpacing === 0) return 0;
+    let glyphs = 0;
+    let spaces = 0;
+    for (const rune of text) {
+      const cp = rune.codePointAt(0) ?? 0;
+      if (cp < 32) continue;
+      glyphs++;
+      if (rune === ' ') spaces++;
+    }
+    return glyphs * this.letterSpacing + spaces * this.wordSpacing;
   }
 
   // -- Images -------------------------------------------------------------
@@ -590,6 +627,17 @@ export class SvgCanvas implements ICanvas {
     this.groupDepth++;
   }
 
+  /** Pending letter spacing in points, applied by the next drawText. */
+  private letterSpacing = 0;
+  /** Pending word spacing in points, applied by the next drawText. */
+  private wordSpacing = 0;
+
+  /** @inheritdoc */
+  public setTextSpacing(letterSpacing: number, wordSpacing: number): void {
+    this.letterSpacing = letterSpacing;
+    this.wordSpacing = wordSpacing;
+  }
+
   // -- Output -------------------------------------------------------------
 
   public getInnerSvg(): string {
@@ -681,7 +729,8 @@ export class SvgCanvas implements ICanvas {
     fontSize: number,
     extraPerSpace: number,
     extraAttributes = '',
-    transform?: string
+    transform?: string,
+    letterSpacing = 0
   ): string {
     const transformAttr = transform ? ` transform="${transform}"` : '';
     const elements: string[] = [];
@@ -718,6 +767,9 @@ export class SvgCanvas implements ICanvas {
         xs.push(this.n(cursor));
         chars += rune;
         cursor += font.getGlyphWidth(gid) * scale;
+        // letter spacing after every glyph; word spacing after spaces
+        // (extraPerSpace also carries justification spacing when present).
+        cursor += letterSpacing;
         if (rune === ' ') cursor += extraPerSpace;
         prevGid = gid;
         hasPrev = true;
@@ -742,7 +794,7 @@ export class SvgCanvas implements ICanvas {
 
   /** Total advance width of a resolved run list, matching what
    * {@link glyphPositionedRuns} paints. */
-  private getRunsWidth(runs: readonly SvgTextRun[], fontSize: number, extraPerSpace = 0): number {
+  private getRunsWidth(runs: readonly SvgTextRun[], fontSize: number, extraPerSpace = 0, letterSpacing = 0): number {
     // kerned, mirroring both the layout engine's reserved widths and the
     // kerned glyph positions painted by glyphPositionedRuns / the PDF `TJ` path.
     let width = 0;
@@ -759,6 +811,8 @@ export class SvgCanvas implements ICanvas {
           width += font.getKerning(prevGid, gid) * scale;
         }
         width += font.getGlyphWidth(gid) * scale;
+        // match glyphPositionedRuns' per-glyph and per-space advances.
+        width += letterSpacing;
         if (rune === ' ') width += extraPerSpace;
         prevGid = gid;
         hasPrev = true;

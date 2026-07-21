@@ -10,4 +10,7 @@ export enum TextDecoration {
 
   /** Line drawn through the middle of the text */
   Strikethrough = 2,
+
+  /** Line drawn above the text (over the cap height) */
+  Overline = 4,
 }

@@ -161,4 +161,50 @@ export class PdfSyntax {
     if (!anyKern) return null;
     return `${result}${hex}>]`;
   }
+
+  /**
+   * Converts a string into a `TJ` array operand that carries both kern-pair
+   * adjustments *and* word spacing, for composite (Type0) fonts where the PDF
+   * `Tw` operator does not apply (it only affects single-byte code 32). After
+   * every space glyph an extra adjustment of `-(wordSpacingPts / fontSize) *
+   * 1000` is inserted (negative → `TJ` moves the following glyph further right
+   * by `wordSpacingPts`). Letter spacing is handled separately by `Tc`.
+   *
+   * Always returns a `[...]` array (never null); callers use it only when
+   * `wordSpacingPts` is non-zero.
+   */
+  public static toSpacedGlyphArray(text: string, font: TtfFont, fontSize: number, wordSpacingPts: number): string {
+    const wordAdjustment = fontSize > 0 ? Math.round((-wordSpacingPts * 1000) / fontSize) : 0;
+
+    let result = '[<';
+    let hex = '';
+    let prevGid = 0;
+    let prevWasSpace = false;
+    let hasPrev = false;
+
+    for (const char of text) {
+      const code = char.codePointAt(0)!;
+      if (code < 32) continue; // Skip control characters
+
+      const gid = font.getGlyphId(code);
+
+      if (hasPrev) {
+        const kern = font.getKerning(prevGid, gid);
+        let adjustment = Math.round((-kern * 1000) / font.unitsPerEm);
+        // Word spacing applies to the gap *after* a space glyph.
+        if (prevWasSpace) adjustment += wordAdjustment;
+        if (adjustment !== 0) {
+          result += `${hex}> ${adjustment} <`;
+          hex = '';
+        }
+      }
+
+      hex += gid.toString(16).toUpperCase().padStart(4, '0');
+      prevGid = gid;
+      prevWasSpace = char === ' ';
+      hasPrev = true;
+    }
+
+    return `${result}${hex}>]`;
+  }
 }

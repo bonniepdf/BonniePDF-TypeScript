@@ -77,6 +77,8 @@ export * from './Elements/Media/Image';
 export * from './Elements/Media/ImageFitMode';
 
 export * from './Elements/Text/TextDecoration';
+export * from './Elements/Text/BaselineAlignment';
+export * from './Elements/Text/DecorationStyle';
 export * from './Elements/Text/TextAlignment';
 export * from './Elements/Text/TextStyle';
 export * from './Elements/Text/TextElementBase';

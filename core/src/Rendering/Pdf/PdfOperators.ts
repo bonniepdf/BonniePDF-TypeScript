@@ -109,6 +109,15 @@ export class PdfOperators {
     s.push(`${PdfSyntax.formatDecimal(spacing)} Tw\n`);
   }
 
+  /**
+   * Emits the character-spacing operator (`Tc`). Applies to every glyph shown
+   * by both `Tj` and `TJ`, for simple and composite fonts alike, so it is the
+   * universal mechanism for letter spacing.
+   */
+  public static setCharacterSpacing(s: string[], spacing: number): void {
+    s.push(`${PdfSyntax.formatDecimal(spacing)} Tc\n`);
+  }
+
   public static strokeLine(s: string[], x1: number, y1: number, x2: number, y2: number): void {
     s.push(
       `${PdfSyntax.formatDecimal(x1)} ${PdfSyntax.formatDecimal(y1)} m ${PdfSyntax.formatDecimal(x2)} ${PdfSyntax.formatDecimal(y2)} l S\n`

@@ -61,6 +61,10 @@ export class MockCanvas implements ICanvas {
     return new Size(text.length * fontSize * 0.6, fontSize);
   }
 
+  setTextSpacing(letterSpacing: number, wordSpacing: number): void {
+    this.operations.push(`SetTextSpacing(${letterSpacing},${wordSpacing})`);
+  }
+
   drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
     this.operations.push(`DrawLine(${x1},${y1},${x2},${y2},${lineWidth})`);
   }

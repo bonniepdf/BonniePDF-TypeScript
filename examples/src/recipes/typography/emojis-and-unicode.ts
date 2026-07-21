@@ -5,7 +5,12 @@
  *   NotoSans          — Latin, Greek, Cyrillic, currency (BMP)
  *   NotoSansMath      — Arrows (U+2190–U+21FF) and Mathematical Operators (U+2200–U+22FF)
  *   NotoSansSymbols2  — Miscellaneous Symbols (U+2600) and Dingbats (U+2700)
- *   NotoEmoji         — Supplementary emoji (U+1F000 and above)
+ *   NotoEmoji         — Supplementary emoji (U+1F000 and above), plus the
+ *                       emoji-presentation code points the symbol blocks
+ *                       delegate to it (⛪ U+26EA, ⛽ U+26FD, ✊ U+270A, …)
+ *
+ * The block sections below list only what each font actually covers; the
+ * "Automatic Glyph Fallback" section shows the engine resolving the rest.
  *
  * PDF/A is intentionally not claimed — emoji fonts include COLR/CBDT tables
  * that archival validators reject. PDF/UA-1 accessibility is still applied.
@@ -107,7 +112,7 @@ export function generate(): Document {
     doc,
     'Miscellaneous Symbols (U+2600 – U+26FF)',
     's-misc',
-    '☀ ☁ ☂ ☃ ☄ ★ ☆ ♠ ♣ ♥ ♦ ☺ ☻ ♻ ⚡ ⚽ ⚾ ⛄ ⛅ ⛪ ⛽',
+    '☀ ☁ ☂ ☃ ☄ ★ ☆ ♠ ♣ ♥ ♦ ⚡ ⚽ ⚾ ⛄ ⛅',
     SYMBOLS_FONT
   );
 
@@ -115,9 +120,33 @@ export function generate(): Document {
     doc,
     'Dingbats (U+2700 – U+27BF)',
     's-dingbats',
-    '✀ ✁ ✂ ✃ ✄ ✆ ✇ ✈ ✉ ✊ ✋ ✌ ✍ ✎ ✏ ✐ ✑ ✒ ✓ ✗ ✘',
+    '✀ ✁ ✂ ✃ ✄ ✆ ✇ ✈ ✉ ✋ ✌ ✍ ✎ ✏ ✐ ✑ ✒ ✓ ✗ ✘',
     SYMBOLS_FONT
   );
+
+  // ── Glyph fallback ────────────────────────────────────────────────────────────
+
+  section(doc, 'Automatic Glyph Fallback', 's-fallback');
+
+  const fallbackIntro = new TextBlock(
+    'Some code points in the symbol blocks above default to emoji presentation, and ' +
+      'Noto delegates those to NotoEmoji rather than NotoSansSymbols2. The line below asks ' +
+      'for NotoSansSymbols2, which covers none of them: the engine routes each one to the ' +
+      'first registered font that does, so no glyph is lost and none is silently replaced ' +
+      'by whatever font the viewer happens to have.'
+  );
+  fallbackIntro.fontName = TEXT_FONT;
+  fallbackIntro.margin = new Thickness(0, 0, 0, 6);
+  doc.add(fallbackIntro);
+
+  // Deliberately drawn with the symbols font, not the emoji font: these render
+  // only because the fallback chain resolves them to NotoEmoji.
+  const fallback = new TextBlock('☺ ♻ ⛪ ⛽ ✊');
+  fallback.fontName = SYMBOLS_FONT;
+  fallback.fontSize = 20;
+  fallback.textColor = ColorPalette.slate[800];
+  fallback.margin = new Thickness(0, 0, 0, 4);
+  doc.add(fallback);
 
   // ── Emoji sections ────────────────────────────────────────────────────────────
 

@@ -48,7 +48,7 @@ const PRODUCTS: Product[] = [
     name: 'Terracotta Planter',
     sku: 'HG-1042',
     price: '£28.00',
-    blurb: 'Hand-thrown stoneware planter with a matte terracotta glaze and a drainage saucer.',
+    blurb: 'Hand-thrown stoneware planter with a matte terracotta glaze.',
     image: 'images/products/terracotta-planter.jpg',
   },
   {

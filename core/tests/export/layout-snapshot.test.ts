@@ -5,6 +5,7 @@ import { VerticalStack } from '../../src/Elements/Layout/VerticalStack';
 import { Hyperlink } from '../../src/Core/Hyperlink';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { LAYOUT_SNAPSHOT_VERSION, LayoutNode } from '../../src/Rendering/LayoutRecorder';
+import { markDebugSource } from '../../src/Rendering/DebugSource';
 
 /** Depth-first walk of the snapshot tree. */
 function walk(node: LayoutNode, visit: (n: LayoutNode) => void): void {
@@ -27,6 +28,21 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     doc.add(new TextBlock('Hello', 14, StandardFonts.Helvetica));
     const result = await doc.generateSvgDocumentAsync();
     expect(result.snapshot).toBeUndefined();
+  });
+
+  it('carries opaque source ids only for preview-marked elements', async () => {
+    doc = new Document();
+    const marked = markDebugSource(
+      markDebugSource(new TextBlock('Marked', 14, StandardFonts.Helvetica), 'src:test-title'),
+      'src:outer-factory'
+    );
+    doc.add(marked);
+    doc.add(new TextBlock('Unmarked', 11, StandardFonts.Helvetica));
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    const nodes = collect(snapshot!.root).filter(n => n.type === 'TextBlock');
+    expect(nodes[0].sourceId).toBe('src:test-title');
+    expect(nodes[1].sourceId).toBeUndefined();
   });
 
   it('captures a Document → Page → content tree', async () => {

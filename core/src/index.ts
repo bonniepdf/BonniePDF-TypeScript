@@ -192,6 +192,7 @@ export type {
   SnapshotMeta,
 } from './Rendering/LayoutRecorder';
 export { LAYOUT_SNAPSHOT_VERSION, accessibilityOf } from './Rendering/LayoutRecorder';
+export { markDebugSource, debugSourceOf } from './Rendering/DebugSource';
 
 // Accessibility / compliance preflight — evaluates the layout snapshot against
 // PDF/UA-1 rules at authoring time and reports per-element findings.

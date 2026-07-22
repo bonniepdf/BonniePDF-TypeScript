@@ -19,10 +19,11 @@
 // mirrors it; both are verified against the shared conformance fixtures.
 // ---------------------------------------------------------------------------
 
+import { debugSourceOf } from './DebugSource';
+
 /** Schema version emitted in every snapshot, so consumers can feature-detect.
- * v2 adds per-node {@link NodeAccessibility} (`a11y`) and {@link SnapshotMeta}
- * (`meta`); v1 consumers that ignore unknown fields remain compatible. */
-export const LAYOUT_SNAPSHOT_VERSION = 2;
+ * v2 adds accessibility metadata; v3 adds optional preview-only source ids. */
+export const LAYOUT_SNAPSHOT_VERSION = 3;
 
 /** Reads an element's canonical capture type without depending on ElementBase. */
 export function captureTypeOf(element: object): string {
@@ -115,6 +116,8 @@ export interface LayoutNode {
   type: string;
   /** Optional author-supplied name/key (e.g. from a future capture API). */
   name?: string;
+  /** Opaque editor-owned source id; present only in instrumented preview builds. */
+  sourceId?: string;
   /** The rectangles this node occupied — one per page it touched (may be empty). */
   rects: LayoutRect[];
   /** Intrinsic accessibility facts, when the element declares a role. */
@@ -217,6 +220,8 @@ export class LayoutRecorder {
 
     const node: LayoutNode = { id: `n${this.nextId++}`, type, rects: [], children: [] };
     if (name) node.name = name;
+    const sourceId = debugSourceOf(element);
+    if (sourceId) node.sourceId = sourceId;
     const a11y = accessibilityOf(element, type);
     if (a11y) node.a11y = a11y;
     const parent = this.stack[this.stack.length - 1];

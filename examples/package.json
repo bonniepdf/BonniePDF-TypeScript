@@ -1,6 +1,6 @@
 {
   "name": "@bonniepdf/examples",
-  "version": "2026.7.1-beta.1",
+  "version": "2026.7.2",
   "description": "Shared registry of BonniePDF example documents",
   "private": true,
   "type": "module",

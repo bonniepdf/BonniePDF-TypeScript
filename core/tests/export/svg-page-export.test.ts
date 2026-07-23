@@ -401,9 +401,55 @@ describe('SVG page export — embedded standard-font alignment', () => {
     doc.add(new Hyperlink('Visit the docs', 'https://www.bonniepdf.dev/docs'));
 
     const svg = await doc.generateFirstPageSvgAsync();
-    expect(svg).toContain('<a href="https://www.bonniepdf.dev/docs" target="_blank" rel="noopener">');
+    expect(svg).toContain('<a href="https://www.bonniepdf.dev/docs" target="_blank" rel="noopener"');
     // The clickable area paints nothing but hit-tests across the link's bounds.
     expect(svg).toMatch(/<a [^>]*><rect [^>]*fill="none" pointer-events="all"\/><\/a>/);
+  });
+
+  it('names each external <a> overlay with the link text (parity with the PDF /Contents)', async () => {
+    doc = new Document();
+    doc.add(new Hyperlink('Visit the docs', 'https://www.bonniepdf.dev/docs'));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    // The anchor carries an accessible name equal to the visible link text, so a
+    // screen reader announces the same thing the PDF /Link annotation does.
+    expect(svg).toMatch(/<a href="[^"]*" target="_blank" rel="noopener" aria-label="Visit the docs">/);
+  });
+
+  it('escapes the accessible name in the aria-label', async () => {
+    doc = new Document();
+    doc.add(new Hyperlink('Terms & "Conditions"', 'https://example.com/terms'));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    expect(svg).toContain('aria-label="Terms &amp; &quot;Conditions&quot;"');
+  });
+
+  it('presents a page with links as a labelled image plus named-link siblings (never role="img" over live links)', async () => {
+    // A page carrying focusable <a> links must NOT be an atomic image: ARIA
+    // role="img" prunes its subtree, which both hides and invalidates the links.
+    doc = new Document();
+    doc.add(new Hyperlink('Visit the docs', 'https://www.bonniepdf.dev/docs'));
+
+    const svg = await doc.generateFirstPageSvgAsync();
+    // Root is a named graphics container, not an atomic image.
+    expect(svg).toContain('aria-label="BonniePDF document - page 1"');
+    expect(svg).not.toContain('role="img"');
+    // The painted page is the aria-hidden visual layer; its label comes from root.
+    expect(svg).toContain('<g id="page-1" data-bonniepdf-page="1" aria-hidden="true">');
+    // The link is a sibling of that group (outside it), so it is a valid,
+    // reachable, named control rather than a pruned descendant.
+    const groupClose = svg.indexOf('</g>');
+    const anchor = svg.indexOf('<a ');
+    expect(anchor).toBeGreaterThan(groupClose);
+  });
+
+  it('keeps role="img" for a link-free page (atomic-image model unchanged)', async () => {
+    doc = simpleDoc();
+    const svg = await doc.generateFirstPageSvgAsync();
+    expect(svg).toContain('role="img"');
+    // No link overlays, so the visual group is not aria-hidden.
+    expect(svg).toContain('<g id="page-1" data-bonniepdf-page="1">');
+    expect(svg).not.toContain('aria-hidden="true"');
   });
 
   it('escapes hyperlink URIs in the overlay markup', async () => {

@@ -18,6 +18,13 @@ export interface SvgPageRenderOutput {
   height: number;
   /** The page's render surface, ready to be serialized to a standalone SVG. */
   canvas: SvgCanvas;
+  /**
+   * Clickable link-overlay markup for this page (external `<a>` anchors and
+   * internal `data-bp-link-page` rects), kept separate from the canvas body so
+   * the assembler can position it above — but outside — the atomic-image group.
+   * Empty when the page has no registered links.
+   */
+  linkOverlays: string;
 }
 
 /**
@@ -145,28 +152,38 @@ export class SvgRenderPipeline {
       } else {
         this.renderPageSlot(ctx, canvas, settings.pageForeground, i, dim.width, false, totalPages);
       }
-      // Link overlays go last so they sit above every painted layer and stay
-      // clickable in an SVG host (e.g. @bonniepdf/previewer).
-      this.renderLinkOverlays(canvas, ctx.pageHyperlinks.get(i) ?? [], dim.height);
+      // Link overlays are kept OUT of the canvas body and returned separately so
+      // the assembler can place them above the painted layers while keeping them
+      // outside the page's atomic-image group — an ARIA role="img" prunes its
+      // subtree, so a live <a> nested inside it is invalid (see assemblePageSvg).
+      const linkOverlays = this.renderLinkOverlays(ctx.pageHyperlinks.get(i) ?? [], dim.height);
 
       canvas.resolveTotalPages(totalPages);
-      outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas });
+      outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas, linkOverlays });
     }
 
     return outputs;
   }
 
   /**
-   * Emits clickable link overlays for the hyperlinks registered on this page,
-   * mirroring the /Link annotations the PDF pipeline writes. External links
-   * (`uri`) become SVG `<a>` elements, so they are live links in any SVG host;
-   * internal links (`targetPageIndex`, e.g. VisualToc entries) become rects
-   * carrying `data-bp-link-page="N"` (1-based) that a host such as
+   * Builds the clickable link overlays for the hyperlinks registered on this
+   * page, mirroring the /Link annotations the PDF pipeline writes. External
+   * links (`uri`) become SVG `<a>` elements, so they are live links in any SVG
+   * host; internal links (`targetPageIndex`, e.g. VisualToc entries) become
+   * rects carrying `data-bp-link-page="N"` (1-based) that a host such as
    * @bonniepdf/previewer wires to page navigation. The rects paint nothing
    * (`fill="none"`) but hit-test (`pointer-events="all"`). Hyperlink render
    * bounds are PDF coordinates (bottom-left origin), so Y is flipped here.
+   *
+   * Every external `<a>` carries an `aria-label` giving it a discernible
+   * accessible name. The name is the link's visible text — the same value the
+   * PDF pipeline writes into the annotation `/Contents` (PDF/UA 7-18) — so the
+   * link reads identically across the PDF and its SVG preview. Without a name an
+   * SVG anchor wrapping only an invisible hit-rect is an unnamed link (WCAG
+   * 2.4.4 / axe `link-name`).
    */
-  private static renderLinkOverlays(canvas: SvgCanvas, links: readonly RegisteredLink[], pageHeight: number): void {
+  private static renderLinkOverlays(links: readonly RegisteredLink[], pageHeight: number): string {
+    const parts: string[] = [];
     for (const link of links) {
       const w = link.renderWidth;
       const h = link.renderHeight;
@@ -177,13 +194,18 @@ export class SvgRenderPipeline {
         `width="${fmtNum(w)}" height="${fmtNum(h)}" fill="none" pointer-events="all"`;
 
       if (typeof link.uri === 'string' && link.uri.length > 0) {
-        canvas.appendRawMarkup(`<a href="${escapeAttr(link.uri)}" target="_blank" rel="noopener"><rect ${rect}/></a>`);
-      } else if (typeof link.targetPageIndex === 'number' && link.targetPageIndex >= 0) {
-        canvas.appendRawMarkup(
-          `<rect ${rect} data-bp-link-page="${link.targetPageIndex + 1}" style="cursor:pointer"/>`
+        // Prefer the visible link text; fall back to the URI so the anchor is
+        // never nameless even for links created without display text.
+        const name = link.text && link.text.length > 0 ? link.text : link.uri;
+        parts.push(
+          `<a href="${escapeAttr(link.uri)}" target="_blank" rel="noopener" ` +
+            `aria-label="${escapeAttr(name)}"><rect ${rect}/></a>`
         );
+      } else if (typeof link.targetPageIndex === 'number' && link.targetPageIndex >= 0) {
+        parts.push(`<rect ${rect} data-bp-link-page="${link.targetPageIndex + 1}" style="cursor:pointer"/>`);
       }
     }
+    return parts.join('');
   }
 
   /**

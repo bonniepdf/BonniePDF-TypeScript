@@ -244,18 +244,42 @@ function assemblePageSvg(
   const attrs = ['xmlns="http://www.w3.org/2000/svg"', `width="${w}"`, `height="${h}"`, `viewBox="0 0 ${w} ${h}"`];
   if (opts.shapeRendering !== 'auto') attrs.push(`shape-rendering="${opts.shapeRendering}"`);
 
+  const overlays = output.linkOverlays;
+  // Only external anchors are focusable interactive controls; internal
+  // navigation rects are inert and don't force the model switch below.
+  const hasInteractiveLinks = overlays.includes('<a ');
+
   const pageLabel = `${escapeAttr(title)} - page ${output.pageNumber}`;
   let head = '';
+  let groupAttrs = '';
   if (opts.includeAccessibilityMetadata) {
-    attrs.push('role="img"');
-    attrs.push(`aria-label="${pageLabel}"`);
     head = `<title>${escapeXml(title + ' - page ' + output.pageNumber)}</title>`;
+    if (hasInteractiveLinks) {
+      // Model: "labelled image + named links". A page carrying live links cannot
+      // be a single atomic image — ARIA `role="img"` prunes its subtree, so a
+      // focusable <a> inside it is both invisible to AT and an invalid nesting
+      // (axe `nested-interactive`). Instead the root stays an unpruned graphics
+      // container named via `aria-label`; the painted page becomes an
+      // `aria-hidden` visual layer (its accessible name is the root's label,
+      // exactly as the atomic-image model presented it); and the link overlays
+      // ride above it as real, individually-named <a> siblings.
+      attrs.push(`aria-label="${pageLabel}"`);
+      groupAttrs = ' aria-hidden="true"';
+    } else {
+      // No interactive links: keep the whole page as one atomic labelled image.
+      attrs.push('role="img"');
+      attrs.push(`aria-label="${pageLabel}"`);
+    }
   }
 
   const body =
-    `<g id="page-${output.pageNumber}" data-bonniepdf-page="${output.pageNumber}">` +
+    `<g id="page-${output.pageNumber}" data-bonniepdf-page="${output.pageNumber}"${groupAttrs}>` +
     output.canvas.getInnerSvg() +
-    `</g>`;
+    `</g>` +
+    // Overlays sit after (above) the visual group and, crucially, outside it —
+    // so external anchors are valid, focusable, named siblings of the page image
+    // rather than pruned descendants of it.
+    overlays;
 
   return `<svg ${attrs.join(' ')}>${head}${body}</svg>`;
 }

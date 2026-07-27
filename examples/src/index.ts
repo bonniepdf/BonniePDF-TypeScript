@@ -2,7 +2,7 @@ import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
 import { generate as simpleDocument } from './recipes/basics/simple-document';
 import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
-import { generate as margins } from './recipes/basics/margins-and-padding';
+import { generate as margins } from './recipes/basics/margins';
 import { generate as pageSettings } from './recipes/basics/page-settings';
 import { generate as headersFooters } from './recipes/layout/headers-footers';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';

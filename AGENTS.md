@@ -16,7 +16,7 @@ This has three consequences that govern almost every decision in this repo:
 
 1. **Behavioural parity is the contract.** The same logical document produces the same PDF output in both implementations, byte-for-byte where the spec defines bytes (object structure, content streams, XMP, font subsetting), modulo the platform-mandated differences listed below. The shared conformance suite — not the other language's source — is what verifies this. If TS and .NET disagree on output for equivalent input, one of them has a bug against the spec.
 
-2. **The API surface is idiomatic, not transliterated.** TypeScript code must read like TypeScript and .NET code like C#. We do **not** copy the other language's casing, overload style, or naming. A C# `AddRow(TableRow)` overload does not become a TS `addRowRow`; a C# property does not keep its PascalCase in TS. Idiomatic divergence in _spelling_ is expected and correct. Behavioural divergence is a bug. See [`the specification`](the specification) for the conventions that define "idiomatic" here.
+2. **The API surface is idiomatic, not transliterated.** TypeScript code must read like TypeScript and .NET code like C#. We do **not** copy the other language's casing, overload style, or naming. A C# `AddRow(TableRow)` overload does not become a TS `addRowRow`; a C# property does not keep its PascalCase in TS. Idiomatic divergence in _spelling_ is expected and correct. Behavioural divergence is a bug. See [`the shared specification`](the shared specification) for the conventions that define "idiomatic" here.
 
 3. **Features land in lockstep against the spec.** A capability is not "done" until it exists in the spec, in both implementations, and in the shared conformance suite. Adding a feature to one language only is a parity break — flag it, don't ship it silently.
 
@@ -36,18 +36,17 @@ The public API targets the shape a TypeScript developer expects. Authoring code 
 
 - **camelCase everywhere** for properties, methods, and accessors. No PascalCase members on the public surface — ever. (`fontSize`, not `FontFamily`; `children`, not `Children`.)
 - **Options objects over positional overloads.** Constructors and factories take a single typed options object; positional forms are convenience sugar, not the primary surface.
-- **Factory functions as the front door.** `text(...)`, `container(...)`, `table(...)`, `doc(...)` build elements without `new` and without per-property mutation. The underlying classes remain public for power users and parity, but the docs lead with factories.
-- **Uniform fluent configuration.** Every element supports the same `.with*` / configure pattern; fluency is not limited to a privileged few types.
+- **Factory functions as the front door.** `text(...)`, `container(...)`, `table(...)`, `document(...)` build elements without `new` and without per-property mutation. The underlying classes remain public for power users and parity, but the docs lead with factories.
+- **Two tiers, not three.** Factories are the front door; the classes are the escape hatch. The TypeScript fluent builder (`Pdf.create`) and the transliterated static `Extensions/` classes have been **deleted** — do not reintroduce either, and do not "restore parity" by mirroring the C# ones, which are idiomatic there. See §2.4 of the guide.
 - **Forgiving inputs, normalised internally.** Colours accept palette tokens, `Color` instances, or hex strings; spacing accepts a number, a `[h, v]` pair, or a per-side object; enums accept their string-literal union. All are normalised to the canonical value object inside the engine. `ColorPalette` remains the single source of truth for token hex values.
 
-The current code does not yet meet this bar in every place. [`the specification`](the specification) is the authoritative description of the target surface and the migration to it. When you touch public API, move it toward that guide; do not add new surface that violates it.
+The current code does not yet meet this bar in every place. [`the shared specification`](the shared specification) is the authoritative description of the target surface and the migration to it. When you touch public API, move it toward that guide; do not add new surface that violates it.
 
 ## Repository layout
 
 - `core/` — the published `@bonniepdf/core` package (engine + public API). Tests in `core/tests/`.
-- `examples/registry/` — the shared example catalogue (`@bonniepdf/examples`) consumed by the website. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not legacy mutation patterns.
-- `ui-shared/` — components, stores, and `LocalExampleSource` used by the website's live viewer.
-- `docs/` — API specification notes and the refactoring guide.
+- `examples/src/` — the shared example catalogue (`@bonniepdf/examples`) consumed by the website, split into `recipes/`, `showcases/`, and `conformance/`. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not legacy mutation patterns.
+- There is **no `docs/` directory here.** The API refactoring guide lives in the neutral spec repo at [`the shared specification`](the shared specification), and no copy may be made in this repo. `@bonniepdf/ui-shared` lives in its own `BonniePDF` repo, not here.
 
 ## Engineering invariants (spec-level — both implementations honour these)
 
@@ -90,4 +89,4 @@ Encryption (RC4 40/128, AES-256 V5/R6) and PDF/A XMP are **shipped and serialize
 ## When in doubt
 
 - The **spec** is the authority, not the other language's source. If a change here would force a behavioural divergence from the spec (and therefore from .NET), surface it — it likely needs a spec change applied to both implementations.
-- For anything touching the public API shape, consult [`the specification`](the specification) before adding surface.
+- For anything touching the public API shape, consult [`the shared specification`](the shared specification) before adding surface.

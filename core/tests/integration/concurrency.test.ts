@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
-import { withPassword } from '../../src/Extensions/DocumentEncryptionExtensions';
+import { withPassword } from '../../src/Security/EncryptionPresets';
 import { assertValidPdf, assertPdfHasFonts } from '../helpers/test-base';
 
 async function generateDocumentBytes(text: string): Promise<Uint8Array> {

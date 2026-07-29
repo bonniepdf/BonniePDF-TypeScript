@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chartToSvg } from '../../src/Extensions/SvgExportExtensions';
+import { chartToSvg } from '../../src/Export/SvgElementExport';
 import { BarChart } from '../../src/Charts/BarChart';
 import { LineChart } from '../../src/Charts/LineChart';
 import { AreaChart } from '../../src/Charts/AreaChart';

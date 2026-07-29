@@ -1,6 +1,6 @@
 import { BorderedElementBase } from './BorderedElementBase';
-import { IContentContainer } from '../../Fluent/IContentContainer';
-import { LayersDescriptor } from '../../Fluent/Descriptors/LayersDescriptor';
+import { IContentContainer } from '../IContentContainer';
+import { LayersDescriptor } from './LayersDescriptor';
 import { IElement } from '../IElement';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
@@ -9,7 +9,7 @@ import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging
 
 /**
  * A container element that supports padding, background color, and borders.
- * Implements IContentContainer to participate in fluent API chains.
+ * Implements IContentContainer as a single-child wrapper.
  */
 export class Container extends BorderedElementBase implements IContentContainer {
   public child?: IElement;

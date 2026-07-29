@@ -56,6 +56,7 @@ export * from './Security/Models/EncryptionOptions';
 export * from './Security/Permissions/PdfPermissions';
 
 export type { IElement, IStatefulElement } from './Elements/IElement';
+export type { IContentContainer } from './Elements/IContentContainer';
 export { RenderStatus } from './Elements/IElement';
 export * from './Elements/IMargin';
 export * from './Elements/ElementBase';
@@ -71,6 +72,7 @@ export * from './Elements/Layout/BorderedElementBase';
 export * from './Elements/Layout/Container';
 export * from './Elements/Layout/HorizontalStack';
 export * from './Elements/Layout/Layers';
+export * from './Elements/Layout/LayersDescriptor';
 export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';
 
@@ -132,26 +134,6 @@ export * from './Charts/GroupedBarChart';
 export * from './Charts/GroupedBarChartElement';
 export * from './Charts/PieChart';
 
-export * from './Fluent/IContentContainer';
-export * from './Fluent/IComponent';
-export * from './Fluent/ContentSlot';
-export * from './Fluent/Pdf';
-export * from './Fluent/PdfBuilder';
-
-export * from './Fluent/Descriptors/PageDescriptor';
-export * from './Fluent/Descriptors/LayersDescriptor';
-export * from './Fluent/Descriptors/ColumnDescriptor';
-export * from './Fluent/Descriptors/RowDescriptor';
-export * from './Fluent/Descriptors/TableDescriptor';
-export * from './Fluent/Descriptors/TableRowDescriptor';
-export * from './Fluent/Descriptors/TextDescriptor';
-export * from './Fluent/Descriptors/TextSpanDescriptor';
-
-export * from './Fluent/Extensions/ContainerBridgeExtensions';
-export * from './Fluent/Extensions/ContainerElementExtensions';
-export * from './Fluent/Extensions/ContainerStyleExtensions';
-export * from './Fluent/Extensions/DocumentSettingsFluentExtensions';
-
 export * from './Document';
 
 export * from './Typography/StandardFonts';
@@ -199,18 +181,11 @@ export { markDebugSource, debugSourceOf } from './Rendering/DebugSource';
 export { evaluateCompliance, ComplianceSeverity } from './Compliance/ComplianceEvaluator';
 export type { ComplianceFinding, ComplianceReport } from './Compliance/ComplianceEvaluator';
 
-// Extensions (non-Fluent) - some omitted to avoid name conflicts with Fluent API
-export * from './Extensions/DocumentEncryptionExtensions';
-export * from './Extensions/DocumentSettingsExtensions';
-export * from './Extensions/HorizontalStackExtensions';
-export * from './Extensions/ImageExtensions';
-export * from './Extensions/QRCodeExtensions';
-export * from './Extensions/BarcodeExtensions';
-export * from './Extensions/DataMatrixExtensions';
-export * from './Extensions/SvgExportExtensions';
-export * from './Extensions/TableCellExtensions';
-export * from './Extensions/VerticalStackExtensions';
-// TextBlockExtensions omitted - alignLeft/alignCenter/alignRight conflict with ContainerStyleExtensions
+// Presets that write several coupled settings fields at once, and the
+// synchronous element-level SVG exporters.
+export * from './Configuration/DocumentSettingsPresets';
+export * from './Security/EncryptionPresets';
+export * from './Export/SvgElementExport';
 
 export * from './Rendering/RenderContext';
 export * from './Rendering/PageDimensions';

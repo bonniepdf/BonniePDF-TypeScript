@@ -8,7 +8,7 @@ import { Table } from '../../src/Elements/Tables/Table';
 import { PdfSize } from '../../src/Configuration/PdfSize';
 import { PageOrientation } from '../../src/Core/PageOrientation';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
-import { asPdf17 } from '../../src/Extensions/DocumentSettingsExtensions';
+import { asPdf17 } from '../../src/Configuration/DocumentSettingsPresets';
 import { assertValidPdf, assertPdfHasFonts, assertPdfHasPages } from '../helpers/test-base';
 
 describe('MultiPage integration', () => {

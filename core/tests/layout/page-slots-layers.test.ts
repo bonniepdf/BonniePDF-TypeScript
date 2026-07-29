@@ -9,7 +9,6 @@ import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Layers } from '../../src/Elements/Layout/Layers';
 import { Container } from '../../src/Elements/Layout/Container';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
-import { Pdf } from '../../src/Fluent/Pdf';
 import { WatermarkSettings } from '../../src/Configuration/WatermarkSettings';
 
 /**
@@ -118,29 +117,6 @@ describe('this feature page slots (DocumentSettings)', () => {
     const stream = renderPageStream(doc.pages as Page[], doc.settings);
     expect(seen).toContain(1);
     expect(stream).toContain('PAGE1');
-  });
-});
-
-describe('this feature page slots (Fluent API)', () => {
-  it('wires background/foreground from the fluent page descriptor', () => {
-    const doc = Pdf.create(b => {
-      b.page(p => {
-        p.background().child = text('BACKGROUNDMARKER');
-        p.content().child = text('BODYMARKER');
-        p.foreground().child = text('FOREGROUNDMARKER');
-      });
-    }).build();
-
-    expect(doc.settings.pageBackground).toBeDefined();
-    expect(doc.settings.pageForeground).toBeDefined();
-
-    const stream = renderPageStream(doc.pages as Page[], doc.settings);
-    const bg = stream.indexOf('BACKGROUNDMARKER');
-    const body = stream.indexOf('BODYMARKER');
-    const fg = stream.indexOf('FOREGROUNDMARKER');
-    expect(bg).toBeGreaterThanOrEqual(0);
-    expect(bg).toBeLessThan(body);
-    expect(body).toBeLessThan(fg);
   });
 });
 

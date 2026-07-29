@@ -31,7 +31,7 @@ import { HorizontalStack } from '../Elements/Layout/HorizontalStack';
 import { Container } from '../Elements/Layout/Container';
 import { BookmarkItem } from '../Configuration/BookmarkItem';
 import type { IElement } from '../Elements/IElement';
-import type { IContentContainer } from '../Fluent/IContentContainer';
+import type { IContentContainer } from '../Elements/IContentContainer';
 import type { DocumentSettings } from '../Configuration/DocumentSettings';
 
 export class PdfDocumentSerializer {
@@ -684,7 +684,7 @@ export function elementRequiresTwoPassLayout(element: IElement): boolean {
   if (element instanceof VerticalStack) return element.children.some(elementRequiresTwoPassLayout);
   if (element instanceof HorizontalStack) return element.children.some(elementRequiresTwoPassLayout);
   if (element instanceof Container && element.child != null) return elementRequiresTwoPassLayout(element.child);
-  // IContentContainer covers fluent API slots (ContentSlot) that wrap a single child.
+  // IContentContainer covers any remaining single-child wrapper element.
   const asContent = element as Partial<IContentContainer>;
   if (asContent.child != null) return elementRequiresTwoPassLayout(asContent.child);
   return false;

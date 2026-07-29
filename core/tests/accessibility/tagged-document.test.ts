@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../../src/Document';
-import { asPdf17, asPdfA } from '../../src/Extensions/DocumentSettingsExtensions';
+import { asPdf17, asPdfA } from '../../src/Configuration/DocumentSettingsPresets';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { pdfToText } from '../helpers/test-base';
 

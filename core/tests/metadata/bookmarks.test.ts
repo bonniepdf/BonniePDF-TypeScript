@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../../src/Document';
 import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { BookmarkItem } from '../../src/Configuration/BookmarkItem';
-import { addBookmark } from '../../src/Extensions/DocumentSettingsExtensions';
+import { addBookmark } from '../../src/Configuration/DocumentSettingsPresets';
 import { pdfToText } from '../helpers/test-base';
 
 describe('Bookmarks', () => {

@@ -8,7 +8,7 @@ import {
   withPasswords,
   withEncryption128,
   withEncryptionAes256,
-} from '../../src/Extensions/DocumentEncryptionExtensions';
+} from '../../src/Security/EncryptionPresets';
 import { assertValidPdf, pdfToText } from '../helpers/test-base';
 
 describe('Encryption integration', () => {

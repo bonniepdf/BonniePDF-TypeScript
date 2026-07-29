@@ -234,6 +234,7 @@ function findingCard(finding: Finding): Container {
   badge.padding = new Thickness(6, 4, 6, 4);
   badge.backgroundColor = style.badge;
   badge.cornerRadius = 4;
+
   const badgeText = new TextBlock(style.label);
   badgeText.fontName = StandardFonts.HelveticaBold;
   badgeText.fontSize = 9;

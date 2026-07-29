@@ -4,7 +4,7 @@ import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { EncryptionSettings } from '../../src/Security/Models/EncryptionSettings';
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
-import { asPdf17, asPdf20, asPdfA, asPdfA4 } from '../../src/Extensions/DocumentSettingsExtensions';
+import { asPdf17, asPdf20, asPdfA, asPdfA4 } from '../../src/Configuration/DocumentSettingsPresets';
 import { pdfToText } from '../helpers/test-base';
 
 describe('PdfVersion', () => {

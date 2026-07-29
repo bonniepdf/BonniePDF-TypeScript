@@ -405,7 +405,7 @@ export class Document {
       el.applyDefaultStyleIfNotSet(style);
     }
     // Canonical traversal: containers expose their renderable children via
-    // IElement.getChildren() (stacks, Container, ContentSlot, lists, Table).
+    // IElement.getChildren() (stacks, Container, lists, Table).
     for (const child of el.getChildren?.() ?? []) {
       Document.applyStyleToElement(child, style);
     }

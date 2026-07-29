@@ -15,10 +15,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
-  asCell,
-  cellBackground,
-  cellPadding,
-  cellBorder,
+  TableCell,
   PdfAConformance,
   AccessibilityMode,
 } from '@bonniepdf/core';
@@ -472,11 +469,10 @@ export function generate(): Document {
     ratingText.fontSize = 10;
     ratingText.textColor = ratingColor;
     ratingText.alignment = TextAlignment.Center;
-    const ratingCell = cellBorder(
-      cellPadding(cellBackground(asCell(ratingText), ratingBg), 4),
-      ColorPalette.slate[300],
-      0.5
-    );
+    const ratingCell = TableCell.from(ratingText)
+      .withBackground(ratingBg)
+      .withPadding(4)
+      .withBorder(ColorPalette.slate[300], 0.5);
 
     const durText = new TextBlock(movie.duration);
     durText.fontName = StandardFonts.Courier;

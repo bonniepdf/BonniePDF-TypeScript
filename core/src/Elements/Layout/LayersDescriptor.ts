@@ -1,9 +1,9 @@
-import { IElement } from '../../Elements/IElement';
-import { Layers } from '../../Elements/Layout/Layers';
+import { IElement } from '../IElement';
+import { Layers } from './Layers';
 
 /**
- * Fluent builder for the {@link Layers} inline z-stacking primitive, used
- * by `Container.layers(...)`. Layers paint in declaration order: background
+ * Builder for the {@link Layers} inline z-stacking primitive, used by
+ * `Container.layers(...)`. Layers paint in declaration order: background
  * behind, the primary layer in the middle (it defines the flow height), and
  * foreground on top.
  */

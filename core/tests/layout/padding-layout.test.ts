@@ -4,8 +4,6 @@ import { Thickness } from '../../src/Core/Thickness';
 import { ElementBase } from '../../src/Elements/ElementBase';
 import { Container } from '../../src/Elements/Layout/Container';
 import { TableCell } from '../../src/Elements/Tables/TableCell';
-import { ContentSlot } from '../../src/Fluent/ContentSlot';
-import { RenderStatus } from '../../src/Elements/RenderStatus';
 import { PdfSize } from '../../src/Configuration/PdfSize';
 import { RenderContext } from '../../src/Rendering/RenderContext';
 import { MockCanvas } from '../helpers/mock-canvas';
@@ -55,22 +53,6 @@ describe('padding layout', () => {
 
     expect(probe.renderedX).toBe(60);
     expect(probe.renderedWidth).toBe(460);
-    expect(ctx.currentY).toBe(120);
-  });
-
-  it('content slots apply their own margins before rendering children', () => {
-    const ctx = new RenderContext(PdfSize.a4, 50);
-    const probe = new ProbeElement();
-    const slot = new ContentSlot();
-    slot.margin = new Thickness(10, 20, 30, 40);
-    slot.child = probe;
-
-    const status = slot.renderStateful(ctx, 500);
-
-    expect(status).toBe(RenderStatus.Complete);
-    expect(probe.renderedX).toBe(60);
-    expect(probe.renderedWidth).toBe(460);
-    expect(ctx.currentX).toBe(50);
     expect(ctx.currentY).toBe(120);
   });
 });

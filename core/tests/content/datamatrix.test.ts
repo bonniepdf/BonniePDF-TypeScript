@@ -4,9 +4,6 @@ import { DataMatrix } from '../../src/Elements/Shapes/DataMatrix';
 import { DataMatrixEncoder, DataMatrixContentException } from '../../src/Elements/Shapes/DataMatrixEncoder';
 import { ColorPalette } from '../../src/Core/ColorPalette';
 import { SemanticRole } from '../../src/Rendering/Tagging/SemanticRole';
-import { Container } from '../../src/Elements/Layout/Container';
-import { Pdf } from '../../src/Fluent/Pdf';
-import { ContainerElementExtensions, dataMatrix } from '../../src/Fluent/Extensions/ContainerElementExtensions';
 import { pdfToText } from '../helpers/test-base';
 
 // Render a matrix to "#"/"." rows for compact comparison.
@@ -202,34 +199,5 @@ describe('DataMatrix element', () => {
       d.add(dm);
     });
     expect(pdf).toContain('%PDF-');
-  });
-});
-
-describe('DataMatrix - fluent parity', () => {
-  it('the dataMatrix container helper adds a DataMatrix element', () => {
-    const container = new Container();
-    const dm = ContainerElementExtensions.dataMatrix(container, 'FLUENT', 80);
-    expect(dm).toBeInstanceOf(DataMatrix);
-    expect(dm.data).toBe('FLUENT');
-    expect(dm.size).toBe(80);
-  });
-
-  it('the free dataMatrix() function mirrors the static helper', () => {
-    const container = new Container();
-    const dm = dataMatrix(container, 'FREE');
-    expect(dm).toBeInstanceOf(DataMatrix);
-    expect(dm.data).toBe('FREE');
-  });
-
-  it('renders through the fluent Pdf.create builder', () => {
-    const doc = Pdf.create(b => {
-      b.page(p => {
-        ContainerElementExtensions.dataMatrix(p.content(), 'https://www.bonniepdf.dev', 100);
-      });
-    }).build();
-    const pdf = pdfToText(doc.generateBytes());
-    expect(pdf).toContain('%PDF-');
-    expect(pdf).toContain('%%EOF');
-    doc.dispose();
   });
 });

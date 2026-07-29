@@ -5,11 +5,7 @@ import { EncryptionAlgorithm } from '../../src/Security/Models/EncryptionAlgorit
 import { PdfEncryptor } from '../../src/Security/Encryption/pdfEncryptor';
 import { SyncAesCipher } from '../../src/Security/Encryption/syncAesCipher';
 import { PdfVersion } from '../../src/Configuration/PdfVersion';
-import {
-  withPassword,
-  withEncryption128,
-  withEncryptionAes256,
-} from '../../src/Extensions/DocumentEncryptionExtensions';
+import { withPassword, withEncryption128, withEncryptionAes256 } from '../../src/Security/EncryptionPresets';
 import { pdfToText } from '../helpers/test-base';
 
 describe('EncryptionSettings', () => {

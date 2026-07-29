@@ -17,10 +17,7 @@ import {
   BorderColors,
   StandardFonts,
   Placeholders,
-  asCell,
-  cellBackground,
-  cellPadding,
-  cellBorder,
+  TableCell,
   PdfAConformance,
   AccessibilityMode,
 } from '@bonniepdf/core';
@@ -142,11 +139,10 @@ export function generate(): Document {
     statusText.fontSize = 8;
     statusText.textColor = statusColor;
     statusText.alignment = TextAlignment.Center;
-    const statusCell = cellBorder(
-      cellPadding(cellBackground(asCell(statusText), statusBgColor), 4),
-      ColorPalette.slate[300],
-      0.5
-    );
+    const statusCell = TableCell.from(statusText)
+      .withBackground(statusBgColor)
+      .withPadding(4)
+      .withBorder(ColorPalette.slate[300], 0.5);
 
     const idCell = new TextBlock(user.id);
     idCell.fontName = StandardFonts.Courier;

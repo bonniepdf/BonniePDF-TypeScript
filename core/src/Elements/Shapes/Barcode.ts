@@ -1,4 +1,7 @@
 import { ElementBase } from '../ElementBase';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
 import { TextAlignment } from '../Text/TextAlignment';
@@ -19,8 +22,42 @@ const STANDARD_FONT_FAMILY = 'Helvetica';
  * Encoding is pure code with zero dependencies. The bar patterns are identical
  * to the BonniePDF .NET reference implementation for the same input.
  */
+/** Settable properties declared by {@link Barcode} itself. */
+export const BARCODE_OWN_OPTION_KEYS = [
+  'value',
+  'symbology',
+  'altText',
+  'isDecorative',
+  'height',
+  'moduleWidth',
+  'quietZone',
+  'includeTextLabel',
+  'textLabelFontSize',
+  'foregroundColor',
+  'backgroundColor',
+  'drawBackground',
+] as const;
+
+/** The full settable surface, base included. */
+export const BARCODE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...BARCODE_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link Barcode}. */
+export type BarcodeOptions = ElementOptions &
+  Partial<Omit<Pick<Barcode, (typeof BARCODE_OWN_OPTION_KEYS)[number]>, 'foregroundColor' | 'backgroundColor'>> & {
+    /** Bar colour. Accepts a palette token or hex. */
+    foregroundColor?: ColorInput;
+    /** Quiet-zone colour. Accepts a palette token or hex. */
+    backgroundColor?: ColorInput;
+  };
+
 export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The value to encode. Content rules depend on {@link symbology}. */
+  /** Creates a barcode, optionally configured in one expression. */
+  constructor(options?: BarcodeOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   public value = '';
 
   /** The barcode symbology. Defaults to Code 128. */
@@ -56,10 +93,26 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
   public textLabelFontSize = 9;
 
   /** The colour of the bars. Default black. */
-  public foregroundColor: Color = new Color(0, 0, 0);
+  private _foregroundColor: Color = new Color(0, 0, 0);
+
+  /** Bar colour. Accepts a palette token or hex. */
+  public get foregroundColor(): Color {
+    return this._foregroundColor;
+  }
+  public set foregroundColor(value: ColorInput) {
+    this._foregroundColor = toColor(value);
+  }
 
   /** The background colour. Default white (recommended for reliable scanning). */
-  public backgroundColor: Color = new Color(255, 255, 255);
+  private _backgroundColor: Color = new Color(255, 255, 255);
+
+  /** Quiet-zone colour. Accepts a palette token or hex. */
+  public get backgroundColor(): Color {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput) {
+    this._backgroundColor = toColor(value);
+  }
 
   /** Whether to draw the background. Default true. */
   public drawBackground = true;

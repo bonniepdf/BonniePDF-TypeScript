@@ -1,4 +1,4 @@
-import { Table } from './Table';
+import { Table, TABLE_OPTION_KEYS, type TableOptions } from './Table';
 
 /**
  * A **layout grid**: arranges content in weighted columns and aligned rows for
@@ -24,6 +24,12 @@ import { Table } from './Table';
  * `Grid` pins the layout-grid tagging on, so — unlike `Table.presentation` — it can
  * never be flipped back into a data table by mistake.
  */
+/** {@link Grid} shares {@link Table}'s options; it differs only in tagging. */
+export type GridOptions = TableOptions;
+
+/** The full settable surface, identical to {@link Table}. */
+export const GRID_OPTION_KEYS = TABLE_OPTION_KEYS;
+
 export class Grid extends Table {
   /** @inheritdoc — always a layout grid (`Div`), independent of `presentation`. */
   protected override get isLayoutGrid(): boolean {

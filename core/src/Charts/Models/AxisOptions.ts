@@ -1,10 +1,31 @@
+import { applyOptions } from '../../Core/applyOptions';
 /**
  * Options for configuring chart axis display
  */
+/** Settable properties of {@link AxisOptions}. */
+export const AXIS_OPTIONS_OPTION_KEYS = [
+  'prefix',
+  'suffix',
+  'maxValue',
+  'minValue',
+  'stepCount',
+  'legend',
+  'showGridLines',
+  'verticalLegend',
+] as const;
+
+/** Options for {@link AxisOptions}. */
+export type AxisOptionsOptions = Partial<Pick<AxisOptions, (typeof AXIS_OPTIONS_OPTION_KEYS)[number]>>;
+
 export class AxisOptions {
   /**
    * Prefix for value labels (e.g., "£", "$")
    */
+  /** Creates axis options, optionally configured in one expression. */
+  constructor(options?: AxisOptionsOptions) {
+    applyOptions(this, options);
+  }
+
   prefix: string = '';
 
   /**

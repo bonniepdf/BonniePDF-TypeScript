@@ -1,6 +1,32 @@
+import { applyOptions } from '../Core/applyOptions';
 /**
  * Contains metadata information about a PDF document
  */
+/** Settable properties of {@link DocumentMetadata}. */
+export const DOCUMENT_METADATA_OPTION_KEYS = [
+  'title',
+  'author',
+  'subject',
+  'keywords',
+  'creator',
+  'producer',
+  'creationDate',
+  'modifiedDate',
+  'trapped',
+  'customProperties',
+] as const;
+
+/** Options for {@link DocumentMetadata}. */
+export type DocumentMetadataOptions = Partial<
+  Omit<Pick<DocumentMetadata, (typeof DOCUMENT_METADATA_OPTION_KEYS)[number]>, 'customProperties'>
+> & {
+  /**
+   * Custom XMP properties. Accepts a `Map` or a plain record - the record form
+   * is the ergonomic one in an options literal.
+   */
+  customProperties?: Map<string, string> | Record<string, string>;
+};
+
 export class DocumentMetadata {
   /**
    * Creates a new instance of DocumentMetadata with default values
@@ -17,14 +43,27 @@ export class DocumentMetadata {
    * @param author - The author name
    */
   constructor(title: string, author: string);
-  constructor(title?: string, author?: string) {
-    this.title = title;
-    this.author = author;
+  constructor(options: DocumentMetadataOptions);
+  constructor(titleOrOptions?: string | DocumentMetadataOptions, author?: string) {
+    const isPositional = typeof titleOrOptions === 'string' || titleOrOptions === undefined;
+    this.title = isPositional ? (titleOrOptions as string | undefined) : undefined;
+    this.author = isPositional ? author : undefined;
     this.creator = 'BonniePDF';
     this.producer = 'BonniePDF';
     this.creationDate = new Date();
     this.modifiedDate = new Date();
     this.customProperties = new Map();
+
+    if (!isPositional) {
+      const { customProperties, ...rest } = titleOrOptions as DocumentMetadataOptions;
+      applyOptions(this, rest);
+      if (customProperties !== undefined) {
+        // A plain record is the ergonomic form in an options literal; normalise
+        // it to the canonical Map the writer consumes.
+        this.customProperties =
+          customProperties instanceof Map ? customProperties : new Map(Object.entries(customProperties));
+      }
+    }
   }
 
   /**

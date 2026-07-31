@@ -1,4 +1,5 @@
 import { TextElementBase } from '../Text/TextElementBase';
+import { TEXT_ELEMENT_OPTION_KEYS, type TextElementOptions } from '../Text/TextElementOptions';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
@@ -6,6 +7,20 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * Base class for list elements (ordered and unordered) that provides common functionality
  * for item spacing, indentation, and nested list handling.
  */
+/** Settable properties declared by {@link ListElementBase} itself. */
+export const LIST_ELEMENT_OWN_OPTION_KEYS = ['indent', 'itemSpacing'] as const;
+
+/** The full settable surface of a list, text/element bases included. */
+export const LIST_ELEMENT_OPTION_KEYS = [...TEXT_ELEMENT_OPTION_KEYS, ...LIST_ELEMENT_OWN_OPTION_KEYS] as const;
+
+/**
+ * Options common to both list types. Intersects {@link TextElementOptions}.
+ * `items` is synthetic sugar over `addItem` on the concrete lists, not a
+ * property here.
+ */
+export type ListElementOptions = TextElementOptions &
+  Partial<Pick<ListElementBase, (typeof LIST_ELEMENT_OWN_OPTION_KEYS)[number]>>;
+
 export abstract class ListElementBase extends TextElementBase {
   /** Indentation for nested lists (in points) */
   public indent = 20;

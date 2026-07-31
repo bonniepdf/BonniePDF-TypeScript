@@ -1,4 +1,7 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
@@ -11,12 +14,37 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Now supports multiple series with transparency for overlapping areas.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link AreaChart} itself. */
+export const AREA_CHART_OWN_OPTION_KEYS = [
+  'defaultFillOpacity',
+  'defaultLineWidth',
+  'areaColor',
+  'fillOpacity',
+  'lineWidth',
+] as const;
+
+/** The full option surface, bases included. */
+export const AREA_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...AREA_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link AreaChart}. */
+export type AreaChartOptions = CartesianChartOptions &
+  Partial<Omit<Pick<AreaChart, (typeof AREA_CHART_OWN_OPTION_KEYS)[number]>, 'areaColor'>> & {
+    /** areaColor colour. Accepts a palette token or hex. */
+    areaColor?: ColorInput;
+  };
+
 export class AreaChart extends CartesianChartBase {
   private static readonly DEFAULT_AREA_COLOR_HEX = '#4f46e5';
 
   /**
    * Default fill opacity for all series (can be overridden per series via Style).
    */
+  /** Creates a AreaChart, optionally configured in one expression. */
+  constructor(options?: AreaChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   defaultFillOpacity: number = 0.3;
 
   /**
@@ -27,7 +55,15 @@ export class AreaChart extends CartesianChartBase {
   /**
    * Color for the area fill and line (backward compatibility for single-series charts).
    */
-  areaColor: Color = Color.fromHex(AreaChart.DEFAULT_AREA_COLOR_HEX);
+  private _areaColor: Color = Color.fromHex(AreaChart.DEFAULT_AREA_COLOR_HEX);
+
+  /** Area colour. Accepts a palette token or hex. */
+  public get areaColor(): Color {
+    return this._areaColor;
+  }
+  public set areaColor(value: ColorInput) {
+    this._areaColor = toColor(value);
+  }
 
   /**
    * Opacity for the area fill (backward compatibility for single-series charts).

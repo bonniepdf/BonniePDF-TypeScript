@@ -2,24 +2,47 @@ import { ElementBase } from '../ElementBase';
 import { IBackgroundColor } from './IBackgroundColor';
 import { Border, BorderColors, Color } from '../../Core';
 import { RenderContext } from '../IElement';
+import { toBorder, type BorderInput } from '../../Normalize/toBorder';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 
 /**
  * Base class for elements with borders and background colors.
  * Provides common functionality for drawing borders and backgrounds.
  */
 export abstract class BorderedElementBase extends ElementBase implements IBackgroundColor {
+  private _border: Border = new Border(0);
+  private _backgroundColor?: Color;
+
   /**
-   * Border widths for each side of the element
+   * Border widths for each side of the element.
+   *
+   * Reads as the canonical {@link Border}; accepts a uniform width or a
+   * per-side object on write (`the specification` §4A.3). Colour is set
+   * through {@link borderColors} - this setter never writes it.
    */
-  public border: Border;
+  public get border(): Border {
+    return this._border;
+  }
+  public set border(value: BorderInput) {
+    this._border = toBorder(value).border;
+  }
+
   /**
    * Border colors for each side of the element
    */
   public borderColors: BorderColors;
+
   /**
-   * Background color for this element (null = transparent)
+   * Background color for this element (undefined = transparent).
+   *
+   * Accepts a palette token (`'slate-100'`) or hex (`'#ff00aa'`) on write.
    */
-  public backgroundColor?: Color;
+  public get backgroundColor(): Color | undefined {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput | undefined) {
+    this._backgroundColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Corner radius for rounded rectangles. 0 = sharp corners (default).
    */
@@ -27,7 +50,6 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
 
   constructor() {
     super();
-    this.border = new Border(0);
     this.borderColors = new BorderColors();
     this.cornerRadius = 0;
   }

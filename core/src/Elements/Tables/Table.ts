@@ -1,4 +1,10 @@
 import { BorderedElementBase } from '../Layout/BorderedElementBase';
+import {
+  BORDERED_ELEMENT_OPTION_KEYS,
+  applyBorderedElementOptions,
+  type BorderedElementOptions,
+} from '../Layout/BorderedElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { IElement, RenderStatus, RenderContext } from '../IElement';
 import { TableRow } from './TableRow';
 import { TableCell } from './TableCell';
@@ -14,6 +20,64 @@ import { beginChildTag, endChildTag, ChildTagToken } from '../../Rendering/Taggi
 /**
  * A table element with support for column weights, cell padding, borders, headers, and footers
  */
+/** Settable properties declared by {@link Table} itself. */
+export const TABLE_OWN_OPTION_KEYS = [
+  'presentation',
+  'cellPadding',
+  'repeatHeadersOnNewPage',
+  'showFootersOnAllPages',
+  'headerBackgroundColor',
+  'headerTextColor',
+  'footerBackgroundColor',
+  'footerTextColor',
+  'rowBackgroundColor',
+  'rowTextColor',
+] as const;
+
+/** The full settable *property* surface of a table, bases included. */
+export const TABLE_OPTION_KEYS = [...BORDERED_ELEMENT_OPTION_KEYS, ...TABLE_OWN_OPTION_KEYS] as const;
+
+type TableOwnKey = (typeof TABLE_OWN_OPTION_KEYS)[number];
+
+type TableColorKey =
+  | 'headerBackgroundColor'
+  | 'headerTextColor'
+  | 'footerBackgroundColor'
+  | 'footerTextColor'
+  | 'rowBackgroundColor'
+  | 'rowTextColor';
+
+/**
+ * Options for {@link Table}. Intersects {@link BorderedElementOptions}.
+ *
+ * `columns`, `rows`, `header` and `footer` are synthetic sugar, not properties:
+ * column weights are constructor-only (`columnWeights` is private readonly), and
+ * rows/header/footer route through `addRow` / `addHeader` / `addFooter`.
+ */
+export type TableOptions = BorderedElementOptions &
+  Partial<Omit<Pick<Table, TableOwnKey>, TableColorKey>> & {
+    /** Header row fill. Accepts a palette token or hex. */
+    headerBackgroundColor?: ColorInput;
+    /** Header row text colour. Accepts a palette token or hex. */
+    headerTextColor?: ColorInput;
+    /** Footer row fill. Accepts a palette token or hex. */
+    footerBackgroundColor?: ColorInput;
+    /** Footer row text colour. Accepts a palette token or hex. */
+    footerTextColor?: ColorInput;
+    /** Body row fill. Accepts a palette token or hex. */
+    rowBackgroundColor?: ColorInput;
+    /** Body row text colour. Accepts a palette token or hex. */
+    rowTextColor?: ColorInput;
+    /** Relative column weights, e.g. `[1, 2, 1]`. Constructor-only sugar. */
+    columns?: number[];
+    /** Body rows to add, in order. Sugar over {@link Table.addRow}. */
+    rows?: TableRow[];
+    /** Header row. Sugar over {@link Table.addHeader}. */
+    header?: TableRow;
+    /** Footer row. Sugar over {@link Table.addFooter}. */
+    footer?: TableRow;
+  };
+
 export class Table extends BorderedElementBase implements IRoleProvider {
   /**
    * When `true`, the table is a **layout (presentation) table**: it arranges
@@ -58,9 +122,29 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   private headersPending = true;
   private taggedHeaderEmitted = false;
 
-  constructor(...columnWeights: number[]) {
+  /** Creates a table with the given relative column weights, e.g. `new Table(1, 2, 1)`. */
+  constructor(...columnWeights: number[]);
+  /** Creates a table configured in one expression. */
+  constructor(options: TableOptions);
+  constructor(...args: number[] | [TableOptions]) {
     super();
-    this.columnWeights = columnWeights;
+
+    // Dispatch (`09a §5`): the rest-param weight form is all-numbers; the sole
+    // non-array object argument is the options bag. Everything else is weights.
+    const first = args[0];
+    const isOptions = args.length === 1 && typeof first === 'object' && first !== null && !Array.isArray(first);
+
+    if (!isOptions) {
+      this.columnWeights = args as number[];
+      return;
+    }
+
+    const { columns, rows, header, footer, ...styleOptions } = first as TableOptions;
+    this.columnWeights = columns ?? [];
+    applyBorderedElementOptions(this, styleOptions);
+    if (header !== undefined) this.addHeader(header);
+    if (footer !== undefined) this.addFooter(footer);
+    for (const row of rows ?? []) this.addRow(row);
   }
 
   /**
@@ -78,27 +162,75 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   /**
    * Default background color for header rows
    */
-  public headerBackgroundColor?: Color;
+  private _headerBackgroundColor?: Color;
+
+  /** Header row fill. Accepts a palette token or hex. */
+  public get headerBackgroundColor(): Color | undefined {
+    return this._headerBackgroundColor;
+  }
+  public set headerBackgroundColor(value: ColorInput | undefined) {
+    this._headerBackgroundColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Default text color for header rows
    */
-  public headerTextColor?: Color;
+  private _headerTextColor?: Color;
+
+  /** Header row text colour. Accepts a palette token or hex. */
+  public get headerTextColor(): Color | undefined {
+    return this._headerTextColor;
+  }
+  public set headerTextColor(value: ColorInput | undefined) {
+    this._headerTextColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Default background color for footer rows
    */
-  public footerBackgroundColor?: Color;
+  private _footerBackgroundColor?: Color;
+
+  /** Footer row fill. Accepts a palette token or hex. */
+  public get footerBackgroundColor(): Color | undefined {
+    return this._footerBackgroundColor;
+  }
+  public set footerBackgroundColor(value: ColorInput | undefined) {
+    this._footerBackgroundColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Default text color for footer rows
    */
-  public footerTextColor?: Color;
+  private _footerTextColor?: Color;
+
+  /** Footer row text colour. Accepts a palette token or hex. */
+  public get footerTextColor(): Color | undefined {
+    return this._footerTextColor;
+  }
+  public set footerTextColor(value: ColorInput | undefined) {
+    this._footerTextColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Default background color for data rows
    */
-  public rowBackgroundColor?: Color;
+  private _rowBackgroundColor?: Color;
+
+  /** Body row fill. Accepts a palette token or hex. */
+  public get rowBackgroundColor(): Color | undefined {
+    return this._rowBackgroundColor;
+  }
+  public set rowBackgroundColor(value: ColorInput | undefined) {
+    this._rowBackgroundColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * Default background color for data rows
    */
-  public rowTextColor?: Color;
+  private _rowTextColor?: Color;
+
+  /** Body row text colour. Accepts a palette token or hex. */
+  public get rowTextColor(): Color | undefined {
+    return this._rowTextColor;
+  }
+  public set rowTextColor(value: ColorInput | undefined) {
+    this._rowTextColor = value === undefined ? undefined : toColor(value);
+  }
 
   /** Adds a header row to the table. */
   public addHeader(...elements: IElement[]): void;

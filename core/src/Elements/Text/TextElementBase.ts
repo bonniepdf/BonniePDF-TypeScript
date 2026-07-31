@@ -6,6 +6,15 @@ import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 import { TextDecoration } from './TextDecoration';
 import { DecorationStyle } from './DecorationStyle';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import {
+  toTextDecoration,
+  toDecorationStyle,
+  toFontWeight,
+  type TextDecorationInput,
+  type DecorationStyleInput,
+  type FontWeightInput,
+} from '../../Normalize/toEnum';
 import { TextStyle } from './TextStyle';
 
 /**
@@ -78,8 +87,8 @@ export abstract class TextElementBase extends ElementBase {
   public get textColor(): Color {
     return this._textColor ?? Color.black;
   }
-  public set textColor(value: Color) {
-    this._textColor = value;
+  public set textColor(value: ColorInput) {
+    this._textColor = toColor(value);
   }
 
   /**
@@ -89,14 +98,21 @@ export abstract class TextElementBase extends ElementBase {
   public get textDecoration(): TextDecoration {
     return this._textDecoration ?? TextDecoration.None;
   }
-  public set textDecoration(value: TextDecoration) {
-    this._textDecoration = value;
+  public set textDecoration(value: TextDecorationInput) {
+    this._textDecoration = toTextDecoration(value);
   }
 
+  private _decorationColor?: Color;
+
   /**
-   * Colour of the decoration lines. Null = use {@link textColor} (pre-G-39 behaviour).
+   * Colour of the decoration lines. Undefined = use {@link textColor} (pre-G-39 behaviour).
    */
-  public decorationColor?: Color;
+  public get decorationColor(): Color | undefined {
+    return this._decorationColor;
+  }
+  public set decorationColor(value: ColorInput | undefined) {
+    this._decorationColor = value === undefined ? undefined : toColor(value);
+  }
 
   /**
    * Thickness of the decoration lines in points. Null = the default derived from
@@ -116,10 +132,17 @@ export abstract class TextElementBase extends ElementBase {
    */
   public wordSpacing = 0;
 
+  private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
+
   /**
    * Line style for decorations (solid/wavy/dashed/dotted) - this feature. Default solid.
    */
-  public decorationStyle: DecorationStyle = DecorationStyle.Solid;
+  public get decorationStyle(): DecorationStyle {
+    return this._decorationStyle;
+  }
+  public set decorationStyle(value: DecorationStyleInput) {
+    this._decorationStyle = toDecorationStyle(value);
+  }
 
   /**
    * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
@@ -160,8 +183,8 @@ export abstract class TextElementBase extends ElementBase {
     return this._fontWeight;
   }
 
-  public set fontWeight(value: FontWeight) {
-    this._fontWeight = value;
+  public set fontWeight(value: FontWeightInput) {
+    this._fontWeight = toFontWeight(value);
     this._fontExplicit = true;
     this.resolveFontName();
   }

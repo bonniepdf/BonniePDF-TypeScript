@@ -114,7 +114,9 @@ export class Color {
   // by shade: `ColorPalette.red[500]`. `Color` is just the RGBA primitive.
 
   /**
-   * Creates a Color from a hex string (e.g., "FF0000" or "#FF0000")
+   * Creates a Color from a hex string (e.g., "FF0000" or "#FF0000").
+   * Any input that is not a well-formed 3/4/6/8-digit hex value yields
+   * {@link Color.black}.
    */
   static fromHex(hex: string): Color {
     if (!hex || hex.trim().length === 0) return Color.black;
@@ -129,6 +131,12 @@ export class Color {
     }
 
     if (h.length !== 6 && h.length !== 8) return Color.black;
+
+    // `parseInt` returns NaN for non-hex digits rather than throwing, so the
+    // try/catch below cannot see it. Without this guard a same-length but
+    // non-hex string (e.g. "gg0000") produces NaN channels, which reach the
+    // content stream as "NaN NaN NaN rg" and corrupt the PDF.
+    if (!/^[0-9a-fA-F]+$/.test(h)) return Color.black;
 
     try {
       const r = parseInt(h.substring(0, 2), 16);

@@ -1,4 +1,6 @@
 import { ElementBase } from '../ElementBase';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { RenderContext } from '../../Rendering/RenderContext';
 
 /**
@@ -18,6 +20,15 @@ import { RenderContext } from '../../Rendering/RenderContext';
  * doc.add(new SectionLink('See Appendix B', 'appendix-b'));
  * ```
  */
+/** Settable properties declared by {@link Section} itself. */
+export const SECTION_OWN_OPTION_KEYS = ['anchorId'] as const;
+
+/** The full settable surface, base included. */
+export const SECTION_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...SECTION_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link Section}. Intersects {@link ElementOptions}. */
+export type SectionOptions = ElementOptions & Partial<Pick<Section, 'anchorId'>>;
+
 export class Section extends ElementBase {
   /**
    * The unique anchor identifier. A {@link SectionLink} or {@link PageNumberOf}
@@ -29,11 +40,18 @@ export class Section extends ElementBase {
    * Creates a new named anchor.
    * @param anchorId - The unique identifier links and page references target.
    */
-  constructor(anchorId: string) {
+  /** Creates a named anchor, optionally with options. */
+  constructor(anchorId: string, options?: SectionOptions);
+  /** Options-only form; `anchorId` is required either way. */
+  constructor(options: SectionOptions & { anchorId: string });
+  constructor(idOrOptions: string | (SectionOptions & { anchorId: string }), options?: SectionOptions) {
     super();
+    const isPositional = typeof idOrOptions === 'string';
+    const anchorId = isPositional ? idOrOptions : idOrOptions?.anchorId;
     if (!anchorId || anchorId === '') {
       throw new Error('Section anchorId cannot be null or empty');
     }
+    applyOptions(this, isPositional ? options : idOrOptions);
     this.anchorId = anchorId;
   }
 

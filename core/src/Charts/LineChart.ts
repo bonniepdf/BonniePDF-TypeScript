@@ -1,4 +1,7 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartSeries } from './Models/ChartSeries';
 import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
@@ -10,6 +13,26 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Now supports multiple series for comparing datasets.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link LineChart} itself. */
+export const LINE_CHART_OWN_OPTION_KEYS = [
+  'defaultLineWidth',
+  'defaultShowMarkers',
+  'defaultMarkerRadius',
+  'lineColor',
+  'lineWidth',
+  'showDataPointMarkers',
+] as const;
+
+/** The full option surface, bases included. */
+export const LINE_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LINE_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link LineChart}. */
+export type LineChartOptions = CartesianChartOptions &
+  Partial<Omit<Pick<LineChart, (typeof LINE_CHART_OWN_OPTION_KEYS)[number]>, 'lineColor'>> & {
+    /** lineColor colour. Accepts a palette token or hex. */
+    lineColor?: ColorInput;
+  };
+
 export class LineChart extends CartesianChartBase {
   private static readonly DEFAULT_LINE_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DATA_POINT_RADIUS = 5;
@@ -17,6 +40,12 @@ export class LineChart extends CartesianChartBase {
   /**
    * Default line width for all series (can be overridden per series via Style).
    */
+  /** Creates a LineChart, optionally configured in one expression. */
+  constructor(options?: LineChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   defaultLineWidth: number = 2;
 
   /**
@@ -32,7 +61,15 @@ export class LineChart extends CartesianChartBase {
   /**
    * Default color for single-series charts (backward compatibility).
    */
-  lineColor: Color = Color.fromHex(LineChart.DEFAULT_LINE_COLOR_HEX);
+  private _lineColor: Color = Color.fromHex(LineChart.DEFAULT_LINE_COLOR_HEX);
+
+  /** Line colour. Accepts a palette token or hex. */
+  public get lineColor(): Color {
+    return this._lineColor;
+  }
+  public set lineColor(value: ColorInput) {
+    this._lineColor = toColor(value);
+  }
 
   /**
    * Width of the line stroke for single-series charts (backward compatibility).

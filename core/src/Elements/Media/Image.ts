@@ -3,6 +3,9 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { ImageInfo } from '../../Rendering/Images/ImageInfo';
 import { ImageLoader } from '../../Rendering/Images/ImageLoader';
 import { ImageFitMode } from './ImageFitMode';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toImageFitMode, type ImageFitModeInput } from '../../Normalize/toEnum';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
@@ -10,8 +13,41 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 /**
  * An image element that displays JPEG or PNG images in the PDF
  */
+/** Settable properties declared by {@link Image} itself. */
+export const IMAGE_OWN_OPTION_KEYS = [
+  'filePath',
+  'imageData',
+  'altText',
+  'isDecorative',
+  'width',
+  'height',
+  'fitMode',
+  'maintainAspectRatio',
+] as const;
+
+/** The full settable surface, base included. */
+export const IMAGE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...IMAGE_OWN_OPTION_KEYS] as const;
+
+/**
+ * Options for {@link Image}.
+ *
+ * `filePath` and `imageData` are mutually exclusive sources; supply one.
+ * `filePath` is Node-only (`05 §4`); `imageData` is universal.
+ */
+export type ImageOptions = ElementOptions &
+  Partial<Omit<Pick<Image, (typeof IMAGE_OWN_OPTION_KEYS)[number]>, 'fitMode'>> & {
+    /** How the image fills its box. Accepts `'contain' | 'cover' | 'fill' | 'fit-height' | 'actual-size'`. */
+    fitMode?: ImageFitModeInput;
+  };
+
 export class Image extends ElementBase implements IRoleProvider, IAltTextProvider {
   private cachedInfo: ImageInfo | undefined;
+
+  /** Creates an image, optionally configured in one expression. */
+  constructor(options?: ImageOptions) {
+    super();
+    applyOptions(this, options);
+  }
 
   /**
    * Path to image file (mutually exclusive with imageData)
@@ -56,7 +92,15 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   /**
    * How to fit the image within bounds
    */
-  fitMode: ImageFitMode = ImageFitMode.Contain;
+  private _fitMode: ImageFitMode = ImageFitMode.Contain;
+
+  /** How the image fills its box. Accepts the enum or a token like `'cover'`. */
+  public get fitMode(): ImageFitMode {
+    return this._fitMode;
+  }
+  public set fitMode(value: ImageFitModeInput) {
+    this._fitMode = toImageFitMode(value);
+  }
 
   /**
    * Whether to maintain aspect ratio (ignored for Fill mode)

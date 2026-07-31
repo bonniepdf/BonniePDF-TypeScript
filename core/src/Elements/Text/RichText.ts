@@ -1,4 +1,7 @@
 import { ElementBase } from '../ElementBase';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toTextAlignment, type TextAlignmentInput } from '../../Normalize/toEnum';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
@@ -18,6 +21,26 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * Text spans with different fonts, sizes, colors, weights, and decorations flow together
  * with automatic word wrapping across span boundaries.
  */
+/** Settable properties declared by {@link RichText} itself. */
+export const RICH_TEXT_OWN_OPTION_KEYS = [
+  'alignment',
+  'defaultStyle',
+  'minLinesBeforeBreak',
+  'minLinesAfterBreak',
+] as const;
+
+/** The full settable surface, base included. */
+export const RICH_TEXT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...RICH_TEXT_OWN_OPTION_KEYS] as const;
+
+type RichTextOwnKey = (typeof RICH_TEXT_OWN_OPTION_KEYS)[number];
+
+/** Options for {@link RichText}. Intersects {@link ElementOptions}. */
+export type RichTextOptions = ElementOptions &
+  Partial<Omit<Pick<RichText, RichTextOwnKey>, 'alignment'>> & {
+    /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+    alignment?: TextAlignmentInput;
+  };
+
 export class RichText extends ElementBase implements IStatefulElement, IRoleProvider {
   /**
    * RichText renders one flowing paragraph, so it tags as /P. Without a role
@@ -35,7 +58,15 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   private lastLineRendered = -1;
 
   /** Text alignment for the paragraph. */
-  public alignment: TextAlignment = TextAlignment.Left;
+  private _alignment: TextAlignment = TextAlignment.Left;
+
+  /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+  public get alignment(): TextAlignment {
+    return this._alignment;
+  }
+  public set alignment(value: TextAlignmentInput) {
+    this._alignment = toTextAlignment(value);
+  }
 
   /**
    * Default style inherited by all spans. Span-level styles override these values.
@@ -47,6 +78,18 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
   /** Minimum number of lines that must appear after a page break (widow control). */
   public minLinesAfterBreak = 2;
+
+  /**
+   * Creates a rich-text block, optionally configured in one expression.
+   *
+   * ```typescript
+   * new RichText({ alignment: 'justify', defaultStyle: new TextStyle({ fontSize: 11 }) });
+   * ```
+   */
+  constructor(options?: RichTextOptions) {
+    super();
+    applyOptions(this, options);
+  }
 
   // --- Builder API ---
 

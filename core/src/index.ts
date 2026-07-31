@@ -4,6 +4,9 @@ export * from './Core/Size';
 export * from './Core/Point';
 export * from './Core/Color';
 export * from './Core/ColorPalette';
+
+// Forgiving-input normalisation + the token grammar (spec 06 §4, §4A).
+export * from './Normalize';
 export * from './Core/Diagnostics';
 export * from './Core/Border';
 export * from './Core/BorderStyle';
@@ -72,6 +75,12 @@ export * from './Elements/Layout/BorderedElementBase';
 export * from './Elements/Layout/Container';
 export * from './Elements/Layout/HorizontalStack';
 export * from './Elements/Layout/Layers';
+// Options types for the element hierarchy (spec 09a Phase 2.B).
+export * from './Elements/ElementOptions';
+export * from './Elements/Layout/BorderedElementOptions';
+export * from './Elements/Text/TextElementOptions';
+// Layout option types (spec 09a Phase 2.E) are exported from their own modules
+// alongside the classes, so no extra barrel lines are needed here.
 export * from './Elements/Layout/LayersDescriptor';
 export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';

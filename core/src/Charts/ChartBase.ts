@@ -1,4 +1,5 @@
 import { ICanvas } from '../Drawing/ICanvas';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartData } from './Models/ChartData';
 import { Color } from '../Core/Color';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
@@ -9,6 +10,23 @@ import { StandardFonts } from '../Typography/StandardFonts';
  * using the ICanvas interface. This ensures charts can be rendered to any backend
  * (PDF, SVG, etc.) without modification.
  */
+/** Settable properties declared by {@link ChartBase} itself. */
+export const CHART_BASE_OPTION_KEYS = [
+  'width',
+  'height',
+  'backgroundColor',
+  'stretchToFit',
+  'svgShapeRendering',
+] as const;
+
+/** Options common to every chart. */
+export type ChartBaseOptions = Partial<
+  Omit<Pick<ChartBase, (typeof CHART_BASE_OPTION_KEYS)[number]>, 'backgroundColor'>
+> & {
+  /** Background fill. Accepts a palette token or hex. */
+  backgroundColor?: import('../Core/Color').Color | ColorInput;
+};
+
 export abstract class ChartBase {
   // Title styling constants (matching SVG chart implementation)
   private static readonly TITLE_FONT_SIZE = 20;
@@ -31,7 +49,15 @@ export abstract class ChartBase {
    * When null, no background is drawn, allowing the chart to blend with document content.
    * Set to Color.White for standalone chart images.
    */
-  backgroundColor: Color | undefined;
+  private _backgroundColor: Color | undefined;
+
+  /** Background fill. Accepts a palette token or hex; undefined = transparent. */
+  public get backgroundColor(): Color | undefined {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput | undefined) {
+    this._backgroundColor = value === undefined ? undefined : toColor(value);
+  }
 
   /**
    * When true, the chart will stretch to fill the container width.

@@ -1,9 +1,24 @@
+import { applyOptions } from '../../Core/applyOptions';
 import { PdfPermissions } from '../Permissions/PdfPermissions';
 import { EncryptionAlgorithm } from './EncryptionAlgorithm';
 
 /**
  * Settings for PDF document encryption.
  */
+/** Settable properties of {@link EncryptionSettings}. */
+export const ENCRYPTION_SETTINGS_OPTION_KEYS = [
+  'algorithm',
+  'userPassword',
+  'ownerPassword',
+  'permissions',
+  'encryptMetadata',
+] as const;
+
+/** Options for {@link EncryptionSettings}. */
+export type EncryptionSettingsOptions = Partial<
+  Pick<EncryptionSettings, (typeof ENCRYPTION_SETTINGS_OPTION_KEYS)[number]>
+>;
+
 export class EncryptionSettings {
   /**
    * Gets or sets the encryption algorithm to use.
@@ -34,12 +49,14 @@ export class EncryptionSettings {
    */
   public encryptMetadata: boolean;
 
-  constructor() {
+  /** Creates encryption settings, optionally configured in one expression. */
+  constructor(options?: EncryptionSettingsOptions) {
     this.algorithm = EncryptionAlgorithm.RC4_128;
     this.userPassword = '';
     this.ownerPassword = '';
     this.permissions = PdfPermissions.All;
     this.encryptMetadata = true;
+    applyOptions(this, options);
   }
 
   /**

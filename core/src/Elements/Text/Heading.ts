@@ -3,6 +3,8 @@ import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { applyOptions } from '../../Core/applyOptions';
+import { TEXT_BLOCK_OPTION_KEYS, type TextBlockOptions } from './TextBlock';
 
 /**
  * A text block that registers itself as a heading in the Table of Contents when rendered.
@@ -10,6 +12,21 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * in the RenderContext.TocEntries dictionary so that a VisualToc
  * can display the correct page reference.
  */
+/** Settable properties declared by {@link Heading} itself. */
+export const HEADING_OWN_OPTION_KEYS = ['tocIdentifier', 'anchorId', 'level'] as const;
+
+/** The full settable surface of a heading, bases included (27 properties). */
+export const HEADING_OPTION_KEYS = [...TEXT_BLOCK_OPTION_KEYS, ...HEADING_OWN_OPTION_KEYS] as const;
+
+type HeadingOwnKey = (typeof HEADING_OWN_OPTION_KEYS)[number];
+
+/**
+ * Options for {@link Heading} - the deepest options chain in the library,
+ * intersecting {@link TextBlockOptions} (which itself intersects the text and
+ * element bases).
+ */
+export type HeadingOptions = TextBlockOptions & Partial<Pick<Heading, HeadingOwnKey>>;
+
 export class Heading extends TextBlock implements IStatefulElement {
   /**
    * Gets or sets the unique identifier used to look up this heading in the TOC entries dictionary.
@@ -51,16 +68,21 @@ export class Heading extends TextBlock implements IStatefulElement {
     }
   }
 
-  constructor();
-
+  /** Creates a heading, optionally with its text. */
+  constructor(text?: string);
   /**
-   * Initializes a new instance of Heading with the specified text.
-   * @param text - The heading text to display
+   * Creates a heading configured in one expression.
+   *
+   * ```typescript
+   * new Heading({ text: 'Hello', level: 1, fontSize: 24, textColor: 'slate-800' });
+   * ```
    */
-  constructor(text: string);
-
-  constructor(text?: string) {
-    super(text);
+  constructor(options: HeadingOptions);
+  /** Convenience: the text as a positional payload, plus options. */
+  constructor(text: string, options?: HeadingOptions);
+  constructor(textOrOptions?: string | HeadingOptions, options?: HeadingOptions) {
+    super(typeof textOrOptions === 'string' ? textOrOptions : undefined);
+    applyOptions(this, typeof textOrOptions === 'string' ? options : textOrOptions);
   }
 
   /**

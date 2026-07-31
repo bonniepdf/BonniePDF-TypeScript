@@ -1,4 +1,7 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
@@ -11,6 +14,25 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Now supports multiple series for comparing datasets.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link LollipopChart} itself. */
+export const LOLLIPOP_CHART_OWN_OPTION_KEYS = [
+  'defaultStemWidth',
+  'defaultHeadRadius',
+  'lollipopColor',
+  'stemWidth',
+  'headRadius',
+] as const;
+
+/** The full option surface, bases included. */
+export const LOLLIPOP_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LOLLIPOP_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link LollipopChart}. */
+export type LollipopChartOptions = CartesianChartOptions &
+  Partial<Omit<Pick<LollipopChart, (typeof LOLLIPOP_CHART_OWN_OPTION_KEYS)[number]>, 'lollipopColor'>> & {
+    /** lollipopColor colour. Accepts a palette token or hex. */
+    lollipopColor?: ColorInput;
+  };
+
 export class LollipopChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_HEAD_RADIUS_VALUE = 8;
@@ -18,6 +40,12 @@ export class LollipopChart extends CartesianChartBase {
   /**
    * Default stem width for all series (can be overridden per series via Style).
    */
+  /** Creates a LollipopChart, optionally configured in one expression. */
+  constructor(options?: LollipopChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   defaultStemWidth: number = 2;
 
   /**
@@ -28,7 +56,15 @@ export class LollipopChart extends CartesianChartBase {
   /**
    * Color for the lollipop stems and heads (backward compatibility).
    */
-  lollipopColor: Color = Color.fromHex(LollipopChart.DEFAULT_COLOR_HEX);
+  private _lollipopColor: Color = Color.fromHex(LollipopChart.DEFAULT_COLOR_HEX);
+
+  /** Lollipop colour. Accepts a palette token or hex. */
+  public get lollipopColor(): Color {
+    return this._lollipopColor;
+  }
+  public set lollipopColor(value: ColorInput) {
+    this._lollipopColor = toColor(value);
+  }
 
   /**
    * Width of the stem line (backward compatibility).

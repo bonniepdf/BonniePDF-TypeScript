@@ -1,4 +1,11 @@
 import { BorderedElementBase } from '../Layout/BorderedElementBase';
+import {
+  BORDERED_ELEMENT_OPTION_KEYS,
+  applyBorderedElementOptions,
+  type BorderedElementOptions,
+} from '../Layout/BorderedElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
 import { IElement } from '../IElement';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Thickness } from '../../Core/Thickness';
@@ -11,15 +18,54 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 /**
  * A table cell with support for custom styling, background color, and padding overrides
  */
+/** Settable properties declared by {@link TableCell} itself. */
+export const TABLE_CELL_OWN_OPTION_KEYS = ['content', 'textColor', 'padding', 'columnSpan', 'isHeader'] as const;
+
+/** The full settable surface of a cell, bases included. */
+export const TABLE_CELL_OPTION_KEYS = [...BORDERED_ELEMENT_OPTION_KEYS, ...TABLE_CELL_OWN_OPTION_KEYS] as const;
+
+type TableCellOwnKey = (typeof TABLE_CELL_OWN_OPTION_KEYS)[number];
+
+/** Options for {@link TableCell}. Intersects {@link BorderedElementOptions}. */
+export type TableCellOptions = BorderedElementOptions &
+  Partial<Omit<Pick<TableCell, TableCellOwnKey>, 'textColor' | 'padding'>> & {
+    /** Cell text colour. Accepts a palette token or hex. */
+    textColor?: ColorInput;
+    /** Cell padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
+    padding?: ThicknessInput;
+  };
+
 export class TableCell extends BorderedElementBase implements IRoleProvider {
   /** The content element to display in this cell */
   public content!: IElement;
 
+  /** Creates a cell, optionally configured in one expression. */
+  constructor(options?: TableCellOptions) {
+    super();
+    applyBorderedElementOptions(this, options);
+  }
+
   /** TextBlock color for this cell */
-  public textColor?: Color;
+  private _textColor?: Color;
+
+  /** Cell text colour. Accepts a palette token or hex. */
+  public get textColor(): Color | undefined {
+    return this._textColor;
+  }
+  public set textColor(value: ColorInput | undefined) {
+    this._textColor = value === undefined ? undefined : toColor(value);
+  }
 
   /** Custom padding for this cell (overrides table default if set) */
-  public padding?: Thickness;
+  private _padding?: Thickness;
+
+  /** Cell padding. Undefined falls back to the row, then the table's `cellPadding`. */
+  public get padding(): Thickness | undefined {
+    return this._padding;
+  }
+  public set padding(value: ThicknessInput | undefined) {
+    this._padding = value === undefined ? undefined : toThickness(value);
+  }
 
   /** Number of columns this cell spans (default: 1) */
   public columnSpan = 1;

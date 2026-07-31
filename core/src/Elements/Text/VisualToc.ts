@@ -1,4 +1,7 @@
 import { TextAlignment } from './TextAlignment';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { ElementBase } from '../ElementBase';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
@@ -17,6 +20,19 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * Supports multi-page overflow via IStatefulElement so that very long
  * tables of contents flow naturally across page boundaries.
  */
+/** Settable properties declared by {@link VisualToc} itself. */
+export const VISUAL_TOC_OWN_OPTION_KEYS = ['headingIdentifiers', 'fontName', 'fontSize', 'textColor'] as const;
+
+/** The full settable surface, base included. */
+export const VISUAL_TOC_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VISUAL_TOC_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link VisualToc}. */
+export type VisualTocOptions = ElementOptions &
+  Partial<Omit<Pick<VisualToc, (typeof VISUAL_TOC_OWN_OPTION_KEYS)[number]>, 'textColor'>> & {
+    /** Entry text colour. Accepts a palette token or hex. */
+    textColor?: ColorInput;
+  };
+
 export class VisualToc extends ElementBase implements IStatefulElement, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {
@@ -27,6 +43,12 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
    * Gets or sets the ordered list of TOC identifiers to render.
    * Each identifier must match the Heading.TocIdentifier of a rendered heading.
    */
+  /** Creates a visual table of contents, optionally configured in one expression. */
+  constructor(options?: VisualTocOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   public headingIdentifiers: string[] = [];
 
   /**
@@ -42,7 +64,15 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
   /**
    * Gets or sets the text color used for TOC entries.
    */
-  public textColor: Color = Color.black;
+  private _textColor: Color = Color.black;
+
+  /** Entry text colour. Accepts a palette token or hex. */
+  public get textColor(): Color {
+    return this._textColor;
+  }
+  public set textColor(value: ColorInput) {
+    this._textColor = toColor(value);
+  }
 
   private lastRenderedIndex = -1;
 

@@ -5,23 +5,86 @@ import { IElement } from '../IElement';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
+import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
+import { toHorizontalAlignment, type HorizontalAlignmentInput } from '../../Normalize/toEnum';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
+import {
+  BORDERED_ELEMENT_OPTION_KEYS,
+  applyBorderedElementOptions,
+  type BorderedElementOptions,
+} from './BorderedElementOptions';
 
 /**
  * A container element that supports padding, background color, and borders.
  * Implements IContentContainer as a single-child wrapper.
  */
+/** Settable properties declared by {@link Container} itself. */
+export const CONTAINER_OWN_OPTION_KEYS = [
+  'child',
+  'padding',
+  'width',
+  'height',
+  'clipContent',
+  'crispEdges',
+  'horizontalAlignment',
+] as const;
+
+/** The full settable surface of a container, bases included. */
+export const CONTAINER_OPTION_KEYS = [...BORDERED_ELEMENT_OPTION_KEYS, ...CONTAINER_OWN_OPTION_KEYS] as const;
+
+type ContainerOwnKey = (typeof CONTAINER_OWN_OPTION_KEYS)[number];
+
+/**
+ * Options for {@link Container}. Intersects {@link BorderedElementOptions}, so
+ * the `{ width, color }` border form works here (applied via
+ * `applyBorderedElementOptions`).
+ */
+export type ContainerOptions = BorderedElementOptions &
+  Partial<Omit<Pick<Container, ContainerOwnKey>, 'padding' | 'horizontalAlignment'>> & {
+    /** Padding inside the border. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
+    padding?: ThicknessInput;
+    /** Child placement. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
+    horizontalAlignment?: HorizontalAlignmentInput;
+  };
+
 export class Container extends BorderedElementBase implements IContentContainer {
   public child?: IElement;
+
+  /** Creates an empty container. */
+  constructor();
+  /**
+   * Creates a container configured in one expression.
+   *
+   * ```typescript
+   * new Container({ padding: 12, border: { width: 1, color: 'slate-300' }, child: text });
+   * ```
+   */
+  constructor(options: ContainerOptions);
+  constructor(options?: ContainerOptions) {
+    super();
+    // Bordered options, not plain applyOptions: the `{ width, color }` border
+    // form has to be split across `border` / `borderColors`.
+    applyBorderedElementOptions(this, options);
+  }
 
   /** @inheritdoc */
   public getChildren(): readonly IElement[] {
     return this.child ? [this.child] : [];
   }
+  private _padding: Thickness = new Thickness(0);
+
   /**
-   * Padding inside the container, inside the border
+   * Padding inside the container, inside the border.
+   *
+   * Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }` on write
+   * (`the specification` §4A.3); omitted sides are zero.
    */
-  public padding: Thickness;
+  public get padding(): Thickness {
+    return this._padding;
+  }
+  public set padding(value: ThicknessInput) {
+    this._padding = toThickness(value);
+  }
   /**
    * Optional fixed width for the container (null = use available width)
    */
@@ -54,18 +117,22 @@ export class Container extends BorderedElementBase implements IContentContainer 
    */
   public crispEdges = false;
 
+  private _horizontalAlignment?: HorizontalAlignment;
+
   /**
    * Horizontal alignment of the child within the container's available width
    * (`AlignCenter`/`AlignRight`/`AlignLeft`). When the child is
    * narrower than the container, it is positioned accordingly; otherwise it
    * fills the width as before. `undefined`/`Start` keep the default left
    * placement. `Stretch` is treated as "fill" (no offset).
+   *
+   * Accepts `'start' | 'center' | 'end' | 'stretch'` on write.
    */
-  public horizontalAlignment?: HorizontalAlignment;
-
-  constructor() {
-    super();
-    this.padding = new Thickness(0);
+  public get horizontalAlignment(): HorizontalAlignment | undefined {
+    return this._horizontalAlignment;
+  }
+  public set horizontalAlignment(value: HorizontalAlignmentInput | undefined) {
+    this._horizontalAlignment = value === undefined ? undefined : toHorizontalAlignment(value);
   }
 
   /**

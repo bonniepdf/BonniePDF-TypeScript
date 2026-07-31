@@ -1,4 +1,8 @@
 import { ListElementBase } from './ListElementBase';
+import { toBulletStyle, type BulletStyleInput } from '../../Normalize/toEnum';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import { applyOptions } from '../../Core/applyOptions';
+import { LIST_ELEMENT_OPTION_KEYS, type ListElementOptions } from './ListElementBase';
 import { BulletStyle } from './BulletStyle';
 import { Color } from '../../Core/Color';
 import { RenderContext } from '../../Rendering/RenderContext';
@@ -6,13 +10,46 @@ import { RenderContext } from '../../Rendering/RenderContext';
 /**
  * An unordered list element that displays bulleted items with various bullet styles
  */
+/** Settable properties declared by {@link UnorderedList} itself. */
+export const UNORDERED_LIST_OWN_OPTION_KEYS = ['bulletStyle', 'customBullet', 'bulletColor'] as const;
+
+/** The full settable *property* surface, bases included. `items` is sugar. */
+export const UNORDERED_LIST_OPTION_KEYS = [...LIST_ELEMENT_OPTION_KEYS, ...UNORDERED_LIST_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link UnorderedList}. Intersects {@link ListElementOptions}. */
+export type UnorderedListOptions = ListElementOptions &
+  Partial<Omit<Pick<UnorderedList, (typeof UNORDERED_LIST_OWN_OPTION_KEYS)[number]>, 'bulletStyle' | 'bulletColor'>> & {
+    /** Bullet glyph. Accepts `'disc' | 'circle' | 'square' | 'dash' | 'custom'`. */
+    bulletStyle?: BulletStyleInput;
+    /** Bullet colour. Accepts a palette token or hex. Defaults to the text colour. */
+    bulletColor?: ColorInput;
+    /** List items, in order. Sugar over {@link UnorderedList.addItem}. */
+    items?: string[];
+  };
+
 export class UnorderedList extends ListElementBase {
   private readonly items: string[] = [];
+
+  /** Creates an unordered list, optionally configured in one expression. */
+  constructor(options?: UnorderedListOptions) {
+    super();
+    const { items, ...rest } = options ?? {};
+    applyOptions(this, rest);
+    for (const item of items ?? []) this.addItem(item);
+  }
   private readonly nestedLists: UnorderedList[] = [];
   private _bulletColor?: Color;
 
   /** Bullet style for the list (Disc, Circle, Square, Dash, Custom) */
-  public bulletStyle: BulletStyle = BulletStyle.Disc;
+  private _bulletStyle: BulletStyle = BulletStyle.Disc;
+
+  /** Bullet glyph. Accepts `'disc' | 'circle' | 'square' | 'dash' | 'custom'`. */
+  public get bulletStyle(): BulletStyle {
+    return this._bulletStyle;
+  }
+  public set bulletStyle(value: BulletStyleInput) {
+    this._bulletStyle = toBulletStyle(value);
+  }
 
   /** Custom bullet character (only used when BulletStyle is Custom) */
   public customBullet = '•';
@@ -21,8 +58,8 @@ export class UnorderedList extends ListElementBase {
   public get bulletColor(): Color {
     return this._bulletColor ?? this.textColor;
   }
-  public set bulletColor(value: Color) {
-    this._bulletColor = value;
+  public set bulletColor(value: ColorInput) {
+    this._bulletColor = toColor(value);
   }
 
   private get bulletChar(): string {

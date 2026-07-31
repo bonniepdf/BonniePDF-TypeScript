@@ -1,4 +1,7 @@
 import { IElement, RenderContext } from '../IElement';
+import { applyOptions } from '../../Core/applyOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
 import { IBackgroundColor } from '../Layout/IBackgroundColor';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
@@ -8,6 +11,31 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 /**
  * A table row with support for custom styling and background color
  */
+/** Settable properties declared by {@link TableRow} itself. */
+export const TABLE_ROW_OPTION_KEYS = [
+  'cells',
+  'textColor',
+  'padding',
+  'isHeader',
+  'isFooter',
+  'minHeight',
+  'backgroundColor',
+] as const;
+
+type TableRowKey = (typeof TABLE_ROW_OPTION_KEYS)[number];
+
+/** Options for {@link TableRow}. */
+export type TableRowOptions = Partial<
+  Omit<Pick<TableRow, TableRowKey>, 'textColor' | 'padding' | 'backgroundColor'>
+> & {
+  /** Row text colour. Accepts a palette token or hex. */
+  textColor?: ColorInput;
+  /** Row padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
+  padding?: ThicknessInput;
+  /** Row fill. Accepts a palette token or hex. */
+  backgroundColor?: ColorInput;
+};
+
 export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {
@@ -18,10 +46,26 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   public cells!: TableCell[];
 
   /** TextBlock color for this row (applied to cells without their own text color) */
-  public textColor?: Color;
+  private _textColor?: Color;
+
+  /** Row text colour. Accepts a palette token or hex. */
+  public get textColor(): Color | undefined {
+    return this._textColor;
+  }
+  public set textColor(value: ColorInput | undefined) {
+    this._textColor = value === undefined ? undefined : toColor(value);
+  }
 
   /** Custom padding for this row (applied to cells without their own padding) */
-  public padding?: Thickness;
+  private _padding?: Thickness;
+
+  /** Row padding. Undefined falls back to the table's `cellPadding`. */
+  public get padding(): Thickness | undefined {
+    return this._padding;
+  }
+  public set padding(value: ThicknessInput | undefined) {
+    this._padding = value === undefined ? undefined : toThickness(value);
+  }
 
   /** Whether this is a header row */
   public isHeader = false;
@@ -33,11 +77,25 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   public minHeight?: number;
 
   /** Background color for this row (applied to cells without their own background) */
-  public backgroundColor?: Color;
+  private _backgroundColor?: Color;
 
-  constructor(cells?: TableCell[]) {
-    if (cells) {
-      this.cells = cells;
+  /** Row fill. Accepts a palette token or hex. */
+  public get backgroundColor(): Color | undefined {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput | undefined) {
+    this._backgroundColor = value === undefined ? undefined : toColor(value);
+  }
+
+  /** Creates a row from its cells. */
+  constructor(cells?: TableCell[]);
+  /** Creates a row configured in one expression. */
+  constructor(options: TableRowOptions);
+  constructor(cellsOrOptions?: TableCell[] | TableRowOptions) {
+    if (Array.isArray(cellsOrOptions)) {
+      this.cells = cellsOrOptions;
+    } else if (cellsOrOptions !== undefined) {
+      applyOptions(this, cellsOrOptions);
     }
   }
 

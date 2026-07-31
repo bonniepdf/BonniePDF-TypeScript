@@ -1,4 +1,5 @@
-import { TextBlock } from './TextBlock';
+import { TextBlock, TEXT_BLOCK_OPTION_KEYS, type TextBlockOptions } from './TextBlock';
+import { applyOptions } from '../../Core/applyOptions';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 
@@ -24,6 +25,17 @@ import { RenderContext } from '../../Rendering/RenderContext';
  * doc.add(new PageNumberOf('ch3'));
  * ```
  */
+/** Settable properties declared by {@link PageNumberOf} itself. */
+export const PAGE_NUMBER_OF_OWN_OPTION_KEYS = ['anchorTarget', 'placeholder'] as const;
+
+/** The full settable surface, bases included. */
+export const PAGE_NUMBER_OF_OPTION_KEYS = [...TEXT_BLOCK_OPTION_KEYS, ...PAGE_NUMBER_OF_OWN_OPTION_KEYS] as const;
+
+type PageNumberOfOwnKey = (typeof PAGE_NUMBER_OF_OWN_OPTION_KEYS)[number];
+
+/** Options for {@link PageNumberOf}. Intersects {@link TextBlockOptions}. */
+export type PageNumberOfOptions = TextBlockOptions & Partial<Pick<PageNumberOf, PageNumberOfOwnKey>>;
+
 export class PageNumberOf extends TextBlock {
   /** The anchor id whose page number is printed. */
   public anchorTarget: string;
@@ -38,11 +50,21 @@ export class PageNumberOf extends TextBlock {
    * Creates a new page-number cross-reference.
    * @param anchorTarget - The id of the {@link Section}/anchor to report.
    */
-  constructor(anchorTarget: string) {
+  /** Creates a page reference to the given anchor, optionally with options. */
+  constructor(anchorTarget: string, options?: PageNumberOfOptions);
+  /** Options-only form; `anchorTarget` is required either way. */
+  constructor(options: PageNumberOfOptions & { anchorTarget: string });
+  constructor(
+    targetOrOptions: string | (PageNumberOfOptions & { anchorTarget: string }),
+    options?: PageNumberOfOptions
+  ) {
     super('');
+    const isPositional = typeof targetOrOptions === 'string';
+    const anchorTarget = isPositional ? targetOrOptions : targetOrOptions?.anchorTarget;
     if (!anchorTarget || anchorTarget === '') {
       throw new Error('PageNumberOf anchorTarget cannot be null or empty');
     }
+    applyOptions(this, isPositional ? options : targetOrOptions);
     this.anchorTarget = anchorTarget;
   }
 

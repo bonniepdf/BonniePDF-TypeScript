@@ -1,4 +1,7 @@
 import { ElementBase } from '../ElementBase';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
 
@@ -6,12 +9,39 @@ import { Color } from '../../Core/Color';
  * Represents a simple line element that can be horizontal or vertical.
  * Useful for visual dividers and structural lines.
  */
+/** Settable properties declared by {@link Line} itself. */
+export const LINE_OWN_OPTION_KEYS = ['thickness', 'color', 'orientation', 'length'] as const;
+
+/** The full settable surface, base included. */
+export const LINE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...LINE_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link Line}. */
+export type LineOptions = ElementOptions &
+  Partial<Omit<Pick<Line, (typeof LINE_OWN_OPTION_KEYS)[number]>, 'color'>> & {
+    /** Stroke colour. Accepts a palette token or hex. */
+    color?: ColorInput;
+  };
+
 export class Line extends ElementBase {
   /** Thickness of the line in points. Default is 1. */
+  /** Creates a line (divider), optionally configured in one expression. */
+  constructor(options?: LineOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   public thickness = 1;
 
   /** Color of the line. Default is Black. */
-  public color: Color = Color.black;
+  private _color: Color = Color.black;
+
+  /** Stroke colour. Accepts a palette token or hex. */
+  public get color(): Color {
+    return this._color;
+  }
+  public set color(value: ColorInput) {
+    this._color = toColor(value);
+  }
 
   /** Orientation of the line. Default is Horizontal. */
   public orientation: LineOrientation = LineOrientation.Horizontal;

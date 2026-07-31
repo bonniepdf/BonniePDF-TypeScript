@@ -1,22 +1,127 @@
+import { applyOptions } from '../Core/applyOptions';
 import { PdfSize } from './PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
 import { Color } from '../Core/Color';
 import { ZoomLevel } from './ZoomLevel';
 import { PageMode, PageModeEnum } from './PageMode';
 import { PdfVersion } from './PdfVersion';
-import { BookmarkItem } from './BookmarkItem';
-import { WatermarkSettings } from './WatermarkSettings';
-import { EncryptionSettings } from '../Security/Models/EncryptionSettings';
-import type { TextStyle } from '../Elements/Text/TextStyle';
+import { BookmarkItem, type BookmarkItemOptions } from './BookmarkItem';
+import { WatermarkSettings, type WatermarkSettingsOptions } from './WatermarkSettings';
+import { EncryptionSettings, type EncryptionSettingsOptions } from '../Security/Models/EncryptionSettings';
+import { TextStyle, type TextStyleOptions } from '../Elements/Text/TextStyle';
 import { AccessibilityMode } from './AccessibilityMode';
 import { PdfAConformance } from './PdfAConformance';
-import { PageLabel } from './PageLabel';
+import { toColor, type ColorInput } from '../Normalize/toColor';
+import { toPageSize, type PageSizeInput } from '../Normalize/toPageSize';
+import {
+  toPageOrientation,
+  toZoomLevel,
+  toPageMode,
+  toPdfAConformance,
+  toAccessibilityMode,
+  type PageOrientationInput,
+  type ZoomLevelInput,
+  type PageModeInput,
+  type PdfAConformanceInput,
+  type AccessibilityModeInput,
+} from '../Normalize/toEnum';
+import { PageLabel, type PageLabelOptions } from './PageLabel';
 import { FacturXMetadata } from '../EInvoice/FacturXMetadata';
 import type { IElement } from '../Elements/IElement';
 
 /**
  * Configuration settings for PDF document creation and display
  */
+/** Every settable {@link DocumentSettings} property. */
+export const DOCUMENT_SETTINGS_OPTION_KEYS = [
+  'pageSize',
+  'pageColor',
+  'orientation',
+  'margin',
+  'defaultZoom',
+  'customZoomLevel',
+  'pageMode',
+  'hideToolbar',
+  'hideMenubar',
+  'hideWindowUI',
+  'fitWindow',
+  'centerWindow',
+  'displayDocTitle',
+  'version',
+  'conformance',
+  'pdfAEnabled',
+  'accessibility',
+  'language',
+  'facturX',
+  'bookmarks',
+  'namedDestinations',
+  'watermark',
+  'defaultTextStyle',
+  'encryption',
+  'pageLabel',
+  'headerTemplate',
+  'footerTemplate',
+  'pageBackground',
+  'pageForeground',
+] as const;
+
+type DocumentSettingsOwnKey = (typeof DOCUMENT_SETTINGS_OPTION_KEYS)[number];
+
+/**
+ * Keys handled specially rather than by plain keyed assignment: either their
+ * accepted input is wider than the stored type (asymmetric accessor), or they
+ * accept a nested options literal in place of an instance.
+ */
+type DocumentSettingsSpecialKey =
+  | 'pageSize'
+  | 'pageColor'
+  | 'orientation'
+  | 'defaultZoom'
+  | 'pageMode'
+  | 'conformance'
+  | 'accessibility'
+  | 'watermark'
+  | 'encryption'
+  | 'pageLabel'
+  | 'defaultTextStyle'
+  | 'bookmarks';
+
+/**
+ * Options for {@link DocumentSettings} - the largest options bag in the library.
+ *
+ * Nested settings accept either an instance or their own options literal, so a
+ * whole document can be configured in one expression without importing the
+ * sub-types.
+ */
+export type DocumentSettingsOptions = Partial<
+  Omit<Pick<DocumentSettings, DocumentSettingsOwnKey>, DocumentSettingsSpecialKey>
+> & {
+  /** Page size. Accepts `'a4'`, `'letter'`, … or `{ width, height }`. */
+  pageSize?: PageSizeInput;
+  /** Page background fill. Accepts a palette token or hex. */
+  pageColor?: ColorInput;
+  /** Page orientation. Accepts `'portrait' | 'landscape'`. */
+  orientation?: PageOrientationInput;
+  /** Initial zoom. Accepts `'fit-page' | 'fit-width' | 'fit-height' | 'custom'`. */
+  defaultZoom?: ZoomLevelInput;
+  /** Viewer page mode. Accepts `'use-none' | 'use-outlines' | …`. */
+  pageMode?: PageModeInput;
+  /** PDF/A claim. Accepts `'none'`, `'pdf/a-2b'`, `'pdf/a-2a'`, `'pdf/a-4'`, … */
+  conformance?: PdfAConformanceInput;
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  accessibility?: AccessibilityModeInput;
+  /** Watermark. Accepts an instance or an options literal. */
+  watermark?: WatermarkSettings | WatermarkSettingsOptions;
+  /** Encryption. Accepts an instance or an options literal. */
+  encryption?: EncryptionSettings | EncryptionSettingsOptions;
+  /** Page labelling. Accepts an instance or an options literal. */
+  pageLabel?: PageLabel | PageLabelOptions;
+  /** Default text style. Accepts an instance or an options literal. */
+  defaultTextStyle?: TextStyle | TextStyleOptions;
+  /** Outline entries. Each accepts an instance or an options literal. */
+  bookmarks?: (BookmarkItem | BookmarkItemOptions)[];
+};
+
 export class DocumentSettings {
   /**
    * Template function for generating page headers.
@@ -52,7 +157,15 @@ export class DocumentSettings {
   /**
    * The page size for the document (default: A4)
    */
-  public pageSize: PdfSize;
+  private _pageSize!: PdfSize;
+
+  /** Page size. Accepts `'a4'`, `'letter'`, … or `{ width, height }`. */
+  public get pageSize(): PdfSize {
+    return this._pageSize;
+  }
+  public set pageSize(value: PageSizeInput) {
+    this._pageSize = toPageSize(value);
+  }
   /**
    * Background colour painted behind every page. When set, the render pipeline
    * fills the entire page (origin 0,0, full width and height, ignoring margins)
@@ -64,11 +177,27 @@ export class DocumentSettings {
    * backgrounds use {@link pageBackground} instead (or both — pageColor fills,
    * pageBackground layers on top).
    */
-  public pageColor?: Color;
+  private _pageColor?: Color;
+
+  /** Page background fill. Accepts a palette token or hex. */
+  public get pageColor(): Color | undefined {
+    return this._pageColor;
+  }
+  public set pageColor(value: ColorInput | undefined) {
+    this._pageColor = value === undefined ? undefined : toColor(value);
+  }
   /**
    * The page orientation for the document (default: Portrait)
    */
-  public orientation: PageOrientation;
+  private _orientation!: PageOrientation;
+
+  /** Page orientation. Accepts `'portrait' | 'landscape'`. */
+  public get orientation(): PageOrientation {
+    return this._orientation;
+  }
+  public set orientation(value: PageOrientationInput) {
+    this._orientation = toPageOrientation(value);
+  }
   /**
    * The margin size in points for all pages (default: 50)
    */
@@ -76,7 +205,15 @@ export class DocumentSettings {
   /**
    * The default zoom level when the PDF is opened (default: FitPage)
    */
-  public defaultZoom: ZoomLevel;
+  private _defaultZoom!: ZoomLevel;
+
+  /** Initial zoom. Accepts `'fit-page' | 'fit-width' | 'fit-height' | 'custom'`. */
+  public get defaultZoom(): ZoomLevel {
+    return this._defaultZoom;
+  }
+  public set defaultZoom(value: ZoomLevelInput) {
+    this._defaultZoom = toZoomLevel(value);
+  }
   /**
    * Custom zoom level for ZoomLevel.Custom (1.0 = 100%, default: 1.0)
    */
@@ -84,7 +221,15 @@ export class DocumentSettings {
   /**
    * How the PDF document should be displayed when opened (default: UseNone)
    */
-  public pageMode: PageMode;
+  private _pageMode!: PageMode;
+
+  /** Viewer page mode. Accepts `'use-none' | 'use-outlines' | …`. */
+  public get pageMode(): PageMode {
+    return this._pageMode;
+  }
+  public set pageMode(value: PageModeInput) {
+    this._pageMode = toPageMode(value);
+  }
   /**
    * Whether to hide the toolbar in the PDF viewer (default: false)
    */
@@ -137,7 +282,18 @@ export class DocumentSettings {
    * (or rely on the bundled Liberation faces) and use that for every
    * text element.
    */
-  public conformance: PdfAConformance;
+  private _conformance!: PdfAConformance;
+
+  /**
+   * PDF/A conformance claim. Accepts `'none'`, `'pdf/a-2b'`, `'pdf/a-2a'`,
+   * `'pdf/a-4'`, … (`the specification` §4A.4).
+   */
+  public get conformance(): PdfAConformance {
+    return this._conformance;
+  }
+  public set conformance(value: PdfAConformanceInput) {
+    this._conformance = toPdfAConformance(value);
+  }
 
   /**
    * Legacy boolean PDF/A switch. Maps onto {@link conformance}:
@@ -164,7 +320,15 @@ export class DocumentSettings {
    * both, or neither. See
    * `the specification`.
    */
-  public accessibility: AccessibilityMode;
+  private _accessibility!: AccessibilityMode;
+
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  public get accessibility(): AccessibilityMode {
+    return this._accessibility;
+  }
+  public set accessibility(value: AccessibilityModeInput) {
+    this._accessibility = toAccessibilityMode(value);
+  }
   /**
    * ZUGFeRD / Factur-X e-invoice metadata. When set (and the document is a
    * PDF/A-3 level), the XMP writer emits the `fx:*` conformance block.
@@ -249,7 +413,15 @@ export class DocumentSettings {
   constructor(pageSize: PdfSize, margin: number);
   constructor(pageSize: PdfSize, orientation: PageOrientation, margin: number);
   constructor(pageSize: PdfSize, orientation: PageOrientation);
-  constructor(pageSize?: PdfSize, orientationOrMargin?: PageOrientation | number, margin?: number) {
+  /** Creates settings configured in one expression. */
+  constructor(options: DocumentSettingsOptions);
+  constructor(
+    pageSizeOrOptions?: PdfSize | DocumentSettingsOptions,
+    orientationOrMargin?: PageOrientation | number,
+    margin?: number
+  ) {
+    const options = pageSizeOrOptions instanceof PdfSize ? undefined : pageSizeOrOptions;
+    const pageSize = pageSizeOrOptions instanceof PdfSize ? pageSizeOrOptions : undefined;
     this.pageSize = pageSize || PdfSize.a4;
     this.orientation = PageOrientation.Portrait;
     this.margin = 50;
@@ -276,6 +448,10 @@ export class DocumentSettings {
         this.margin = margin;
       }
     }
+
+    if (options !== undefined) {
+      applyDocumentSettingsOptions(this, options);
+    }
   }
 
   /**
@@ -284,4 +460,51 @@ export class DocumentSettings {
   getOrientedPageSize(): PdfSize {
     return this.pageSize.getOrientedSize(this.orientation);
   }
+}
+
+/**
+ * Applies {@link DocumentSettingsOptions}, coercing nested literals into their
+ * canonical types and resolving the `conformance` / `pdfAEnabled` overlap.
+ *
+ * Concrete callers MUST use this rather than {@link applyOptions} directly: a
+ * bare keyed assignment would store plain literals where the engine expects
+ * `WatermarkSettings`, `TextStyle`, … instances.
+ */
+export function applyDocumentSettingsOptions(
+  target: DocumentSettings,
+  options: DocumentSettingsOptions
+): DocumentSettings {
+  const { watermark, encryption, pageLabel, defaultTextStyle, bookmarks, pdfAEnabled, conformance, ...rest } = options;
+
+  applyOptions(target, rest);
+
+  if (watermark !== undefined) {
+    target.watermark = watermark instanceof WatermarkSettings ? watermark : new WatermarkSettings(watermark);
+  }
+  if (encryption !== undefined) {
+    target.encryption = encryption instanceof EncryptionSettings ? encryption : new EncryptionSettings(encryption);
+  }
+  if (pageLabel !== undefined) {
+    target.pageLabel = pageLabel instanceof PageLabel ? pageLabel : new PageLabel(pageLabel);
+  }
+  if (defaultTextStyle !== undefined) {
+    target.defaultTextStyle =
+      defaultTextStyle instanceof TextStyle ? defaultTextStyle : new TextStyle(defaultTextStyle);
+  }
+  if (bookmarks !== undefined) {
+    target.bookmarks = bookmarks.map(b => (b instanceof BookmarkItem ? b : new BookmarkItem(b)));
+  }
+
+  // `pdfAEnabled` is legacy sugar over `conformance` (it flips PdfA2b/None), so
+  // it is applied first and `conformance` wins when both are supplied. Without a
+  // fixed order this would depend on the literal's key order, which is not a
+  // contract callers should have to reason about.
+  if (pdfAEnabled !== undefined) {
+    target.pdfAEnabled = pdfAEnabled;
+  }
+  if (conformance !== undefined) {
+    target.conformance = conformance;
+  }
+
+  return target;
 }

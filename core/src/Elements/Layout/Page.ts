@@ -1,10 +1,26 @@
+import { applyOptions } from '../../Core/applyOptions';
 import { IElement } from '../IElement';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { PdfSize } from '../../Configuration/PdfSize';
 import { Color } from '../../Core/Color';
 
 /**
  * Represents a single page in a PDF document
  */
+/**
+ * Settable properties of {@link Page}.
+ *
+ * `size` and `margin` are `readonly` - they are the page's identity and stay
+ * constructor-only, so they are not options.
+ */
+export const PAGE_OPTION_KEYS = ['pageColor', 'pageBackground', 'pageForeground'] as const;
+
+/** Options for {@link Page}. */
+export type PageOptions = Partial<Omit<Pick<Page, (typeof PAGE_OPTION_KEYS)[number]>, 'pageColor'>> & {
+  /** Page background fill. Accepts a palette token or hex. */
+  pageColor?: ColorInput;
+};
+
 export class Page {
   private readonly elements: IElement[] = [];
   public readonly size: PdfSize;
@@ -17,7 +33,15 @@ export class Page {
    * the document-level `pageColor` (if any) is used. Leave both undefined for a
    * transparent (viewer-default) background.
    */
-  public pageColor?: Color;
+  private _pageColor?: Color;
+
+  /** Page background fill. Accepts a palette token or hex. */
+  public get pageColor(): Color | undefined {
+    return this._pageColor;
+  }
+  public set pageColor(value: ColorInput | undefined) {
+    this._pageColor = value === undefined ? undefined : toColor(value);
+  }
 
   /**
    * Full-page background element for this page only (drawn behind all content,
@@ -45,20 +69,29 @@ export class Page {
    * @param height - Page height in points
    * @param margin - Page margin in points
    */
-  constructor(width: number, height: number, margin: number);
+  constructor(width: number, height: number, margin: number, options?: PageOptions);
   /**
    * Creates a new instance of Page with the specified page size and margin
    * @param pageSize - The page size
    * @param margin - Page margin in points
    */
-  constructor(pageSize: PdfSize, margin: number);
-  constructor(widthOrPageSize: number | PdfSize, height: number, marginOrMargin?: number) {
+  constructor(pageSize: PdfSize, margin: number, options?: PageOptions);
+  constructor(
+    widthOrPageSize: number | PdfSize,
+    height: number,
+    marginOrOptions?: number | PageOptions,
+    options?: PageOptions
+  ) {
+    // The explicit-dimensions form puts margin third and options fourth; the
+    // PdfSize form puts margin second and options third.
     if (typeof widthOrPageSize === 'number') {
       this.size = new PdfSize(widthOrPageSize, height);
-      this.margin = marginOrMargin ?? 0;
+      this.margin = typeof marginOrOptions === 'number' ? marginOrOptions : 0;
+      applyOptions(this, options);
     } else {
       this.size = widthOrPageSize;
       this.margin = height;
+      applyOptions(this, typeof marginOrOptions === 'number' ? options : marginOrOptions);
     }
   }
 

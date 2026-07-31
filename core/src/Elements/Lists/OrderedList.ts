@@ -1,16 +1,50 @@
 import { ListElementBase } from './ListElementBase';
+import { toNumberFormat, type NumberFormatInput } from '../../Normalize/toEnum';
+import { applyOptions } from '../../Core/applyOptions';
+import { LIST_ELEMENT_OPTION_KEYS, type ListElementOptions } from './ListElementBase';
 import { NumberFormat } from './NumberFormat';
 import { RenderContext } from '../../Rendering/RenderContext';
 
 /**
  * An ordered list element that displays numbered items with various numbering formats
  */
+/** Settable properties declared by {@link OrderedList} itself. */
+export const ORDERED_LIST_OWN_OPTION_KEYS = ['numberFormat', 'startNumber'] as const;
+
+/** The full settable *property* surface, bases included. `items` is sugar. */
+export const ORDERED_LIST_OPTION_KEYS = [...LIST_ELEMENT_OPTION_KEYS, ...ORDERED_LIST_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link OrderedList}. Intersects {@link ListElementOptions}. */
+export type OrderedListOptions = ListElementOptions &
+  Partial<Omit<Pick<OrderedList, (typeof ORDERED_LIST_OWN_OPTION_KEYS)[number]>, 'numberFormat'>> & {
+    /** Numbering style. Accepts `'decimal' | 'upper-roman' | 'lower-roman' | 'upper-alpha' | 'lower-alpha'`. */
+    numberFormat?: NumberFormatInput;
+    /** List items, in order. Sugar over {@link OrderedList.addItem}. */
+    items?: string[];
+  };
+
 export class OrderedList extends ListElementBase {
   private readonly items: string[] = [];
+
+  /** Creates an ordered list, optionally configured in one expression. */
+  constructor(options?: OrderedListOptions) {
+    super();
+    const { items, ...rest } = options ?? {};
+    applyOptions(this, rest);
+    for (const item of items ?? []) this.addItem(item);
+  }
   private readonly nestedLists: OrderedList[] = [];
 
   /** Number format for the list (Decimal, Roman, Alpha, etc.) */
-  public numberFormat: NumberFormat = NumberFormat.Decimal;
+  private _numberFormat: NumberFormat = NumberFormat.Decimal;
+
+  /** Numbering style. Accepts `'decimal' | 'upper-roman' | 'lower-roman' | 'upper-alpha' | 'lower-alpha'`. */
+  public get numberFormat(): NumberFormat {
+    return this._numberFormat;
+  }
+  public set numberFormat(value: NumberFormatInput) {
+    this._numberFormat = toNumberFormat(value);
+  }
 
   /** Starting number for the list (default: 1) */
   public startNumber = 1;

@@ -1,4 +1,7 @@
 import { ElementBase } from '../ElementBase';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
@@ -19,8 +22,41 @@ import { DataMatrixEncoder, EncodedDataMatrix } from './DataMatrixEncoder';
  * labels, documents - and unlike QR it supports rectangular as well as square
  * symbols.
  */
+/** Settable properties declared by {@link DataMatrix} itself. */
+export const DATA_MATRIX_OWN_OPTION_KEYS = [
+  'data',
+  'altText',
+  'isDecorative',
+  'size',
+  'rectangular',
+  'quietZone',
+  'foregroundColor',
+  'backgroundColor',
+  'drawBackground',
+] as const;
+
+/** The full settable surface, base included. */
+export const DATA_MATRIX_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...DATA_MATRIX_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link DataMatrix}. */
+export type DataMatrixOptions = ElementOptions &
+  Partial<
+    Omit<Pick<DataMatrix, (typeof DATA_MATRIX_OWN_OPTION_KEYS)[number]>, 'foregroundColor' | 'backgroundColor'>
+  > & {
+    /** Module colour. Accepts a palette token or hex. */
+    foregroundColor?: ColorInput;
+    /** Quiet-zone colour. Accepts a palette token or hex. */
+    backgroundColor?: ColorInput;
+  };
+
 export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The data/text to encode. Any Unicode string is accepted. */
+  /** Creates a Data Matrix symbol, optionally configured in one expression. */
+  constructor(options?: DataMatrixOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   public data = '';
 
   /**
@@ -54,10 +90,26 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
   public quietZone = 2;
 
   /** The colour of the dark modules (usually black). */
-  public foregroundColor: Color = new Color(0, 0, 0);
+  private _foregroundColor: Color = new Color(0, 0, 0);
+
+  /** Module colour. Accepts a palette token or hex. */
+  public get foregroundColor(): Color {
+    return this._foregroundColor;
+  }
+  public set foregroundColor(value: ColorInput) {
+    this._foregroundColor = toColor(value);
+  }
 
   /** The background colour (usually white, recommended for reliable scanning). */
-  public backgroundColor: Color = new Color(255, 255, 255);
+  private _backgroundColor: Color = new Color(255, 255, 255);
+
+  /** Quiet-zone colour. Accepts a palette token or hex. */
+  public get backgroundColor(): Color {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput) {
+    this._backgroundColor = toColor(value);
+  }
 
   /** Whether to draw the background. If `false`, the symbol is transparent. */
   public drawBackground = true;

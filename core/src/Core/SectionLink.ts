@@ -1,4 +1,4 @@
-import { Hyperlink } from './Hyperlink';
+import { Hyperlink, HYPERLINK_OPTION_KEYS, type HyperlinkOptions } from './Hyperlink';
 import { RenderContext } from '../Rendering/RenderContext';
 
 /**
@@ -19,6 +19,12 @@ import { RenderContext } from '../Rendering/RenderContext';
  * doc.add(new SectionLink('See Chapter 3', 'ch3'));
  * ```
  */
+/** The full settable surface, base included. */
+export const SECTION_LINK_OPTION_KEYS = [...HYPERLINK_OPTION_KEYS, 'anchorTarget'] as const;
+
+/** Options for {@link SectionLink}. Intersects {@link HyperlinkOptions}. */
+export type SectionLinkOptions = HyperlinkOptions & Partial<Pick<SectionLink, 'anchorTarget'>>;
+
 export class SectionLink extends Hyperlink {
   /** The anchor id this link jumps to (a {@link Section} or anchored {@link Heading}). */
   public anchorTarget: string;
@@ -28,12 +34,22 @@ export class SectionLink extends Hyperlink {
    * @param text - The visible link text.
    * @param anchorTarget - The id of the {@link Section}/anchor to jump to.
    */
-  constructor(text: string, anchorTarget: string) {
-    super(text);
-    if (!anchorTarget || anchorTarget === '') {
+  /** Creates a cross-reference link from text and an anchor target. */
+  constructor(text: string, anchorTarget: string, options?: SectionLinkOptions);
+  /** Options-only form; `text` and `anchorTarget` are required either way. */
+  constructor(options: SectionLinkOptions & { text: string; anchorTarget: string });
+  constructor(
+    textOrOptions: string | (SectionLinkOptions & { text: string; anchorTarget: string }),
+    anchorTarget?: string,
+    options?: SectionLinkOptions
+  ) {
+    const isPositional = typeof textOrOptions === 'string';
+    super(isPositional ? { ...options, text: textOrOptions } : textOrOptions);
+    const target = isPositional ? anchorTarget : textOrOptions.anchorTarget;
+    if (!target || target === '') {
       throw new Error('SectionLink anchorTarget cannot be null or empty');
     }
-    this.anchorTarget = anchorTarget;
+    this.anchorTarget = target;
   }
 
   /**

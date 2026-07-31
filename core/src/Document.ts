@@ -1,5 +1,5 @@
-import { DocumentSettings } from './Configuration/DocumentSettings';
-import { DocumentMetadata } from './Configuration/DocumentMetadata';
+import { DocumentSettings, type DocumentSettingsOptions } from './Configuration/DocumentSettings';
+import { DocumentMetadata, type DocumentMetadataOptions } from './Configuration/DocumentMetadata';
 import { IElement } from './Elements/IElement';
 import { Page } from './Elements/Layout/Page';
 import { PdfSize } from './Configuration/PdfSize';
@@ -19,12 +19,23 @@ import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 import { FileAttachment } from './Attachments/FileAttachment';
 import { AttachmentRelationship } from './Attachments/AttachmentRelationship';
 
-/** Options for creating a {@link Document}. */
+/**
+ * Options for creating a {@link Document}.
+ *
+ * The `settings` / `metadata` split is deliberate and binding (`09 §2.1`): it
+ * mirrors the document model and the C# surface (`doc.Settings.X` /
+ * `doc.Metadata.X`), so an option path here and a property path there are the
+ * same path. Flattening `title`/`conformance`/… to the top level would invent a
+ * TypeScript-only grouping with no neutral-spec counterpart.
+ *
+ * Each half accepts either an instance or its own options literal, so no
+ * sub-type import is needed to configure a document.
+ */
 export interface DocumentOptions {
-  /** Document settings; a default instance is created when omitted. */
-  settings?: DocumentSettings;
-  /** Document metadata; a default instance is created when omitted. */
-  metadata?: DocumentMetadata;
+  /** Document settings; accepts an instance or an options literal. */
+  settings?: DocumentSettings | DocumentSettingsOptions;
+  /** Document metadata; accepts an instance or an options literal. */
+  metadata?: DocumentMetadata | DocumentMetadataOptions;
 }
 
 /** Options for {@link Document.addPage}. */
@@ -94,8 +105,13 @@ export class Document {
       this.settings = arg;
       this.metadata = metadata ?? new DocumentMetadata();
     } else {
-      this.settings = arg?.settings ?? new DocumentSettings();
-      this.metadata = arg?.metadata ?? new DocumentMetadata();
+      // `DocumentOptions` is the only bare-object form (`09a §3.4` rule 1), so
+      // anything reaching here is that bag; each half may be an instance or a
+      // literal.
+      const settings = arg?.settings;
+      const metadata = arg?.metadata;
+      this.settings = settings instanceof DocumentSettings ? settings : new DocumentSettings(settings ?? {});
+      this.metadata = metadata instanceof DocumentMetadata ? metadata : new DocumentMetadata(metadata ?? {});
     }
     // Auto-create the first page (mirrors C# behaviour)
     this.addPage();

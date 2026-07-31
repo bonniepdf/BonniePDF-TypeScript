@@ -4,17 +4,121 @@ import { Color } from '../../Core/Color';
 import { TextDecoration } from './TextDecoration';
 import { BaselineAlignment } from './BaselineAlignment';
 import { DecorationStyle } from './DecorationStyle';
+import { applyOptions } from '../../Core/applyOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import {
+  toTextDecoration,
+  toDecorationStyle,
+  toBaselineAlignment,
+  toFontWeight,
+  type TextDecorationInput,
+  type DecorationStyleInput,
+  type BaselineAlignmentInput,
+  type FontWeightInput,
+} from '../../Normalize/toEnum';
 
 /**
- * Defines the visual style for text rendering. Properties set to null inherit
+ * Every settable {@link TextStyle} property, as a runtime list.
+ *
+ * Exists so a test can assert the options bag covers the class's whole settable
+ * surface - `09a §9` risk 1 ("silent capability gaps"): a property that exists
+ * on the class but not in its options is a knob TypeScript callers can reach and
+ * C# callers cannot, which is a parity defect rather than a spelling difference.
+ */
+export const TEXT_STYLE_OPTION_KEYS = [
+  'fontFamily',
+  'fontWeight',
+  'italic',
+  'fontSize',
+  'color',
+  'backgroundColor',
+  'decoration',
+  'decorationColor',
+  'decorationThickness',
+  'decorationStyle',
+  'baselineAlignment',
+  'baselineShift',
+  'letterSpacing',
+  'wordSpacing',
+  'lineHeightMultiplier',
+] as const;
+
+type TextStyleOptionKey = (typeof TEXT_STYLE_OPTION_KEYS)[number];
+
+/**
+ * Keys whose accepted *input* is wider than the stored type, because the
+ * property is an asymmetric accessor (reads canonical, writes forgiving).
+ * `Pick` yields the getter type, so these are overridden explicitly - the
+ * pattern `09a §3.1` prescribes.
+ */
+type TextStyleWidenedKey =
+  | 'fontWeight'
+  | 'color'
+  | 'backgroundColor'
+  | 'decoration'
+  | 'decorationColor'
+  | 'decorationStyle'
+  | 'baselineAlignment';
+
+/**
+ * Options for constructing a {@link TextStyle}.
+ *
+ * Derived from the class rather than hand-written, so adding a property to
+ * `TextStyle` and to {@link TEXT_STYLE_OPTION_KEYS} carries its JSDoc into
+ * autocomplete with no second declaration to keep in step.
+ */
+export type TextStyleOptions = Partial<Omit<Pick<TextStyle, TextStyleOptionKey>, TextStyleWidenedKey>> & {
+  /** Font weight. Accepts `'bold'`, `'semi-bold'`, … or the numeric value. */
+  fontWeight?: FontWeightInput;
+  /** Text colour. Accepts a palette token (`'slate-600'`) or hex (`'#ff00aa'`). */
+  color?: ColorInput;
+  /** Background highlight colour. Accepts a palette token or hex. */
+  backgroundColor?: ColorInput;
+  /** Decoration. Accepts one token or a list: `['underline', 'overline']`. */
+  decoration?: TextDecorationInput;
+  /** Decoration line colour. Accepts a palette token or hex. */
+  decorationColor?: ColorInput;
+  /** Decoration line style. Accepts `'solid' | 'wavy' | 'dashed' | 'dotted'`. */
+  decorationStyle?: DecorationStyleInput;
+  /** Baseline alignment. Accepts `'baseline' | 'superscript' | 'subscript'`. */
+  baselineAlignment?: BaselineAlignmentInput;
+};
+
+/**
+ * Defines the visual style for text rendering. Properties left unset inherit
  * from the parent RichText element's defaultStyle.
  */
 export class TextStyle {
+  /**
+   * Creates a text style, optionally configured in one expression.
+   *
+   * ```typescript
+   * new TextStyle({ fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' });
+   * ```
+   *
+   * Every option is optional and omitted keys are left at their default, so the
+   * no-argument form remains valid. Values go through the property setters, so
+   * they accept the same forgiving inputs as direct assignment.
+   */
+  constructor(options?: TextStyleOptions) {
+    applyOptions(this, options);
+  }
+
   /** Font family name (e.g. "Helvetica") or TTF file path. Null = inherit from parent. */
   public fontFamily?: string;
 
-  /** Font weight (100-900). Normal = 400, Bold = 700. */
-  public fontWeight: FontWeight = FontWeight.Normal;
+  private _fontWeight: FontWeight = FontWeight.Normal;
+
+  /**
+   * Font weight (100-900). Normal = 400, Bold = 700.
+   * Accepts `'bold'`, `'semi-bold'`, … or the numeric value.
+   */
+  public get fontWeight(): FontWeight {
+    return this._fontWeight;
+  }
+  public set fontWeight(value: FontWeightInput) {
+    this._fontWeight = toFontWeight(value);
+  }
 
   /** Whether the text should be rendered in italic/oblique style. */
   public italic = false;
@@ -22,20 +126,59 @@ export class TextStyle {
   /** Font size in points. Null = inherit from parent. */
   public fontSize?: number;
 
-  /** Text color. Null = inherit from parent. */
-  public color?: Color;
-
-  /** Background highlight color behind the text. Null = no highlight. */
-  public backgroundColor?: Color;
-
-  /** Text decoration (underline, strikethrough, overline, or a combination). */
-  public decoration: TextDecoration = TextDecoration.None;
+  private _color?: Color;
 
   /**
-   * Colour of the decoration lines (underline/strikethrough/overline). Null =
-   * use the text {@link color}, matching the pre-G-39 behaviour.
+   * Text color. Undefined = inherit from parent.
+   * Accepts a palette token (`'slate-600'`) or hex (`'#ff00aa'`).
    */
-  public decorationColor?: Color;
+  public get color(): Color | undefined {
+    return this._color;
+  }
+  public set color(value: ColorInput | undefined) {
+    this._color = value === undefined ? undefined : toColor(value);
+  }
+
+  private _backgroundColor?: Color;
+
+  /**
+   * Background highlight color behind the text. Undefined = no highlight.
+   * Accepts a palette token or hex.
+   */
+  public get backgroundColor(): Color | undefined {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput | undefined) {
+    this._backgroundColor = value === undefined ? undefined : toColor(value);
+  }
+
+  private _decoration: TextDecoration = TextDecoration.None;
+
+  /**
+   * Text decoration (underline, strikethrough, overline, or a combination).
+   * Accepts a single token, or a list for combinations:
+   * `['underline', 'overline']`.
+   */
+  public get decoration(): TextDecoration {
+    return this._decoration;
+  }
+  public set decoration(value: TextDecorationInput) {
+    this._decoration = toTextDecoration(value);
+  }
+
+  private _decorationColor?: Color;
+
+  /**
+   * Colour of the decoration lines (underline/strikethrough/overline).
+   * Undefined = use the text {@link color}, matching the pre-G-39 behaviour.
+   * Accepts a palette token or hex.
+   */
+  public get decorationColor(): Color | undefined {
+    return this._decorationColor;
+  }
+  public set decorationColor(value: ColorInput | undefined) {
+    this._decorationColor = value === undefined ? undefined : toColor(value);
+  }
 
   /**
    * Thickness of the decoration lines in points. Null = the default derived from
@@ -43,15 +186,33 @@ export class TextStyle {
    */
   public decorationThickness?: number;
 
-  /** Line style for decorations (solid/wavy/dashed/dotted). Default solid. */
-  public decorationStyle: DecorationStyle = DecorationStyle.Solid;
+  private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
+
+  /**
+   * Line style for decorations. Default solid.
+   * Accepts `'solid' | 'wavy' | 'dashed' | 'dotted'`.
+   */
+  public get decorationStyle(): DecorationStyle {
+    return this._decorationStyle;
+  }
+  public set decorationStyle(value: DecorationStyleInput) {
+    this._decorationStyle = toDecorationStyle(value);
+  }
+
+  private _baselineAlignment: BaselineAlignment = BaselineAlignment.Baseline;
 
   /**
    * Semantic vertical alignment (super/subscript). See {@link BaselineAlignment}.
    * The shift magnitude derives from {@link effectiveFontSize} unless
    * {@link baselineShift} is set explicitly.
+   * Accepts `'baseline' | 'superscript' | 'subscript'`.
    */
-  public baselineAlignment: BaselineAlignment = BaselineAlignment.Baseline;
+  public get baselineAlignment(): BaselineAlignment {
+    return this._baselineAlignment;
+  }
+  public set baselineAlignment(value: BaselineAlignmentInput) {
+    this._baselineAlignment = toBaselineAlignment(value);
+  }
 
   /**
    * Explicit baseline shift in points (positive = up). Overrides the magnitude

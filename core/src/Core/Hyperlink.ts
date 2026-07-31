@@ -8,6 +8,9 @@ import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
+import { applyOptions } from './applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
+import { toThickness, type ThicknessInput } from '../Normalize/toThickness';
 import type { StructureElement } from '../Rendering/Tagging/StructureElement';
 
 /**
@@ -16,6 +19,31 @@ import type { StructureElement } from '../Rendering/Tagging/StructureElement';
  * Hyperlinks are clickable areas that navigate to a URI.
  * This element implements IElement so it can be added like other elements.
  */
+/**
+ * Settable *authoring* properties of {@link Hyperlink}. The `render*` bounds and
+ * `linkedStructElement` are layout output, set by `setRenderBounds` during
+ * rendering, and are deliberately excluded.
+ */
+export const HYPERLINK_OPTION_KEYS = [
+  'text',
+  'uri',
+  'targetPageIndex',
+  'fontName',
+  'fontSize',
+  'textColor',
+  'margin',
+] as const;
+
+type HyperlinkKey = (typeof HYPERLINK_OPTION_KEYS)[number];
+
+/** Options for {@link Hyperlink}. */
+export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'textColor' | 'margin'>> & {
+  /** Link text colour. Accepts a palette token or hex. */
+  textColor?: ColorInput;
+  /** Margin around the link. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
+  margin?: ThicknessInput;
+};
+
 export class Hyperlink implements IElement, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {
@@ -45,11 +73,27 @@ export class Hyperlink implements IElement, IRoleProvider {
   /**
    * Gets or sets the text color for the link
    */
-  textColor: Color = Color.blue;
+  private _textColor: Color = Color.blue;
+
+  /** Link text colour. Accepts a palette token or hex on write. */
+  public get textColor(): Color {
+    return this._textColor;
+  }
+  public set textColor(value: ColorInput) {
+    this._textColor = toColor(value);
+  }
   /**
    * Gets or sets the margin around the hyperlink
    */
-  margin: Thickness = new Thickness(0);
+  private _margin: Thickness = new Thickness(0);
+
+  /** Margin around the link. Accepts the forgiving spacing forms on write. */
+  public get margin(): Thickness {
+    return this._margin;
+  }
+  public set margin(value: ThicknessInput) {
+    this._margin = toThickness(value);
+  }
 
   // Internal properties set during rendering
 
@@ -89,17 +133,27 @@ export class Hyperlink implements IElement, IRoleProvider {
    * @param text - The link text to display
    * @param uri - The URI (URL) that this hyperlink points to
    */
-  constructor(text: string, uri?: string) {
+  /** Creates a hyperlink from its text and optional URI. */
+  constructor(text: string, uri?: string, options?: HyperlinkOptions);
+  /** Options-only form; `text` is required either way. */
+  constructor(options: HyperlinkOptions & { text: string });
+  constructor(textOrOptions: string | (HyperlinkOptions & { text: string }), uri?: string, options?: HyperlinkOptions) {
+    const isPositional = typeof textOrOptions === 'string';
+    const text = isPositional ? textOrOptions : textOrOptions.text;
     if (!text || text === '') {
-      throw new Error('TextBlock cannot be null or empty');
+      throw new Error('Hyperlink text cannot be null or empty');
     }
     this.text = text;
 
-    if (uri !== undefined) {
-      if (!uri || uri === '') {
-        throw new Error('URI cannot be null or empty');
+    if (isPositional) {
+      if (uri !== undefined) {
+        if (uri === '') throw new Error('URI cannot be null or empty');
+        this.uri = uri;
       }
-      this.uri = uri;
+      applyOptions(this, options);
+    } else {
+      // `text` already assigned above; applyOptions re-assigns it harmlessly.
+      applyOptions(this, textOrOptions);
     }
   }
 

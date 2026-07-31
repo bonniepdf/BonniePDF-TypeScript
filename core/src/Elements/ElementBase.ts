@@ -1,6 +1,7 @@
 import { IMargin } from './IMargin';
 import { IElement, RenderContext } from './IElement';
 import { Thickness } from '../Core/Thickness';
+import { toThickness, type ThicknessInput } from '../Normalize/toThickness';
 
 /**
  * Base class for PDF elements that provides common functionality for margin handling,
@@ -12,10 +13,22 @@ export abstract class ElementBase implements IElement, IMargin {
    * The starting Y position when rendering begins (used for Y-position tracking)
    */
   protected startingY: number = 0;
+  private _margin: Thickness = new Thickness(0);
+
   /**
-   * Margin around this element
+   * Margin around this element.
+   *
+   * Reads as the canonical {@link Thickness}; accepts any of the forgiving
+   * spacing forms on write (`12`, `[h, v]`, `[l, t, r, b]`, `{ bottom: 12 }`) -
+   * see `the specification` §4A.3. Omitted sides are zero.
    */
-  public margin: Thickness;
+  public get margin(): Thickness {
+    return this._margin;
+  }
+  public set margin(value: ThicknessInput) {
+    this._margin = toThickness(value);
+  }
+
   /**
    * Whether this element can be split across page boundaries.
    * When false, the element is treated as atomic and will be moved to a new page
@@ -23,10 +36,6 @@ export abstract class ElementBase implements IElement, IMargin {
    * Default is true.
    */
   public breakAllowed: boolean = true;
-
-  constructor() {
-    this.margin = new Thickness(0);
-  }
 
   /**
    * Gets the preferred width of this element, if any.

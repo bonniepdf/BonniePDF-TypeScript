@@ -32,6 +32,7 @@ import { Container } from '../Elements/Layout/Container';
 import { BookmarkItem } from '../Configuration/BookmarkItem';
 import type { IElement } from '../Elements/IElement';
 import type { IContentContainer } from '../Elements/IContentContainer';
+import type { ViewerPreferencesSettings } from './Writers/IPdfWriter';
 import type { DocumentSettings } from '../Configuration/DocumentSettings';
 
 export class PdfDocumentSerializer {
@@ -258,8 +259,20 @@ export class PdfDocumentSerializer {
     // PDF/UA-1 mandates /DisplayDocTitle true (Matterhorn Protocol §7-1).
     if (hasViewerPreferences(settings) || conformancePlan.needsViewerPreferencesDisplayDocTitle) {
       catalogOptions.viewerPrefsId = writer.getNewId();
-      const vp = conformancePlan.needsViewerPreferencesDisplayDocTitle
-        ? { ...settings, displayDocTitle: true }
+      // Build the override explicitly rather than spreading `settings`: a spread
+      // flattens to a plain object and silently drops anything backed by a
+      // prototype accessor, so it would quietly lose properties as the settings
+      // surface gains normalising setters. Only the six ViewerPreferences fields
+      // are needed here.
+      const vp: ViewerPreferencesSettings = conformancePlan.needsViewerPreferencesDisplayDocTitle
+        ? {
+            hideToolbar: settings.hideToolbar,
+            hideMenubar: settings.hideMenubar,
+            hideWindowUI: settings.hideWindowUI,
+            fitWindow: settings.fitWindow,
+            centerWindow: settings.centerWindow,
+            displayDocTitle: true,
+          }
         : settings;
       writer.writeViewerPreferences(catalogOptions.viewerPrefsId, vp);
     }

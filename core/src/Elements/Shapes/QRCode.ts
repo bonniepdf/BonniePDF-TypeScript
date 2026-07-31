@@ -1,4 +1,8 @@
 import { QrCodeEncoder } from './QrCodeEncoder';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toColor, type ColorInput } from '../../Normalize/toColor';
+import { toQrEcc, type QrEccInput } from '../../Normalize/toEnum';
 import { QrEcc } from './QrEcc';
 import { ElementBase } from '../ElementBase';
 import { RenderContext } from '../../Rendering/RenderContext';
@@ -16,8 +20,46 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * https://www.nayuki.io/page/qr-code-generator-library
  * Ported to TypeScript for BonniePDF.
  */
+/** Settable properties declared by {@link QRCode} itself. */
+export const QR_CODE_OWN_OPTION_KEYS = [
+  'data',
+  'altText',
+  'isDecorative',
+  'size',
+  'foregroundColor',
+  'backgroundColor',
+  'drawBackground',
+  'errorCorrection',
+  'quietZone',
+] as const;
+
+/** The full settable surface, base included. */
+export const QR_CODE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...QR_CODE_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link QRCode}. */
+export type QRCodeOptions = ElementOptions &
+  Partial<
+    Omit<
+      Pick<QRCode, (typeof QR_CODE_OWN_OPTION_KEYS)[number]>,
+      'foregroundColor' | 'backgroundColor' | 'errorCorrection'
+    >
+  > & {
+    /** Module colour. Accepts a palette token or hex. */
+    foregroundColor?: ColorInput;
+    /** Quiet-zone colour. Accepts a palette token or hex. */
+    backgroundColor?: ColorInput;
+    /** Error-correction level. Accepts `'low' | 'medium' | 'quartile' | 'high'`. */
+    errorCorrection?: QrEccInput;
+  };
+
 export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The data/text to encode in the QR Code. */
+  /** Creates a QR code, optionally configured in one expression. */
+  constructor(options?: QRCodeOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   public data = '';
 
   /**
@@ -42,10 +84,26 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
   public size = 100;
 
   /** The color of the QR code modules (usually black). */
-  public foregroundColor: Color = new Color(0, 0, 0);
+  private _foregroundColor: Color = new Color(0, 0, 0);
+
+  /** Module colour. Accepts a palette token or hex. */
+  public get foregroundColor(): Color {
+    return this._foregroundColor;
+  }
+  public set foregroundColor(value: ColorInput) {
+    this._foregroundColor = toColor(value);
+  }
 
   /** The background color of the QR code (usually white). */
-  public backgroundColor: Color = new Color(255, 255, 255);
+  private _backgroundColor: Color = new Color(255, 255, 255);
+
+  /** Quiet-zone colour. Accepts a palette token or hex. */
+  public get backgroundColor(): Color {
+    return this._backgroundColor;
+  }
+  public set backgroundColor(value: ColorInput) {
+    this._backgroundColor = toColor(value);
+  }
 
   /** Whether to draw the background color. If false, the QR code will be transparent. */
   public drawBackground = true;
@@ -54,7 +112,15 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
    * The error correction level to use. Higher levels provide more redundancy
    * at the cost of reduced data capacity. Default is Medium (~15%).
    */
-  public errorCorrection: QrEcc = QrEcc.Medium;
+  private _errorCorrection: QrEcc = QrEcc.Medium;
+
+  /** Error-correction level. Accepts `'low' | 'medium' | 'quartile' | 'high'`. */
+  public get errorCorrection(): QrEcc {
+    return this._errorCorrection;
+  }
+  public set errorCorrection(value: QrEccInput) {
+    this._errorCorrection = toQrEcc(value);
+  }
 
   /** Number of quiet-zone modules around the QR code. The spec recommends 4. Set to 0 to disable. */
   public quietZone = 4;

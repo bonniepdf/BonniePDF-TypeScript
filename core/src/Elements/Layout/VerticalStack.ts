@@ -2,11 +2,30 @@ import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
  * Implements IStatefulElement to support rendering children that overflow across pages.
  */
+/** Settable properties declared by {@link VerticalStack} itself. */
+export const VERTICAL_STACK_OWN_OPTION_KEYS = ['spacing'] as const;
+
+/**
+ * The full settable *property* surface, base included. `children` is synthetic
+ * sugar over {@link VerticalStack.addChild}, not a property - see
+ * `HORIZONTAL_STACK_OPTION_KEYS` for the rationale.
+ */
+export const VERTICAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VERTICAL_STACK_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link VerticalStack}. */
+export type VerticalStackOptions = ElementOptions &
+  Partial<Pick<VerticalStack, 'spacing'>> & {
+    /** Children to add, in order. Sugar over {@link VerticalStack.addChild}. */
+    children?: IElement[];
+  };
+
 export class VerticalStack extends ElementBase implements IStatefulElement {
   private readonly _children: IElement[] = [];
   private lastChildRendered: number = -1;
@@ -14,6 +33,19 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   /**
    * Spacing between children in points. Default is 0.
    */
+  /** Creates an empty vertical stack. */
+  constructor();
+  /** Creates a vertical stack configured in one expression. */
+  constructor(options: VerticalStackOptions);
+  constructor(options?: VerticalStackOptions) {
+    super();
+    const { children, ...rest } = options ?? {};
+    applyOptions(this, rest);
+    if (children !== undefined) {
+      for (const child of children) this.addChild(child);
+    }
+  }
+
   public spacing: number = 0;
 
   /**

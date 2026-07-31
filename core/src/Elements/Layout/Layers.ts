@@ -1,3 +1,5 @@
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { ElementBase } from '../ElementBase';
 import { IElement, RenderContext } from '../IElement';
 
@@ -9,6 +11,25 @@ import { IElement, RenderContext } from '../IElement';
  * card backgrounds behind a label, badges over an image, and so on - without
  * the absolute-positioning workarounds.
  */
+/** Settable properties declared by {@link Layers} itself. */
+export const LAYERS_OWN_OPTION_KEYS = ['primaryLayer'] as const;
+
+/**
+ * The full settable *property* surface, base included. `background` and
+ * `foreground` are synthetic sugar over {@link Layers.addBackground} /
+ * {@link Layers.addForeground}, not properties.
+ */
+export const LAYERS_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...LAYERS_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link Layers}. */
+export type LayersOptions = ElementOptions &
+  Partial<Pick<Layers, 'primaryLayer'>> & {
+    /** Layers painted behind the primary layer, in order. */
+    background?: IElement[];
+    /** Layers painted on top of the primary layer, in order. */
+    foreground?: IElement[];
+  };
+
 export class Layers extends ElementBase {
   private readonly backgroundLayersList: IElement[] = [];
   private readonly foregroundLayersList: IElement[] = [];
@@ -18,6 +39,18 @@ export class Layers extends ElementBase {
    * tallest declared layer defines the height instead.
    */
   public primaryLayer?: IElement;
+
+  /** Creates an empty z-stack. */
+  constructor();
+  /** Creates a z-stack configured in one expression. */
+  constructor(options: LayersOptions);
+  constructor(options?: LayersOptions) {
+    super();
+    const { background, foreground, ...rest } = options ?? {};
+    applyOptions(this, rest);
+    for (const el of background ?? []) this.addBackground(el);
+    for (const el of foreground ?? []) this.addForeground(el);
+  }
 
   /** Layers painted behind the primary layer, in declaration order. */
   public get backgroundLayers(): readonly IElement[] {

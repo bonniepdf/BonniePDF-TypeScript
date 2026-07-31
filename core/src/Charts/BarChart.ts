@@ -1,4 +1,7 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
@@ -11,6 +14,19 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Now supports multiple series.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link BarChart} itself. */
+export const BAR_CHART_OWN_OPTION_KEYS = ['barColor', 'barWidthRatio'] as const;
+
+/** The full option surface, bases included. */
+export const BAR_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...BAR_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link BarChart}. */
+export type BarChartOptions = CartesianChartOptions &
+  Partial<Omit<Pick<BarChart, (typeof BAR_CHART_OWN_OPTION_KEYS)[number]>, 'barColor'>> & {
+    /** barColor colour. Accepts a palette token or hex. */
+    barColor?: ColorInput;
+  };
+
 export class BarChart extends CartesianChartBase {
   private static readonly BAR_COLOR_HEX = '#4f46e5';
 
@@ -20,7 +36,21 @@ export class BarChart extends CartesianChartBase {
   /**
    * Color for the bars (backward compatibility).
    */
-  barColor: Color = Color.fromHex(BarChart.BAR_COLOR_HEX);
+  /** Creates a BarChart, optionally configured in one expression. */
+  constructor(options?: BarChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
+  private _barColor: Color = Color.fromHex(BarChart.BAR_COLOR_HEX);
+
+  /** Bar colour. Accepts a palette token or hex. */
+  public get barColor(): Color {
+    return this._barColor;
+  }
+  public set barColor(value: ColorInput) {
+    this._barColor = toColor(value);
+  }
 
   /**
    * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).

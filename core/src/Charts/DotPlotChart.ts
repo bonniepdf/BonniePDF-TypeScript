@@ -1,4 +1,7 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ChartSeries } from './Models/ChartSeries';
 import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
@@ -10,6 +13,19 @@ import { ICanvas } from '../Drawing/ICanvas';
  * Now supports multiple series for comparing datasets.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link DotPlotChart} itself. */
+export const DOT_PLOT_CHART_OWN_OPTION_KEYS = ['defaultDotRadius', 'dotColor', 'dotRadius'] as const;
+
+/** The full option surface, bases included. */
+export const DOT_PLOT_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...DOT_PLOT_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link DotPlotChart}. */
+export type DotPlotChartOptions = CartesianChartOptions &
+  Partial<Omit<Pick<DotPlotChart, (typeof DOT_PLOT_CHART_OWN_OPTION_KEYS)[number]>, 'dotColor'>> & {
+    /** dotColor colour. Accepts a palette token or hex. */
+    dotColor?: ColorInput;
+  };
+
 export class DotPlotChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DOT_RADIUS_VALUE = 10;
@@ -17,12 +33,26 @@ export class DotPlotChart extends CartesianChartBase {
   /**
    * Default dot radius for all series (can be overridden per series via Style).
    */
+  /** Creates a DotPlotChart, optionally configured in one expression. */
+  constructor(options?: DotPlotChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   defaultDotRadius: number = DotPlotChart.DEFAULT_DOT_RADIUS_VALUE;
 
   /**
    * Color for the data point circles (backward compatibility).
    */
-  dotColor: Color = Color.fromHex(DotPlotChart.DEFAULT_COLOR_HEX);
+  private _dotColor: Color = Color.fromHex(DotPlotChart.DEFAULT_COLOR_HEX);
+
+  /** Dot colour. Accepts a palette token or hex. */
+  public get dotColor(): Color {
+    return this._dotColor;
+  }
+  public set dotColor(value: ColorInput) {
+    this._dotColor = toColor(value);
+  }
 
   /**
    * Radius of the data point circles (backward compatibility).

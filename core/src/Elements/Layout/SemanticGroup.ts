@@ -1,4 +1,4 @@
-import { VerticalStack } from './VerticalStack';
+import { VerticalStack, type VerticalStackOptions } from './VerticalStack';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 
@@ -14,12 +14,27 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * {@link semanticRole}. Children that are themselves {@link IRoleProvider}
  * get their own nested structure elements.
  */
+/**
+ * Options for {@link SemanticGroup}. The role itself is not a settable property
+ * (it is exposed read-only as `semanticRole`), so it stays a constructor value.
+ */
+export type SemanticGroupOptions = VerticalStackOptions;
+
 export class SemanticGroup extends VerticalStack implements IRoleProvider {
   private readonly _role: SemanticRole;
 
-  constructor(role: SemanticRole) {
-    super();
-    this._role = role;
+  /** Creates a semantic group for the given role. */
+  constructor(role: SemanticRole, options?: SemanticGroupOptions);
+  /** Options-only form; `role` is required either way. */
+  constructor(options: SemanticGroupOptions & { role: SemanticRole });
+  constructor(
+    roleOrOptions: SemanticRole | (SemanticGroupOptions & { role: SemanticRole }),
+    options?: SemanticGroupOptions
+  ) {
+    // SemanticRole is a string enum, so a string first argument is the role.
+    const isPositional = typeof roleOrOptions === 'string';
+    super((isPositional ? options : roleOrOptions) ?? {});
+    this._role = isPositional ? roleOrOptions : roleOrOptions.role;
   }
 
   /** @inheritdoc */

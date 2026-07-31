@@ -2,11 +2,48 @@ import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
+import { applyOptions } from '../../Core/applyOptions';
+import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import {
+  toHorizontalAlignment,
+  toWidthDistribution,
+  type HorizontalAlignmentInput,
+  type WidthDistributionInput,
+} from '../../Normalize/toEnum';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 
 /**
  * A layout element that arranges children horizontally with spacing and alignment options
  */
+/** Settable properties declared by {@link HorizontalStack} itself. */
+export const HORIZONTAL_STACK_OWN_OPTION_KEYS = ['spacing', 'alignment', 'widthDistribution', 'height'] as const;
+
+/**
+ * The full settable *property* surface, bases included.
+ *
+ * `children` is deliberately absent: it is a read-only projection over the
+ * internal list, and the options bag exposes it as **synthetic sugar** over
+ * {@link HorizontalStack.addChild} rather than as a property. Keeping it out
+ * here is what lets the exhaustiveness guard stay meaningful.
+ */
+export const HORIZONTAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...HORIZONTAL_STACK_OWN_OPTION_KEYS] as const;
+
+type HorizontalStackOwnKey = (typeof HORIZONTAL_STACK_OWN_OPTION_KEYS)[number];
+
+/** Options for {@link HorizontalStack}. */
+export type HorizontalStackOptions = ElementOptions &
+  Partial<Omit<Pick<HorizontalStack, HorizontalStackOwnKey>, 'alignment' | 'widthDistribution'>> & {
+    /** Cross-axis alignment. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
+    alignment?: HorizontalAlignmentInput;
+    /** Width sharing. Accepts `'equal' | 'weighted' | 'auto'`. */
+    widthDistribution?: WidthDistributionInput;
+    /**
+     * Children to add, in order. Sugar over {@link HorizontalStack.addChild};
+     * use `addChild(child, weight)` directly when a per-child weight is needed.
+     */
+    children?: IElement[];
+  };
+
 export class HorizontalStack extends ElementBase implements IStatefulElement {
   private readonly _children: IElement[] = [];
   private readonly widths: (number | null)[] = [];
@@ -15,15 +52,48 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * Spacing between children (in points)
    */
+  /** Creates an empty horizontal stack. */
+  constructor();
+  /** Creates a horizontal stack configured in one expression. */
+  constructor(options: HorizontalStackOptions);
+  constructor(options?: HorizontalStackOptions) {
+    super();
+    const { children, ...rest } = options ?? {};
+    applyOptions(this, rest);
+    if (children !== undefined) {
+      for (const child of children) this.addChild(child);
+    }
+  }
+
   public spacing: number = 10;
   /**
    * Horizontal alignment of children within the stack
    */
-  public alignment: HorizontalAlignment = HorizontalAlignment.Start;
+  private _alignment: HorizontalAlignment = HorizontalAlignment.Start;
+
+  /**
+   * Cross-axis alignment. Accepts `'start' | 'center' | 'end' | 'stretch'`.
+   */
+  public get alignment(): HorizontalAlignment {
+    return this._alignment;
+  }
+  public set alignment(value: HorizontalAlignmentInput) {
+    this._alignment = toHorizontalAlignment(value);
+  }
   /**
    * Width distribution mode for children
    */
-  public widthDistribution: WidthDistribution = WidthDistribution.Auto;
+  private _widthDistribution: WidthDistribution = WidthDistribution.Auto;
+
+  /**
+   * How available width is shared. Accepts `'equal' | 'weighted' | 'auto'`.
+   */
+  public get widthDistribution(): WidthDistribution {
+    return this._widthDistribution;
+  }
+  public set widthDistribution(value: WidthDistributionInput) {
+    this._widthDistribution = toWidthDistribution(value);
+  }
   /**
    * Optional fixed height for the stack. If null, height is determined by the tallest child.
    */

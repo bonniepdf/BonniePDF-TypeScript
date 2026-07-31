@@ -1,4 +1,5 @@
 import { TextElementBase } from './TextElementBase';
+import { toTextAlignment, type TextAlignmentInput } from '../../Normalize/toEnum';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
@@ -8,6 +9,32 @@ import { TextDecoration } from './TextDecoration';
 import { paintDecorationLine } from './DecorationStyle';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { applyOptions } from '../../Core/applyOptions';
+import { TEXT_ELEMENT_OPTION_KEYS, type TextElementOptions } from './TextElementOptions';
+
+/** Settable properties declared by {@link TextBlock} itself. */
+export const TEXT_BLOCK_OWN_OPTION_KEYS = [
+  'text',
+  'alignment',
+  'minLinesBeforeBreak',
+  'minLinesAfterBreak',
+  'maxLines',
+  'ellipsis',
+  'firstLineIndent',
+  'paragraphSpacing',
+] as const;
+
+/** The full settable surface of a text block, bases included. */
+export const TEXT_BLOCK_OPTION_KEYS = [...TEXT_ELEMENT_OPTION_KEYS, ...TEXT_BLOCK_OWN_OPTION_KEYS] as const;
+
+type TextBlockOwnKey = (typeof TEXT_BLOCK_OWN_OPTION_KEYS)[number];
+
+/** Options for {@link TextBlock}. Intersects {@link TextElementOptions}. */
+export type TextBlockOptions = TextElementOptions &
+  Partial<Omit<Pick<TextBlock, TextBlockOwnKey>, 'alignment'>> & {
+    /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+    alignment?: TextAlignmentInput;
+  };
 
 /**
  * A text block element that supports word wrapping, alignment, font customization,
@@ -30,7 +57,15 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public get semanticRole(): SemanticRole {
     return SemanticRole.P;
   }
-  public alignment: TextAlignment = TextAlignment.Left;
+  private _alignment: TextAlignment = TextAlignment.Left;
+
+  /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+  public get alignment(): TextAlignment {
+    return this._alignment;
+  }
+  public set alignment(value: TextAlignmentInput) {
+    this._alignment = toTextAlignment(value);
+  }
 
   /**
    * Minimum number of lines to render before a page break (orphan control).
@@ -76,11 +111,28 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   /** Per-line extra leading above the line, parallel to {@link cachedLines}. */
   private cachedSpaceBefore?: number[];
 
-  constructor(text?: string) {
+  /** Creates a text block, optionally with its text. */
+  constructor(text?: string);
+  /**
+   * Creates a text block configured in one expression.
+   *
+   * ```typescript
+   * new TextBlock({ text: 'Hello', fontSize: 11, textColor: 'slate-600' });
+   * ```
+   */
+  constructor(options: TextBlockOptions);
+  /** Convenience: the text as a positional payload, plus options. */
+  constructor(text: string, options?: TextBlockOptions);
+  constructor(textOrOptions?: string | TextBlockOptions, options?: TextBlockOptions) {
     super();
-    if (text !== undefined) {
-      this.text = text;
+    // Resolve the two accepted shapes into one text + one options bag. A string
+    // first argument is the payload; anything else is the options bag itself
+    // (`09a §3.4`: an options object is the only bare-object argument form).
+    const isPositional = typeof textOrOptions === 'string';
+    if (isPositional) {
+      this.text = textOrOptions;
     }
+    applyOptions(this, isPositional ? options : textOrOptions);
   }
 
   /**

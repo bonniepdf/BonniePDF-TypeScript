@@ -1,4 +1,6 @@
 import { ChartData } from './Models/ChartData';
+import { applyOptions } from '../Core/applyOptions';
+import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartDataPoint } from './Models/ChartDataPoint';
 import { ChartBase } from './ChartBase';
 import { Color } from '../Core/Color';
@@ -14,6 +16,24 @@ import { StandardFonts } from '../Typography/StandardFonts';
  * All layout is computed dynamically from Width and Height, so the chart
  * adapts correctly to any size or StretchToFit mode.
  */
+/** Settable properties declared by {@link PieChart} itself. */
+export const PIE_CHART_OWN_OPTION_KEYS = [
+  'colors',
+  'isDonut',
+  'totalLabel',
+  'totalLabelFontSize',
+  'totalValueFontSize',
+  'totalValueFormat',
+  'showLegend',
+  'showTotal',
+] as const;
+
+/** The full option surface, base included. */
+export const PIE_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...PIE_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options for {@link PieChart}. Intersects {@link ChartBaseOptions}. */
+export type PieChartOptions = ChartBaseOptions & Partial<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>>;
+
 export class PieChart extends ChartBase {
   // Layout proportions (relative to chart dimensions)
   private static readonly TITLE_AREA_HEIGHT = 60;
@@ -58,6 +78,12 @@ export class PieChart extends ChartBase {
    * Custom colors to use for the pie slices.
    * If null, uses the default color palette.
    */
+  /** Creates a pie chart, optionally configured in one expression. */
+  constructor(options?: PieChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   colors: string[] | undefined;
 
   /**

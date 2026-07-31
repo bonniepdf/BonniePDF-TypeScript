@@ -1,4 +1,6 @@
 import { ChartData } from './Models/ChartData';
+import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
+import { applyOptions } from '../Core/applyOptions';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
@@ -11,6 +13,19 @@ import { TextAlignment } from '../Elements/Text/TextAlignment';
  * Extends CartesianChartBase and uses standard ChartData model with ChartSeries.
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
+/** Settable properties declared by {@link GroupedBarChart} itself. */
+export const GROUPED_BAR_CHART_OWN_OPTION_KEYS = ['barWidthRatio', 'groupGapRatio'] as const;
+
+/** The full option surface, bases included. */
+export const GROUPED_BAR_CHART_OPTION_KEYS = [
+  ...CARTESIAN_CHART_OPTION_KEYS,
+  ...GROUPED_BAR_CHART_OWN_OPTION_KEYS,
+] as const;
+
+/** Options for {@link GroupedBarChart}. */
+export type GroupedBarChartOptions = CartesianChartOptions &
+  Partial<Pick<GroupedBarChart, (typeof GROUPED_BAR_CHART_OWN_OPTION_KEYS)[number]>>;
+
 export class GroupedBarChart extends CartesianChartBase {
   /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
   override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';
@@ -18,6 +33,12 @@ export class GroupedBarChart extends CartesianChartBase {
   /**
    * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
    */
+  /** Creates a GroupedBarChart, optionally configured in one expression. */
+  constructor(options?: GroupedBarChartOptions) {
+    super();
+    applyOptions(this, options);
+  }
+
   barWidthRatio: number = 0.6;
 
   /**

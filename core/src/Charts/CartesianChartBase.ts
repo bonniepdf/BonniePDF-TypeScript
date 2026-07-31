@@ -1,4 +1,5 @@
 import { ICanvas } from '../Drawing/ICanvas';
+import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
 import { AxisOptions } from './Models/AxisOptions';
@@ -14,6 +15,22 @@ import { StandardFonts } from '../Typography/StandardFonts';
  * Provides common functionality for drawing axes, grid lines, labels, and legends.
  * Uses the Template Method pattern to ensure consistent drawing order across all derived charts.
  */
+/** Settable properties declared by {@link CartesianChartBase} itself. */
+export const CARTESIAN_CHART_OWN_OPTION_KEYS = [
+  'fontFamily',
+  'showValueLabels',
+  'labelFontSize',
+  'showLegend',
+  'orientation',
+] as const;
+
+/** The full option surface of a cartesian chart, base included. */
+export const CARTESIAN_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...CARTESIAN_CHART_OWN_OPTION_KEYS] as const;
+
+/** Options common to cartesian charts. Intersects {@link ChartBaseOptions}. */
+export type CartesianChartOptions = ChartBaseOptions &
+  Partial<Pick<CartesianChartBase, (typeof CARTESIAN_CHART_OWN_OPTION_KEYS)[number]>>;
+
 export abstract class CartesianChartBase extends ChartBase {
   // Layout constants (relative to chart height)
   protected static readonly TITLE_AREA_HEIGHT = 60;

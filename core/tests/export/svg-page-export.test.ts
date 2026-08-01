@@ -8,7 +8,7 @@ import { Table } from '../../src/Elements/Tables/Table';
 import { Image } from '../../src/Elements/Media/Image';
 import { ChartElement } from '../../src/Charts/ChartElement';
 import { BarChart } from '../../src/Charts/BarChart';
-import { WatermarkSettings } from '../../src/Configuration/WatermarkSettings';
+import { Watermark } from '../../src/Configuration/Watermark';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { FontManager } from '../../src/Typography/FontManager';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
@@ -179,7 +179,7 @@ describe('SVG page export', () => {
 
   it('draws the watermark over content so it is never occluded', async () => {
     doc = simpleDoc();
-    doc.settings.watermark = new WatermarkSettings('DRAFT');
+    doc.settings.watermark = new Watermark('DRAFT');
     const svg = await doc.generateFirstPageSvgAsync();
     expect(svg).toContain('DRAFT');
     expect(svg).toContain('rotate(45'); // default -45deg negated for SVG

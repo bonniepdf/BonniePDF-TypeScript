@@ -3,7 +3,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  WatermarkSettings,
+  Watermark,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -25,7 +25,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
 
-  const watermark = new WatermarkSettings('CONFIDENTIAL');
+  const watermark = new Watermark('CONFIDENTIAL');
   watermark.fontSize = 60;
   watermark.textColor = Color.red;
   watermark.opacity = 0.08;

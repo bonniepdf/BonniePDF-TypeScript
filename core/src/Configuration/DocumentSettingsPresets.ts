@@ -1,7 +1,7 @@
 import { DocumentSettings } from './DocumentSettings';
 import { PdfVersion } from './PdfVersion';
 import { BookmarkItem } from './BookmarkItem';
-import { WatermarkSettings } from './WatermarkSettings';
+import { Watermark } from './Watermark';
 import { PdfAConformance } from './PdfAConformance';
 
 /**
@@ -89,7 +89,7 @@ export function withWatermark(
   opacity?: number,
   rotationDegrees?: number
 ): DocumentSettings {
-  const watermark = new WatermarkSettings();
+  const watermark = new Watermark();
   watermark.text = text;
   if (opacity !== undefined) {
     watermark.opacity = opacity;

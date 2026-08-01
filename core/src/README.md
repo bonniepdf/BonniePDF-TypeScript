@@ -29,7 +29,7 @@ TypeScript/BonniePDF/
 │   ├── PageMode.ts
 │   ├── ZoomLevel.ts
 │   ├── BookmarkItem.ts
-│   ├── WatermarkSettings.ts
+│   ├── Watermark.ts
 │   ├── DocumentMetadata.ts
 │   ├── DocumentSettings.ts
 │   └── InternalConfiguration.ts

@@ -8,7 +8,7 @@ import { ColorPalette } from '../Core/ColorPalette';
  * The watermark is rendered at the specified opacity and rotation using
  * PDF ExtGState for transparency and the cm operator for rotation.
  */
-/** Settable properties of {@link WatermarkSettings}. */
+/** Settable properties of {@link Watermark}. */
 export const WATERMARK_OPTION_KEYS = [
   'text',
   'fontName',
@@ -18,15 +18,13 @@ export const WATERMARK_OPTION_KEYS = [
   'rotationDegrees',
 ] as const;
 
-/** Options for {@link WatermarkSettings}. */
-export type WatermarkSettingsOptions = Partial<
-  Omit<Pick<WatermarkSettings, (typeof WATERMARK_OPTION_KEYS)[number]>, 'textColor'>
-> & {
+/** Options for {@link Watermark}. */
+export type WatermarkOptions = Partial<Omit<Pick<Watermark, (typeof WATERMARK_OPTION_KEYS)[number]>, 'textColor'>> & {
   /** Text colour. Accepts a palette token (`'slate-400'`) or hex. */
   textColor?: ColorInput;
 };
 
-export class WatermarkSettings {
+export class Watermark {
   /**
    * The watermark text to display (e.g. "DRAFT", "CONFIDENTIAL").
    */
@@ -64,8 +62,8 @@ export class WatermarkSettings {
   /** Creates a watermark from its text. */
   constructor(text?: string);
   /** Creates a watermark configured in one expression. */
-  constructor(options: WatermarkSettingsOptions);
-  constructor(textOrOptions: string | WatermarkSettingsOptions = '') {
+  constructor(options: WatermarkOptions);
+  constructor(textOrOptions: string | WatermarkOptions = '') {
     const text = typeof textOrOptions === 'string' ? textOrOptions : '';
     this.text = text;
     this.fontName = 'Helvetica';

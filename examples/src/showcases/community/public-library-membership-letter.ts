@@ -1,4 +1,4 @@
-// Public library membership letter
+// Public Library Membership
 //
 // The accessibility-first public-service showcase. UK public-sector documents
 // must meet the Public Sector Bodies Accessibility Regulations 2018, so this is

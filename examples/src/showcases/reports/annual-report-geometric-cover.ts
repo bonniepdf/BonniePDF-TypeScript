@@ -31,7 +31,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 
 const PAGE = PdfSize.a4;
 
-const COMPANY = 'Northwind Capital';
+const COMPANY = 'Sample Company';
 const YEAR = 2025;
 
 const INK = ColorPalette.slate[800];

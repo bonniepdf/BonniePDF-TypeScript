@@ -76,8 +76,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(BODY);
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Event Ticket - Aurora Sound Festival';
-  metadata.author = 'Aurora Live';
+  metadata.title = 'Event Ticket - Sample Sound Festival';
+  metadata.author = 'Sample Live';
   metadata.subject = 'Event ticket - accessible (PDF/UA) and archival (PDF/A-2a)';
 
   const bgData = assets?.get(BG_IMAGE);
@@ -100,9 +100,9 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   // ── Main body (dark) ────────────────────────────────────────────────────────
   const info = new VerticalStack();
-  info.addChild(tb('AURORA LIVE presents', 8, ACCENT, { bold: true, mb: 6 }));
+  info.addChild(tb('SAMPLE LIVE presents', 8, ACCENT, { bold: true, mb: 6 }));
 
-  const eventName = new Heading('Aurora Sound Festival');
+  const eventName = new Heading('Sample Sound Festival');
   eventName.fontName = StandardFonts.HelveticaBold;
   eventName.fontSize = 19;
   eventName.textColor = CREAM;

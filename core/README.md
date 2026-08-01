@@ -98,7 +98,7 @@ const settings = new DocumentSettings(PdfSize.a4);
 
 const metadata = new DocumentMetadata();
 metadata.title = 'My Report';
-metadata.author = 'ACME Corp';
+metadata.author = 'Sample Company';
 
 const doc = new Document(settings, metadata);
 doc.add(/* elements */);

@@ -243,7 +243,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Product Roadmap';
-  metadata.author = 'Acme Platform';
+  metadata.author = 'Sample Platform';
   metadata.subject = 'H1 2026 product roadmap - swimlanes by team across a six-month timeline';
 
   const doc = new Document(settings, metadata);
@@ -251,7 +251,7 @@ export function generate(): Document {
   // ── Title row: heading left, period badge right ───────────────────────────
   const titleBlock = new VerticalStack();
   titleBlock.addChild(tb('Product Roadmap', 23, INK, { bold: true }));
-  titleBlock.addChild(tb('Acme Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }));
+  titleBlock.addChild(tb('Sample Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }));
 
   const badge = new Container();
   badge.backgroundColor = BADGE_BG;

@@ -112,16 +112,16 @@ const ROLES = ['Manager', 'Lead', 'Senior', 'Junior', 'Intern', 'Director', 'VP'
 const LOCATIONS = ['New York', 'London', 'Berlin', 'Tokyo', 'Sydney', 'Toronto', 'Paris'];
 
 const COMPANY_NAMES = [
-  'Meridian Labs',
-  'Studio Eleven',
-  'Acme Corporation',
-  'Northwind Traders',
-  'Contoso Ltd',
-  'Alpine Software',
-  'Lunar Industries',
-  'Verdant Solutions',
-  'Pinnacle Systems',
-  'Cobalt Dynamics',
+  'Sample Company',
+  'Sample Customer',
+  'Sample Supplier',
+  'Sample Software',
+  'Sample Industries',
+  'Sample Solutions',
+  'Sample Systems',
+  'Sample Services',
+  'Sample Retail',
+  'Sample Group',
 ];
 
 const LOREM_SENTENCES = [

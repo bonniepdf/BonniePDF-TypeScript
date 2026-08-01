@@ -72,7 +72,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = `Invoice INV-US-${year}-0148`;
-  metadata.author = 'Redwood Systems Inc.';
+  metadata.author = 'Sample Company Inc.';
   metadata.subject = 'US commercial invoice with destination-based state and county sales tax.';
 
   const doc = new Document(settings, metadata);
@@ -86,9 +86,7 @@ export function generate(): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(
-    cell('Redwood Systems Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) })
-  );
+  seller.addChild(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
   seller.addChild(
     lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED })
   );
@@ -114,7 +112,7 @@ export function generate(): Document {
   meta.margin = new Thickness(0, 0, 0, 18);
   const billTo = labelled(
     'BILL TO',
-    lines(['Cascade Retail LLC', 'Accounts Payable', '18 Pioneer Square', 'Seattle, WA 98104'], { color: MUTED }),
+    lines(['Sample Customer LLC', 'Accounts Payable', '18 Pioneer Square', 'Seattle, WA 98104'], { color: MUTED }),
     ACCENT
   );
   const detailsStack = new VerticalStack();
@@ -184,8 +182,8 @@ export function generate(): Document {
     lines(
       [
         'Please reference invoice INV-US-0148 and PO-88213 with payment.',
-        'ACH: Routing 121000248  ·  Account ****4471  ·  Redwood Systems Inc.',
-        'Checks payable to Redwood Systems Inc., 500 Market Street, San Francisco, CA 94105.',
+        'ACH: Routing 121000248  ·  Account ****4471  ·  Sample Company Inc.',
+        'Checks payable to Sample Company Inc., 500 Market Street, San Francisco, CA 94105.',
       ],
       { size: 8, color: MUTED }
     ),

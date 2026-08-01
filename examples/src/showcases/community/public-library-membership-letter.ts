@@ -73,7 +73,7 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(LIBRARY_INK);
 
   settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const f = new TextBlock(`Northbridge Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`);
+    const f = new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`);
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.textColor = LIBRARY_SECONDARY;
@@ -82,7 +82,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Public library membership confirmation';
-  metadata.author = 'Northbridge Libraries';
+  metadata.author = 'Sample Libraries';
   metadata.subject = 'Public library membership confirmation with borrowing limits and branch hours (fictional).';
 
   const doc = new Document(settings, metadata);
@@ -91,7 +91,7 @@ export function generate(): Document {
   mast.backgroundColor = LIBRARY_INK;
   mast.padding = new Thickness(14, 10, 14, 10);
   mast.margin = new Thickness(0, 0, 0, 6);
-  const brand = new TextBlock('Northbridge Libraries');
+  const brand = new TextBlock('Sample Libraries');
   brand.fontName = StandardFonts.HelveticaBold;
   brand.fontSize = 18;
   brand.textColor = Color.white;
@@ -138,7 +138,7 @@ export function generate(): Document {
   doc.add(h1('Your public library membership'));
   doc.add(
     body(
-      `Welcome to Northbridge Libraries. Your membership is active from ${longDate} ` +
+      `Welcome to Sample Libraries. Your membership is active from ${longDate} ` +
         `and your first card renewal date is ${renewalDate}. You can use your card at ` +
         `any branch, online catalogue terminal, or through the library app.`
     )

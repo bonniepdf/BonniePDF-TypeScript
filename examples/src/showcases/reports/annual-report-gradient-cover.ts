@@ -31,7 +31,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 
 const PAGE = PdfSize.a4;
 
-const COMPANY = 'Aurora Dynamics';
+const COMPANY = 'Sample Company';
 const YEAR = 2025;
 
 /** Four brand cubic-bezier circle quadrants - a reusable circle sub-path. */
@@ -95,7 +95,7 @@ function drawCover(canvas: ICanvas, size: Size): void {
   canvas.restoreState();
 
   // 5. Cover type, drawn directly on the canvas.
-  canvas.drawText(108, h * 0.2 - 9, 'AURORA', Color.white, 15, StandardFonts.HelveticaBold, TextAlignment.Left);
+  canvas.drawText(108, h * 0.2 - 9, 'SAMPLE', Color.white, 15, StandardFonts.HelveticaBold, TextAlignment.Left);
 
   canvas.drawText(
     72,

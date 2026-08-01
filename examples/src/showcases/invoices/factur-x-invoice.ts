@@ -71,7 +71,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   const doc = new Document(settings);
   doc.metadata.title = 'E-Invoice INV-2026-1001';
-  doc.metadata.author = 'BonniePDF GmbH';
+  doc.metadata.author = 'Sample Company GmbH';
   doc.metadata.subject =
     'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.';
 
@@ -84,7 +84,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(cell('BonniePDF GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
+  seller.addChild(cell('Sample Company GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
   seller.addChild(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
   seller.addChild(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
   const titleStack = new VerticalStack();
@@ -109,7 +109,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   meta.margin = new Thickness(0, 0, 0, 18);
   const buyer = labelled(
     'BILLED TO',
-    lines(['Contoso Ltd', '1 Example Way', 'EC1A 1BB London', 'United Kingdom'], { color: MUTED }),
+    lines(['Sample Customer', '1 Example Way', 'EC1A 1BB London', 'United Kingdom'], { color: MUTED }),
     ACCENT
   );
   const detailsStack = new VerticalStack();

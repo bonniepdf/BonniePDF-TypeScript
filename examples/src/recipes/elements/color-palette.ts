@@ -1,21 +1,12 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   HorizontalStack,
   VerticalStack,
   Container,
-  Border,
-  BorderColors,
   ColorPalette,
   SHADES,
   StandardFonts,
-  Thickness,
-  WidthDistribution,
   type PaletteName,
 } from '@bonniepdf/core';
 
@@ -28,105 +19,91 @@ const LABEL_WIDTH = 56;
 
 /** A single colour square for one palette/shade. */
 function swatch(name: PaletteName, shade: (typeof SHADES)[number]): Container {
-  const cell = new Container();
-  // No fixed width: under the row's Weighted distribution the stack stretches each swatch
-  // to fill the page, so the 11 boxes span the full width minus the label gutter.
-  cell.height = BOX_HEIGHT;
-  cell.backgroundColor = ColorPalette[name][shade];
-  // A hairline border keeps the lightest shades (50) visible against the white page.
-  cell.border = new Border(0.5);
-  cell.borderColors = new BorderColors(ColorPalette.slate[200]);
-  cell.cornerRadius = 2;
-  return cell;
+  // No fixed width: under the row's weighted distribution the stack stretches each
+  // swatch to fill the page, so the 11 boxes span the full width minus the label
+  // gutter. A hairline border keeps the lightest shades (50) visible on white.
+  return new Container({
+    height: BOX_HEIGHT,
+    backgroundColor: ColorPalette[name][shade],
+    border: { width: 0.5, color: 'slate-200' },
+    cornerRadius: 2,
+  });
 }
 
 /** The left-hand row label carrying the palette name. */
 function rowLabel(name: PaletteName): Container {
-  const text = new TextBlock(name);
-  text.fontName = StandardFonts.Helvetica;
-  text.fontSize = 9;
-  text.textColor = ColorPalette.slate[700];
-
-  const box = new Container();
-  box.width = LABEL_WIDTH;
-  box.height = BOX_HEIGHT;
-  // Nudge the label down so it sits roughly centred against the box.
-  box.padding = new Thickness(0, 9, H_GAP, 0);
-  box.child = text;
-  return box;
+  return new Container({
+    width: LABEL_WIDTH,
+    height: BOX_HEIGHT,
+    // Nudge the label down so it sits roughly centred against the box.
+    padding: { top: 9, right: H_GAP },
+    child: new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: 'slate-700' }),
+  });
 }
 
 /** A centred header cell carrying a shade number (50, 100, … 950). */
 function headerCell(label: string): TextBlock {
-  const text = new TextBlock(label);
-  text.fontName = StandardFonts.Helvetica;
-  text.fontSize = 7;
-  text.textColor = ColorPalette.slate[500];
   // Centred via alignment; no wrapping Container needed — the cell it lands in
   // already stretches with its column so the number stays centred over the swatch.
-  text.alignment = TextAlignment.Center;
-  return text;
+  return new TextBlock(label, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 7,
+    textColor: 'slate-500',
+    alignment: 'center',
+  });
+}
+
+/** The header row: a fixed-width gutter above the labels, then a shade number per column. */
+function headerRow(): HorizontalStack {
+  // Weighted distribution: the gutter keeps its fixed width (null weight), and the
+  // 11 columns share the remaining page width equally (weight 1 each).
+  const header = new HorizontalStack({ widthDistribution: 'weighted', spacing: H_GAP });
+  header.addChild(new Container({ width: LABEL_WIDTH }));
+  for (const shade of SHADES) header.addChild(headerCell(String(shade)), 1);
+  return header;
+}
+
+/** One palette row: a fixed-width label, then 11 swatches that fill the rest equally. */
+function paletteRow(name: PaletteName): HorizontalStack {
+  const row = new HorizontalStack({ widthDistribution: 'weighted', spacing: H_GAP });
+  row.addChild(rowLabel(name));
+  for (const shade of SHADES) row.addChild(swatch(name, shade), 1);
+  return row;
 }
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 36);
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'ColorPalette Swatches';
-  metadata.author = 'BonniePDF';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 36,
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'ColorPalette Swatches',
+      author: 'BonniePDF',
+    },
+  });
 
   // ── Title ──
-  const title = new TextBlock('ColorPalette');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 18;
-  title.textColor = ColorPalette.slate[800];
-  doc.add(title);
-
-  const subtitle = new TextBlock(
-    'Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].'
+  doc.add(
+    new TextBlock('ColorPalette', { fontName: StandardFonts.HelveticaBold, fontSize: 18, textColor: 'slate-800' })
   );
-  subtitle.fontName = StandardFonts.Helvetica;
-  subtitle.fontSize = 9;
-  subtitle.textColor = ColorPalette.slate[500];
-  subtitle.margin = new Thickness(0, 4, 0, 8);
-  doc.add(subtitle);
 
-  // ── Grid ──
-  const grid = new VerticalStack();
-  grid.spacing = V_GAP;
+  doc.add(
+    new TextBlock(
+      'Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].',
+      { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: 'slate-500', margin: { top: 4, bottom: 8 } }
+    )
+  );
 
-  // Header row: an empty gutter above the labels, then a shade number per column.
-  const header = new HorizontalStack();
-  // Weighted distribution: the gutter keeps its fixed width (null weight), and the 11 columns
-  // share the remaining page width equally (weight 1 each).
-  header.widthDistribution = WidthDistribution.Weighted;
-  header.spacing = H_GAP;
-  const gutter = new Container();
-  gutter.width = LABEL_WIDTH;
-  header.addChild(gutter);
-  for (const shade of SHADES) {
-    header.addChild(headerCell(String(shade)), 1);
-  }
-  grid.addChild(header);
-
-  // One row per palette, lightest (50) on the left to darkest (950) on the right.
+  // ── Grid ── one row per palette, lightest (50) on the left to darkest (950) on the right.
   const names = Object.keys(ColorPalette) as PaletteName[];
-  for (const name of names) {
-    const row = new HorizontalStack();
-    // Fixed-width label (null weight) + 11 swatches that fill the rest equally (weight 1).
-    row.widthDistribution = WidthDistribution.Weighted;
-    row.spacing = H_GAP;
-    row.addChild(rowLabel(name));
-    for (const shade of SHADES) {
-      row.addChild(swatch(name, shade), 1);
-    }
-    grid.addChild(row);
-  }
-
-  doc.add(grid);
+  doc.add(
+    new VerticalStack({
+      spacing: V_GAP,
+      children: [headerRow(), ...names.map(paletteRow)],
+    })
+  );
 
   return doc;
 }

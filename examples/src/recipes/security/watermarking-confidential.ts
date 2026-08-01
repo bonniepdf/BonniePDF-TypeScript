@@ -1,70 +1,50 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  Watermark,
-  TextBlock,
-  TextStyle,
-  TextAlignment,
-  Table,
-  Color,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
-  StandardFonts,
-  PdfAConformance,
-  AccessibilityMode,
-} from '@bonniepdf/core';
+import { Document, TextBlock, Table, StandardFonts } from '@bonniepdf/core';
 
+/**
+ * A confidential financial report with a faint red CONFIDENTIAL watermark on
+ * every page, authored through the options-object front door. The watermark is a
+ * nested `watermark` literal on `settings`; colours are tokens/hex and the table
+ * border uses the `{ width, color }` sugar.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.conformance = PdfAConformance.PdfA2b;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 60,
+      conformance: 'pdf/a-2b',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
+      watermark: { text: 'CONFIDENTIAL', fontSize: 60, textColor: '#ff0000', opacity: 0.08, rotationDegrees: -55 },
+    },
+    metadata: {
+      title: 'Confidential Report',
+      author: 'BonniePDF',
+    },
+  });
 
-  const watermark = new Watermark('CONFIDENTIAL');
-  watermark.fontSize = 60;
-  watermark.textColor = Color.red;
-  watermark.opacity = 0.08;
-  watermark.rotationDegrees = -55;
-  settings.watermark = watermark;
+  const year = new Date().getFullYear();
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Confidential Report';
-  metadata.author = 'BonniePDF';
+  doc.add(
+    new TextBlock(`Financial Performance Report Q4 ${year}`, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      textColor: 'slate-800',
+      margin: { bottom: 20 },
+    })
+  );
 
-  const doc = new Document(settings, metadata);
+  const table = new Table({
+    columns: [200, 120, 120],
+    border: { width: 0.5, color: 'slate-200' },
+    cellPadding: 6,
+    headerBackgroundColor: 'slate-700',
+    headerTextColor: '#ffffff',
+  });
 
-  const now = new Date();
-  const year = now.getFullYear();
-
-  const title = new TextBlock(`Financial Performance Report Q4 ${year}`);
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 22;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 20);
-  doc.add(title);
-
-  const table = new Table(200, 120, 120);
-  table.border = new Border(0.5);
-  table.borderColors = new BorderColors(ColorPalette.slate[200]);
-  table.cellPadding = 6;
-  table.headerBackgroundColor = ColorPalette.slate[700];
-  table.headerTextColor = Color.white;
-
-  const hMetric = new TextBlock('Metric');
-  hMetric.fontName = StandardFonts.HelveticaBold;
-  hMetric.fontSize = 11;
-  const hQ3 = new TextBlock(`Q3 ${year}`);
-  hQ3.fontName = StandardFonts.HelveticaBold;
-  hQ3.fontSize = 11;
-  const hQ4 = new TextBlock(`Q4 ${year}`);
-  hQ4.fontName = StandardFonts.HelveticaBold;
-  hQ4.fontSize = 11;
-  table.addHeader(hMetric, hQ3, hQ4);
+  const headerCell = (text: string): TextBlock =>
+    new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 11 });
+  table.addHeader(headerCell('Metric'), headerCell(`Q3 ${year}`), headerCell(`Q4 ${year}`));
 
   const rows = [
     ['Revenue', '$4.2M', '$5.1M'],
@@ -74,30 +54,20 @@ export function generate(): Document {
     ['Customer Growth', '+12%', '+18%'],
   ];
 
+  const cell = (text: string): TextBlock => new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 11 });
   for (const [metric, q3, q4] of rows) {
-    const mText = new TextBlock(metric);
-    mText.fontName = StandardFonts.Helvetica;
-    mText.fontSize = 11;
-    const q3Text = new TextBlock(q3);
-    q3Text.fontName = StandardFonts.Helvetica;
-    q3Text.fontSize = 11;
-    const q4Text = new TextBlock(q4);
-    q4Text.fontName = StandardFonts.Helvetica;
-    q4Text.fontSize = 11;
-    table.addRow(mText, q3Text, q4Text);
+    table.addRow(cell(metric), cell(q3), cell(q4));
   }
 
   doc.add(table);
 
-  const disclaimer = new TextBlock(
-    'This report contains proprietary financial data and is intended solely for ' +
-      'authorised recipients. Unauthorised disclosure or distribution is prohibited.'
+  doc.add(
+    new TextBlock(
+      'This report contains proprietary financial data and is intended solely for ' +
+        'authorised recipients. Unauthorised disclosure or distribution is prohibited.',
+      { fontName: StandardFonts.TimesItalic, fontSize: 10, textColor: 'slate-500', margin: { top: 20 } }
+    )
   );
-  disclaimer.fontName = StandardFonts.TimesItalic;
-  disclaimer.fontSize = 10;
-  disclaimer.textColor = ColorPalette.slate[500];
-  disclaimer.margin = new Thickness(0, 20, 0, 0);
-  doc.add(disclaimer);
 
   return doc;
 }

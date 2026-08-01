@@ -1,29 +1,12 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfAConformance,
-  AccessibilityMode,
-  TextBlock,
-  TextStyle,
-  Heading,
-  Container,
-  VerticalStack,
-  Image,
-  ImageFitMode,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
-  StandardFonts,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, Container, VerticalStack, Image, StandardFonts } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
 /**
  * Raster images — fit modes, containers, alpha transparency, and accessible
- * tagging. PDF/A-2a + PDF/UA-1: every informative image carries alt text so it
- * becomes a Figure with /Alt, and the decorative divider is marked as an
- * artifact so assistive technology skips it.
+ * tagging — authored through the options-object front door. PDF/A-2a + PDF/UA-1:
+ * every informative image carries alt text so it becomes a Figure with /Alt, and
+ * the decorative divider is marked as an artifact so assistive technology skips
+ * it. `fitMode` is a token (`'contain' | 'cover' | 'fill'`).
  *
  * The PNGs are generated in-memory (a single stored zlib block keeps this
  * dependency-free), so the example needs no external assets.
@@ -43,72 +26,72 @@ export function generate(): Document {
   });
   const dividerPng = buildPng(48, false, () => [220, 224, 230, 255]);
 
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Images';
-  metadata.author = 'BonniePDF';
-  metadata.subject =
-    'Raster image embedding — fit modes, containers, alpha transparency, and accessible Figure/Artifact tagging. PDF/A-2a + PDF/UA-1.';
-  metadata.keywords = 'pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-700' },
+    },
+    metadata: {
+      title: 'Images',
+      author: 'BonniePDF',
+      subject:
+        'Raster image embedding — fit modes, containers, alpha transparency, and accessible Figure/Artifact tagging. PDF/A-2a + PDF/UA-1.',
+      keywords: 'pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode',
+    },
+  });
 
   // ── Title ─────────────────────────────────────────────────────────────────────
 
-  const h1 = new Heading('Images');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 8);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'BonniePDF embeds PNG images as PDF image XObjects. Under PDF/UA-1 every image must be either a ' +
-      'Figure carrying alternative text (informative) or an Artifact (decorative). Each informative image ' +
-      'below carries alt text; the divider at the end is marked decorative.'
+  doc.add(
+    new Heading('Images', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: 'slate-800',
+      margin: { bottom: 8 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 12);
-  doc.add(intro);
+
+  doc.add(
+    new TextBlock(
+      'BonniePDF embeds PNG images as PDF image XObjects. Under PDF/UA-1 every image must be either a ' +
+        'Figure carrying alternative text (informative) or an Artifact (decorative). Each informative image ' +
+        'below carries alt text; the divider at the end is marked decorative.',
+      { margin: { bottom: 12 } }
+    )
+  );
 
   // ── Fit modes ───────────────────────────────────────────────────────────────
 
   renderSection(doc, 'Fit Modes', 's-fit', [
-    fitModeBlock(gradientPng, ImageFitMode.Contain, 'Contain', 'scaled to fit within the box, preserving aspect ratio'),
-    fitModeBlock(
-      gradientPng,
-      ImageFitMode.Cover,
-      'Cover',
-      'scaled to fill the box, preserving aspect ratio (may crop)'
-    ),
-    fitModeBlock(gradientPng, ImageFitMode.Fill, 'Fill', 'stretched to fill the box, ignoring aspect ratio'),
+    fitModeBlock(gradientPng, 'contain', 'Contain', 'scaled to fit within the box, preserving aspect ratio'),
+    fitModeBlock(gradientPng, 'cover', 'Cover', 'scaled to fill the box, preserving aspect ratio (may crop)'),
+    fitModeBlock(gradientPng, 'fill', 'Fill', 'stretched to fill the box, ignoring aspect ratio'),
   ]);
 
   // ── Alpha transparency ────────────────────────────────────────────────────────
 
-  const alphaPlain = new Image();
-  alphaPlain.imageData = alphaPng;
-  alphaPlain.width = 200;
-  alphaPlain.fitMode = ImageFitMode.Contain;
-  alphaPlain.altText = 'A circular blue-to-red gradient fading to transparent at the edges, on the page background.';
-  alphaPlain.margin = new Thickness(0, 0, 0, 10);
+  const alphaPlain = new Image({
+    imageData: alphaPng,
+    width: 200,
+    fitMode: 'contain',
+    altText: 'A circular blue-to-red gradient fading to transparent at the edges, on the page background.',
+    margin: { bottom: 10 },
+  });
 
-  const alphaInContainer = new Image();
-  alphaInContainer.imageData = alphaPng;
-  alphaInContainer.width = 200;
-  alphaInContainer.fitMode = ImageFitMode.Contain;
-  alphaInContainer.altText =
-    'The circular gradient over a green container, whose colour shows through the transparent edges.';
-  const tinted = new Container();
-  tinted.backgroundColor = ColorPalette.emerald[100];
-  tinted.padding = new Thickness(10);
-  tinted.child = alphaInContainer;
+  const tinted = new Container({
+    backgroundColor: 'emerald-100',
+    padding: 10,
+    child: new Image({
+      imageData: alphaPng,
+      width: 200,
+      fitMode: 'contain',
+      altText: 'The circular gradient over a green container, whose colour shows through the transparent edges.',
+    }),
+  });
 
   renderSection(doc, 'Alpha Transparency', 's-alpha', [
     [
@@ -120,16 +103,16 @@ export function generate(): Document {
 
   // ── Image in a bordered container ─────────────────────────────────────────────
 
-  const containerImage = new Image();
-  containerImage.imageData = gradientPng;
-  containerImage.width = 250;
-  containerImage.fitMode = ImageFitMode.Contain;
-  containerImage.altText = 'Colour gradient inside a bordered container.';
-  const bordered = new Container();
-  bordered.padding = new Thickness(15);
-  bordered.border = new Border(2);
-  bordered.borderColors = new BorderColors(ColorPalette.slate[600]);
-  bordered.child = containerImage;
+  const bordered = new Container({
+    padding: 15,
+    border: { width: 2, color: 'slate-600' },
+    child: new Image({
+      imageData: gradientPng,
+      width: 250,
+      fitMode: 'contain',
+      altText: 'Colour gradient inside a bordered container.',
+    }),
+  });
 
   renderSection(doc, 'Image in a Bordered Container', 's-container', [
     [caption('A bordered, padded container wraps the image.'), bordered],
@@ -137,12 +120,7 @@ export function generate(): Document {
 
   // ── Decorative image ───────────────────────────────────────────────────────────
 
-  const divider = new Image();
-  divider.imageData = dividerPng;
-  divider.width = 360;
-  divider.height = 12;
-  divider.fitMode = ImageFitMode.Fill;
-  divider.isDecorative = true;
+  const divider = new Image({ imageData: dividerPng, width: 360, height: 12, fitMode: 'fill', isDecorative: true });
 
   renderSection(doc, 'Decorative Images', 's-decorative', [
     [caption('The light grey bar below is decorative; it is tagged as an artifact and carries no alt text.'), divider],
@@ -170,41 +148,41 @@ function renderSection(doc: Document, title: string, tocId: string, blocks: Bloc
 
 /** Wraps elements in a Container so they measure and page-break as one unit. */
 function group(doc: Document, ...elements: IElement[]): void {
-  const stack = new VerticalStack();
-  for (const el of elements) stack.addChild(el);
-  const unit = new Container();
-  unit.child = stack;
-  doc.add(unit);
+  doc.add(new Container({ child: new VerticalStack({ children: elements }) }));
 }
 
 function sectionHeading(title: string, tocId: string): Heading {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 15;
-  h.textColor = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 14, 0, 6);
-  return h;
+  return new Heading(title, {
+    tocIdentifier: tocId,
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 15,
+    textColor: 'indigo-600',
+    margin: { top: 14, bottom: 6 },
+  });
 }
 
 function caption(text: string): TextBlock {
-  const c = new TextBlock(text);
-  c.fontSize = 10;
-  c.textColor = ColorPalette.slate[500];
-  c.margin = new Thickness(0, 0, 0, 6);
-  return c;
+  return new TextBlock(text, { fontSize: 10, textColor: 'slate-500', margin: { bottom: 6 } });
 }
 
-function fitModeBlock(png: Uint8Array, fitMode: ImageFitMode, label: string, description: string): Block {
-  const img = new Image();
-  img.imageData = png;
-  img.width = 300;
-  img.height = 150;
-  img.fitMode = fitMode;
-  img.altText = `Colour gradient shown in ${label.toLowerCase()} fit mode.`;
-  img.margin = new Thickness(0, 0, 0, 10);
-  return [caption(`${label}: ${description}.`), img];
+function fitModeBlock(
+  png: Uint8Array,
+  fitMode: 'contain' | 'cover' | 'fill',
+  label: string,
+  description: string
+): Block {
+  return [
+    caption(`${label}: ${description}.`),
+    new Image({
+      imageData: png,
+      width: 300,
+      height: 150,
+      fitMode,
+      altText: `Colour gradient shown in ${label.toLowerCase()} fit mode.`,
+      margin: { bottom: 10 },
+    }),
+  ];
 }
 
 // ── In-memory PNG builder (single stored zlib block; no external deps) ──────────

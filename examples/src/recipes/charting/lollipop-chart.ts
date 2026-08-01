@@ -1,105 +1,96 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
-  ChartElement,
   LollipopChart,
-  PdfAConformance,
+  ChartElement,
+  StandardFonts,
 } from '@bonniepdf/core';
 
 const C_PINK = '#ec4899';
 
+/**
+ * A quarterly-metrics lollipop chart - stems with circular heads, a clear and
+ * minimal bar alternative - authored through the options-object front door.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) => {
+        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+        stack.addChild(
+          new TextBlock('BonniePDF - Lollipop Chart', {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+          })
+        );
+        stack.addChild(
+          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+    },
+    metadata: {
+      title: 'Lollipop Chart',
+      author: 'BonniePDF',
+      subject: 'Lollipop chart example - stems with circular heads, a clear minimal bar alternative',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number) => {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF - Lollipop Chart');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-    return stack;
-  };
+  doc.add(
+    new TextBlock('Lollipop Chart: Quarterly Metrics', {
+      fontSize: 24,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 8 },
+    })
+  );
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Lollipop Chart';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Lollipop chart example - stems with circular heads, a clear minimal bar alternative';
-
-  const doc = new Document(settings, metadata);
-
-  const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.alignment = TextAlignment.Center;
-  title.margin = new Thickness(0, 0, 0, 8);
-  doc.add(title);
-
-  const subtitle = new TextBlock('Stems with circular heads - clear and minimal bar alternative');
-  subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
-  subtitle.alignment = TextAlignment.Center;
-  subtitle.margin = new Thickness(0, 0, 0, 20);
-  doc.add(subtitle);
+  doc.add(
+    new TextBlock('Stems with circular heads - clear and minimal bar alternative', {
+      fontSize: 14,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 20 },
+    })
+  );
 
   const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
   const values = [4500, 6200, 8500, 11500];
-  const s = new ChartSeries();
-  s.color = Color.fromHex(C_PINK);
-  s.dataPoints = labels.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
+
+  const data = new ChartData({
+    title: 'Quarterly Revenue',
+    series: [{ color: C_PINK, dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
+    xAxis: { legend: 'Quarter' },
   });
 
-  const data = new ChartData();
-  data.title = 'Quarterly Revenue';
-  data.series = [s];
-  data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 15000;
-  data.yAxis.stepCount = 5;
-  data.yAxis.legend = 'Revenue';
-  data.xAxis.legend = 'Quarter';
-
-  const chart = new LollipopChart();
-  chart.height = 380;
-  chart.stretchToFit = true;
-  chart.lollipopColor = Color.fromHex(C_PINK);
-  chart.stemWidth = 2.5;
-  chart.headRadius = 10;
-  chart.fontFamily = StandardFonts.Helvetica;
-  chart.labelFontSize = 9;
-  chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  const chart = new LollipopChart({
+    height: 380,
+    stretchToFit: true,
+    lollipopColor: C_PINK,
+    stemWidth: 2.5,
+    headRadius: 10,
+    fontFamily: StandardFonts.Helvetica,
+    labelFontSize: 9,
+    showValueLabels: true,
+    backgroundColor: '#fafafa',
+  });
 
   doc.add(
     new ChartElement(

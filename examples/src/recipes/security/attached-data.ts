@@ -1,4 +1,4 @@
-// ── Report with embedded source data (PDF/A-3 associated file) ──────────────
+// ── Report with Embedded Data (PDF/A-3 associated file) ──────────────
 //
 // A PDF/A-3 report that carries its underlying data as an embedded associated
 // file. The rendered table is the human-readable view; the same numbers are
@@ -6,29 +6,22 @@
 // downstream tools (or an auditor) can consume the exact source data without
 // re-keying it. Demonstrates the generic this feature attachment API.
 //
-// Validated in CI (.NET side) by veraPDF as PDF/A-3b. Parity peer of the .NET
-// AttachedDataExample.
+// Authored through the options-object front door. Validated in CI (.NET side)
+// by veraPDF as PDF/A-3b. Parity peer of the .NET AttachedDataExample.
 
 import {
   Document,
-  DocumentSettings,
-  PdfSize,
-  PdfAConformance,
   TextBlock,
-  TextAlignment,
-  TextStyle,
   Table,
-  Border,
-  Thickness,
-  Color,
-  ColorPalette,
   StandardFonts,
   AttachmentRelationship,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 
-const INK = ColorPalette.slate[900];
-const BODY = ColorPalette.slate[600];
-const MUTE = ColorPalette.slate[500];
+const INK = 'slate-900';
+const BODY = 'slate-600';
+const MUTE = 'slate-500';
 
 const ROWS: Array<[string, number, number]> = [
   ['Q1 2026', 412_000, 128],
@@ -38,34 +31,35 @@ const ROWS: Array<[string, number, number]> = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.pageSize = PdfSize.a4;
-  settings.margin = 48;
-  settings.conformance = PdfAConformance.PdfA3b;
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(BODY);
-
-  const doc = new Document(settings);
-  doc.metadata.title = 'Quarterly revenue 2026';
-  doc.metadata.author = 'BonniePDF';
-  doc.metadata.subject = 'PDF/A-3 report with embedded source data';
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 48,
+      conformance: 'pdf/a-3b',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: BODY },
+    },
+    metadata: {
+      title: 'Quarterly revenue 2026',
+      author: 'BonniePDF',
+      subject: 'PDF/A-3 Report with Embedded Data',
+    },
+  });
 
   doc.add(tb('Quarterly revenue - 2026', 18, INK, true, undefined, 4));
   doc.add(tb('The source data for this report is embedded as quarterly-revenue.csv.', 9, MUTE, false, undefined, 16));
 
-  const table = new Table(2, 2, 2);
-  table.border = Border.none;
-  table.cellPadding = 6;
+  const table = new Table({ columns: [2, 2, 2], border: 0, cellPadding: 6 });
   // Real tabular data → a proper header row (emits TH cells for assistive tech).
   table.addHeader(
     tb('Quarter', 8, MUTE, true),
-    tb('Revenue (EUR)', 8, MUTE, true, TextAlignment.Right),
-    tb('Customers', 8, MUTE, true, TextAlignment.Right)
+    tb('Revenue (EUR)', 8, MUTE, true, 'right'),
+    tb('Customers', 8, MUTE, true, 'right')
   );
   for (const [quarter, revenue, customers] of ROWS) {
     table.addRow(
       tb(quarter, 10, INK),
-      tb(revenue.toLocaleString('en-US'), 10, BODY, false, TextAlignment.Right),
-      tb(String(customers), 10, BODY, false, TextAlignment.Right)
+      tb(revenue.toLocaleString('en-US'), 10, BODY, false, 'right'),
+      tb(String(customers), 10, BODY, false, 'right')
     );
   }
   doc.add(table);
@@ -90,12 +84,19 @@ function buildCsv(): Uint8Array {
   return new TextEncoder().encode(csv);
 }
 
-function tb(text: string, size: number, color: Color, bold = false, align?: TextAlignment, bottom = 0): TextBlock {
-  const t = new TextBlock(text);
-  t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.textColor = color;
-  if (align !== undefined) t.alignment = align;
-  if (bottom > 0) t.margin = new Thickness(0, 0, 0, bottom);
-  return t;
+function tb(
+  text: string,
+  size: number,
+  color: ColorInput,
+  bold = false,
+  align?: TextAlignmentInput,
+  bottom = 0
+): TextBlock {
+  return new TextBlock(text, {
+    fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    textColor: color,
+    alignment: align,
+    margin: bottom > 0 ? { bottom } : undefined,
+  });
 }

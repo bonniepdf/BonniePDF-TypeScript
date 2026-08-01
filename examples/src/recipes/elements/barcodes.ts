@@ -1,56 +1,60 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
   TextBlock,
-  TextStyle,
   VerticalStack,
   HorizontalStack,
   Container,
   Line,
   Barcode,
   BarcodeSymbology,
-  Color,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
-  AccessibilityMode,
 } from '@bonniepdf/core';
 
+/**
+ * Native, vector-based 1D barcodes - Code 128, EAN-13, UPC-A, ITF-14 - authored
+ * through the options-object front door. Check digits and quiet zones are
+ * computed automatically; the human-readable value is printed beneath each
+ * symbol. PDF/A-2a + PDF/UA-1.
+ *
+ * `symbology` has no token form (it is a stable enum), so it stays
+ * `BarcodeSymbology.*`; everything else on the `Barcode` and its wrapper is set
+ * through the options object with colours as tokens/hex.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Barcodes';
-  metadata.author = 'BonniePDF';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 50,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'Barcodes',
+      author: 'BonniePDF',
+    },
+  });
 
   // ── Title ──
-  const title = new TextBlock('1D Barcodes');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 16);
-  doc.add(title);
-
-  const intro = new TextBlock(
-    'BonniePDF renders 1D barcodes as native vector graphics - sharp at any zoom, tiny in the PDF, and ' +
-      'with zero external dependencies. The four built-in symbologies cover retail and logistics across the ' +
-      'UK, EU, and US. Check digits and quiet zones are computed automatically; the human-readable value is ' +
-      'printed beneath each symbol.'
+  doc.add(
+    new TextBlock('1D Barcodes', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: 'slate-800',
+      margin: { bottom: 16 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 20);
-  doc.add(intro);
+
+  doc.add(
+    new TextBlock(
+      'BonniePDF renders 1D barcodes as native vector graphics - sharp at any zoom, tiny in the PDF, and ' +
+        'with zero external dependencies. The four built-in symbologies cover retail and logistics across the ' +
+        'UK, EU, and US. Check digits and quiet zones are computed automatically; the human-readable value is ' +
+        'printed beneath each symbol.',
+      { margin: { bottom: 20 } }
+    )
+  );
 
   const barcodeSections: [string, string, string, BarcodeSymbology, string, string[]][] = [
     [
@@ -99,65 +103,49 @@ export function generate(): Document {
   for (let i = 0; i < barcodeSections.length; i++) {
     const [sectionTitle, cardTitle, value, symbology, description, specifics] = barcodeSections[i];
 
-    const header = new TextBlock(sectionTitle);
-    header.fontName = StandardFonts.HelveticaBold;
-    header.fontSize = 16;
-    header.textColor = ColorPalette.indigo[600];
-    header.margin = new Thickness(0, 0, 0, 10);
-    doc.add(header);
+    doc.add(sectionHeader(sectionTitle));
 
-    const barcode = new Barcode();
-    barcode.value = value;
-    barcode.symbology = symbology;
-    barcode.height = 55;
-    barcode.altText = `${cardTitle}: ${value}`;
-
-    const barcodeWrap = new Container();
-    barcodeWrap.backgroundColor = Color.white;
-    barcodeWrap.border = new Border(1);
-    barcodeWrap.borderColors = new BorderColors(ColorPalette.slate[200]);
-    barcodeWrap.padding = new Thickness(12);
-    barcodeWrap.child = barcode;
-
-    const row = new HorizontalStack();
-    row.spacing = 20;
-    row.widthDistribution = WidthDistribution.Weighted;
-    row.addChild(barcodeWrap, 1);
-
-    const details = new VerticalStack();
-
-    const heading = new TextBlock(cardTitle);
-    heading.fontName = StandardFonts.HelveticaBold;
-    heading.fontSize = 13;
-    heading.textColor = ColorPalette.slate[800];
-    heading.margin = new Thickness(0, 0, 0, 6);
-    details.addChild(heading);
-
-    const desc = new TextBlock(description);
-    desc.fontSize = 10;
-    desc.textColor = ColorPalette.slate[600];
-    desc.margin = new Thickness(0, 0, 0, 6);
-    details.addChild(desc);
-
-    for (const line of specifics) {
-      const s = new TextBlock(line);
-      s.fontSize = 9;
-      s.textColor = ColorPalette.slate[500];
-      s.margin = new Thickness(0, 0, 0, 2);
-      details.addChild(s);
-    }
-
-    row.addChild(details, 1);
+    const row = new HorizontalStack({ spacing: 20, widthDistribution: 'weighted' });
+    row.addChild(
+      new Container({
+        backgroundColor: '#ffffff',
+        border: { width: 1, color: 'slate-200' },
+        padding: 12,
+        child: new Barcode({ value, symbology, height: 55, altText: `${cardTitle}: ${value}` }),
+      }),
+      1
+    );
+    row.addChild(
+      new VerticalStack({
+        children: [
+          new TextBlock(cardTitle, {
+            fontName: StandardFonts.HelveticaBold,
+            fontSize: 13,
+            textColor: 'slate-800',
+            margin: { bottom: 6 },
+          }),
+          new TextBlock(description, { fontSize: 10, textColor: 'slate-600', margin: { bottom: 6 } }),
+          ...specifics.map(line => new TextBlock(line, { fontSize: 9, textColor: 'slate-500', margin: { bottom: 2 } })),
+        ],
+      }),
+      1
+    );
     doc.add(row);
 
     if (i < barcodeSections.length - 1) {
-      const divider = new Line();
-      divider.color = ColorPalette.slate[200];
-      divider.thickness = 1;
-      divider.margin = new Thickness(0, 20, 0, 20);
-      doc.add(divider);
+      doc.add(new Line({ color: 'slate-200', thickness: 1, margin: { top: 20, bottom: 20 } }));
     }
   }
 
   return doc;
+}
+
+/** A bold indigo section header (a styled TextBlock, matching the original). */
+function sectionHeader(text: string): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 16,
+    textColor: 'indigo-600',
+    margin: { bottom: 10 },
+  });
 }

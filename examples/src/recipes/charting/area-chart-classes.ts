@@ -1,0 +1,120 @@
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfSize,
+  AccessibilityMode,
+  PageOrientation,
+  TextBlock,
+  TextStyle,
+  TextElementBase,
+  TextAlignment,
+  HorizontalStack,
+  Color,
+  ColorPalette,
+  Thickness,
+  StandardFonts,
+  WidthDistribution,
+  ChartData,
+  ChartSeries,
+  ChartDataPoint,
+  ChartElement,
+  AreaChart,
+  PdfAConformance,
+} from '@bonniepdf/core';
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const C_PURPLE = '#a855f7';
+
+/**
+ * The **class / construct-then-mutate** companion to `area-chart.ts`.
+ *
+ * Same monthly-sales area chart (filled area under the line), authored the long way: `new` each chart model and assign
+ * properties. This is the escape hatch the options-object front door sits on
+ * top of. Renders **byte-for-byte identically** to the options-style
+ * `area-chart.ts` (an equivalence test binds the two).
+ */
+export function generate(): Document {
+  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+
+  settings.footerTemplate = (pageNumber: number) => {
+    const stack = new HorizontalStack();
+    stack.widthDistribution = WidthDistribution.Weighted;
+    const left = new TextBlock('BonniePDF - Area Chart');
+    left.fontName = StandardFonts.Helvetica;
+    left.fontSize = 10;
+    left.textColor = ColorPalette.slate[500];
+    stack.addChild(left);
+    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+    right.fontName = StandardFonts.Helvetica;
+    right.fontSize = 10;
+    right.textColor = ColorPalette.slate[500];
+    right.alignment = TextAlignment.Right;
+    stack.addChild(right, 1);
+    return stack;
+  };
+
+  const metadata = new DocumentMetadata();
+  metadata.title = 'Area Chart';
+  metadata.author = 'BonniePDF';
+  metadata.subject = 'Area chart example - filled area under the line with configurable opacity';
+
+  const doc = new Document(settings, metadata);
+
+  const title = new TextBlock('Area Chart: Monthly Sales Performance');
+  title.fontSize = 24;
+  title.textColor = ColorPalette.slate[800];
+  title.alignment = TextAlignment.Center;
+  title.margin = new Thickness(0, 0, 0, 8);
+  doc.add(title);
+
+  const subtitle = new TextBlock('Filled area under the line with configurable opacity');
+  subtitle.fontSize = 14;
+  subtitle.textColor = ColorPalette.slate[600];
+  subtitle.alignment = TextAlignment.Center;
+  subtitle.margin = new Thickness(0, 0, 0, 20);
+  doc.add(subtitle);
+
+  const values = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800];
+  const s = new ChartSeries();
+  s.color = Color.fromHex(C_PURPLE);
+  s.dataPoints = MONTH_LABELS.map((label, i) => {
+    const p = new ChartDataPoint();
+    p.label = label;
+    p.value = values[i];
+    return p;
+  });
+
+  const data = new ChartData();
+  data.title = 'Monthly Sales';
+  data.series = [s];
+  data.yAxis.prefix = '£';
+  data.yAxis.maxValue = 15000;
+  data.yAxis.stepCount = 5;
+  data.yAxis.legend = 'Sales';
+  data.xAxis.legend = 'Month';
+
+  const chart = new AreaChart();
+  chart.height = 380;
+  chart.stretchToFit = true;
+  chart.areaColor = Color.fromHex(C_PURPLE);
+  chart.fillOpacity = 0.3;
+  chart.fontFamily = StandardFonts.Helvetica;
+  chart.labelFontSize = 9;
+  chart.showValueLabels = true;
+  chart.backgroundColor = Color.fromHex('#fafafa');
+
+  doc.add(
+    new ChartElement(
+      chart,
+      data,
+      'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
+    )
+  );
+
+  return doc;
+}

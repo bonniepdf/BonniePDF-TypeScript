@@ -49,7 +49,7 @@ const AMBER = ColorPalette.amber[500];
 const PAGE = new PdfSize(311.8, 212.6, 'Shelf Label 110x75');
 
 const PRODUCT = {
-  retailer: 'Greenfields',
+  retailer: 'Sample Shop',
   message: 'Everyday Low Price',
   brand: 'Harvest Grove',
   name: 'Organic Rolled Oats',

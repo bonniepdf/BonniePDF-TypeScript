@@ -71,6 +71,7 @@ import { generate as annualReportMaskedCover } from './showcases/reports/annual-
 import { generate as annualReportGeometricCover } from './showcases/reports/annual-report-geometric-cover';
 import { generate as eventTicket } from './showcases/operations/event-ticket';
 import { generate as patientSummary } from './showcases/healthcare/patient-summary';
+import { generate as outpatientAppointmentLetter } from './showcases/healthcare/outpatient-appointment-letter';
 import { generate as productRoadmap } from './showcases/operations/product-roadmap';
 // ── Vertical-market gallery follow-up (registrations + new showcases) ────────
 import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
@@ -977,7 +978,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'annual-report',
-    name: 'Annual Report',
+    name: 'Annual - Classic',
     category: 'Reports',
     tier: 'showcase',
     description:
@@ -991,7 +992,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'annual-report-gradient-cover',
-    name: 'Annual Report Cover - Gradient',
+    name: 'Annual - Gradient',
     category: 'Reports',
     tier: 'showcase',
     description:
@@ -1004,7 +1005,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'annual-report-masked-cover',
-    name: 'Annual Report Cover - Masked Image',
+    name: 'Annual - Masked',
     category: 'Reports',
     tier: 'showcase',
     description:
@@ -1018,7 +1019,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'annual-report-geometric-cover',
-    name: 'Annual Report Cover - Geometric',
+    name: 'Annual - Geometric',
     category: 'Reports',
     tier: 'showcase',
     description:
@@ -1055,6 +1056,20 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PatientSummaryExample',
     thumbnails: false,
     pdfUa1: false,
+  },
+  {
+    id: 'outpatient-appointment-letter',
+    name: 'Outpatient Appointment',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      "An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider's branding. PDF/A-2a + PDF/UA-1.",
+    filename: 'outpatient-appointment-letter.pdf',
+    generate: outpatientAppointmentLetter,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
   },
   {
     id: 'product-roadmap',
@@ -1142,8 +1157,8 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'edge-receipt',
-    name: 'Edge Receipt (Cloudflare Worker)',
-    category: 'Edge',
+    name: 'Point-of-Sale Receipt',
+    category: 'Retail',
     tier: 'showcase',
     description:
       'The browser/edge flagship: a point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. Zero dependencies, no WASM - a few KB, generated client-side or in a Cloudflare Worker via generateBytesAsync(). PDF/A-2a + PDF/UA-1.',
@@ -1155,7 +1170,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'public-library-membership-letter',
-    name: 'Public Library Membership Letter',
+    name: 'Public Library Membership',
     category: 'Community',
     tier: 'showcase',
     region: 'UK',
@@ -1169,7 +1184,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'audit-report',
-    name: 'Compliance Audit Report (GDPR / ISO 27001)',
+    name: 'GDPR ISO 27001 Audit Report',
     category: 'Compliance',
     tier: 'showcase',
     region: 'EU/UK',
@@ -1211,7 +1226,7 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'financial-statement',
-    name: 'Statutory Financial Statements (IFRS)',
+    name: 'IFRS Financial Statements',
     category: 'Reports',
     tier: 'showcase',
     region: 'UK/EU',

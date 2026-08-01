@@ -1,117 +1,99 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
-  GroupedBarChartElement,
   GroupedBarChart,
-  PdfAConformance,
+  GroupedBarChartElement,
+  StandardFonts,
+  type ColorInput,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+/**
+ * A grouped bar chart comparing three product lines across twelve months,
+ * authored through the options-object front door. Each series is a `ChartData`
+ * `series` literal (`name` + `color` + a `dataPoints` array of `{ label, value }`).
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  settings.footerTemplate = (pageNumber: number) => {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF - Grouped Bar Chart');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-    return stack;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Grouped Bar Chart';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Grouped bar chart example - three product lines compared across 12 months';
-
-  const doc = new Document(settings, metadata);
-
-  const title = new TextBlock('Grouped Bar Chart: Quarterly Revenue by Product Line');
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.alignment = TextAlignment.Center;
-  title.margin = new Thickness(0, 0, 0, 8);
-  doc.add(title);
-
-  const subtitle = new TextBlock('Comparison of three product lines across all months');
-  subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
-  subtitle.alignment = TextAlignment.Center;
-  subtitle.margin = new Thickness(0, 0, 0, 20);
-  doc.add(subtitle);
-
-  const data = new ChartData();
-  data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 15000;
-  data.yAxis.stepCount = 5;
-  const electronics = new ChartSeries();
-  electronics.color = Color.fromHex('#4f46e5');
-  electronics.name = 'Electronics';
-  electronics.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800][i];
-    return p;
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) => {
+        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+        stack.addChild(
+          new TextBlock('BonniePDF - Grouped Bar Chart', {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+          })
+        );
+        stack.addChild(
+          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+    },
+    metadata: {
+      title: 'Grouped Bar Chart',
+      author: 'BonniePDF',
+      subject: 'Grouped bar chart example - three product lines compared across 12 months',
+    },
   });
 
-  const clothing = new ChartSeries();
-  clothing.color = Color.fromHex('#f43f5e');
-  clothing.name = 'Clothing';
-  clothing.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200][i];
-    return p;
+  doc.add(
+    new TextBlock('Grouped Bar Chart: Quarterly Revenue by Product Line', {
+      fontSize: 24,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 8 },
+    })
+  );
+
+  doc.add(
+    new TextBlock('Comparison of three product lines across all months', {
+      fontSize: 14,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 20 },
+    })
+  );
+
+  const series = (name: string, color: ColorInput, values: number[]) => ({
+    name,
+    color,
+    dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i] })),
   });
 
-  const homeAndGarden = new ChartSeries();
-  homeAndGarden.color = Color.fromHex('#22c55e');
-  homeAndGarden.name = 'Home & Garden';
-  homeAndGarden.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800][i];
-    return p;
+  const data = new ChartData({
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
+    series: [
+      series('Electronics', '#4f46e5', [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800]),
+      series('Clothing', '#f43f5e', [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200]),
+      series('Home & Garden', '#22c55e', [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800]),
+    ],
   });
 
-  data.series = [electronics, clothing, homeAndGarden];
-
-  const chart = new GroupedBarChart();
-  chart.height = 380;
-  chart.stretchToFit = true;
-  chart.showValueLabels = true;
-  chart.fontFamily = StandardFonts.Helvetica;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  const chart = new GroupedBarChart({
+    height: 380,
+    stretchToFit: true,
+    showValueLabels: true,
+    fontFamily: StandardFonts.Helvetica,
+    backgroundColor: '#fafafa',
+  });
 
   doc.add(
     new GroupedBarChartElement(

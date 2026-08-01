@@ -15,6 +15,7 @@ import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportO
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { LayoutRecorder, LayoutSnapshot } from '../Rendering/LayoutRecorder';
+import { debugSourceOf } from '../Rendering/DebugSource';
 
 /** A rendered SVG document: one standalone SVG string per page, plus `@font-face`
  * CSS that embeds (as subsetted data URIs) the fonts the document used, so a host
@@ -183,6 +184,17 @@ export async function exportSvgDocumentAsync(
       title: typeof metaTitle === 'string' && metaTitle.length > 0 ? metaTitle : undefined,
     });
     snapshot = recorder.snapshot();
+
+    // Document is represented by a synthetic root, and its constructor-created
+    // first Page has no separate declaration. In instrumented editor previews,
+    // both therefore navigate to the Document construction site. Explicitly
+    // added pages retain their own (or absent) source attribution.
+    const documentSourceId = debugSourceOf(document);
+    if (documentSourceId) {
+      snapshot.root.sourceId = documentSourceId;
+      const automaticPage = snapshot.root.children.find(node => node.type === 'Page');
+      if (automaticPage && !automaticPage.sourceId) automaticPage.sourceId = documentSourceId;
+    }
   }
 
   return { pages: pageSvgs, fontFaceCss: buildFontFaceCss(usage), snapshot };

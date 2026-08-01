@@ -1,21 +1,4 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  TextBlock,
-  TextElementBase,
-  TextStyle,
-  TextAlignment,
-  Table,
-  TableRow,
-  Heading,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  PdfAConformance,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, TextElementBase, Table, TableRow, StandardFonts } from '@bonniepdf/core';
 
 const EMPLOYEES: [string, string, string][] = [
   ['Alice Chen', 'Engineering', 'Senior Developer'],
@@ -88,102 +71,108 @@ const OVERVIEW_SECTIONS: [string, string][] = [
   ],
 ];
 
+/**
+ * A multi-page table with repeating headers and zebra-striped rows, followed by
+ * flowing prose - authored through the options-object front door.
+ *
+ * The `Table` is configured in one expression (`columns`, `repeatHeadersOnNewPage`,
+ * header colours as tokens); rows are built in a loop because their zebra fill
+ * alternates. Each cell is tagged `/TH` or `/TD` within the `/Table` structure
+ * tree. Colours are palette tokens (`'slate-600'`) or hex (`'#ffffff'`).
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Right;
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Employee Directory';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Table with repeating headers spanning multiple pages. PDF/A-2a + PDF/UA-1.';
-  metadata.keywords = 'pdf, table, accessibility, pdf/ua, pdf/a, multi-page, BonniePDF';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+          fontSize: 9,
+          textColor: 'slate-400',
+          alignment: 'right',
+        }),
+    },
+    metadata: {
+      title: 'Employee Directory',
+      author: 'BonniePDF',
+      subject: 'Table with repeating headers spanning multiple pages. PDF/A-2a + PDF/UA-1.',
+      keywords: 'pdf, table, accessibility, pdf/ua, pdf/a, multi-page, BonniePDF',
+    },
+  });
 
   // ── Part 1: Employee table ─────────────────────────────────────────────────
 
-  const h1Dir = new Heading('Part 1: Employee Directory');
-  h1Dir.tocIdentifier = 'directory';
-  h1Dir.level = 1;
-  h1Dir.fontName = StandardFonts.HelveticaBold;
-  h1Dir.fontSize = 20;
-  h1Dir.textColor = ColorPalette.slate[800];
-  h1Dir.margin = new Thickness(0, 0, 0, 10);
-  doc.add(h1Dir);
-
-  const tableIntro = new TextBlock(
-    'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is tagged as /TH (header) or /TD (data) within the /Table structure tree.'
+  doc.add(
+    new Heading('Part 1: Employee Directory', {
+      tocIdentifier: 'directory',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 20,
+      textColor: 'slate-800',
+      margin: { bottom: 10 },
+    })
   );
-  tableIntro.margin = new Thickness(0, 0, 0, 10);
-  doc.add(tableIntro);
 
-  const table = new Table(100, 160, 140);
-  table.repeatHeadersOnNewPage = true;
-  table.headerBackgroundColor = ColorPalette.blue[600];
-  table.headerTextColor = Color.white;
+  doc.add(
+    new TextBlock(
+      'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is tagged as /TH (header) or /TD (data) within the /Table structure tree.',
+      { margin: { bottom: 10 } }
+    )
+  );
 
-  const deptHeader = new TextBlock('Department');
-  deptHeader.fontName = StandardFonts.HelveticaBold;
-  deptHeader.fontSize = 10;
-  const nameHeader = new TextBlock('Name');
-  nameHeader.fontName = StandardFonts.HelveticaBold;
-  nameHeader.fontSize = 10;
-  const roleHeader = new TextBlock('Role');
-  roleHeader.fontName = StandardFonts.HelveticaBold;
-  roleHeader.fontSize = 10;
-  table.addHeader(deptHeader, nameHeader, roleHeader);
+  const table = new Table({
+    columns: [100, 160, 140],
+    repeatHeadersOnNewPage: true,
+    headerBackgroundColor: 'blue-600',
+    headerTextColor: '#ffffff',
+  });
+
+  const headerCell = (text: string): TextBlock =>
+    new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 10 });
+  table.addHeader(headerCell('Department'), headerCell('Name'), headerCell('Role'));
 
   let rowIndex = 0;
   for (const [name, dept, role] of EMPLOYEES) {
-    const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
-    const deptCell = new TextBlock(dept);
-    deptCell.fontSize = 10;
-    deptCell.textColor = ColorPalette.slate[600];
-    const nameCell = new TextBlock(name);
-    nameCell.fontSize = 10;
-    nameCell.textColor = ColorPalette.slate[800];
-    const roleCell = new TextBlock(role);
-    roleCell.fontSize = 10;
-    roleCell.textColor = ColorPalette.slate[600];
-    table.addRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
+    const bg = rowIndex++ % 2 === 0 ? '#ffffff' : 'slate-50';
+    const row = TableRow.fromElements(
+      new TextBlock(dept, { fontSize: 10, textColor: 'slate-600' }),
+      new TextBlock(name, { fontSize: 10, textColor: 'slate-800' }),
+      new TextBlock(role, { fontSize: 10, textColor: 'slate-600' })
+    );
+    row.backgroundColor = bg;
+    table.addRow(row);
   }
 
   doc.add(table);
 
   // ── Part 2: Prose sections ─────────────────────────────────────────────────
 
-  const h1Overview = new Heading('Part 2: Company Overview');
-  h1Overview.tocIdentifier = 'overview';
-  h1Overview.level = 1;
-  h1Overview.fontName = StandardFonts.HelveticaBold;
-  h1Overview.fontSize = 20;
-  h1Overview.textColor = ColorPalette.slate[800];
-  h1Overview.margin = new Thickness(0, 20, 0, 10);
-  doc.add(h1Overview);
+  doc.add(
+    new Heading('Part 2: Company Overview', {
+      tocIdentifier: 'overview',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 20,
+      textColor: 'slate-800',
+      margin: { top: 20, bottom: 10 },
+    })
+  );
 
   for (const [title, body] of OVERVIEW_SECTIONS) {
-    const h2 = new Heading(title);
-    h2.tocIdentifier = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    h2.level = 2;
-    h2.fontName = StandardFonts.HelveticaBold;
-    h2.fontSize = 14;
-    h2.textColor = ColorPalette.slate[700];
-    h2.margin = new Thickness(0, 14, 0, 6);
-    doc.add(h2);
+    doc.add(
+      new Heading(title, {
+        tocIdentifier: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 14,
+        textColor: 'slate-700',
+        margin: { top: 14, bottom: 6 },
+      })
+    );
 
-    const p = new TextBlock(body);
-    p.margin = new Thickness(0, 0, 0, 6);
-    doc.add(p);
+    doc.add(new TextBlock(body, { margin: { bottom: 6 } }));
   }
 
   return doc;

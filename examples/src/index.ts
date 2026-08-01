@@ -16,6 +16,7 @@ import { generate as textBlockOverflow } from './conformance/text-block-overflow
 import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
 import { generate as verticalStackOverflowClasses } from './recipes/layout/vertical-stack-overflow-classes';
 import { generate as tables } from './recipes/elements/tables';
+import { generate as tablesClasses } from './recipes/elements/tables-classes';
 import { generate as textAlignment } from './recipes/typography/text-alignment';
 import { generate as textAlignmentClasses } from './recipes/typography/text-alignment-classes';
 import { generate as embeddedFontMetrics } from './recipes/typography/embedded-font-metrics';
@@ -33,27 +34,49 @@ import { generate as emojisAndUnicodeClasses } from './recipes/typography/emojis
 import { generate as advancedTypography } from './recipes/typography/advanced-typography';
 import { generate as advancedTypographyClasses } from './recipes/typography/advanced-typography-classes';
 import { generate as dickensNovel } from './recipes/typography/dickens-novel';
+import { generate as dickensNovelClasses } from './recipes/typography/dickens-novel-classes';
 import { generate as lists } from './recipes/elements/lists';
+import { generate as listsClasses } from './recipes/elements/lists-classes';
 import { generate as hyperlinks } from './recipes/elements/hyperlinks';
+import { generate as hyperlinksClasses } from './recipes/elements/hyperlinks-classes';
 import { generate as crossReferences } from './recipes/elements/cross-references';
+import { generate as crossReferencesClasses } from './recipes/elements/cross-references-classes';
 import { generate as shapesAndBorders } from './recipes/elements/shapes-and-borders';
+import { generate as shapesAndBordersClasses } from './recipes/elements/shapes-and-borders-classes';
 import { generate as colorPalette } from './recipes/elements/color-palette';
+import { generate as colorPaletteClasses } from './recipes/elements/color-palette-classes';
 import { generate as qrCodes } from './recipes/elements/qr-codes';
+import { generate as qrCodesClasses } from './recipes/elements/qr-codes-classes';
 import { generate as barcodes } from './recipes/elements/barcodes';
+import { generate as barcodesClasses } from './recipes/elements/barcodes-classes';
 import { generate as dataMatrix } from './recipes/elements/data-matrix';
+import { generate as dataMatrixClasses } from './recipes/elements/data-matrix-classes';
 import { generate as images } from './recipes/elements/images';
+import { generate as imagesClasses } from './recipes/elements/images-classes';
 import { generate as chartShowcase } from './recipes/charting/chart-showcase';
+import { generate as chartShowcaseClasses } from './recipes/charting/chart-showcase-classes';
 import { generate as barChart } from './recipes/charting/bar-chart';
+import { generate as barChartClasses } from './recipes/charting/bar-chart-classes';
 import { generate as groupedBarChart } from './recipes/charting/grouped-bar-chart';
+import { generate as groupedBarChartClasses } from './recipes/charting/grouped-bar-chart-classes';
 import { generate as lineChart } from './recipes/charting/line-chart';
+import { generate as lineChartClasses } from './recipes/charting/line-chart-classes';
 import { generate as areaChart } from './recipes/charting/area-chart';
+import { generate as areaChartClasses } from './recipes/charting/area-chart-classes';
 import { generate as lollipopChart } from './recipes/charting/lollipop-chart';
+import { generate as lollipopChartClasses } from './recipes/charting/lollipop-chart-classes';
 import { generate as dotPlotChart } from './recipes/charting/dot-plot-chart';
+import { generate as dotPlotChartClasses } from './recipes/charting/dot-plot-chart-classes';
 import { generate as pieChart } from './recipes/charting/pie-chart';
+import { generate as pieChartClasses } from './recipes/charting/pie-chart-classes';
 import { generate as multiSeriesLineChart } from './recipes/charting/multi-series-line-chart';
+import { generate as multiSeriesLineChartClasses } from './recipes/charting/multi-series-line-chart-classes';
 import { generate as watermarking } from './recipes/security/watermarking';
+import { generate as watermarkingClasses } from './recipes/security/watermarking-classes';
 import { generate as encryption } from './recipes/security/encryption';
+import { generate as encryptionClasses } from './recipes/security/encryption-classes';
 import { generate as attachedData } from './recipes/security/attached-data';
+import { generate as attachedDataClasses } from './recipes/security/attached-data-classes';
 // ── Showcases (industry / vertical-market documents) ────────────────────────
 import { generate as businessInvoice } from './showcases/invoices/business-invoice';
 import { generate as usSalesInvoice } from './showcases/invoices/us-sales-invoice';
@@ -77,9 +100,13 @@ import { generate as productRoadmap } from './showcases/operations/product-roadm
 import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
 import { generate as shippingLabel } from './showcases/operations/shipping-label';
 import { generate as horizontalBarChart } from './recipes/charting/horizontal-bar-chart';
+import { generate as horizontalBarChartClasses } from './recipes/charting/horizontal-bar-chart-classes';
 import { generate as horizontalGroupedBarChart } from './recipes/charting/horizontal-grouped-bar-chart';
+import { generate as horizontalGroupedBarChartClasses } from './recipes/charting/horizontal-grouped-bar-chart-classes';
 import { generate as horizontalLollipopChart } from './recipes/charting/horizontal-lollipop-chart';
+import { generate as horizontalLollipopChartClasses } from './recipes/charting/horizontal-lollipop-chart-classes';
 import { generate as watermarkingConfidential } from './recipes/security/watermarking-confidential';
+import { generate as watermarkingConfidentialClasses } from './recipes/security/watermarking-confidential-classes';
 import { generate as edgeReceipt } from './showcases/edge/edge-receipt';
 import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
 import { generate as auditReport } from './showcases/compliance/audit-report';
@@ -579,6 +606,21 @@ export const examples: ExampleDef[] = [
     generate: dickensNovel,
     dotnetClass: 'DickensNovelExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'dickens-novel-classes',
+    name: 'Dickens: A Tale of Two Cities (Class API)',
+    category: 'Typography',
+    description:
+      'The same multi-page book layout as Dickens: A Tale of Two Cities, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'dickens-novel-classes.pdf',
+    generate: dickensNovelClasses,
+    dotnetClass: 'DickensNovelExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'dickens-novel',
+    variantLabel: 'Class API',
   },
   // Elements
   {
@@ -591,6 +633,21 @@ export const examples: ExampleDef[] = [
     generate: tables,
     dotnetClass: 'TablesExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'tables-classes',
+    name: 'Tables (Class API)',
+    category: 'Elements',
+    description:
+      'The same multi-page employee table + prose as Tables, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'tables-classes.pdf',
+    generate: tablesClasses,
+    dotnetClass: 'TablesExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'tables',
+    variantLabel: 'Class API',
   },
   {
     id: 'lists',
@@ -602,6 +659,21 @@ export const examples: ExampleDef[] = [
     generate: lists,
     dotnetClass: 'ListsExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'lists-classes',
+    name: 'Lists (Class API)',
+    category: 'Elements',
+    description:
+      'The same ordered/unordered list tour as Lists, authored the long way: construct each list and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'lists-classes.pdf',
+    generate: listsClasses,
+    dotnetClass: 'ListsExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'lists',
+    variantLabel: 'Class API',
   },
   {
     id: 'hyperlinks',
@@ -613,6 +685,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'HyperlinksExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'hyperlinks-classes',
+    name: 'Hyperlinks (Class API)',
+    category: 'Elements',
+    description:
+      'The same hyperlink tour as Hyperlinks, authored the long way: construct each link and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'hyperlinks-classes.pdf',
+    generate: hyperlinksClasses,
+    thumbnails: false,
+    dotnetClass: 'HyperlinksExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'hyperlinks',
+    variantLabel: 'Class API',
   },
   {
     id: 'cross-references',
@@ -625,6 +713,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'CrossReferencesExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'cross-references-classes',
+    name: 'Cross-References (Class API)',
+    category: 'Elements',
+    description:
+      'The same cross-reference field guide as Cross-References, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'cross-references-classes.pdf',
+    generate: crossReferencesClasses,
+    thumbnails: false,
+    dotnetClass: 'CrossReferencesExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'cross-references',
+    variantLabel: 'Class API',
   },
   {
     id: 'shapes-and-borders',
@@ -635,6 +739,21 @@ export const examples: ExampleDef[] = [
     generate: shapesAndBorders,
     dotnetClass: 'ShapesAndBordersExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'shapes-and-borders-classes',
+    name: 'Shapes & Borders (Class API)',
+    category: 'Elements',
+    description:
+      'The same rounded-rectangle / borders / cards / banners tour as Shapes & Borders, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'shapes-and-borders-classes.pdf',
+    generate: shapesAndBordersClasses,
+    dotnetClass: 'ShapesAndBordersExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'shapes-and-borders',
+    variantLabel: 'Class API',
   },
   {
     id: 'color-palette',
@@ -647,6 +766,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'ColorPaletteExample',
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'color-palette-classes',
+    name: 'Colour Palette (Class API)',
+    category: 'Elements',
+    description:
+      'The same 22-ramp swatch grid as Colour Palette, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'color-palette-classes.pdf',
+    generate: colorPaletteClasses,
+    thumbnails: false,
+    dotnetClass: 'ColorPaletteExample',
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'color-palette',
+    variantLabel: 'Class API',
   },
   {
     id: 'qr-codes',
@@ -659,6 +794,21 @@ export const examples: ExampleDef[] = [
     // .NET ships the Fluent variant as the canonical source
     dotnetClass: 'QRCodesExampleFluent',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'qr-codes-classes',
+    name: 'QR Codes (Class API)',
+    category: 'Elements',
+    description:
+      'The same native vector-QR tour as QR Codes, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'qr-codes-classes.pdf',
+    generate: qrCodesClasses,
+    dotnetClass: 'QRCodesExampleFluent',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'qr-codes',
+    variantLabel: 'Class API',
   },
   {
     id: 'barcodes',
@@ -671,6 +821,21 @@ export const examples: ExampleDef[] = [
     generate: barcodes,
     dotnetClass: 'BarcodesExampleFluent',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'barcodes-classes',
+    name: 'Barcodes (Class API)',
+    category: 'Elements',
+    description:
+      'The same native 1D-barcode tour as Barcodes, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'barcodes-classes.pdf',
+    generate: barcodesClasses,
+    dotnetClass: 'BarcodesExampleFluent',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'barcodes',
+    variantLabel: 'Class API',
   },
   {
     id: 'data-matrix',
@@ -683,6 +848,21 @@ export const examples: ExampleDef[] = [
     generate: dataMatrix,
     dotnetClass: 'DataMatrixExampleFluent',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'data-matrix-classes',
+    name: 'Data Matrix (Class API)',
+    category: 'Elements',
+    description:
+      'The same native Data Matrix tour as Data Matrix, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'data-matrix-classes.pdf',
+    generate: dataMatrixClasses,
+    dotnetClass: 'DataMatrixExampleFluent',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'data-matrix',
+    variantLabel: 'Class API',
   },
   {
     id: 'images',
@@ -694,6 +874,21 @@ export const examples: ExampleDef[] = [
     generate: images,
     dotnetClass: 'ImagesExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'images-classes',
+    name: 'Images (Class API)',
+    category: 'Elements',
+    description:
+      'The same raster-image tour as Images, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'images-classes.pdf',
+    generate: imagesClasses,
+    dotnetClass: 'ImagesExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'images',
+    variantLabel: 'Class API',
   },
   // Charting
   {
@@ -706,6 +901,21 @@ export const examples: ExampleDef[] = [
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'chart-showcase-classes',
+    name: 'Chart Showcase (Class API)',
+    category: 'Charting',
+    description:
+      'The same eight-page all-chart-types showcase as Chart Showcase, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'chart-showcase-classes.pdf',
+    generate: chartShowcaseClasses,
+    dotnetClass: 'ChartShowcaseExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'chart-showcase',
+    variantLabel: 'Class API',
   },
   {
     id: 'bar-chart',
@@ -717,6 +927,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'BarChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'bar-chart-classes',
+    name: 'Bar Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same monthly-sales bar chart as Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'bar-chart-classes.pdf',
+    generate: barChartClasses,
+    dotnetClass: 'BarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'bar-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'grouped-bar-chart',
@@ -728,6 +954,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'GroupedBarChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'grouped-bar-chart-classes',
+    name: 'Grouped Bar Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same three-series grouped bar chart as Grouped Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'grouped-bar-chart-classes.pdf',
+    generate: groupedBarChartClasses,
+    dotnetClass: 'GroupedBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'grouped-bar-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'line-chart',
@@ -739,6 +981,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'LineChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'line-chart-classes',
+    name: 'Line Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same monthly-revenue line chart as Line Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'line-chart-classes.pdf',
+    generate: lineChartClasses,
+    dotnetClass: 'LineChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'line-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'area-chart',
@@ -750,6 +1008,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AreaChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'area-chart-classes',
+    name: 'Area Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Area Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'area-chart-classes.pdf',
+    generate: areaChartClasses,
+    dotnetClass: 'AreaChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'area-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'lollipop-chart',
@@ -761,6 +1035,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'LollipopChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'lollipop-chart-classes',
+    name: 'Lollipop Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Lollipop Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'lollipop-chart-classes.pdf',
+    generate: lollipopChartClasses,
+    dotnetClass: 'LollipopChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'lollipop-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'dot-plot-chart',
@@ -772,6 +1062,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'DotPlotChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'dot-plot-chart-classes',
+    name: 'Dot Plot Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Dot Plot Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'dot-plot-chart-classes.pdf',
+    generate: dotPlotChartClasses,
+    dotnetClass: 'DotPlotChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'dot-plot-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'pie-chart',
@@ -783,6 +1089,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PieChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'pie-chart-classes',
+    name: 'Pie Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Pie Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'pie-chart-classes.pdf',
+    generate: pieChartClasses,
+    dotnetClass: 'PieChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'pie-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'multi-series-line-chart',
@@ -794,6 +1116,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'MultiSeriesLineChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'multi-series-line-chart-classes',
+    name: 'Multi-Series Line Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Multi-Series Line Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'multi-series-line-chart-classes.pdf',
+    generate: multiSeriesLineChartClasses,
+    dotnetClass: 'MultiSeriesLineChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'multi-series-line-chart',
+    variantLabel: 'Class API',
   },
   // Security
   {
@@ -806,6 +1144,21 @@ export const examples: ExampleDef[] = [
     // .NET has three variants; Draft is canonical
     dotnetClass: 'WatermarkDraftExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'watermarking-classes',
+    name: 'Watermarking (Class API)',
+    category: 'Security',
+    description:
+      'The same DRAFT-watermarked draft document as Watermarking, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'watermarking-classes.pdf',
+    generate: watermarkingClasses,
+    dotnetClass: 'WatermarkDraftExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'watermarking',
+    variantLabel: 'Class API',
   },
   {
     id: 'encryption',
@@ -819,10 +1172,26 @@ export const examples: ExampleDef[] = [
     password: 'demo123',
     // .NET has three variants; Password is canonical
     dotnetClass: 'EncryptionPasswordExample',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'encryption-classes',
+    name: 'Encryption (Class API)',
+    category: 'Security',
+    description:
+      'The same AES-256 encrypted document as Encryption, authored the long way: construct settings/elements and assign properties (encryption uses the same preset builder). Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'encryption-classes.pdf',
+    generate: encryptionClasses,
+    pdfUa1: true,
+    password: 'demo123',
+    dotnetClass: 'EncryptionPasswordExample',
+    gallery: false,
+    variantOf: 'encryption',
+    variantLabel: 'Class API',
   },
   {
     id: 'attached-data',
-    name: 'Report with Embedded Source Data',
+    name: 'Report with Embedded Data',
     category: 'Security',
     description:
       'A PDF/A-3 report that embeds its underlying CSV data as an associated file (/AFRelationship /Source) for reproducibility, using the generic file-attachment API.',
@@ -830,6 +1199,21 @@ export const examples: ExampleDef[] = [
     generate: attachedData,
     dotnetClass: 'AttachedDataExample',
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'attached-data-classes',
+    name: 'Report with Embedded Data (Class API)',
+    category: 'Security',
+    description:
+      'The same PDF/A-3 report with embedded CSV as Report with Embedded Data, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'attached-data-classes.pdf',
+    generate: attachedDataClasses,
+    dotnetClass: 'AttachedDataExample',
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'attached-data',
+    variantLabel: 'Class API',
   },
   // Showcases - Invoices (vertical: billing; region-specific tax/e-invoicing)
   {
@@ -1121,6 +1505,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'HorizontalBarChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'horizontal-bar-chart-classes',
+    name: 'Horizontal Bar Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Horizontal Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'horizontal-bar-chart-classes.pdf',
+    generate: horizontalBarChartClasses,
+    dotnetClass: 'HorizontalBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'horizontal-bar-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'horizontal-grouped-bar-chart',
@@ -1132,6 +1532,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'HorizontalGroupedBarChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'horizontal-grouped-bar-chart-classes',
+    name: 'Horizontal Grouped Bar Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Horizontal Grouped Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'horizontal-grouped-bar-chart-classes.pdf',
+    generate: horizontalGroupedBarChartClasses,
+    dotnetClass: 'HorizontalGroupedBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'horizontal-grouped-bar-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'horizontal-lollipop-chart',
@@ -1143,6 +1559,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'HorizontalLollipopChartExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'horizontal-lollipop-chart-classes',
+    name: 'Horizontal Lollipop Chart (Class API)',
+    category: 'Charting',
+    description:
+      'The same chart as Horizontal Lollipop Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'horizontal-lollipop-chart-classes.pdf',
+    generate: horizontalLollipopChartClasses,
+    dotnetClass: 'HorizontalLollipopChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'horizontal-lollipop-chart',
+    variantLabel: 'Class API',
   },
   {
     id: 'watermarking-confidential',
@@ -1154,6 +1586,21 @@ export const examples: ExampleDef[] = [
     generate: watermarkingConfidential,
     dotnetClass: 'WatermarkConfidentialExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'watermarking-confidential-classes',
+    name: 'Watermarking - Confidential (Class API)',
+    category: 'Security',
+    description:
+      'The same red CONFIDENTIAL watermarked report as Watermarking - Confidential, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'watermarking-confidential-classes.pdf',
+    generate: watermarkingConfidentialClasses,
+    dotnetClass: 'WatermarkConfidentialExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'watermarking-confidential',
+    variantLabel: 'Class API',
   },
   {
     id: 'edge-receipt',

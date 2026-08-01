@@ -1,120 +1,101 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  ZoomLevel,
-  TextBlock,
-  TextStyle,
-  Heading,
-  Hyperlink,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  PdfAConformance,
-  AccessibilityMode,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, Hyperlink, StandardFonts } from '@bonniepdf/core';
 
+/**
+ * Hyperlinks - basic, styled (colour / size / weight), and margined links -
+ * authored through the options-object front door. PDF/A-2a + PDF/UA-1.
+ *
+ * Each link is `new Hyperlink(text, uri, { … })`: the text and target stay
+ * positional, everything visual (colour token, size, weight, margin) goes in the
+ * options object.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
-  settings.defaultZoom = ZoomLevel.FitPage;
-  settings.displayDocTitle = true;
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Hyperlink Examples';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Demonstrating hyperlink support in PDFs';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-700' },
+      defaultZoom: 'fit-page',
+      displayDocTitle: true,
+    },
+    metadata: {
+      title: 'Hyperlink Examples',
+      author: 'BonniePDF',
+      subject: 'Demonstrating hyperlink support in PDFs',
+    },
+  });
 
   // ── Title ──
   // A real Heading (H1), not a big TextBlock: PDF/UA preflight requires the
   // outline to start at H1, and headings give AT users document structure.
-  const title = new Heading('Hyperlink Support Demo');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 12);
-  doc.add(title);
+  doc.add(
+    new Heading('Hyperlink Support Demo', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: 'slate-800',
+      margin: { bottom: 12 },
+    })
+  );
 
   // ── Basic links ──
-  const basicLabel = new Heading('Basic Links');
-  basicLabel.level = 2;
-  basicLabel.fontName = StandardFonts.HelveticaBold;
-  basicLabel.fontSize = 14;
-  basicLabel.textColor = ColorPalette.slate[700];
-  basicLabel.margin = new Thickness(0, 0, 0, 8);
-  doc.add(basicLabel);
+  doc.add(sectionLabel('Basic Links', 8));
 
   for (const [text, uri, mb] of [
     ['Visit GitHub', 'https://github.com', 8],
     ['Visit Microsoft', 'https://microsoft.com', 8],
     ['Search on Google', 'https://google.com', 16],
   ] as [string, string, number][]) {
-    // TS constructor: Hyperlink(text, uri) - note .NET swaps the order
-    const link = new Hyperlink(text, uri);
-    link.margin = new Thickness(0, 0, 0, mb);
-    doc.add(link);
+    // TS constructor: Hyperlink(text, uri, options) - note .NET swaps text/uri.
+    doc.add(new Hyperlink(text, uri, { margin: { bottom: mb } }));
   }
 
   // ── Styled links ──
-  const styledLabel = new Heading('Styled Links');
-  styledLabel.level = 2;
-  styledLabel.fontName = StandardFonts.HelveticaBold;
-  styledLabel.fontSize = 14;
-  styledLabel.textColor = ColorPalette.slate[700];
-  styledLabel.margin = new Thickness(0, 0, 0, 8);
-  doc.add(styledLabel);
+  doc.add(sectionLabel('Styled Links', 8));
 
   // Default blue
-  const defaultLink = new Hyperlink('Default Blue Link', 'https://github.com');
-  defaultLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(defaultLink);
+  doc.add(new Hyperlink('Default Blue Link', 'https://github.com', { margin: { bottom: 8 } }));
 
   // Green
-  const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
-  greenLink.textColor = ColorPalette.green[500];
-  greenLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(greenLink);
+  doc.add(new Hyperlink('Green Link', 'https://microsoft.com', { textColor: 'green-500', margin: { bottom: 8 } }));
 
   // Large purple
-  const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
-  purpleLink.fontSize = 16;
-  purpleLink.textColor = ColorPalette.purple[500];
-  purpleLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(purpleLink);
+  doc.add(
+    new Hyperlink('Large Purple Link', 'https://google.com', {
+      fontSize: 16,
+      textColor: 'purple-500',
+      margin: { bottom: 8 },
+    })
+  );
 
   // Bold red
-  const redLink = new Hyperlink('Bold Red Link', 'https://stackoverflow.com');
-  redLink.fontName = StandardFonts.HelveticaBold;
-  redLink.fontSize = 14;
-  redLink.textColor = Color.red;
-  redLink.margin = new Thickness(0, 0, 0, 16);
-  doc.add(redLink);
+  doc.add(
+    new Hyperlink('Bold Red Link', 'https://stackoverflow.com', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 14,
+      textColor: '#ff0000',
+      margin: { bottom: 16 },
+    })
+  );
 
   // ── Links with margins ──
-  const marginLabel = new Heading('Links with Margins');
-  marginLabel.level = 2;
-  marginLabel.fontName = StandardFonts.HelveticaBold;
-  marginLabel.fontSize = 14;
-  marginLabel.textColor = ColorPalette.slate[700];
-  doc.add(marginLabel);
+  doc.add(sectionLabel('Links with Margins'));
 
-  const before = new TextBlock('Text before link.');
-  before.fontSize = 10;
-  doc.add(before);
+  doc.add(new TextBlock('Text before link.', { fontSize: 10 }));
 
-  const marginLink = new Hyperlink('Link with 20pt vertical margins', 'https://github.com');
-  marginLink.margin = new Thickness(0, 20, 0, 20);
-  doc.add(marginLink);
+  doc.add(new Hyperlink('Link with 20pt vertical margins', 'https://github.com', { margin: { top: 20, bottom: 20 } }));
 
-  const after = new TextBlock('Text after link.');
-  after.fontSize = 10;
-  doc.add(after);
+  doc.add(new TextBlock('Text after link.', { fontSize: 10 }));
 
   return doc;
+}
+
+/** A level-2 section label with the shared style used across this example. */
+function sectionLabel(text: string, marginBottom?: number): Heading {
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 14,
+    textColor: 'slate-700',
+    margin: marginBottom === undefined ? undefined : { bottom: marginBottom },
+  });
 }

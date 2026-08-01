@@ -1,104 +1,95 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
-  ChartElement,
   DotPlotChart,
-  PdfAConformance,
+  ChartElement,
+  StandardFonts,
 } from '@bonniepdf/core';
 
 const C_TEAL = '#14b8a6';
 
+/**
+ * A product-performance dot plot chart - circular markers positioned along a
+ * value axis - authored through the options-object front door.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) => {
+        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+        stack.addChild(
+          new TextBlock('BonniePDF - Dot Plot Chart', {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+          })
+        );
+        stack.addChild(
+          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+    },
+    metadata: {
+      title: 'Dot Plot Chart',
+      author: 'BonniePDF',
+      subject: 'Dot plot chart example - circular markers positioned along a value axis',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number) => {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF - Dot Plot Chart');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-    return stack;
-  };
+  doc.add(
+    new TextBlock('Dot Plot Chart: Product Performance', {
+      fontSize: 24,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 8 },
+    })
+  );
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Dot Plot Chart';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Dot plot chart example - circular markers positioned along a value axis';
-
-  const doc = new Document(settings, metadata);
-
-  const title = new TextBlock('Dot Plot Chart: Product Performance');
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.alignment = TextAlignment.Center;
-  title.margin = new Thickness(0, 0, 0, 8);
-  doc.add(title);
-
-  const subtitle = new TextBlock('Circular markers positioned along a value axis');
-  subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
-  subtitle.alignment = TextAlignment.Center;
-  subtitle.margin = new Thickness(0, 0, 0, 20);
-  doc.add(subtitle);
+  doc.add(
+    new TextBlock('Circular markers positioned along a value axis', {
+      fontSize: 14,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 20 },
+    })
+  );
 
   const labels = ['Prod A', 'Prod B', 'Prod C', 'Prod D', 'Prod E', 'Prod F', 'Prod G', 'Prod H'];
   const values = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500];
-  const s = new ChartSeries();
-  s.color = Color.fromHex(C_TEAL);
-  s.dataPoints = labels.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
+
+  const data = new ChartData({
+    title: 'Product Sales',
+    series: [{ color: C_TEAL, dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
+    yAxis: { prefix: '£', maxValue: 12000, stepCount: 5, legend: 'Sales' },
+    xAxis: { legend: 'Product' },
   });
 
-  const data = new ChartData();
-  data.title = 'Product Sales';
-  data.series = [s];
-  data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 12000;
-  data.yAxis.stepCount = 5;
-  data.yAxis.legend = 'Sales';
-  data.xAxis.legend = 'Product';
-
-  const chart = new DotPlotChart();
-  chart.height = 380;
-  chart.stretchToFit = true;
-  chart.dotColor = Color.fromHex(C_TEAL);
-  chart.dotRadius = 12;
-  chart.fontFamily = StandardFonts.Helvetica;
-  chart.labelFontSize = 9;
-  chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  const chart = new DotPlotChart({
+    height: 380,
+    stretchToFit: true,
+    dotColor: C_TEAL,
+    dotRadius: 12,
+    fontFamily: StandardFonts.Helvetica,
+    labelFontSize: 9,
+    showValueLabels: true,
+    backgroundColor: '#fafafa',
+  });
 
   doc.add(
     new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')

@@ -1,267 +1,237 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   HorizontalStack,
   VerticalStack,
   Container,
   Line,
   QRCode,
-  QrEcc,
-  Color,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
-  AccessibilityMode,
 } from '@bonniepdf/core';
 
+/**
+ * Native, vector-based QR codes (ISO/IEC 18004) - a basic code, the four
+ * error-correction levels, and custom foreground/background colours - authored
+ * through the options-object front door.
+ *
+ * Each `QRCode` is configured in one expression: `data`, `size`, `quietZone`,
+ * `errorCorrection` as a token (`'low' | 'medium' | 'quartile' | 'high'`), and
+ * `foregroundColor`/`backgroundColor` as palette tokens.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'QR Codes';
-  metadata.author = 'BonniePDF';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 50,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'QR Codes',
+      author: 'BonniePDF',
+    },
+  });
 
   // ── Title ──
-  const title = new TextBlock('QR Code Generator');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 20);
-  doc.add(title);
-
-  const intro = new TextBlock(
-    'BonniePDF provides a native, high-performance, vector-based QR Code element that implements ' +
-      'a full ISO/IEC 18004 compliant encoder. Because it produces vector shapes rather than bitmaps, ' +
-      'the generated codes are razor-sharp at any zoom level and keep the PDF file size extremely small.'
+  doc.add(
+    new TextBlock('QR Code Generator', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: 'slate-800',
+      margin: { bottom: 20 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 20);
-  doc.add(intro);
+
+  doc.add(
+    new TextBlock(
+      'BonniePDF provides a native, high-performance, vector-based QR Code element that implements ' +
+        'a full ISO/IEC 18004 compliant encoder. Because it produces vector shapes rather than bitmaps, ' +
+        'the generated codes are razor-sharp at any zoom level and keep the PDF file size extremely small.',
+      { margin: { bottom: 20 } }
+    )
+  );
 
   // ── Section 1: Basic QR Code ──
-  const basicHeader = new TextBlock('Basic QR Code');
-  basicHeader.fontName = StandardFonts.HelveticaBold;
-  basicHeader.fontSize = 16;
-  basicHeader.textColor = ColorPalette.indigo[600];
-  basicHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(basicHeader);
+  doc.add(sectionHeader('Basic QR Code'));
 
-  const basicRow = new HorizontalStack();
-  basicRow.spacing = 20;
-  basicRow.widthDistribution = WidthDistribution.Weighted;
-
-  const basicQr = new QRCode();
-  basicQr.data = 'https://bonniepdf.com';
-  basicQr.size = 130;
-  basicQr.quietZone = 2;
-  basicQr.altText = 'QR code linking to bonniepdf.com';
-
-  const basicQrWrap = new Container();
-  basicQrWrap.padding = new Thickness(10);
-  basicQrWrap.child = basicQr;
-  basicRow.addChild(basicQrWrap, 1);
-
-  const basicDetails = new VerticalStack();
-  for (const [text, bold, mb] of [
-    ['A simple QR Code', true, 8],
-    ['Size: 130pt', false, 4],
-    ['Quiet Zone: 2 modules', false, 4],
-    ['Error Correction: Medium (default)', false, 4],
-    ['Data: https://bonniepdf.com', false, 0],
-  ] as [string, boolean, number][]) {
-    const t = new TextBlock(text);
-    t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-    if (mb) t.margin = new Thickness(0, 0, 0, mb);
-    basicDetails.addChild(t);
-  }
-  basicRow.addChild(basicDetails, 2);
+  const basicRow = new HorizontalStack({ spacing: 20, widthDistribution: 'weighted' });
+  basicRow.addChild(
+    new Container({
+      padding: 10,
+      child: new QRCode({
+        data: 'https://bonniepdf.com',
+        size: 130,
+        quietZone: 2,
+        altText: 'QR code linking to bonniepdf.com',
+      }),
+    }),
+    1
+  );
+  basicRow.addChild(
+    new VerticalStack({
+      children: (
+        [
+          ['A simple QR Code', true, 8],
+          ['Size: 130pt', false, 4],
+          ['Quiet Zone: 2 modules', false, 4],
+          ['Error Correction: Medium (default)', false, 4],
+          ['Data: https://bonniepdf.com', false, 0],
+        ] as [string, boolean, number][]
+      ).map(
+        ([text, bold, mb]) =>
+          new TextBlock(text, {
+            fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+            margin: mb ? { bottom: mb } : undefined,
+          })
+      ),
+    }),
+    2
+  );
   doc.add(basicRow);
 
-  const basicDivider = new Line();
-  basicDivider.color = ColorPalette.slate[200];
-  basicDivider.thickness = 1;
-  basicDivider.margin = new Thickness(0, 20, 0, 20);
-  doc.add(basicDivider);
+  doc.add(divider());
 
   // ── Section 2: Error correction levels ──
-  const eccHeader = new TextBlock('Error Correction Levels');
-  eccHeader.fontName = StandardFonts.HelveticaBold;
-  eccHeader.fontSize = 16;
-  eccHeader.textColor = ColorPalette.indigo[600];
-  eccHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(eccHeader);
+  doc.add(sectionHeader('Error Correction Levels'));
 
-  const eccIntro = new TextBlock(
-    'Higher error correction levels provide more redundancy at the cost of denser modules and ' +
-      'reduced data capacity. They are useful if the code might be damaged or if you intend to overlay a logo.'
+  doc.add(
+    new TextBlock(
+      'Higher error correction levels provide more redundancy at the cost of denser modules and ' +
+        'reduced data capacity. They are useful if the code might be damaged or if you intend to overlay a logo.',
+      { margin: { bottom: 15 } }
+    )
   );
-  eccIntro.margin = new Thickness(0, 0, 0, 15);
-  doc.add(eccIntro);
-
-  const eccRow = new HorizontalStack();
-  eccRow.spacing = 15;
-  eccRow.widthDistribution = WidthDistribution.Equal;
 
   const urlData = 'https://github.com/bonniepdf';
-  for (const [ecc, eccLabel, eccDetail] of [
-    [QrEcc.Low, 'Low', '~7% restoration'],
-    [QrEcc.Medium, 'Medium', '~15% restoration'],
-    [QrEcc.Quartile, 'Quartile', '~25% restoration'],
-    [QrEcc.High, 'High', '~30% restoration'],
-  ] as [QrEcc, string, string][]) {
-    const qr = new QRCode();
-    qr.data = urlData;
-    qr.size = 100;
-    qr.errorCorrection = ecc;
-    qr.quietZone = 1;
-    qr.altText = `QR code linking to github.com/bonniepdf ( error correction)`;
+  doc.add(
+    new HorizontalStack({
+      spacing: 15,
+      widthDistribution: 'equal',
+      children: (
+        [
+          ['low', 'Low', '~7% restoration'],
+          ['medium', 'Medium', '~15% restoration'],
+          ['quartile', 'Quartile', '~25% restoration'],
+          ['high', 'High', '~30% restoration'],
+        ] as const
+      ).map(
+        ([ecc, eccLabel, eccDetail]) =>
+          new VerticalStack({
+            children: [
+              new Container({
+                backgroundColor: 'slate-50',
+                border: { width: 1, color: 'slate-200' },
+                padding: 10,
+                child: new QRCode({
+                  data: urlData,
+                  size: 100,
+                  errorCorrection: ecc,
+                  quietZone: 1,
+                  altText: `QR code linking to github.com/bonniepdf ( error correction)`,
+                }),
+              }),
+              new TextBlock(eccLabel, {
+                fontName: StandardFonts.HelveticaBold,
+                alignment: 'center',
+                margin: { top: 8 },
+              }),
+              new TextBlock(eccDetail, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
+              new TextBlock(urlData, { fontSize: 8, textColor: 'slate-400', alignment: 'center', margin: { top: 4 } }),
+            ],
+          })
+      ),
+    })
+  );
 
-    const qrWrap = new Container();
-    qrWrap.backgroundColor = ColorPalette.slate[50];
-    qrWrap.border = new Border(1);
-    qrWrap.borderColors = new BorderColors(ColorPalette.slate[200]);
-    qrWrap.padding = new Thickness(10);
-    qrWrap.child = qr;
-
-    const label = new TextBlock(eccLabel);
-    label.fontName = StandardFonts.HelveticaBold;
-    label.alignment = TextAlignment.Center;
-    label.margin = new Thickness(0, 8, 0, 0);
-
-    const detail = new TextBlock(eccDetail);
-    detail.fontSize = 9;
-    detail.textColor = ColorPalette.slate[500];
-    detail.alignment = TextAlignment.Center;
-
-    const url = new TextBlock(urlData);
-    url.fontSize = 8;
-    url.textColor = ColorPalette.slate[400];
-    url.alignment = TextAlignment.Center;
-    url.margin = new Thickness(0, 4, 0, 0);
-
-    const col = new VerticalStack();
-    col.addChild(qrWrap);
-    col.addChild(label);
-    col.addChild(detail);
-    col.addChild(url);
-    eccRow.addChild(col);
-  }
-  doc.add(eccRow);
-
-  const eccDivider = new Line();
-  eccDivider.color = ColorPalette.slate[200];
-  eccDivider.thickness = 1;
-  eccDivider.margin = new Thickness(0, 20, 0, 20);
-  doc.add(eccDivider);
+  doc.add(divider());
 
   // ── Section 3: Colors & backgrounds ──
-  const colorsHeader = new TextBlock('Colors & Backgrounds');
-  colorsHeader.fontName = StandardFonts.HelveticaBold;
-  colorsHeader.fontSize = 16;
-  colorsHeader.textColor = ColorPalette.indigo[600];
-  colorsHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(colorsHeader);
+  doc.add(sectionHeader('Colors & Backgrounds'));
 
-  const colorRow = new HorizontalStack();
-  colorRow.spacing = 20;
-  colorRow.widthDistribution = WidthDistribution.Equal;
-
-  // Custom foreground
-  const fgCol = new VerticalStack();
-  const fgTitle = new TextBlock('Custom Foreground');
-  fgTitle.fontName = StandardFonts.HelveticaBold;
-  fgTitle.margin = new Thickness(0, 0, 0, 8);
-  fgCol.addChild(fgTitle);
-  const fgQr = new QRCode();
-  fgQr.data = 'tel:+1234567890';
-  fgQr.size = 120;
-  fgQr.foregroundColor = ColorPalette.blue[700];
-  fgQr.quietZone = 2;
-  fgQr.altText = 'QR code that dials the phone number +1 234 567 890';
-  const fgWrap = new Container();
-  fgWrap.border = new Border(1);
-  fgWrap.borderColors = new BorderColors(ColorPalette.blue[200]);
-  fgWrap.padding = new Thickness(10);
-  fgWrap.child = fgQr;
-  fgCol.addChild(fgWrap);
-  const fgLabel = new TextBlock('tel:+1234567890');
-  fgLabel.fontSize = 9;
-  fgLabel.textColor = ColorPalette.slate[500];
-  fgLabel.alignment = TextAlignment.Center;
-  fgLabel.margin = new Thickness(0, 8, 0, 0);
-  fgCol.addChild(fgLabel);
-  colorRow.addChild(fgCol);
-
-  // Custom background
-  const bgCol = new VerticalStack();
-  const bgTitle = new TextBlock('Custom Background');
-  bgTitle.fontName = StandardFonts.HelveticaBold;
-  bgTitle.margin = new Thickness(0, 0, 0, 8);
-  bgCol.addChild(bgTitle);
-  const bgQr = new QRCode();
-  bgQr.data = 'mailto:hello@example.com';
-  bgQr.size = 120;
-  bgQr.foregroundColor = ColorPalette.rose[900];
-  bgQr.backgroundColor = ColorPalette.rose[50];
-  bgQr.quietZone = 2;
-  bgQr.altText = 'QR code that composes an email to hello@example.com';
-  const bgWrap = new Container();
-  bgWrap.border = new Border(1);
-  bgWrap.borderColors = new BorderColors(ColorPalette.rose[200]);
-  bgWrap.padding = new Thickness(10);
-  bgWrap.child = bgQr;
-  bgCol.addChild(bgWrap);
-  const bgLabel = new TextBlock('mailto:hello@example.com');
-  bgLabel.fontSize = 9;
-  bgLabel.textColor = ColorPalette.slate[500];
-  bgLabel.alignment = TextAlignment.Center;
-  bgLabel.margin = new Thickness(0, 8, 0, 0);
-  bgCol.addChild(bgLabel);
-  colorRow.addChild(bgCol);
-
-  // Transparent background (container shows through)
-  const transCol = new VerticalStack();
-  const transTitle = new TextBlock('Transparent Background');
-  transTitle.fontName = StandardFonts.HelveticaBold;
-  transTitle.margin = new Thickness(0, 0, 0, 8);
-  transCol.addChild(transTitle);
-  const transQr = new QRCode();
-  transQr.data = 'WIFI:S:MyNetwork;T:WPA;P:password;;';
-  transQr.size = 120;
-  transQr.foregroundColor = ColorPalette.amber[900];
-  transQr.drawBackground = false;
-  transQr.quietZone = 2;
-  transQr.altText = 'QR code to join the MyNetwork Wi-Fi network';
-  const transWrap = new Container();
-  transWrap.backgroundColor = ColorPalette.amber[100];
-  transWrap.border = new Border(1);
-  transWrap.borderColors = new BorderColors(ColorPalette.amber[300]);
-  transWrap.padding = new Thickness(10);
-  transWrap.child = transQr;
-  transCol.addChild(transWrap);
-  const transLabel = new TextBlock('WIFI:S:MyNetwork;...');
-  transLabel.fontSize = 9;
-  transLabel.textColor = ColorPalette.slate[500];
-  transLabel.alignment = TextAlignment.Center;
-  transLabel.margin = new Thickness(0, 8, 0, 0);
-  transCol.addChild(transLabel);
-  colorRow.addChild(transCol);
-
-  doc.add(colorRow);
+  doc.add(
+    new HorizontalStack({
+      spacing: 20,
+      widthDistribution: 'equal',
+      children: [
+        colorColumn(
+          'Custom Foreground',
+          new Container({
+            border: { width: 1, color: 'blue-200' },
+            padding: 10,
+            child: new QRCode({
+              data: 'tel:+1234567890',
+              size: 120,
+              foregroundColor: 'blue-700',
+              quietZone: 2,
+              altText: 'QR code that dials the phone number +1 234 567 890',
+            }),
+          }),
+          'tel:+1234567890'
+        ),
+        colorColumn(
+          'Custom Background',
+          new Container({
+            border: { width: 1, color: 'rose-200' },
+            padding: 10,
+            child: new QRCode({
+              data: 'mailto:hello@example.com',
+              size: 120,
+              foregroundColor: 'rose-900',
+              backgroundColor: 'rose-50',
+              quietZone: 2,
+              altText: 'QR code that composes an email to hello@example.com',
+            }),
+          }),
+          'mailto:hello@example.com'
+        ),
+        colorColumn(
+          'Transparent Background',
+          new Container({
+            backgroundColor: 'amber-100',
+            border: { width: 1, color: 'amber-300' },
+            padding: 10,
+            child: new QRCode({
+              data: 'WIFI:S:MyNetwork;T:WPA;P:password;;',
+              size: 120,
+              foregroundColor: 'amber-900',
+              drawBackground: false,
+              quietZone: 2,
+              altText: 'QR code to join the MyNetwork Wi-Fi network',
+            }),
+          }),
+          'WIFI:S:MyNetwork;...'
+        ),
+      ],
+    })
+  );
 
   return doc;
+}
+
+/** A bold indigo section header (a styled TextBlock, matching the original). */
+function sectionHeader(text: string): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 16,
+    textColor: 'indigo-600',
+    margin: { bottom: 10 },
+  });
+}
+
+/** A full-width hairline divider with 20pt vertical breathing room. */
+function divider(): Line {
+  return new Line({ color: 'slate-200', thickness: 1, margin: { top: 20, bottom: 20 } });
+}
+
+/** A titled QR column: bold caption, the (already-wrapped) code, then a small data label. */
+function colorColumn(title: string, wrap: Container, labelText: string): VerticalStack {
+  return new VerticalStack({
+    children: [
+      new TextBlock(title, { fontName: StandardFonts.HelveticaBold, margin: { bottom: 8 } }),
+      wrap,
+      new TextBlock(labelText, { fontSize: 9, textColor: 'slate-500', alignment: 'center', margin: { top: 8 } }),
+    ],
+  });
 }

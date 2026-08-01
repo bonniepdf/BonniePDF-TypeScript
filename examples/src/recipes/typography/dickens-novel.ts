@@ -1,33 +1,16 @@
 /**
- * Dickens Novel - multi-page book layout demo.
+ * Dickens Novel - multi-page book layout demo, authored through the
+ * options-object front door.
  *
  * Demonstrates: running headers, footer page numbers, VisualToc, Heading
  * elements, justified body text, and automatic pagination across hundreds
  * of paragraphs. Body text is generated programmatically so this example
  * is self-contained without requiring a local file.
  *
- * To render from the real Project Gutenberg source, replace generateBody()
+ * To render from the real Project Gutenberg source, replace the body loop
  * with a parser that reads pg98.txt (A Tale of Two Cities, eBook #98).
  */
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  TextBlock,
-  TextStyle,
-  TextAlignment,
-  Heading,
-  VisualToc,
-  Spacer,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  HorizontalStack,
-  WidthDistribution,
-  PdfAConformance,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, VisualToc, HorizontalStack, StandardFonts } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
 
@@ -89,113 +72,126 @@ const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
 // ── Entry point ────────────────────────────────────────────────────────────
 
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
-  settings.margin = 72;
-  settings.displayDocTitle = true;
-
-  settings.headerTemplate = (pageNum: number) => {
-    if (pageNum <= 1) return undefined;
-
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    stack.spacing = 0;
-
-    const left = new TextBlock('A Tale of Two Cities');
-    left.fontName = StandardFonts.TimesItalic;
-    left.fontSize = 9;
-    left.textColor = ColorPalette.slate[500];
-    left.alignment = TextAlignment.Left;
-    stack.addChild(left, 1);
-
-    const right = new TextBlock('Charles Dickens');
-    right.fontName = StandardFonts.TimesItalic;
-    right.fontSize = 9;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-
-    return stack;
-  };
-
-  settings.footerTemplate = (pageNum: number) => {
-    if (pageNum <= 1) return undefined;
-    const b = new TextBlock(String(pageNum));
-    b.fontName = StandardFonts.TimesRoman;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[500];
-    b.alignment = TextAlignment.Center;
-    b.margin = new Thickness(0, 2, 0, 0);
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'A Tale of Two Cities';
-  metadata.author = 'Charles Dickens';
-  metadata.subject = 'Project Gutenberg eBook #98 - A public domain classic.';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      margin: 72,
+      displayDocTitle: true,
+      headerTemplate: (pageNum: number) => {
+        if (pageNum <= 1) return undefined;
+        const stack = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
+        stack.addChild(
+          new TextBlock('A Tale of Two Cities', {
+            fontName: StandardFonts.TimesItalic,
+            fontSize: 9,
+            textColor: 'slate-500',
+            alignment: 'left',
+          }),
+          1
+        );
+        stack.addChild(
+          new TextBlock('Charles Dickens', {
+            fontName: StandardFonts.TimesItalic,
+            fontSize: 9,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+      footerTemplate: (pageNum: number) => {
+        if (pageNum <= 1) return undefined;
+        return new TextBlock(String(pageNum), {
+          fontName: StandardFonts.TimesRoman,
+          fontSize: 9,
+          textColor: 'slate-500',
+          alignment: 'center',
+          margin: { top: 2 },
+        });
+      },
+    },
+    metadata: {
+      title: 'A Tale of Two Cities',
+      author: 'Charles Dickens',
+      subject: 'Project Gutenberg eBook #98 - A public domain classic.',
+    },
+  });
 
   // ── Title page ─────────────────────────────────────────────────────────
-  const titlePageTitle = new TextBlock('A TALE OF TWO CITIES');
-  titlePageTitle.fontName = StandardFonts.TimesBold;
-  titlePageTitle.fontSize = 28;
-  titlePageTitle.textColor = ColorPalette.slate[900];
-  titlePageTitle.alignment = TextAlignment.Center;
-  titlePageTitle.margin = new Thickness(0, 100, 0, 12);
-  doc.add(titlePageTitle);
+  doc.add(
+    new TextBlock('A TALE OF TWO CITIES', {
+      fontName: StandardFonts.TimesBold,
+      fontSize: 28,
+      textColor: 'slate-900',
+      alignment: 'center',
+      margin: { top: 100, bottom: 12 },
+    })
+  );
 
-  const titlePageSubtitle = new TextBlock('A Story of the French Revolution');
-  titlePageSubtitle.fontName = StandardFonts.TimesItalic;
-  titlePageSubtitle.fontSize = 15;
-  titlePageSubtitle.textColor = ColorPalette.slate[600];
-  titlePageSubtitle.alignment = TextAlignment.Center;
-  titlePageSubtitle.margin = new Thickness(0, 0, 0, 40);
-  doc.add(titlePageSubtitle);
+  doc.add(
+    new TextBlock('A Story of the French Revolution', {
+      fontName: StandardFonts.TimesItalic,
+      fontSize: 15,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 40 },
+    })
+  );
 
-  const titlePageRule = new TextBlock('---------------');
-  titlePageRule.fontName = StandardFonts.TimesRoman;
-  titlePageRule.fontSize = 13;
-  titlePageRule.textColor = ColorPalette.slate[400];
-  titlePageRule.alignment = TextAlignment.Center;
-  titlePageRule.margin = new Thickness(0, 0, 0, 40);
-  doc.add(titlePageRule);
+  doc.add(
+    new TextBlock('---------------', {
+      fontName: StandardFonts.TimesRoman,
+      fontSize: 13,
+      textColor: 'slate-400',
+      alignment: 'center',
+      margin: { bottom: 40 },
+    })
+  );
 
-  const titlePageAuthor = new TextBlock('Charles Dickens');
-  titlePageAuthor.fontName = StandardFonts.TimesBold;
-  titlePageAuthor.fontSize = 20;
-  titlePageAuthor.textColor = ColorPalette.slate[800];
-  titlePageAuthor.alignment = TextAlignment.Center;
-  titlePageAuthor.margin = new Thickness(0, 0, 0, 60);
-  doc.add(titlePageAuthor);
+  doc.add(
+    new TextBlock('Charles Dickens', {
+      fontName: StandardFonts.TimesBold,
+      fontSize: 20,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 60 },
+    })
+  );
 
-  const titlePageEdition = new TextBlock('Project Gutenberg Edition · eBook #98');
-  titlePageEdition.fontName = StandardFonts.TimesRoman;
-  titlePageEdition.fontSize = 10;
-  titlePageEdition.textColor = ColorPalette.slate[400];
-  titlePageEdition.alignment = TextAlignment.Center;
-  titlePageEdition.margin = new Thickness(0, 0, 0, 4);
-  doc.add(titlePageEdition);
+  doc.add(
+    new TextBlock('Project Gutenberg Edition · eBook #98', {
+      fontName: StandardFonts.TimesRoman,
+      fontSize: 10,
+      textColor: 'slate-400',
+      alignment: 'center',
+      margin: { bottom: 4 },
+    })
+  );
 
-  const titlePagePublicDomain = new TextBlock('Public domain - free to read, copy, and share.');
-  titlePagePublicDomain.fontName = StandardFonts.TimesItalic;
-  titlePagePublicDomain.fontSize = 9;
-  titlePagePublicDomain.textColor = ColorPalette.slate[400];
-  titlePagePublicDomain.alignment = TextAlignment.Center;
-  doc.add(titlePagePublicDomain);
+  doc.add(
+    new TextBlock('Public domain - free to read, copy, and share.', {
+      fontName: StandardFonts.TimesItalic,
+      fontSize: 9,
+      textColor: 'slate-400',
+      alignment: 'center',
+    })
+  );
   doc.addPage();
 
   // ── Table of Contents ─────────────────────────────────────────────────
-  const tocTitle = new TextBlock('Table of Contents');
-  tocTitle.fontName = StandardFonts.TimesBold;
-  tocTitle.fontSize = 24;
-  tocTitle.textColor = ColorPalette.slate[900];
-  tocTitle.alignment = TextAlignment.Center;
-  tocTitle.margin = new Thickness(0, 40, 0, 40);
-  doc.add(tocTitle);
+  doc.add(
+    new TextBlock('Table of Contents', {
+      fontName: StandardFonts.TimesBold,
+      fontSize: 24,
+      textColor: 'slate-900',
+      alignment: 'center',
+      margin: { top: 40, bottom: 40 },
+    })
+  );
 
   const tocIds: string[] = [];
   for (const book of BOOKS) {
@@ -203,61 +199,73 @@ export function generate(): Document {
     for (const ch of book.chapters) tocIds.push(ch.tocId);
   }
 
-  const toc = new VisualToc();
-  toc.headingIdentifiers = tocIds;
-  toc.fontName = StandardFonts.TimesRoman;
-  toc.fontSize = 11;
-  toc.textColor = ColorPalette.slate[800];
-  toc.margin = new Thickness(0, 0, 0, 40);
-  doc.add(toc);
+  doc.add(
+    new VisualToc({
+      headingIdentifiers: tocIds,
+      fontName: StandardFonts.TimesRoman,
+      fontSize: 11,
+      textColor: 'slate-800',
+      margin: { bottom: 40 },
+    })
+  );
 
   doc.addPage();
 
   // ── Body ──────────────────────────────────────────────────────────────
   let paraIndex = 0;
   for (const book of BOOKS) {
-    const bookTopRule = new TextBlock('---------------');
-    bookTopRule.fontName = StandardFonts.TimesRoman;
-    bookTopRule.fontSize = 11;
-    bookTopRule.textColor = ColorPalette.slate[300];
-    bookTopRule.alignment = TextAlignment.Center;
-    bookTopRule.margin = new Thickness(0, 56, 0, 14);
-    doc.add(bookTopRule);
+    doc.add(
+      new TextBlock('---------------', {
+        fontName: StandardFonts.TimesRoman,
+        fontSize: 11,
+        textColor: 'slate-300',
+        alignment: 'center',
+        margin: { top: 56, bottom: 14 },
+      })
+    );
 
-    const bookHeading = new Heading(book.title.toUpperCase());
-    bookHeading.tocIdentifier = book.tocId;
-    bookHeading.fontName = StandardFonts.TimesBold;
-    bookHeading.fontSize = 14;
-    bookHeading.textColor = ColorPalette.slate[800];
-    bookHeading.alignment = TextAlignment.Center;
-    bookHeading.margin = new Thickness(0, 0, 0, 14);
-    doc.add(bookHeading);
+    doc.add(
+      new Heading(book.title.toUpperCase(), {
+        tocIdentifier: book.tocId,
+        fontName: StandardFonts.TimesBold,
+        fontSize: 14,
+        textColor: 'slate-800',
+        alignment: 'center',
+        margin: { bottom: 14 },
+      })
+    );
 
-    const bookBottomRule = new TextBlock('---------------');
-    bookBottomRule.fontName = StandardFonts.TimesRoman;
-    bookBottomRule.fontSize = 11;
-    bookBottomRule.textColor = ColorPalette.slate[300];
-    bookBottomRule.alignment = TextAlignment.Center;
-    bookBottomRule.margin = new Thickness(0, 0, 0, 32);
-    doc.add(bookBottomRule);
+    doc.add(
+      new TextBlock('---------------', {
+        fontName: StandardFonts.TimesRoman,
+        fontSize: 11,
+        textColor: 'slate-300',
+        alignment: 'center',
+        margin: { bottom: 32 },
+      })
+    );
 
     for (const ch of book.chapters) {
-      const chapterNumber = new TextBlock(ch.number);
-      chapterNumber.fontName = StandardFonts.TimesBold;
-      chapterNumber.fontSize = 10;
-      chapterNumber.textColor = ColorPalette.slate[500];
-      chapterNumber.alignment = TextAlignment.Center;
-      chapterNumber.margin = new Thickness(0, 32, 0, 6);
-      doc.add(chapterNumber);
+      doc.add(
+        new TextBlock(ch.number, {
+          fontName: StandardFonts.TimesBold,
+          fontSize: 10,
+          textColor: 'slate-500',
+          alignment: 'center',
+          margin: { top: 32, bottom: 6 },
+        })
+      );
 
-      const chapterHeading = new Heading(ch.title);
-      chapterHeading.tocIdentifier = ch.tocId;
-      chapterHeading.fontName = StandardFonts.TimesBold;
-      chapterHeading.fontSize = 17;
-      chapterHeading.textColor = ColorPalette.slate[900];
-      chapterHeading.alignment = TextAlignment.Center;
-      chapterHeading.margin = new Thickness(0, 0, 0, 18);
-      doc.add(chapterHeading);
+      doc.add(
+        new Heading(ch.title, {
+          tocIdentifier: ch.tocId,
+          fontName: StandardFonts.TimesBold,
+          fontSize: 17,
+          textColor: 'slate-900',
+          alignment: 'center',
+          margin: { bottom: 18 },
+        })
+      );
 
       for (let i = 0; i < ch.paragraphCount; i++) {
         const sentenceCount = 4 + (paraIndex % 4);
@@ -267,13 +275,15 @@ export function generate(): Document {
         }
         paraIndex++;
 
-        const paragraph = new TextBlock(paragraphParts.join(' '));
-        paragraph.fontName = StandardFonts.TimesRoman;
-        paragraph.fontSize = 11;
-        paragraph.textColor = ColorPalette.slate[900];
-        paragraph.alignment = TextAlignment.Justify;
-        paragraph.margin = new Thickness(0, 0, 0, 7);
-        doc.add(paragraph);
+        doc.add(
+          new TextBlock(paragraphParts.join(' '), {
+            fontName: StandardFonts.TimesRoman,
+            fontSize: 11,
+            textColor: 'slate-900',
+            alignment: 'justify',
+            margin: { bottom: 7 },
+          })
+        );
       }
     }
   }

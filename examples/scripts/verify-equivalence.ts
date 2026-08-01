@@ -95,8 +95,143 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'advanced-typography-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
-];
+  {
+    canonical: 'dickens-novel',
+    variant: 'dickens-novel-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'tables',
+    variant: 'tables-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'lists',
+    variant: 'lists-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'hyperlinks',
+    variant: 'hyperlinks-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'cross-references',
+    variant: 'cross-references-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'shapes-and-borders',
+    variant: 'shapes-and-borders-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'color-palette',
+    variant: 'color-palette-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'qr-codes',
+    variant: 'qr-codes-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'barcodes',
+    variant: 'barcodes-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'data-matrix',
+    variant: 'data-matrix-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'images',
+    variant: 'images-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'bar-chart',
+    variant: 'bar-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'grouped-bar-chart',
+    variant: 'grouped-bar-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'line-chart',
+    variant: 'line-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 
+  {
+    canonical: 'pie-chart',
+    variant: 'pie-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'area-chart',
+    variant: 'area-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'lollipop-chart',
+    variant: 'lollipop-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'dot-plot-chart',
+    variant: 'dot-plot-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'multi-series-line-chart',
+    variant: 'multi-series-line-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'horizontal-bar-chart',
+    variant: 'horizontal-bar-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'horizontal-grouped-bar-chart',
+    variant: 'horizontal-grouped-bar-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'horizontal-lollipop-chart',
+    variant: 'horizontal-lollipop-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'chart-showcase',
+    variant: 'chart-showcase-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'watermarking',
+    variant: 'watermarking-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'encryption',
+    variant: 'encryption-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'attached-data',
+    variant: 'attached-data-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'watermarking-confidential',
+    variant: 'watermarking-confidential-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+];
 registerBundledFonts();
 
 function findExample(id: string): ExampleDef {

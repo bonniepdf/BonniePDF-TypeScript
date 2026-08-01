@@ -1,77 +1,75 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
-  ChartElement,
   LollipopChart,
+  ChartElement,
   ChartOrientation,
-  PdfAConformance,
+  StandardFonts,
 } from '@bonniepdf/core';
 
 const C_VIOLET = '#7c3aed';
 
+/**
+ * A horizontal lollipop chart ranking product revenue - lollipop style reduces
+ * ink without losing clarity - authored through the options-object front door.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) => {
+        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+        stack.addChild(
+          new TextBlock('BonniePDF - Horizontal Lollipop Chart', {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+          })
+        );
+        stack.addChild(
+          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+    },
+    metadata: {
+      title: 'Horizontal Lollipop Chart',
+      author: 'BonniePDF',
+      subject: 'Product revenue ranking using a horizontal lollipop chart',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number) => {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF - Horizontal Lollipop Chart');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-    return stack;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Horizontal Lollipop Chart';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Product revenue ranking using a horizontal lollipop chart';
-
-  const doc = new Document(settings, metadata);
-
-  const title = new TextBlock('Horizontal Lollipop Chart: Product Revenue Ranking');
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.alignment = TextAlignment.Center;
-  title.margin = new Thickness(0, 0, 0, 8);
-  doc.add(title);
-
-  const subtitle = new TextBlock(
-    'Year-to-date revenue per product line - lollipop style reduces ink without losing clarity'
+  doc.add(
+    new TextBlock('Horizontal Lollipop Chart: Product Revenue Ranking', {
+      fontSize: 24,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 8 },
+    })
   );
-  subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
-  subtitle.alignment = TextAlignment.Center;
-  subtitle.margin = new Thickness(0, 0, 0, 20);
-  doc.add(subtitle);
+
+  doc.add(
+    new TextBlock('Year-to-date revenue per product line - lollipop style reduces ink without losing clarity', {
+      fontSize: 14,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 20 },
+    })
+  );
 
   const products = [
     { label: 'Product A', value: 45000 },
@@ -84,37 +82,30 @@ export function generate(): Document {
     { label: 'Product H', value: 91000 },
   ];
 
-  const s = new ChartSeries();
-  s.color = Color.fromHex(C_VIOLET);
-  s.dataPoints = products.map(r => {
-    const p = new ChartDataPoint();
-    p.label = r.label;
-    p.value = r.value;
-    p.labelFormat = "'£'#,##0";
-    return p;
+  const data = new ChartData({
+    title: 'Product Revenue',
+    series: [
+      {
+        color: C_VIOLET,
+        dataPoints: products.map(r => ({ label: r.label, value: r.value, labelFormat: "'£'#,##0" })),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 100000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
+    xAxis: { legend: 'Product' },
   });
 
-  const data = new ChartData();
-  data.title = 'Product Revenue';
-  data.series = [s];
-  data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 100000;
-  data.yAxis.stepCount = 5;
-  data.yAxis.showGridLines = true;
-  data.yAxis.legend = 'Revenue';
-  data.xAxis.legend = 'Product';
-
-  const chart = new LollipopChart();
-  chart.orientation = ChartOrientation.Horizontal;
-  chart.height = 400;
-  chart.stretchToFit = true;
-  chart.lollipopColor = Color.fromHex(C_VIOLET);
-  chart.stemWidth = 2;
-  chart.headRadius = 9;
-  chart.fontFamily = StandardFonts.Helvetica;
-  chart.labelFontSize = 9;
-  chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  const chart = new LollipopChart({
+    orientation: ChartOrientation.Horizontal,
+    height: 400,
+    stretchToFit: true,
+    lollipopColor: C_VIOLET,
+    stemWidth: 2,
+    headRadius: 9,
+    fontFamily: StandardFonts.Helvetica,
+    labelFontSize: 9,
+    showValueLabels: true,
+    backgroundColor: '#fafafa',
+  });
 
   doc.add(
     new ChartElement(chart, data, 'Horizontal lollipop chart showing product revenue ranking for eight product lines.')

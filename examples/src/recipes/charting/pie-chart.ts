@@ -1,26 +1,12 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
-  ChartElement,
   PieChart,
-  PdfAConformance,
+  ChartElement,
+  StandardFonts,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -39,75 +25,85 @@ const ALL_COLORS = [
   '#06b6d4',
 ];
 
+/**
+ * A donut chart of monthly sales - slice colours, legend, and centre total -
+ * authored through the options-object front door. The slice palette is a plain
+ * `colors` string array on the `PieChart`; a pie has no axes, so `ChartData`
+ * just carries the single `series`.
+ */
 export function generate(): Document {
   const year = new Date().getFullYear();
 
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  settings.footerTemplate = (pageNumber: number) => {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-    const left = new TextBlock('BonniePDF - Pie Chart');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
-    return stack;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Pie Chart';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Pie / donut chart example - monthly sales breakdown with legend and centre total';
-
-  const doc = new Document(settings, metadata);
-
-  const title = new TextBlock(`Pie Chart: Monthly Sales ${year}`);
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.alignment = TextAlignment.Center;
-  title.margin = new Thickness(0, 0, 0, 8);
-  doc.add(title);
-
-  const subtitle = new TextBlock('Donut chart with legend and total value in the centre');
-  subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
-  subtitle.alignment = TextAlignment.Center;
-  subtitle.margin = new Thickness(0, 0, 0, 20);
-  doc.add(subtitle);
-
-  const values = [7234, 4891, 8456, 3127, 9542, 6789, 5234, 8901, 2456, 7890, 6123, 9876];
-  const s = new ChartSeries();
-  s.color = Color.fromHex('#4f46e5');
-  s.dataPoints = MONTH_LABELS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) => {
+        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+        stack.addChild(
+          new TextBlock('BonniePDF - Pie Chart', {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+          })
+        );
+        stack.addChild(
+          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 10,
+            textColor: 'slate-500',
+            alignment: 'right',
+          }),
+          1
+        );
+        return stack;
+      },
+    },
+    metadata: {
+      title: 'Pie Chart',
+      author: 'BonniePDF',
+      subject: 'Pie / donut chart example - monthly sales breakdown with legend and centre total',
+    },
   });
 
-  const data = new ChartData();
-  data.title = `Monthly Sales ${year}`;
-  data.series = [s];
+  doc.add(
+    new TextBlock(`Pie Chart: Monthly Sales ${year}`, {
+      fontSize: 24,
+      textColor: 'slate-800',
+      alignment: 'center',
+      margin: { bottom: 8 },
+    })
+  );
 
-  const chart = new PieChart();
-  chart.height = 380;
-  chart.stretchToFit = true;
-  chart.isDonut = true;
-  chart.totalLabel = 'Total';
-  chart.showLegend = true;
-  chart.colors = ALL_COLORS;
-  chart.backgroundColor = Color.white;
+  doc.add(
+    new TextBlock('Donut chart with legend and total value in the centre', {
+      fontSize: 14,
+      textColor: 'slate-600',
+      alignment: 'center',
+      margin: { bottom: 20 },
+    })
+  );
+
+  const values = [7234, 4891, 8456, 3127, 9542, 6789, 5234, 8901, 2456, 7890, 6123, 9876];
+
+  const data = new ChartData({
+    title: `Monthly Sales ${year}`,
+    series: [{ color: '#4f46e5', dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i] })) }],
+  });
+
+  const chart = new PieChart({
+    height: 380,
+    stretchToFit: true,
+    isDonut: true,
+    totalLabel: 'Total',
+    showLegend: true,
+    colors: ALL_COLORS,
+    backgroundColor: '#ffffff',
+  });
 
   doc.add(
     new ChartElement(

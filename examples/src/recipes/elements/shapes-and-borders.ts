@@ -1,257 +1,212 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  TextBlock,
-  TextStyle,
-  HorizontalStack,
-  VerticalStack,
-  Container,
-  Line,
-  Color,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
-  StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
-  AccessibilityMode,
-} from '@bonniepdf/core';
+import { Document, TextBlock, HorizontalStack, VerticalStack, Container, Line, StandardFonts } from '@bonniepdf/core';
 
+/**
+ * Rounded rectangles - corner radius on containers, rounded borders, card
+ * layouts, a radius comparison, and practical banner callouts - authored
+ * through the options-object front door.
+ *
+ * `Container` is configured in one expression: `cornerRadius`, `backgroundColor`
+ * (token or hex), the `{ width, color }` border sugar, and `padding` via the
+ * `[horizontal, vertical]` shorthand.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Rounded Rectangles';
-  metadata.author = 'BonniePDF';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 50,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'Rounded Rectangles',
+      author: 'BonniePDF',
+    },
+  });
 
   // ── Title ──
-  const title = new TextBlock('Rounded Rectangles');
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 20);
-  doc.add(title);
+  doc.add(
+    new TextBlock('Rounded Rectangles', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: 'slate-800',
+      margin: { bottom: 20 },
+    })
+  );
 
   // ── Section 1: Basic rounded containers ──
-  const basicHeader = new TextBlock('Basic Rounded Containers');
-  basicHeader.fontName = StandardFonts.HelveticaBold;
-  basicHeader.fontSize = 14;
-  basicHeader.textColor = ColorPalette.indigo[600];
-  basicHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(basicHeader);
+  doc.add(sectionHeader('Basic Rounded Containers'));
 
-  const box1Text = new TextBlock('A container with 8pt corner radius and a light blue background.');
-  box1Text.fontName = StandardFonts.Helvetica;
-  box1Text.fontSize = 12;
-  box1Text.textColor = ColorPalette.blue[800];
-  const box1 = new Container();
-  box1.backgroundColor = ColorPalette.blue[50];
-  box1.cornerRadius = 8;
-  box1.padding = new Thickness(16);
-  box1.margin = new Thickness(0, 0, 0, 12);
-  box1.child = box1Text;
-  doc.add(box1);
-
-  const box2Text = new TextBlock(
-    'A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.'
+  doc.add(
+    new Container({
+      backgroundColor: 'blue-50',
+      cornerRadius: 8,
+      padding: 16,
+      margin: { bottom: 12 },
+      child: new TextBlock('A container with 8pt corner radius and a light blue background.', {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 12,
+        textColor: 'blue-800',
+      }),
+    })
   );
-  box2Text.fontName = StandardFonts.Helvetica;
-  box2Text.fontSize = 12;
-  box2Text.textColor = ColorPalette.green[800];
-  const box2 = new Container();
-  box2.backgroundColor = ColorPalette.green[50];
-  box2.cornerRadius = 16;
-  box2.padding = new Thickness(20);
-  box2.margin = new Thickness(0, 0, 0, 12);
-  box2.child = box2Text;
-  doc.add(box2);
+
+  doc.add(
+    new Container({
+      backgroundColor: 'green-50',
+      cornerRadius: 16,
+      padding: 20,
+      margin: { bottom: 12 },
+      child: new TextBlock(
+        'A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.',
+        { fontName: StandardFonts.Helvetica, fontSize: 12, textColor: 'green-800' }
+      ),
+    })
+  );
 
   // ── Section 2: Rounded borders ──
-  const bordersHeader = new TextBlock('Rounded Borders');
-  bordersHeader.fontName = StandardFonts.HelveticaBold;
-  bordersHeader.fontSize = 14;
-  bordersHeader.textColor = ColorPalette.indigo[600];
-  bordersHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(bordersHeader);
+  doc.add(sectionHeader('Rounded Borders'));
 
-  const strokeText = new TextBlock('A rounded border with no background fill. The stroke follows the curved path.');
-  strokeText.fontName = StandardFonts.Helvetica;
-  strokeText.fontSize = 12;
-  strokeText.textColor = ColorPalette.slate[700];
-  const strokeBox = new Container();
-  strokeBox.border = new Border(2);
-  strokeBox.borderColors = new BorderColors(ColorPalette.indigo[500]);
-  strokeBox.cornerRadius = 10;
-  strokeBox.padding = new Thickness(16);
-  strokeBox.margin = new Thickness(0, 0, 0, 12);
-  strokeBox.child = strokeText;
-  doc.add(strokeBox);
-
-  const alertText = new TextBlock(
-    'Rounded border combined with a background fill - great for alert boxes and callouts.'
+  doc.add(
+    new Container({
+      border: { width: 2, color: 'indigo-500' },
+      cornerRadius: 10,
+      padding: 16,
+      margin: { bottom: 12 },
+      child: new TextBlock('A rounded border with no background fill. The stroke follows the curved path.', {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 12,
+        textColor: 'slate-700',
+      }),
+    })
   );
-  alertText.fontName = StandardFonts.Helvetica;
-  alertText.fontSize = 12;
-  alertText.textColor = Color.fromHex('#92400e');
-  const alertBox = new Container();
-  alertBox.backgroundColor = Color.fromHex('#fef3c7');
-  alertBox.border = new Border(2);
-  alertBox.borderColors = new BorderColors(Color.fromHex('#f59e0b'));
-  alertBox.cornerRadius = 10;
-  alertBox.padding = new Thickness(16);
-  alertBox.margin = new Thickness(0, 0, 0, 12);
-  alertBox.child = alertText;
-  doc.add(alertBox);
+
+  doc.add(
+    new Container({
+      backgroundColor: '#fef3c7',
+      border: { width: 2, color: '#f59e0b' },
+      cornerRadius: 10,
+      padding: 16,
+      margin: { bottom: 12 },
+      child: new TextBlock('Rounded border combined with a background fill - great for alert boxes and callouts.', {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 12,
+        textColor: '#92400e',
+      }),
+    })
+  );
 
   // ── Section 3: Card layout ──
-  const cardHeader = new TextBlock('Card Layout');
-  cardHeader.fontName = StandardFonts.HelveticaBold;
-  cardHeader.fontSize = 14;
-  cardHeader.textColor = ColorPalette.indigo[600];
-  cardHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(cardHeader);
+  doc.add(sectionHeader('Card Layout'));
 
-  const cardRow = new HorizontalStack();
-  cardRow.widthDistribution = WidthDistribution.Weighted;
-  cardRow.spacing = 12;
-  cardRow.margin = new Thickness(0, 0, 0, 12);
+  const cardRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { bottom: 12 } });
   for (const [cardTitle, description, accent, bg] of [
-    [
-      'Feature A',
-      'Rounded corners make UI elements feel modern and approachable.',
-      ColorPalette.blue[500],
-      ColorPalette.blue[50],
-    ],
-    [
-      'Feature B',
-      'Bezier curves approximate perfect quarter-circle arcs.',
-      ColorPalette.purple[500],
-      Color.fromHex('#faf5ff'),
-    ],
-    [
-      'Feature C',
-      'Works with backgrounds, borders, or both combined.',
-      ColorPalette.teal[500],
-      Color.fromHex('#f0fdfa'),
-    ],
-  ] as [string, string, Color, Color][]) {
-    const stack = new VerticalStack();
-
-    const t = new TextBlock(cardTitle);
-    t.fontName = StandardFonts.HelveticaBold;
-    t.fontSize = 14;
-    t.textColor = accent;
-    t.margin = new Thickness(0, 0, 0, 6);
-    stack.addChild(t);
-
-    const d = new TextBlock(description);
-    d.fontName = StandardFonts.Helvetica;
-    d.fontSize = 10;
-    d.textColor = ColorPalette.slate[600];
-    stack.addChild(d);
-
-    const c = new Container();
-    c.backgroundColor = bg;
-    c.border = new Border(1);
-    c.borderColors = new BorderColors(accent);
-    c.cornerRadius = 10;
-    c.padding = new Thickness(14);
-    c.child = stack;
-    cardRow.addChild(c, 1);
+    ['Feature A', 'Rounded corners make UI elements feel modern and approachable.', 'blue-500', 'blue-50'],
+    ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', 'purple-500', '#faf5ff'],
+    ['Feature C', 'Works with backgrounds, borders, or both combined.', 'teal-500', '#f0fdfa'],
+  ] as const) {
+    cardRow.addChild(
+      new Container({
+        backgroundColor: bg,
+        border: { width: 1, color: accent },
+        cornerRadius: 10,
+        padding: 14,
+        child: new VerticalStack({
+          children: [
+            new TextBlock(cardTitle, {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 14,
+              textColor: accent,
+              margin: { bottom: 6 },
+            }),
+            new TextBlock(description, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: 'slate-600' }),
+          ],
+        }),
+      }),
+      1
+    );
   }
   doc.add(cardRow);
 
   // ── Section 4: Radius comparison ──
-  const radiusHeader = new TextBlock('Radius Comparison');
-  radiusHeader.fontName = StandardFonts.HelveticaBold;
-  radiusHeader.fontSize = 14;
-  radiusHeader.textColor = ColorPalette.indigo[600];
-  radiusHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(radiusHeader);
+  doc.add(sectionHeader('Radius Comparison'));
 
   for (const r of [0, 4, 8, 12, 20, 30]) {
     const label = r === 0 ? 'CornerRadius = 0 (sharp corners, default)' : `CornerRadius = ${r}`;
-    const t = new TextBlock(label);
-    t.fontName = StandardFonts.Helvetica;
-    t.fontSize = 11;
-    t.textColor = ColorPalette.slate[700];
-    const c = new Container();
-    c.backgroundColor = ColorPalette.slate[100];
-    c.border = new Border(1);
-    c.borderColors = new BorderColors(ColorPalette.slate[400]);
-    c.cornerRadius = r;
-    c.padding = new Thickness(12, 8, 12, 8);
-    c.margin = new Thickness(0, 0, 0, 6);
-    c.child = t;
-    doc.add(c);
+    doc.add(
+      new Container({
+        backgroundColor: 'slate-100',
+        border: { width: 1, color: 'slate-400' },
+        cornerRadius: r,
+        padding: [12, 8],
+        margin: { bottom: 6 },
+        child: new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 11, textColor: 'slate-700' }),
+      })
+    );
   }
 
   // ── Section 5: Practical banners ──
-  const divider = new Line();
-  divider.color = ColorPalette.slate[300];
-  divider.thickness = 1;
-  divider.margin = new Thickness(0, 16, 0, 0);
-  doc.add(divider);
-  const practicalHeader = new TextBlock('Practical Examples');
-  practicalHeader.fontName = StandardFonts.HelveticaBold;
-  practicalHeader.fontSize = 14;
-  practicalHeader.textColor = ColorPalette.indigo[600];
-  practicalHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(practicalHeader);
+  doc.add(new Line({ color: 'slate-300', thickness: 1, margin: { top: 16 } }));
+  doc.add(sectionHeader('Practical Examples'));
 
-  const banners: [string, string, string, string, boolean][] = [
-    ['Success! Your document has been generated successfully.', '#dcfce7', '', '', false],
-    ['Warning: Please review the document before sending.', '#fef9c3', '#ca8a04', '', false],
-    ['Error: Unable to process the request. Please try again.', '#fee2e2', '#991b1b', '#991b1b', true],
-    ['Info: Rounded corners are built from four Bezier arcs using k=0.5523.', '#dbeafe', '', '', false],
-  ];
+  const banners = [
+    {
+      message: 'Success! Your document has been generated successfully.',
+      bg: '#dcfce7',
+      border: 'green-600',
+      text: 'green-800',
+      bold: true,
+    },
+    {
+      message: 'Warning: Please review the document before sending.',
+      bg: '#fef9c3',
+      border: '#ca8a04',
+      text: '#854d0e',
+      bold: true,
+    },
+    {
+      message: 'Error: Unable to process the request. Please try again.',
+      bg: '#fee2e2',
+      border: '#991b1b',
+      text: '#991b1b',
+      bold: true,
+    },
+    {
+      message: 'Info: Rounded corners are built from four Bezier arcs using k=0.5523.',
+      bg: '#dbeafe',
+      border: 'blue-600',
+      text: 'blue-800',
+      bold: false,
+    },
+  ] as const;
 
-  const bannerAccents: string[] = ['', '#ca8a04', '#991b1b', ''];
-  const bannerBorders = [
-    ColorPalette.green[600],
-    Color.fromHex('#ca8a04'),
-    Color.fromHex('#991b1b'),
-    ColorPalette.blue[600],
-  ];
-  const bannerTexts = [
-    ColorPalette.green[800],
-    Color.fromHex('#854d0e'),
-    Color.fromHex('#991b1b'),
-    ColorPalette.blue[800],
-  ];
-  const bannerBgs = ['#dcfce7', '#fef9c3', '#fee2e2', '#dbeafe'];
-  const bannerMessages = [
-    'Success! Your document has been generated successfully.',
-    'Warning: Please review the document before sending.',
-    'Error: Unable to process the request. Please try again.',
-    'Info: Rounded corners are built from four Bezier arcs using k=0.5523.',
-  ];
-  const bannerBold = [true, true, true, false];
-
-  for (let i = 0; i < 4; i++) {
-    const t = new TextBlock(bannerMessages[i]);
-    t.fontName = bannerBold[i] ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-    t.fontSize = 12;
-    t.textColor = bannerTexts[i];
-    const c = new Container();
-    c.backgroundColor = Color.fromHex(bannerBgs[i]);
-    c.border = new Border(1);
-    c.borderColors = new BorderColors(bannerBorders[i]);
-    c.cornerRadius = 8;
-    c.padding = new Thickness(16, 12, 16, 12);
-    c.margin = new Thickness(0, 0, 0, 8);
-    c.child = t;
-    doc.add(c);
+  for (const banner of banners) {
+    doc.add(
+      new Container({
+        backgroundColor: banner.bg,
+        border: { width: 1, color: banner.border },
+        cornerRadius: 8,
+        padding: [16, 12],
+        margin: { bottom: 8 },
+        child: new TextBlock(banner.message, {
+          fontName: banner.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+          fontSize: 12,
+          textColor: banner.text,
+        }),
+      })
+    );
   }
 
   return doc;
+}
+
+/** A bold indigo section header (a styled TextBlock, matching the original). */
+function sectionHeader(text: string): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 14,
+    textColor: 'indigo-600',
+    margin: { top: 12, bottom: 6 },
+  });
 }

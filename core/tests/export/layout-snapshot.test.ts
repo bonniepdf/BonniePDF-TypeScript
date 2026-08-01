@@ -45,6 +45,18 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     expect(nodes[1].sourceId).toBeUndefined();
   });
 
+  it('maps the Document root and its auto-created Page to the document declaration', async () => {
+    doc = markDebugSource(new Document(), 'src:document-declaration');
+    doc.add(new TextBlock('First page', 14, StandardFonts.Helvetica));
+    const explicitPage = doc.addPage();
+    explicitPage.add(new TextBlock('Second page', 14, StandardFonts.Helvetica));
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    expect(snapshot!.root.sourceId).toBe('src:document-declaration');
+    expect(snapshot!.root.children[0].sourceId).toBe('src:document-declaration');
+    expect(snapshot!.root.children[1].sourceId).toBeUndefined();
+  });
+
   it('captures a Document → Page → content tree', async () => {
     doc = new Document();
     doc.add(new TextBlock('First', 14, StandardFonts.Helvetica));

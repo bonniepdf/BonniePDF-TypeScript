@@ -9,7 +9,6 @@ import {
   HorizontalStack,
   VerticalStack,
   Container,
-  Spacer,
   Border,
   BorderColors,
   ColorPalette,
@@ -92,10 +91,8 @@ export function generate(): Document {
   subtitle.fontName = StandardFonts.Helvetica;
   subtitle.fontSize = 9;
   subtitle.textColor = ColorPalette.slate[500];
-  subtitle.margin = new Thickness(0, 4, 0, 0);
+  subtitle.margin = new Thickness(0, 4, 0, 8);
   doc.add(subtitle);
-
-  doc.add(new Spacer(8));
 
   // ── Grid ──
   const grid = new VerticalStack();

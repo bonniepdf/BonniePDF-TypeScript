@@ -104,6 +104,20 @@ export class TextStyle {
     applyOptions(this, options);
   }
 
+  /**
+   * Returns an independent copy of this style.
+   *
+   * The fluent builders (`bold()`, `withColor()`, `subscript()`, …) mutate and
+   * return `this`, so a style shared across several `RichText` spans and mutated
+   * between them would otherwise leak its final state back onto the earlier
+   * spans. `RichText.span()` clones the style on the way in for exactly this
+   * reason; callers can also clone explicitly to fork a base style. All fields
+   * are value types (`Color` is immutable), so a shallow copy is a full copy.
+   */
+  public clone(): TextStyle {
+    return Object.assign(new TextStyle(), this);
+  }
+
   /** Font family name (e.g. "Helvetica") or TTF file path. Null = inherit from parent. */
   public fontFamily?: string;
 

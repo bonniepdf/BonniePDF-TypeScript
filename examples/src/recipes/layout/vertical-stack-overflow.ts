@@ -1,20 +1,12 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
+  Heading,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   TextElementBase,
   VerticalStack,
   Barcode,
   BarcodeSymbology,
-  Heading,
-  ColorPalette,
-  Thickness,
   StandardFonts,
-  PdfAConformance,
 } from '@bonniepdf/core';
 
 /**
@@ -28,8 +20,8 @@ import {
  * page is carried to the next one instead.
  *
  * The example is a warehouse asset-label sheet - one scannable Code 128 label
- * per storage location. Every label is a Figure with alt-text; the running
- * footer is an Artifact.
+ * per storage location - authored through the options-object front door. Every
+ * label is a Figure with alt-text; the running footer is an Artifact.
  */
 const LOCATIONS: string[] = [
   'WH1-A01-R02-B03',
@@ -55,57 +47,62 @@ const LOCATIONS: string[] = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: 'slate-400',
+          alignment: 'right',
+        }),
+    },
+    metadata: {
+      title: 'Warehouse Asset-Label Sheet',
+      author: 'BonniePDF',
+      subject:
+        'Demonstrates VerticalStack paginating a column of barcodes in an accessible PDF/A-2a + PDF/UA-1 document.',
+      keywords: 'pdf, accessibility, layout, vertical stack, barcode, logistics, warehouse, BonniePDF',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Right;
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Warehouse Asset-Label Sheet';
-  metadata.author = 'BonniePDF';
-  metadata.subject =
-    'Demonstrates VerticalStack paginating a column of barcodes in an accessible PDF/A-2a + PDF/UA-1 document.';
-  metadata.keywords = 'pdf, accessibility, layout, vertical stack, barcode, logistics, warehouse, BonniePDF';
-
-  const doc = new Document(settings, metadata);
-
-  const h1 = new Heading('Warehouse Asset-Label Sheet');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 10);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'One Code 128 label per storage location. Barcodes have no pagination of their own, so a VerticalStack lays the column out and carries each label that would fall off the page onto the next one - nothing is lost off the bottom edge.'
+  doc.add(
+    new Heading('Warehouse Asset-Label Sheet', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      textColor: 'slate-800',
+      margin: { bottom: 10 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 16);
-  doc.add(intro);
 
-  const sheet = new VerticalStack();
-  sheet.spacing = 18;
-  for (const location of LOCATIONS) {
-    const label = new Barcode();
-    label.value = location;
-    label.symbology = BarcodeSymbology.Code128;
-    label.height = 46;
-    label.textLabelFontSize = 10;
-    label.altText = `Warehouse location barcode ${location}`;
-    sheet.addChild(label);
-  }
-  doc.add(sheet);
+  doc.add(
+    new TextBlock(
+      'One Code 128 label per storage location. Barcodes have no pagination of their own, so a VerticalStack lays the column out and carries each label that would fall off the page onto the next one - nothing is lost off the bottom edge.',
+      { margin: { bottom: 16 } }
+    )
+  );
+
+  doc.add(
+    new VerticalStack({
+      spacing: 18,
+      children: LOCATIONS.map(
+        location =>
+          new Barcode({
+            value: location,
+            symbology: BarcodeSymbology.Code128,
+            height: 46,
+            textLabelFontSize: 10,
+            altText: `Warehouse location barcode ${location}`,
+          })
+      ),
+    })
+  );
 
   return doc;
 }

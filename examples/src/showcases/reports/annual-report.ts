@@ -95,14 +95,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     hero.height = 220;
     hero.fitMode = ImageFitMode.Cover;
     hero.isDecorative = true;
-    doc.add(new Spacer(24));
+    hero.margin = new Thickness(0, 24, 0, 24);
     doc.add(hero);
-    doc.add(new Spacer(24));
   } else {
     doc.add(new Spacer(150));
   }
-  doc.add(brandMark());
-  doc.add(new Spacer(26));
+  const mark = brandMark();
+  mark.margin = new Thickness(0, 0, 0, 26);
+  doc.add(mark);
   doc.add(coverLabel('ANNUAL REPORT'));
   doc.add(coverTitle(COMPANY));
   doc.add(triColourRule());
@@ -116,8 +116,9 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   //  Page 2 - letter to shareholders + performance highlights
   // ════════════════════════════════════════════════════════════════════════
   doc.addPage();
-  doc.add(new Spacer(10));
-  doc.add(sectionHeading('Letter to Shareholders'));
+  const shareholderHeading = sectionHeading('Letter to Shareholders');
+  shareholderHeading.margin = new Thickness(0, 10, 0, 12);
+  doc.add(shareholderHeading);
   doc.add(
     body(
       `This past year tested our resolve and rewarded our discipline. Against a ` +
@@ -135,17 +136,18 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
         `flagship platform now serves more than two million daily users.`
     )
   );
-
-  doc.add(new Spacer(20));
-  doc.add(sectionHeading('Performance Highlights'));
+  const performanceHeading = sectionHeading('Performance Highlights');
+  performanceHeading.margin = new Thickness(0, 20, 0, 12);
+  doc.add(performanceHeading);
   doc.add(kpiRow());
 
   // ════════════════════════════════════════════════════════════════════════
   //  Page 3 - operational review (flows naturally, repeating the bands)
   // ════════════════════════════════════════════════════════════════════════
   doc.addPage();
-  doc.add(new Spacer(10));
-  doc.add(sectionHeading('Operational Review'));
+  const operationalHeading = sectionHeading('Operational Review');
+  operationalHeading.margin = new Thickness(0, 10, 0, 12);
+  doc.add(operationalHeading);
   doc.add(
     body(
       `Revenue grew 18% year over year, led by double-digit gains across every ` +

@@ -1,22 +1,37 @@
 import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
 import { generate as simpleDocument } from './recipes/basics/simple-document';
+import { generate as simpleDocumentClasses } from './recipes/basics/simple-document-classes';
 import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
+import { generate as pdfComplianceClasses } from './recipes/basics/pdf-compliance-classes';
 import { generate as margins } from './recipes/basics/margins';
+import { generate as marginsClasses } from './recipes/basics/margins-classes';
 import { generate as pageSettings } from './recipes/basics/page-settings';
+import { generate as pageSettingsClasses } from './recipes/basics/page-settings-classes';
 import { generate as headersFooters } from './recipes/layout/headers-footers';
+import { generate as headersFootersClasses } from './recipes/layout/headers-footers-classes';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
+import { generate as horizontalStacksClasses } from './recipes/layout/horizontal-stacks-classes';
 import { generate as textBlockOverflow } from './conformance/text-block-overflow';
 import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
+import { generate as verticalStackOverflowClasses } from './recipes/layout/vertical-stack-overflow-classes';
 import { generate as tables } from './recipes/elements/tables';
 import { generate as textAlignment } from './recipes/typography/text-alignment';
+import { generate as textAlignmentClasses } from './recipes/typography/text-alignment-classes';
 import { generate as embeddedFontMetrics } from './recipes/typography/embedded-font-metrics';
+import { generate as embeddedFontMetricsClasses } from './recipes/typography/embedded-font-metrics-classes';
 import { generate as bookPageLayout } from './recipes/typography/book-page-layout';
+import { generate as bookPageLayoutClasses } from './recipes/typography/book-page-layout-classes';
 import { generate as richTextStyles } from './recipes/typography/rich-text-styles';
+import { generate as richTextStylesClasses } from './recipes/typography/rich-text-styles-classes';
 import { generate as textDecorations } from './recipes/typography/text-decorations';
+import { generate as textDecorationsClasses } from './recipes/typography/text-decorations-classes';
 import { generate as customFonts } from './recipes/typography/custom-fonts';
+import { generate as customFontsClasses } from './recipes/typography/custom-fonts-classes';
 import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
+import { generate as emojisAndUnicodeClasses } from './recipes/typography/emojis-and-unicode-classes';
 import { generate as advancedTypography } from './recipes/typography/advanced-typography';
+import { generate as advancedTypographyClasses } from './recipes/typography/advanced-typography-classes';
 import { generate as dickensNovel } from './recipes/typography/dickens-novel';
 import { generate as lists } from './recipes/elements/lists';
 import { generate as hyperlinks } from './recipes/elements/hyperlinks';
@@ -108,6 +123,21 @@ export interface ExampleDef {
    * See {@link galleryExamples}.
    */
   gallery?: boolean;
+  /**
+   * Marks this example as an authoring-style *variant* of another example
+   * (its `id`), rather than a distinct document. Variants render the same
+   * output as their parent - they only differ in how the source is written
+   * (e.g. options-object vs construct-then-mutate). Set `gallery: false`
+   * alongside this so the variant does not get its own sidebar link / gallery
+   * card; the website surfaces it through a switcher on the parent's page.
+   */
+  variantOf?: string;
+  /**
+   * Short label for this authoring style, shown in the website's source-code
+   * variant switcher (e.g. 'Options API', 'Class API'). Set it on the parent
+   * too so its own switcher entry reads well. Falls back to {@link name}.
+   */
+  variantLabel?: string;
   /** User password for encrypted PDFs - passed to the viewer so it can open the document. */
   password?: string;
 }
@@ -124,17 +154,51 @@ export const examples: ExampleDef[] = [
     generate: simpleDocument,
     dotnetClass: 'SimpleDocumentExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'simple-document-classes',
+    name: 'Simple Document (Class API)',
+    category: 'Basic',
+    description:
+      'The same document as Simple Document, authored the long way: construct each object with `new`, then set properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'simple-document-classes.pdf',
+    generate: simpleDocumentClasses,
+    dotnetClass: 'SimpleDocumentExample',
+    pdfUa1: true,
+    // Not a distinct gallery entry: it's an authoring-style variant of
+    // `simple-document`, surfaced through the source switcher on that page.
+    gallery: false,
+    variantOf: 'simple-document',
+    variantLabel: 'Class API',
   },
   {
     id: 'pdf-compliance',
     name: 'PDF/A + PDF/UA',
     category: 'Basic',
     description:
-      'The modern archival + accessible baseline every example in this gallery uses, explained: settings.conformance = PdfAConformance.PdfA2a alongside AccessibilityMode.PdfUa1 - validated by veraPDF against profile 2a.',
+      "The modern archival + accessible baseline every example in this gallery uses, explained: settings.conformance = 'pdf/a-2a' alongside accessibility = 'pdf/ua-1' - validated by veraPDF against profile 2a.",
     filename: 'pdf-compliance.pdf',
     generate: pdfCompliance,
     dotnetClass: 'PdfComplianceExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'pdf-compliance-classes',
+    name: 'PDF/A + PDF/UA (Class API)',
+    category: 'Basic',
+    description:
+      'The same PDF/A-2a + PDF/UA-1 baseline as PDF/A + PDF/UA, authored the long way: construct settings and metadata objects and assign each property. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'pdf-compliance-classes.pdf',
+    generate: pdfComplianceClasses,
+    dotnetClass: 'PdfComplianceExample',
+    pdfUa1: true,
+    // Not a distinct gallery entry: it's an authoring-style variant of
+    // `pdf-compliance`, surfaced through the source switcher on that page.
+    gallery: false,
+    variantOf: 'pdf-compliance',
+    variantLabel: 'Class API',
   },
   {
     id: 'margins',
@@ -145,6 +209,21 @@ export const examples: ExampleDef[] = [
     generate: margins,
     dotnetClass: 'MarginsAndPadding',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'margins-classes',
+    name: 'Margins and Padding (Class API)',
+    category: 'Basic',
+    description:
+      'The same margins-and-padding tour as Margins and Padding, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'margins-classes.pdf',
+    generate: marginsClasses,
+    dotnetClass: 'MarginsAndPadding',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'margins',
+    variantLabel: 'Class API',
   },
   {
     id: 'page-settings',
@@ -155,6 +234,21 @@ export const examples: ExampleDef[] = [
     generate: pageSettings,
     dotnetClass: 'PageSettingsExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'page-settings-classes',
+    name: 'Page Settings (Class API)',
+    category: 'Basic',
+    description:
+      'The same standard-page-formats gallery as Page Settings, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'page-settings-classes.pdf',
+    generate: pageSettingsClasses,
+    dotnetClass: 'PageSettingsExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'page-settings',
+    variantLabel: 'Class API',
   },
   // Layout
   {
@@ -167,6 +261,21 @@ export const examples: ExampleDef[] = [
     generate: headersFooters,
     dotnetClass: 'HeadersFootersExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'headers-footers-classes',
+    name: 'Headers & Footers (Class API)',
+    category: 'Layout',
+    description:
+      'The same running-header/footer document as Headers & Footers, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'headers-footers-classes.pdf',
+    generate: headersFootersClasses,
+    dotnetClass: 'HeadersFootersExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'headers-footers',
+    variantLabel: 'Class API',
   },
   {
     id: 'horizontal-stacks',
@@ -179,6 +288,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'HorizontalStacksExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'horizontal-stacks-classes',
+    name: 'Horizontal Stacks (Class API)',
+    category: 'Layout',
+    description:
+      'The same HorizontalStack tour as Horizontal Stacks, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'horizontal-stacks-classes.pdf',
+    generate: horizontalStacksClasses,
+    thumbnails: false,
+    dotnetClass: 'HorizontalStacksExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'horizontal-stacks',
+    variantLabel: 'Class API',
   },
   {
     id: 'text-block-overflow',
@@ -204,6 +329,21 @@ export const examples: ExampleDef[] = [
     generate: verticalStackOverflow,
     dotnetClass: 'VerticalStackOverflowExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'vertical-stack-overflow-classes',
+    name: 'VerticalStack Overflow (Class API)',
+    category: 'Layout',
+    description:
+      'The same warehouse asset-label sheet as VerticalStack Overflow, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'vertical-stack-overflow-classes.pdf',
+    generate: verticalStackOverflowClasses,
+    dotnetClass: 'VerticalStackOverflowExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'vertical-stack-overflow',
+    variantLabel: 'Class API',
   },
   // Typography
   {
@@ -217,6 +357,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'TextAlignmentExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'text-alignment-classes',
+    name: 'Text Alignment (Class API)',
+    category: 'Typography',
+    description:
+      'The same alignment tour as Text Alignment, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'text-alignment-classes.pdf',
+    generate: textAlignmentClasses,
+    thumbnails: false,
+    dotnetClass: 'TextAlignmentExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'text-alignment',
+    variantLabel: 'Class API',
   },
   {
     id: 'embedded-font-metrics',
@@ -229,6 +385,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'EmbeddedFontMetricsExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'embedded-font-metrics-classes',
+    name: 'Embedded-Font Metrics (Class API)',
+    category: 'Typography',
+    description:
+      'The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'embedded-font-metrics-classes.pdf',
+    generate: embeddedFontMetricsClasses,
+    thumbnails: false,
+    dotnetClass: 'EmbeddedFontMetricsExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'embedded-font-metrics',
+    variantLabel: 'Class API',
   },
   {
     id: 'book-page-layout',
@@ -241,6 +413,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'BookPageLayoutExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'book-page-layout-classes',
+    name: 'Book Page Layout (Class API)',
+    category: 'Typography',
+    description:
+      'The same typeset chapter page as Book Page Layout, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'book-page-layout-classes.pdf',
+    generate: bookPageLayoutClasses,
+    thumbnails: false,
+    dotnetClass: 'BookPageLayoutExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'book-page-layout',
+    variantLabel: 'Class API',
   },
   {
     id: 'rich-text-styles',
@@ -252,6 +440,21 @@ export const examples: ExampleDef[] = [
     generate: richTextStyles,
     dotnetClass: 'RichTextExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'rich-text-styles-classes',
+    name: 'Rich Text Styles (Class API)',
+    category: 'Typography',
+    description:
+      'The same inline mixed-style RichText tour as Rich Text Styles, authored the long way: fluent per-span TextStyle builders and construct-then-mutate. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'rich-text-styles-classes.pdf',
+    generate: richTextStylesClasses,
+    dotnetClass: 'RichTextExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'rich-text-styles',
+    variantLabel: 'Class API',
   },
   {
     id: 'text-decorations',
@@ -264,6 +467,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'TextDecorationExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'text-decorations-classes',
+    name: 'Text Decorations (Class API)',
+    category: 'Typography',
+    description:
+      'The same underline/strikethrough tour as Text Decorations, authored the long way: construct each element and assign properties, using the TextDecoration flag enum. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'text-decorations-classes.pdf',
+    generate: textDecorationsClasses,
+    thumbnails: false,
+    dotnetClass: 'TextDecorationExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'text-decorations',
+    variantLabel: 'Class API',
   },
   {
     id: 'custom-fonts',
@@ -276,6 +495,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'CustomFontExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'custom-fonts-classes',
+    name: 'Custom Fonts (Class API)',
+    category: 'Typography',
+    description:
+      'The same TrueType-embedding / Unicode-coverage tour as Custom Fonts, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'custom-fonts-classes.pdf',
+    generate: customFontsClasses,
+    thumbnails: false,
+    dotnetClass: 'CustomFontExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'custom-fonts',
+    variantLabel: 'Class API',
   },
   {
     id: 'emojis-and-unicode',
@@ -288,6 +523,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'EmojiExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'emojis-and-unicode-classes',
+    name: 'Emojis & Unicode (Class API)',
+    category: 'Typography',
+    description:
+      'The same full-Unicode / emoji tour as Emojis & Unicode, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'emojis-and-unicode-classes.pdf',
+    generate: emojisAndUnicodeClasses,
+    thumbnails: false,
+    dotnetClass: 'EmojiExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'emojis-and-unicode',
+    variantLabel: 'Class API',
   },
   {
     id: 'advanced-typography',
@@ -300,6 +551,22 @@ export const examples: ExampleDef[] = [
     thumbnails: false,
     dotnetClass: 'AdvancedTypographyExample',
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'advanced-typography-classes',
+    name: 'Advanced Typography (Class API)',
+    category: 'Typography',
+    description:
+      'The same super/subscript + decoration-styling tour as Advanced Typography, authored the long way: construct each element and assign properties, per-span TextStyles via the fluent builders. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'advanced-typography-classes.pdf',
+    generate: advancedTypographyClasses,
+    thumbnails: false,
+    dotnetClass: 'AdvancedTypographyExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'advanced-typography',
+    variantLabel: 'Class API',
   },
   {
     id: 'dickens-novel',

@@ -1,25 +1,15 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  TextBlock,
-  TextStyle,
-  TextAlignment,
-  TextElementBase,
-  Heading,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  PdfAConformance,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, TextElementBase, StandardFonts } from '@bonniepdf/core';
 
 /**
  * Page header/footer templates in an accessible, archival document
- * (PDF/A-2a + PDF/UA-1). Header and footer template content is tagged as
- * `/Artifact` - visible on every page but excluded from the structure tree -
- * while the numbered body sections use semantic `Heading` (`/H2`) and
- * `TextBlock` (`/P`) elements.
+ * (PDF/A-2a + PDF/UA-1), authored through the options-object front door.
+ *
+ * Header and footer template content is tagged as `/Artifact` - visible on
+ * every page but excluded from the structure tree - while the numbered body
+ * sections use semantic `Heading` (`/H2`) and `TextBlock` (`/P`) elements. The
+ * running header/footer are `headerTemplate` / `footerTemplate` functions on
+ * `settings` (`pageNumber => element`), given inline; `TotalPagesToken` resolves
+ * to the final page count after layout.
  */
 const SECTIONS: [string, string][] = [
   [
@@ -57,76 +47,77 @@ const SECTIONS: [string, string][] = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      headerTemplate: (pageNumber: number) =>
+        new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: 'slate-500',
+          alignment: 'center',
+        }),
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: 'slate-400',
+          alignment: 'center',
+        }),
+    },
+    metadata: {
+      title: 'Headers and Footers Demo',
+      author: 'BonniePDF',
+      subject: 'Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.',
+      keywords: 'pdf, accessibility, headers, footers, page numbers, BonniePDF',
+    },
+  });
 
-  settings.headerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[500];
-    b.alignment = TextAlignment.Center;
-    return b;
-  };
-
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Center;
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Headers and Footers Demo';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.';
-  metadata.keywords = 'pdf, accessibility, headers, footers, page numbers, BonniePDF';
-
-  const doc = new Document(settings, metadata);
-
-  const h1 = new Heading('Chapter 1: Headers & Footers');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 14);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'Headers and footers are rendered as Artifact elements - they are visible on every page but are excluded from the accessibility structure tree. The numbered sections below describe how the template system works.'
+  doc.add(
+    new Heading('Chapter 1: Headers & Footers', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      textColor: 'slate-800',
+      margin: { bottom: 14 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 12);
-  doc.add(intro);
+
+  doc.add(
+    new TextBlock(
+      'Headers and footers are rendered as Artifact elements - they are visible on every page but are excluded from the accessibility structure tree. The numbered sections below describe how the template system works.',
+      { margin: { bottom: 12 } }
+    )
+  );
 
   SECTIONS.forEach(([title, body], index) => {
     const number = `1.${index + 1}`;
-    const h2 = new Heading(`${number} ${title}`);
-    h2.tocIdentifier = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    h2.level = 2;
-    h2.fontName = StandardFonts.HelveticaBold;
-    h2.fontSize = 14;
-    h2.textColor = ColorPalette.indigo[600];
-    h2.margin = new Thickness(0, 14, 0, 6);
-    doc.add(h2);
+    doc.add(
+      new Heading(`${number} ${title}`, {
+        tocIdentifier: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 14,
+        textColor: 'indigo-600',
+        margin: { top: 14, bottom: 6 },
+      })
+    );
 
-    const p = new TextBlock(body);
-    p.margin = new Thickness(0, 0, 0, 8);
-    doc.add(p);
+    doc.add(new TextBlock(body, { margin: { bottom: 8 } }));
 
     // Second paragraph to push content onto additional pages
-    const p2 = new TextBlock(
-      `This section is part of the Headers & Footers demonstration. Each page carries the same ` +
-        `running header and footer so you can observe them across multiple pages. The content here ` +
-        `intentionally repeats to ensure the document spans several pages.`
+    doc.add(
+      new TextBlock(
+        `This section is part of the Headers & Footers demonstration. Each page carries the same ` +
+          `running header and footer so you can observe them across multiple pages. The content here ` +
+          `intentionally repeats to ensure the document spans several pages.`,
+        { margin: { bottom: 8 } }
+      )
     );
-    p2.margin = new Thickness(0, 0, 0, 8);
-    doc.add(p2);
   });
 
   return doc;

@@ -99,7 +99,10 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   public span(text: string, style?: TextStyle): RichText {
     const textSpan = new TextSpan();
     textSpan.text = text;
-    textSpan.style = style;
+    // Snapshot the style: the fluent builders mutate and return `this`, so a
+    // style shared across spans and mutated between them would otherwise leak
+    // its final state onto every span that references it.
+    textSpan.style = style?.clone();
     this.spans.push(textSpan);
     this.invalidateCache();
     return this;
@@ -120,7 +123,8 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   public line(text: string, style?: TextStyle): RichText {
     const textSpan = new TextSpan();
     textSpan.text = text;
-    textSpan.style = style;
+    // Snapshot the style - see span() for why.
+    textSpan.style = style?.clone();
     textSpan.isLineBreak = true;
     this.spans.push(textSpan);
     this.invalidateCache();

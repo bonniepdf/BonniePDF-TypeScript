@@ -10,22 +10,12 @@
  *
  * This example renders the four alignments entirely in embedded Liberation Sans,
  * served from `/fonts/liberation/` (copied from `core/assets/fonts/` at build
- * time) and embedded as a compact glyph subset. PDF/A-2a + PDF/UA-1.
+ * time) and embedded as a compact glyph subset, and is authored through the
+ * options-object front door: a font path is just a `fontName` / `fontFamily`
+ * string, alignment is a `'left' | 'center' | 'right' | 'justify'` token.
+ * PDF/A-2a + PDF/UA-1.
  */
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  TextBlock,
-  TextAlignment,
-  TextStyle,
-  Heading,
-  ColorPalette,
-  Thickness,
-  PdfAConformance,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, type TextAlignmentInput } from '@bonniepdf/core';
 
 // Liberation Sans — Regular for body text, Bold for headings.
 const SANS = '/fonts/liberation/LiberationSans-Regular.ttf';
@@ -50,72 +40,73 @@ const BOOK_PARAS = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily(SANS).withSize(11).withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 60,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      // Body text inherits Liberation Sans (Regular) via the default-style cascade.
+      defaultTextStyle: { fontFamily: SANS, fontSize: 11, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'Embedded-Font Metrics',
+      author: 'BonniePDF',
+      subject: 'How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.',
+      keywords: 'pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, liberation',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Embedded-Font Metrics';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'How an embedded TrueType font makes alignment edges exact, using its own hmtx advance widths.';
-  metadata.keywords = 'pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, liberation';
-
-  const doc = new Document(settings, metadata);
-  // Body text inherits Liberation Sans (Regular) via the default-style cascade.
-
-  const h1 = new Heading('Embedded-Font Metrics');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = SANS_BOLD;
-  h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 16);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries ' +
-      'its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and ' +
-      'justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.'
+  doc.add(
+    new Heading('Embedded-Font Metrics', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: SANS_BOLD,
+      fontSize: 22,
+      textColor: 'slate-800',
+      margin: { bottom: 16 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 14);
-  doc.add(intro);
 
-  alignedSample(doc, 'Left Aligned (Default)', 's-left', TextAlignment.Left);
-  alignedSample(doc, 'Centre Aligned', 's-centre', TextAlignment.Center);
-  alignedSample(doc, 'Right Aligned', 's-right', TextAlignment.Right);
-  alignedSample(doc, 'Justified', 's-justify', TextAlignment.Justify);
+  doc.add(
+    new TextBlock(
+      'The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries ' +
+        'its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and ' +
+        'justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.',
+      { margin: { bottom: 14 } }
+    )
+  );
+
+  alignedSample(doc, 'Left Aligned (Default)', 's-left', 'left');
+  alignedSample(doc, 'Centre Aligned', 's-centre', 'center');
+  alignedSample(doc, 'Right Aligned', 's-right', 'right');
+  alignedSample(doc, 'Justified', 's-justify', 'justify');
 
   // ── Book-style justified paragraphs ─────────────────────────────────────────
   section(doc, 'Book-Style Justified Paragraphs', 'book');
   for (const text of BOOK_PARAS) {
-    const p = new TextBlock(text);
-    p.fontName = SANS;
-    p.alignment = TextAlignment.Justify;
-    p.margin = new Thickness(0, 0, 0, 8);
-    doc.add(p);
+    doc.add(new TextBlock(text, { fontName: SANS, alignment: 'justify', margin: { bottom: 8 } }));
   }
 
   return doc;
 }
 
-function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = SANS_BOLD;
-  h.fontSize = 13;
-  h.textColor = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 0, 0, 6);
-  h.alignment = alignment;
-  doc.add(h);
+function section(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput = 'left'): void {
+  doc.add(
+    new Heading(title, {
+      tocIdentifier: tocId,
+      level: 2,
+      fontName: SANS_BOLD,
+      fontSize: 13,
+      textColor: 'indigo-600',
+      margin: { bottom: 6 },
+      alignment,
+    })
+  );
 }
 
-function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment): void {
+function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput): void {
   section(doc, title, tocId, alignment);
-  const p = new TextBlock(SAMPLE_TEXT);
-  p.alignment = alignment;
-  p.margin = new Thickness(0, 0, 0, 14);
-  doc.add(p);
+  doc.add(new TextBlock(SAMPLE_TEXT, { alignment, margin: { bottom: 14 } }));
 }

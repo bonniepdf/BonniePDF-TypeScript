@@ -268,8 +268,8 @@ export function generate(): Document {
   titleRow.alignment = HorizontalAlignment.Center;
   titleRow.addChild(titleBlock, 4);
   titleRow.addChild(badgeCell, 1);
+  titleRow.margin = new Thickness(0, 0, 0, 16);
   doc.add(titleRow);
-  doc.add(new Spacer(16));
 
   // ── Swimlane data ──────────────────────────────────────────────────────────
   interface Team {
@@ -346,10 +346,9 @@ export function generate(): Document {
   card.clipContent = true;
   card.border = new Border(1);
   card.borderColors = new BorderColors(HAIR);
+  card.margin = new Thickness(0, 0, 0, 12);
   card.child = body;
   doc.add(card);
-
-  doc.add(new Spacer(12));
 
   // ── Footer: team legend left, status key right ─────────────────────────────
   const legend = new HorizontalStack();

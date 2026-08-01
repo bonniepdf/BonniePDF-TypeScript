@@ -64,14 +64,14 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Invoice INV-2026-0042';
-  metadata.author = 'Northwind Cloud Ltd';
+  metadata.author = 'Sample Company Ltd';
   metadata.subject = 'Subscription invoice - accessible (PDF/UA) and archival (PDF/A-2a)';
 
   const doc = new Document(settings, metadata);
 
   // ── Header: brand + invoice meta ────────────────────────────────────────────
   const brand = new VerticalStack();
-  brand.addChild(tb('NORTHWIND CLOUD', 15, BRAND, { bold: true }));
+  brand.addChild(tb('SAMPLE COMPANY', 15, BRAND, { bold: true }));
   brand.addChild(tb('Infrastructure for builders', 9, MUTE, { mb: 0 }));
 
   const meta = new VerticalStack();
@@ -92,12 +92,12 @@ export function generate(): Document {
   // ── Bill-to / from ─────────────────────────────────────────────────────────
   const billTo = new VerticalStack();
   billTo.addChild(tb('BILLED TO', 8, MUTE, { bold: true, mb: 4 }));
-  billTo.addChild(tb('Aperture Labs Inc.', 10, INK, { bold: true }));
-  billTo.addChild(tb('Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@aperture.example', 9, BODY));
+  billTo.addChild(tb('Sample Customer Ltd', 10, INK, { bold: true }));
+  billTo.addChild(tb('Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com', 9, BODY));
 
   const from = new VerticalStack();
   from.addChild(tb('FROM', 8, MUTE, { bold: true, mb: 4, align: TextAlignment.Right }));
-  from.addChild(tb('Northwind Cloud Ltd', 10, INK, { bold: true, align: TextAlignment.Right }));
+  from.addChild(tb('Sample Company Ltd', 10, INK, { bold: true, align: TextAlignment.Right }));
   from.addChild(tb('4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
 
   const addr = new Grid(1, 1);
@@ -166,13 +166,13 @@ export function generate(): Document {
 
   const payInfo = new VerticalStack();
   payInfo.addChild(tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }));
-  payInfo.addChild(tb('Account name  Northwind Cloud Ltd', 9, BODY, { mb: 2 }));
+  payInfo.addChild(tb('Account name  Sample Company Ltd', 9, BODY, { mb: 2 }));
   payInfo.addChild(tb('Sort code  04-00-72    Account  19483055', 9, BODY, { mb: 2 }));
   payInfo.addChild(tb('Reference  INV-2026-0042', 9, BODY, { mb: 2 }));
   payInfo.addChild(tb('Amount  ' + money(total), 9, INK, { bold: true }));
 
   const qr = new QRCode();
-  qr.data = 'https://pay.northwind.example/inv/INV-2026-0042';
+  qr.data = 'https://pay.example.com/inv/INV-2026-0042';
   qr.size = 96;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Medium;

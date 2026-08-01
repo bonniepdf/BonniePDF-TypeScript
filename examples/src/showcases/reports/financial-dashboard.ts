@@ -57,7 +57,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = title;
-  metadata.author = 'Acme Corporation';
+  metadata.author = 'Sample Company';
   metadata.subject = `${quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown`;
 
   const doc = new Document(settings, metadata);
@@ -67,11 +67,11 @@ export function generate(): Document {
   // ════════════════════════════════════════════════════════════════════════════
 
   const companyStack = new VerticalStack();
-  const acmeCorporationText = new TextBlock('ACME CORPORATION');
-  acmeCorporationText.fontName = StandardFonts.HelveticaBold;
-  acmeCorporationText.fontSize = 14;
-  acmeCorporationText.textColor = CREAM;
-  companyStack.addChild(acmeCorporationText);
+  const companyText = new TextBlock('Sample Company');
+  companyText.fontName = StandardFonts.HelveticaBold;
+  companyText.fontSize = 14;
+  companyText.textColor = CREAM;
+  companyStack.addChild(companyText);
   const confidentialInternalUseOnlyText = new TextBlock('Confidential - Internal Use Only');
   confidentialInternalUseOnlyText.fontName = StandardFonts.Helvetica;
   confidentialInternalUseOnlyText.fontSize = 8;

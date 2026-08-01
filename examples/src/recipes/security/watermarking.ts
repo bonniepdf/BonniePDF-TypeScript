@@ -47,7 +47,7 @@ export function generate(): Document {
   // Brand banner - a filled container introduces the document above the stamp.
   const bannerStack = new VerticalStack();
 
-  const eyebrow = new TextBlock('HORIZON VENTURES');
+  const eyebrow = new TextBlock('SAMPLE COMPANY');
   eyebrow.fontName = StandardFonts.HelveticaBold;
   eyebrow.fontSize = 11;
   eyebrow.textColor = ColorPalette.blue[200];

@@ -62,7 +62,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = `VAT Invoice INV-UK-${year}-0311`;
-  metadata.author = 'Thornbury & Vale Ltd';
+  metadata.author = 'Sample Company Ltd';
   metadata.subject = 'UK VAT invoice with a per-rate VAT breakdown (standard, reduced, zero).';
 
   const doc = new Document(settings, metadata);
@@ -75,9 +75,7 @@ export function generate(): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(
-    cell('Thornbury & Vale Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) })
-  );
+  seller.addChild(cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
   seller.addChild(lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }));
   seller.addChild(
     cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) })
@@ -105,7 +103,7 @@ export function generate(): Document {
   meta.margin = new Thickness(0, 0, 0, 18);
   const customer = labelled(
     'INVOICE TO',
-    lines(['Harbourside Leisure plc', 'Finance Department', '4 Waterfront Square', 'Cardiff CF10 4PA'], {
+    lines(['Sample Customer PLC', 'Finance Department', '4 Waterfront Square', 'Cardiff CF10 4PA'], {
       color: MUTED,
     }),
     ACCENT

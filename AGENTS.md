@@ -45,7 +45,7 @@ The current code does not yet meet this bar in every place. [`the shared specifi
 ## Repository layout
 
 - `core/` — the published `@bonniepdf/core` package (engine + public API). Tests in `core/tests/`.
-- `examples/src/` — the shared example catalogue (`@bonniepdf/examples`) consumed by the website, split into `recipes/`, `showcases/`, and `conformance/`. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not legacy mutation patterns.
+- `examples/src/` — the shared example catalogue (`@bonniepdf/examples`) consumed by the website, split into `recipes/`, `showcases/`, and `conformance/`. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not legacy mutation patterns. **One deliberate exception:** a `*-classes.ts` file (e.g. `recipes/basics/simple-document-classes.ts`) is a construct-then-mutate _companion_ to its options-object sibling, kept to document the underlying class/escape-hatch surface. Do **not** "fix" it to the front-door style — `scripts/verify-equivalence.ts` asserts each companion renders byte-for-byte identically to its canonical form (run `pnpm --filter @bonniepdf/examples verify-equivalence`).
 - There is **no `docs/` directory here.** The API refactoring guide lives in the neutral spec repo at [`the shared specification`](the shared specification), and no copy may be made in this repo. `@bonniepdf/ui-shared` lives in its own `BonniePDF` repo, not here.
 
 ## Engineering invariants (spec-level — both implementations honour these)

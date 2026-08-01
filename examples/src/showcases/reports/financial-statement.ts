@@ -97,7 +97,7 @@ export function generate(): Document {
 
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const f = new TextBlock(
-      `Meridian Components Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -106,14 +106,14 @@ export function generate(): Document {
   };
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Financial Statements - Meridian Components Ltd';
-  metadata.author = 'Meridian Components Ltd';
+  metadata.title = 'Financial Statements - Sample Company Ltd';
+  metadata.author = 'Sample Company Ltd';
   metadata.subject = 'Statutory financial statements (IFRS) for the year ended 31 March 2026 (fictional).';
 
   const doc = new Document(settings, metadata);
 
   // ── Title block ───────────────────────────────────────────────────────────
-  doc.add(company('Meridian Components Ltd'));
+  doc.add(company('Sample Company Ltd'));
   doc.add(h1('Annual Report and Financial Statements'));
   doc.add(sub('For the year ended 31 March 2026'));
   doc.add(sub('Company registration number 07741122 (England & Wales)  ·  Prepared under UK-adopted IFRS'));

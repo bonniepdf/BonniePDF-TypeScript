@@ -69,7 +69,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = `GST e-Invoice INV-IN-${year}-0771`;
-  metadata.author = 'Ashwin Technologies Pvt Ltd';
+  metadata.author = 'Sample Company Private Limited';
   metadata.subject = 'India GST e-invoice with IRN, signed QR, HSN codes, and CGST/SGST breakdown.';
 
   const doc = new Document(settings, metadata);
@@ -88,7 +88,7 @@ export function generate(): Document {
     cell('TAX INVOICE  ·  e-Invoice', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 6) })
   );
   seller.addChild(
-    cell('Ashwin Technologies Pvt Ltd', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) })
+    cell('Sample Company Private Limited', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) })
   );
   seller.addChild(
     lines(['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India'], { color: MUTED })
@@ -155,7 +155,13 @@ export function generate(): Document {
   const buyer = labelled(
     'BILL TO',
     lines(
-      ['Meridian Retail Pvt Ltd', 'No. 88, MG Road', 'Bengaluru 560001', 'Karnataka, India', 'GSTIN: 29XYZAB6789K1Z2'],
+      [
+        'Sample Customer Private Limited',
+        'No. 88, MG Road',
+        'Bengaluru 560001',
+        'Karnataka, India',
+        'GSTIN: 29XYZAB6789K1Z2',
+      ],
       { color: MUTED }
     ),
     ACCENT

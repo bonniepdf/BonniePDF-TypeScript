@@ -44,7 +44,7 @@ const MARGIN = 72;
 
 const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
 
-const COMPANY = 'Horizon Ventures';
+const COMPANY = 'Sample Company';
 const YEAR = 2025;
 const REPORT_TITLE = `Annual Report ${YEAR}`;
 

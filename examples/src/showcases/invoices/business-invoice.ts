@@ -124,7 +124,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = `Invoice INV-${year}-001`;
-  metadata.author = 'Studio Eleven';
+  metadata.author = 'Sample Company Inc.';
   metadata.subject = 'Invoice for design and development services.';
 
   const doc = new Document(settings, metadata);
@@ -144,10 +144,8 @@ export function generate(): Document {
 
   // The address lines share one style, so they flow as a single paragraph.
   const companyStack = new VerticalStack();
-  companyStack.addChild(tb('STUDIO ELEVEN', { bold: true, size: 20, color: TEXT_DARK, mb: 4 }));
-  companyStack.addChild(
-    tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@studioeleven.co')
-  );
+  companyStack.addChild(tb('SAMPLE COMPANY INC.', { bold: true, size: 20, color: TEXT_DARK, mb: 4 }));
+  companyStack.addChild(tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com'));
 
   // H1 heading - visually identical to a styled TextBlock but carries
   // the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
@@ -175,7 +173,7 @@ export function generate(): Document {
 
   // Each address is one TextBlock with hard line breaks, so it tags as a single
   // paragraph under PDF/UA instead of one per line.
-  const address = 'Meridian Labs\nSarah Chen\n88 Innovation Way\nAustin, TX 78701';
+  const address = 'Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack();
   billToStack.addChild(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }));
@@ -246,7 +244,7 @@ export function generate(): Document {
   // "Thanks!" stays separate for its top margin.
   const messageStack = new VerticalStack();
   messageStack.addChild(tb('Customer message', { bold: true, color: TEXT_DARK, mb: 4 }));
-  messageStack.addChild(tb('Hello!\nThank you for choosing Studio Eleven.\nPlease return this invoice with payment.'));
+  messageStack.addChild(tb('Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment.'));
   messageStack.addChild(tb('Thanks!', { mt: 4 }));
 
   const totalsStack = new VerticalStack();
@@ -274,7 +272,7 @@ export function generate(): Document {
   paymentTable.border = Border.none;
   paymentTable.addRow(
     paymentColumn('Bank Transfer', 'Chase Bank\nRouting: 021000021\nAccount: ****7842'),
-    paymentColumn('Other Methods', 'PayPal: pay@studioeleven.co\nWise: @studioeleven'),
+    paymentColumn('Other Methods', 'PayPal: payments@example.com\nWise: @sample-company'),
     paymentColumn('Reference', 'Please include invoice\nnumber with payment')
   );
 
@@ -290,7 +288,7 @@ export function generate(): Document {
   // ── Footer bar ────────────────────────────────────────────────────────────
   mainStack.addChild(bar(ACCENT_GREEN, new Thickness(0, 0.5, 0, 0), new Thickness(0, 20, 0, 0)));
   mainStack.addChild(
-    tb('Thank you for your business  |  hello@studioeleven.co  |  www.studioeleven.co', {
+    tb('Thank you for your business  |  hello@example.com  |  www.example.com', {
       size: 8,
       color: TEXT_LIGHT,
       align: TextAlignment.Center,

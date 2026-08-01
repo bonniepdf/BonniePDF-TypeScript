@@ -143,7 +143,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
    * ```typescript
    * new Container().layers(layers => layers
    *   .background(Image.load('card-bg.jpg'))
-   *   .foreground(new TextBlock('Horizon Ventures')));
+   *   .foreground(new TextBlock('Sample Company')));
    * ```
    */
   public layers(configure: (layers: LayersDescriptor) => void): Container {

@@ -38,7 +38,7 @@ const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
 
 const PAGE = PdfSize.a4;
 
-const COMPANY = 'Meridian Group';
+const COMPANY = 'Sample Company';
 const YEAR = 2025;
 
 const BAND = ColorPalette.emerald[900]; // brand band behind the title

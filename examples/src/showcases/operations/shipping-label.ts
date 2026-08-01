@@ -83,7 +83,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Shipping Label 1Z999AA10123456784';
-  metadata.author = 'Acme Logistics';
+  metadata.author = 'Sample Logistics';
   metadata.subject = 'Carrier-style shipping label - accessible (PDF/UA) and archival (PDF/A-2a)';
 
   const doc = new Document(settings, metadata);
@@ -94,7 +94,7 @@ export function generate(): Document {
   doc.add(heading);
 
   // ── Carrier header + service class ──────────────────────────────────────────
-  doc.add(band('ACME LOGISTICS', 12, INK, Color.white));
+  doc.add(band('SAMPLE LOGISTICS', 12, INK, Color.white));
   const svc = new Container();
   svc.backgroundColor = ColorPalette.slate[800];
   svc.padding = new Thickness(10, 4, 10, 4);
@@ -113,7 +113,7 @@ export function generate(): Document {
   // ── From / To addresses ─────────────────────────────────────────────────────
   const from = new VerticalStack();
   from.addChild(tb('FROM', 7, MUTE, { bold: true, mb: 2 }));
-  from.addChild(tb('Northwind Supplies', 8, INK, { bold: true }));
+  from.addChild(tb('Sample Supplies', 8, INK, { bold: true }));
   from.addChild(tb('4 Tenter Ground\nLondon E1 7NH, UK', 8, BODY));
   const fromWrap = new Container();
   fromWrap.child = from;
@@ -123,7 +123,7 @@ export function generate(): Document {
   const to = new VerticalStack();
   to.addChild(tb('SHIP TO', 8, MUTE, { bold: true, mb: 3 }));
   to.addChild(tb('Jordan Avery', 13, INK, { bold: true }));
-  to.addChild(tb('Aperture Labs Inc.\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom', 10, INK));
+  to.addChild(tb('Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom', 10, INK));
   const toWrap = new Container();
   toWrap.child = to;
   toWrap.border = new Border(1);
@@ -161,7 +161,7 @@ export function generate(): Document {
   cartonStack.addChild(carton);
 
   const qr = new QRCode();
-  qr.data = 'https://track.acme.example/p/1Z999AA10123456784';
+  qr.data = 'https://track.example.com/p/1Z999AA10123456784';
   qr.size = 66;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Quartile;

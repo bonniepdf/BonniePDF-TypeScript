@@ -88,14 +88,14 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Courier').withSize(9).withColor(INK);
 
   const metadata = new DocumentMetadata();
-  metadata.title = `Receipt #${ORDER_NO} - Northwind Coffee`;
-  metadata.author = 'Northwind Coffee';
+  metadata.title = `Receipt #${ORDER_NO} - Sample Coffee`;
+  metadata.author = 'Sample Coffee';
   metadata.subject = 'Point-of-sale receipt generated client-side / at the edge with BonniePDF.';
 
   const doc = new Document(settings, metadata);
 
   // ── Store header ────────────────────────────────────────────────────────
-  const name = new Heading('NORTHWIND COFFEE');
+  const name = new Heading('SAMPLE COFFEE');
   name.level = 1;
   name.fontName = StandardFonts.CourierBold;
   name.fontSize = 13;
@@ -139,7 +139,7 @@ export function generate(): Document {
 
   // ── Digital-receipt QR (native vector, no image assets) ─────────────────
   const qr = new QRCode();
-  qr.data = `https://receipts.northwind.example/r/${ORDER_NO}`;
+  qr.data = `https://receipts.example.com/r/${ORDER_NO}`;
   qr.size = 108;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Medium;

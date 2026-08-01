@@ -92,14 +92,14 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Patient Summary';
-  metadata.author = 'Acme Health';
+  metadata.author = 'Sample Healthcare';
   metadata.subject = 'Patient summary sheet - demographics, vitals, and alerts';
 
   const doc = new Document(settings, metadata);
 
   // ── Page header band ─────────────────────────────────────────────────────
   const brand = new VerticalStack();
-  brand.addChild(tb('ACME HEALTH', 13, Color.white, { bold: true }));
+  brand.addChild(tb('SAMPLE HEALTHCARE', 13, Color.white, { bold: true }));
   brand.addChild(tb('Patient Summary', 8, CREAM, { top: 4 }));
 
   const issued = new VerticalStack();

@@ -129,7 +129,7 @@ export function generate(): Document {
   // Running header + footer (auto-artifacted, excluded from the reading order).
   settings.headerTemplate = (pageNumber: number): IElement | undefined => {
     if (pageNumber === 1) return undefined;
-    return bandRow('Northwind Data Ltd - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]);
+    return bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]);
   };
   settings.footerTemplate = (pageNumber: number): IElement =>
     bandRow('CONFIDENTIAL - not for distribution', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, MUTED);
@@ -153,7 +153,7 @@ export function generate(): Document {
   doc.add(h1('Data Protection & Information Security Audit'));
   doc.add(
     body(
-      'Northwind Data Ltd — assessment against the EU General Data Protection ' +
+      'Sample Company — assessment against the EU General Data Protection ' +
         'Regulation (2016/679), the UK GDPR / Data Protection Act 2018, and ' +
         'ISO/IEC 27001:2022.',
       { color: MUTED }
@@ -174,7 +174,7 @@ export function generate(): Document {
   doc.add(h2('Executive summary'));
   doc.add(
     body(
-      'Northwind Data Ltd demonstrates a maturing information-security programme. ' +
+      'Sample Company demonstrates a maturing information-security programme. ' +
         'Of the 93 Annex A controls in scope, 71 are fully implemented and 15 are ' +
         'partially implemented. Twelve findings were raised, of which two are rated ' +
         'Critical and require remediation before the next surveillance visit: the ' +
@@ -244,7 +244,7 @@ export function generate(): Document {
       'The audit combined documentation review, control walk-throughs, and sample ' +
         'testing across the in-scope processing activities. Conformance is assessed ' +
         'against ISO/IEC 27001:2022 Annex A and the accountability obligations of the ' +
-        'EU and UK GDPR. This report is confidential to Northwind Data Ltd.'
+        'EU and UK GDPR. This report is confidential to Sample Company.'
     )
   );
 

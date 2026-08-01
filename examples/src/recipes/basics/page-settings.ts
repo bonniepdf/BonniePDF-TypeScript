@@ -1,20 +1,4 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  PageOrientation,
-  TextBlock,
-  TextAlignment,
-  TextStyle,
-  VerticalStack,
-  Line,
-  Color,
-  ColorPalette,
-  StandardFonts,
-  PdfAConformance,
-  AccessibilityMode,
-} from '@bonniepdf/core';
+import { Document, PdfSize, PageOrientation, TextBlock, VerticalStack, Line, StandardFonts } from '@bonniepdf/core';
 
 // PdfSize has no AllSizes static - enumerate the standard sizes explicitly.
 const ALL_SIZES: PdfSize[] = [
@@ -38,25 +22,35 @@ const ALL_SIZES: PdfSize[] = [
   PdfSize.executive,
 ].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
 
+/**
+ * A gallery of every standard page format, one spread per size in both
+ * orientations, authored through the options-object front door.
+ *
+ * The page geometry is inherently imperative - `addPage` / `setCurrentPageSettings`
+ * walk through the sizes - but everything placed on each page is built in a
+ * single expression: a `VerticalStack` of options-constructed `TextBlock`s and a
+ * `Line`, colours as palette tokens. The running footer is a `footerTemplate`
+ * on `settings` (a `pageNumber => element` function), given inline.
+ */
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Center;
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Standard PDF Page Formats Gallery';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: 'slate-400',
+          alignment: 'center',
+        }),
+    },
+    metadata: {
+      title: 'Standard PDF Page Formats Gallery',
+    },
+  });
 
   let isFirstPage = true;
 
@@ -72,51 +66,34 @@ export function generate(): Document {
       }
 
       const current = size.getOrientedSize(orientation);
-
-      const content = new VerticalStack();
-
-      const heading = new TextBlock(`${formatName} (${orientation})`);
-      heading.fontName = StandardFonts.HelveticaBold;
-      heading.fontSize = 28;
-      heading.textColor = ColorPalette.slate[800];
-      content.addChild(heading);
-
-      const sub = new TextBlock('Technical Specifications');
-      sub.fontSize = 14;
-      sub.textColor = ColorPalette.slate[500];
-      content.addChild(sub);
-
-      const divider = new Line();
-      divider.color = ColorPalette.slate[200];
-      divider.thickness = 1;
-      content.addChild(divider);
-
       const mmPerInch = 25.4;
-      const points = new TextBlock(
-        `${'Points:'.padEnd(15)} ${current.width.toFixed(2)}pt x ${current.height.toFixed(2)}pt`
-      );
-      points.fontName = StandardFonts.Courier;
-      points.fontSize = 11;
-      points.textColor = ColorPalette.slate[600];
-      content.addChild(points);
 
-      const inches = new TextBlock(
-        `${'Inches:'.padEnd(15)} ${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`
+      doc.add(
+        new VerticalStack({
+          children: [
+            new TextBlock(`${formatName} (${orientation})`, {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 28,
+              textColor: 'slate-800',
+            }),
+            new TextBlock('Technical Specifications', { fontSize: 14, textColor: 'slate-500' }),
+            new Line({ color: 'slate-200', thickness: 1 }),
+            new TextBlock(`${'Points:'.padEnd(15)} ${current.width.toFixed(2)}pt x ${current.height.toFixed(2)}pt`, {
+              fontName: StandardFonts.Courier,
+              fontSize: 11,
+              textColor: 'slate-600',
+            }),
+            new TextBlock(
+              `${'Inches:'.padEnd(15)} ${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`,
+              { fontName: StandardFonts.Courier, fontSize: 11, textColor: 'slate-600' }
+            ),
+            new TextBlock(
+              `${'Millimeters:'.padEnd(15)} ${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`,
+              { fontName: StandardFonts.Courier, fontSize: 11, textColor: 'slate-600' }
+            ),
+          ],
+        })
       );
-      inches.fontName = StandardFonts.Courier;
-      inches.fontSize = 11;
-      inches.textColor = ColorPalette.slate[600];
-      content.addChild(inches);
-
-      const millimeters = new TextBlock(
-        `${'Millimeters:'.padEnd(15)} ${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`
-      );
-      millimeters.fontName = StandardFonts.Courier;
-      millimeters.fontSize = 11;
-      millimeters.textColor = ColorPalette.slate[600];
-      content.addChild(millimeters);
-
-      doc.add(content);
     }
   }
 

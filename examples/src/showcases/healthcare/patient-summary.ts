@@ -10,7 +10,6 @@ import {
   Container,
   Table,
   Grid,
-  Spacer,
   Color,
   Thickness,
   Border,
@@ -128,8 +127,6 @@ export function generate(): Document {
     return w;
   };
 
-  doc.add(pad(new Spacer(20)));
-
   // ── 1. Patient card (teal bleed band) ────────────────────────────────────
   const idLine = new VerticalStack();
   idLine.addChild(tb('Eleanor M. Whitfield', 15, Color.white, { bold: true }));
@@ -170,10 +167,9 @@ export function generate(): Document {
   patientCard.clipContent = true; // ← this feature
   patientCard.border = new Border(0.75);
   patientCard.borderColors = new BorderColors(HAIRLINE);
+  patientCard.margin = new Thickness(0, 20, 0, 16);
   patientCard.child = patientStack;
   doc.add(pad(patientCard));
-
-  doc.add(pad(new Spacer(16)));
 
   // ── 2. Vitals card (indigo bleed band, 4-up grid) ────────────────────────
   const vital = (value: string, unit: string, label: string, status: string, tone: Color): VerticalStack => {
@@ -195,9 +191,9 @@ export function generate(): Document {
     vital('97', '% SpO2', 'Oxygen', 'Watch', ROSE)
   );
 
-  doc.add(pad(card(INDIGO, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid)));
-
-  doc.add(pad(new Spacer(16)));
+  const vitalsCard = card(INDIGO, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid);
+  vitalsCard.margin = new Thickness(0, 0, 0, 16);
+  doc.add(pad(vitalsCard));
 
   // ── 3. Allergies & alerts card (rose bleed band) ─────────────────────────
   const alerts = new VerticalStack();
@@ -215,9 +211,9 @@ export function generate(): Document {
   alert('Latex', 'Contact urticaria. Use nitrile gloves.', 6);
   alert('Warfarin', 'On anticoagulation - INR target 2.0-3.0.', 6);
 
-  doc.add(pad(card(ROSE, 'ALLERGIES & ALERTS', alerts)));
-
-  doc.add(pad(new Spacer(28)));
+  const alertsCard = card(ROSE, 'ALLERGIES & ALERTS', alerts);
+  alertsCard.margin = new Thickness(0, 0, 0, 28);
+  doc.add(pad(alertsCard));
 
   return doc;
 }

@@ -1,26 +1,15 @@
-import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  TextBlock,
-  TextAlignment,
-  TextStyle,
-  Heading,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  PdfAConformance,
-} from '@bonniepdf/core';
+import { Document, Heading, TextBlock, StandardFonts, type TextAlignmentInput } from '@bonniepdf/core';
 
 /**
- * Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1: the
- * heading is /H1, section titles /H2, and every aligned paragraph is a /P —
- * alignment is purely presentational and does not change the structure-tree role.
+ * Left, centre, right, and justified text alignment, authored through the
+ * options-object front door. PDF/A-2a + PDF/UA-1: the heading is /H1, section
+ * titles /H2, and every aligned paragraph is a /P — alignment is purely
+ * presentational and does not change the structure-tree role.
  *
- * All text is set in standard-14 Times Roman. For a demonstration of why an
- * embedded font makes right/centre/justified edges exact, see embedded-font-metrics.
+ * Alignment is a forgiving token (`'left' | 'center' | 'right' | 'justify'`),
+ * the page is set up with `pageSize: 'a4'` + a uniform `margin`, and all text is
+ * standard-14 Times Roman. For a demonstration of why an embedded font makes
+ * right/centre/justified edges exact, see embedded-font-metrics.
  */
 const SAMPLE_TEXT =
   'The quick brown fox jumps over the lazy dog. This sentence demonstrates how text alignment ' +
@@ -41,73 +30,71 @@ const BOOK_PARAS = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle()
-    .withFamily(StandardFonts.TimesRoman)
-    .withSize(11)
-    .withColor(ColorPalette.slate[600]);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 60,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: StandardFonts.TimesRoman, fontSize: 11, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'Text Alignment',
+      author: 'BonniePDF',
+      subject: 'Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1.',
+      keywords: 'pdf, pdf/ua, pdf/a, accessibility, text, alignment, justified',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Text Alignment';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1.';
-  metadata.keywords = 'pdf, pdf/ua, pdf/a, accessibility, text, alignment, justified';
-
-  const doc = new Document(settings, metadata);
-
-  const h1 = new Heading('Text Alignment Comparison');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 16);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'The four standard alignments are shown below. Each paragraph carries the same text and the ' +
-      'same /P structure-tree role — alignment is a purely visual property.'
+  doc.add(
+    new Heading('Text Alignment Comparison', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      textColor: 'slate-800',
+      margin: { bottom: 16 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 14);
-  doc.add(intro);
 
-  alignedSample(doc, 'Left Aligned (Default)', 's-left', TextAlignment.Left);
-  alignedSample(doc, 'Centre Aligned', 's-centre', TextAlignment.Center);
-  alignedSample(doc, 'Right Aligned', 's-right', TextAlignment.Right);
-  alignedSample(doc, 'Justified', 's-justify', TextAlignment.Justify);
+  doc.add(
+    new TextBlock(
+      'The four standard alignments are shown below. Each paragraph carries the same text and the ' +
+        'same /P structure-tree role — alignment is a purely visual property.',
+      { margin: { bottom: 14 } }
+    )
+  );
+
+  alignedSample(doc, 'Left Aligned (Default)', 's-left', 'left');
+  alignedSample(doc, 'Centre Aligned', 's-centre', 'center');
+  alignedSample(doc, 'Right Aligned', 's-right', 'right');
+  alignedSample(doc, 'Justified', 's-justify', 'justify');
 
   // ── Book-style justified paragraphs ─────────────────────────────────────────
   section(doc, 'Book-Style Justified Paragraphs', 'book');
   for (const text of BOOK_PARAS) {
-    const p = new TextBlock(text);
-    p.fontName = StandardFonts.TimesRoman;
-    p.alignment = TextAlignment.Justify;
-    p.margin = new Thickness(0, 0, 0, 8);
-    doc.add(p);
+    doc.add(new TextBlock(text, { fontName: StandardFonts.TimesRoman, alignment: 'justify', margin: { bottom: 8 } }));
   }
 
   return doc;
 }
 
-function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 13;
-  h.textColor = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 0, 0, 6);
-  h.alignment = alignment;
-  doc.add(h);
+function section(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput = 'left'): void {
+  doc.add(
+    new Heading(title, {
+      tocIdentifier: tocId,
+      level: 2,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 13,
+      textColor: 'indigo-600',
+      margin: { bottom: 6 },
+      alignment,
+    })
+  );
 }
 
-function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment): void {
+function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput): void {
   section(doc, title, tocId, alignment);
-  const p = new TextBlock(SAMPLE_TEXT);
-  p.alignment = alignment;
-  p.margin = new Thickness(0, 0, 0, 14);
-  doc.add(p);
+  doc.add(new TextBlock(SAMPLE_TEXT, { alignment, margin: { bottom: 14 } }));
 }

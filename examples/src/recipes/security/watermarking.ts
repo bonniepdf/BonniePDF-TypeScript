@@ -9,7 +9,6 @@ import {
   TextAlignment,
   VerticalStack,
   Container,
-  Spacer,
   ColorPalette,
   Thickness,
   Border,
@@ -134,13 +133,11 @@ export function generate(): Document {
   para2.alignment = TextAlignment.Justify;
   doc.add(para2);
 
-  doc.add(new Spacer(18));
-
   const s2 = new TextBlock('Section 2: Expected Outcomes');
   s2.fontName = StandardFonts.HelveticaBold;
   s2.fontSize = 18;
   s2.textColor = ColorPalette.blue[800];
-  s2.margin = new Thickness(0, 0, 0, 12);
+  s2.margin = new Thickness(0, 18, 0, 12);
   doc.add(s2);
 
   const para3 = new TextBlock(

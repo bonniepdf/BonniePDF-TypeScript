@@ -263,3 +263,49 @@ describe('RichText — stateful pagination (widow/orphan control)', () => {
     expect(again.canvas.texts.map(t => t.text)).toEqual(['one', 'two']);
   });
 });
+
+describe('TextStyle.clone', () => {
+  it('returns an independent copy, including private-backed fields', () => {
+    const a = new TextStyle();
+    a.fontSize = 10;
+    a.italic = true;
+    a.color = Color.red;
+    a.fontWeight = FontWeight.Bold;
+
+    const b = a.clone();
+    expect(b.fontSize).toBe(10);
+    expect(b.italic).toBe(true);
+    expect(b.color).toEqual(Color.red);
+    expect(b.fontWeight).toBe(FontWeight.Bold);
+
+    // Mutating the original must not touch the clone.
+    a.fontSize = 20;
+    a.italic = false;
+    a.fontWeight = FontWeight.Normal;
+    expect(b.fontSize).toBe(10);
+    expect(b.italic).toBe(true);
+    expect(b.fontWeight).toBe(FontWeight.Bold);
+  });
+});
+
+describe('RichText.span — style snapshotting (no shared-style aliasing)', () => {
+  it('captures each span style at span() time, immune to later mutation of a shared style', () => {
+    // One style, mutated between spans. Pre-clone, the first span referenced
+    // the shared object and rendered at its FINAL size (30); with span()
+    // cloning it keeps the size it had when it was added (9).
+    const shared = new TextStyle();
+    shared.fontSize = 9;
+
+    const { ctx, canvas } = makeContext();
+    const rt = new RichText().span('first', shared);
+    shared.withSize(30); // mutate the shared style after the first span
+    rt.span('second', shared);
+    rt.render(ctx, 5000);
+
+    const sizes = canvas.texts.map(t => t.fontSize);
+    // Both sizes must be present: the first span stayed at 9, the second is 30.
+    // The aliasing bug produced [30, 30] (no 9).
+    expect(sizes).toContain(9);
+    expect(sizes).toContain(30);
+  });
+});

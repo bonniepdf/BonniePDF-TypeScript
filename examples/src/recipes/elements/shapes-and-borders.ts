@@ -8,7 +8,6 @@ import {
   HorizontalStack,
   VerticalStack,
   Container,
-  Spacer,
   Line,
   Color,
   ColorPalette,
@@ -197,10 +196,10 @@ export function generate(): Document {
   }
 
   // ── Section 5: Practical banners ──
-  doc.add(new Spacer(16));
   const divider = new Line();
   divider.color = ColorPalette.slate[300];
   divider.thickness = 1;
+  divider.margin = new Thickness(0, 16, 0, 0);
   doc.add(divider);
   const practicalHeader = new TextBlock('Practical Examples');
   practicalHeader.fontName = StandardFonts.HelveticaBold;

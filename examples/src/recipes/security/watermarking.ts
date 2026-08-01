@@ -3,7 +3,7 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  WatermarkSettings,
+  Watermark,
   TextBlock,
   TextStyle,
   TextAlignment,
@@ -26,9 +26,9 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
 
   // A tuned watermark: a large, faint diagonal DRAFT sits over the content on
-  // every page. WatermarkSettings exposes the font, size, colour, opacity and
+  // every page. Watermark exposes the font, size, colour, opacity and
   // rotation so the stamp can be matched to the document's palette.
-  const watermark = new WatermarkSettings('DRAFT');
+  const watermark = new Watermark('DRAFT');
   watermark.fontName = StandardFonts.HelveticaBold;
   watermark.fontSize = 120;
   watermark.textColor = ColorPalette.slate[400];

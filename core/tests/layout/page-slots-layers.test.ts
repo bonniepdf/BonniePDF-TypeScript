@@ -9,7 +9,7 @@ import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Layers } from '../../src/Elements/Layout/Layers';
 import { Container } from '../../src/Elements/Layout/Container';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
-import { WatermarkSettings } from '../../src/Configuration/WatermarkSettings';
+import { Watermark } from '../../src/Configuration/Watermark';
 
 /**
  * Page slots (Background / Foreground) and the Layers primitive.
@@ -71,7 +71,7 @@ describe('this feature page slots (DocumentSettings)', () => {
     const doc = new Document();
     doc.add(text('BODYMARKER'));
     doc.settings.pageBackground = () => text('BACKGROUNDMARKER');
-    doc.settings.watermark = new WatermarkSettings('WMARK');
+    doc.settings.watermark = new Watermark('WMARK');
 
     const stream = renderPageStream(doc.pages as Page[], doc.settings);
     expect(stream.indexOf('BACKGROUNDMARKER')).toBeLessThan(stream.indexOf('WMARK'));
@@ -80,7 +80,7 @@ describe('this feature page slots (DocumentSettings)', () => {
   it('paints the watermark over body content but under the foreground slot', () => {
     const doc = new Document();
     doc.add(text('BODYMARKER'));
-    doc.settings.watermark = new WatermarkSettings('WMARK');
+    doc.settings.watermark = new Watermark('WMARK');
     doc.settings.pageForeground = () => text('FOREGROUNDMARKER');
 
     const stream = renderPageStream(doc.pages as Page[], doc.settings);

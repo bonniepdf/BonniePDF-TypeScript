@@ -5,7 +5,7 @@ import {
   applyDocumentSettingsOptions,
 } from '../../src/Configuration/DocumentSettings';
 import { DocumentMetadata, DOCUMENT_METADATA_OPTION_KEYS } from '../../src/Configuration/DocumentMetadata';
-import { WatermarkSettings, WATERMARK_OPTION_KEYS } from '../../src/Configuration/WatermarkSettings';
+import { Watermark, WATERMARK_OPTION_KEYS } from '../../src/Configuration/Watermark';
 import { BookmarkItem, BOOKMARK_ITEM_OPTION_KEYS } from '../../src/Configuration/BookmarkItem';
 import { PageLabel, PAGE_LABEL_OPTION_KEYS } from '../../src/Configuration/PageLabel';
 import { EncryptionSettings, ENCRYPTION_SETTINGS_OPTION_KEYS } from '../../src/Security/Models/EncryptionSettings';
@@ -38,9 +38,9 @@ function settableSurface(instance: object, internal: readonly string[] = []): st
 }
 
 describe('simple config classes (09a Phase 2.D)', () => {
-  it('WatermarkSettings: positional and options forms', () => {
-    expect(new WatermarkSettings('DRAFT').text).toBe('DRAFT');
-    const w = new WatermarkSettings({
+  it('Watermark: positional and options forms', () => {
+    expect(new Watermark('DRAFT').text).toBe('DRAFT');
+    const w = new Watermark({
       text: 'CONFIDENTIAL',
       textColor: 'rose-500',
       opacity: 0.3,
@@ -86,7 +86,7 @@ describe('simple config classes (09a Phase 2.D)', () => {
   });
 
   it('covers their settable surfaces', () => {
-    expect(settableSurface(new WatermarkSettings())).toEqual([...WATERMARK_OPTION_KEYS].sort());
+    expect(settableSurface(new Watermark())).toEqual([...WATERMARK_OPTION_KEYS].sort());
     expect(settableSurface(new BookmarkItem())).toEqual([...BOOKMARK_ITEM_OPTION_KEYS].sort());
     expect(settableSurface(new PageLabel())).toEqual([...PAGE_LABEL_OPTION_KEYS].sort());
     expect(settableSurface(new EncryptionSettings())).toEqual([...ENCRYPTION_SETTINGS_OPTION_KEYS].sort());
@@ -175,7 +175,7 @@ describe('DocumentSettings options', () => {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
       bookmarks: [{ title: 'Intro', pageIndex: 0 }],
     });
-    expect(s.watermark).toBeInstanceOf(WatermarkSettings);
+    expect(s.watermark).toBeInstanceOf(Watermark);
     expect(s.watermark?.text).toBe('DRAFT');
     expect(s.encryption).toBeInstanceOf(EncryptionSettings);
     expect(s.encryption?.userPassword).toBe('pw');
@@ -189,7 +189,7 @@ describe('DocumentSettings options', () => {
 
   it('passes nested instances through unchanged', () => {
     const style = new TextStyle({ fontSize: 9 });
-    const wm = new WatermarkSettings('X');
+    const wm = new Watermark('X');
     const s = new DocumentSettings({ defaultTextStyle: style, watermark: wm });
     expect(s.defaultTextStyle).toBe(style);
     expect(s.watermark).toBe(wm);

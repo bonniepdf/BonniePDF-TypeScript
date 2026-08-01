@@ -22,7 +22,7 @@ export * from './Configuration/PdfVersion';
 export * from './Configuration/PageMode';
 export * from './Configuration/ZoomLevel';
 export * from './Configuration/BookmarkItem';
-export * from './Configuration/WatermarkSettings';
+export * from './Configuration/Watermark';
 export * from './Configuration/DocumentMetadata';
 export * from './Configuration/DocumentSettings';
 export * from './Configuration/AccessibilityMode';

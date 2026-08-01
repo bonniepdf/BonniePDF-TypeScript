@@ -6,7 +6,7 @@ import { ZoomLevel } from './ZoomLevel';
 import { PageMode, PageModeEnum } from './PageMode';
 import { PdfVersion } from './PdfVersion';
 import { BookmarkItem, type BookmarkItemOptions } from './BookmarkItem';
-import { WatermarkSettings, type WatermarkSettingsOptions } from './WatermarkSettings';
+import { Watermark, type WatermarkOptions } from './Watermark';
 import { EncryptionSettings, type EncryptionSettingsOptions } from '../Security/Models/EncryptionSettings';
 import { TextStyle, type TextStyleOptions } from '../Elements/Text/TextStyle';
 import { AccessibilityMode } from './AccessibilityMode';
@@ -111,7 +111,7 @@ export type DocumentSettingsOptions = Partial<
   /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
   accessibility?: AccessibilityModeInput;
   /** Watermark. Accepts an instance or an options literal. */
-  watermark?: WatermarkSettings | WatermarkSettingsOptions;
+  watermark?: Watermark | WatermarkOptions;
   /** Encryption. Accepts an instance or an options literal. */
   encryption?: EncryptionSettings | EncryptionSettingsOptions;
   /** Page labelling. Accepts an instance or an options literal. */
@@ -362,7 +362,7 @@ export class DocumentSettings {
    * Gets or sets the watermark settings for the document.
    * When null, no watermark is rendered.
    */
-  public watermark?: WatermarkSettings;
+  public watermark?: Watermark;
   /**
    * Default text style applied to all text elements that have not had their style
    * properties explicitly set. Use this to define a document-wide font/size/color
@@ -468,7 +468,7 @@ export class DocumentSettings {
  *
  * Concrete callers MUST use this rather than {@link applyOptions} directly: a
  * bare keyed assignment would store plain literals where the engine expects
- * `WatermarkSettings`, `TextStyle`, … instances.
+ * `Watermark`, `TextStyle`, … instances.
  */
 export function applyDocumentSettingsOptions(
   target: DocumentSettings,
@@ -479,7 +479,7 @@ export function applyDocumentSettingsOptions(
   applyOptions(target, rest);
 
   if (watermark !== undefined) {
-    target.watermark = watermark instanceof WatermarkSettings ? watermark : new WatermarkSettings(watermark);
+    target.watermark = watermark instanceof Watermark ? watermark : new Watermark(watermark);
   }
   if (encryption !== undefined) {
     target.encryption = encryption instanceof EncryptionSettings ? encryption : new EncryptionSettings(encryption);

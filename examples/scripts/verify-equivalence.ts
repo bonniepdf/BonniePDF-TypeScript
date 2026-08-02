@@ -231,6 +231,51 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'watermarking-confidential-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'business-invoice',
+    variant: 'business-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'us-sales-invoice',
+    variant: 'us-sales-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'uk-vat-invoice',
+    variant: 'uk-vat-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'factur-x-invoice',
+    variant: 'factur-x-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'india-gst-invoice',
+    variant: 'india-gst-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'saas-invoice',
+    variant: 'saas-invoice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'shelf-label',
+    variant: 'shelf-label-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'edge-receipt',
+    variant: 'edge-receipt-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'public-library-membership-letter',
+    variant: 'public-library-membership-letter-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

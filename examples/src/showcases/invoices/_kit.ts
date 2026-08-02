@@ -18,7 +18,7 @@ import {
   HorizontalStack,
   WidthDistribution,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
+import type { IElement, TextAlignmentInput } from '@bonniepdf/core';
 
 export const INK = ColorPalette.slate[700];
 export const MUTED = ColorPalette.slate[500];
@@ -30,7 +30,8 @@ export interface CellOpts {
   size?: number;
   bold?: boolean;
   color?: Color;
-  align?: TextAlignment;
+  /** Text alignment. Accepts the `TextAlignment` enum or a token (`'left'`, `'right'`, …). */
+  align?: TextAlignmentInput;
   margin?: Thickness;
 }
 

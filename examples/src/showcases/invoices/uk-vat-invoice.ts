@@ -6,14 +6,12 @@
 // mixes standard-rated (20%), reduced-rated (5%), and zero-rated (0%) lines and
 // summarises the net / VAT / gross per rate, the way UK accounting software does.
 // GBP throughout; fictional company data.
+//
+// Authored through the options-object front door; elements are added directly
+// with doc.add(...). Shares the _kit building blocks with the sibling invoices.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
@@ -22,12 +20,7 @@ import {
   Grid,
   ColorPalette,
   Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  TextStyle,
-  PdfAConformance,
 } from '@bonniepdf/core';
 import { cell, money, lines, labelled, totalLine, divider, accentBar, INK, MUTED, HEADER_BG, RULE } from './_kit';
 
@@ -54,80 +47,86 @@ export function generate(): Document {
   const year = now.getFullYear();
   const fmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  const settings = new DocumentSettings(PdfSize.a4, 44);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 44,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: `VAT Invoice INV-UK-${year}-0311`,
+      author: 'Sample Company Ltd',
+      subject: 'UK VAT invoice with a per-rate VAT breakdown (standard, reduced, zero).',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = `VAT Invoice INV-UK-${year}-0311`;
-  metadata.author = 'Sample Company Ltd';
-  metadata.subject = 'UK VAT invoice with a per-rate VAT breakdown (standard, reduced, zero).';
-
-  const doc = new Document(settings, metadata);
-  const root = new VerticalStack();
-  root.addChild(accentBar(ACCENT));
+  doc.add(accentBar(ACCENT));
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Grid(1.3, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  header.margin = new Thickness(0, 16, 0, 18);
-  const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }));
-  seller.addChild(
-    cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) })
-  );
-  seller.addChild(cell('Company No. 09182773 (England & Wales)', { size: 8, color: MUTED }));
-  const title = new Heading('VAT INVOICE');
-  title.level = 1;
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.textColor = ACCENT;
-  title.alignment = TextAlignment.Right;
-  const titleStack = new VerticalStack();
-  titleStack.addChild(title);
-  titleStack.addChild(
-    cell(`INV-UK-${year}-0311`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
-  );
+  const header = new Grid({ columns: [1.3, 1], cellPadding: 0, border: 0, margin: { top: 16, bottom: 18 } });
+  const seller = new VerticalStack({
+    children: [
+      cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }),
+      lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }),
+      cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }),
+      cell('Company No. 09182773 (England & Wales)', { size: 8, color: MUTED }),
+    ],
+  });
+  const titleStack = new VerticalStack({
+    children: [
+      new Heading('VAT INVOICE', {
+        level: 1,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 24,
+        textColor: ACCENT,
+        alignment: 'right',
+      }),
+      cell(`INV-UK-${year}-0311`, { color: MUTED, align: 'right', margin: new Thickness(0, 2, 0, 0) }),
+    ],
+  });
   header.addRow(seller, titleStack);
-  root.addChild(header);
+  doc.add(header);
 
   // ── Customer + tax point ──────────────────────────────────────────────────
-  const meta = new Grid(1, 1);
-  meta.cellPadding = 12;
-  meta.border = new Border(0.5);
-  meta.borderColors = new BorderColors(RULE);
-  meta.margin = new Thickness(0, 0, 0, 18);
+  const meta = new Grid({
+    columns: [1, 1],
+    cellPadding: 12,
+    border: { width: 0.5, color: RULE },
+    margin: { bottom: 18 },
+  });
   const customer = labelled(
     'INVOICE TO',
-    lines(['Sample Customer PLC', 'Finance Department', '4 Waterfront Square', 'Cardiff CF10 4PA'], {
-      color: MUTED,
-    }),
+    lines(['Sample Customer PLC', 'Finance Department', '4 Waterfront Square', 'Cardiff CF10 4PA'], { color: MUTED }),
     ACCENT
   );
-  const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', fmt.format(now)));
-  detailsStack.addChild(totalLine('Tax point', fmt.format(now)));
-  detailsStack.addChild(totalLine('Customer VAT no.', 'GB 442 8810 21'));
-  detailsStack.addChild(totalLine('Payment terms', '30 days'));
+  const detailsStack = new VerticalStack({
+    children: [
+      totalLine('Invoice date', fmt.format(now)),
+      totalLine('Tax point', fmt.format(now)),
+      totalLine('Customer VAT no.', 'GB 442 8810 21'),
+      totalLine('Payment terms', '30 days'),
+    ],
+  });
   meta.addRow(customer, labelled('DETAILS', detailsStack, ACCENT));
-  root.addChild(meta);
+  doc.add(meta);
 
   // ── Line items (with VAT-rate column) ──────────────────────────────────────
-  const table = new Table(3, 0.6, 1, 0.7, 1);
-  table.cellPadding = 8;
-  table.border = Border.none;
-  table.headerBackgroundColor = HEADER_BG;
-  table.headerTextColor = INK;
+  const table = new Table({
+    columns: [3, 0.6, 1, 0.7, 1],
+    cellPadding: 8,
+    border: 0,
+    headerBackgroundColor: HEADER_BG,
+    headerTextColor: INK,
+  });
   table.addHeader(
     cell('Description', { bold: true }),
-    cell('Qty', { bold: true, align: TextAlignment.Center }),
-    cell('Unit price', { bold: true, align: TextAlignment.Right }),
-    cell('VAT', { bold: true, align: TextAlignment.Center }),
-    cell('Net amount', { bold: true, align: TextAlignment.Right })
+    cell('Qty', { bold: true, align: 'center' }),
+    cell('Unit price', { bold: true, align: 'right' }),
+    cell('VAT', { bold: true, align: 'center' }),
+    cell('Net amount', { bold: true, align: 'right' })
   );
 
   // Accumulate net and VAT per rate for the summary block.
@@ -141,28 +140,29 @@ export function generate(): Document {
     byRate.set(it.vatRate, bucket);
     table.addRow(
       cell(it.description),
-      cell(String(it.qty), { align: TextAlignment.Center }),
-      cell(money(it.unitPrice, GBP, 'en-GB'), { align: TextAlignment.Right }),
-      cell(it.rateLabel, { align: TextAlignment.Center, color: MUTED }),
-      cell(money(net, GBP, 'en-GB'), { align: TextAlignment.Right })
+      cell(String(it.qty), { align: 'center' }),
+      cell(money(it.unitPrice, GBP, 'en-GB'), { align: 'right' }),
+      cell(it.rateLabel, { align: 'center', color: MUTED }),
+      cell(money(net, GBP, 'en-GB'), { align: 'right' })
     );
   }
-  root.addChild(table);
-  root.addChild(divider(RULE, 0.5));
+  doc.add(table);
+  doc.add(divider(RULE, 0.5));
 
   // ── VAT summary by rate (the defining feature of a UK VAT invoice) ─────────
-  const summary = new Table(1.4, 1, 1, 1);
-  summary.cellPadding = 7;
-  summary.border = new Border(0.5);
-  summary.borderColors = new BorderColors(RULE);
-  summary.headerBackgroundColor = HEADER_BG;
-  summary.headerTextColor = INK;
-  summary.margin = new Thickness(0, 10, 0, 0);
+  const summary = new Table({
+    columns: [1.4, 1, 1, 1],
+    cellPadding: 7,
+    border: { width: 0.5, color: RULE },
+    headerBackgroundColor: HEADER_BG,
+    headerTextColor: INK,
+    margin: { top: 10 },
+  });
   summary.addHeader(
     cell('VAT rate', { bold: true }),
-    cell('Net', { bold: true, align: TextAlignment.Right }),
-    cell('VAT', { bold: true, align: TextAlignment.Right }),
-    cell('Gross', { bold: true, align: TextAlignment.Right })
+    cell('Net', { bold: true, align: 'right' }),
+    cell('VAT', { bold: true, align: 'right' }),
+    cell('Gross', { bold: true, align: 'right' })
   );
   let vatTotal = 0;
   const rates = [...byRate.entries()].sort((a, b) => b[0] - a[0]);
@@ -171,41 +171,41 @@ export function generate(): Document {
     vatTotal += vat;
     summary.addRow(
       cell(bucket.label),
-      cell(money(bucket.net, GBP, 'en-GB'), { align: TextAlignment.Right }),
-      cell(money(vat, GBP, 'en-GB'), { align: TextAlignment.Right }),
-      cell(money(bucket.net + vat, GBP, 'en-GB'), { align: TextAlignment.Right })
+      cell(money(bucket.net, GBP, 'en-GB'), { align: 'right' }),
+      cell(money(vat, GBP, 'en-GB'), { align: 'right' }),
+      cell(money(bucket.net + vat, GBP, 'en-GB'), { align: 'right' })
     );
   }
-  root.addChild(summary);
+  doc.add(summary);
 
   // ── Grand total ────────────────────────────────────────────────────────────
-  const totals = new VerticalStack();
-  totals.addChild(totalLine('Total net', money(netTotal, GBP, 'en-GB')));
-  totals.addChild(totalLine('Total VAT', money(vatTotal, GBP, 'en-GB')));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(
-    totalLine('Total due (GBP)', money(netTotal + vatTotal, GBP, 'en-GB'), { bold: true, size: 13, color: ACCENT })
-  );
-  const totalsBox = new Container();
-  totalsBox.child = totals;
-  totalsBox.padding = new Thickness(14, 12, 14, 12);
-  totalsBox.backgroundColor = ColorPalette.rose[50];
-  totalsBox.cornerRadius = 8;
-  const totalsRow = new HorizontalStack();
-  totalsRow.widthDistribution = WidthDistribution.Weighted;
-  totalsRow.margin = new Thickness(0, 10, 0, 0);
+  const totals = new VerticalStack({
+    children: [
+      totalLine('Total net', money(netTotal, GBP, 'en-GB')),
+      totalLine('Total VAT', money(vatTotal, GBP, 'en-GB')),
+      divider(INK, 0.6),
+      totalLine('Total due (GBP)', money(netTotal + vatTotal, GBP, 'en-GB'), { bold: true, size: 13, color: ACCENT }),
+    ],
+  });
+  const totalsBox = new Container({
+    child: totals,
+    padding: [14, 12],
+    backgroundColor: ColorPalette.rose[50],
+    cornerRadius: 8,
+  });
+  const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 10 } });
   totalsRow.addChild(new Container(), 1);
   totalsRow.addChild(totalsBox, 1);
-  root.addChild(totalsRow);
+  doc.add(totalsRow);
 
-  const key = cell('S = Standard 20%   ·   R = Reduced 5%   ·   Z = Zero-rated 0%', {
-    size: 8,
-    color: MUTED,
-    margin: new Thickness(0, 20, 0, 0),
-  });
-  root.addChild(key);
+  doc.add(
+    cell('S = Standard 20%   ·   R = Reduced 5%   ·   Z = Zero-rated 0%', {
+      size: 8,
+      color: MUTED,
+      margin: new Thickness(0, 20, 0, 0),
+    })
+  );
 
-  doc.add(root);
   return doc;
 }
 

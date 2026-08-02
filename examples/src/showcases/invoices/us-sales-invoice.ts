@@ -5,30 +5,22 @@
 // subtotal. This showcase renders a clean commercial invoice in that idiom: a
 // destination-based state + county sales-tax breakdown, a purchase-order
 // reference, USD amounts, and a remittance line. Fictional data throughout.
+//
+// Authored through the options-object front door; elements are added directly
+// with doc.add(...) (the document already flows vertically). Shares the _kit
+// building blocks with the sibling regional invoices.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
-  TextBlock,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
   Table,
   Grid,
-  Color,
   ColorPalette,
   Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  TextStyle,
-  PdfAConformance,
 } from '@bonniepdf/core';
 import {
   cell,
@@ -64,117 +56,126 @@ export function generate(): Document {
   const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const due = new Date(now.getTime() + 30 * 86400000);
 
-  const settings = new DocumentSettings(PdfSize.a4, 44);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-US';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 44,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-US',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: `Invoice INV-US-${year}-0148`,
+      author: 'Sample Company Inc.',
+      subject: 'US commercial invoice with destination-based state and county sales tax.',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = `Invoice INV-US-${year}-0148`;
-  metadata.author = 'Sample Company Inc.';
-  metadata.subject = 'US commercial invoice with destination-based state and county sales tax.';
-
-  const doc = new Document(settings, metadata);
-  const root = new VerticalStack();
-
-  root.addChild(accentBar(ACCENT));
+  doc.add(accentBar(ACCENT));
 
   // ── Header: seller | INVOICE ────────────────────────────────────────────
-  const header = new Grid(1.3, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  header.margin = new Thickness(0, 16, 0, 18);
-  const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(
-    lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED })
-  );
-  const title = new Heading('INVOICE');
-  title.level = 1;
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 26;
-  title.textColor = ACCENT;
-  title.alignment = TextAlignment.Right;
-  const titleStack = new VerticalStack();
-  titleStack.addChild(title);
-  titleStack.addChild(
-    cell(`INV-US-${year}-0148`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
-  );
+  const header = new Grid({ columns: [1.3, 1], cellPadding: 0, border: 0, margin: { top: 16, bottom: 18 } });
+  const seller = new VerticalStack({
+    children: [
+      cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }),
+      lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED }),
+    ],
+  });
+  const titleStack = new VerticalStack({
+    children: [
+      new Heading('INVOICE', {
+        level: 1,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 26,
+        textColor: ACCENT,
+        alignment: 'right',
+      }),
+      cell(`INV-US-${year}-0148`, { color: MUTED, align: 'right', margin: new Thickness(0, 2, 0, 0) }),
+    ],
+  });
   header.addRow(seller, titleStack);
-  root.addChild(header);
+  doc.add(header);
 
   // ── Bill-to + details ────────────────────────────────────────────────────
-  const meta = new Grid(1, 1);
-  meta.cellPadding = 12;
-  meta.border = new Border(0.5);
-  meta.borderColors = new BorderColors(RULE);
-  meta.margin = new Thickness(0, 0, 0, 18);
+  const meta = new Grid({
+    columns: [1, 1],
+    cellPadding: 12,
+    border: { width: 0.5, color: RULE },
+    margin: { bottom: 18 },
+  });
   const billTo = labelled(
     'BILL TO',
     lines(['Sample Customer LLC', 'Accounts Payable', '18 Pioneer Square', 'Seattle, WA 98104'], { color: MUTED }),
     ACCENT
   );
-  const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', fmt.format(now)));
-  detailsStack.addChild(totalLine('Due date (Net 30)', fmt.format(due)));
-  detailsStack.addChild(totalLine('Purchase order', 'PO-88213'));
-  detailsStack.addChild(totalLine('Ship to', 'Seattle, WA'));
+  const detailsStack = new VerticalStack({
+    children: [
+      totalLine('Invoice date', fmt.format(now)),
+      totalLine('Due date (Net 30)', fmt.format(due)),
+      totalLine('Purchase order', 'PO-88213'),
+      totalLine('Ship to', 'Seattle, WA'),
+    ],
+  });
   meta.addRow(billTo, labelled('DETAILS', detailsStack, ACCENT));
-  root.addChild(meta);
+  doc.add(meta);
 
   // ── Line items ────────────────────────────────────────────────────────────
-  const table = new Table(3, 0.7, 1, 1);
-  table.cellPadding = 8;
-  table.border = Border.none;
-  table.headerBackgroundColor = HEADER_BG;
-  table.headerTextColor = INK;
+  const table = new Table({
+    columns: [3, 0.7, 1, 1],
+    cellPadding: 8,
+    border: 0,
+    headerBackgroundColor: HEADER_BG,
+    headerTextColor: INK,
+  });
   table.addHeader(
     cell('Description', { bold: true }),
-    cell('Qty', { bold: true, align: TextAlignment.Center }),
-    cell('Unit price', { bold: true, align: TextAlignment.Right }),
-    cell('Amount', { bold: true, align: TextAlignment.Right })
+    cell('Qty', { bold: true, align: 'center' }),
+    cell('Unit price', { bold: true, align: 'right' }),
+    cell('Amount', { bold: true, align: 'right' })
   );
   let subtotal = 0;
   for (const it of ITEMS) {
     const amount = it.qty * it.unitPrice;
     subtotal += amount;
-    const desc = new VerticalStack();
-    desc.addChild(cell(it.description));
-    if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
+    const desc = new VerticalStack({
+      children: it.detail ? [cell(it.description), cell(it.detail, { size: 8, color: MUTED })] : [cell(it.description)],
+    });
     table.addRow(
       desc,
-      cell(String(it.qty), { align: TextAlignment.Center }),
-      cell(money(it.unitPrice, USD), { align: TextAlignment.Right }),
-      cell(money(amount, USD), { align: TextAlignment.Right })
+      cell(String(it.qty), { align: 'center' }),
+      cell(money(it.unitPrice, USD), { align: 'right' }),
+      cell(money(amount, USD), { align: 'right' })
     );
   }
-  root.addChild(table);
-  root.addChild(divider(RULE, 0.5));
+  doc.add(table);
+  doc.add(divider(RULE, 0.5));
 
   // ── Totals: sales tax is state + county on the taxable subtotal ─────────
   const stateTax = subtotal * STATE_TAX_RATE;
   const countyTax = subtotal * COUNTY_TAX_RATE;
   const total = subtotal + stateTax + countyTax;
 
-  const totals = new VerticalStack();
-  totals.addChild(totalLine('Subtotal', money(subtotal, USD)));
-  totals.addChild(totalLine('CA state sales tax (6.25%)', money(stateTax, USD)));
-  totals.addChild(totalLine('King County district tax (2.25%)', money(countyTax, USD)));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total due (USD)', money(total, USD), { bold: true, size: 13, color: ACCENT }));
+  const totals = new VerticalStack({
+    children: [
+      totalLine('Subtotal', money(subtotal, USD)),
+      totalLine('CA state sales tax (6.25%)', money(stateTax, USD)),
+      totalLine('King County district tax (2.25%)', money(countyTax, USD)),
+      divider(INK, 0.6),
+      totalLine('Total due (USD)', money(total, USD), { bold: true, size: 13, color: ACCENT }),
+    ],
+  });
 
-  const totalsBox = new Container();
-  totalsBox.child = totals;
-  totalsBox.padding = new Thickness(14, 12, 14, 12);
-  totalsBox.backgroundColor = ColorPalette.blue[50];
-  totalsBox.cornerRadius = 8;
-  const totalsRow = new HorizontalStack();
-  totalsRow.widthDistribution = WidthDistribution.Weighted;
-  totalsRow.margin = new Thickness(0, 6, 0, 0);
+  const totalsBox = new Container({
+    child: totals,
+    padding: [14, 12],
+    backgroundColor: ColorPalette.blue[50],
+    cornerRadius: 8,
+  });
+  const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 6 } });
   totalsRow.addChild(new Container(), 1);
   totalsRow.addChild(totalsBox, 1);
-  root.addChild(totalsRow);
+  doc.add(totalsRow);
 
   // ── Remittance note ─────────────────────────────────────────────────────
   const note = labelled(
@@ -190,8 +191,7 @@ export function generate(): Document {
     ACCENT
   );
   note.padding = new Thickness(0, 22, 0, 0);
-  root.addChild(note);
+  doc.add(note);
 
-  doc.add(root);
   return doc;
 }

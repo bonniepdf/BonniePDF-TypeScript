@@ -10,28 +10,20 @@
 // agree. The XML is a caller input (loaded from the assets map); BonniePDF does
 // not generate it.
 //
-// Shares the regional-invoice visual grammar via `_kit`. Validated in CI (on the
-// .NET side, where the Java toolchain lives) by veraPDF (PDF/A-3b) and the
-// Mustang project (ZUGFeRD / EN 16931). Parity peer of the .NET
-// FacturXInvoiceExample.
+// Authored through the options-object front door; elements are added directly
+// with doc.add(...). Shares the _kit building blocks. Validated in CI (on the
+// .NET side) by veraPDF (PDF/A-3b) and the Mustang project. Parity peer of the
+// .NET FacturXInvoiceExample.
 
 import {
   Document,
-  DocumentSettings,
-  PdfSize,
-  PdfAConformance,
-  TextAlignment,
-  TextStyle,
   VerticalStack,
   HorizontalStack,
   Container,
   Table,
   Grid,
-  Thickness,
-  Border,
-  BorderColors,
   ColorPalette,
-  WidthDistribution,
+  Thickness,
   applyFacturX,
   FacturXProfile,
 } from '@bonniepdf/core';
@@ -63,116 +55,126 @@ const ITEMS: LineItem[] = [
 ];
 
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 44);
-  // applyFacturX forces PDF/A-3b; set here too so the intent is explicit.
-  settings.conformance = PdfAConformance.PdfA3b;
-  settings.language = 'en';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 44,
+      // applyFacturX forces PDF/A-3b; set here too so the intent is explicit.
+      conformance: 'pdf/a-3b',
+      language: 'en',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: 'E-Invoice INV-2026-1001',
+      author: 'Sample Company GmbH',
+      subject:
+        'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.',
+    },
+  });
 
-  const doc = new Document(settings);
-  doc.metadata.title = 'E-Invoice INV-2026-1001';
-  doc.metadata.author = 'Sample Company GmbH';
-  doc.metadata.subject =
-    'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.';
-
-  const root = new VerticalStack();
-  root.addChild(accentBar(ACCENT));
+  doc.add(accentBar(ACCENT));
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Grid(1.3, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  header.margin = new Thickness(0, 16, 0, 18);
-  const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
-  seller.addChild(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
-  const titleStack = new VerticalStack();
-  titleStack.addChild(cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: TextAlignment.Right }));
-  titleStack.addChild(
-    cell('EN 16931 · Factur-X / ZUGFeRD', {
-      size: 8,
-      color: MUTED,
-      align: TextAlignment.Right,
-      margin: new Thickness(0, 2, 0, 0),
-    })
-  );
-  titleStack.addChild(cell('INV-2026-1001', { color: MUTED, align: TextAlignment.Right }));
+  const header = new Grid({ columns: [1.3, 1], cellPadding: 0, border: 0, margin: { top: 16, bottom: 18 } });
+  const seller = new VerticalStack({
+    children: [
+      cell('Sample Company GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }),
+      lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }),
+      cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }),
+    ],
+  });
+  const titleStack = new VerticalStack({
+    children: [
+      cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: 'right' }),
+      cell('EN 16931 · Factur-X / ZUGFeRD', {
+        size: 8,
+        color: MUTED,
+        align: 'right',
+        margin: new Thickness(0, 2, 0, 0),
+      }),
+      cell('INV-2026-1001', { color: MUTED, align: 'right' }),
+    ],
+  });
   header.addRow(seller, titleStack);
-  root.addChild(header);
+  doc.add(header);
 
   // ── Buyer + details ─────────────────────────────────────────────────────
-  const meta = new Grid(1, 1);
-  meta.cellPadding = 12;
-  meta.border = new Border(0.5);
-  meta.borderColors = new BorderColors(RULE);
-  meta.margin = new Thickness(0, 0, 0, 18);
+  const meta = new Grid({
+    columns: [1, 1],
+    cellPadding: 12,
+    border: { width: 0.5, color: RULE },
+    margin: { bottom: 18 },
+  });
   const buyer = labelled(
     'BILLED TO',
     lines(['Sample Customer', '1 Example Way', 'EC1A 1BB London', 'United Kingdom'], { color: MUTED }),
     ACCENT
   );
-  const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', '07 Jul 2026'));
-  detailsStack.addChild(totalLine('Due date', '21 Jul 2026'));
-  detailsStack.addChild(totalLine('Buyer reference', 'PO-2026-042'));
-  detailsStack.addChild(totalLine('Terms', '14 days net'));
+  const detailsStack = new VerticalStack({
+    children: [
+      totalLine('Invoice date', '07 Jul 2026'),
+      totalLine('Due date', '21 Jul 2026'),
+      totalLine('Buyer reference', 'PO-2026-042'),
+      totalLine('Terms', '14 days net'),
+    ],
+  });
   meta.addRow(buyer, labelled('DETAILS', detailsStack, ACCENT));
-  root.addChild(meta);
+  doc.add(meta);
 
   // ── Line items ──────────────────────────────────────────────────────────
-  const table = new Table(3, 0.7, 1, 1);
-  table.cellPadding = 8;
-  table.border = Border.none;
-  table.headerBackgroundColor = HEADER_BG;
-  table.headerTextColor = INK;
+  const table = new Table({
+    columns: [3, 0.7, 1, 1],
+    cellPadding: 8,
+    border: 0,
+    headerBackgroundColor: HEADER_BG,
+    headerTextColor: INK,
+  });
   table.addHeader(
     cell('Description', { bold: true }),
-    cell('Qty', { bold: true, align: TextAlignment.Center }),
-    cell('Unit price', { bold: true, align: TextAlignment.Right }),
-    cell('Net amount', { bold: true, align: TextAlignment.Right })
+    cell('Qty', { bold: true, align: 'center' }),
+    cell('Unit price', { bold: true, align: 'right' }),
+    cell('Net amount', { bold: true, align: 'right' })
   );
   let net = 0;
   for (const it of ITEMS) {
     const amount = it.qty * it.unitPrice;
     net += amount;
-    const desc = new VerticalStack();
-    desc.addChild(cell(it.description));
-    if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
+    const desc = new VerticalStack({
+      children: it.detail ? [cell(it.description), cell(it.detail, { size: 8, color: MUTED })] : [cell(it.description)],
+    });
     table.addRow(
       desc,
-      cell(String(it.qty), { align: TextAlignment.Center }),
-      cell(money(it.unitPrice, EUR, LOCALE), { align: TextAlignment.Right }),
-      cell(money(amount, EUR, LOCALE), { align: TextAlignment.Right })
+      cell(String(it.qty), { align: 'center' }),
+      cell(money(it.unitPrice, EUR, LOCALE), { align: 'right' }),
+      cell(money(amount, EUR, LOCALE), { align: 'right' })
     );
   }
-  root.addChild(table);
-  root.addChild(divider(RULE, 0.5));
+  doc.add(table);
+  doc.add(divider(RULE, 0.5));
 
   // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────────
   const vat = net * VAT_RATE;
-  const totals = new VerticalStack();
-  totals.addChild(totalLine('Total net', money(net, EUR, LOCALE)));
-  totals.addChild(totalLine('VAT (19%)', money(vat, EUR, LOCALE)));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }));
-  const totalsBox = new Container();
-  totalsBox.child = totals;
-  totalsBox.padding = new Thickness(14, 12, 14, 12);
-  totalsBox.backgroundColor = ColorPalette.blue[50];
-  totalsBox.cornerRadius = 8;
-  const totalsRow = new HorizontalStack();
-  totalsRow.widthDistribution = WidthDistribution.Weighted;
-  totalsRow.margin = new Thickness(0, 6, 0, 0);
+  const totals = new VerticalStack({
+    children: [
+      totalLine('Total net', money(net, EUR, LOCALE)),
+      totalLine('VAT (19%)', money(vat, EUR, LOCALE)),
+      divider(INK, 0.6),
+      totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }),
+    ],
+  });
+  const totalsBox = new Container({
+    child: totals,
+    padding: [14, 12],
+    backgroundColor: ColorPalette.blue[50],
+    cornerRadius: 8,
+  });
+  const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 6 } });
   totalsRow.addChild(new Container(), 1);
   totalsRow.addChild(totalsBox, 1);
-  root.addChild(totalsRow);
+  doc.add(totalsRow);
 
   // ── Remittance + embedded-XML panel ───────────────────────────────────────
-  const bottom = new Grid(1.1, 1);
-  bottom.cellPadding = 0;
-  bottom.border = Border.none;
-  bottom.margin = new Thickness(0, 20, 0, 0);
+  const bottom = new Grid({ columns: [1.1, 1], cellPadding: 0, border: 0, margin: { top: 20 } });
   const pay = labelled(
     'PAYMENT',
     lines(['IBAN: DE21 1001 0000 0012 3456 78', 'BIC: PBNKDEFFXXX', 'Deutsche Postbank, Berlin'], {
@@ -181,22 +183,20 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     }),
     ACCENT
   );
-  const xml = new Container();
-  xml.backgroundColor = HEADER_BG;
-  xml.cornerRadius = 6;
-  xml.padding = new Thickness(12, 10, 12, 10);
-  const xmlStack = new VerticalStack();
-  xmlStack.addChild(cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }));
-  xmlStack.addChild(cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }));
-  xmlStack.addChild(cell('PDF/A-3 as an associated file — /AFRelationship /Data.', { size: 8, color: MUTED }));
-  xml.child = xmlStack;
-  const payCell = new Container();
-  payCell.child = pay;
-  payCell.padding = new Thickness(0, 0, 20, 0);
-  bottom.addRow(payCell, xml);
-  root.addChild(bottom);
-
-  doc.add(root);
+  const xml = new Container({
+    backgroundColor: HEADER_BG,
+    cornerRadius: 6,
+    padding: [12, 10],
+    child: new VerticalStack({
+      children: [
+        cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }),
+        cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }),
+        cell('PDF/A-3 as an associated file — /AFRelationship /Data.', { size: 8, color: MUTED }),
+      ],
+    }),
+  });
+  bottom.addRow(new Container({ child: pay, padding: { right: 20 } }), xml);
+  doc.add(bottom);
 
   // ── Bind the invoice XML: PDF/A-3 + embedded CII + fx: XMP ──
   const xmlBytes = assets?.get(ASSET_KEY);

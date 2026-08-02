@@ -3,7 +3,7 @@ import type { ShadingRequest } from './Pdf/GradientShading';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
 import { PdfCanvas } from '../Drawing/PdfCanvas';
-import { SvgCanvas, SvgCanvasOptions } from '../Drawing/SvgCanvas';
+import { SvgCanvas, SvgCanvasOptions, SvgIdAllocator } from '../Drawing/SvgCanvas';
 import { Color } from '../Core/Color';
 import { ImageInfo } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
@@ -62,6 +62,14 @@ export class RenderContext implements RenderContextContract {
    * creation rather than being recreated and discarded.
    */
   private readonly svgPages: SvgCanvas[] = [];
+
+  /**
+   * Shared across every {@link SvgCanvas} this context creates (main page
+   * canvases and positioned child canvases alike), so `clip`/`grad` ids stay
+   * unique across a page composited from several canvases - see
+   * {@link SvgIdAllocator}.
+   */
+  private readonly svgIdAllocator = new SvgIdAllocator();
   public currentPageIndex: number = 0;
   public currentX: number = 0;
   public currentY: number = 0;
@@ -139,7 +147,8 @@ export class RenderContext implements RenderContextContract {
             .filter((run): run is ResolvedTextRun & { embeddedFont: TtfFont } => run.embeddedFont !== null)
             .map(run => ({ fontFamily: run.fontIdentifier, font: run.embeddedFont, text: run.text })),
       },
-      this.svgOptions
+      this.svgOptions,
+      this.svgIdAllocator
     );
   }
 

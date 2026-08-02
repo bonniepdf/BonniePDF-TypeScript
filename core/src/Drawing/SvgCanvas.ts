@@ -125,6 +125,32 @@ export interface SvgCanvasOptions {
   shapeRendering?: 'auto' | 'optimizeSpeed' | 'crispEdges' | 'geometricPrecision';
 }
 
+/**
+ * Source of unique `clip`/`grad` id suffixes for one or more {@link SvgCanvas}
+ * instances. A page's SVG can be composited from several canvases (the main
+ * canvas plus positioned child canvases for charts/images - see
+ * {@link RenderContext.getCanvas}), so ids must stay unique across all of
+ * them, not just within one instance. Sharing one allocator across those
+ * canvases achieves that; a fresh, un-shared allocator (the constructor
+ * default) is correct for a standalone canvas whose output is never
+ * composited with another's.
+ *
+ * Deliberately *not* a static/process-wide counter: that would make a
+ * document's SVG output depend on how many other documents were rendered
+ * earlier in the same process, breaking the byte-for-byte reproducibility the
+ * equivalence guard and PDF/A determinism work both rely on.
+ */
+export class SvgIdAllocator {
+  private clipId = 0;
+  private gradId = 0;
+  public nextClipId(): string {
+    return `clip${this.clipId++}`;
+  }
+  public nextGradId(): string {
+    return `grad${this.gradId++}`;
+  }
+}
+
 export class SvgCanvas implements ICanvas {
   public readonly width: number;
   public readonly height: number;
@@ -137,9 +163,7 @@ export class SvgCanvas implements ICanvas {
   private readonly options: SvgCanvasOptions;
   private groupDepth = 0;
   private readonly embeddedFontUsage = new Map<string, { font: TtfFont; codePoints: Set<number> }>();
-
-  private static clipIdCounter = 0;
-  private static gradIdCounter = 0;
+  private readonly idAllocator: SvgIdAllocator;
 
   // track save depths so restoreState closes transform groups too
   private saveDepths: number[] = [];
@@ -151,12 +175,14 @@ export class SvgCanvas implements ICanvas {
     width: number,
     height: number,
     fontResolver?: SvgFontResolver | SvgFontLookup,
-    options?: SvgCanvasOptions
+    options?: SvgCanvasOptions,
+    idAllocator?: SvgIdAllocator
   ) {
     this.width = width;
     this.height = height;
     this.fontResolver = fontResolver ? normalizeFontResolver(fontResolver) : undefined;
     this.options = options ?? {};
+    this.idAllocator = idAllocator ?? new SvgIdAllocator();
   }
 
   // -- Graphics state -----------------------------------------------------
@@ -493,7 +519,7 @@ export class SvgCanvas implements ICanvas {
   // -- Clipping (legacy) --------------------------------------------------
 
   public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
-    const id = `clip${SvgCanvas.clipIdCounter++}`;
+    const id = this.idAllocator.nextClipId();
     this.svgElements.push(
       `<clipPath id="${id}"><rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(
         height
@@ -615,7 +641,7 @@ export class SvgCanvas implements ICanvas {
   public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
     const d = this.currentPathData.join(' ');
     if (!d) return;
-    const id = `clip${SvgCanvas.clipIdCounter++}`;
+    const id = this.idAllocator.nextClipId();
     const ruleAttr = rule === 'evenodd' ? ' clip-rule="evenodd"' : '';
     this.svgElements.push(`<defs><clipPath id="${id}"><path d="${d}"${ruleAttr}/></clipPath></defs>`);
     this.svgElements.push(`<g clip-path="url(#${id})">`);
@@ -848,7 +874,7 @@ export class SvgCanvas implements ICanvas {
   }
 
   private emitGradientDef(paint: LinearGradientPaint | RadialGradientPaint): string {
-    const id = `grad${SvgCanvas.gradIdCounter++}`;
+    const id = this.idAllocator.nextGradId();
     if (paint instanceof LinearGradientPaint) {
       const stops = paint.stops
         .map(

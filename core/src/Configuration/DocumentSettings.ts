@@ -296,11 +296,12 @@ export class DocumentSettings {
   }
 
   /**
-   * Legacy boolean PDF/A switch. Maps onto {@link conformance}:
-   * reading returns `true` whenever any PDF/A level is selected;
-   * writing `true` selects {@link PdfAConformance.PdfA2b} (the modern
-   * visual-reproducibility baseline) and writing `false` selects
-   * {@link PdfAConformance.None}.
+   * Legacy boolean view of {@link conformance}, not a separate PDF/A setting.
+   * Reading it returns `true` whenever any PDF/A level is selected. Writing it
+   * replaces the exact conformance level: `true` selects
+   * {@link PdfAConformance.PdfA2b}, the modern visual-reproducibility baseline,
+   * while `false` selects {@link PdfAConformance.None}. Prefer
+   * {@link conformance} in new code when the precise PDF/A profile matters.
    */
   public get pdfAEnabled(): boolean {
     return this.conformance !== PdfAConformance.None;

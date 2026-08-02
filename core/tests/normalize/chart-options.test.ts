@@ -39,19 +39,42 @@ function settableSurface(instance: object, internal: readonly string[] = []): st
 
 describe('Cartesian chart options (09a Phase 2.I)', () => {
   it('BarChart: colour token + own + inherited base options', () => {
+    const data = new ChartData({ series: [{ dataPoints: [{ label: 'A', value: 10 }] }] });
     const c = new BarChart({
+      data,
+      title: 'Revenue',
+      altText: 'Revenue bar chart',
+      margin: 4,
       barColor: 'indigo-600',
       barWidthRatio: 0.5,
       width: 600,
+      yAxis: { prefix: '£' },
       showLegend: false,
       orientation: ChartOrientation.Horizontal,
     });
+    expect(c.data).toBe(data);
+    expect(c.title).toBe('Revenue');
+    expect(c.altText).toBe('Revenue bar chart');
+    expect(c.margin).toEqual(new Thickness(4));
+    expect(c.yAxis.prefix).toBe('£');
     expect(c.barColor).toBe(ColorPalette.indigo[600]);
     expect(c.barWidthRatio).toBe(0.5);
     expect(c.width).toBe(600);
     expect(c.showLegend).toBe(false);
     expect(c.orientation).toBe(ChartOrientation.Horizontal);
     expect(new BarChart().width).toBe(800);
+  });
+
+  it('applies owned data before chart-level title and axes regardless of option order', () => {
+    const c = new BarChart({
+      title: 'Chart title',
+      yAxis: { prefix: '$' },
+      data: { title: 'Data title', yAxis: { prefix: 'USD ' } },
+    });
+
+    expect(c.title).toBe('Chart title');
+    expect(c.data.title).toBe('Chart title');
+    expect(c.yAxis.prefix).toBe('$');
   });
 
   it('Line/Area/Lollipop/DotPlot accept colour tokens', () => {
@@ -133,7 +156,7 @@ describe('Chart data model options', () => {
   });
 });
 
-describe('Chart element wrappers (required chart + data)', () => {
+describe('Deprecated chart element wrappers', () => {
   const chart = new BarChart();
   const gbc = new GroupedBarChart();
   const data = new ChartData({ title: 't' });

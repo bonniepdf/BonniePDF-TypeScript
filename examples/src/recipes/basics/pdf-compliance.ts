@@ -1,91 +1,91 @@
-import { Document, Heading, TextBlock, StandardFonts } from '@bonniepdf/core';
+import { Document, Heading, Line, StandardFonts, TextBlock, UnorderedList } from '@bonniepdf/core';
 
 /**
- * PDF/A-2a + PDF/UA-1 - the recommended modern baseline.
- *
- * PDF/A-2a is the strongest of the "basic + accessible" archival levels:
- *
- *   • PDF/A-2  → modern PDF 1.7 visual fidelity (transparency, JPEG2000,
- *     OpenType font embedding allowed).
- *   • "a"      → tagged structure (presupposes PDF/UA-1).
- *
- * Setting `conformance: 'pdf/a-2a'` auto-upgrades `version` to PDF 1.7 and
- * emits the `pdfaid:part 2 / pdfaid:conformance A` XMP claim, the sRGB ICC
- * profile, the `/OutputIntents` entry, and the `pdfaExtension:schemas`
- * declaration for the `pdfuaid` namespace (PDF/A-2 §6.6.2.3.1). The "a" level
- * requires `accessibility: 'pdf/ua-1'` - the document throws at save time
- * otherwise.
- *
- * Conformance and accessibility are the only two knobs that matter here; both
- * are set as forgiving token strings on `settings`. Verified against veraPDF
- * profile `2a`.
+ * A concise PDF/A-2a + PDF/UA-1 example.
  */
 export function generate(): Document {
-  const HEADING = StandardFonts.HelveticaBold;
-  const BODY = StandardFonts.Helvetica;
-
   const doc = new Document({
     settings: {
-      // Conformance is the source of truth: 'pdf/a-2a' auto-upgrades the PDF
-      // version and triggers all the PDF/A machinery; the "a" level requires
-      // PDF/UA-1 tagging; language is a BCP-47 tag, required for PDF/UA-1.
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
     },
     metadata: {
-      title: 'PDF/A-2a Compliant Document',
+      title: 'Archival and Accessible PDF with BonniePDF',
       author: 'BonniePDF',
-      subject: 'A minimal PDF/A-2a + PDF/UA-1 document - archival and accessible.',
-      keywords: 'pdf, pdf/a-2a, pdf/ua, accessibility, archival, BonniePDF',
+      subject: 'A concise PDF/A-2a and PDF/UA-1 example.',
+      keywords: 'pdf/a-2a, pdf/ua-1, accessibility, archival, BonniePDF',
     },
   });
 
   doc.add(
-    new Heading('PDF/A-2a + PDF/UA-1', {
+    new Heading('Archival and accessible PDF', {
       level: 1,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
-      margin: { bottom: 12 },
+      textColor: 'slate-900',
+      margin: { bottom: 8 },
     })
   );
-
   doc.add(
     new TextBlock(
-      'This document targets PDF/A-2a - the "accessible archival" profile from ISO 19005-2. ' +
-        'It is simultaneously a long-term archival file (PDF/A) and a screen-reader-friendly document (PDF/UA-1). ' +
-        'Both claims are verified by veraPDF against profiles 2a and ua1 respectively.',
-      { fontName: BODY, fontSize: 12, textColor: 'slate-700', margin: { bottom: 12 } }
+      'BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.',
+      { fontSize: 11, textColor: 'slate-600', margin: { bottom: 12 } }
     )
   );
+  doc.add(new Line({ thickness: 2, color: 'blue-600', margin: { bottom: 14 } }));
 
   doc.add(
-    new Heading('Why PDF/A-2a over PDF/A-1b?', {
+    new Heading('Settings used by this document', {
       level: 2,
-      fontName: HEADING,
-      fontSize: 16,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 15,
       textColor: 'slate-800',
-      margin: { top: 16, bottom: 8 },
+      margin: { bottom: 5 },
+    })
+  );
+  doc.add(
+    new UnorderedList({
+      items: [
+        'conformance: pdf/a-2a - requests modern PDF/A archival output.',
+        'accessibility: pdf/ua-1 - emits tagged structure for assistive technology.',
+        'language: en-GB - declares the document language for screen readers.',
+      ],
+      fontSize: 10,
+      textColor: 'slate-700',
+      bulletColor: 'blue-600',
+      itemSpacing: 5,
+      margin: { bottom: 14 },
     })
   );
 
   doc.add(
+    new Heading('Responsibilities', {
+      level: 2,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 15,
+      textColor: 'slate-800',
+      margin: { bottom: 5 },
+    })
+  );
+  doc.add(
     new TextBlock(
-      'PDF/A-1b (2005) is based on PDF 1.4 and disallows transparency, JPEG2000, and modern font features. ' +
-        'PDF/A-2a (2011) is based on PDF 1.7, lifts those restrictions, and crucially requires the same tagged ' +
-        'structure that the European Accessibility Act (EAA) calls for. For new documents authored in 2026 onward, ' +
-        'PDF/A-2a is the natural target - and BonniePDF reaches it with two lines of configuration.',
-      { fontName: BODY, fontSize: 12, textColor: 'slate-700', margin: { bottom: 12 } }
+      'BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and honest-claim resource checks.',
+      { fontSize: 10, textColor: 'slate-700', margin: { bottom: 8 } }
+    )
+  );
+  doc.add(
+    new TextBlock(
+      'The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.',
+      { fontSize: 10, textColor: 'slate-700', margin: { bottom: 16 } }
     )
   );
 
+  doc.add(new Line({ color: 'slate-300', margin: { bottom: 10 } }));
   doc.add(
     new TextBlock(
-      'The legacy boolean `settings.pdfAEnabled = true` still works and maps to PDF/A-2b under the hood - ' +
-        'the safe automatic upgrade from the historic PDF/A-1b baseline. For new code, prefer setting ' +
-        '`settings.conformance` to the exact profile you want (here, PDF/A-2a).',
-      { fontName: BODY, fontSize: 10, textColor: 'slate-600' }
+      'Legacy compatibility: pdfAEnabled reads true for any PDF/A profile. Assigning true selects PdfA2b; assigning false selects None. New code should use conformance.',
+      { fontName: StandardFonts.HelveticaOblique, fontSize: 9, textColor: 'slate-500' }
     )
   );
 

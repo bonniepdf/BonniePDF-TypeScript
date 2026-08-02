@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   AreaChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -108,13 +107,9 @@ export function generate(): Document {
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
-    )
-  );
+  chart.data = data;
+  chart.altText = 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.';
+  doc.add(chart);
 
   return doc;
 }

@@ -21,7 +21,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   BarChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -223,8 +222,7 @@ export function generate(): Document {
   doc.add(kpiRule);
 
   // ════════════════════════════════════════════════════════════════════════════
-  // 3.  Monthly revenue bar chart - ChartElement must be a direct doc.add() call;
-  //     nesting it inside a Container or Table prevents width resolution.
+  // 3.  Monthly revenue bar chart
   // ════════════════════════════════════════════════════════════════════════════
 
   const chartTitleCell = new Container();
@@ -254,21 +252,16 @@ export function generate(): Document {
   chartData.yAxis.maxValue = 250;
   chartData.yAxis.stepCount = 5;
 
-  const barChart = new BarChart();
+  const barChart = new BarChart({
+    data: chartData,
+    altText: 'Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.',
+  });
   barChart.height = 200;
   barChart.stretchToFit = true;
   barChart.barColor = TERRA;
   barChart.fontFamily = StandardFonts.Helvetica;
   barChart.labelFontSize = 8;
-
-  // Direct doc.add - the only way ChartElement resolves its available width
-  doc.add(
-    new ChartElement(
-      barChart,
-      chartData,
-      'Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.'
-    )
-  );
+  doc.add(barChart);
 
   // ════════════════════════════════════════════════════════════════════════════
   // 4.  Top products table

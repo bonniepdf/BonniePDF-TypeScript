@@ -222,10 +222,10 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'pdf-compliance',
-    name: 'PDF/A + PDF/UA',
+    name: 'Archival & Accessible PDF',
     category: 'Basic',
     description:
-      "The modern archival + accessible baseline every example in this gallery uses, explained: settings.conformance = 'pdf/a-2a' alongside accessibility = 'pdf/ua-1' - validated by veraPDF against profile 2a.",
+      'A concise PDF/A-2a and PDF/UA-1 example showing the two settings, what BonniePDF handles, and what the author supplies.',
     filename: 'pdf-compliance.pdf',
     generate: pdfCompliance,
     dotnetClass: 'PdfComplianceExample',
@@ -234,10 +234,10 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'pdf-compliance-classes',
-    name: 'PDF/A + PDF/UA (Class API)',
+    name: 'Archival & Accessible PDF (Class API)',
     category: 'Basic',
     description:
-      'The same PDF/A-2a + PDF/UA-1 baseline as PDF/A + PDF/UA, authored the long way: construct settings and metadata objects and assign each property. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same concise conformance example, authored by constructing and mutating every object without helper functions.',
     filename: 'pdf-compliance-classes.pdf',
     generate: pdfComplianceClasses,
     dotnetClass: 'PdfComplianceExample',

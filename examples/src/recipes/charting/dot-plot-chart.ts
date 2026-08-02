@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   DotPlotChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -81,6 +80,8 @@ export function generate(): Document {
   });
 
   const chart = new DotPlotChart({
+    data,
+    altText: 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.',
     height: 380,
     stretchToFit: true,
     dotColor: C_TEAL,
@@ -90,10 +91,7 @@ export function generate(): Document {
     showValueLabels: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')
-  );
+  doc.add(chart);
 
   return doc;
 }

@@ -36,7 +36,9 @@ export class GroupedBarChart extends CartesianChartBase {
   /** Creates a GroupedBarChart, optionally configured in one expression. */
   constructor(options?: GroupedBarChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   barWidthRatio: number = 0.6;

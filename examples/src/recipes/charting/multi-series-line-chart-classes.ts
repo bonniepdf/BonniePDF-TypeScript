@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   LineChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -118,9 +117,9 @@ export function generate(): Document {
   chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(chart, data, `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`)
-  );
+  chart.data = data;
+  chart.altText = `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`;
+  doc.add(chart);
 
   return doc;
 }

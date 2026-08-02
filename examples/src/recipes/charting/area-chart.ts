@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   AreaChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -81,6 +80,8 @@ export function generate(): Document {
   });
 
   const chart = new AreaChart({
+    data,
+    altText: 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.',
     height: 380,
     stretchToFit: true,
     areaColor: C_PURPLE,
@@ -90,14 +91,7 @@ export function generate(): Document {
     showValueLabels: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

@@ -36,7 +36,9 @@ export class DotPlotChart extends CartesianChartBase {
   /** Creates a DotPlotChart, optionally configured in one expression. */
   constructor(options?: DotPlotChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   defaultDotRadius: number = DotPlotChart.DEFAULT_DOT_RADIUS_VALUE;

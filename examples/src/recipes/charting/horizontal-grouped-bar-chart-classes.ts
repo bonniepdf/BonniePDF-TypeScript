@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  GroupedBarChartElement,
   GroupedBarChart,
   ChartOrientation,
   PdfAConformance,
@@ -133,13 +132,9 @@ export function generate(): Document {
   chart.showLegend = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new GroupedBarChartElement(
-      chart,
-      data,
-      'Horizontal grouped bar chart comparing quarterly sales across three product lines.'
-    )
-  );
+  chart.data = data;
+  chart.altText = 'Horizontal grouped bar chart comparing quarterly sales across three product lines.';
+  doc.add(chart);
 
   return doc;
 }

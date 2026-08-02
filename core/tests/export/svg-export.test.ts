@@ -57,6 +57,11 @@ describe('SvgExport', () => {
     expect(svg).toMatch(/<svg[^>]*shape-rendering="crispEdges"/);
   });
 
+  it("chartToSvg uses a chart element's owned data by default", () => {
+    const svg = chartToSvg(new BarChart({ data: createSampleData('Owned data') }));
+    expect(svg).toContain('Owned data');
+  });
+
   it('GroupedBarChart_ToSvg_RootUsesCrispEdges', () => {
     const svg = chartToSvg(new GroupedBarChart(), createSampleData());
     expect(svg).toMatch(/<svg[^>]*shape-rendering="crispEdges"/);

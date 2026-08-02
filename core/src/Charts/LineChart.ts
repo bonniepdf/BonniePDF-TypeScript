@@ -43,7 +43,9 @@ export class LineChart extends CartesianChartBase {
   /** Creates a LineChart, optionally configured in one expression. */
   constructor(options?: LineChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   defaultLineWidth: number = 2;

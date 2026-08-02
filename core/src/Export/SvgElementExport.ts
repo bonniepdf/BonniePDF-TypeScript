@@ -45,7 +45,7 @@ export function toSvg(page: Page): string {
  * Note: Chart SVG export uses standard font fallback rendering without per-glyph kerning.
  * For accurate kerning with embedded fonts, render the chart via a Page using toSvg(Page) instead.
  */
-export function chartToSvg(chart: ChartBase, data: ChartData): string {
+export function chartToSvg(chart: ChartBase, data: ChartData = chart.data): string {
   // Charts use standard fonts internally, so no per-glyph font resolver is needed here.
   // Axis-aligned charts (bar, grouped bar) opt into crisp edges via
   // `svgShapeRendering`; others keep the default antialiasing for their

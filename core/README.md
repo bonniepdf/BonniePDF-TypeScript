@@ -151,7 +151,7 @@ table.addRow(new TextBlock('Widget'), new TextBlock('3'), new TextBlock('£30.00
 ### Charts
 
 ```typescript
-import { BarChart, ChartElement, ChartData, ChartSeries, ChartDataPoint, Color } from '@bonniepdf/core';
+import { BarChart, ChartData, ChartSeries, ChartDataPoint, Color } from '@bonniepdf/core';
 
 const points = [
   { label: 'Jan', value: 42000 },
@@ -172,12 +172,14 @@ const data = new ChartData();
 data.title = 'Monthly Revenue';
 data.series = [series];
 
-const chart = new BarChart();
-chart.height = 200;
-chart.barColor = Color.fromHex('#2196F3');
+const chart = new BarChart({
+  data,
+  height: 200,
+  barColor: Color.fromHex('#2196F3'),
+  altText: 'Monthly revenue, Jan-Mar.',
+});
 
-// Add to the document with alt-text for accessibility.
-doc.add(new ChartElement(chart, data, 'Monthly revenue, Jan-Mar.'));
+doc.add(chart);
 ```
 
 ### Custom fonts

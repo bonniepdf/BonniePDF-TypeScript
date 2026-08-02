@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   LollipopChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -109,13 +108,9 @@ export function generate(): Document {
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
-    )
-  );
+  chart.data = data;
+  chart.altText = 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.';
+  doc.add(chart);
 
   return doc;
 }

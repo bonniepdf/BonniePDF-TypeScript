@@ -22,6 +22,7 @@ export const GROUPED_BAR_CHART_ELEMENT_OPTION_KEYS = [
 export type GroupedBarChartElementOptions = ElementOptions &
   Partial<Pick<GroupedBarChartElement, (typeof GROUPED_BAR_CHART_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
+/** @deprecated GroupedBarChart is a document element; set its data and add it directly. */
 export class GroupedBarChartElement extends ElementBase {
   private readonly chart: GroupedBarChart;
   private readonly data: ChartData;

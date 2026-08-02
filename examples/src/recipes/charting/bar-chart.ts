@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   BarChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -85,6 +84,8 @@ export function generate(): Document {
   });
 
   const chart = new BarChart({
+    data,
+    altText: 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.',
     height: 380,
     stretchToFit: true,
     barColor: C_INDIGO,
@@ -92,14 +93,7 @@ export function generate(): Document {
     labelFontSize: 9,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   LineChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -82,6 +81,8 @@ export function generate(): Document {
   });
 
   const chart = new LineChart({
+    data,
+    altText: 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.',
     height: 380,
     stretchToFit: true,
     lineColor: C_VIOLET,
@@ -92,10 +93,7 @@ export function generate(): Document {
     showDataPointMarkers: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(chart, data, 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.')
-  );
+  doc.add(chart);
 
   return doc;
 }

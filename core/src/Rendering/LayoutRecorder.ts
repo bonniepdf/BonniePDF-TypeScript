@@ -70,7 +70,22 @@ export interface NodeAccessibility {
 }
 
 const HEADING_LEVELS: Record<string, number> = { H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6 };
-const IMAGE_LIKE_TYPES = new Set(['Image', 'QRCode', 'Barcode', 'DataMatrix', 'CanvasElement']);
+const IMAGE_LIKE_TYPES = new Set([
+  'Image',
+  'QRCode',
+  'Barcode',
+  'DataMatrix',
+  'CanvasElement',
+  'BarChart',
+  'GroupedBarChart',
+  'LineChart',
+  'AreaChart',
+  'PieChart',
+  'DotPlotChart',
+  'LollipopChart',
+  'ChartElement',
+  'GroupedBarChartElement',
+]);
 
 /**
  * Derives {@link NodeAccessibility} from an element instance by reading its

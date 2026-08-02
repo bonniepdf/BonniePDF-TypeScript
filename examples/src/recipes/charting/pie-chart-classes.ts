@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   PieChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -117,13 +116,9 @@ export function generate(): Document {
   chart.colors = ALL_COLORS;
   chart.backgroundColor = Color.white;
 
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
-    )
-  );
+  chart.data = data;
+  chart.altText = `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`;
+  doc.add(chart);
 
   return doc;
 }

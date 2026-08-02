@@ -2,7 +2,7 @@ import { ICanvas } from '../Drawing/ICanvas';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
-import { AxisOptions } from './Models/AxisOptions';
+import { AxisOptions, type AxisOptionsOptions } from './Models/AxisOptions';
 import { ChartOrientation } from './ChartOrientation';
 import { ChartBase } from './ChartBase';
 import { Color } from '../Core/Color';
@@ -17,6 +17,8 @@ import { StandardFonts } from '../Typography/StandardFonts';
  */
 /** Settable properties declared by {@link CartesianChartBase} itself. */
 export const CARTESIAN_CHART_OWN_OPTION_KEYS = [
+  'xAxis',
+  'yAxis',
   'fontFamily',
   'showValueLabels',
   'labelFontSize',
@@ -29,7 +31,12 @@ export const CARTESIAN_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...CARTES
 
 /** Options common to cartesian charts. Intersects {@link ChartBaseOptions}. */
 export type CartesianChartOptions = ChartBaseOptions &
-  Partial<Pick<CartesianChartBase, (typeof CARTESIAN_CHART_OWN_OPTION_KEYS)[number]>>;
+  Partial<Omit<Pick<CartesianChartBase, (typeof CARTESIAN_CHART_OWN_OPTION_KEYS)[number]>, 'xAxis' | 'yAxis'>> & {
+    /** Category axis presentation; accepts an AxisOptions instance or literal. */
+    xAxis?: AxisOptions | AxisOptionsOptions;
+    /** Value axis presentation; accepts an AxisOptions instance or literal. */
+    yAxis?: AxisOptions | AxisOptionsOptions;
+  };
 
 export abstract class CartesianChartBase extends ChartBase {
   // Layout constants (relative to chart height)
@@ -59,6 +66,22 @@ export abstract class CartesianChartBase extends ChartBase {
   // Styling constants
   protected static readonly AXIS_COLOR = Color.fromHex('#666666');
   protected static readonly GRID_LINE_COLOR = Color.fromHex('#e0e0e0');
+
+  /** Category-axis presentation owned by this chart. */
+  public get xAxis(): AxisOptions {
+    return this.data.xAxis;
+  }
+  public set xAxis(value: AxisOptions | AxisOptionsOptions) {
+    this.data.xAxis = value instanceof AxisOptions ? value : new AxisOptions(value);
+  }
+
+  /** Value-axis presentation owned by this chart. */
+  public get yAxis(): AxisOptions {
+    return this.data.yAxis;
+  }
+  public set yAxis(value: AxisOptions | AxisOptionsOptions) {
+    this.data.yAxis = value instanceof AxisOptions ? value : new AxisOptions(value);
+  }
 
   /**
    * Font family for labels

@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   LineChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -94,6 +93,8 @@ export function generate(): Document {
   });
 
   const chart = new LineChart({
+    data,
+    altText: `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`,
     height: 380,
     stretchToFit: true,
     fontFamily: StandardFonts.Helvetica,
@@ -102,10 +103,7 @@ export function generate(): Document {
     showDataPointMarkers: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(chart, data, `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`)
-  );
+  doc.add(chart);
 
   return doc;
 }

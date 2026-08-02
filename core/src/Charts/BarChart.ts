@@ -39,7 +39,9 @@ export class BarChart extends CartesianChartBase {
   /** Creates a BarChart, optionally configured in one expression. */
   constructor(options?: BarChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   private _barColor: Color = Color.fromHex(BarChart.BAR_COLOR_HEX);

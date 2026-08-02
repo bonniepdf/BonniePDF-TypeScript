@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   LollipopChart,
-  ChartElement,
   ChartOrientation,
   StandardFonts,
 } from '@bonniepdf/core';
@@ -95,6 +94,8 @@ export function generate(): Document {
   });
 
   const chart = new LollipopChart({
+    data,
+    altText: 'Horizontal lollipop chart showing product revenue ranking for eight product lines.',
     orientation: ChartOrientation.Horizontal,
     height: 400,
     stretchToFit: true,
@@ -106,10 +107,7 @@ export function generate(): Document {
     showValueLabels: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(chart, data, 'Horizontal lollipop chart showing product revenue ranking for eight product lines.')
-  );
+  doc.add(chart);
 
   return doc;
 }

@@ -14,8 +14,6 @@ import { Document, Heading, TextBlock, UnorderedList, QRCode, Line, PdfSize, Sta
  * colours as palette tokens (`'slate-600'`), and spacing as `{ bottom: 12 }`.
  */
 export function generate(): Document {
-  const HEADING = StandardFonts.HelveticaBold;
-
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -39,7 +37,7 @@ export function generate(): Document {
     new Heading('Hello, Document API!', {
       tocIdentifier: 'intro',
       level: 1,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
       textColor: 'slate-800',
       margin: { bottom: 12 },
@@ -56,7 +54,7 @@ export function generate(): Document {
     new Heading('Key Features', {
       tocIdentifier: 'features',
       level: 2,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
       textColor: 'slate-700',
       margin: { bottom: 6 },
@@ -66,7 +64,7 @@ export function generate(): Document {
   doc.add(
     new UnorderedList({
       fontSize: 11,
-      itemSpacing: 2,
+      itemSpacing: 6,
       items: [
         'Simple, intuitive API',
         'Built-in metadata support',
@@ -91,7 +89,7 @@ export function generate(): Document {
     new Heading('Scan to verify', {
       tocIdentifier: 'verify',
       level: 2,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
       textColor: 'slate-700',
       margin: { bottom: 6 },
@@ -108,7 +106,7 @@ export function generate(): Document {
     new Heading('Page 2', {
       tocIdentifier: 'page2',
       level: 1,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
       textColor: 'slate-800',
       margin: { bottom: 12 },
@@ -124,7 +122,7 @@ export function generate(): Document {
     new Heading(`Page 3: ${squareSize.name}`, {
       tocIdentifier: 'square',
       level: 1,
-      fontName: HEADING,
+      fontName: StandardFonts.HelveticaBold,
       fontSize: 16,
       textColor: 'slate-800',
       alignment: 'center',

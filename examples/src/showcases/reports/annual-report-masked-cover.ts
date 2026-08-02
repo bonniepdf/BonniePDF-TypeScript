@@ -152,7 +152,6 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const cover = new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage));
   cover.drawWidth = PAGE.width;
   cover.drawHeight = PAGE.height;
-  cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a hero landscape image clipped to an angled mask above a green title band.`;
   doc.add(cover);
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).

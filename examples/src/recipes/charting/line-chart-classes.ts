@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   LineChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -109,9 +108,9 @@ export function generate(): Document {
   chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(chart, data, 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.')
-  );
+  chart.data = data;
+  chart.altText = 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.';
+  doc.add(chart);
 
   return doc;
 }

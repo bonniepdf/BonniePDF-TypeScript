@@ -1,57 +1,50 @@
+// Product Roadmap
+//
+// Landscape A4 Gantt-style product roadmap: a six-month timeline header over
+// team swimlanes (Development, Design, Marketing), with rounded task bars
+// positioned by month using weighted horizontal stacks. Authored through the
+// options-object front door.
+
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  PageOrientation,
   TextBlock,
-  TextAlignment,
   VerticalStack,
   HorizontalStack,
-  WidthDistribution,
-  HorizontalAlignment,
   Container,
   Spacer,
   Color,
-  Thickness,
   Border,
   BorderColors,
   StandardFonts,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
 // ── Palette (Slate neutrals + per-team accent pairs) ─────────────────────────
-const INK = Color.fromHex('#0f172a'); // slate-900  headings
-const MUTE = Color.fromHex('#64748b'); // slate-500  captions
+const INK = '#0f172a'; // slate-900  headings
+const MUTE = '#64748b'; // slate-500  captions
+// Raw `Color` instances (not string tokens): these three feed the
+// `BorderColors`/`Border` class constructors directly for per-side colours
+// options sugar can't express (a single `border.color` applies to every side
+// named), so they need the canonical `Color` type those constructors expect.
 const FAINT = Color.fromHex('#94a3b8'); // slate-400  month labels
 const HAIR = Color.fromHex('#e2e8f0'); // slate-200  card border + separators
-const HEADBG = Color.fromHex('#f8fafc'); // slate-50   header band + future tint
+const HEADBG = '#f8fafc'; // slate-50   header band + future tint
 const TODAY = Color.fromHex('#fb7185'); // rose-400   "today" marker line
-const BADGE_BG = Color.fromHex('#eef2ff'); // indigo-50  header badge
-const BADGE_TX = Color.fromHex('#4338ca'); // indigo-700 header badge text
+const BADGE_BG = '#eef2ff'; // indigo-50  header badge
+const BADGE_TX = '#4338ca'; // indigo-700 header badge text
 
 // Each team carries a solid shade (work underway), a soft tint (planned work),
 // and a dark text shade readable on the tint.
 interface TeamShades {
-  solid: Color;
-  tint: Color;
-  dark: Color;
+  solid: ColorInput;
+  tint: ColorInput;
+  dark: ColorInput;
 }
-const DEV: TeamShades = {
-  solid: Color.fromHex('#4f46e5'), // indigo-600
-  tint: Color.fromHex('#e0e7ff'), // indigo-100
-  dark: Color.fromHex('#3730a3'), // indigo-800
-};
-const DESIGN: TeamShades = {
-  solid: Color.fromHex('#0d9488'), // teal-600
-  tint: Color.fromHex('#ccfbf1'), // teal-100
-  dark: Color.fromHex('#115e59'), // teal-800
-};
-const MARKETING: TeamShades = {
-  solid: Color.fromHex('#059669'), // emerald-600
-  tint: Color.fromHex('#d1fae5'), // emerald-100
-  dark: Color.fromHex('#065f46'), // emerald-800
-};
+const DEV: TeamShades = { solid: '#4f46e5', tint: '#e0e7ff', dark: '#3730a3' }; // indigo 600/100/800
+const DESIGN: TeamShades = { solid: '#0d9488', tint: '#ccfbf1', dark: '#115e59' }; // teal 600/100/800
+const MARKETING: TeamShades = { solid: '#059669', tint: '#d1fae5', dark: '#065f46' }; // emerald 600/100/800
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'];
 const TODAY_AFTER_MONTH = 3; // the marker line sits on the Mar/Apr boundary
@@ -71,16 +64,16 @@ interface Seg {
 function tb(
   content: string,
   size: number,
-  color: Color,
-  opts: { bold?: boolean; align?: TextAlignment; top?: number } = {}
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
 ): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.textColor = color;
-  if (opts.align !== undefined) t.alignment = opts.align;
-  if (opts.top) t.margin = new Thickness(0, opts.top, 0, 0);
-  return t;
+  return new TextBlock(content, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    textColor: color,
+    alignment: opts.align,
+    margin: opts.top ? { top: opts.top } : undefined,
+  });
 }
 
 // One column-slot of the timeline body. Unlike a spreadsheet grid there are no
@@ -88,17 +81,15 @@ function tb(
 // month (the "today" boundary gets a stronger rose line), and a faint tint on
 // months after the today marker so the future half of the plan reads apart.
 function slot(height: number, month: number | 'gutter'): Container {
-  const c = new Container();
-  c.height = height;
   const isGutter = month === 'gutter';
   const isLast = month === MONTHS.length;
   const isToday = month === TODAY_AFTER_MONTH;
-  if (!isGutter && (month as number) > TODAY_AFTER_MONTH) c.backgroundColor = HEADBG;
-  if (!isLast) {
-    c.border = new Border(0, 0, isToday ? 1.2 : SEP, 0);
-    c.borderColors = BorderColors.rightOnly(isToday ? TODAY : HAIR);
-  }
-  return c;
+  return new Container({
+    height,
+    backgroundColor: !isGutter && (month as number) > TODAY_AFTER_MONTH ? HEADBG : undefined,
+    border: isLast ? undefined : new Border(0, 0, isToday ? 1.2 : SEP, 0),
+    borderColors: isLast ? undefined : BorderColors.rightOnly(isToday ? TODAY : HAIR),
+  });
 }
 
 // A full-width band of column slots (gutter + six months). Used as the striped
@@ -108,16 +99,11 @@ function slot(height: number, month: number | 'gutter'): Container {
 // grid on SVG export; the rounded bars live on a separate layer and keep their
 // antialiasing.
 function band(height: number): Container {
-  const row = new HorizontalStack();
-  row.spacing = 0;
-  row.widthDistribution = WidthDistribution.Weighted;
+  const row = new HorizontalStack({ spacing: 0, widthDistribution: 'weighted' });
   row.addChild(slot(height, 'gutter'), LABEL_WEIGHT);
   for (let m = 1; m <= MONTHS.length; m++) row.addChild(slot(height, m), 1);
 
-  const crisp = new Container();
-  crisp.crispEdges = true;
-  crisp.child = row;
-  return crisp;
+  return new Container({ crispEdges: true, child: row });
 }
 
 // A rounded task pill. Work underway is a solid fill with white text; planned
@@ -125,26 +111,27 @@ function band(height: number): Container {
 // status is readable at a glance without a spreadsheet of columns. No outlines:
 // the fill alone carries the shape, which keeps edges clean against the grid.
 function bar(label: string, team: TeamShades, planned: boolean): Container {
-  const c = new Container();
-  c.backgroundColor = planned ? team.tint : team.solid;
-  c.cornerRadius = BAR_HEIGHT / 2;
-  c.clipContent = true; // long labels mask to the pill instead of overflowing
-  c.height = BAR_HEIGHT;
-  c.margin = new Thickness(3, 0, 3, 0); // seam between back-to-back bars
-  c.padding = new Thickness(8, 4, 8, 4);
-  c.child = tb(label, 7, planned ? team.dark : Color.white, { bold: true, align: TextAlignment.Center });
-  return c;
+  return new Container({
+    backgroundColor: planned ? team.tint : team.solid,
+    cornerRadius: BAR_HEIGHT / 2,
+    clipContent: true, // long labels mask to the pill instead of overflowing
+    height: BAR_HEIGHT,
+    margin: { left: 3, right: 3 }, // seam between back-to-back bars
+    padding: [8, 4],
+    child: tb(label, 7, planned ? team.dark : '#ffffff', { bold: true, align: 'center' }),
+  });
 }
 
 // The bar layer of a row: a left label of weight LABEL_WEIGHT, then the
 // six-month timeline as weighted bars and *transparent* gaps (one weight = one
 // month) so the column separators show through. Bars are vertically centred.
 function barLayer(labelCell: IElement, segs: Seg[], team: TeamShades): HorizontalStack {
-  const row = new HorizontalStack();
-  row.spacing = 0;
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.alignment = HorizontalAlignment.Center;
-  row.height = ROW_HEIGHT;
+  const row = new HorizontalStack({
+    spacing: 0,
+    widthDistribution: 'weighted',
+    alignment: 'center',
+    height: ROW_HEIGHT,
+  });
   row.addChild(labelCell, LABEL_WEIGHT);
 
   let cursor = 1;
@@ -168,107 +155,99 @@ function roadmapRow(labelCell: IElement, segs: Seg[], team: TeamShades): Contain
 }
 
 // Left label for the first row of a team: name + sub with a coloured rail.
-function teamLabel(name: string, sub: string, accent: Color): Container {
-  const v = new VerticalStack();
-  v.addChild(tb(name, 9, INK, { bold: true }));
-  v.addChild(tb(sub, 6.8, MUTE, { top: 2 }));
-  const c = new Container();
-  c.child = v;
-  c.padding = new Thickness(14, 3, 8, 3);
-  c.border = Border.leftOnly(2.5);
-  c.borderColors = BorderColors.leftOnly(accent);
-  c.margin = new Thickness(0, 0, 0, 0);
-  return c;
+function teamLabel(name: string, sub: string, accent: ColorInput): Container {
+  return new Container({
+    padding: [14, 3, 8, 3],
+    border: { left: 2.5, color: accent },
+    child: new VerticalStack({ children: [tb(name, 9, INK, { bold: true }), tb(sub, 6.8, MUTE, { top: 2 })] }),
+  });
 }
 
 // Month header band: an uppercase label centred in each column over a soft
 // slate ground, closed with a single hairline. The vertical separators and the
 // today line start here and continue down the body.
 function monthHeader(): Container {
-  const row = new HorizontalStack();
-  row.spacing = 0;
-  row.widthDistribution = WidthDistribution.Weighted;
+  const row = new HorizontalStack({ spacing: 0, widthDistribution: 'weighted' });
 
   const cell = (content: IElement | null, month: number | 'gutter'): Container => {
-    const c = slot(24, month);
-    c.backgroundColor = HEADBG; // header ground overrides the future tint
-    const bottom = c.border ?? Border.none;
-    c.border = new Border(bottom.left, 0, bottom.right, 1);
-    const right = c.borderColors?.right ?? HAIR;
-    c.borderColors = new BorderColors(HAIR, HAIR, right, HAIR);
-    if (content) {
-      c.child = content;
-      c.padding = new Thickness(0, 8, 0, 0);
-    }
-    return c;
+    const isLast = month === MONTHS.length;
+    const isToday = month === TODAY_AFTER_MONTH;
+    return new Container({
+      height: 24,
+      backgroundColor: HEADBG, // header ground overrides the future tint
+      border: new Border(0, 0, isLast ? 0 : isToday ? 1.2 : SEP, 1),
+      borderColors: new BorderColors(HAIR, HAIR, isToday ? TODAY : HAIR, HAIR),
+      padding: content ? { top: 8 } : undefined,
+      child: content ?? undefined,
+    });
   };
 
   row.addChild(cell(tb('H1 2026 TIMELINE', 6.5, FAINT, { bold: true, top: 1 }), 'gutter'), LABEL_WEIGHT);
   // Gutter caption gets left padding to align with the team labels below.
-  (row.getChildren()[0] as Container).padding = new Thickness(14, 8, 0, 0);
+  (row.getChildren()[0] as Container).padding = { left: 14, top: 8 };
   for (let m = 1; m <= MONTHS.length; m++) {
-    row.addChild(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: TextAlignment.Center }), m), 1);
+    row.addChild(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: 'center' }), m), 1);
   }
 
-  const crisp = new Container();
-  crisp.crispEdges = true;
-  crisp.child = row;
-  return crisp;
+  return new Container({ crispEdges: true, child: row });
 }
 
 // A small legend dot + label pair.
-function legendItem(color: Color, label: string, tinted = false): HorizontalStack {
-  const dot = new Container();
-  dot.width = 7;
-  dot.height = 7;
-  dot.cornerRadius = 3.5;
-  dot.backgroundColor = color;
-  dot.margin = new Thickness(0, 1, 5, 0);
-  if (tinted) {
-    dot.border = new Border(SEP);
-    dot.borderColors = new BorderColors(FAINT);
-  }
-  const item = new HorizontalStack();
-  item.spacing = 0;
-  item.alignment = HorizontalAlignment.Center;
-  item.addChild(dot);
-  item.addChild(tb(label, 7.5, MUTE));
-  return item;
+function legendItem(color: ColorInput, label: string, tinted = false): HorizontalStack {
+  const dot = new Container({
+    width: 7,
+    height: 7,
+    cornerRadius: 3.5,
+    backgroundColor: color,
+    margin: { top: 1, right: 5 },
+    border: tinted ? SEP : undefined,
+    borderColors: tinted ? new BorderColors(FAINT) : undefined,
+  });
+  return new HorizontalStack({ spacing: 0, alignment: 'center', children: [dot, tb(label, 7.5, MUTE)] });
 }
 
 export function generate(): Document {
-  // Landscape A4 with a comfortable margin; rows carry their own structure.
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 38);
-  settings.language = 'en-GB';
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Product Roadmap';
-  metadata.author = 'Sample Platform';
-  metadata.subject = 'H1 2026 product roadmap - swimlanes by team across a six-month timeline';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      // Landscape A4 with a comfortable margin; rows carry their own structure.
+      pageSize: 'a4',
+      orientation: 'landscape',
+      margin: 38,
+      language: 'en-GB',
+    },
+    metadata: {
+      title: 'Product Roadmap',
+      author: 'Sample Platform',
+      subject: 'H1 2026 product roadmap - swimlanes by team across a six-month timeline',
+    },
+  });
 
   // ── Title row: heading left, period badge right ───────────────────────────
-  const titleBlock = new VerticalStack();
-  titleBlock.addChild(tb('Product Roadmap', 23, INK, { bold: true }));
-  titleBlock.addChild(tb('Sample Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }));
+  const titleBlock = new VerticalStack({
+    children: [
+      tb('Product Roadmap', 23, INK, { bold: true }),
+      tb('Sample Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }),
+    ],
+  });
 
-  const badge = new Container();
-  badge.backgroundColor = BADGE_BG;
-  badge.cornerRadius = 10;
-  badge.padding = new Thickness(14, 6, 14, 6);
-  badge.child = tb('H1 2026', 9, BADGE_TX, { bold: true });
-  const badgeCell = new Container();
-  badgeCell.horizontalAlignment = HorizontalAlignment.End;
-  badgeCell.child = badge;
+  const badgeCell = new Container({
+    horizontalAlignment: 'end',
+    child: new Container({
+      backgroundColor: BADGE_BG,
+      cornerRadius: 10,
+      padding: [14, 6],
+      child: tb('H1 2026', 9, BADGE_TX, { bold: true }),
+    }),
+  });
 
-  const titleRow = new HorizontalStack();
-  titleRow.spacing = 0;
-  titleRow.widthDistribution = WidthDistribution.Weighted;
-  titleRow.alignment = HorizontalAlignment.Center;
+  const titleRow = new HorizontalStack({
+    spacing: 0,
+    widthDistribution: 'weighted',
+    alignment: 'center',
+    margin: { bottom: 16 },
+  });
   titleRow.addChild(titleBlock, 4);
   titleRow.addChild(badgeCell, 1);
-  titleRow.margin = new Thickness(0, 0, 0, 16);
   doc.add(titleRow);
 
   // ── Swimlane data ──────────────────────────────────────────────────────────
@@ -327,8 +306,7 @@ export function generate(): Document {
   // ── Timeline card: one rounded frame around header + swimlanes ────────────
   // A single border on the card replaces the per-cell boxes of a spreadsheet
   // grid, so nothing double-strokes anywhere.
-  const body = new VerticalStack();
-  body.spacing = 0;
+  const body = new VerticalStack({ spacing: 0 });
   body.addChild(monthHeader());
   body.addChild(band(10)); // breathing room under the header
   teams.forEach((team, ti) => {
@@ -340,38 +318,38 @@ export function generate(): Document {
   });
   body.addChild(band(12)); // bottom breathing room
 
-  const card = new Container();
-  card.backgroundColor = Color.white;
-  card.cornerRadius = 10;
-  card.clipContent = true;
-  card.border = new Border(1);
-  card.borderColors = new BorderColors(HAIR);
-  card.margin = new Thickness(0, 0, 0, 12);
-  card.child = body;
-  doc.add(card);
+  doc.add(
+    new Container({
+      backgroundColor: '#ffffff',
+      cornerRadius: 10,
+      clipContent: true,
+      border: { width: 1, color: HAIR },
+      margin: { bottom: 12 },
+      child: body,
+    })
+  );
 
   // ── Footer: team legend left, status key right ─────────────────────────────
-  const legend = new HorizontalStack();
-  legend.spacing = 14;
-  legend.alignment = HorizontalAlignment.Center;
-  legend.addChild(legendItem(DEV.solid, 'Development'));
-  legend.addChild(legendItem(DESIGN.solid, 'Design'));
-  legend.addChild(legendItem(MARKETING.solid, 'Marketing'));
+  const legend = new HorizontalStack({
+    spacing: 14,
+    alignment: 'center',
+    children: [
+      legendItem(DEV.solid, 'Development'),
+      legendItem(DESIGN.solid, 'Design'),
+      legendItem(MARKETING.solid, 'Marketing'),
+    ],
+  });
 
-  const statusKey = new HorizontalStack();
-  statusKey.spacing = 14;
-  statusKey.alignment = HorizontalAlignment.Center;
-  statusKey.addChild(legendItem(DEV.solid, 'Underway'));
-  statusKey.addChild(legendItem(DEV.tint, 'Planned', true));
-  statusKey.addChild(legendItem(TODAY, 'Today'));
-  const statusCell = new Container();
-  statusCell.horizontalAlignment = HorizontalAlignment.End;
-  statusCell.child = statusKey;
+  const statusCell = new Container({
+    horizontalAlignment: 'end',
+    child: new HorizontalStack({
+      spacing: 14,
+      alignment: 'center',
+      children: [legendItem(DEV.solid, 'Underway'), legendItem(DEV.tint, 'Planned', true), legendItem(TODAY, 'Today')],
+    }),
+  });
 
-  const footer = new HorizontalStack();
-  footer.spacing = 0;
-  footer.widthDistribution = WidthDistribution.Weighted;
-  footer.alignment = HorizontalAlignment.Center;
+  const footer = new HorizontalStack({ spacing: 0, widthDistribution: 'weighted', alignment: 'center' });
   footer.addChild(legend, 1);
   footer.addChild(statusCell, 1);
   doc.add(footer);

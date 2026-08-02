@@ -6,18 +6,13 @@
 // classification summary, and a QR verification link of the sort UK institutions
 // now print (e.g. HEDD). Archival + accessible: PDF/A-2a + PDF/UA-1, en-GB.
 //
-// Fictional student, institution, and results.
+// Fictional student, institution, and results. Authored through the
+// options-object front door.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
   TextElementBase,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
@@ -25,16 +20,10 @@ import {
   Table,
   Grid,
   QRCode,
-  QrEcc,
-  Color,
   ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  HorizontalAlignment,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 
 const NAVY = ColorPalette.blue[900]; // academic navy
@@ -72,74 +61,76 @@ const MODULES: Module[] = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
-
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const f = new TextBlock(
-      `University of Wessexbridge  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
-    f.fontName = StandardFonts.Helvetica;
-    f.fontSize = 8;
-    f.textColor = MUTED;
-    return f;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Academic Transcript - Alexandra R. Bennett';
-  metadata.author = 'University of Wessexbridge';
-  metadata.subject = 'Official degree transcript with UK honours classification (fictional).';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 50,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(
+          `University of Wessexbridge  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+        ),
+    },
+    metadata: {
+      title: 'Academic Transcript - Alexandra R. Bennett',
+      author: 'University of Wessexbridge',
+      subject: 'Official degree transcript with UK honours classification (fictional).',
+    },
+  });
 
   // ── Institution header ────────────────────────────────────────────────────
-  const header = new Grid(2.4, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  header.margin = new Thickness(0, 0, 0, 6);
-  const uni = new VerticalStack();
-  const crest = new TextBlock('UNIVERSITY OF WESSEXBRIDGE');
-  crest.fontName = StandardFonts.HelveticaBold;
-  crest.fontSize = 16;
-  crest.textColor = NAVY;
-  uni.addChild(crest);
-  const estd = new TextBlock('Founded 1887  ·  Registrar’s Office');
-  estd.fontSize = 9;
-  estd.textColor = MUTED;
-  estd.margin = new Thickness(0, 2, 0, 0);
-  uni.addChild(estd);
-  const doctype = new TextBlock('ACADEMIC TRANSCRIPT');
-  doctype.fontName = StandardFonts.HelveticaBold;
-  doctype.fontSize = 12;
-  doctype.textColor = GOLD;
-  doctype.alignment = TextAlignment.Right;
-  header.addRow(uni, doctype);
+  const header = new Grid({ columns: [2.4, 1], cellPadding: 0, border: 0, margin: { bottom: 6 } });
+  header.addRow(
+    new VerticalStack({
+      children: [
+        new TextBlock('UNIVERSITY OF WESSEXBRIDGE', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 16,
+          textColor: NAVY,
+        }),
+        new TextBlock('Founded 1887  ·  Registrar’s Office', { fontSize: 9, textColor: MUTED, margin: { top: 2 } }),
+      ],
+    }),
+    new TextBlock('ACADEMIC TRANSCRIPT', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 12,
+      textColor: GOLD,
+      alignment: 'right',
+    })
+  );
   doc.add(header);
 
-  const navyRule = new Container();
-  navyRule.backgroundColor = NAVY;
-  navyRule.padding = new Thickness(0, 1.5, 0, 0);
-  navyRule.margin = new Thickness(0, 0, 0, 16);
-  navyRule.child = thinSpacer();
-  doc.add(navyRule);
+  doc.add(
+    new Container({
+      backgroundColor: NAVY,
+      padding: { top: 1.5 },
+      margin: { bottom: 16 },
+      child: thinSpacer(),
+    })
+  );
 
   // ── Student details ───────────────────────────────────────────────────────
-  const details = new Grid(1, 1);
-  details.cellPadding = 0;
-  details.border = Border.none;
-  details.margin = new Thickness(0, 0, 0, 18);
-  const left = new VerticalStack();
-  left.addChild(kv('Student', 'Alexandra R. Bennett'));
-  left.addChild(kv('Student ID', '20458812'));
-  left.addChild(kv('Date of birth', '14 March 2003'));
-  const right = new VerticalStack();
-  right.addChild(kv('Programme', 'BSc (Hons) Computer Science'));
-  right.addChild(kv('Awarding body', 'University of Wessexbridge'));
-  right.addChild(kv('Date conferred', '15 July 2026'));
-  details.addRow(left, right);
+  const details = new Grid({ columns: [1, 1], cellPadding: 0, border: 0, margin: { bottom: 18 } });
+  details.addRow(
+    new VerticalStack({
+      children: [
+        kv('Student', 'Alexandra R. Bennett'),
+        kv('Student ID', '20458812'),
+        kv('Date of birth', '14 March 2003'),
+      ],
+    }),
+    new VerticalStack({
+      children: [
+        kv('Programme', 'BSc (Hons) Computer Science'),
+        kv('Awarding body', 'University of Wessexbridge'),
+        kv('Date conferred', '15 July 2026'),
+      ],
+    })
+  );
   doc.add(details);
 
   // ── Award classification banner ───────────────────────────────────────────
@@ -147,82 +138,86 @@ export function generate(): Document {
   const weighted =
     MODULES.filter(m => m.level >= 5).reduce((s, m) => s + m.mark * (m.level === 6 ? 2 : 1) * m.credits, 0) /
     MODULES.filter(m => m.level >= 5).reduce((s, m) => s + (m.level === 6 ? 2 : 1) * m.credits, 0);
-  const banner = new Container();
-  banner.backgroundColor = ColorPalette.blue[50];
-  banner.border = Border.leftOnly(5);
-  banner.borderColors = BorderColors.leftOnly(NAVY);
-  banner.padding = new Thickness(16, 12, 16, 12);
-  banner.margin = new Thickness(0, 0, 0, 20);
-  const bstack = new VerticalStack();
-  const blabel = new TextBlock('AWARD');
-  blabel.fontName = StandardFonts.HelveticaBold;
-  blabel.fontSize = 8;
-  blabel.textColor = MUTED;
-  bstack.addChild(blabel);
-  // The award is the transcript's primary heading (H1). Tagging it as the
-  // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2); the
-  // section headings below are H2. Styling is unchanged.
-  const bval = h1('Upper Second-Class Honours (2:1)');
-  bstack.addChild(bval);
-  const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`);
-  bmeta.fontSize = 9;
-  bmeta.textColor = INK;
-  bstack.addChild(bmeta);
-  banner.child = bstack;
-  doc.add(banner);
+
+  doc.add(
+    new Container({
+      backgroundColor: ColorPalette.blue[50],
+      border: { left: 5, color: NAVY },
+      padding: [16, 12],
+      margin: { bottom: 20 },
+      child: new VerticalStack({
+        children: [
+          new TextBlock('AWARD', { fontName: StandardFonts.HelveticaBold, fontSize: 8, textColor: MUTED }),
+          // The award is the transcript's primary heading (H1). Tagging it as
+          // the first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede
+          // any H2); the section headings below are H2. Styling is unchanged.
+          h1('Upper Second-Class Honours (2:1)'),
+          new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`, {
+            fontSize: 9,
+            textColor: INK,
+          }),
+        ],
+      }),
+    })
+  );
 
   // ── Module register ───────────────────────────────────────────────────────
   doc.add(h2('Module results'));
-  const table = new Table(0.7, 1, 3, 0.9, 0.9);
-  table.cellPadding = 7;
-  table.border = new Border(0.5);
-  table.borderColors = new BorderColors(RULE);
-  table.headerBackgroundColor = NAVY;
-  table.headerTextColor = Color.white;
-  table.margin = new Thickness(0, 4, 0, 18);
+  const table = new Table({
+    columns: [0.7, 1, 3, 0.9, 0.9],
+    cellPadding: 7,
+    border: { width: 0.5, color: RULE },
+    headerBackgroundColor: NAVY,
+    headerTextColor: '#ffffff',
+    margin: { top: 4, bottom: 18 },
+  });
   table.addHeader(
-    th('Level', TextAlignment.Left),
-    th('Code', TextAlignment.Left),
-    th('Module', TextAlignment.Left),
-    th('Credits', TextAlignment.Right),
-    th('Mark', TextAlignment.Right)
+    th('Level', 'left'),
+    th('Code', 'left'),
+    th('Module', 'left'),
+    th('Credits', 'right'),
+    th('Mark', 'right')
   );
   for (const m of MODULES) {
     table.addRow(
-      td(String(m.level), TextAlignment.Left, MUTED),
-      td(m.code, TextAlignment.Left, INK),
-      td(m.title, TextAlignment.Left, INK),
-      td(String(m.credits), TextAlignment.Right, INK),
-      td(`${m.mark}%`, TextAlignment.Right, m.mark >= 70 ? ColorPalette.emerald[600] : INK)
+      td(String(m.level), 'left', MUTED),
+      td(m.code, 'left', INK),
+      td(m.title, 'left', INK),
+      td(String(m.credits), 'right', INK),
+      td(`${m.mark}%`, 'right', m.mark >= 70 ? ColorPalette.emerald[600] : INK)
     );
   }
   doc.add(table);
 
   // ── Verification ──────────────────────────────────────────────────────────
-  const verify = new HorizontalStack();
-  verify.widthDistribution = WidthDistribution.Weighted;
-  const vtext = new VerticalStack();
-  vtext.addChild(h2('Verification'));
-  vtext.addChild(
-    body(
-      'This is an official record issued by the University of Wessexbridge. Scan ' +
-        'the code or visit verify.wessexbridge.ac.uk and enter transcript reference ' +
-        '20458812 to confirm authenticity. The grading scheme is defined in the ' +
-        'University Academic Regulations.'
-    )
+  const verify = new HorizontalStack({ widthDistribution: 'weighted' });
+  verify.addChild(
+    new VerticalStack({
+      children: [
+        h2('Verification'),
+        body(
+          'This is an official record issued by the University of Wessexbridge. Scan ' +
+            'the code or visit verify.wessexbridge.ac.uk and enter transcript reference ' +
+            '20458812 to confirm authenticity. The grading scheme is defined in the ' +
+            'University Academic Regulations.'
+        ),
+      ],
+    }),
+    3
   );
-  const qr = new QRCode();
-  qr.data = 'https://verify.wessexbridge.ac.uk/t/20458812';
-  qr.size = 92;
-  qr.quietZone = 1;
-  qr.errorCorrection = QrEcc.Quartile;
-  qr.altText = 'QR code to verify transcript reference 20458812.';
-  const qrWrap = new Container();
-  qrWrap.child = qr;
-  qrWrap.horizontalAlignment = HorizontalAlignment.End;
-
-  verify.addChild(vtext, 3);
-  verify.addChild(qrWrap, 1);
+  verify.addChild(
+    new Container({
+      horizontalAlignment: 'end',
+      child: new QRCode({
+        data: 'https://verify.wessexbridge.ac.uk/t/20458812',
+        size: 92,
+        quietZone: 1,
+        errorCorrection: 'quartile',
+        altText: 'QR code to verify transcript reference 20458812.',
+      }),
+    }),
+    1
+  );
   doc.add(verify);
 
   return doc;
@@ -231,71 +226,55 @@ export function generate(): Document {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function h1(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 1;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 16;
-  h.textColor = NAVY;
-  h.margin = new Thickness(0, 2, 0, 2);
-  return h;
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 16,
+    textColor: NAVY,
+    margin: { top: 2, bottom: 2 },
+  });
 }
 
 function h2(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 13;
-  h.textColor = NAVY;
-  h.margin = new Thickness(0, 4, 0, 8);
-  return h;
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 13,
+    textColor: NAVY,
+    margin: { top: 4, bottom: 8 },
+  });
 }
 
 function body(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 9.5;
-  b.textColor = INK;
-  b.alignment = TextAlignment.Justify;
-  b.margin = new Thickness(0, 0, 12, 0);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 9.5,
+    textColor: INK,
+    alignment: 'justify',
+    margin: { right: 12 },
+  });
 }
 
 function kv(label: string, value: string): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.margin = new Thickness(0, 0, 0, 5);
-  const l = new TextBlock(label);
-  l.fontName = StandardFonts.HelveticaBold;
-  l.fontSize = 9;
-  l.textColor = MUTED;
-  row.addChild(l, 2);
-  const v = new TextBlock(value);
-  v.fontSize = 10;
-  v.textColor = INK;
-  row.addChild(v, 3);
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 5 } });
+  row.addChild(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
+  row.addChild(new TextBlock(value, { fontSize: 10, textColor: INK }), 3);
   return row;
 }
 
-function th(text: string, align: TextAlignment): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  b.textColor = Color.white;
-  b.alignment = align;
-  return b;
+function th(text: string, align: TextAlignmentInput): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 9,
+    textColor: '#ffffff',
+    alignment: align,
+  });
 }
 
-function td(text: string, align: TextAlignment, color: Color): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 9.5;
-  b.textColor = color;
-  b.alignment = align;
-  return b;
+function td(text: string, align: TextAlignmentInput, color: ColorInput): TextBlock {
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9.5, textColor: color, alignment: align });
 }
 
 function thinSpacer(): TextBlock {
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  return s;
+  return new TextBlock(' ', { fontSize: 1 });
 }

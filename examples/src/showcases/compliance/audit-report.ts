@@ -7,37 +7,24 @@
 // findings register table that flows across pages with a repeating header row.
 //
 // This is the kind of document a GRC / infosec platform exports; fictional org
-// and findings throughout.
+// and findings throughout. Authored through the options-object front door.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
   TextElementBase,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
   Table,
-  Color,
   ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
   ChartElement,
   BarChart,
   PieChart,
-  PdfAConformance,
+  type ColorInput,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -45,7 +32,6 @@ const PRIMARY = ColorPalette.indigo[700];
 const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
-const HEADER_BG = ColorPalette.slate[100];
 
 // Severity palette.
 const SEV = {
@@ -120,34 +106,42 @@ export function generate(): Document {
   const now = new Date();
   const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
 
-  const settings = new DocumentSettings(PdfSize.a4, 54);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
-
-  // Running header + footer (auto-artifacted, excluded from the reading order).
-  settings.headerTemplate = (pageNumber: number): IElement | undefined => {
-    if (pageNumber === 1) return undefined;
-    return bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]);
-  };
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    bandRow('CONFIDENTIAL - not for distribution', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, MUTED);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Data Protection & Information Security Audit - AR-2026-014';
-  metadata.author = 'Aegis Assurance LLP';
-  metadata.subject = 'GDPR (EU/UK) and ISO/IEC 27001:2022 audit report (fictional).';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 54,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
+      // Running header + footer (auto-artifacted, excluded from the reading order).
+      headerTemplate: (pageNumber: number) =>
+        pageNumber === 1
+          ? undefined
+          : bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]),
+      footerTemplate: (pageNumber: number) =>
+        bandRow(
+          'CONFIDENTIAL - not for distribution',
+          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          MUTED
+        ),
+    },
+    metadata: {
+      title: 'Data Protection & Information Security Audit - AR-2026-014',
+      author: 'Aegis Assurance LLP',
+      subject: 'GDPR (EU/UK) and ISO/IEC 27001:2022 audit report (fictional).',
+    },
+  });
 
   // ── Title block ───────────────────────────────────────────────────────────
-  const bar = new Container();
-  bar.backgroundColor = PRIMARY;
-  bar.padding = new Thickness(0, 3, 0, 0);
-  bar.margin = new Thickness(0, 0, 0, 14);
-  bar.child = thinSpacer();
-  doc.add(bar);
+  doc.add(
+    new Container({
+      backgroundColor: PRIMARY,
+      padding: { top: 3 },
+      margin: { bottom: 14 },
+      child: thinSpacer(),
+    })
+  );
 
   doc.add(eyebrow('AUDIT REPORT · CONFIDENTIAL'));
   doc.add(h1('Data Protection & Information Security Audit'));
@@ -161,9 +155,7 @@ export function generate(): Document {
   );
 
   // Meta line.
-  const metaRow = new HorizontalStack();
-  metaRow.widthDistribution = WidthDistribution.Weighted;
-  metaRow.margin = new Thickness(0, 4, 0, 20);
+  const metaRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 4, bottom: 20 } });
   metaRow.addChild(metaItem('Report ref', 'AR-2026-014'), 1);
   metaRow.addChild(metaItem('Audit period', 'Apr–Jun 2026'), 1);
   metaRow.addChild(metaItem('Issued', longDate), 1);
@@ -184,10 +176,7 @@ export function generate(): Document {
   );
 
   // ── KPI tiles ─────────────────────────────────────────────────────────────
-  const kpis = new HorizontalStack();
-  kpis.widthDistribution = WidthDistribution.Weighted;
-  kpis.spacing = 12;
-  kpis.margin = new Thickness(0, 6, 0, 20);
+  const kpis = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { top: 6, bottom: 20 } });
   kpis.addChild(kpi('82%', 'Overall conformance', PRIMARY), 1);
   kpis.addChild(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
   kpis.addChild(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
@@ -195,10 +184,7 @@ export function generate(): Document {
   doc.add(kpis);
 
   // ── Charts: control status donut + findings-by-severity column ────────────
-  const charts = new HorizontalStack();
-  charts.widthDistribution = WidthDistribution.Weighted;
-  charts.spacing = 14;
-  charts.margin = new Thickness(0, 0, 0, 6);
+  const charts = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14, margin: { bottom: 6 } });
   charts.addChild(card('Control status (93 controls)', controlDonut()), 1);
   charts.addChild(card('Findings by severity', severityBars()), 1);
   doc.add(charts);
@@ -210,12 +196,13 @@ export function generate(): Document {
     body('Each finding maps to a control or regulatory requirement and a remediation status.', { color: MUTED, mb: 10 })
   );
 
-  const table = new Table(0.6, 2.6, 1.4, 1, 1.1);
-  table.cellPadding = 8;
-  table.border = new Border(0.5);
-  table.borderColors = new BorderColors(RULE);
-  table.headerBackgroundColor = PRIMARY;
-  table.headerTextColor = Color.white;
+  const table = new Table({
+    columns: [0.6, 2.6, 1.4, 1, 1.1],
+    cellPadding: 8,
+    border: { width: 0.5, color: RULE },
+    headerBackgroundColor: PRIMARY,
+    headerTextColor: '#ffffff',
+  });
   table.addHeader(th('ID'), th('Area'), th('Requirement'), th('Severity'), th('Status'));
   for (const f of FINDINGS) {
     table.addRow(
@@ -256,25 +243,21 @@ export function generate(): Document {
 function controlDonut(): ChartElement {
   const labels = ['Compliant', 'Partial', 'Non-conformant', 'Not applicable'];
   const values = [71, 15, 5, 2];
-  const series = new ChartSeries();
-  series.dataPoints = labels.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = values[i];
-    return p;
-  });
-  const data = new ChartData();
-  data.title = 'Control status';
-  data.series = [series];
 
-  const chart = new PieChart();
-  chart.height = 180;
-  chart.stretchToFit = true;
-  chart.isDonut = true;
-  chart.totalLabel = 'Controls';
-  chart.showLegend = true;
-  chart.colors = ['#059669', '#f59e0b', '#e11d48', '#94a3b8'];
-  chart.backgroundColor = Color.white;
+  const data = new ChartData({
+    title: 'Control status',
+    series: [{ dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
+  });
+
+  const chart = new PieChart({
+    height: 180,
+    stretchToFit: true,
+    isDonut: true,
+    totalLabel: 'Controls',
+    showLegend: true,
+    colors: ['#059669', '#f59e0b', '#e11d48', '#94a3b8'],
+    backgroundColor: '#ffffff',
+  });
   return new ChartElement(
     chart,
     data,
@@ -285,169 +268,145 @@ function controlDonut(): ChartElement {
 function severityBars(): ChartElement {
   const order: Severity[] = ['Critical', 'High', 'Medium', 'Low'];
   const counts = order.map(s => FINDINGS.filter(f => f.severity === s).length);
-  const series = new ChartSeries();
-  series.dataPoints = order.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = counts[i];
-    return p;
-  });
-  const data = new ChartData();
-  data.title = 'Findings by severity';
-  data.series = [series];
-  data.yAxis.maxValue = 6;
-  data.yAxis.stepCount = 3;
 
-  const chart = new BarChart();
-  chart.height = 180;
-  chart.stretchToFit = true;
-  chart.barColor = PRIMARY;
-  chart.fontFamily = StandardFonts.Helvetica;
-  chart.labelFontSize = 8;
-  chart.backgroundColor = Color.white;
+  const data = new ChartData({
+    title: 'Findings by severity',
+    series: [{ dataPoints: order.map((label, i) => ({ label, value: counts[i] })) }],
+    yAxis: { maxValue: 6, stepCount: 3 },
+  });
+
+  const chart = new BarChart({
+    height: 180,
+    stretchToFit: true,
+    barColor: PRIMARY,
+    fontFamily: StandardFonts.Helvetica,
+    labelFontSize: 8,
+    backgroundColor: '#ffffff',
+  });
   return new ChartElement(chart, data, 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function bandRow(left: string, right: string, rightColor: Color): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  const l = new TextBlock(left);
-  l.fontName = StandardFonts.Helvetica;
-  l.fontSize = 8;
-  l.textColor = MUTED;
-  row.addChild(l, 3);
-  const r = new TextBlock(right);
-  r.fontName = StandardFonts.HelveticaBold;
-  r.fontSize = 8;
-  r.textColor = rightColor;
-  r.alignment = TextAlignment.Right;
-  row.addChild(r, 2);
+function bandRow(left: string, right: string, rightColor: ColorInput): HorizontalStack {
+  const row = new HorizontalStack({ widthDistribution: 'weighted' });
+  row.addChild(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }), 3);
+  row.addChild(
+    new TextBlock(right, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 8,
+      textColor: rightColor,
+      alignment: 'right',
+    }),
+    2
+  );
   return row;
 }
 
 function eyebrow(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  b.textColor = PRIMARY;
-  b.margin = new Thickness(0, 0, 0, 4);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 9,
+    textColor: PRIMARY,
+    margin: { bottom: 4 },
+  });
 }
 
 function h1(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 1;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 22;
-  h.textColor = ColorPalette.slate[800];
-  h.margin = new Thickness(0, 0, 0, 6);
-  return h;
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 22,
+    textColor: ColorPalette.slate[800],
+    margin: { bottom: 6 },
+  });
 }
 
 function h2(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 14;
-  h.textColor = PRIMARY;
-  h.margin = new Thickness(0, 8, 0, 8);
-  return h;
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 14,
+    textColor: PRIMARY,
+    margin: { top: 8, bottom: 8 },
+  });
 }
 
-function body(text: string, opts: { color?: Color; mb?: number } = {}): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 10;
-  b.textColor = opts.color ?? INK;
-  b.alignment = TextAlignment.Justify;
-  b.margin = new Thickness(0, 0, 0, opts.mb ?? 10);
-  return b;
+function body(text: string, opts: { color?: ColorInput; mb?: number } = {}): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 10,
+    textColor: opts.color ?? INK,
+    alignment: 'justify',
+    margin: { bottom: opts.mb ?? 10 },
+  });
 }
 
 function metaItem(label: string, value: string): VerticalStack {
-  const stack = new VerticalStack();
-  const l = new TextBlock(label.toUpperCase());
-  l.fontName = StandardFonts.HelveticaBold;
-  l.fontSize = 7;
-  l.textColor = MUTED;
-  l.margin = new Thickness(0, 0, 0, 2);
-  stack.addChild(l);
-  const v = new TextBlock(value);
-  v.fontName = StandardFonts.Helvetica;
-  v.fontSize = 10;
-  v.textColor = INK;
-  stack.addChild(v);
-  return stack;
+  return new VerticalStack({
+    children: [
+      new TextBlock(label.toUpperCase(), {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 7,
+        textColor: MUTED,
+        margin: { bottom: 2 },
+      }),
+      new TextBlock(value, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: INK }),
+    ],
+  });
 }
 
-function kpi(value: string, label: string, accent: Color): Container {
-  const stack = new VerticalStack();
-  const v = new TextBlock(value);
-  v.fontName = StandardFonts.HelveticaBold;
-  v.fontSize = 20;
-  v.textColor = accent;
-  v.margin = new Thickness(0, 0, 0, 3);
-  stack.addChild(v);
-  const l = new TextBlock(label);
-  l.fontName = StandardFonts.Helvetica;
-  l.fontSize = 8.5;
-  l.textColor = MUTED;
-  stack.addChild(l);
-  const c = new Container();
-  c.backgroundColor = ColorPalette.indigo[50];
-  c.cornerRadius = 8;
-  c.padding = new Thickness(14, 12, 14, 12);
-  c.child = stack;
-  return c;
+function kpi(value: string, label: string, accent: ColorInput): Container {
+  return new Container({
+    backgroundColor: ColorPalette.indigo[50],
+    cornerRadius: 8,
+    padding: [14, 12],
+    child: new VerticalStack({
+      children: [
+        new TextBlock(value, {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 20,
+          textColor: accent,
+          margin: { bottom: 3 },
+        }),
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 8.5, textColor: MUTED }),
+      ],
+    }),
+  });
 }
 
 function card(title: string, chart: IElement): Container {
-  const stack = new VerticalStack();
-  const h = new TextBlock(title);
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 11;
-  h.textColor = PRIMARY;
-  h.margin = new Thickness(0, 0, 0, 8);
-  stack.addChild(h);
-  stack.addChild(chart);
-  const c = new Container();
-  c.border = new Border(0.75);
-  c.borderColors = new BorderColors(RULE);
-  c.cornerRadius = 8;
-  c.padding = new Thickness(14, 14, 14, 14);
-  c.child = stack;
-  return c;
+  return new Container({
+    border: { width: 0.75, color: RULE },
+    cornerRadius: 8,
+    padding: 14,
+    child: new VerticalStack({
+      children: [
+        new TextBlock(title, {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 11,
+          textColor: PRIMARY,
+          margin: { bottom: 8 },
+        }),
+        chart,
+      ],
+    }),
+  });
 }
 
 function th(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  b.textColor = Color.white;
-  return b;
+  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: '#ffffff' });
 }
 
-function td(text: string, color: Color): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 9;
-  b.textColor = color;
-  return b;
+function td(text: string, color: ColorInput): TextBlock {
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: color });
 }
 
 /** A severity cell: a coloured dot label pill effect via bold coloured text. */
 function severityCell(sev: Severity): TextBlock {
-  const b = new TextBlock(sev);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  b.textColor = SEV[sev];
-  return b;
+  return new TextBlock(sev, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: SEV[sev] });
 }
 
 function thinSpacer(): TextBlock {
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  return s;
+  return new TextBlock(' ', { fontSize: 1 });
 }

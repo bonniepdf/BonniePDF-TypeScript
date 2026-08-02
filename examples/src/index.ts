@@ -89,8 +89,11 @@ import { generate as facturXInvoiceClasses } from './showcases/invoices/factur-x
 import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
 import { generate as indiaGstInvoiceClasses } from './showcases/invoices/india-gst-invoice-classes';
 import { generate as userDirectory } from './showcases/catalogs/user-directory';
+import { generate as userDirectoryClasses } from './showcases/catalogs/user-directory-classes';
 import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
+import { generate as movieCatalogClasses } from './showcases/catalogs/movie-catalog-classes';
 import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
+import { generate as productPhotoGalleryClasses } from './showcases/catalogs/product-photo-gallery-classes';
 import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
 import { generate as complianceFindingsRegister } from './showcases/reports/compliance-findings-register';
 import { generate as annualReport } from './showcases/reports/annual-report';
@@ -98,13 +101,18 @@ import { generate as annualReportGradientCover } from './showcases/reports/annua
 import { generate as annualReportMaskedCover } from './showcases/reports/annual-report-masked-cover';
 import { generate as annualReportGeometricCover } from './showcases/reports/annual-report-geometric-cover';
 import { generate as eventTicket } from './showcases/operations/event-ticket';
+import { generate as eventTicketClasses } from './showcases/operations/event-ticket-classes';
 import { generate as patientSummary } from './showcases/healthcare/patient-summary';
+import { generate as patientSummaryClasses } from './showcases/healthcare/patient-summary-classes';
 import { generate as outpatientAppointmentLetter } from './showcases/healthcare/outpatient-appointment-letter';
+import { generate as outpatientAppointmentLetterClasses } from './showcases/healthcare/outpatient-appointment-letter-classes';
 import { generate as productRoadmap } from './showcases/operations/product-roadmap';
+import { generate as productRoadmapClasses } from './showcases/operations/product-roadmap-classes';
 // ── Vertical-market gallery follow-up (registrations + new showcases) ────────
 import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
 import { generate as saasInvoiceClasses } from './showcases/invoices/saas-invoice-classes';
 import { generate as shippingLabel } from './showcases/operations/shipping-label';
+import { generate as shippingLabelClasses } from './showcases/operations/shipping-label-classes';
 import { generate as horizontalBarChart } from './recipes/charting/horizontal-bar-chart';
 import { generate as horizontalBarChartClasses } from './recipes/charting/horizontal-bar-chart-classes';
 import { generate as horizontalGroupedBarChart } from './recipes/charting/horizontal-grouped-bar-chart';
@@ -118,11 +126,14 @@ import { generate as edgeReceiptClasses } from './showcases/edge/edge-receipt-cl
 import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
 import { generate as publicLibraryMembershipLetterClasses } from './showcases/community/public-library-membership-letter-classes';
 import { generate as auditReport } from './showcases/compliance/audit-report';
+import { generate as auditReportClasses } from './showcases/compliance/audit-report-classes';
 import { generate as shelfLabel } from './showcases/retail/shelf-label';
 import { generate as shelfLabelClasses } from './showcases/retail/shelf-label-classes';
 import { generate as ukDegreeTranscript } from './showcases/education/uk-degree-transcript';
+import { generate as ukDegreeTranscriptClasses } from './showcases/education/uk-degree-transcript-classes';
 import { generate as financialStatement } from './showcases/reports/financial-statement';
 import { generate as labReport } from './showcases/healthcare/lab-report';
+import { generate as labReportClasses } from './showcases/healthcare/lab-report-classes';
 
 export * from './recipes/svg';
 
@@ -1396,6 +1407,22 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UserDirectoryExample',
     pdfUa1: true,
     thumbnails: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'user-directory-classes',
+    name: 'User Directory (Class API)',
+    category: 'Catalogs',
+    tier: 'showcase',
+    description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
+    filename: 'user-directory-classes.pdf',
+    generate: userDirectoryClasses,
+    dotnetClass: 'UserDirectoryExample',
+    pdfUa1: true,
+    thumbnails: false,
+    gallery: false,
+    variantOf: 'user-directory',
+    variantLabel: 'Class API',
   },
   {
     id: 'movie-catalog',
@@ -1409,6 +1436,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'MovieCatalogExample',
     pdfUa1: true,
     thumbnails: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'movie-catalog-classes',
+    name: 'Movie Catalog (Class API)',
+    category: 'Catalogs',
+    tier: 'showcase',
+    description:
+      'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
+    filename: 'movie-catalog-classes.pdf',
+    generate: movieCatalogClasses,
+    dotnetClass: 'MovieCatalogExample',
+    pdfUa1: true,
+    thumbnails: false,
+    gallery: false,
+    variantOf: 'movie-catalog',
+    variantLabel: 'Class API',
   },
   {
     id: 'product-photo-gallery',
@@ -1432,6 +1476,33 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'product-photo-gallery-classes',
+    name: 'Product Photo Gallery (Class API)',
+    category: 'Catalogs',
+    tier: 'showcase',
+    description:
+      'A retail look-book: products laid out two-per-row as photo cards with name, SKU, price, and blurb, paginating automatically. PDF/A-2a + PDF/UA-1. Product photographs are pending - cards show a labelled placeholder until the images are supplied.',
+    filename: 'product-photo-gallery-classes.pdf',
+    generate: productPhotoGalleryClasses,
+    requiredAssets: [
+      'images/products/terracotta-planter.jpg',
+      'images/products/linen-throw.jpg',
+      'images/products/brass-reading-lamp.jpg',
+      'images/products/ceramic-pour-over.jpg',
+      'images/products/wool-floor-cushion.jpg',
+      'images/products/smoked-glass-carafe.jpg',
+      'images/products/oak-wall-shelf.jpg',
+      'images/products/rattan-pendant-shade.jpg',
+    ],
+    dotnetClass: 'ProductPhotoGalleryExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'product-photo-gallery',
+    variantLabel: 'Class API',
   },
   {
     id: 'compliance-findings-register',
@@ -1526,6 +1597,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'EventTicketExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'event-ticket-classes',
+    name: 'Event Ticket (Class API)',
+    category: 'Operations',
+    tier: 'showcase',
+    description:
+      'Event ticket / boarding-pass style card (PDF/UA-1 + PDF/A-2a) with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
+    filename: 'event-ticket-classes.pdf',
+    generate: eventTicketClasses,
+    requiredAssets: ['images/danny-howe-bn-D2bCvpik-unsplash.jpg'],
+    dotnetClass: 'EventTicketExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'event-ticket',
+    variantLabel: 'Class API',
   },
   {
     id: 'patient-summary',
@@ -1539,6 +1628,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PatientSummaryExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'patient-summary-classes',
+    name: 'Patient Summary (Class API)',
+    category: 'Healthcare',
+    tier: 'showcase',
+    description:
+      'A4 portrait healthcare patient-summary sheet built from rounded-corner cards: each card clips a full-bleed coloured header band to its rounded outline - a teal patient card, an indigo vitals grid, and a rose allergies/alerts panel.',
+    filename: 'patient-summary-classes.pdf',
+    generate: patientSummaryClasses,
+    dotnetClass: 'PatientSummaryExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'patient-summary',
+    variantLabel: 'Class API',
   },
   {
     id: 'outpatient-appointment-letter',
@@ -1553,6 +1659,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: null,
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'outpatient-appointment-letter-classes',
+    name: 'Outpatient Appointment (Class API)',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      "An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider's branding. PDF/A-2a + PDF/UA-1.",
+    filename: 'outpatient-appointment-letter-classes.pdf',
+    generate: outpatientAppointmentLetterClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'outpatient-appointment-letter',
+    variantLabel: 'Class API',
   },
   {
     id: 'product-roadmap',
@@ -1566,6 +1690,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'product-roadmap-classes',
+    name: 'Product Roadmap (Class API)',
+    category: 'Operations',
+    tier: 'showcase',
+    description:
+      'Landscape A4 Gantt-style product roadmap: a six-month timeline header over team swimlanes (Development, Design, Marketing), with rounded task bars positioned by month using weighted horizontal stacks.',
+    filename: 'product-roadmap-classes.pdf',
+    generate: productRoadmapClasses,
+    dotnetClass: 'ProductRoadmapExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'product-roadmap',
+    variantLabel: 'Class API',
   },
   // ── Vertical-market gallery follow-up ─────────────────────────────────────
   {
@@ -1610,6 +1751,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ShippingLabelExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'shipping-label-classes',
+    name: 'Shipping Label (Class API)',
+    category: 'Operations',
+    tier: 'showcase',
+    description:
+      'A 4x6" carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link. PDF/A-2a + PDF/UA-1.',
+    filename: 'shipping-label-classes.pdf',
+    generate: shippingLabelClasses,
+    dotnetClass: 'ShippingLabelExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'shipping-label',
+    variantLabel: 'Class API',
   },
   {
     id: 'horizontal-bar-chart',
@@ -1793,6 +1951,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AuditReportExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'audit-report-classes',
+    name: 'GDPR ISO 27001 Audit Report (Class API)',
+    category: 'Compliance',
+    tier: 'showcase',
+    region: 'EU/UK',
+    description:
+      'An enterprise data-protection & security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. Archival PDF/A-2a + PDF/UA-1.',
+    filename: 'audit-report-classes.pdf',
+    generate: auditReportClasses,
+    dotnetClass: 'AuditReportExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'audit-report',
+    variantLabel: 'Class API',
   },
   {
     id: 'shelf-label',
@@ -1839,6 +2015,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UkDegreeTranscriptExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'uk-degree-transcript-classes',
+    name: 'UK Degree Transcript (Class API)',
+    category: 'Education',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'An official UK university degree transcript: institution header, student details, a UK honours classification banner (2:1), a module register grouped by FHEQ level with credits and marks that flows across pages, and a QR verification link. PDF/A-2a + PDF/UA-1.',
+    filename: 'uk-degree-transcript-classes.pdf',
+    generate: ukDegreeTranscriptClasses,
+    dotnetClass: 'UkDegreeTranscriptExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'uk-degree-transcript',
+    variantLabel: 'Class API',
   },
   {
     id: 'financial-statement',
@@ -1867,6 +2061,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'LabReportExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'lab-report-classes',
+    name: 'Pathology Lab Report (Class API)',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. Privacy-sensitive and client-side-generated. PDF/A-2a + PDF/UA-1.',
+    filename: 'lab-report-classes.pdf',
+    generate: labReportClasses,
+    dotnetClass: 'LabReportExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'lab-report',
+    variantLabel: 'Class API',
   },
 ];
 

@@ -1,26 +1,14 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   TextElementBase,
   VerticalStack,
   HorizontalStack,
   Container,
   Image,
-  ImageFitMode,
   Heading,
-  Color,
   ColorPalette,
-  Border,
-  BorderColors,
-  Thickness,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -34,6 +22,8 @@ import type { IElement } from '@bonniepdf/core';
  * image under `images/products/`; until those assets exist the card shows a
  * labelled placeholder. When a real image is supplied via the assets map it is
  * rendered as a Figure with alt-text. See {@link ExampleDef.requiredAssets}.
+ *
+ * Authored through the options-object front door.
  */
 interface Product {
   name: string;
@@ -109,128 +99,119 @@ const CARD_IMAGE_RADIUS = 6;
 function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>): IElement {
   const data = assets?.get(product.image);
   if (data && data.length > 0) {
-    const img = new Image();
-    img.imageData = data;
-    img.height = CARD_HEIGHT_IMAGE;
-    img.fitMode = ImageFitMode.Cover;
-    img.altText = `Product photograph of the ${product.name}`;
-
-    const imageMask = new Container();
-    imageMask.height = CARD_HEIGHT_IMAGE;
-    imageMask.cornerRadius = CARD_IMAGE_RADIUS;
-    imageMask.clipContent = true;
-    imageMask.child = img;
-    return imageMask;
+    return new Container({
+      height: CARD_HEIGHT_IMAGE,
+      cornerRadius: CARD_IMAGE_RADIUS,
+      clipContent: true,
+      child: new Image({
+        imageData: data,
+        height: CARD_HEIGHT_IMAGE,
+        fitMode: 'cover',
+        altText: `Product photograph of the ${product.name}`,
+      }),
+    });
   }
 
-  const label = new TextBlock(product.name);
-  label.fontName = StandardFonts.HelveticaBold;
-  label.fontSize = 10;
-  label.textColor = ColorPalette.slate[400];
-  label.alignment = TextAlignment.Center;
-  label.margin = new Thickness(0, CARD_HEIGHT_IMAGE / 2 - 14, 0, 0);
-
   // Placeholder until the real photograph is supplied.
-  const placeholder = new Container();
-  placeholder.height = CARD_HEIGHT_IMAGE;
-  placeholder.backgroundColor = ColorPalette.slate[100];
-  placeholder.cornerRadius = CARD_IMAGE_RADIUS;
-  placeholder.child = label;
-
-  return placeholder;
+  return new Container({
+    height: CARD_HEIGHT_IMAGE,
+    backgroundColor: ColorPalette.slate[100],
+    cornerRadius: CARD_IMAGE_RADIUS,
+    child: new TextBlock(product.name, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 10,
+      textColor: ColorPalette.slate[400],
+      alignment: 'center',
+      margin: { top: CARD_HEIGHT_IMAGE / 2 - 14 },
+    }),
+  });
 }
 
 function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>): Container {
-  const body = new VerticalStack();
-  body.spacing = 4;
+  const meta = new HorizontalStack({ widthDistribution: 'weighted' });
+  meta.addChild(new TextBlock(product.sku, { fontSize: 9, textColor: ColorPalette.slate[500] }), 1);
+  meta.addChild(
+    new TextBlock(product.price, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 12,
+      textColor: ACCENT,
+      alignment: 'right',
+    }),
+    1
+  );
 
-  body.addChild(productMedia(product, assets));
+  const body = new VerticalStack({
+    spacing: 4,
+    children: [
+      productMedia(product, assets),
+      new Heading(product.name, {
+        tocIdentifier: product.sku.toLowerCase(),
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 12,
+        textColor: ColorPalette.slate[800],
+        margin: { top: 6 },
+      }),
+      meta,
+      new TextBlock(product.blurb, { fontSize: 9.5, textColor: ColorPalette.slate[600] }),
+    ],
+  });
 
-  const name = new Heading(product.name);
-  name.tocIdentifier = product.sku.toLowerCase();
-  name.level = 2;
-  name.fontName = StandardFonts.HelveticaBold;
-  name.fontSize = 12;
-  name.textColor = ColorPalette.slate[800];
-  name.margin = new Thickness(0, 6, 0, 0);
-  body.addChild(name);
-
-  const meta = new HorizontalStack();
-  meta.widthDistribution = WidthDistribution.Weighted;
-  const sku = new TextBlock(product.sku);
-  sku.fontSize = 9;
-  sku.textColor = ColorPalette.slate[500];
-
-  const price = new TextBlock(product.price);
-  price.fontName = StandardFonts.HelveticaBold;
-  price.fontSize = 12;
-  price.textColor = ACCENT;
-  price.alignment = TextAlignment.Right;
-  meta.addChild(sku, 1);
-  meta.addChild(price, 1);
-  body.addChild(meta);
-
-  const blurb = new TextBlock(product.blurb);
-  blurb.fontSize = 9.5;
-  blurb.textColor = ColorPalette.slate[600];
-  body.addChild(blurb);
-
-  const card = new Container();
-  card.child = body;
-  card.padding = new Thickness(12);
-  card.backgroundColor = Color.white;
-  card.cornerRadius = 8;
-  card.border = new Border(1);
-  card.borderColors = new BorderColors(ColorPalette.slate[200]);
-  return card;
+  return new Container({
+    child: body,
+    padding: 12,
+    backgroundColor: '#ffffff',
+    cornerRadius: 8,
+    border: { width: 1, color: ColorPalette.slate[200] },
+  });
 }
 
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: ColorPalette.slate[700] },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: ColorPalette.slate[400],
+          alignment: 'right',
+        }),
+    },
+    metadata: {
+      title: 'Product Gallery - Spring Collection',
+      author: 'BonniePDF',
+      subject: 'An accessible PDF/A-2a + PDF/UA-1 retail product-photo gallery.',
+      keywords: 'pdf, accessibility, retail, catalogue, product gallery, e-commerce, BonniePDF',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Right;
-    return b;
-  };
+  doc.add(
+    new Heading('Spring Collection', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 24,
+      textColor: ColorPalette.slate[800],
+      margin: { bottom: 4 },
+    })
+  );
 
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Product Gallery - Spring Collection';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'An accessible PDF/A-2a + PDF/UA-1 retail product-photo gallery.';
-  metadata.keywords = 'pdf, accessibility, retail, catalogue, product gallery, e-commerce, BonniePDF';
-
-  const doc = new Document(settings, metadata);
-
-  const h1 = new Heading('Spring Collection');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 4);
-  doc.add(h1);
-
-  const intro = new TextBlock('Homeware & lighting - selected pieces from the new season.');
-  intro.fontSize = 12;
-  intro.textColor = ColorPalette.slate[500];
-  intro.margin = new Thickness(0, 0, 0, 18);
-  doc.add(intro);
+  doc.add(
+    new TextBlock('Homeware & lighting - selected pieces from the new season.', {
+      fontSize: 12,
+      textColor: ColorPalette.slate[500],
+      margin: { bottom: 18 },
+    })
+  );
 
   // Two products per row; the gallery paginates automatically.
-  const gallery = new VerticalStack();
-  gallery.spacing = 16;
+  const gallery = new VerticalStack({ spacing: 16 });
   for (let i = 0; i < PRODUCTS.length; i += 2) {
-    const row = new HorizontalStack();
-    row.spacing = 16;
-    row.widthDistribution = WidthDistribution.Equal;
+    const row = new HorizontalStack({ spacing: 16, widthDistribution: 'equal' });
     row.addChild(productCard(PRODUCTS[i], assets));
     if (i + 1 < PRODUCTS.length) {
       row.addChild(productCard(PRODUCTS[i + 1], assets));

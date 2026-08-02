@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   GroupedBarChart,
-  GroupedBarChartElement,
   ChartOrientation,
   StandardFonts,
   type ColorInput,
@@ -92,6 +91,8 @@ export function generate(): Document {
   });
 
   const chart = new GroupedBarChart({
+    data,
+    altText: 'Horizontal grouped bar chart comparing quarterly sales across three product lines.',
     orientation: ChartOrientation.Horizontal,
     height: 380,
     stretchToFit: true,
@@ -102,14 +103,7 @@ export function generate(): Document {
     showLegend: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new GroupedBarChartElement(
-      chart,
-      data,
-      'Horizontal grouped bar chart comparing quarterly sales across three product lines.'
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

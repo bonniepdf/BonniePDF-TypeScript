@@ -43,7 +43,9 @@ export class LollipopChart extends CartesianChartBase {
   /** Creates a LollipopChart, optionally configured in one expression. */
   constructor(options?: LollipopChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   defaultStemWidth: number = 2;

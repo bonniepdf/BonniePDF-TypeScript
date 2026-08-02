@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   LollipopChart,
   ChartOrientation,
   PdfAConformance,
@@ -124,9 +123,9 @@ export function generate(): Document {
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(chart, data, 'Horizontal lollipop chart showing product revenue ranking for eight product lines.')
-  );
+  chart.data = data;
+  chart.altText = 'Horizontal lollipop chart showing product revenue ranking for eight product lines.';
+  doc.add(chart);
 
   return doc;
 }

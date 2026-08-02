@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  GroupedBarChartElement,
   GroupedBarChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -121,13 +120,9 @@ export function generate(): Document {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new GroupedBarChartElement(
-      chart,
-      data,
-      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.'
-    )
-  );
+  chart.data = data;
+  chart.altText = 'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.';
+  doc.add(chart);
 
   return doc;
 }

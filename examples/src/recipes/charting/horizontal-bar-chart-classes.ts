@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   BarChart,
   ChartOrientation,
   PdfAConformance,
@@ -119,9 +118,9 @@ export function generate(): Document {
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(chart, data, 'Horizontal bar chart showing regional sales performance across six UK regions.')
-  );
+  chart.data = data;
+  chart.altText = 'Horizontal bar chart showing regional sales performance across six UK regions.';
+  doc.add(chart);
 
   return doc;
 }

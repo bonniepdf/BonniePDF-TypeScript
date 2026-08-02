@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   BarChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -111,13 +110,9 @@ export function generate(): Document {
   chart.labelFontSize = 9;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
-    )
-  );
+  chart.data = data;
+  chart.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';
+  doc.add(chart);
 
   return doc;
 }

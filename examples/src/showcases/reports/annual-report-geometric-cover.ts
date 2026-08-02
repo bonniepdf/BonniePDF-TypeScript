@@ -208,7 +208,6 @@ export function generate(): Document {
   const cover = new CanvasElement(drawCover);
   cover.drawWidth = PAGE.width;
   cover.drawHeight = PAGE.height;
-  cover.altText = `${COMPANY} Annual Report ${YEAR} cover: a geometric layout with a circular cropped photo badge and the company name.`;
   doc.add(cover);
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).

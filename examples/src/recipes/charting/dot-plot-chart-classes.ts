@@ -18,7 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   DotPlotChart,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -108,9 +107,9 @@ export function generate(): Document {
   chart.showValueLabels = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
-  doc.add(
-    new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')
-  );
+  chart.data = data;
+  chart.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';
+  doc.add(chart);
 
   return doc;
 }

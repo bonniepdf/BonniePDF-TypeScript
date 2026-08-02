@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   GroupedBarChart,
-  GroupedBarChartElement,
   StandardFonts,
   type ColorInput,
 } from '@bonniepdf/core';
@@ -88,20 +87,15 @@ export function generate(): Document {
   });
 
   const chart = new GroupedBarChart({
+    data,
+    altText: 'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.',
     height: 380,
     stretchToFit: true,
     showValueLabels: true,
     fontFamily: StandardFonts.Helvetica,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new GroupedBarChartElement(
-      chart,
-      data,
-      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.'
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

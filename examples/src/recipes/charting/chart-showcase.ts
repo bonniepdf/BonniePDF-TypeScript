@@ -4,8 +4,6 @@ import {
   HorizontalStack,
   TextElementBase,
   ChartData,
-  ChartElement,
-  GroupedBarChartElement,
   BarChart,
   LineChart,
   AreaChart,
@@ -103,16 +101,8 @@ export function generate(): Document {
   // ── Bar chart ──
   pageHeader(doc, 'Bar Chart: Monthly Sales Report', 'Vertical bars with grid lines and value labels');
   doc.add(
-    new ChartElement(
-      new BarChart({
-        height: 400,
-        stretchToFit: true,
-        barColor: C_INDIGO,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new BarChart({
+      data: new ChartData({
         title: 'Monthly Sales',
         series: [
           {
@@ -122,8 +112,14 @@ export function generate(): Document {
         ],
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
       }),
-      'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
-    )
+      altText: 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.',
+      height: 400,
+      stretchToFit: true,
+      barColor: C_INDIGO,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -131,15 +127,8 @@ export function generate(): Document {
   // ── Grouped bar chart ──
   pageHeader(doc, 'Grouped Bar Chart: Quarterly Revenue', 'Comparison of three product lines across all months');
   doc.add(
-    new GroupedBarChartElement(
-      new GroupedBarChart({
-        height: 400,
-        stretchToFit: true,
-        showValueLabels: true,
-        fontFamily: StandardFonts.Helvetica,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new GroupedBarChart({
+      data: new ChartData({
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
         series: [
           {
@@ -159,8 +148,13 @@ export function generate(): Document {
           },
         ],
       }),
-      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.'
-    )
+      altText: 'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.',
+      height: 400,
+      stretchToFit: true,
+      showValueLabels: true,
+      fontFamily: StandardFonts.Helvetica,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -168,19 +162,8 @@ export function generate(): Document {
   // ── Line chart ──
   pageHeader(doc, 'Line Chart: Monthly Revenue Trends', 'Connected data points with markers and value labels');
   doc.add(
-    new ChartElement(
-      new LineChart({
-        height: 400,
-        stretchToFit: true,
-        lineColor: C_VIOLET,
-        lineWidth: 2.5,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        showValueLabels: true,
-        showDataPointMarkers: true,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new LineChart({
+      data: new ChartData({
         title: 'Monthly Revenue',
         series: [
           {
@@ -191,8 +174,17 @@ export function generate(): Document {
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
         xAxis: { legend: 'Month' },
       }),
-      'Line chart of monthly revenue from January to December, ending at 12,800 GBP.'
-    )
+      altText: 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.',
+      height: 400,
+      stretchToFit: true,
+      lineColor: C_VIOLET,
+      lineWidth: 2.5,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      showValueLabels: true,
+      showDataPointMarkers: true,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -200,19 +192,8 @@ export function generate(): Document {
   // ── Area chart ──
   pageHeader(doc, 'Area Chart: Monthly Sales Performance', 'Filled area under the line with configurable opacity');
   doc.add(
-    new ChartElement(
-      new AreaChart({
-        height: 400,
-        stretchToFit: true,
-        areaColor: C_PURPLE,
-        fillOpacity: 0.3,
-        lineWidth: 2.5,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        showValueLabels: true,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new AreaChart({
+      data: new ChartData({
         title: 'Monthly Sales',
         series: [
           {
@@ -223,8 +204,17 @@ export function generate(): Document {
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Sales' },
         xAxis: { legend: 'Month' },
       }),
-      'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
-    )
+      altText: 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.',
+      height: 400,
+      stretchToFit: true,
+      areaColor: C_PURPLE,
+      fillOpacity: 0.3,
+      lineWidth: 2.5,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      showValueLabels: true,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -232,19 +222,8 @@ export function generate(): Document {
   // ── Lollipop chart ──
   pageHeader(doc, 'Lollipop Chart: Quarterly Metrics', 'Stems with circular heads - clear and minimal bar alternative');
   doc.add(
-    new ChartElement(
-      new LollipopChart({
-        height: 400,
-        stretchToFit: true,
-        lollipopColor: C_PINK,
-        stemWidth: 2.5,
-        headRadius: 10,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        showValueLabels: true,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new LollipopChart({
+      data: new ChartData({
         title: 'Quarterly Revenue',
         series: [
           {
@@ -255,8 +234,17 @@ export function generate(): Document {
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
         xAxis: { legend: 'Quarter' },
       }),
-      'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
-    )
+      altText: 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.',
+      height: 400,
+      stretchToFit: true,
+      lollipopColor: C_PINK,
+      stemWidth: 2.5,
+      headRadius: 10,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      showValueLabels: true,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -264,18 +252,8 @@ export function generate(): Document {
   // ── Dot plot chart ──
   pageHeader(doc, 'Dot Plot Chart: Product Performance', 'Circular markers positioned along a value axis');
   doc.add(
-    new ChartElement(
-      new DotPlotChart({
-        height: 400,
-        stretchToFit: true,
-        dotColor: C_TEAL,
-        dotRadius: 12,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        showValueLabels: true,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new DotPlotChart({
+      data: new ChartData({
         title: 'Product Sales',
         series: [
           {
@@ -288,8 +266,16 @@ export function generate(): Document {
         yAxis: { prefix: '£', maxValue: 12000, stepCount: 5, legend: 'Sales' },
         xAxis: { legend: 'Product' },
       }),
-      'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.'
-    )
+      altText: 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.',
+      height: 400,
+      stretchToFit: true,
+      dotColor: C_TEAL,
+      dotRadius: 12,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      showValueLabels: true,
+      backgroundColor: CHART_BG,
+    })
   );
 
   doc.addPage();
@@ -297,17 +283,8 @@ export function generate(): Document {
   // ── Pie / donut chart ──
   pageHeader(doc, `Pie Chart: Monthly Sales ${year}`, 'Donut chart with legend and total value in the centre');
   doc.add(
-    new ChartElement(
-      new PieChart({
-        height: 400,
-        stretchToFit: true,
-        isDonut: true,
-        totalLabel: 'Total',
-        showLegend: true,
-        colors: ALL_COLORS,
-        backgroundColor: '#ffffff',
-      }),
-      new ChartData({
+    new PieChart({
+      data: new ChartData({
         title: `Monthly Sales ${year}`,
         series: [
           {
@@ -316,8 +293,15 @@ export function generate(): Document {
           },
         ],
       }),
-      `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
-    )
+      altText: `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`,
+      height: 400,
+      stretchToFit: true,
+      isDonut: true,
+      totalLabel: 'Total',
+      showLegend: true,
+      colors: ALL_COLORS,
+      backgroundColor: '#ffffff',
+    })
   );
 
   doc.addPage();
@@ -329,17 +313,8 @@ export function generate(): Document {
     `Comparing ${year - 1} and ${year} revenue with a shared axis`
   );
   doc.add(
-    new ChartElement(
-      new LineChart({
-        height: 400,
-        stretchToFit: true,
-        fontFamily: StandardFonts.Helvetica,
-        labelFontSize: 9,
-        showValueLabels: true,
-        showDataPointMarkers: true,
-        backgroundColor: CHART_BG,
-      }),
-      new ChartData({
+    new LineChart({
+      data: new ChartData({
         title: 'Year-over-Year Revenue Comparison',
         series: [
           {
@@ -356,8 +331,15 @@ export function generate(): Document {
         yAxis: { prefix: '£', maxValue: 150000, stepCount: 5, legend: 'Revenue' },
         xAxis: { legend: 'Month' },
       }),
-      `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`
-    )
+      altText: `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`,
+      height: 400,
+      stretchToFit: true,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      showValueLabels: true,
+      showDataPointMarkers: true,
+      backgroundColor: CHART_BG,
+    })
   );
 
   return doc;

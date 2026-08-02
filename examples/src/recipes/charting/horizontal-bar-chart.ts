@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   BarChart,
-  ChartElement,
   ChartOrientation,
   StandardFonts,
 } from '@bonniepdf/core';
@@ -95,6 +94,8 @@ export function generate(): Document {
   });
 
   const chart = new BarChart({
+    data,
+    altText: 'Horizontal bar chart showing regional sales performance across six UK regions.',
     orientation: ChartOrientation.Horizontal,
     height: 380,
     stretchToFit: true,
@@ -105,10 +106,7 @@ export function generate(): Document {
     showValueLabels: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(chart, data, 'Horizontal bar chart showing regional sales performance across six UK regions.')
-  );
+  doc.add(chart);
 
   return doc;
 }

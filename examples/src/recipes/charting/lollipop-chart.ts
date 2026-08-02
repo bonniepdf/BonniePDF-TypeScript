@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   LollipopChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -81,6 +80,8 @@ export function generate(): Document {
   });
 
   const chart = new LollipopChart({
+    data,
+    altText: 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.',
     height: 380,
     stretchToFit: true,
     lollipopColor: C_PINK,
@@ -91,14 +92,7 @@ export function generate(): Document {
     showValueLabels: true,
     backgroundColor: '#fafafa',
   });
-
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

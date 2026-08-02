@@ -26,9 +26,9 @@ import {
   StandardFonts,
   WidthDistribution,
   ChartData,
+  ChartBase,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   BarChart,
   PieChart,
 } from '@bonniepdf/core';
@@ -90,7 +90,7 @@ function chartCard(title: string, body: IElement, accent: Color): Container {
   return card;
 }
 
-function quarterlyBarChart(primary: Color): ChartElement {
+function quarterlyBarChart(primary: Color): ChartBase {
   const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
   const values = [182, 205, 241, 288];
   const series = new ChartSeries();
@@ -108,17 +108,20 @@ function quarterlyBarChart(primary: Color): ChartElement {
   data.yAxis.maxValue = 320;
   data.yAxis.stepCount = 4;
 
-  const chart = new BarChart();
+  const chart = new BarChart({
+    data,
+    altText: 'Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.',
+  });
   chart.height = 190;
   chart.stretchToFit = true;
   chart.barColor = primary;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 8;
   chart.backgroundColor = Color.white;
-  return new ChartElement(chart, data, 'Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.');
+  return chart;
 }
 
-function segmentDonut(colors: string[]): ChartElement {
+function segmentDonut(colors: string[]): ChartBase {
   const labels = ['Platform', 'Services', 'Hardware', 'Licensing'];
   const values = [512, 274, 118, 84];
   const series = new ChartSeries();
@@ -132,7 +135,10 @@ function segmentDonut(colors: string[]): ChartElement {
   data.title = 'Revenue by segment';
   data.series = [series];
 
-  const chart = new PieChart();
+  const chart = new PieChart({
+    data,
+    altText: 'Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.',
+  });
   chart.height = 190;
   chart.stretchToFit = true;
   chart.isDonut = true;
@@ -140,11 +146,7 @@ function segmentDonut(colors: string[]): ChartElement {
   chart.showLegend = true;
   chart.colors = colors;
   chart.backgroundColor = Color.white;
-  return new ChartElement(
-    chart,
-    data,
-    'Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.'
-  );
+  return chart;
 }
 
 function financialTable(primary: Color): Table {

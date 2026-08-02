@@ -5,7 +5,6 @@ import {
   TextElementBase,
   ChartData,
   PieChart,
-  ChartElement,
   StandardFonts,
 } from '@bonniepdf/core';
 
@@ -96,6 +95,8 @@ export function generate(): Document {
   });
 
   const chart = new PieChart({
+    data,
+    altText: `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`,
     height: 380,
     stretchToFit: true,
     isDonut: true,
@@ -104,14 +105,7 @@ export function generate(): Document {
     colors: ALL_COLORS,
     backgroundColor: '#ffffff',
   });
-
-  doc.add(
-    new ChartElement(
-      chart,
-      data,
-      `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
-    )
-  );
+  doc.add(chart);
 
   return doc;
 }

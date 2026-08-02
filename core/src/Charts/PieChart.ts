@@ -81,7 +81,9 @@ export class PieChart extends ChartBase {
   /** Creates a pie chart, optionally configured in one expression. */
   constructor(options?: PieChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   colors: string[] | undefined;

@@ -38,9 +38,9 @@ import {
   StandardFonts,
   WidthDistribution,
   ChartData,
+  ChartBase,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
   BarChart,
   PieChart,
   PdfAConformance,
@@ -259,7 +259,7 @@ export function generate(): Document {
 
 // ── Charts ────────────────────────────────────────────────────────────────────
 
-function controlDonut(): ChartElement {
+function controlDonut(): ChartBase {
   const labels = ['Compliant', 'Partial', 'Non-conformant', 'Not applicable'];
   const values = [71, 15, 5, 2];
   const series = new ChartSeries();
@@ -281,14 +281,12 @@ function controlDonut(): ChartElement {
   chart.showLegend = true;
   chart.colors = ['#059669', '#f59e0b', '#e11d48', '#94a3b8'];
   chart.backgroundColor = Color.white;
-  return new ChartElement(
-    chart,
-    data,
-    'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.'
-  );
+  chart.data = data;
+  chart.altText = 'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.';
+  return chart;
 }
 
-function severityBars(): ChartElement {
+function severityBars(): ChartBase {
   const order: Severity[] = ['Critical', 'High', 'Medium', 'Low'];
   const counts = order.map(s => FINDINGS.filter(f => f.severity === s).length);
   const series = new ChartSeries();
@@ -311,7 +309,9 @@ function severityBars(): ChartElement {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 8;
   chart.backgroundColor = Color.white;
-  return new ChartElement(chart, data, 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.');
+  chart.data = data;
+  chart.altText = 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.';
+  return chart;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

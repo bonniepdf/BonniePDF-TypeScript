@@ -27,6 +27,13 @@ export interface ChildTagToken {
  */
 export function beginChildTag(ctx: RenderContext, child: IElement): ChildTagToken {
   const tagging = ctx.tagging;
+  // Some elements render through a positioned secondary canvas and therefore
+  // must open their marked-content scope on that canvas themselves. They still
+  // expose IRoleProvider/IAltTextProvider so layout capture and compliance
+  // preflight see the same semantics as every other figure element.
+  if ((child as IElement & { handlesOwnTagging?: boolean }).handlesOwnTagging === true) {
+    return { isArtifact: false, tagThis: false };
+  }
   // Inside an /Artifact region (header/footer/slot/decorative subtree) nothing
   // may be tagged as real content - PDF/UA 7.1-2. The child renders as part of
   // the enclosing artifact, so open no structure scope.

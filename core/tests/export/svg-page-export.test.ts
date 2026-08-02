@@ -6,7 +6,6 @@ import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { TextAlignment } from '../../src/Elements/Text/TextAlignment';
 import { Table } from '../../src/Elements/Tables/Table';
 import { Image } from '../../src/Elements/Media/Image';
-import { ChartElement } from '../../src/Charts/ChartElement';
 import { BarChart } from '../../src/Charts/BarChart';
 import { Watermark } from '../../src/Configuration/Watermark';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
@@ -153,10 +152,13 @@ describe('SVG page export', () => {
 
   it('renders charts into the page surface', async () => {
     doc = new Document();
-    const chart = new BarChart();
-    chart.width = 400;
-    chart.height = 250;
-    doc.add(new ChartElement(chart, createTestChartData(4), 'A bar chart'));
+    const chart = new BarChart({
+      data: createTestChartData(4),
+      width: 400,
+      height: 250,
+      altText: 'A bar chart',
+    });
+    doc.add(chart);
     const svg = await doc.generateFirstPageSvgAsync();
     // Chart bars render as filled rects within the page.
     expect(svg).toContain('<rect');

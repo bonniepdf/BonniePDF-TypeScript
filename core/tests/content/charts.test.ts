@@ -8,7 +8,6 @@ import { PieChart } from '../../src/Charts/PieChart';
 import { DotPlotChart } from '../../src/Charts/DotPlotChart';
 import { LollipopChart } from '../../src/Charts/LollipopChart';
 import { GroupedBarChart } from '../../src/Charts/GroupedBarChart';
-import { ChartElement } from '../../src/Charts/ChartElement';
 import { ChartData } from '../../src/Charts/Models/ChartData';
 import { ChartSeries } from '../../src/Charts/Models/ChartSeries';
 import { ChartDataPoint } from '../../src/Charts/Models/ChartDataPoint';
@@ -130,10 +129,9 @@ describe('AreaChart', () => {
 
   it('PDF output registers an alpha graphics state for fillOpacity', () => {
     const doc = new Document();
-    const chart = new AreaChart();
-    chart.fillOpacity = 0.42;
+    const chart = new AreaChart({ data: createSampleData(3), fillOpacity: 0.42 });
 
-    doc.add(new ChartElement(chart, createSampleData(3)));
+    doc.add(chart);
 
     const pdf = pdfToText(doc.generateBytes());
     expect(pdf).toContain('/ExtGState');
@@ -147,10 +145,13 @@ describe('AreaChart', () => {
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
     doc.settings.language = 'en-GB';
 
-    const chart = new AreaChart();
-    chart.fillOpacity = 0.42;
+    const chart = new AreaChart({
+      data: createSampleData(3),
+      fillOpacity: 0.42,
+      altText: 'Sample area chart',
+    });
 
-    doc.add(new ChartElement(chart, createSampleData(3), 'Sample area chart'));
+    doc.add(chart);
 
     const pdf = pdfToText(doc.generateBytes());
     expect(pdf).toContain('/ExtGState');
@@ -219,18 +220,21 @@ describe('GroupedBarChart', () => {
   });
 });
 
-describe('ChartElement PDF/UA tagging', () => {
+describe('Chart PDF/UA tagging', () => {
   it('chart with altText is emitted as a Figure with /Alt', () => {
     const doc = new Document();
     doc.settings.version = PdfVersion.Pdf17;
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
     doc.settings.language = 'en-GB';
 
-    const chart = new BarChart();
-    chart.height = 180;
-    chart.stretchToFit = true;
+    const chart = new BarChart({
+      data: createSampleData(3),
+      height: 180,
+      stretchToFit: true,
+      altText: 'Bar chart comparing three test values.',
+    });
 
-    doc.add(new ChartElement(chart, createSampleData(3), 'Bar chart comparing three test values.'));
+    doc.add(chart);
 
     const pdf = pdfToText(doc.generateBytes());
     expect(pdf).toContain('/S /Figure');
@@ -244,11 +248,9 @@ describe('ChartElement PDF/UA tagging', () => {
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
     doc.settings.language = 'en-GB';
 
-    const chart = new BarChart();
-    chart.height = 180;
-    chart.stretchToFit = true;
+    const chart = new BarChart({ data: createSampleData(3), height: 180, stretchToFit: true });
 
-    doc.add(new ChartElement(chart, createSampleData(3)));
+    doc.add(chart);
 
     const pdf = pdfToText(doc.generateBytes());
     expect(pdf).toContain('/Artifact BMC');

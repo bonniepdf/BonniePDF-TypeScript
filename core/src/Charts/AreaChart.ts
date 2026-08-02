@@ -42,7 +42,9 @@ export class AreaChart extends CartesianChartBase {
   /** Creates a AreaChart, optionally configured in one expression. */
   constructor(options?: AreaChartOptions) {
     super();
-    applyOptions(this, options);
+    const { data, ...rest } = options ?? {};
+    if (data !== undefined) this.data = data;
+    applyOptions(this, rest);
   }
 
   defaultFillOpacity: number = 0.3;

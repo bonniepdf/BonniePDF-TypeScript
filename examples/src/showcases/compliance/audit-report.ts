@@ -21,7 +21,7 @@ import {
   ColorPalette,
   StandardFonts,
   ChartData,
-  ChartElement,
+  ChartBase,
   BarChart,
   PieChart,
   type ColorInput,
@@ -240,7 +240,7 @@ export function generate(): Document {
 
 // ── Charts ────────────────────────────────────────────────────────────────────
 
-function controlDonut(): ChartElement {
+function controlDonut(): ChartBase {
   const labels = ['Compliant', 'Partial', 'Non-conformant', 'Not applicable'];
   const values = [71, 15, 5, 2];
 
@@ -250,6 +250,8 @@ function controlDonut(): ChartElement {
   });
 
   const chart = new PieChart({
+    data,
+    altText: 'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.',
     height: 180,
     stretchToFit: true,
     isDonut: true,
@@ -258,14 +260,10 @@ function controlDonut(): ChartElement {
     colors: ['#059669', '#f59e0b', '#e11d48', '#94a3b8'],
     backgroundColor: '#ffffff',
   });
-  return new ChartElement(
-    chart,
-    data,
-    'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.'
-  );
+  return chart;
 }
 
-function severityBars(): ChartElement {
+function severityBars(): ChartBase {
   const order: Severity[] = ['Critical', 'High', 'Medium', 'Low'];
   const counts = order.map(s => FINDINGS.filter(f => f.severity === s).length);
 
@@ -276,6 +274,8 @@ function severityBars(): ChartElement {
   });
 
   const chart = new BarChart({
+    data,
+    altText: 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.',
     height: 180,
     stretchToFit: true,
     barColor: PRIMARY,
@@ -283,7 +283,7 @@ function severityBars(): ChartElement {
     labelFontSize: 8,
     backgroundColor: '#ffffff',
   });
-  return new ChartElement(chart, data, 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.');
+  return chart;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

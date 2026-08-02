@@ -18,8 +18,6 @@ import {
   ChartData,
   ChartSeries,
   ChartDataPoint,
-  ChartElement,
-  GroupedBarChartElement,
   BarChart,
   LineChart,
   AreaChart,
@@ -145,13 +143,9 @@ export function generate(): Document {
     chart.labelFontSize = 9;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(
-        chart,
-        data,
-        'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.'
-      )
-    );
+    chart.data = data;
+    chart.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -214,13 +208,10 @@ export function generate(): Document {
     chart.fontFamily = StandardFonts.Helvetica;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new GroupedBarChartElement(
-        chart,
-        data,
-        'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.'
-      )
-    );
+    chart.data = data;
+    chart.altText =
+      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -269,9 +260,9 @@ export function generate(): Document {
     chart.showDataPointMarkers = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(chart, data, 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.')
-    );
+    chart.data = data;
+    chart.altText = 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -320,13 +311,9 @@ export function generate(): Document {
     chart.showValueLabels = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(
-        chart,
-        data,
-        'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.'
-      )
-    );
+    chart.data = data;
+    chart.altText = 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -375,13 +362,9 @@ export function generate(): Document {
     chart.showValueLabels = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(
-        chart,
-        data,
-        'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.'
-      )
-    );
+    chart.data = data;
+    chart.altText = 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -431,9 +414,9 @@ export function generate(): Document {
     chart.showValueLabels = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(chart, data, 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.')
-    );
+    chart.data = data;
+    chart.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -477,13 +460,9 @@ export function generate(): Document {
     chart.colors = ALL_COLORS;
     chart.backgroundColor = Color.white;
 
-    doc.add(
-      new ChartElement(
-        chart,
-        data,
-        `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`
-      )
-    );
+    chart.data = data;
+    chart.altText = `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`;
+    doc.add(chart);
   }
 
   doc.addPage();
@@ -543,9 +522,9 @@ export function generate(): Document {
     chart.showDataPointMarkers = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
-    doc.add(
-      new ChartElement(chart, data, `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`)
-    );
+    chart.data = data;
+    chart.altText = `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`;
+    doc.add(chart);
   }
 
   return doc;

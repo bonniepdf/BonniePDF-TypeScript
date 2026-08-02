@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { HorizontalStack } from '../../src/Elements/Layout/HorizontalStack';
+import { VerticalStack } from '../../src/Elements/Layout/VerticalStack';
 import { WidthDistribution } from '../../src/Elements/Layout/WidthDistribution';
 import { ElementBase } from '../../src/Elements/ElementBase';
 import { RenderContext } from '../../src/Rendering/RenderContext';
@@ -32,18 +33,29 @@ describe('HorizontalStack', () => {
     expect(stack.widthDistribution).toBe(WidthDistribution.Auto);
   });
 
-  it('addChild adds child element', () => {
+  it('add adds child element', () => {
     const stack = new HorizontalStack();
     const el = new TestElement();
-    stack.addChild(el);
+    stack.add(el);
     expect((stack as any).children).toHaveLength(1);
   });
 
-  it('addChild with weight stores element', () => {
+  it('add with weight stores element', () => {
     const stack = new HorizontalStack();
     const el = new TestElement();
-    stack.addChild(el, 100);
+    stack.add(el, 100);
     expect((stack as any).children).toHaveLength(1);
+  });
+
+  it('keeps deprecated addChild aliases as forwarding compatibility shims', () => {
+    const horizontal = new HorizontalStack();
+    const vertical = new VerticalStack();
+
+    horizontal.addChild(new TestElement(), 1);
+    vertical.addChild(new TestElement());
+
+    expect(horizontal.children).toHaveLength(1);
+    expect(vertical.children).toHaveLength(1);
   });
 
   it('can set widthDistribution to Weighted', () => {
@@ -63,8 +75,8 @@ describe('HorizontalStack', () => {
     stack.widthDistribution = WidthDistribution.Equal;
     const el1 = new TestElement();
     const el2 = new TestElement();
-    stack.addChild(el1);
-    stack.addChild(el2);
+    stack.add(el1);
+    stack.add(el2);
     const h = stack.measureHeight(200);
     expect(h).toBeGreaterThan(0);
   });
@@ -74,8 +86,8 @@ describe('HorizontalStack', () => {
     stack.widthDistribution = WidthDistribution.Equal;
     const el1 = new TestElement();
     const el2 = new TestElement();
-    stack.addChild(el1);
-    stack.addChild(el2);
+    stack.add(el1);
+    stack.add(el2);
     const ctx = createCtx();
     stack.render(ctx, 200);
     // Each child gets roughly half the total (margin may reduce slightly)
@@ -90,8 +102,8 @@ describe('HorizontalStack', () => {
     stack.widthDistribution = WidthDistribution.Weighted;
     const el1 = new TestElement();
     const el2 = new TestElement();
-    stack.addChild(el1, 60);
-    stack.addChild(el2, 40);
+    stack.add(el1, 60);
+    stack.add(el2, 40);
     const ctx = createCtx();
     // With Weighted, widths are exact pixel values
     stack.render(ctx, 200);
@@ -104,7 +116,7 @@ describe('HorizontalStack', () => {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Equal;
     const elements = [new TestElement(), new TestElement(), new TestElement()];
-    for (const el of elements) stack.addChild(el);
+    for (const el of elements) stack.add(el);
     const ctx = createCtx();
     stack.render(ctx, 300);
     for (const el of elements) {

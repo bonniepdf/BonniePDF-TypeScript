@@ -234,9 +234,9 @@ function bandRow(
 ): HorizontalStack {
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
-  row.addChild(left, weights[0]);
-  row.addChild(center, weights[1]);
-  row.addChild(right, weights[2]);
+  row.add(left, weights[0]);
+  row.add(center, weights[1]);
+  row.add(right, weights[2]);
   return row;
 }
 
@@ -271,7 +271,7 @@ function brandMark(): HorizontalStack {
     square.width = 14;
     square.height = 14;
     square.cornerRadius = 3;
-    row.addChild(square);
+    row.add(square);
   }
   return row;
 }
@@ -303,7 +303,7 @@ function triColourRule(): HorizontalStack {
     segment.backgroundColor = color;
     segment.width = 34;
     segment.height = 5;
-    row.addChild(segment);
+    row.add(segment);
   }
   return row;
 }
@@ -367,7 +367,7 @@ function kpiRow(): HorizontalStack {
     ['2.1M', 'Daily active users', TERTIARY],
   ];
   for (const [value, label, accent] of cards) {
-    row.addChild(kpiCard(value, label, accent), 1);
+    row.add(kpiCard(value, label, accent), 1);
   }
   return row;
 }
@@ -380,13 +380,13 @@ function kpiCard(value: string, label: string, accent: Color): Container {
   v.fontSize = 24;
   v.textColor = accent;
   v.margin = new Thickness(0, 0, 0, 4);
-  stack.addChild(v);
+  stack.add(v);
 
   const l = new TextBlock(label);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 10;
   l.textColor = ColorPalette.slate[500];
-  stack.addChild(l);
+  stack.add(l);
 
   const card = new Container();
   card.backgroundColor = ColorPalette.blue[50];

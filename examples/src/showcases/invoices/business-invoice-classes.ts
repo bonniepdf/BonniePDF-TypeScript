@@ -100,8 +100,8 @@ function moneyRow(
 /** A payment-method column: green eyebrow over a multi-line body (one paragraph). */
 function paymentColumn(title: string, body: string): VerticalStack {
   const s = new VerticalStack();
-  s.addChild(tb(title, { size: 8, bold: true, color: ACCENT_GREEN, mb: 4 }));
-  s.addChild(tb(body, { size: 8 }));
+  s.add(tb(title, { size: 8, bold: true, color: ACCENT_GREEN, mb: 4 }));
+  s.add(tb(body, { size: 8 }));
   return s;
 }
 
@@ -155,8 +155,8 @@ export function generate(): Document {
 
   // The address lines share one style, so they flow as a single paragraph.
   const companyStack = new VerticalStack();
-  companyStack.addChild(tb('SAMPLE COMPANY INC.', { bold: true, size: 20, color: TEXT_DARK, mb: 4 }));
-  companyStack.addChild(tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com'));
+  companyStack.add(tb('SAMPLE COMPANY INC.', { bold: true, size: 20, color: TEXT_DARK, mb: 4 }));
+  companyStack.add(tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com'));
 
   // H1 heading - visually identical to a styled TextBlock but carries
   // the semantic role for screen readers (PDF/UA-1 Matterhorn §14-1).
@@ -167,12 +167,12 @@ export function generate(): Document {
   invoiceTitle.textColor = ACCENT_GREEN;
   invoiceTitle.alignment = TextAlignment.Right;
   const titleStack = new VerticalStack();
-  titleStack.addChild(invoiceTitle);
+  titleStack.add(invoiceTitle);
 
   // A VerticalStack is itself an element, so it goes straight into the row — no
   // wrapping Container needed (an unstyled Container is a pure passthrough).
-  headerRow.addChild(companyStack, 1.2);
-  headerRow.addChild(titleStack, 1);
+  headerRow.add(companyStack, 1.2);
+  headerRow.add(titleStack, 1);
   doc.add(headerRow);
 
   // ── Bill To / Ship To / Details ───────────────────────────────────────────
@@ -187,19 +187,19 @@ export function generate(): Document {
   const address = 'Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack();
-  billToStack.addChild(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }));
-  billToStack.addChild(tb(address));
+  billToStack.add(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }));
+  billToStack.add(tb(address));
 
   const shipToStack = new VerticalStack();
-  shipToStack.addChild(tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4 }));
-  shipToStack.addChild(tb(address));
+  shipToStack.add(tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4 }));
+  shipToStack.add(tb(address));
 
   const detailsStack = new VerticalStack();
-  detailsStack.addChild(tb('Details', { bold: true, color: TEXT_DARK, mb: 4 }));
-  detailsStack.addChild(detailRow('Invoice #', `${year}-001`));
-  detailsStack.addChild(detailRow('Invoice date', dateStr));
-  detailsStack.addChild(detailRow('Terms', 'Net 14'));
-  detailsStack.addChild(detailRow('Due date', dueDateStr));
+  detailsStack.add(tb('Details', { bold: true, color: TEXT_DARK, mb: 4 }));
+  detailsStack.add(detailRow('Invoice #', `${year}-001`));
+  detailsStack.add(detailRow('Invoice date', dateStr));
+  detailsStack.add(detailRow('Terms', 'Net 14'));
+  detailsStack.add(detailRow('Due date', dueDateStr));
 
   // The stacks drop straight into the grid cells; the cell supplies the padding,
   // so extra Container wrappers would add a redundant node for no effect.
@@ -254,18 +254,18 @@ export function generate(): Document {
   // The three greeting lines share one style and flow as a single paragraph;
   // "Thanks!" stays separate for its top margin.
   const messageStack = new VerticalStack();
-  messageStack.addChild(tb('Customer message', { bold: true, color: TEXT_DARK, mb: 4 }));
-  messageStack.addChild(tb('Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment.'));
-  messageStack.addChild(tb('Thanks!', { mt: 4 }));
+  messageStack.add(tb('Customer message', { bold: true, color: TEXT_DARK, mb: 4 }));
+  messageStack.add(tb('Hello!\nThank you for choosing Sample Company.\nPlease return this invoice with payment.'));
+  messageStack.add(tb('Thanks!', { mt: 4 }));
 
   const totalsStack = new VerticalStack();
-  totalsStack.addChild(moneyRow('Subtotal', usd(subtotal)));
-  totalsStack.addChild(moneyRow('Sales tax (8.25%)', usd(tax)));
-  totalsStack.addChild(
+  totalsStack.add(moneyRow('Subtotal', usd(subtotal)));
+  totalsStack.add(moneyRow('Sales tax (8.25%)', usd(tax)));
+  totalsStack.add(
     moneyRow('Discount (early payment)', '-$1,400.00', { labelColor: ACCENT_GREEN, valueColor: ACCENT_GREEN })
   );
-  totalsStack.addChild(bar(TEXT_DARK, new Thickness(0, 0.5, 0, 0), new Thickness(0, 4, 0, 4)));
-  totalsStack.addChild(
+  totalsStack.add(bar(TEXT_DARK, new Thickness(0, 0.5, 0, 0), new Thickness(0, 4, 0, 4)));
+  totalsStack.add(
     moneyRow('Total', usd(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 })
   );
 

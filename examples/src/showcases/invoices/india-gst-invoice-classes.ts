@@ -91,17 +91,17 @@ export function generate(): Document {
   header.margin = new Thickness(0, 14, 0, 14);
 
   const seller = new VerticalStack();
-  seller.addChild(
+  seller.add(
     cell('TAX INVOICE  ·  e-Invoice', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 6) })
   );
-  seller.addChild(
+  seller.add(
     cell('Sample Company Private Limited', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) })
   );
-  seller.addChild(
+  seller.add(
     lines(['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India'], { color: MUTED })
   );
-  seller.addChild(cell('GSTIN: 29ABCDE1234F1Z5', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
-  seller.addChild(cell('State: Karnataka (29)  ·  PAN: ABCDE1234F', { size: 8, color: MUTED }));
+  seller.add(cell('GSTIN: 29ABCDE1234F1Z5', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
+  seller.add(cell('State: Karnataka (29)  ·  PAN: ABCDE1234F', { size: 8, color: MUTED }));
 
   // Signed QR: on a real e-invoice this encodes the IRP-signed payload (JWT).
   const qrPayload = JSON.stringify({
@@ -122,10 +122,10 @@ export function generate(): Document {
   const qrStack = new VerticalStack();
   const qrWrap = new HorizontalStack();
   qrWrap.widthDistribution = WidthDistribution.Weighted;
-  qrWrap.addChild(new Container(), 1);
-  qrWrap.addChild(qr);
-  qrStack.addChild(qrWrap);
-  qrStack.addChild(
+  qrWrap.add(new Container(), 1);
+  qrWrap.add(qr);
+  qrStack.add(qrWrap);
+  qrStack.add(
     cell('Signed QR (IRP)', { size: 8, color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0) })
   );
 
@@ -139,11 +139,11 @@ export function generate(): Document {
   irnBox.padding = new Thickness(12, 9, 12, 9);
   irnBox.margin = new Thickness(0, 0, 0, 16);
   const irnStack = new VerticalStack();
-  irnStack.addChild(
+  irnStack.add(
     cell('IRN (Invoice Reference Number)', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 2) })
   );
-  irnStack.addChild(cell(IRN, { size: 8, color: INK }));
-  irnStack.addChild(
+  irnStack.add(cell(IRN, { size: 8, color: INK }));
+  irnStack.add(
     cell('Ack No. 112500771223344   ·   Ack Date ' + fmt.format(now), {
       size: 8,
       color: MUTED,
@@ -174,10 +174,10 @@ export function generate(): Document {
     ACCENT
   );
   const details = new VerticalStack();
-  details.addChild(totalLine('Invoice no.', `INV-IN-${year}-0771`));
-  details.addChild(totalLine('Invoice date', fmt.format(now)));
-  details.addChild(totalLine('Place of supply', 'Karnataka (29)'));
-  details.addChild(totalLine('Reverse charge', 'No'));
+  details.add(totalLine('Invoice no.', `INV-IN-${year}-0771`));
+  details.add(totalLine('Invoice date', fmt.format(now)));
+  details.add(totalLine('Place of supply', 'Karnataka (29)'));
+  details.add(totalLine('Reverse charge', 'No'));
   meta.addRow(buyer, labelled('DETAILS', details, ACCENT));
   doc.add(meta);
 
@@ -214,11 +214,11 @@ export function generate(): Document {
   const sgst = taxable * SGST;
   const grand = taxable + cgst + sgst;
   const totals = new VerticalStack();
-  totals.addChild(totalLine('Taxable value', money(taxable, INR, 'en-IN')));
-  totals.addChild(totalLine('CGST @ 9%', money(cgst, INR, 'en-IN')));
-  totals.addChild(totalLine('SGST @ 9%', money(sgst, INR, 'en-IN')));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total (INR)', money(grand, INR, 'en-IN'), { bold: true, size: 13, color: ACCENT }));
+  totals.add(totalLine('Taxable value', money(taxable, INR, 'en-IN')));
+  totals.add(totalLine('CGST @ 9%', money(cgst, INR, 'en-IN')));
+  totals.add(totalLine('SGST @ 9%', money(sgst, INR, 'en-IN')));
+  totals.add(divider(INK, 0.6));
+  totals.add(totalLine('Total (INR)', money(grand, INR, 'en-IN'), { bold: true, size: 13, color: ACCENT }));
   const totalsBox = new Container();
   totalsBox.child = totals;
   totalsBox.padding = new Thickness(14, 12, 14, 12);
@@ -227,8 +227,8 @@ export function generate(): Document {
   const totalsRow = new HorizontalStack();
   totalsRow.widthDistribution = WidthDistribution.Weighted;
   totalsRow.margin = new Thickness(0, 6, 0, 0);
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   const note = cell(

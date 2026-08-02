@@ -106,7 +106,7 @@ export function generate(): Document {
     ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', 'purple-500', '#faf5ff'],
     ['Feature C', 'Works with backgrounds, borders, or both combined.', 'teal-500', '#f0fdfa'],
   ] as const) {
-    cardRow.addChild(
+    cardRow.add(
       new Container({
         backgroundColor: bg,
         border: { width: 1, color: accent },

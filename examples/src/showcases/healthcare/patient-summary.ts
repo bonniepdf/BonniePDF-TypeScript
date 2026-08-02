@@ -195,7 +195,7 @@ export function generate(): Document {
   const alert = (name: string, detail: string, top: number): void => {
     const row = new Grid({ columns: [1, 2.4], border: 0, cellPadding: 3 });
     row.addRow(tb(name, 10, ROSE, { bold: true }), tb(detail, 9.5, BODY));
-    alerts.addChild(new Container({ margin: top ? { top } : undefined, child: row }));
+    alerts.add(new Container({ margin: top ? { top } : undefined, child: row }));
   };
   alert('Penicillin', 'Anaphylaxis - documented 2014. Avoid all beta-lactams.', 0);
   alert('Latex', 'Contact urticaria. Use nitrile gloves.', 6);

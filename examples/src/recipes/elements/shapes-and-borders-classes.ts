@@ -164,13 +164,13 @@ export function generate(): Document {
     t.fontSize = 14;
     t.textColor = accent;
     t.margin = new Thickness(0, 0, 0, 6);
-    stack.addChild(t);
+    stack.add(t);
 
     const d = new TextBlock(description);
     d.fontName = StandardFonts.Helvetica;
     d.fontSize = 10;
     d.textColor = ColorPalette.slate[600];
-    stack.addChild(d);
+    stack.add(d);
 
     const c = new Container();
     c.backgroundColor = bg;
@@ -179,7 +179,7 @@ export function generate(): Document {
     c.cornerRadius = 10;
     c.padding = new Thickness(14);
     c.child = stack;
-    cardRow.addChild(c, 1);
+    cardRow.add(c, 1);
   }
   doc.add(cardRow);
 

@@ -150,7 +150,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   const body = new VerticalStack();
   body.spacing = 4;
 
-  body.addChild(productMedia(product, assets));
+  body.add(productMedia(product, assets));
 
   const name = new Heading(product.name);
   name.tocIdentifier = product.sku.toLowerCase();
@@ -159,7 +159,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   name.fontSize = 12;
   name.textColor = ColorPalette.slate[800];
   name.margin = new Thickness(0, 6, 0, 0);
-  body.addChild(name);
+  body.add(name);
 
   const meta = new HorizontalStack();
   meta.widthDistribution = WidthDistribution.Weighted;
@@ -172,14 +172,14 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   price.fontSize = 12;
   price.textColor = ACCENT;
   price.alignment = TextAlignment.Right;
-  meta.addChild(sku, 1);
-  meta.addChild(price, 1);
-  body.addChild(meta);
+  meta.add(sku, 1);
+  meta.add(price, 1);
+  body.add(meta);
 
   const blurb = new TextBlock(product.blurb);
   blurb.fontSize = 9.5;
   blurb.textColor = ColorPalette.slate[600];
-  body.addChild(blurb);
+  body.add(blurb);
 
   const card = new Container();
   card.child = body;
@@ -237,11 +237,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     const row = new HorizontalStack();
     row.spacing = 16;
     row.widthDistribution = WidthDistribution.Equal;
-    row.addChild(productCard(PRODUCTS[i], assets));
+    row.add(productCard(PRODUCTS[i], assets));
     if (i + 1 < PRODUCTS.length) {
-      row.addChild(productCard(PRODUCTS[i + 1], assets));
+      row.add(productCard(PRODUCTS[i + 1], assets));
     }
-    gallery.addChild(row);
+    gallery.add(row);
   }
   doc.add(gallery);
 

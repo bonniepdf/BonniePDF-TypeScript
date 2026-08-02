@@ -94,10 +94,10 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   const card = new VerticalStack();
-  card.addChild(retailerStrip());
-  card.addChild(mainOffer());
-  card.addChild(detailRow());
-  card.addChild(barcodePanel());
+  card.add(retailerStrip());
+  card.add(mainOffer());
+  card.add(detailRow());
+  card.add(barcodePanel());
 
   const wrapper = new Container();
   wrapper.border = new Border(0.75);
@@ -113,8 +113,8 @@ function retailerStrip(): Container {
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
   row.alignment = HorizontalAlignment.Center;
-  row.addChild(text(PRODUCT.retailer.toUpperCase(), 10, Color.white, true), 1);
-  row.addChild(text(PRODUCT.message, 9.4, Color.white, true, TextAlignment.Right), 1);
+  row.add(text(PRODUCT.retailer.toUpperCase(), 10, Color.white, true), 1);
+  row.add(text(PRODUCT.message, 9.4, Color.white, true, TextAlignment.Right), 1);
 
   const strip = new Container();
   strip.backgroundColor = ACCENT;
@@ -125,24 +125,24 @@ function retailerStrip(): Container {
 
 function mainOffer(): Table {
   const left = new VerticalStack();
-  left.addChild(text(PRODUCT.brand.toUpperCase(), 8, ACCENT_DARK, true, TextAlignment.Left, 0, 2));
+  left.add(text(PRODUCT.brand.toUpperCase(), 8, ACCENT_DARK, true, TextAlignment.Left, 0, 2));
   const name = new Heading(PRODUCT.name);
   name.level = 1;
   name.fontName = StandardFonts.HelveticaBold;
   name.fontSize = 16;
   name.textColor = INK;
   name.margin = new Thickness(0, 0, 0, 1);
-  left.addChild(name);
-  left.addChild(text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY));
+  left.add(name);
+  left.add(text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY));
 
   const leftCell = new Container();
   leftCell.padding = new Thickness(0, 0, 6, 0);
   leftCell.child = left;
 
   const price = new VerticalStack();
-  price.addChild(text(`Was ${gbp(PRODUCT.wasPrice)}`, 8.5, PROMO, true, TextAlignment.Right, 0, 0));
-  price.addChild(text(gbp(PRODUCT.nowPrice), 30, INK, true, TextAlignment.Right, 0, -1));
-  price.addChild(unitPriceBadge());
+  price.add(text(`Was ${gbp(PRODUCT.wasPrice)}`, 8.5, PROMO, true, TextAlignment.Right, 0, 0));
+  price.add(text(gbp(PRODUCT.nowPrice), 30, INK, true, TextAlignment.Right, 0, -1));
+  price.add(unitPriceBadge());
 
   const row = new Grid(1.75, 1);
   row.border = Border.none;
@@ -178,8 +178,8 @@ function detailRow(): Table {
 
 function detailCell(label: string, value: string, accent: Color): Container {
   const stack = new VerticalStack();
-  stack.addChild(text(label, 5.8, MUTED, true, TextAlignment.Center, 0, 0));
-  stack.addChild(text(value, 7.2, accent, true, TextAlignment.Center, 0, 0));
+  stack.add(text(label, 5.8, MUTED, true, TextAlignment.Center, 0, 0));
+  stack.add(text(value, 7.2, accent, true, TextAlignment.Center, 0, 0));
 
   const c = new Container();
   c.backgroundColor = ColorPalette.slate[50];
@@ -194,7 +194,7 @@ function detailCell(label: string, value: string, accent: Color): Container {
 
 function barcodePanel(): Container {
   const stack = new VerticalStack();
-  stack.addChild(text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, TextAlignment.Center, 0, 2));
+  stack.add(text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, TextAlignment.Center, 0, 2));
 
   const barcode = new Barcode();
   barcode.value = PRODUCT.ean12;
@@ -205,13 +205,9 @@ function barcodePanel(): Container {
   const barWrap = new Container();
   barWrap.child = barcode;
   barWrap.horizontalAlignment = HorizontalAlignment.Center;
-  stack.addChild(barWrap);
-  stack.addChild(
-    text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, TextAlignment.Center, 4, 1)
-  );
-  stack.addChild(
-    text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, TextAlignment.Center)
-  );
+  stack.add(barWrap);
+  stack.add(text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, TextAlignment.Center, 4, 1));
+  stack.add(text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, TextAlignment.Center));
 
   const panel = new Container();
   panel.border = new Border(0, 0.75, 0, 0);

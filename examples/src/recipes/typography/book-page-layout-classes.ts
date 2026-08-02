@@ -147,12 +147,12 @@ export function generate(): Document {
   butThen.fontName = StandardFonts.TimesBold;
   butThen.fontSize = 11;
   butThen.textColor = ColorPalette.slate[800];
-  emphStack.addChild(butThen);
+  emphStack.add(butThen);
   const whisper = new TextBlock('he continued, his voice dropping to a conspiratorial whisper -');
   whisper.fontName = StandardFonts.TimesItalic;
   whisper.fontSize = 11;
   whisper.textColor = ColorPalette.slate[700];
-  emphStack.addChild(whisper);
+  emphStack.add(whisper);
   doc.add(emphStack);
 
   const p5 = new TextBlock(
@@ -186,7 +186,7 @@ export function generate(): Document {
   quoteText.alignment = TextAlignment.Justify;
 
   const quoteInner = new VerticalStack();
-  quoteInner.addChild(quoteText);
+  quoteInner.add(quoteText);
 
   const quoteBlock = new Container();
   quoteBlock.child = quoteInner;

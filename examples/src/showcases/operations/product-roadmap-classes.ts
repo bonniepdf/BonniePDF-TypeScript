@@ -118,8 +118,8 @@ function band(height: number): Container {
   const row = new HorizontalStack();
   row.spacing = 0;
   row.widthDistribution = WidthDistribution.Weighted;
-  row.addChild(slot(height, 'gutter'), LABEL_WEIGHT);
-  for (let m = 1; m <= MONTHS.length; m++) row.addChild(slot(height, m), 1);
+  row.add(slot(height, 'gutter'), LABEL_WEIGHT);
+  for (let m = 1; m <= MONTHS.length; m++) row.add(slot(height, m), 1);
 
   const crisp = new Container();
   crisp.crispEdges = true;
@@ -152,15 +152,15 @@ function barLayer(labelCell: IElement, segs: Seg[], team: TeamShades): Horizonta
   row.widthDistribution = WidthDistribution.Weighted;
   row.alignment = HorizontalAlignment.Center;
   row.height = ROW_HEIGHT;
-  row.addChild(labelCell, LABEL_WEIGHT);
+  row.add(labelCell, LABEL_WEIGHT);
 
   let cursor = 1;
   for (const seg of segs) {
-    if (seg.start > cursor) row.addChild(new Spacer(BAR_HEIGHT), seg.start - cursor);
-    row.addChild(bar(seg.label, team, seg.start > TODAY_AFTER_MONTH), seg.end - seg.start + 1);
+    if (seg.start > cursor) row.add(new Spacer(BAR_HEIGHT), seg.start - cursor);
+    row.add(bar(seg.label, team, seg.start > TODAY_AFTER_MONTH), seg.end - seg.start + 1);
     cursor = seg.end + 1;
   }
-  if (cursor <= MONTHS.length) row.addChild(new Spacer(BAR_HEIGHT), MONTHS.length - cursor + 1);
+  if (cursor <= MONTHS.length) row.add(new Spacer(BAR_HEIGHT), MONTHS.length - cursor + 1);
 
   return row;
 }
@@ -177,8 +177,8 @@ function roadmapRow(labelCell: IElement, segs: Seg[], team: TeamShades): Contain
 // Left label for the first row of a team: name + sub with a coloured rail.
 function teamLabel(name: string, sub: string, accent: Color): Container {
   const v = new VerticalStack();
-  v.addChild(tb(name, 9, INK, { bold: true }));
-  v.addChild(tb(sub, 6.8, MUTE, { top: 2 }));
+  v.add(tb(name, 9, INK, { bold: true }));
+  v.add(tb(sub, 6.8, MUTE, { top: 2 }));
   const c = new Container();
   c.child = v;
   c.padding = new Thickness(14, 3, 8, 3);
@@ -210,11 +210,11 @@ function monthHeader(): Container {
     return c;
   };
 
-  row.addChild(cell(tb('H1 2026 TIMELINE', 6.5, FAINT, { bold: true, top: 1 }), 'gutter'), LABEL_WEIGHT);
+  row.add(cell(tb('H1 2026 TIMELINE', 6.5, FAINT, { bold: true, top: 1 }), 'gutter'), LABEL_WEIGHT);
   // Gutter caption gets left padding to align with the team labels below.
   (row.getChildren()[0] as Container).padding = new Thickness(14, 8, 0, 0);
   for (let m = 1; m <= MONTHS.length; m++) {
-    row.addChild(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: TextAlignment.Center }), m), 1);
+    row.add(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: TextAlignment.Center }), m), 1);
   }
 
   const crisp = new Container();
@@ -238,8 +238,8 @@ function legendItem(color: Color, label: string, tinted = false): HorizontalStac
   const item = new HorizontalStack();
   item.spacing = 0;
   item.alignment = HorizontalAlignment.Center;
-  item.addChild(dot);
-  item.addChild(tb(label, 7.5, MUTE));
+  item.add(dot);
+  item.add(tb(label, 7.5, MUTE));
   return item;
 }
 
@@ -257,8 +257,8 @@ export function generate(): Document {
 
   // ── Title row: heading left, period badge right ───────────────────────────
   const titleBlock = new VerticalStack();
-  titleBlock.addChild(tb('Product Roadmap', 23, INK, { bold: true }));
-  titleBlock.addChild(tb('Sample Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }));
+  titleBlock.add(tb('Product Roadmap', 23, INK, { bold: true }));
+  titleBlock.add(tb('Sample Platform  ·  Engineering, Design & Go-to-Market', 9.5, MUTE, { top: 5 }));
 
   const badge = new Container();
   badge.backgroundColor = BADGE_BG;
@@ -273,8 +273,8 @@ export function generate(): Document {
   titleRow.spacing = 0;
   titleRow.widthDistribution = WidthDistribution.Weighted;
   titleRow.alignment = HorizontalAlignment.Center;
-  titleRow.addChild(titleBlock, 4);
-  titleRow.addChild(badgeCell, 1);
+  titleRow.add(titleBlock, 4);
+  titleRow.add(badgeCell, 1);
   titleRow.margin = new Thickness(0, 0, 0, 16);
   doc.add(titleRow);
 
@@ -336,16 +336,16 @@ export function generate(): Document {
   // grid, so nothing double-strokes anywhere.
   const body = new VerticalStack();
   body.spacing = 0;
-  body.addChild(monthHeader());
-  body.addChild(band(10)); // breathing room under the header
+  body.add(monthHeader());
+  body.add(band(10)); // breathing room under the header
   teams.forEach((team, ti) => {
-    if (ti > 0) body.addChild(band(16)); // whitespace between sections - no rules
+    if (ti > 0) body.add(band(16)); // whitespace between sections - no rules
     team.rows.forEach((segs, ri) => {
       const label = ri === 0 ? teamLabel(team.name, team.sub, team.shades.solid) : new Container();
-      body.addChild(roadmapRow(label, segs, team.shades));
+      body.add(roadmapRow(label, segs, team.shades));
     });
   });
-  body.addChild(band(12)); // bottom breathing room
+  body.add(band(12)); // bottom breathing room
 
   const card = new Container();
   card.backgroundColor = Color.white;
@@ -361,16 +361,16 @@ export function generate(): Document {
   const legend = new HorizontalStack();
   legend.spacing = 14;
   legend.alignment = HorizontalAlignment.Center;
-  legend.addChild(legendItem(DEV.solid, 'Development'));
-  legend.addChild(legendItem(DESIGN.solid, 'Design'));
-  legend.addChild(legendItem(MARKETING.solid, 'Marketing'));
+  legend.add(legendItem(DEV.solid, 'Development'));
+  legend.add(legendItem(DESIGN.solid, 'Design'));
+  legend.add(legendItem(MARKETING.solid, 'Marketing'));
 
   const statusKey = new HorizontalStack();
   statusKey.spacing = 14;
   statusKey.alignment = HorizontalAlignment.Center;
-  statusKey.addChild(legendItem(DEV.solid, 'Underway'));
-  statusKey.addChild(legendItem(DEV.tint, 'Planned', true));
-  statusKey.addChild(legendItem(TODAY, 'Today'));
+  statusKey.add(legendItem(DEV.solid, 'Underway'));
+  statusKey.add(legendItem(DEV.tint, 'Planned', true));
+  statusKey.add(legendItem(TODAY, 'Today'));
   const statusCell = new Container();
   statusCell.horizontalAlignment = HorizontalAlignment.End;
   statusCell.child = statusKey;
@@ -379,8 +379,8 @@ export function generate(): Document {
   footer.spacing = 0;
   footer.widthDistribution = WidthDistribution.Weighted;
   footer.alignment = HorizontalAlignment.Center;
-  footer.addChild(legend, 1);
-  footer.addChild(statusCell, 1);
+  footer.add(legend, 1);
+  footer.add(statusCell, 1);
   doc.add(footer);
 
   return doc;

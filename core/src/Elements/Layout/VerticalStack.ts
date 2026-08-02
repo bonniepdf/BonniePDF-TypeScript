@@ -14,7 +14,7 @@ export const VERTICAL_STACK_OWN_OPTION_KEYS = ['spacing'] as const;
 
 /**
  * The full settable *property* surface, base included. `children` is synthetic
- * sugar over {@link VerticalStack.addChild}, not a property - see
+ * sugar over {@link VerticalStack.add}, not a property - see
  * `HORIZONTAL_STACK_OPTION_KEYS` for the rationale.
  */
 export const VERTICAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VERTICAL_STACK_OWN_OPTION_KEYS] as const;
@@ -22,7 +22,7 @@ export const VERTICAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VERTICAL_S
 /** Options for {@link VerticalStack}. */
 export type VerticalStackOptions = ElementOptions &
   Partial<Pick<VerticalStack, 'spacing'>> & {
-    /** Children to add, in order. Sugar over {@link VerticalStack.addChild}. */
+    /** Children to add, in order. Sugar over {@link VerticalStack.add}. */
     children?: IElement[];
   };
 
@@ -42,7 +42,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     const { children, ...rest } = options ?? {};
     applyOptions(this, rest);
     if (children !== undefined) {
-      for (const child of children) this.addChild(child);
+      for (const child of children) this.add(child);
     }
   }
 
@@ -60,8 +60,14 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     return this._children;
   }
 
-  public addChild(child: IElement): void {
+  /** Adds a child element to this stack. */
+  public add(child: IElement): void {
     this._children.push(child);
+  }
+
+  /** @deprecated Use {@link add} instead. */
+  public addChild(child: IElement): void {
+    this.add(child);
   }
 
   /**

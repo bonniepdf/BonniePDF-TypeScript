@@ -96,10 +96,8 @@ export function generate(): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(
-    lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED })
-  );
+  seller.add(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
+  seller.add(lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED }));
   const title = new Heading('INVOICE');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
@@ -107,8 +105,8 @@ export function generate(): Document {
   title.textColor = ACCENT;
   title.alignment = TextAlignment.Right;
   const titleStack = new VerticalStack();
-  titleStack.addChild(title);
-  titleStack.addChild(
+  titleStack.add(title);
+  titleStack.add(
     cell(`INV-US-${year}-0148`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
   );
   header.addRow(seller, titleStack);
@@ -126,10 +124,10 @@ export function generate(): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', fmt.format(now)));
-  detailsStack.addChild(totalLine('Due date (Net 30)', fmt.format(due)));
-  detailsStack.addChild(totalLine('Purchase order', 'PO-88213'));
-  detailsStack.addChild(totalLine('Ship to', 'Seattle, WA'));
+  detailsStack.add(totalLine('Invoice date', fmt.format(now)));
+  detailsStack.add(totalLine('Due date (Net 30)', fmt.format(due)));
+  detailsStack.add(totalLine('Purchase order', 'PO-88213'));
+  detailsStack.add(totalLine('Ship to', 'Seattle, WA'));
   meta.addRow(billTo, labelled('DETAILS', detailsStack, ACCENT));
   doc.add(meta);
 
@@ -150,8 +148,8 @@ export function generate(): Document {
     const amount = it.qty * it.unitPrice;
     subtotal += amount;
     const desc = new VerticalStack();
-    desc.addChild(cell(it.description));
-    if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
+    desc.add(cell(it.description));
+    if (it.detail) desc.add(cell(it.detail, { size: 8, color: MUTED }));
     table.addRow(
       desc,
       cell(String(it.qty), { align: TextAlignment.Center }),
@@ -168,11 +166,11 @@ export function generate(): Document {
   const total = subtotal + stateTax + countyTax;
 
   const totals = new VerticalStack();
-  totals.addChild(totalLine('Subtotal', money(subtotal, USD)));
-  totals.addChild(totalLine('CA state sales tax (6.25%)', money(stateTax, USD)));
-  totals.addChild(totalLine('King County district tax (2.25%)', money(countyTax, USD)));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total due (USD)', money(total, USD), { bold: true, size: 13, color: ACCENT }));
+  totals.add(totalLine('Subtotal', money(subtotal, USD)));
+  totals.add(totalLine('CA state sales tax (6.25%)', money(stateTax, USD)));
+  totals.add(totalLine('King County district tax (2.25%)', money(countyTax, USD)));
+  totals.add(divider(INK, 0.6));
+  totals.add(totalLine('Total due (USD)', money(total, USD), { bold: true, size: 13, color: ACCENT }));
 
   const totalsBox = new Container();
   totalsBox.child = totals;
@@ -182,8 +180,8 @@ export function generate(): Document {
   const totalsRow = new HorizontalStack();
   totalsRow.widthDistribution = WidthDistribution.Weighted;
   totalsRow.margin = new Thickness(0, 6, 0, 0);
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   // ── Remittance note ─────────────────────────────────────────────────────

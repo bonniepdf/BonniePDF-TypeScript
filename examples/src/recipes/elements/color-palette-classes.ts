@@ -118,11 +118,11 @@ export function generate(): Document {
   header.spacing = H_GAP;
   const gutter = new Container();
   gutter.width = LABEL_WIDTH;
-  header.addChild(gutter);
+  header.add(gutter);
   for (const shade of SHADES) {
-    header.addChild(headerCell(String(shade)), 1);
+    header.add(headerCell(String(shade)), 1);
   }
-  grid.addChild(header);
+  grid.add(header);
 
   // One row per palette, lightest (50) on the left to darkest (950) on the right.
   const names = Object.keys(ColorPalette) as PaletteName[];
@@ -131,11 +131,11 @@ export function generate(): Document {
     // Fixed-width label (null weight) + 11 swatches that fill the rest equally (weight 1).
     row.widthDistribution = WidthDistribution.Weighted;
     row.spacing = H_GAP;
-    row.addChild(rowLabel(name));
+    row.add(rowLabel(name));
     for (const shade of SHADES) {
-      row.addChild(swatch(name, shade), 1);
+      row.add(swatch(name, shade), 1);
     }
-    grid.addChild(row);
+    grid.add(row);
   }
 
   doc.add(grid);

@@ -116,7 +116,7 @@ export function generate(): Document {
     label.height = 46;
     label.textLabelFontSize = 10;
     label.altText = `Warehouse location barcode ${location}`;
-    sheet.addChild(label);
+    sheet.add(label);
   }
   doc.add(sheet);
 

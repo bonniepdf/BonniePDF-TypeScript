@@ -91,17 +91,17 @@ export function generate(): Document {
       heading.fontName = StandardFonts.HelveticaBold;
       heading.fontSize = 28;
       heading.textColor = ColorPalette.slate[800];
-      content.addChild(heading);
+      content.add(heading);
 
       const sub = new TextBlock('Technical Specifications');
       sub.fontSize = 14;
       sub.textColor = ColorPalette.slate[500];
-      content.addChild(sub);
+      content.add(sub);
 
       const divider = new Line();
       divider.color = ColorPalette.slate[200];
       divider.thickness = 1;
-      content.addChild(divider);
+      content.add(divider);
 
       const mmPerInch = 25.4;
       const points = new TextBlock(
@@ -110,7 +110,7 @@ export function generate(): Document {
       points.fontName = StandardFonts.Courier;
       points.fontSize = 11;
       points.textColor = ColorPalette.slate[600];
-      content.addChild(points);
+      content.add(points);
 
       const inches = new TextBlock(
         `${'Inches:'.padEnd(15)} ${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`
@@ -118,7 +118,7 @@ export function generate(): Document {
       inches.fontName = StandardFonts.Courier;
       inches.fontSize = 11;
       inches.textColor = ColorPalette.slate[600];
-      content.addChild(inches);
+      content.add(inches);
 
       const millimeters = new TextBlock(
         `${'Millimeters:'.padEnd(15)} ${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`
@@ -126,7 +126,7 @@ export function generate(): Document {
       millimeters.fontName = StandardFonts.Courier;
       millimeters.fontSize = 11;
       millimeters.textColor = ColorPalette.slate[600];
-      content.addChild(millimeters);
+      content.add(millimeters);
 
       doc.add(content);
     }

@@ -148,8 +148,8 @@ export function generate(): Document {
     ],
   });
 
-  headerRow.addChild(companyStack, 1.2);
-  headerRow.addChild(titleStack, 1);
+  headerRow.add(companyStack, 1.2);
+  headerRow.add(titleStack, 1);
   doc.add(headerRow);
 
   // ── Bill To / Ship To / Details ───────────────────────────────────────────

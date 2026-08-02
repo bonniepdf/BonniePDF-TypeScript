@@ -74,7 +74,7 @@ export function generate(): Document {
   const comparison = new HorizontalStack();
   comparison.widthDistribution = WidthDistribution.Equal;
   comparison.spacing = 16;
-  comparison.addChild(
+  comparison.add(
     comparisonColumn(
       'Padding on the outer box',
       'The blue band is 16pt of padding: space the container reserves inside its own border.',
@@ -83,7 +83,7 @@ export function generate(): Document {
       paddingDemo()
     )
   );
-  comparison.addChild(
+  comparison.add(
     comparisonColumn(
       'Margin on the inner box',
       'The blue band is 16pt of margin: space the inner element holds outside itself.',
@@ -182,7 +182,7 @@ export function generate(): Document {
     c.padding = new Thickness(8);
     if (topMargin) c.margin = new Thickness(0, 5, 0, 0);
     c.child = t;
-    stack.addChild(c);
+    stack.add(c);
   }
   doc.add(stack);
 
@@ -220,14 +220,14 @@ function comparisonColumn(heading: string, caption: string, demo: Container): Ve
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 10;
   label.textColor = ColorPalette.slate[700];
-  column.addChild(label);
+  column.add(label);
 
-  column.addChild(demo);
+  column.add(demo);
 
   const desc = new TextBlock(caption);
   desc.fontSize = 9;
   desc.textColor = ColorPalette.slate[500];
-  column.addChild(desc);
+  column.add(desc);
 
   return column;
 }

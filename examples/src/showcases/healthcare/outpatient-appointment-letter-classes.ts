@@ -84,8 +84,8 @@ export function generate(): Document {
   brandSub.textColor = MUTED;
   const brand = new VerticalStack();
   brand.spacing = 3;
-  brand.addChild(brandName);
-  brand.addChild(brandSub);
+  brand.add(brandName);
+  brand.add(brandSub);
 
   const issuedDate = new TextBlock('Issued 1 August 2026');
   issuedDate.fontSize = 9.5;
@@ -97,8 +97,8 @@ export function generate(): Document {
   issuedRef.alignment = TextAlignment.Right;
   const issued = new VerticalStack();
   issued.spacing = 3;
-  issued.addChild(issuedDate);
-  issued.addChild(issuedRef);
+  issued.add(issuedDate);
+  issued.add(issuedRef);
 
   masthead.addRow(brand, issued);
   doc.add(masthead);
@@ -153,8 +153,8 @@ export function generate(): Document {
 
   const appointmentStack = new VerticalStack();
   appointmentStack.spacing = 8;
-  appointmentStack.addChild(appointmentHeading);
-  appointmentStack.addChild(appointmentDetails);
+  appointmentStack.add(appointmentHeading);
+  appointmentStack.add(appointmentDetails);
 
   const appointmentBox = new Container();
   appointmentBox.backgroundColor = BLUE_PALE;
@@ -193,8 +193,8 @@ export function generate(): Document {
 
   const noticeStack = new VerticalStack();
   noticeStack.spacing = 5;
-  noticeStack.addChild(noticeHeading);
-  noticeStack.addChild(noticeBody);
+  noticeStack.add(noticeHeading);
+  noticeStack.add(noticeBody);
 
   const notice = new Container();
   notice.backgroundColor = NOTICE;
@@ -263,7 +263,7 @@ function detail(label: string, value: string): VerticalStack {
 
   const s = new VerticalStack();
   s.spacing = 3;
-  s.addChild(labelBlock);
-  s.addChild(valueBlock);
+  s.add(labelBlock);
+  s.add(valueBlock);
   return s;
 }

@@ -93,8 +93,8 @@ export function generate(): Document {
     Irn: IRN,
   });
   const qrWrap = new HorizontalStack({ widthDistribution: 'weighted' });
-  qrWrap.addChild(new Container(), 1);
-  qrWrap.addChild(
+  qrWrap.add(new Container(), 1);
+  qrWrap.add(
     new QRCode({
       data: qrPayload,
       size: 108,
@@ -223,8 +223,8 @@ export function generate(): Document {
     cornerRadius: 8,
   });
   const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 6 } });
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   doc.add(

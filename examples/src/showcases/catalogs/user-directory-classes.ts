@@ -72,8 +72,8 @@ export function generate(): Document {
   subtitle.margin = new Thickness(0, 0, 0, 5);
 
   const headerStack = new VerticalStack();
-  headerStack.addChild(title);
-  headerStack.addChild(subtitle);
+  headerStack.add(title);
+  headerStack.add(subtitle);
 
   // Table
   const usersTable = new Table(1, 2, 2.5, 2, 1.5, 2, 2);

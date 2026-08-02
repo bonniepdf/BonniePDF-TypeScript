@@ -170,10 +170,10 @@ export function generate(): Document {
   const metaRow = new HorizontalStack();
   metaRow.widthDistribution = WidthDistribution.Weighted;
   metaRow.margin = new Thickness(0, 4, 0, 20);
-  metaRow.addChild(metaItem('Report ref', 'AR-2026-014'), 1);
-  metaRow.addChild(metaItem('Audit period', 'Apr–Jun 2026'), 1);
-  metaRow.addChild(metaItem('Issued', longDate), 1);
-  metaRow.addChild(metaItem('Auditor', 'Aegis Assurance LLP'), 1);
+  metaRow.add(metaItem('Report ref', 'AR-2026-014'), 1);
+  metaRow.add(metaItem('Audit period', 'Apr–Jun 2026'), 1);
+  metaRow.add(metaItem('Issued', longDate), 1);
+  metaRow.add(metaItem('Auditor', 'Aegis Assurance LLP'), 1);
   doc.add(metaRow);
 
   // ── Executive summary ─────────────────────────────────────────────────────
@@ -194,10 +194,10 @@ export function generate(): Document {
   kpis.widthDistribution = WidthDistribution.Weighted;
   kpis.spacing = 12;
   kpis.margin = new Thickness(0, 6, 0, 20);
-  kpis.addChild(kpi('82%', 'Overall conformance', PRIMARY), 1);
-  kpis.addChild(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
-  kpis.addChild(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
-  kpis.addChild(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
+  kpis.add(kpi('82%', 'Overall conformance', PRIMARY), 1);
+  kpis.add(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
+  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
+  kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
   // ── Charts: control status donut + findings-by-severity column ────────────
@@ -205,8 +205,8 @@ export function generate(): Document {
   charts.widthDistribution = WidthDistribution.Weighted;
   charts.spacing = 14;
   charts.margin = new Thickness(0, 0, 0, 6);
-  charts.addChild(card('Control status (93 controls)', controlDonut()), 1);
-  charts.addChild(card('Findings by severity', severityBars()), 1);
+  charts.add(card('Control status (93 controls)', controlDonut()), 1);
+  charts.add(card('Findings by severity', severityBars()), 1);
   doc.add(charts);
 
   // ── Findings register (flows to page 2, repeating header) ────────────────
@@ -323,13 +323,13 @@ function bandRow(left: string, right: string, rightColor: Color): HorizontalStac
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 8;
   l.textColor = MUTED;
-  row.addChild(l, 3);
+  row.add(l, 3);
   const r = new TextBlock(right);
   r.fontName = StandardFonts.HelveticaBold;
   r.fontSize = 8;
   r.textColor = rightColor;
   r.alignment = TextAlignment.Right;
-  row.addChild(r, 2);
+  row.add(r, 2);
   return row;
 }
 
@@ -379,12 +379,12 @@ function metaItem(label: string, value: string): VerticalStack {
   l.fontSize = 7;
   l.textColor = MUTED;
   l.margin = new Thickness(0, 0, 0, 2);
-  stack.addChild(l);
+  stack.add(l);
   const v = new TextBlock(value);
   v.fontName = StandardFonts.Helvetica;
   v.fontSize = 10;
   v.textColor = INK;
-  stack.addChild(v);
+  stack.add(v);
   return stack;
 }
 
@@ -395,12 +395,12 @@ function kpi(value: string, label: string, accent: Color): Container {
   v.fontSize = 20;
   v.textColor = accent;
   v.margin = new Thickness(0, 0, 0, 3);
-  stack.addChild(v);
+  stack.add(v);
   const l = new TextBlock(label);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 8.5;
   l.textColor = MUTED;
-  stack.addChild(l);
+  stack.add(l);
   const c = new Container();
   c.backgroundColor = ColorPalette.indigo[50];
   c.cornerRadius = 8;
@@ -416,8 +416,8 @@ function card(title: string, chart: IElement): Container {
   h.fontSize = 11;
   h.textColor = PRIMARY;
   h.margin = new Thickness(0, 0, 0, 8);
-  stack.addChild(h);
-  stack.addChild(chart);
+  stack.add(h);
+  stack.add(chart);
   const c = new Container();
   c.border = new Border(0.75);
   c.borderColors = new BorderColors(RULE);

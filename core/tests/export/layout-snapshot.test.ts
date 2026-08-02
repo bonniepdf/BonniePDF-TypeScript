@@ -99,8 +99,8 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
   it('nests children under a VerticalStack', async () => {
     doc = new Document();
     const stack = new VerticalStack();
-    stack.addChild(new TextBlock('A', 12, StandardFonts.Helvetica));
-    stack.addChild(new TextBlock('B', 12, StandardFonts.Helvetica));
+    stack.add(new TextBlock('A', 12, StandardFonts.Helvetica));
+    stack.add(new TextBlock('B', 12, StandardFonts.Helvetica));
     doc.add(stack);
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -172,8 +172,8 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     const build = () => {
       const d = new Document();
       const stack = new VerticalStack();
-      stack.addChild(new TextBlock('Alpha', 14, StandardFonts.Helvetica));
-      stack.addChild(new TextBlock('Beta', 11, StandardFonts.Helvetica));
+      stack.add(new TextBlock('Alpha', 14, StandardFonts.Helvetica));
+      stack.add(new TextBlock('Beta', 11, StandardFonts.Helvetica));
       d.add(stack);
       for (let i = 0; i < 60; i++) d.add(new TextBlock(`Row ${i}`, 12, StandardFonts.Helvetica));
       return d;

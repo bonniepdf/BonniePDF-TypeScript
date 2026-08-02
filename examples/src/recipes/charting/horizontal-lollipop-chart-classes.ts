@@ -47,13 +47,13 @@ export function generate(): Document {
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
     left.textColor = ColorPalette.slate[500];
-    stack.addChild(left);
+    stack.add(left);
     const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
     right.textColor = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
+    stack.add(right, 1);
     return stack;
   };
 

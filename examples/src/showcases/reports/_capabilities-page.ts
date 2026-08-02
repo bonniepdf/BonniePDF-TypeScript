@@ -64,8 +64,8 @@ function kpiCard(value: string, label: string, accent: Color, tint: Color): Cont
   const stack = new VerticalStack();
   const v = tb(value, 22, accent, true);
   v.margin = new Thickness(0, 0, 0, 3);
-  stack.addChild(v);
-  stack.addChild(tb(label, 9, MUTED));
+  stack.add(v);
+  stack.add(tb(label, 9, MUTED));
   const card = new Container();
   card.backgroundColor = tint;
   card.cornerRadius = 8;
@@ -79,8 +79,8 @@ function chartCard(title: string, body: IElement, accent: Color): Container {
   const stack = new VerticalStack();
   const heading = tb(title, 11, accent, true);
   heading.margin = new Thickness(0, 0, 0, 8);
-  stack.addChild(heading);
-  stack.addChild(body);
+  stack.add(heading);
+  stack.add(body);
   const card = new Container();
   card.border = new Border(0.75);
   card.borderColors = new BorderColors(RULE);
@@ -187,11 +187,11 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
 
   const eyebrow = tb('INSIDE THE REPORT', 9, brand.accent, true);
   eyebrow.margin = new Thickness(0, 0, 0, 4);
-  content.addChild(eyebrow);
+  content.add(eyebrow);
 
   const heading = tb('Performance at a glance', 22, brand.primary, true);
   heading.margin = new Thickness(0, 0, 0, 6);
-  content.addChild(heading);
+  content.add(heading);
 
   const intro = tb(
     `${brand.company}'s ${brand.year} results, laid out the way an annual report ` +
@@ -200,32 +200,32 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
     MUTED
   );
   intro.margin = new Thickness(0, 0, 0, 18);
-  content.addChild(intro);
+  content.add(intro);
 
   // KPI band
   const kpis = new HorizontalStack();
   kpis.widthDistribution = WidthDistribution.Weighted;
   kpis.spacing = 12;
   kpis.margin = new Thickness(0, 0, 0, 18);
-  kpis.addChild(kpiCard('£988M', 'Total revenue', brand.primary, brand.tint), 1);
-  kpis.addChild(kpiCard('+18%', 'Year-over-year growth', brand.accent, brand.tint), 1);
-  kpis.addChild(kpiCard('21.4%', 'Operating margin', brand.primary, brand.tint), 1);
-  content.addChild(kpis);
+  kpis.add(kpiCard('£988M', 'Total revenue', brand.primary, brand.tint), 1);
+  kpis.add(kpiCard('+18%', 'Year-over-year growth', brand.accent, brand.tint), 1);
+  kpis.add(kpiCard('21.4%', 'Operating margin', brand.primary, brand.tint), 1);
+  content.add(kpis);
 
   // Charts row: column chart | donut
   const charts = new HorizontalStack();
   charts.widthDistribution = WidthDistribution.Weighted;
   charts.spacing = 14;
   charts.margin = new Thickness(0, 0, 0, 18);
-  charts.addChild(chartCard('Quarterly revenue (£m)', quarterlyBarChart(brand.primary), brand.accent), 1);
-  charts.addChild(chartCard('Revenue by segment', segmentDonut(brand.segmentColors), brand.accent), 1);
-  content.addChild(charts);
+  charts.add(chartCard('Quarterly revenue (£m)', quarterlyBarChart(brand.primary), brand.accent), 1);
+  charts.add(chartCard('Revenue by segment', segmentDonut(brand.segmentColors), brand.accent), 1);
+  content.add(charts);
 
   // Financial summary table
   const tableHeading = tb('Five-year financial summary', 11, brand.accent, true);
   tableHeading.margin = new Thickness(0, 0, 0, 8);
-  content.addChild(tableHeading);
-  content.addChild(financialTable(brand.primary));
+  content.add(tableHeading);
+  content.add(financialTable(brand.primary));
 
   // The cover documents use a zero margin, so inset the page ourselves.
   const inset = new Container();

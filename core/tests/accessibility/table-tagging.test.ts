@@ -183,7 +183,7 @@ describe('Table tagging', () => {
     const nested = new Table(1, 1);
     nested.border = Border.none;
     nested.addRow(tb('Subtotal'), tb('$1.00'));
-    cellStack.addChild(nested);
+    cellStack.add(nested);
 
     const outer = new Table(1, 1);
     outer.border = Border.none;

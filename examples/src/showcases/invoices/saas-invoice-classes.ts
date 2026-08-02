@@ -80,13 +80,13 @@ export function generate(): Document {
 
   // ── Header: brand + invoice meta ────────────────────────────────────────────
   const brand = new VerticalStack();
-  brand.addChild(tb('SAMPLE COMPANY', 15, BRAND, { bold: true }));
-  brand.addChild(tb('Infrastructure for builders', 9, MUTE, { mb: 0 }));
+  brand.add(tb('SAMPLE COMPANY', 15, BRAND, { bold: true }));
+  brand.add(tb('Infrastructure for builders', 9, MUTE, { mb: 0 }));
 
   const meta = new VerticalStack();
-  meta.addChild(tb('Invoice  INV-2026-0042', 10, INK, { bold: true, align: TextAlignment.Right }));
-  meta.addChild(tb('Issued  18 Jun 2026', 9, MUTE, { align: TextAlignment.Right }));
-  meta.addChild(tb('Due  02 Jul 2026', 9, MUTE, { align: TextAlignment.Right }));
+  meta.add(tb('Invoice  INV-2026-0042', 10, INK, { bold: true, align: TextAlignment.Right }));
+  meta.add(tb('Issued  18 Jun 2026', 9, MUTE, { align: TextAlignment.Right }));
+  meta.add(tb('Due  02 Jul 2026', 9, MUTE, { align: TextAlignment.Right }));
 
   const headerTable = new Grid(1, 1);
   headerTable.border = Border.none;
@@ -100,14 +100,14 @@ export function generate(): Document {
 
   // ── Bill-to / from ─────────────────────────────────────────────────────────
   const billTo = new VerticalStack();
-  billTo.addChild(tb('BILLED TO', 8, MUTE, { bold: true, mb: 4 }));
-  billTo.addChild(tb('Sample Customer Ltd', 10, INK, { bold: true }));
-  billTo.addChild(tb('Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com', 9, BODY));
+  billTo.add(tb('BILLED TO', 8, MUTE, { bold: true, mb: 4 }));
+  billTo.add(tb('Sample Customer Ltd', 10, INK, { bold: true }));
+  billTo.add(tb('Accounts Payable\n19 Enfield Road, London N1 5BA\nbilling@example.com', 9, BODY));
 
   const from = new VerticalStack();
-  from.addChild(tb('FROM', 8, MUTE, { bold: true, mb: 4, align: TextAlignment.Right }));
-  from.addChild(tb('Sample Company Ltd', 10, INK, { bold: true, align: TextAlignment.Right }));
-  from.addChild(tb('4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
+  from.add(tb('FROM', 8, MUTE, { bold: true, mb: 4, align: TextAlignment.Right }));
+  from.add(tb('Sample Company Ltd', 10, INK, { bold: true, align: TextAlignment.Right }));
+  from.add(tb('4 Tenter Ground, London E1 7NH\nVAT GB 482 9173 55', 9, BODY, { align: TextAlignment.Right }));
 
   const addr = new Grid(1, 1);
   addr.border = Border.none;
@@ -174,11 +174,11 @@ export function generate(): Document {
   doc.add(payHeading);
 
   const payInfo = new VerticalStack();
-  payInfo.addChild(tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }));
-  payInfo.addChild(tb('Account name  Sample Company Ltd', 9, BODY, { mb: 2 }));
-  payInfo.addChild(tb('Sort code  04-00-72    Account  19483055', 9, BODY, { mb: 2 }));
-  payInfo.addChild(tb('Reference  INV-2026-0042', 9, BODY, { mb: 2 }));
-  payInfo.addChild(tb('Amount  ' + money(total), 9, INK, { bold: true }));
+  payInfo.add(tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }));
+  payInfo.add(tb('Account name  Sample Company Ltd', 9, BODY, { mb: 2 }));
+  payInfo.add(tb('Sort code  04-00-72    Account  19483055', 9, BODY, { mb: 2 }));
+  payInfo.add(tb('Reference  INV-2026-0042', 9, BODY, { mb: 2 }));
+  payInfo.add(tb('Amount  ' + money(total), 9, INK, { bold: true }));
 
   const qr = new QRCode();
   qr.data = 'https://pay.example.com/inv/INV-2026-0042';

@@ -111,13 +111,13 @@ export function generate(): Document {
     const label = new TextBlock('begins on page');
     label.fontSize = 11;
     label.textColor = ColorPalette.slate[500];
-    row.addChild(label, label.getPreferredWidth());
+    row.add(label, label.getPreferredWidth());
 
     const pageRef = new PageNumberOf(id);
     pageRef.fontName = StandardFonts.HelveticaBold;
     pageRef.fontSize = 11;
     pageRef.textColor = ColorPalette.slate[700];
-    row.addChild(pageRef);
+    row.add(pageRef);
 
     doc.add(row);
   }

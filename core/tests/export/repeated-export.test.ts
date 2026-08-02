@@ -18,7 +18,7 @@ function richDoc(): Document {
   doc.add(new TextBlock('This is a second paragraph with some content.'));
   const stack = new VerticalStack();
   for (const line of ['- one', '- two', '- three']) {
-    stack.addChild(new TextBlock(line));
+    stack.add(new TextBlock(line));
   }
   doc.add(stack);
   doc.addPage();
@@ -34,10 +34,10 @@ function richDoc(): Document {
 function containerWrappedDoc(): Document {
   const doc = new Document();
   const stack = new VerticalStack();
-  stack.addChild(new TextBlock('Card title'));
+  stack.add(new TextBlock('Card title'));
   const table = new Table(1, 1);
   table.addRow(new TextBlock('Label'), new TextBlock('Value'));
-  stack.addChild(table);
+  stack.add(table);
 
   const card = new Container();
   card.child = stack;

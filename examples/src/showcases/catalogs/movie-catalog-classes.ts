@@ -389,19 +389,19 @@ export function generate(): Document {
   titleText.fontName = StandardFonts.TimesBold;
   titleText.fontSize = 26;
   titleText.textColor = ColorPalette.slate[900];
-  titleStack.addChild(titleText);
+  titleStack.add(titleText);
 
   const tagline = new TextBlock('A curated selection of timeless cinema from the golden age of Hollywood');
   tagline.fontName = StandardFonts.TimesItalic;
   tagline.fontSize = 12;
   tagline.textColor = ColorPalette.slate[600];
-  titleStack.addChild(tagline);
+  titleStack.add(tagline);
 
   const countLine = new TextBlock(`Total Movies: ${MOVIES.length} | Compiled: ${monthYear}`);
   countLine.fontName = StandardFonts.Helvetica;
   countLine.fontSize = 10;
   countLine.textColor = ColorPalette.slate[500];
-  titleStack.addChild(countLine);
+  titleStack.add(countLine);
 
   // ── Movies table ──
   const moviesTable = new Table(1, 3, 4, 2, 1.5, 2);
@@ -499,7 +499,7 @@ export function generate(): Document {
   statsTitle.fontName = StandardFonts.HelveticaBold;
   statsTitle.fontSize = 12;
   statsTitle.textColor = ColorPalette.slate[800];
-  statsStack.addChild(statsTitle);
+  statsStack.add(statsTitle);
 
   const avgRating = MOVIES.reduce((s, m) => s + m.rating, 0) / MOVIES.length;
   const topRated = [...MOVIES].sort((a, b) => b.rating - a.rating)[0];
@@ -516,7 +516,7 @@ export function generate(): Document {
     t.fontName = StandardFonts.Helvetica;
     t.fontSize = 10;
     t.textColor = ColorPalette.slate[700];
-    statsStack.addChild(t);
+    statsStack.add(t);
   }
 
   // ── Footer ──

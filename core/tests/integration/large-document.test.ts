@@ -41,8 +41,8 @@ describe('LargeDocument integration', () => {
     for (let i = 0; i < 20; i++) {
       const stack = new HorizontalStack();
       stack.widthDistribution = WidthDistribution.Equal;
-      stack.addChild(new TextBlock(`Left ${i}`, 10, StandardFonts.Helvetica));
-      stack.addChild(new TextBlock(`Right ${i}`, 10, StandardFonts.Helvetica));
+      stack.add(new TextBlock(`Left ${i}`, 10, StandardFonts.Helvetica));
+      stack.add(new TextBlock(`Right ${i}`, 10, StandardFonts.Helvetica));
       doc.add(stack);
     }
     assertValidPdf(doc.generateBytes());

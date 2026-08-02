@@ -81,8 +81,8 @@ describe('MultiPage integration', () => {
     doc = new Document();
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Equal;
-    stack.addChild(new TextBlock('Left column', 10, StandardFonts.Helvetica));
-    stack.addChild(new TextBlock('Right column', 10, StandardFonts.Helvetica));
+    stack.add(new TextBlock('Left column', 10, StandardFonts.Helvetica));
+    stack.add(new TextBlock('Right column', 10, StandardFonts.Helvetica));
     doc.add(stack);
     assertValidPdf(doc.generateBytes());
   });

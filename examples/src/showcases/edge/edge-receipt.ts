@@ -195,8 +195,8 @@ function center(text: string, size = 8, color: ColorInput = MUTE, marginTop = 0)
 function kv(label: string, value: string, opts: { bold?: boolean; size?: number } = {}): HorizontalStack {
   const size = opts.size ?? 9;
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 1.5, bottom: 1.5 } });
-  row.addChild(cell(label, size, opts.bold, 'left'), 3);
-  row.addChild(cell(value, size, opts.bold, 'right'), 2);
+  row.add(cell(label, size, opts.bold, 'left'), 3);
+  row.add(cell(value, size, opts.bold, 'right'), 2);
   return row;
 }
 

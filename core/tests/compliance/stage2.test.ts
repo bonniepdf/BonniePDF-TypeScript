@@ -54,11 +54,11 @@ describe('Stage 2 accessibility hardening (this feature)', () => {
       h.tocIdentifier = 's';
       h.level = 1;
       h.fontSize = 18;
-      g.addChild(h);
+      g.add(h);
       const p = new TextBlock();
       p.text = 'Body text.';
       p.fontSize = 12;
-      g.addChild(p);
+      g.add(p);
       d.add(g);
     });
 
@@ -74,11 +74,11 @@ describe('Stage 2 accessibility hardening (this feature)', () => {
       h.tocIdentifier = 'sh';
       h.level = 2;
       h.fontSize = 16;
-      stack.addChild(h);
+      stack.add(h);
       const p = new TextBlock();
       p.text = 'Stack body.';
       p.fontSize = 12;
-      stack.addChild(p);
+      stack.add(p);
       d.add(stack);
     });
 
@@ -100,7 +100,7 @@ describe('Stage 2 accessibility hardening (this feature)', () => {
       const tb2 = new TextBlock();
       tb2.text = '2';
       t.addRow(tb1, tb2);
-      stack.addChild(t);
+      stack.add(t);
       d.add(stack);
     });
 

@@ -88,8 +88,8 @@ export function generate(): Document {
 
 function retailerStrip(): Container {
   const row = new HorizontalStack({ widthDistribution: 'weighted', alignment: 'center' });
-  row.addChild(text(PRODUCT.retailer.toUpperCase(), 10, '#ffffff', true), 1);
-  row.addChild(text(PRODUCT.message, 9.4, '#ffffff', true, 'right'), 1);
+  row.add(text(PRODUCT.retailer.toUpperCase(), 10, '#ffffff', true), 1);
+  row.add(text(PRODUCT.message, 9.4, '#ffffff', true, 'right'), 1);
   return new Container({ backgroundColor: ACCENT, padding: [9, 4], child: row });
 }
 

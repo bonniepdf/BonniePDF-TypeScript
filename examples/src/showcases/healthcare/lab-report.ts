@@ -8,35 +8,26 @@
 // healthcare/privacy examples default to TypeScript).
 //
 // Archival + accessible: PDF/A-2a + PDF/UA-1, en-GB. Entirely fictional; not
-// medical data and not medical advice.
+// medical data and not medical advice. Authored through the options-object
+// front door.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
   TextElementBase,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
   Table,
   Grid,
-  Color,
   ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 
-const CLINICAL_BLUE = Color.fromHex('#2563eb');
+const CLINICAL_BLUE = '#2563eb';
 const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
@@ -85,117 +76,127 @@ const PANELS: Panel[] = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 50);
-  settings.pageColor = Color.white;
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
-
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const f = new TextBlock(
-      `CONFIDENTIAL - Patient: WESTON, Harold (Patient ID CGH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
-    f.fontName = StandardFonts.Helvetica;
-    f.fontSize = 8;
-    f.textColor = MUTED;
-    return f;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Laboratory Report - specimen L26-118842';
-  metadata.author = 'City General Hospital Pathology Services';
-  metadata.subject = 'Pathology laboratory report with reference ranges and flags (fictional).';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 50,
+      pageColor: '#ffffff',
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(
+          `CONFIDENTIAL - Patient: WESTON, Harold (Patient ID CGH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+        ),
+    },
+    metadata: {
+      title: 'Laboratory Report - specimen L26-118842',
+      author: 'City General Hospital Pathology Services',
+      subject: 'Pathology laboratory report with reference ranges and flags (fictional).',
+    },
+  });
 
   // ── Header ────────────────────────────────────────────────────────────────
-  const header = new Grid(2.4, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  const org = new VerticalStack();
-  const trust = new TextBlock('City General Hospital Pathology Services');
-  trust.fontName = StandardFonts.HelveticaBold;
-  trust.fontSize = 14;
-  trust.textColor = CLINICAL_BLUE;
-  org.addChild(trust);
-  const dept = new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry');
-  dept.fontSize = 9;
-  dept.textColor = MUTED;
-  dept.margin = new Thickness(0, 2, 0, 0);
-  org.addChild(dept);
-  const accred = new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189');
-  accred.fontSize = 8;
-  accred.textColor = MUTED;
-  accred.margin = new Thickness(0, 1, 0, 0);
-  org.addChild(accred);
-  const title = new Heading('LABORATORY REPORT');
-  title.level = 1;
-  title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 13;
-  title.textColor = INK;
-  title.alignment = TextAlignment.Right;
-  header.addRow(org, title);
+  const header = new Grid({ columns: [2.4, 1], cellPadding: 0, border: 0 });
+  header.addRow(
+    new VerticalStack({
+      children: [
+        new TextBlock('City General Hospital Pathology Services', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 14,
+          textColor: CLINICAL_BLUE,
+        }),
+        new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry', {
+          fontSize: 9,
+          textColor: MUTED,
+          margin: { top: 2 },
+        }),
+        new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189', {
+          fontSize: 8,
+          textColor: MUTED,
+          margin: { top: 1 },
+        }),
+      ],
+    }),
+    new Heading('LABORATORY REPORT', {
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 13,
+      textColor: INK,
+      alignment: 'right',
+    })
+  );
   doc.add(header);
 
-  const blueRule = new Container();
-  blueRule.backgroundColor = CLINICAL_BLUE;
-  blueRule.padding = new Thickness(0, 1.5, 0, 0);
-  blueRule.margin = new Thickness(0, 6, 0, 16);
-  const rs = new TextBlock(' ');
-  rs.fontSize = 1;
-  blueRule.child = rs;
-  doc.add(blueRule);
+  doc.add(
+    new Container({
+      backgroundColor: CLINICAL_BLUE,
+      padding: { top: 1.5 },
+      margin: { top: 6, bottom: 16 },
+      child: new TextBlock(' ', { fontSize: 1 }),
+    })
+  );
 
   // ── Patient + specimen block ──────────────────────────────────────────────
-  const info = new Grid(1, 1);
-  info.cellPadding = 12;
-  info.border = new Border(0.5);
-  info.borderColors = new BorderColors(RULE);
-  info.margin = new Thickness(0, 0, 0, 18);
-  const patient = new VerticalStack();
-  patient.addChild(sectionLabel('PATIENT'));
-  patient.addChild(kv('Name', 'WESTON, Harold'));
-  patient.addChild(kv('Date of birth', '02 Nov 1951 (74y)'));
-  patient.addChild(kv('Sex', 'Male'));
-  patient.addChild(kv('Patient ID', 'CGH-9434765919'));
-  patient.addChild(kv('Hospital no.', 'CGH-2208814'));
-  const specimen = new VerticalStack();
-  specimen.addChild(sectionLabel('SPECIMEN'));
-  specimen.addChild(kv('Specimen ID', 'L26-118842'));
-  specimen.addChild(kv('Collected', '06 Jul 2026 08:14'));
-  specimen.addChild(kv('Received', '06 Jul 2026 09:02'));
-  specimen.addChild(kv('Reported', '06 Jul 2026 11:37'));
-  specimen.addChild(kv('Requested by', 'Dr A. Kaur, Ward 12'));
-  info.addRow(patient, specimen);
+  const info = new Grid({
+    columns: [1, 1],
+    cellPadding: 12,
+    border: { width: 0.5, color: RULE },
+    margin: { bottom: 18 },
+  });
+  info.addRow(
+    new VerticalStack({
+      children: [
+        sectionLabel('PATIENT'),
+        kv('Name', 'WESTON, Harold'),
+        kv('Date of birth', '02 Nov 1951 (74y)'),
+        kv('Sex', 'Male'),
+        kv('Patient ID', 'CGH-9434765919'),
+        kv('Hospital no.', 'CGH-2208814'),
+      ],
+    }),
+    new VerticalStack({
+      children: [
+        sectionLabel('SPECIMEN'),
+        kv('Specimen ID', 'L26-118842'),
+        kv('Collected', '06 Jul 2026 08:14'),
+        kv('Received', '06 Jul 2026 09:02'),
+        kv('Reported', '06 Jul 2026 11:37'),
+        kv('Requested by', 'Dr A. Kaur, Ward 12'),
+      ],
+    })
+  );
   doc.add(info);
 
   // ── Result panels ─────────────────────────────────────────────────────────
   for (const panel of PANELS) {
     doc.add(h2(panel.title));
-    const table = new Table(2.6, 1, 1.2, 1.4, 0.7);
-    table.cellPadding = 7;
-    table.border = new Border(0.5);
-    table.borderColors = new BorderColors(RULE);
-    table.headerBackgroundColor = HEADER_BG;
-    table.headerTextColor = INK;
-    table.margin = new Thickness(0, 4, 0, 14);
+    const table = new Table({
+      columns: [2.6, 1, 1.2, 1.4, 0.7],
+      cellPadding: 7,
+      border: { width: 0.5, color: RULE },
+      headerBackgroundColor: HEADER_BG,
+      headerTextColor: INK,
+      margin: { top: 4, bottom: 14 },
+    });
     table.addHeader(
-      th('Analyte', TextAlignment.Left),
-      th('Result', TextAlignment.Right),
-      th('Units', TextAlignment.Left),
-      th('Reference range', TextAlignment.Left),
-      th('Flag', TextAlignment.Center)
+      th('Analyte', 'left'),
+      th('Result', 'right'),
+      th('Units', 'left'),
+      th('Reference range', 'left'),
+      th('Flag', 'center')
     );
     for (const a of panel.rows) {
       const abnormal = a.flag !== '';
       const resultColor = a.flag === 'H' ? HIGH : a.flag === 'L' ? LOW : INK;
       table.addRow(
-        td(a.name, TextAlignment.Left, INK, false),
-        td(a.result, TextAlignment.Right, resultColor, abnormal),
-        td(a.units, TextAlignment.Left, MUTED, false),
-        td(a.range, TextAlignment.Left, MUTED, false),
-        td(a.flag, TextAlignment.Center, resultColor, true)
+        td(a.name, 'left', INK, false),
+        td(a.result, 'right', resultColor, abnormal),
+        td(a.units, 'left', MUTED, false),
+        td(a.range, 'left', MUTED, false),
+        td(a.flag, 'center', resultColor, true)
       );
     }
     doc.add(table);
@@ -214,26 +215,29 @@ export function generate(): Document {
   );
 
   // ── Authorisation ─────────────────────────────────────────────────────────
-  const auth = new Container();
-  auth.backgroundColor = ColorPalette.blue[50];
-  auth.border = Border.leftOnly(3);
-  auth.borderColors = BorderColors.leftOnly(CLINICAL_BLUE);
-  auth.padding = new Thickness(14, 10, 14, 10);
-  auth.margin = new Thickness(0, 8, 0, 0);
-  const astack = new VerticalStack();
-  astack.addChild(sectionLabel('AUTHORISED BY'));
-  const authName = new TextBlock('Dr S. Patel, Consultant Haematologist (electronically authorised)');
-  authName.fontName = StandardFonts.HelveticaBold;
-  authName.fontSize = 10;
-  authName.textColor = INK;
-  authName.margin = new Thickness(0, 2, 0, 2);
-  astack.addChild(authName);
-  const authMeta = new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503');
-  authMeta.fontSize = 8.5;
-  authMeta.textColor = MUTED;
-  astack.addChild(authMeta);
-  auth.child = astack;
-  doc.add(auth);
+  doc.add(
+    new Container({
+      backgroundColor: ColorPalette.blue[50],
+      border: { left: 3, color: CLINICAL_BLUE },
+      padding: [14, 10],
+      margin: { top: 8 },
+      child: new VerticalStack({
+        children: [
+          sectionLabel('AUTHORISED BY'),
+          new TextBlock('Dr S. Patel, Consultant Haematologist (electronically authorised)', {
+            fontName: StandardFonts.HelveticaBold,
+            fontSize: 10,
+            textColor: INK,
+            margin: { top: 2, bottom: 2 },
+          }),
+          new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503', {
+            fontSize: 8.5,
+            textColor: MUTED,
+          }),
+        ],
+      }),
+    })
+  );
 
   return doc;
 }
@@ -241,64 +245,50 @@ export function generate(): Document {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function h2(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 13;
-  h.textColor = CLINICAL_BLUE;
-  h.margin = new Thickness(0, 4, 0, 6);
-  return h;
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 13,
+    textColor: CLINICAL_BLUE,
+    margin: { top: 4, bottom: 6 },
+  });
 }
 
 function body(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 9.5;
-  b.textColor = INK;
-  b.alignment = TextAlignment.Justify;
-  b.margin = new Thickness(0, 0, 0, 10);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 9.5,
+    textColor: INK,
+    alignment: 'justify',
+    margin: { bottom: 10 },
+  });
 }
 
 function sectionLabel(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 8;
-  b.textColor = CLINICAL_BLUE;
-  b.margin = new Thickness(0, 0, 0, 6);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 8,
+    textColor: CLINICAL_BLUE,
+    margin: { bottom: 6 },
+  });
 }
 
 function kv(label: string, value: string): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.margin = new Thickness(0, 0, 0, 4);
-  const l = new TextBlock(label);
-  l.fontName = StandardFonts.HelveticaBold;
-  l.fontSize = 9;
-  l.textColor = MUTED;
-  row.addChild(l, 2);
-  const v = new TextBlock(value);
-  v.fontSize = 9.5;
-  v.textColor = INK;
-  row.addChild(v, 3);
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 4 } });
+  row.addChild(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
+  row.addChild(new TextBlock(value, { fontSize: 9.5, textColor: INK }), 3);
   return row;
 }
 
-function th(text: string, align: TextAlignment): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 9;
-  b.textColor = INK;
-  b.alignment = align;
-  return b;
+function th(text: string, align: TextAlignmentInput): TextBlock {
+  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: INK, alignment: align });
 }
 
-function td(text: string, align: TextAlignment, color: Color, bold: boolean): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  b.fontSize = 9.5;
-  b.textColor = color;
-  b.alignment = align;
-  return b;
+function td(text: string, align: TextAlignmentInput, color: ColorInput, bold: boolean): TextBlock {
+  return new TextBlock(text, {
+    fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: 9.5,
+    textColor: color,
+    alignment: align,
+  });
 }

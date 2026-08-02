@@ -276,6 +276,61 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'public-library-membership-letter-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'lab-report',
+    variant: 'lab-report-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'patient-summary',
+    variant: 'patient-summary-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'outpatient-appointment-letter',
+    variant: 'outpatient-appointment-letter-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'audit-report',
+    variant: 'audit-report-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'uk-degree-transcript',
+    variant: 'uk-degree-transcript-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'shipping-label',
+    variant: 'shipping-label-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'event-ticket',
+    variant: 'event-ticket-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'product-roadmap',
+    variant: 'product-roadmap-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'product-photo-gallery',
+    variant: 'product-photo-gallery-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'movie-catalog',
+    variant: 'movie-catalog-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'user-directory',
+    variant: 'user-directory-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

@@ -1,23 +1,18 @@
+// Movie Catalog
+//
+// Landscape A4 classic film catalog with a 47-row table, colour-coded
+// ratings, alternating rows, and repeating headers. Authored through the
+// options-object front door.
+
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   VerticalStack,
   Table,
   TableRow,
-  Color,
-  ColorPalette,
-  Border,
-  BorderColors,
-  StandardFonts,
   TableCell,
-  PdfAConformance,
-  AccessibilityMode,
+  ColorPalette,
+  StandardFonts,
 } from '@bonniepdf/core';
 
 interface Movie {
@@ -363,70 +358,61 @@ export function generate(): Document {
   const now = new Date();
   const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 40);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(ColorPalette.slate[600]);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Classic Movies Collection';
-  metadata.author = 'Classic Cinema Archive';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      orientation: 'landscape',
+      margin: 40,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: ColorPalette.slate[600] },
+    },
+    metadata: {
+      title: 'Classic Movies Collection',
+      author: 'Classic Cinema Archive',
+    },
+  });
 
   // ── Title section ──
-  const titleStack = new VerticalStack();
-
-  const titleText = new TextBlock('Classic Movies Collection');
-  titleText.fontName = StandardFonts.TimesBold;
-  titleText.fontSize = 26;
-  titleText.textColor = ColorPalette.slate[900];
-  titleStack.addChild(titleText);
-
-  const tagline = new TextBlock('A curated selection of timeless cinema from the golden age of Hollywood');
-  tagline.fontName = StandardFonts.TimesItalic;
-  tagline.fontSize = 12;
-  tagline.textColor = ColorPalette.slate[600];
-  titleStack.addChild(tagline);
-
-  const countLine = new TextBlock(`Total Movies: ${MOVIES.length} | Compiled: ${monthYear}`);
-  countLine.fontName = StandardFonts.Helvetica;
-  countLine.fontSize = 10;
-  countLine.textColor = ColorPalette.slate[500];
-  titleStack.addChild(countLine);
+  const titleStack = new VerticalStack({
+    children: [
+      new TextBlock('Classic Movies Collection', {
+        fontName: StandardFonts.TimesBold,
+        fontSize: 26,
+        textColor: ColorPalette.slate[900],
+      }),
+      new TextBlock('A curated selection of timeless cinema from the golden age of Hollywood', {
+        fontName: StandardFonts.TimesItalic,
+        fontSize: 12,
+        textColor: ColorPalette.slate[600],
+      }),
+      new TextBlock(`Total Movies: ${MOVIES.length} | Compiled: ${monthYear}`, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        textColor: ColorPalette.slate[500],
+      }),
+    ],
+  });
 
   // ── Movies table ──
-  const moviesTable = new Table(1, 3, 4, 2, 1.5, 2);
-  moviesTable.cellPadding = 8;
-  moviesTable.border = new Border(0.5);
-  moviesTable.borderColors = new BorderColors(ColorPalette.slate[400]);
-  moviesTable.headerBackgroundColor = ColorPalette.indigo[800];
-  moviesTable.headerTextColor = Color.white;
-  moviesTable.repeatHeadersOnNewPage = true;
+  const moviesTable = new Table({
+    columns: [1, 3, 4, 2, 1.5, 2],
+    cellPadding: 8,
+    border: { width: 0.5, color: ColorPalette.slate[400] },
+    headerBackgroundColor: ColorPalette.indigo[800],
+    headerTextColor: '#ffffff',
+    repeatHeadersOnNewPage: true,
+  });
 
-  const hYear = new TextBlock('Year');
-  hYear.fontName = StandardFonts.HelveticaBold;
-  hYear.fontSize = 10;
-  hYear.alignment = TextAlignment.Center;
-  const hTitle = new TextBlock('Title');
-  hTitle.fontName = StandardFonts.HelveticaBold;
-  hTitle.fontSize = 10;
-  const hDirector = new TextBlock('Director');
-  hDirector.fontName = StandardFonts.HelveticaBold;
-  hDirector.fontSize = 10;
-  const hGenre = new TextBlock('Genre');
-  hGenre.fontName = StandardFonts.HelveticaBold;
-  hGenre.fontSize = 10;
-  const hRating = new TextBlock('Rating');
-  hRating.fontName = StandardFonts.HelveticaBold;
-  hRating.fontSize = 10;
-  hRating.alignment = TextAlignment.Center;
-  const hDuration = new TextBlock('Duration');
-  hDuration.fontName = StandardFonts.HelveticaBold;
-  hDuration.fontSize = 10;
-  hDuration.alignment = TextAlignment.Center;
-  moviesTable.addHeader(hYear, hTitle, hDirector, hGenre, hRating, hDuration);
+  moviesTable.addHeader(
+    new TextBlock('Year', { fontName: StandardFonts.HelveticaBold, fontSize: 10, alignment: 'center' }),
+    new TextBlock('Title', { fontName: StandardFonts.HelveticaBold, fontSize: 10 }),
+    new TextBlock('Director', { fontName: StandardFonts.HelveticaBold, fontSize: 10 }),
+    new TextBlock('Genre', { fontName: StandardFonts.HelveticaBold, fontSize: 10 }),
+    new TextBlock('Rating', { fontName: StandardFonts.HelveticaBold, fontSize: 10, alignment: 'center' }),
+    new TextBlock('Duration', { fontName: StandardFonts.HelveticaBold, fontSize: 10, alignment: 'center' })
+  );
 
   MOVIES.forEach((movie, rowIndex) => {
     const ratingColor =
@@ -441,93 +427,90 @@ export function generate(): Document {
         : movie.rating >= 7.5
           ? ColorPalette.amber[50]
           : ColorPalette.slate[100];
-    const rowBg = rowIndex % 2 === 0 ? Color.white : ColorPalette.slate[50];
+    const rowBg = rowIndex % 2 === 0 ? '#ffffff' : ColorPalette.slate[50];
 
-    const yearText = new TextBlock(String(movie.year));
-    yearText.fontName = StandardFonts.CourierBold;
-    yearText.fontSize = 10;
-    yearText.textColor = ColorPalette.indigo[700];
-    yearText.alignment = TextAlignment.Center;
+    const ratingCell = new TableCell({
+      content: new TextBlock(movie.rating.toFixed(1), {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 10,
+        textColor: ratingColor,
+        alignment: 'center',
+      }),
+      backgroundColor: ratingBg,
+      padding: 4,
+      border: { width: 0.5, color: ColorPalette.slate[300] },
+    });
 
-    const titleCell = new TextBlock(movie.title);
-    titleCell.fontName = StandardFonts.HelveticaBold;
-    titleCell.fontSize = 10;
-    titleCell.textColor = ColorPalette.slate[900];
-
-    const directorText = new TextBlock(movie.director);
-    directorText.fontName = StandardFonts.Helvetica;
-    directorText.fontSize = 10;
-    directorText.textColor = ColorPalette.slate[700];
-
-    const genreText = new TextBlock(movie.genre);
-    genreText.fontName = StandardFonts.Helvetica;
-    genreText.fontSize = 9;
-    genreText.textColor = ColorPalette.slate[600];
-
-    const ratingText = new TextBlock(movie.rating.toFixed(1));
-    ratingText.fontName = StandardFonts.HelveticaBold;
-    ratingText.fontSize = 10;
-    ratingText.textColor = ratingColor;
-    ratingText.alignment = TextAlignment.Center;
-    const ratingCell = TableCell.from(ratingText)
-      .withBackground(ratingBg)
-      .withPadding(4)
-      .withBorder(ColorPalette.slate[300], 0.5);
-
-    const durText = new TextBlock(movie.duration);
-    durText.fontName = StandardFonts.Courier;
-    durText.fontSize = 9;
-    durText.textColor = ColorPalette.slate[600];
-    durText.alignment = TextAlignment.Center;
-
-    const row = TableRow.fromElements(yearText, titleCell, directorText, genreText, ratingCell, durText);
-    row.withBackground(rowBg);
+    const row = TableRow.fromElements(
+      new TextBlock(String(movie.year), {
+        fontName: StandardFonts.CourierBold,
+        fontSize: 10,
+        textColor: ColorPalette.indigo[700],
+        alignment: 'center',
+      }),
+      new TextBlock(movie.title, {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 10,
+        textColor: ColorPalette.slate[900],
+      }),
+      new TextBlock(movie.director, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        textColor: ColorPalette.slate[700],
+      }),
+      new TextBlock(movie.genre, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 9,
+        textColor: ColorPalette.slate[600],
+      }),
+      ratingCell,
+      new TextBlock(movie.duration, {
+        fontName: StandardFonts.Courier,
+        fontSize: 9,
+        textColor: ColorPalette.slate[600],
+        alignment: 'center',
+      })
+    );
+    row.backgroundColor = rowBg;
     moviesTable.addRow(row);
   });
 
   // ── Statistics section ──
-  const statsStack = new VerticalStack();
-
-  const statsTitle = new TextBlock('Collection Statistics');
-  statsTitle.fontName = StandardFonts.HelveticaBold;
-  statsTitle.fontSize = 12;
-  statsTitle.textColor = ColorPalette.slate[800];
-  statsStack.addChild(statsTitle);
-
   const avgRating = MOVIES.reduce((s, m) => s + m.rating, 0) / MOVIES.length;
   const topRated = [...MOVIES].sort((a, b) => b.rating - a.rating)[0];
   const earliest = [...MOVIES].sort((a, b) => a.year - b.year)[0];
   const latest = [...MOVIES].sort((a, b) => b.year - a.year)[0];
 
-  for (const text of [
-    `- Average Rating: ${avgRating.toFixed(1)}/10`,
-    `- Top Rated: ${topRated.title} (${topRated.rating.toFixed(1)})`,
-    `- Year Range: ${earliest.year} - ${latest.year}`,
-    '- Most Represented Genre: Drama',
-  ]) {
-    const t = new TextBlock(text);
-    t.fontName = StandardFonts.Helvetica;
-    t.fontSize = 10;
-    t.textColor = ColorPalette.slate[700];
-    statsStack.addChild(t);
-  }
+  const statsStack = new VerticalStack({
+    children: [
+      new TextBlock('Collection Statistics', {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 12,
+        textColor: ColorPalette.slate[800],
+      }),
+      ...[
+        `- Average Rating: ${avgRating.toFixed(1)}/10`,
+        `- Top Rated: ${topRated.title} (${topRated.rating.toFixed(1)})`,
+        `- Year Range: ${earliest.year} - ${latest.year}`,
+        '- Most Represented Genre: Drama',
+      ].map(
+        text =>
+          new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: ColorPalette.slate[700] })
+      ),
+    ],
+  });
 
   // ── Footer ──
   const footer = new TextBlock(
-    `© ${now.getFullYear()} Classic Cinema Archive. All rights reserved. | Films listed for educational purposes.`
+    `© ${now.getFullYear()} Classic Cinema Archive. All rights reserved. | Films listed for educational purposes.`,
+    { fontName: StandardFonts.HelveticaOblique, fontSize: 8, textColor: ColorPalette.slate[400] }
   );
-  footer.fontName = StandardFonts.HelveticaOblique;
-  footer.fontSize = 8;
-  footer.textColor = ColorPalette.slate[400];
 
   // ── Assemble ──
-  const mainStack = new VerticalStack();
-  mainStack.addChild(titleStack);
-  mainStack.addChild(moviesTable);
-  mainStack.addChild(statsStack);
-  mainStack.addChild(footer);
-
-  doc.add(mainStack);
+  doc.add(titleStack);
+  doc.add(moviesTable);
+  doc.add(statsStack);
+  doc.add(footer);
 
   return doc;
 }

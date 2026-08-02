@@ -9,7 +9,7 @@
 // The whole document is a narrow 80 mm thermal-printer page rendered in Courier
 // (a standard-14 font, so nothing to download), a QR code and a Code 128 order
 // barcode drawn as native vector shapes, and an itemised total. It weighs a few
-// KB and builds in microseconds.
+// KB and builds in microseconds. Authored through the options-object front door.
 //
 // Deploying it to a Cloudflare Worker is this small:
 //
@@ -27,27 +27,18 @@
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   Heading,
   HorizontalStack,
   Container,
-  HorizontalAlignment,
   Barcode,
   BarcodeSymbology,
   QRCode,
-  QrEcc,
-  Color,
+  PdfSize,
   ColorPalette,
-  Thickness,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 
 const INK = ColorPalette.slate[800];
@@ -81,28 +72,33 @@ export function generate(): Document {
     minute: '2-digit',
   }).format(now);
 
-  const settings = new DocumentSettings(PAGE, 16);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Courier').withSize(9).withColor(INK);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = `Receipt #${ORDER_NO} - Sample Coffee`;
-  metadata.author = 'Sample Coffee';
-  metadata.subject = 'Point-of-sale receipt generated client-side / at the edge with BonniePDF.';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: PAGE,
+      margin: 16,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Courier', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: `Receipt #${ORDER_NO} - Sample Coffee`,
+      author: 'Sample Coffee',
+      subject: 'Point-of-sale receipt generated client-side / at the edge with BonniePDF.',
+    },
+  });
 
   // ── Store header ────────────────────────────────────────────────────────
-  const name = new Heading('SAMPLE COFFEE');
-  name.level = 1;
-  name.fontName = StandardFonts.CourierBold;
-  name.fontSize = 13;
-  name.textColor = INK;
-  name.alignment = TextAlignment.Center;
-  name.margin = new Thickness(0, 0, 0, 3);
-  doc.add(name);
+  doc.add(
+    new Heading('SAMPLE COFFEE', {
+      level: 1,
+      fontName: StandardFonts.CourierBold,
+      fontSize: 13,
+      textColor: INK,
+      alignment: 'center',
+      margin: { bottom: 3 },
+    })
+  );
   doc.add(center('123 Harbour Road, Bristol BS1 4RW'));
   doc.add(center('+44 117 555 0110'));
 
@@ -138,31 +134,35 @@ export function generate(): Document {
   doc.add(rule());
 
   // ── Digital-receipt QR (native vector, no image assets) ─────────────────
-  const qr = new QRCode();
-  qr.data = `https://receipts.example.com/r/${ORDER_NO}`;
-  qr.size = 108;
-  qr.quietZone = 1;
-  qr.errorCorrection = QrEcc.Medium;
-  qr.foregroundColor = INK;
-  qr.altText = `QR code linking to the digital receipt for order ${ORDER_NO}.`;
-  const qrWrap = new Container();
-  qrWrap.child = qr;
-  qrWrap.horizontalAlignment = HorizontalAlignment.Center;
-  qrWrap.padding = new Thickness(0, 4, 0, 4);
-  doc.add(qrWrap);
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      padding: { top: 4, bottom: 4 },
+      child: new QRCode({
+        data: `https://receipts.example.com/r/${ORDER_NO}`,
+        size: 108,
+        quietZone: 1,
+        errorCorrection: 'medium',
+        foregroundColor: INK,
+        altText: `QR code linking to the digital receipt for order ${ORDER_NO}.`,
+      }),
+    })
+  );
   doc.add(center('Scan for your digital receipt', 8, MUTE));
 
   // ── Order barcode (Code 128) ────────────────────────────────────────────
-  const barcode = new Barcode();
-  barcode.value = `NW${ORDER_NO}`;
-  barcode.symbology = BarcodeSymbology.Code128;
-  barcode.height = 38;
-  barcode.altText = `Order barcode (Code 128): NW${ORDER_NO}`;
-  const barWrap = new Container();
-  barWrap.child = barcode;
-  barWrap.horizontalAlignment = HorizontalAlignment.Center;
-  barWrap.padding = new Thickness(0, 8, 0, 2);
-  doc.add(barWrap);
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      padding: { top: 8, bottom: 2 },
+      child: new Barcode({
+        value: `NW${ORDER_NO}`,
+        symbology: BarcodeSymbology.Code128,
+        height: 38,
+        altText: `Order barcode (Code 128): NW${ORDER_NO}`,
+      }),
+    })
+  );
 
   doc.add(rule());
 
@@ -181,43 +181,41 @@ function gbp(n: number): string {
 }
 
 /** A centred single line of receipt text. */
-function center(text: string, size = 8, color: Color = MUTE, marginTop = 0): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Courier;
-  b.fontSize = size;
-  b.textColor = color;
-  b.alignment = TextAlignment.Center;
-  if (marginTop) b.margin = new Thickness(0, marginTop, 0, 0);
-  return b;
+function center(text: string, size = 8, color: ColorInput = MUTE, marginTop = 0): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.Courier,
+    fontSize: size,
+    textColor: color,
+    alignment: 'center',
+    margin: marginTop ? { top: marginTop } : undefined,
+  });
 }
 
 /** A "label ............ value" row: label grows left, value hugs the right edge. */
 function kv(label: string, value: string, opts: { bold?: boolean; size?: number } = {}): HorizontalStack {
   const size = opts.size ?? 9;
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.margin = new Thickness(0, 1.5, 0, 1.5);
-  row.addChild(cell(label, size, opts.bold, TextAlignment.Left), 3);
-  row.addChild(cell(value, size, opts.bold, TextAlignment.Right), 2);
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 1.5, bottom: 1.5 } });
+  row.addChild(cell(label, size, opts.bold, 'left'), 3);
+  row.addChild(cell(value, size, opts.bold, 'right'), 2);
   return row;
 }
 
-function cell(text: string, size: number, bold = false, align: TextAlignment = TextAlignment.Left): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = bold ? StandardFonts.CourierBold : StandardFonts.Courier;
-  b.fontSize = size;
-  b.textColor = INK;
-  b.alignment = align;
-  return b;
+function cell(text: string, size: number, bold = false, align: TextAlignmentInput = 'left'): TextBlock {
+  return new TextBlock(text, {
+    fontName: bold ? StandardFonts.CourierBold : StandardFonts.Courier,
+    fontSize: size,
+    textColor: INK,
+    alignment: align,
+  });
 }
 
 /** A dashed tear-line rule, the way a thermal printer separates sections. */
 function rule(): TextBlock {
-  const b = new TextBlock('- - - - - - - - - - - - - - - -');
-  b.fontName = StandardFonts.Courier;
-  b.fontSize = 9;
-  b.textColor = MUTE;
-  b.alignment = TextAlignment.Center;
-  b.margin = new Thickness(0, 5, 0, 5);
-  return b;
+  return new TextBlock('- - - - - - - - - - - - - - - -', {
+    fontName: StandardFonts.Courier,
+    fontSize: 9,
+    textColor: MUTE,
+    alignment: 'center',
+    margin: { top: 5, bottom: 5 },
+  });
 }

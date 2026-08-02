@@ -79,10 +79,15 @@ import { generate as attachedData } from './recipes/security/attached-data';
 import { generate as attachedDataClasses } from './recipes/security/attached-data-classes';
 // ── Showcases (industry / vertical-market documents) ────────────────────────
 import { generate as businessInvoice } from './showcases/invoices/business-invoice';
+import { generate as businessInvoiceClasses } from './showcases/invoices/business-invoice-classes';
 import { generate as usSalesInvoice } from './showcases/invoices/us-sales-invoice';
+import { generate as usSalesInvoiceClasses } from './showcases/invoices/us-sales-invoice-classes';
 import { generate as ukVatInvoice } from './showcases/invoices/uk-vat-invoice';
+import { generate as ukVatInvoiceClasses } from './showcases/invoices/uk-vat-invoice-classes';
 import { generate as facturXInvoice } from './showcases/invoices/factur-x-invoice';
+import { generate as facturXInvoiceClasses } from './showcases/invoices/factur-x-invoice-classes';
 import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
+import { generate as indiaGstInvoiceClasses } from './showcases/invoices/india-gst-invoice-classes';
 import { generate as userDirectory } from './showcases/catalogs/user-directory';
 import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
 import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
@@ -98,6 +103,7 @@ import { generate as outpatientAppointmentLetter } from './showcases/healthcare/
 import { generate as productRoadmap } from './showcases/operations/product-roadmap';
 // ── Vertical-market gallery follow-up (registrations + new showcases) ────────
 import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
+import { generate as saasInvoiceClasses } from './showcases/invoices/saas-invoice-classes';
 import { generate as shippingLabel } from './showcases/operations/shipping-label';
 import { generate as horizontalBarChart } from './recipes/charting/horizontal-bar-chart';
 import { generate as horizontalBarChartClasses } from './recipes/charting/horizontal-bar-chart-classes';
@@ -108,9 +114,12 @@ import { generate as horizontalLollipopChartClasses } from './recipes/charting/h
 import { generate as watermarkingConfidential } from './recipes/security/watermarking-confidential';
 import { generate as watermarkingConfidentialClasses } from './recipes/security/watermarking-confidential-classes';
 import { generate as edgeReceipt } from './showcases/edge/edge-receipt';
+import { generate as edgeReceiptClasses } from './showcases/edge/edge-receipt-classes';
 import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
+import { generate as publicLibraryMembershipLetterClasses } from './showcases/community/public-library-membership-letter-classes';
 import { generate as auditReport } from './showcases/compliance/audit-report';
 import { generate as shelfLabel } from './showcases/retail/shelf-label';
+import { generate as shelfLabelClasses } from './showcases/retail/shelf-label-classes';
 import { generate as ukDegreeTranscript } from './showcases/education/uk-degree-transcript';
 import { generate as financialStatement } from './showcases/reports/financial-statement';
 import { generate as labReport } from './showcases/healthcare/lab-report';
@@ -1228,6 +1237,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'BusinessInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'business-invoice-classes',
+    name: 'Business Invoice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    description:
+      'The same branded invoice as Business Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'business-invoice-classes.pdf',
+    generate: businessInvoiceClasses,
+    dotnetClass: 'BusinessInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'business-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'us-sales-invoice',
@@ -1242,6 +1268,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UsSalesInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'us-sales-invoice-classes',
+    name: 'US Sales-Tax Invoice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'US',
+    description:
+      'The same US sales-tax invoice as US Sales-Tax Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'us-sales-invoice-classes.pdf',
+    generate: usSalesInvoiceClasses,
+    dotnetClass: 'UsSalesInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'us-sales-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'uk-vat-invoice',
@@ -1256,6 +1300,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UkVatInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'uk-vat-invoice-classes',
+    name: 'UK VAT Invoice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same UK VAT invoice as UK VAT Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'uk-vat-invoice-classes.pdf',
+    generate: ukVatInvoiceClasses,
+    dotnetClass: 'UkVatInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'uk-vat-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'factur-x-invoice',
@@ -1271,6 +1333,25 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FacturXInvoiceExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'factur-x-invoice-classes',
+    name: 'EU E-Invoice (Factur-X / ZUGFeRD, EN 16931) (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'EU',
+    description:
+      'The same EU Factur-X e-invoice as EU E-Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'factur-x_invoice-classes.pdf',
+    generate: facturXInvoiceClasses,
+    requiredAssets: ['factur-x/en16931-invoice.xml'],
+    dotnetClass: 'FacturXInvoiceExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'factur-x-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'india-gst-invoice',
@@ -1285,6 +1366,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'IndiaGstInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'india-gst-invoice-classes',
+    name: 'India GST E-Invoice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'India',
+    description:
+      'The same India GST e-invoice as India GST E-Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'india-gst-invoice-classes.pdf',
+    generate: indiaGstInvoiceClasses,
+    dotnetClass: 'IndiaGstInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'india-gst-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'user-directory',
@@ -1481,6 +1580,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'SaasInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'saas-invoice-classes',
+    name: 'SaaS Invoice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    description:
+      'The same accessible subscription invoice as SaaS Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'saas-invoice-classes.pdf',
+    generate: saasInvoiceClasses,
+    dotnetClass: 'SaasInvoiceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'saas-invoice',
+    variantLabel: 'Class API',
   },
   {
     id: 'shipping-label',
@@ -1614,6 +1730,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'EdgeReceiptExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'edge-receipt-classes',
+    name: 'Point-of-Sale Receipt (Class API)',
+    category: 'Retail',
+    tier: 'showcase',
+    description:
+      'The same 80mm thermal-printer receipt as Point-of-Sale Receipt, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'edge-receipt-classes.pdf',
+    generate: edgeReceiptClasses,
+    dotnetClass: 'EdgeReceiptExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'edge-receipt',
+    variantLabel: 'Class API',
   },
   {
     id: 'public-library-membership-letter',
@@ -1628,6 +1761,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PublicLibraryMembershipLetterExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'public-library-membership-letter-classes',
+    name: 'Public Library Membership (Class API)',
+    category: 'Community',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same accessible public-library membership letter as Public Library Membership, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'public-library-membership-letter-classes.pdf',
+    generate: publicLibraryMembershipLetterClasses,
+    dotnetClass: 'PublicLibraryMembershipLetterExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'public-library-membership-letter',
+    variantLabel: 'Class API',
   },
   {
     id: 'audit-report',
@@ -1656,6 +1807,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ShelfLabelExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'shelf-label-classes',
+    name: 'Retail Shelf Label (EU/UK) (Class API)',
+    category: 'Retail',
+    tier: 'showcase',
+    region: 'EU/UK',
+    description:
+      'The same EU/UK shelf-edge label as Retail Shelf Label, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'shelf-label-classes.pdf',
+    generate: shelfLabelClasses,
+    dotnetClass: 'ShelfLabelExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'shelf-label',
+    variantLabel: 'Class API',
   },
   {
     id: 'uk-degree-transcript',

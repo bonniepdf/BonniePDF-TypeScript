@@ -6,33 +6,23 @@
 // required by the UK Price Marking Order 2004 and EU Directive 98/6/EC.
 //
 // Fictional retailer, product, price and article number (GS1 prefix 50 = GS1 UK).
+// Authored through the options-object front door.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
-  Table,
   Grid,
   Barcode,
   BarcodeSymbology,
-  Color,
+  PdfSize,
   ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
   StandardFonts,
-  WidthDistribution,
-  HorizontalAlignment,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 
 const ACCENT = ColorPalette.emerald[700];
@@ -43,7 +33,6 @@ const BODY = ColorPalette.slate[600];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
 const PROMO = ColorPalette.rose[600];
-const AMBER = ColorPalette.amber[500];
 
 // 110 mm x 75 mm shelf-edge card.
 const PAGE = new PdfSize(311.8, 212.6, 'Shelf Label 110x75');
@@ -70,94 +59,80 @@ const PRODUCT = {
 const DETAIL_TILE_HEIGHT = 31;
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PAGE, 8);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
+  const doc = new Document({
+    settings: {
+      pageSize: PAGE,
+      margin: 8,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: `${PRODUCT.brand} ${PRODUCT.name} - shelf label`,
+      author: PRODUCT.retailer,
+      subject: 'EU/UK retail shelf-edge label with EAN-13 and mandatory unit price.',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = `${PRODUCT.brand} ${PRODUCT.name} - shelf label`;
-  metadata.author = PRODUCT.retailer;
-  metadata.subject = 'EU/UK retail shelf-edge label with EAN-13 and mandatory unit price.';
-
-  const doc = new Document(settings, metadata);
-
-  const card = new VerticalStack();
-  card.addChild(retailerStrip());
-  card.addChild(mainOffer());
-  card.addChild(detailRow());
-  card.addChild(barcodePanel());
-
-  const wrapper = new Container();
-  wrapper.border = new Border(0.75);
-  wrapper.borderColors = new BorderColors(RULE);
-  wrapper.padding = new Thickness(0);
-  wrapper.child = card;
-  doc.add(wrapper);
+  doc.add(
+    new Container({
+      border: { width: 0.75, color: RULE },
+      padding: 0,
+      child: new VerticalStack({ children: [retailerStrip(), mainOffer(), detailRow(), barcodePanel()] }),
+    })
+  );
 
   return doc;
 }
 
 function retailerStrip(): Container {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.alignment = HorizontalAlignment.Center;
-  row.addChild(text(PRODUCT.retailer.toUpperCase(), 10, Color.white, true), 1);
-  row.addChild(text(PRODUCT.message, 9.4, Color.white, true, TextAlignment.Right), 1);
-
-  const strip = new Container();
-  strip.backgroundColor = ACCENT;
-  strip.padding = new Thickness(9, 4, 9, 4);
-  strip.child = row;
-  return strip;
+  const row = new HorizontalStack({ widthDistribution: 'weighted', alignment: 'center' });
+  row.addChild(text(PRODUCT.retailer.toUpperCase(), 10, '#ffffff', true), 1);
+  row.addChild(text(PRODUCT.message, 9.4, '#ffffff', true, 'right'), 1);
+  return new Container({ backgroundColor: ACCENT, padding: [9, 4], child: row });
 }
 
-function mainOffer(): Table {
-  const left = new VerticalStack();
-  left.addChild(text(PRODUCT.brand.toUpperCase(), 8, ACCENT_DARK, true, TextAlignment.Left, 0, 2));
-  const name = new Heading(PRODUCT.name);
-  name.level = 1;
-  name.fontName = StandardFonts.HelveticaBold;
-  name.fontSize = 16;
-  name.textColor = INK;
-  name.margin = new Thickness(0, 0, 0, 1);
-  left.addChild(name);
-  left.addChild(text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY));
+function mainOffer(): Grid {
+  const left = new VerticalStack({
+    children: [
+      text(PRODUCT.brand.toUpperCase(), 8, ACCENT_DARK, true, 'left', 0, 2),
+      new Heading(PRODUCT.name, {
+        level: 1,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 16,
+        textColor: INK,
+        margin: { bottom: 1 },
+      }),
+      text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY),
+    ],
+  });
 
-  const leftCell = new Container();
-  leftCell.padding = new Thickness(0, 0, 6, 0);
-  leftCell.child = left;
+  const price = new VerticalStack({
+    children: [
+      text(`Was ${gbp(PRODUCT.wasPrice)}`, 8.5, PROMO, true, 'right', 0, 0),
+      text(gbp(PRODUCT.nowPrice), 30, INK, true, 'right', 0, -1),
+      unitPriceBadge(),
+    ],
+  });
 
-  const price = new VerticalStack();
-  price.addChild(text(`Was ${gbp(PRODUCT.wasPrice)}`, 8.5, PROMO, true, TextAlignment.Right, 0, 0));
-  price.addChild(text(gbp(PRODUCT.nowPrice), 30, INK, true, TextAlignment.Right, 0, -1));
-  price.addChild(unitPriceBadge());
-
-  const row = new Grid(1.75, 1);
-  row.border = Border.none;
-  row.cellPadding = 8;
-  row.margin = new Thickness(0, 0, 0, 0);
-  row.addRow(leftCell, price);
+  const row = new Grid({ columns: [1.75, 1], border: 0, cellPadding: 8 });
+  row.addRow(new Container({ padding: { right: 6 }, child: left }), price);
   return row;
 }
 
 function unitPriceBadge(): Container {
-  const badge = new Container();
-  badge.backgroundColor = ACCENT_LIGHT;
-  badge.border = new Border(0.5);
-  badge.borderColors = new BorderColors(ColorPalette.emerald[200]);
-  badge.padding = new Thickness(5, 2, 5, 2);
-  badge.margin = new Thickness(0, 1, 0, 0);
-  badge.child = text(`${gbp(PRODUCT.unitPrice)}/${PRODUCT.unitBasis}`, 8.2, ACCENT_DARK, true, TextAlignment.Right);
-  return badge;
+  return new Container({
+    backgroundColor: ACCENT_LIGHT,
+    border: { width: 0.5, color: ColorPalette.emerald[200] },
+    padding: [5, 2],
+    margin: { top: 1 },
+    child: text(`${gbp(PRODUCT.unitPrice)}/${PRODUCT.unitBasis}`, 8.2, ACCENT_DARK, true, 'right'),
+  });
 }
 
-function detailRow(): Table {
-  const table = new Grid(1, 1, 1);
-  table.border = Border.none;
-  table.cellPadding = 0;
-  table.margin = new Thickness(8, 0, 8, 6);
+function detailRow(): Grid {
+  const table = new Grid({ columns: [1, 1, 1], border: 0, cellPadding: 0, margin: { left: 8, right: 8, bottom: 6 } });
   table.addRow(
     detailCell('SAVE', gbp(PRODUCT.saving), PROMO),
     detailCell('SKU', PRODUCT.sku, BODY),
@@ -166,67 +141,61 @@ function detailRow(): Table {
   return table;
 }
 
-function detailCell(label: string, value: string, accent: Color): Container {
-  const stack = new VerticalStack();
-  stack.addChild(text(label, 5.8, MUTED, true, TextAlignment.Center, 0, 0));
-  stack.addChild(text(value, 7.2, accent, true, TextAlignment.Center, 0, 0));
-
-  const c = new Container();
-  c.backgroundColor = ColorPalette.slate[50];
-  c.border = new Border(0.5);
-  c.borderColors = new BorderColors(RULE);
-  c.height = DETAIL_TILE_HEIGHT;
-  c.padding = new Thickness(4, 3, 4, 3);
-  c.margin = new Thickness(1, 0, 1, 0);
-  c.child = stack;
-  return c;
+function detailCell(label: string, value: string, accent: ColorInput): Container {
+  return new Container({
+    backgroundColor: ColorPalette.slate[50],
+    border: { width: 0.5, color: RULE },
+    height: DETAIL_TILE_HEIGHT,
+    padding: [4, 3],
+    margin: { left: 1, right: 1 },
+    child: new VerticalStack({
+      children: [text(label, 5.8, MUTED, true, 'center', 0, 0), text(value, 7.2, accent, true, 'center', 0, 0)],
+    }),
+  });
 }
 
 function barcodePanel(): Container {
-  const stack = new VerticalStack();
-  stack.addChild(text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, TextAlignment.Center, 0, 2));
+  const barWrap = new Container({
+    horizontalAlignment: 'center',
+    child: new Barcode({
+      value: PRODUCT.ean12,
+      symbology: BarcodeSymbology.Ean13,
+      height: 58,
+      altText: `EAN-13 article number ${PRODUCT.displayEan}.`,
+    }),
+  });
 
-  const barcode = new Barcode();
-  barcode.value = PRODUCT.ean12;
-  barcode.symbology = BarcodeSymbology.Ean13;
-  barcode.height = 58;
-  barcode.altText = `EAN-13 article number ${PRODUCT.displayEan}.`;
-
-  const barWrap = new Container();
-  barWrap.child = barcode;
-  barWrap.horizontalAlignment = HorizontalAlignment.Center;
-  stack.addChild(barWrap);
-  stack.addChild(
-    text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, TextAlignment.Center, 4, 1)
-  );
-  stack.addChild(
-    text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, TextAlignment.Center)
-  );
-
-  const panel = new Container();
-  panel.border = new Border(0, 0.75, 0, 0);
-  panel.borderColors = new BorderColors(undefined, RULE, undefined, undefined);
-  panel.padding = new Thickness(8, 9, 8, 12);
-  panel.child = stack;
-  return panel;
+  return new Container({
+    // Top-only rule above the barcode panel.
+    border: { top: 0.75, color: RULE },
+    padding: [8, 9, 8, 12],
+    child: new VerticalStack({
+      children: [
+        text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, 'center', 0, 2),
+        barWrap,
+        text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, 'center', 4, 1),
+        text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, 'center'),
+      ],
+    }),
+  });
 }
 
 function text(
   value: string,
   size: number,
-  color: Color,
+  color: ColorInput,
   bold = false,
-  align: TextAlignment = TextAlignment.Left,
+  align: TextAlignmentInput = 'left',
   top = 0,
   bottom = 0
 ): TextBlock {
-  const block = new TextBlock(value);
-  block.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  block.fontSize = size;
-  block.textColor = color;
-  block.alignment = align;
-  if (top || bottom) block.margin = new Thickness(0, top, 0, bottom);
-  return block;
+  return new TextBlock(value, {
+    fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    textColor: color,
+    alignment: align,
+    margin: top || bottom ? { top, bottom } : undefined,
+  });
 }
 
 function gbp(n: number): string {

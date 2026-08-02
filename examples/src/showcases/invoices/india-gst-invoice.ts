@@ -7,31 +7,20 @@
 // intra-state CGST + SGST split (9% + 9%), the IRN and acknowledgement details,
 // INR amounts, and the signed QR generated with BonniePDF's native vector QR.
 // Fictional GSTIN / IRN values.
+//
+// Authored through the options-object front door; elements are added directly
+// with doc.add(...). Shares the _kit building blocks with the sibling invoices.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
-  TextAlignment,
-  Heading,
   VerticalStack,
   HorizontalStack,
   Container,
   Table,
   Grid,
   QRCode,
-  QrEcc,
-  Color,
   ColorPalette,
   Thickness,
-  Border,
-  BorderColors,
-  StandardFonts,
-  WidthDistribution,
-  TextStyle,
-  PdfAConformance,
 } from '@bonniepdf/core';
 import { cell, money, lines, labelled, totalLine, divider, accentBar, INK, MUTED, HEADER_BG, RULE } from './_kit';
 
@@ -61,40 +50,39 @@ export function generate(): Document {
   const year = now.getFullYear();
   const fmt = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  const settings = new DocumentSettings(PdfSize.a4, 40);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-IN';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 40,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-IN',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
+    },
+    metadata: {
+      title: `GST e-Invoice INV-IN-${year}-0771`,
+      author: 'Sample Company Private Limited',
+      subject: 'India GST e-invoice with IRN, signed QR, HSN codes, and CGST/SGST breakdown.',
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = `GST e-Invoice INV-IN-${year}-0771`;
-  metadata.author = 'Sample Company Private Limited';
-  metadata.subject = 'India GST e-invoice with IRN, signed QR, HSN codes, and CGST/SGST breakdown.';
-
-  const doc = new Document(settings, metadata);
-  const root = new VerticalStack();
-  root.addChild(accentBar(SAFFRON, 4));
-  root.addChild(accentBar(ACCENT, 4));
+  doc.add(accentBar(SAFFRON, 4));
+  doc.add(accentBar(ACCENT, 4));
 
   // ── Header: seller | e-invoice signed QR ──────────────────────────────────
-  const header = new Grid(1.5, 1);
-  header.cellPadding = 0;
-  header.border = Border.none;
-  header.margin = new Thickness(0, 14, 0, 14);
+  const header = new Grid({ columns: [1.5, 1], cellPadding: 0, border: 0, margin: { top: 14, bottom: 14 } });
 
-  const seller = new VerticalStack();
-  seller.addChild(
-    cell('TAX INVOICE  ·  e-Invoice', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 6) })
-  );
-  seller.addChild(
-    cell('Sample Company Private Limited', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) })
-  );
-  seller.addChild(
-    lines(['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India'], { color: MUTED })
-  );
-  seller.addChild(cell('GSTIN: 29ABCDE1234F1Z5', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
-  seller.addChild(cell('State: Karnataka (29)  ·  PAN: ABCDE1234F', { size: 8, color: MUTED }));
+  const seller = new VerticalStack({
+    children: [
+      cell('TAX INVOICE  ·  e-Invoice', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 6) }),
+      cell('Sample Company Private Limited', { bold: true, size: 15, color: INK, margin: new Thickness(0, 0, 0, 2) }),
+      lines(['4th Floor, Prestige Tech Park', 'Outer Ring Road, Bengaluru 560103', 'Karnataka, India'], {
+        color: MUTED,
+      }),
+      cell('GSTIN: 29ABCDE1234F1Z5', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }),
+      cell('State: Karnataka (29)  ·  PAN: ABCDE1234F', { size: 8, color: MUTED }),
+    ],
+  });
 
   // Signed QR: on a real e-invoice this encodes the IRP-signed payload (JWT).
   const qrPayload = JSON.stringify({
@@ -104,54 +92,62 @@ export function generate(): Document {
     DocDt: fmt.format(now),
     Irn: IRN,
   });
-  const qr = new QRCode();
-  qr.data = qrPayload;
-  qr.size = 108;
-  qr.quietZone = 2;
-  qr.errorCorrection = QrEcc.Medium;
-  qr.foregroundColor = INK;
-  qr.backgroundColor = Color.white;
-  qr.altText = `IRP-signed QR code for GST e-invoice INV-IN-${year}-0771`;
-  const qrStack = new VerticalStack();
-  const qrWrap = new HorizontalStack();
-  qrWrap.widthDistribution = WidthDistribution.Weighted;
+  const qrWrap = new HorizontalStack({ widthDistribution: 'weighted' });
   qrWrap.addChild(new Container(), 1);
-  qrWrap.addChild(qr);
-  qrStack.addChild(qrWrap);
-  qrStack.addChild(
-    cell('Signed QR (IRP)', { size: 8, color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 4, 0, 0) })
-  );
-
-  header.addRow(seller, qrStack);
-  root.addChild(header);
-
-  // ── IRN band ────────────────────────────────────────────────────────────
-  const irnBox = new Container();
-  irnBox.backgroundColor = ColorPalette.emerald[50];
-  irnBox.cornerRadius = 6;
-  irnBox.padding = new Thickness(12, 9, 12, 9);
-  irnBox.margin = new Thickness(0, 0, 0, 16);
-  const irnStack = new VerticalStack();
-  irnStack.addChild(
-    cell('IRN (Invoice Reference Number)', { bold: true, size: 8, color: ACCENT, margin: new Thickness(0, 0, 0, 2) })
-  );
-  irnStack.addChild(cell(IRN, { size: 8, color: INK }));
-  irnStack.addChild(
-    cell('Ack No. 112500771223344   ·   Ack Date ' + fmt.format(now), {
-      size: 8,
-      color: MUTED,
-      margin: new Thickness(0, 3, 0, 0),
+  qrWrap.addChild(
+    new QRCode({
+      data: qrPayload,
+      size: 108,
+      quietZone: 2,
+      errorCorrection: 'medium',
+      foregroundColor: INK,
+      backgroundColor: '#ffffff',
+      altText: `IRP-signed QR code for GST e-invoice INV-IN-${year}-0771`,
     })
   );
-  irnBox.child = irnStack;
-  root.addChild(irnBox);
+  const qrStack = new VerticalStack({
+    children: [
+      qrWrap,
+      cell('Signed QR (IRP)', { size: 8, color: MUTED, align: 'right', margin: new Thickness(0, 4, 0, 0) }),
+    ],
+  });
+
+  header.addRow(seller, qrStack);
+  doc.add(header);
+
+  // ── IRN band ────────────────────────────────────────────────────────────
+  doc.add(
+    new Container({
+      backgroundColor: ColorPalette.emerald[50],
+      cornerRadius: 6,
+      padding: [12, 9],
+      margin: { bottom: 16 },
+      child: new VerticalStack({
+        children: [
+          cell('IRN (Invoice Reference Number)', {
+            bold: true,
+            size: 8,
+            color: ACCENT,
+            margin: new Thickness(0, 0, 0, 2),
+          }),
+          cell(IRN, { size: 8, color: INK }),
+          cell('Ack No. 112500771223344   ·   Ack Date ' + fmt.format(now), {
+            size: 8,
+            color: MUTED,
+            margin: new Thickness(0, 3, 0, 0),
+          }),
+        ],
+      }),
+    })
+  );
 
   // ── Buyer + invoice details ────────────────────────────────────────────
-  const meta = new Grid(1, 1);
-  meta.cellPadding = 12;
-  meta.border = new Border(0.5);
-  meta.borderColors = new BorderColors(RULE);
-  meta.margin = new Thickness(0, 0, 0, 16);
+  const meta = new Grid({
+    columns: [1, 1],
+    cellPadding: 12,
+    border: { width: 0.5, color: RULE },
+    margin: { bottom: 16 },
+  });
   const buyer = labelled(
     'BILL TO',
     lines(
@@ -166,26 +162,31 @@ export function generate(): Document {
     ),
     ACCENT
   );
-  const details = new VerticalStack();
-  details.addChild(totalLine('Invoice no.', `INV-IN-${year}-0771`));
-  details.addChild(totalLine('Invoice date', fmt.format(now)));
-  details.addChild(totalLine('Place of supply', 'Karnataka (29)'));
-  details.addChild(totalLine('Reverse charge', 'No'));
+  const details = new VerticalStack({
+    children: [
+      totalLine('Invoice no.', `INV-IN-${year}-0771`),
+      totalLine('Invoice date', fmt.format(now)),
+      totalLine('Place of supply', 'Karnataka (29)'),
+      totalLine('Reverse charge', 'No'),
+    ],
+  });
   meta.addRow(buyer, labelled('DETAILS', details, ACCENT));
-  root.addChild(meta);
+  doc.add(meta);
 
   // ── Line items with HSN + taxable value ────────────────────────────────
-  const table = new Table(2.6, 0.9, 0.5, 1, 1);
-  table.cellPadding = 7;
-  table.border = Border.none;
-  table.headerBackgroundColor = HEADER_BG;
-  table.headerTextColor = INK;
+  const table = new Table({
+    columns: [2.6, 0.9, 0.5, 1, 1],
+    cellPadding: 7,
+    border: 0,
+    headerBackgroundColor: HEADER_BG,
+    headerTextColor: INK,
+  });
   table.addHeader(
     cell('Description', { bold: true }),
-    cell('HSN/SAC', { bold: true, align: TextAlignment.Center }),
-    cell('Qty', { bold: true, align: TextAlignment.Center }),
-    cell('Rate', { bold: true, align: TextAlignment.Right }),
-    cell('Taxable value', { bold: true, align: TextAlignment.Right })
+    cell('HSN/SAC', { bold: true, align: 'center' }),
+    cell('Qty', { bold: true, align: 'center' }),
+    cell('Rate', { bold: true, align: 'right' }),
+    cell('Taxable value', { bold: true, align: 'right' })
   );
   let taxable = 0;
   for (const it of ITEMS) {
@@ -193,44 +194,46 @@ export function generate(): Document {
     taxable += value;
     table.addRow(
       cell(it.description),
-      cell(it.hsn, { align: TextAlignment.Center, color: MUTED }),
-      cell(String(it.qty), { align: TextAlignment.Center }),
-      cell(money(it.unitPrice, INR, 'en-IN'), { align: TextAlignment.Right }),
-      cell(money(value, INR, 'en-IN'), { align: TextAlignment.Right })
+      cell(it.hsn, { align: 'center', color: MUTED }),
+      cell(String(it.qty), { align: 'center' }),
+      cell(money(it.unitPrice, INR, 'en-IN'), { align: 'right' }),
+      cell(money(value, INR, 'en-IN'), { align: 'right' })
     );
   }
-  root.addChild(table);
-  root.addChild(divider(RULE, 0.5));
+  doc.add(table);
+  doc.add(divider(RULE, 0.5));
 
   // ── GST breakdown (intra-state → CGST + SGST) ───────────────────────────
   const cgst = taxable * CGST;
   const sgst = taxable * SGST;
   const grand = taxable + cgst + sgst;
-  const totals = new VerticalStack();
-  totals.addChild(totalLine('Taxable value', money(taxable, INR, 'en-IN')));
-  totals.addChild(totalLine('CGST @ 9%', money(cgst, INR, 'en-IN')));
-  totals.addChild(totalLine('SGST @ 9%', money(sgst, INR, 'en-IN')));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total (INR)', money(grand, INR, 'en-IN'), { bold: true, size: 13, color: ACCENT }));
-  const totalsBox = new Container();
-  totalsBox.child = totals;
-  totalsBox.padding = new Thickness(14, 12, 14, 12);
-  totalsBox.backgroundColor = ColorPalette.emerald[50];
-  totalsBox.cornerRadius = 8;
-  const totalsRow = new HorizontalStack();
-  totalsRow.widthDistribution = WidthDistribution.Weighted;
-  totalsRow.margin = new Thickness(0, 6, 0, 0);
+  const totals = new VerticalStack({
+    children: [
+      totalLine('Taxable value', money(taxable, INR, 'en-IN')),
+      totalLine('CGST @ 9%', money(cgst, INR, 'en-IN')),
+      totalLine('SGST @ 9%', money(sgst, INR, 'en-IN')),
+      divider(INK, 0.6),
+      totalLine('Total (INR)', money(grand, INR, 'en-IN'), { bold: true, size: 13, color: ACCENT }),
+    ],
+  });
+  const totalsBox = new Container({
+    child: totals,
+    padding: [14, 12],
+    backgroundColor: ColorPalette.emerald[50],
+    cornerRadius: 8,
+  });
+  const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 6 } });
   totalsRow.addChild(new Container(), 1);
   totalsRow.addChild(totalsBox, 1);
-  root.addChild(totalsRow);
+  doc.add(totalsRow);
 
-  const note = cell(
-    'This is a computer-generated e-invoice registered on the GST Invoice Registration Portal. ' +
-      'The signed QR above encodes the IRP-issued payload.',
-    { size: 8, color: MUTED, margin: new Thickness(0, 20, 0, 0) }
+  doc.add(
+    cell(
+      'This is a computer-generated e-invoice registered on the GST Invoice Registration Portal. ' +
+        'The signed QR above encodes the IRP-issued payload.',
+      { size: 8, color: MUTED, margin: new Thickness(0, 20, 0, 0) }
+    )
   );
-  root.addChild(note);
 
-  doc.add(root);
   return doc;
 }

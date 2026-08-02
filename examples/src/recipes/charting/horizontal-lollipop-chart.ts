@@ -26,14 +26,14 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
       footerTemplate: (pageNumber: number) => {
         const stack = new HorizontalStack({ widthDistribution: 'weighted' });
-        stack.addChild(
+        stack.add(
           new TextBlock('BonniePDF - Horizontal Lollipop Chart', {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
             textColor: 'slate-500',
           })
         );
-        stack.addChild(
+        stack.add(
           new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,

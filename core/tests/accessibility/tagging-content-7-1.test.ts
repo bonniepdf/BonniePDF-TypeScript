@@ -45,8 +45,8 @@ describe('PDF/UA 7.1 - no untagged text in tagged documents', () => {
   it('tags text inside a HorizontalStack child', () => {
     const pdf = tagged(d => {
       const row = new HorizontalStack();
-      row.addChild(new TextBlock('Left column text'));
-      row.addChild(new TextBlock('Right column text'));
+      row.add(new TextBlock('Left column text'));
+      row.add(new TextBlock('Right column text'));
       d.add(row);
     });
     expect(untaggedTextShows(pdf)).toBe(0);
@@ -57,7 +57,7 @@ describe('PDF/UA 7.1 - no untagged text in tagged documents', () => {
       const row = new HorizontalStack();
       const cell = new Container();
       cell.child = new TextBlock('Boxed text');
-      row.addChild(cell);
+      row.add(cell);
       d.add(row);
     });
     expect(untaggedTextShows(pdf)).toBe(0);
@@ -112,7 +112,7 @@ describe('PDF/UA 7.1 - no untagged text in tagged documents', () => {
       // must stay artifact content, not get its own /P structure scope.
       d.settings.headerTemplate = () => {
         const stack = new HorizontalStack();
-        stack.addChild(new TextBlock('Confidential'));
+        stack.add(new TextBlock('Confidential'));
         return stack;
       };
       d.add(new TextBlock('Body paragraph.'));

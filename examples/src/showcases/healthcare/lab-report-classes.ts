@@ -124,17 +124,17 @@ export function generate(): Document {
   trust.fontName = StandardFonts.HelveticaBold;
   trust.fontSize = 14;
   trust.textColor = CLINICAL_BLUE;
-  org.addChild(trust);
+  org.add(trust);
   const dept = new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry');
   dept.fontSize = 9;
   dept.textColor = MUTED;
   dept.margin = new Thickness(0, 2, 0, 0);
-  org.addChild(dept);
+  org.add(dept);
   const accred = new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189');
   accred.fontSize = 8;
   accred.textColor = MUTED;
   accred.margin = new Thickness(0, 1, 0, 0);
-  org.addChild(accred);
+  org.add(accred);
   const title = new Heading('LABORATORY REPORT');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
@@ -160,19 +160,19 @@ export function generate(): Document {
   info.borderColors = new BorderColors(RULE);
   info.margin = new Thickness(0, 0, 0, 18);
   const patient = new VerticalStack();
-  patient.addChild(sectionLabel('PATIENT'));
-  patient.addChild(kv('Name', 'WESTON, Harold'));
-  patient.addChild(kv('Date of birth', '02 Nov 1951 (74y)'));
-  patient.addChild(kv('Sex', 'Male'));
-  patient.addChild(kv('Patient ID', 'CGH-9434765919'));
-  patient.addChild(kv('Hospital no.', 'CGH-2208814'));
+  patient.add(sectionLabel('PATIENT'));
+  patient.add(kv('Name', 'WESTON, Harold'));
+  patient.add(kv('Date of birth', '02 Nov 1951 (74y)'));
+  patient.add(kv('Sex', 'Male'));
+  patient.add(kv('Patient ID', 'CGH-9434765919'));
+  patient.add(kv('Hospital no.', 'CGH-2208814'));
   const specimen = new VerticalStack();
-  specimen.addChild(sectionLabel('SPECIMEN'));
-  specimen.addChild(kv('Specimen ID', 'L26-118842'));
-  specimen.addChild(kv('Collected', '06 Jul 2026 08:14'));
-  specimen.addChild(kv('Received', '06 Jul 2026 09:02'));
-  specimen.addChild(kv('Reported', '06 Jul 2026 11:37'));
-  specimen.addChild(kv('Requested by', 'Dr A. Kaur, Ward 12'));
+  specimen.add(sectionLabel('SPECIMEN'));
+  specimen.add(kv('Specimen ID', 'L26-118842'));
+  specimen.add(kv('Collected', '06 Jul 2026 08:14'));
+  specimen.add(kv('Received', '06 Jul 2026 09:02'));
+  specimen.add(kv('Reported', '06 Jul 2026 11:37'));
+  specimen.add(kv('Requested by', 'Dr A. Kaur, Ward 12'));
   info.addRow(patient, specimen);
   doc.add(info);
 
@@ -227,17 +227,17 @@ export function generate(): Document {
   auth.padding = new Thickness(14, 10, 14, 10);
   auth.margin = new Thickness(0, 8, 0, 0);
   const astack = new VerticalStack();
-  astack.addChild(sectionLabel('AUTHORISED BY'));
+  astack.add(sectionLabel('AUTHORISED BY'));
   const authName = new TextBlock('Dr S. Patel, Consultant Haematologist (electronically authorised)');
   authName.fontName = StandardFonts.HelveticaBold;
   authName.fontSize = 10;
   authName.textColor = INK;
   authName.margin = new Thickness(0, 2, 0, 2);
-  astack.addChild(authName);
+  astack.add(authName);
   const authMeta = new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503');
   authMeta.fontSize = 8.5;
   authMeta.textColor = MUTED;
-  astack.addChild(authMeta);
+  astack.add(authMeta);
   auth.child = astack;
   doc.add(auth);
 
@@ -283,11 +283,11 @@ function kv(label: string, value: string): HorizontalStack {
   l.fontName = StandardFonts.HelveticaBold;
   l.fontSize = 9;
   l.textColor = MUTED;
-  row.addChild(l, 2);
+  row.add(l, 2);
   const v = new TextBlock(value);
   v.fontSize = 9.5;
   v.textColor = INK;
-  row.addChild(v, 3);
+  row.add(v, 3);
   return row;
 }
 

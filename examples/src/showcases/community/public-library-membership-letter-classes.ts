@@ -133,8 +133,8 @@ export function generate(): Document {
   const addr = body('Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT', { mb: 0 });
 
   const meta = new VerticalStack();
-  meta.addChild(body(longDate, { align: TextAlignment.Right, mb: 0 }));
-  meta.addChild(
+  meta.add(body(longDate, { align: TextAlignment.Right, mb: 0 }));
+  meta.add(
     body('Membership no. NBL-4471-208823', {
       align: TextAlignment.Right,
       color: LIBRARY_SECONDARY,
@@ -165,17 +165,17 @@ export function generate(): Document {
   const clabel = new TextBlock('Membership status');
   clabel.fontSize = 11;
   clabel.textColor = LIBRARY_SECONDARY;
-  cstack.addChild(clabel);
+  cstack.add(clabel);
   const cval = new TextBlock('Active');
   cval.fontName = StandardFonts.HelveticaBold;
   cval.fontSize = 28;
   cval.textColor = LIBRARY_INK;
   cval.margin = new Thickness(0, 2, 0, 2);
-  cstack.addChild(cval);
+  cstack.add(cval);
   const cdate = new TextBlock('Borrow, renew, and reserve items from today');
   cdate.fontSize = 11;
   cdate.textColor = LIBRARY_SECONDARY;
-  cstack.addChild(cdate);
+  cstack.add(cdate);
   callout.child = cstack;
   doc.add(callout);
 

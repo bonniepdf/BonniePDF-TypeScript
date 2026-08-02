@@ -112,12 +112,12 @@ export function generate(): Document {
   crest.fontName = StandardFonts.HelveticaBold;
   crest.fontSize = 16;
   crest.textColor = NAVY;
-  uni.addChild(crest);
+  uni.add(crest);
   const estd = new TextBlock('Founded 1887  ·  Registrar’s Office');
   estd.fontSize = 9;
   estd.textColor = MUTED;
   estd.margin = new Thickness(0, 2, 0, 0);
-  uni.addChild(estd);
+  uni.add(estd);
   const doctype = new TextBlock('ACADEMIC TRANSCRIPT');
   doctype.fontName = StandardFonts.HelveticaBold;
   doctype.fontSize = 12;
@@ -139,13 +139,13 @@ export function generate(): Document {
   details.border = Border.none;
   details.margin = new Thickness(0, 0, 0, 18);
   const left = new VerticalStack();
-  left.addChild(kv('Student', 'Alexandra R. Bennett'));
-  left.addChild(kv('Student ID', '20458812'));
-  left.addChild(kv('Date of birth', '14 March 2003'));
+  left.add(kv('Student', 'Alexandra R. Bennett'));
+  left.add(kv('Student ID', '20458812'));
+  left.add(kv('Date of birth', '14 March 2003'));
   const right = new VerticalStack();
-  right.addChild(kv('Programme', 'BSc (Hons) Computer Science'));
-  right.addChild(kv('Awarding body', 'University of Wessexbridge'));
-  right.addChild(kv('Date conferred', '15 July 2026'));
+  right.add(kv('Programme', 'BSc (Hons) Computer Science'));
+  right.add(kv('Awarding body', 'University of Wessexbridge'));
+  right.add(kv('Date conferred', '15 July 2026'));
   details.addRow(left, right);
   doc.add(details);
 
@@ -165,16 +165,16 @@ export function generate(): Document {
   blabel.fontName = StandardFonts.HelveticaBold;
   blabel.fontSize = 8;
   blabel.textColor = MUTED;
-  bstack.addChild(blabel);
+  bstack.add(blabel);
   // The award is the transcript's primary heading (H1). Tagging it as the
   // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2); the
   // section headings below are H2. Styling is unchanged.
   const bval = h1('Upper Second-Class Honours (2:1)');
-  bstack.addChild(bval);
+  bstack.add(bval);
   const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`);
   bmeta.fontSize = 9;
   bmeta.textColor = INK;
-  bstack.addChild(bmeta);
+  bstack.add(bmeta);
   banner.child = bstack;
   doc.add(banner);
 
@@ -209,8 +209,8 @@ export function generate(): Document {
   const verify = new HorizontalStack();
   verify.widthDistribution = WidthDistribution.Weighted;
   const vtext = new VerticalStack();
-  vtext.addChild(h2('Verification'));
-  vtext.addChild(
+  vtext.add(h2('Verification'));
+  vtext.add(
     body(
       'This is an official record issued by the University of Wessexbridge. Scan ' +
         'the code or visit verify.wessexbridge.ac.uk and enter transcript reference ' +
@@ -228,8 +228,8 @@ export function generate(): Document {
   qrWrap.child = qr;
   qrWrap.horizontalAlignment = HorizontalAlignment.End;
 
-  verify.addChild(vtext, 3);
-  verify.addChild(qrWrap, 1);
+  verify.add(vtext, 3);
+  verify.add(qrWrap, 1);
   doc.add(verify);
 
   return doc;
@@ -275,11 +275,11 @@ function kv(label: string, value: string): HorizontalStack {
   l.fontName = StandardFonts.HelveticaBold;
   l.fontSize = 9;
   l.textColor = MUTED;
-  row.addChild(l, 2);
+  row.add(l, 2);
   const v = new TextBlock(value);
   v.fontSize = 10;
   v.textColor = INK;
-  row.addChild(v, 3);
+  row.add(v, 3);
   return row;
 }
 

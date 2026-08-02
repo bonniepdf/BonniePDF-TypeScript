@@ -118,18 +118,18 @@ export function generate(): Document {
 
   // ── From / To addresses ─────────────────────────────────────────────────────
   const from = new VerticalStack();
-  from.addChild(tb('FROM', 7, MUTE, { bold: true, mb: 2 }));
-  from.addChild(tb('Sample Supplies', 8, INK, { bold: true }));
-  from.addChild(tb('4 Tenter Ground\nLondon E1 7NH, UK', 8, BODY));
+  from.add(tb('FROM', 7, MUTE, { bold: true, mb: 2 }));
+  from.add(tb('Sample Supplies', 8, INK, { bold: true }));
+  from.add(tb('4 Tenter Ground\nLondon E1 7NH, UK', 8, BODY));
   const fromWrap = new Container();
   fromWrap.child = from;
   fromWrap.margin = new Thickness(0, 0, 0, 4);
   doc.add(fromWrap);
 
   const to = new VerticalStack();
-  to.addChild(tb('SHIP TO', 8, MUTE, { bold: true, mb: 3 }));
-  to.addChild(tb('Jordan Avery', 13, INK, { bold: true }));
-  to.addChild(tb('Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom', 10, INK));
+  to.add(tb('SHIP TO', 8, MUTE, { bold: true, mb: 3 }));
+  to.add(tb('Jordan Avery', 13, INK, { bold: true }));
+  to.add(tb('Sample Customer Ltd\n19 Enfield Road\nLondon N1 5BA\nUnited Kingdom', 10, INK));
   const toWrap = new Container();
   toWrap.child = to;
   toWrap.border = new Border(1);
@@ -163,8 +163,8 @@ export function generate(): Document {
   carton.height = 40;
   carton.altText = 'Carton code (ITF-14): 1540141253721';
   const cartonStack = new VerticalStack();
-  cartonStack.addChild(tb('CARTON (ITF-14)', 7, MUTE, { bold: true, mb: 2 }));
-  cartonStack.addChild(carton);
+  cartonStack.add(tb('CARTON (ITF-14)', 7, MUTE, { bold: true, mb: 2 }));
+  cartonStack.add(carton);
 
   const qr = new QRCode();
   qr.data = 'https://track.example.com/p/1Z999AA10123456784';
@@ -173,11 +173,11 @@ export function generate(): Document {
   qr.errorCorrection = QrEcc.Quartile;
   qr.altText = 'QR code linking to parcel tracking for 1Z999AA10123456784';
   const qrStack = new VerticalStack();
-  qrStack.addChild(tb('SCAN', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Right }));
+  qrStack.add(tb('SCAN', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Right }));
   const qrInner = new Container();
   qrInner.horizontalAlignment = HorizontalAlignment.End;
   qrInner.child = qr;
-  qrStack.addChild(qrInner);
+  qrStack.add(qrInner);
 
   const bottom = new Grid(2, 1);
   bottom.border = Border.none;

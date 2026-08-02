@@ -65,13 +65,13 @@ export function generate(): Document {
   eyebrow.fontSize = 11;
   eyebrow.textColor = ColorPalette.blue[200];
   eyebrow.margin = new Thickness(0, 0, 0, 6);
-  bannerStack.addChild(eyebrow);
+  bannerStack.add(eyebrow);
 
   const bannerTitle = new TextBlock('Product Strategy Proposal');
   bannerTitle.fontName = StandardFonts.HelveticaBold;
   bannerTitle.fontSize = 26;
   bannerTitle.textColor = ColorPalette.slate[50];
-  bannerStack.addChild(bannerTitle);
+  bannerStack.add(bannerTitle);
 
   const banner = new Container();
   banner.backgroundColor = ColorPalette.blue[700];

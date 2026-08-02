@@ -156,10 +156,10 @@ export function generate(): Document {
 
   // Meta line.
   const metaRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 4, bottom: 20 } });
-  metaRow.addChild(metaItem('Report ref', 'AR-2026-014'), 1);
-  metaRow.addChild(metaItem('Audit period', 'Apr–Jun 2026'), 1);
-  metaRow.addChild(metaItem('Issued', longDate), 1);
-  metaRow.addChild(metaItem('Auditor', 'Aegis Assurance LLP'), 1);
+  metaRow.add(metaItem('Report ref', 'AR-2026-014'), 1);
+  metaRow.add(metaItem('Audit period', 'Apr–Jun 2026'), 1);
+  metaRow.add(metaItem('Issued', longDate), 1);
+  metaRow.add(metaItem('Auditor', 'Aegis Assurance LLP'), 1);
   doc.add(metaRow);
 
   // ── Executive summary ─────────────────────────────────────────────────────
@@ -177,16 +177,16 @@ export function generate(): Document {
 
   // ── KPI tiles ─────────────────────────────────────────────────────────────
   const kpis = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { top: 6, bottom: 20 } });
-  kpis.addChild(kpi('82%', 'Overall conformance', PRIMARY), 1);
-  kpis.addChild(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
-  kpis.addChild(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
-  kpis.addChild(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
+  kpis.add(kpi('82%', 'Overall conformance', PRIMARY), 1);
+  kpis.add(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
+  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
+  kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
   // ── Charts: control status donut + findings-by-severity column ────────────
   const charts = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14, margin: { bottom: 6 } });
-  charts.addChild(card('Control status (93 controls)', controlDonut()), 1);
-  charts.addChild(card('Findings by severity', severityBars()), 1);
+  charts.add(card('Control status (93 controls)', controlDonut()), 1);
+  charts.add(card('Findings by severity', severityBars()), 1);
   doc.add(charts);
 
   // ── Findings register (flows to page 2, repeating header) ────────────────
@@ -290,8 +290,8 @@ function severityBars(): ChartBase {
 
 function bandRow(left: string, right: string, rightColor: ColorInput): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
-  row.addChild(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }), 3);
-  row.addChild(
+  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }), 3);
+  row.add(
     new TextBlock(right, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 8,

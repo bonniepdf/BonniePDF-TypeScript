@@ -106,7 +106,7 @@ export function generate(): Document {
     doc.add(sectionHeader(sectionTitle));
 
     const row = new HorizontalStack({ spacing: 20, widthDistribution: 'weighted' });
-    row.addChild(
+    row.add(
       new Container({
         backgroundColor: '#ffffff',
         border: { width: 1, color: 'slate-200' },
@@ -115,7 +115,7 @@ export function generate(): Document {
       }),
       1
     );
-    row.addChild(
+    row.add(
       new VerticalStack({
         children: [
           new TextBlock(cardTitle, {

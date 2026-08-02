@@ -129,8 +129,8 @@ function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>
 
 function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>): Container {
   const meta = new HorizontalStack({ widthDistribution: 'weighted' });
-  meta.addChild(new TextBlock(product.sku, { fontSize: 9, textColor: ColorPalette.slate[500] }), 1);
-  meta.addChild(
+  meta.add(new TextBlock(product.sku, { fontSize: 9, textColor: ColorPalette.slate[500] }), 1);
+  meta.add(
     new TextBlock(product.price, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
@@ -212,11 +212,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const gallery = new VerticalStack({ spacing: 16 });
   for (let i = 0; i < PRODUCTS.length; i += 2) {
     const row = new HorizontalStack({ spacing: 16, widthDistribution: 'equal' });
-    row.addChild(productCard(PRODUCTS[i], assets));
+    row.add(productCard(PRODUCTS[i], assets));
     if (i + 1 < PRODUCTS.length) {
-      row.addChild(productCard(PRODUCTS[i + 1], assets));
+      row.add(productCard(PRODUCTS[i + 1], assets));
     }
-    gallery.addChild(row);
+    gallery.add(row);
   }
   doc.add(gallery);
 

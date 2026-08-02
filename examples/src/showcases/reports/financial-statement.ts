@@ -167,17 +167,17 @@ function renderLine(l: Line): IElement {
   label.fontSize = 10;
   label.textColor = bold ? NAVY : INK;
   if (l.indent) label.margin = new Thickness(14, 0, 0, 0);
-  row.addChild(label, 6);
-  row.addChild(numCell(l.note ?? '', false, MUTED, TextAlignment.Center), 1);
-  row.addChild(numCell(fmt(l.cur), bold, bold ? NAVY : INK, TextAlignment.Right), 2);
-  row.addChild(numCell(fmt(l.prior), bold, MUTED, TextAlignment.Right), 2);
+  row.add(label, 6);
+  row.add(numCell(l.note ?? '', false, MUTED, TextAlignment.Center), 1);
+  row.add(numCell(fmt(l.cur), bold, bold ? NAVY : INK, TextAlignment.Right), 2);
+  row.add(numCell(fmt(l.prior), bold, MUTED, TextAlignment.Right), 2);
 
   // Subtotals/totals get a rule above; totals a heavier one.
   if (l.kind === 'subtotal' || l.kind === 'total') {
     const stack = new VerticalStack();
-    stack.addChild(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
-    stack.addChild(row);
-    if (l.kind === 'total') stack.addChild(rule(NAVY, 0.5));
+    stack.add(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
+    stack.add(row);
+    if (l.kind === 'total') stack.add(rule(NAVY, 0.5));
     return stack;
   }
   return row;
@@ -196,10 +196,10 @@ function columnHeads(): HorizontalStack {
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
   row.margin = new Thickness(0, 2, 0, 2);
-  row.addChild(numCell('', false, MUTED, TextAlignment.Left), 6);
-  row.addChild(numCell('Note', false, MUTED, TextAlignment.Center), 1);
-  row.addChild(numCell('2026', true, NAVY, TextAlignment.Right), 2);
-  row.addChild(numCell('2025', true, MUTED, TextAlignment.Right), 2);
+  row.add(numCell('', false, MUTED, TextAlignment.Left), 6);
+  row.add(numCell('Note', false, MUTED, TextAlignment.Center), 1);
+  row.add(numCell('2026', true, NAVY, TextAlignment.Right), 2);
+  row.add(numCell('2025', true, MUTED, TextAlignment.Right), 2);
   return row;
 }
 

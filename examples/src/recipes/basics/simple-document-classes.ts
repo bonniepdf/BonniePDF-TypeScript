@@ -77,7 +77,7 @@ export function generate(): Document {
 
   const features = new UnorderedList();
   features.fontSize = 11;
-  features.itemSpacing = 2;
+  features.itemSpacing = 6;
   for (const item of [
     'Simple, intuitive API',
     'Built-in metadata support',

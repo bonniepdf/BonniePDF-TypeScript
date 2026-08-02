@@ -61,8 +61,8 @@ function tb(
 
 function field(label: string, value: string, color: Color, labelColor: Color): VerticalStack {
   const v = new VerticalStack();
-  v.addChild(tb(label, 7, labelColor, { bold: true, mb: 2 }));
-  v.addChild(tb(value, 11, color, { bold: true }));
+  v.add(tb(label, 7, labelColor, { bold: true, mb: 2 }));
+  v.add(tb(value, 11, color, { bold: true }));
   return v;
 }
 
@@ -106,16 +106,16 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   // ── Main body (dark) ────────────────────────────────────────────────────────
   const info = new VerticalStack();
-  info.addChild(tb('SAMPLE LIVE presents', 8, ACCENT, { bold: true, mb: 6 }));
+  info.add(tb('SAMPLE LIVE presents', 8, ACCENT, { bold: true, mb: 6 }));
 
   const eventName = new Heading('Sample Sound Festival');
   eventName.fontName = StandardFonts.HelveticaBold;
   eventName.fontSize = 19;
   eventName.textColor = CREAM;
   eventName.margin = new Thickness(0, 0, 0, 3);
-  info.addChild(eventName);
+  info.add(eventName);
 
-  info.addChild(tb('Main Stage, Victoria Park, London', 10, BODY, { mb: 12 }));
+  info.add(tb('Main Stage, Victoria Park, London', 10, BODY, { mb: 12 }));
 
   const facts = new Grid(1, 1, 1);
   facts.border = Border.none;
@@ -125,7 +125,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     field('GATES', '16:00', CREAM, MUTE),
     field('ADMITS', 'One', CREAM, MUTE)
   );
-  info.addChild(facts);
+  info.add(facts);
 
   // Ticket-id barcode runs along the full width of the body.
   const ticketBarcode = new Barcode();
@@ -143,7 +143,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const barcodeWrap = new Container();
   barcodeWrap.child = ticketBarcode;
   barcodeWrap.margin = new Thickness(0, 16, 0, 0);
-  info.addChild(barcodeWrap);
+  info.add(barcodeWrap);
 
   const body = new Container();
   body.backgroundColor = bgData ? INK.withAlpha(0.82) : INK;
@@ -153,7 +153,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   // ── Tear-off stub (lighter) with the QR entry pass ──────────────────────────
   const stub = new VerticalStack();
-  stub.addChild(tb('ADMIT ONE', 8, ACCENT, { bold: true, mb: 8, align: TextAlignment.Center }));
+  stub.add(tb('ADMIT ONE', 8, ACCENT, { bold: true, mb: 8, align: TextAlignment.Center }));
 
   const qr = new QRCode();
   qr.data = 'https://tix.aurora.example/t/ASF26-4471-XK';
@@ -173,12 +173,12 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   qrWrap.horizontalAlignment = HorizontalAlignment.Center;
   qrWrap.margin = new Thickness(0, 0, 0, 10);
   qrWrap.child = qrCard;
-  stub.addChild(qrWrap);
+  stub.add(qrWrap);
 
-  stub.addChild(tb('SECTION', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Center }));
-  stub.addChild(tb('GA - STANDING', 12, CREAM, { bold: true, mb: 8, align: TextAlignment.Center }));
-  stub.addChild(tb('TICKET', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Center }));
-  stub.addChild(tb('ASF26-4471-XK', 10, CREAM, { bold: true, align: TextAlignment.Center }));
+  stub.add(tb('SECTION', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Center }));
+  stub.add(tb('GA - STANDING', 12, CREAM, { bold: true, mb: 8, align: TextAlignment.Center }));
+  stub.add(tb('TICKET', 7, MUTE, { bold: true, mb: 2, align: TextAlignment.Center }));
+  stub.add(tb('ASF26-4471-XK', 10, CREAM, { bold: true, align: TextAlignment.Center }));
 
   const stubBox = new Container();
   stubBox.backgroundColor = STUB;

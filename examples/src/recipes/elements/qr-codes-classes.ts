@@ -86,7 +86,7 @@ export function generate(): Document {
   const basicQrWrap = new Container();
   basicQrWrap.padding = new Thickness(10);
   basicQrWrap.child = basicQr;
-  basicRow.addChild(basicQrWrap, 1);
+  basicRow.add(basicQrWrap, 1);
 
   const basicDetails = new VerticalStack();
   for (const [text, bold, mb] of [
@@ -99,9 +99,9 @@ export function generate(): Document {
     const t = new TextBlock(text);
     t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
     if (mb) t.margin = new Thickness(0, 0, 0, mb);
-    basicDetails.addChild(t);
+    basicDetails.add(t);
   }
-  basicRow.addChild(basicDetails, 2);
+  basicRow.add(basicDetails, 2);
   doc.add(basicRow);
 
   const basicDivider = new Line();
@@ -167,11 +167,11 @@ export function generate(): Document {
     url.margin = new Thickness(0, 4, 0, 0);
 
     const col = new VerticalStack();
-    col.addChild(qrWrap);
-    col.addChild(label);
-    col.addChild(detail);
-    col.addChild(url);
-    eccRow.addChild(col);
+    col.add(qrWrap);
+    col.add(label);
+    col.add(detail);
+    col.add(url);
+    eccRow.add(col);
   }
   doc.add(eccRow);
 
@@ -198,7 +198,7 @@ export function generate(): Document {
   const fgTitle = new TextBlock('Custom Foreground');
   fgTitle.fontName = StandardFonts.HelveticaBold;
   fgTitle.margin = new Thickness(0, 0, 0, 8);
-  fgCol.addChild(fgTitle);
+  fgCol.add(fgTitle);
   const fgQr = new QRCode();
   fgQr.data = 'tel:+1234567890';
   fgQr.size = 120;
@@ -210,21 +210,21 @@ export function generate(): Document {
   fgWrap.borderColors = new BorderColors(ColorPalette.blue[200]);
   fgWrap.padding = new Thickness(10);
   fgWrap.child = fgQr;
-  fgCol.addChild(fgWrap);
+  fgCol.add(fgWrap);
   const fgLabel = new TextBlock('tel:+1234567890');
   fgLabel.fontSize = 9;
   fgLabel.textColor = ColorPalette.slate[500];
   fgLabel.alignment = TextAlignment.Center;
   fgLabel.margin = new Thickness(0, 8, 0, 0);
-  fgCol.addChild(fgLabel);
-  colorRow.addChild(fgCol);
+  fgCol.add(fgLabel);
+  colorRow.add(fgCol);
 
   // Custom background
   const bgCol = new VerticalStack();
   const bgTitle = new TextBlock('Custom Background');
   bgTitle.fontName = StandardFonts.HelveticaBold;
   bgTitle.margin = new Thickness(0, 0, 0, 8);
-  bgCol.addChild(bgTitle);
+  bgCol.add(bgTitle);
   const bgQr = new QRCode();
   bgQr.data = 'mailto:hello@example.com';
   bgQr.size = 120;
@@ -237,21 +237,21 @@ export function generate(): Document {
   bgWrap.borderColors = new BorderColors(ColorPalette.rose[200]);
   bgWrap.padding = new Thickness(10);
   bgWrap.child = bgQr;
-  bgCol.addChild(bgWrap);
+  bgCol.add(bgWrap);
   const bgLabel = new TextBlock('mailto:hello@example.com');
   bgLabel.fontSize = 9;
   bgLabel.textColor = ColorPalette.slate[500];
   bgLabel.alignment = TextAlignment.Center;
   bgLabel.margin = new Thickness(0, 8, 0, 0);
-  bgCol.addChild(bgLabel);
-  colorRow.addChild(bgCol);
+  bgCol.add(bgLabel);
+  colorRow.add(bgCol);
 
   // Transparent background (container shows through)
   const transCol = new VerticalStack();
   const transTitle = new TextBlock('Transparent Background');
   transTitle.fontName = StandardFonts.HelveticaBold;
   transTitle.margin = new Thickness(0, 0, 0, 8);
-  transCol.addChild(transTitle);
+  transCol.add(transTitle);
   const transQr = new QRCode();
   transQr.data = 'WIFI:S:MyNetwork;T:WPA;P:password;;';
   transQr.size = 120;
@@ -265,14 +265,14 @@ export function generate(): Document {
   transWrap.borderColors = new BorderColors(ColorPalette.amber[300]);
   transWrap.padding = new Thickness(10);
   transWrap.child = transQr;
-  transCol.addChild(transWrap);
+  transCol.add(transWrap);
   const transLabel = new TextBlock('WIFI:S:MyNetwork;...');
   transLabel.fontSize = 9;
   transLabel.textColor = ColorPalette.slate[500];
   transLabel.alignment = TextAlignment.Center;
   transLabel.margin = new Thickness(0, 8, 0, 0);
-  transCol.addChild(transLabel);
-  colorRow.addChild(transCol);
+  transCol.add(transLabel);
+  colorRow.add(transCol);
 
   doc.add(colorRow);
 

@@ -100,9 +100,9 @@ export function generate(): Document {
     const row = new HorizontalStack({ spacing: 4, margin: { left: 16, bottom: 10 } });
 
     const label = new TextBlock('begins on page', { fontSize: 11, textColor: 'slate-500' });
-    row.addChild(label, label.getPreferredWidth());
+    row.add(label, label.getPreferredWidth());
 
-    row.addChild(new PageNumberOf(id, { fontName: StandardFonts.HelveticaBold, fontSize: 11, textColor: 'slate-700' }));
+    row.add(new PageNumberOf(id, { fontName: StandardFonts.HelveticaBold, fontSize: 11, textColor: 'slate-700' }));
 
     doc.add(row);
   }

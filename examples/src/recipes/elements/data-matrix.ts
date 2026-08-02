@@ -58,7 +58,7 @@ export function generate(): Document {
   doc.add(sectionHeader('Basic Data Matrix'));
 
   const basicRow = new HorizontalStack({ spacing: 20, widthDistribution: 'weighted' });
-  basicRow.addChild(
+  basicRow.add(
     new Container({
       padding: 10,
       child: new DataMatrix({
@@ -70,7 +70,7 @@ export function generate(): Document {
     }),
     1
   );
-  basicRow.addChild(
+  basicRow.add(
     new VerticalStack({
       children: (
         [

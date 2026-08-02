@@ -207,8 +207,8 @@ function kv(label: string, value: string, opts: { bold?: boolean; size?: number 
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
   row.margin = new Thickness(0, 1.5, 0, 1.5);
-  row.addChild(cell(label, size, opts.bold, TextAlignment.Left), 3);
-  row.addChild(cell(value, size, opts.bold, TextAlignment.Right), 2);
+  row.add(cell(label, size, opts.bold, TextAlignment.Left), 3);
+  row.add(cell(value, size, opts.bold, TextAlignment.Right), 2);
   return row;
 }
 

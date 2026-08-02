@@ -275,8 +275,8 @@ function sectionLabel(text: string): TextBlock {
 
 function kv(label: string, value: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 4 } });
-  row.addChild(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
-  row.addChild(new TextBlock(value, { fontSize: 9.5, textColor: INK }), 3);
+  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
+  row.add(new TextBlock(value, { fontSize: 9.5, textColor: INK }), 3);
   return row;
 }
 

@@ -169,8 +169,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     cornerRadius: 8,
   });
   const totalsRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 6 } });
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   // ── Remittance + embedded-XML panel ───────────────────────────────────────

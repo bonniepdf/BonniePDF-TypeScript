@@ -71,8 +71,8 @@ function card(bandColor: Color, bandTitle: string, body: TextBlock | VerticalSta
   bodyWrap.child = body;
 
   const stack = new VerticalStack();
-  stack.addChild(band);
-  stack.addChild(bodyWrap);
+  stack.add(band);
+  stack.add(bodyWrap);
 
   const c = new Container();
   c.backgroundColor = CARD;
@@ -106,12 +106,12 @@ export function generate(): Document {
 
   // ── Page header band ─────────────────────────────────────────────────────
   const brand = new VerticalStack();
-  brand.addChild(tb('SAMPLE HEALTHCARE', 13, Color.white, { bold: true }));
-  brand.addChild(tb('Patient Summary', 8, CREAM, { top: 4 }));
+  brand.add(tb('SAMPLE HEALTHCARE', 13, Color.white, { bold: true }));
+  brand.add(tb('Patient Summary', 8, CREAM, { top: 4 }));
 
   const issued = new VerticalStack();
-  issued.addChild(tb('Confidential', 8, CREAM, { align: TextAlignment.Right }));
-  issued.addChild(tb('Generated 18 June 2026', 8, CREAM, { align: TextAlignment.Right, top: 4 }));
+  issued.add(tb('Confidential', 8, CREAM, { align: TextAlignment.Right }));
+  issued.add(tb('Generated 18 June 2026', 8, CREAM, { align: TextAlignment.Right, top: 4 }));
 
   const headerGrid = new Grid(1, 1);
   headerGrid.border = Border.none;
@@ -136,8 +136,8 @@ export function generate(): Document {
 
   // ── 1. Patient card (teal bleed band) ────────────────────────────────────
   const idLine = new VerticalStack();
-  idLine.addChild(tb('Eleanor M. Whitfield', 15, Color.white, { bold: true }));
-  idLine.addChild(tb('MRN 00482931  ·  DOB 14 Mar 1979  ·  Female', 9, CREAM, { top: 5 }));
+  idLine.add(tb('Eleanor M. Whitfield', 15, Color.white, { bold: true }));
+  idLine.add(tb('MRN 00482931  ·  DOB 14 Mar 1979  ·  Female', 9, CREAM, { top: 5 }));
 
   const patientBand = new Container();
   patientBand.backgroundColor = TEAL;
@@ -145,14 +145,14 @@ export function generate(): Document {
   patientBand.child = idLine;
 
   const detailsLeft = new VerticalStack();
-  detailsLeft.addChild(detailRow('Blood type', 'O positive'));
-  detailsLeft.addChild(detailRow('Primary GP', 'Dr. A. Okafor'));
-  detailsLeft.addChild(detailRow('Phone', '+44 7700 900482'));
+  detailsLeft.add(detailRow('Blood type', 'O positive'));
+  detailsLeft.add(detailRow('Primary GP', 'Dr. A. Okafor'));
+  detailsLeft.add(detailRow('Phone', '+44 7700 900482'));
 
   const detailsRight = new VerticalStack();
-  detailsRight.addChild(detailRow('NHS number', '943 476 5919'));
-  detailsRight.addChild(detailRow('Ward', 'Cardiology - 4B'));
-  detailsRight.addChild(detailRow('Admitted', '16 Jun 2026'));
+  detailsRight.add(detailRow('NHS number', '943 476 5919'));
+  detailsRight.add(detailRow('Ward', 'Cardiology - 4B'));
+  detailsRight.add(detailRow('Admitted', '16 Jun 2026'));
 
   const detailsGrid = new Grid(1, 1);
   detailsGrid.border = Border.none;
@@ -165,8 +165,8 @@ export function generate(): Document {
   detailsBody.child = detailsGrid;
 
   const patientStack = new VerticalStack();
-  patientStack.addChild(patientBand);
-  patientStack.addChild(detailsBody);
+  patientStack.add(patientBand);
+  patientStack.add(detailsBody);
 
   const patientCard = new Container();
   patientCard.backgroundColor = CARD;
@@ -181,10 +181,10 @@ export function generate(): Document {
   // ── 2. Vitals card (indigo bleed band, 4-up grid) ────────────────────────
   const vital = (value: string, unit: string, label: string, status: string, tone: Color): VerticalStack => {
     const v = new VerticalStack();
-    v.addChild(tb(value, 18, INK, { bold: true }));
-    v.addChild(tb(unit, 8, MUTE, { top: 2 }));
-    v.addChild(tb(label.toUpperCase(), 7.5, BODY, { bold: true, top: 8 }));
-    v.addChild(tb(status, 7.5, tone, { bold: true, top: 3 }));
+    v.add(tb(value, 18, INK, { bold: true }));
+    v.add(tb(unit, 8, MUTE, { top: 2 }));
+    v.add(tb(label.toUpperCase(), 7.5, BODY, { bold: true, top: 8 }));
+    v.add(tb(status, 7.5, tone, { bold: true, top: 3 }));
     return v;
   };
 
@@ -212,7 +212,7 @@ export function generate(): Document {
     const c = new Container();
     c.child = row;
     if (top) c.margin = new Thickness(0, top, 0, 0);
-    alerts.addChild(c);
+    alerts.add(c);
   };
   alert('Penicillin', 'Anaphylaxis - documented 2014. Avoid all beta-lactams.', 0);
   alert('Latex', 'Contact urticaria. Use nitrile gloves.', 6);

@@ -255,18 +255,18 @@ function findingCard(finding: Finding): Container {
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 12;
   heading.textColor = ColorPalette.slate[800];
-  body.addChild(heading);
+  body.add(heading);
 
   const category = new TextBlock(finding.category);
   category.fontName = StandardFonts.HelveticaBold;
   category.fontSize = 9;
   category.textColor = ColorPalette.slate[500];
-  body.addChild(category);
+  body.add(category);
 
   const description = new TextBlock(finding.description);
   description.fontSize = 10.5;
   description.textColor = ColorPalette.slate[700];
-  body.addChild(description);
+  body.add(description);
 
   // Optional "Related: F-XXX (page N)" cross-reference - a clickable SectionLink
   // to the related finding plus its resolved page number, on one row.
@@ -279,33 +279,33 @@ function findingCard(finding: Finding): Container {
     relatedLabel.fontName = StandardFonts.HelveticaBold;
     relatedLabel.fontSize = 9;
     relatedLabel.textColor = ColorPalette.slate[500];
-    relatedRow.addChild(relatedLabel, relatedLabel.getPreferredWidth());
+    relatedRow.add(relatedLabel, relatedLabel.getPreferredWidth());
 
     const relatedLink = new SectionLink(finding.related, anchorFor(finding.related));
     relatedLink.fontName = StandardFonts.HelveticaBold;
     relatedLink.fontSize = 9;
     relatedLink.textColor = ColorPalette.blue[700];
-    relatedRow.addChild(relatedLink, relatedLink.getPreferredWidth());
+    relatedRow.add(relatedLink, relatedLink.getPreferredWidth());
 
     const onPage = new TextBlock('on page');
     onPage.fontSize = 9;
     onPage.textColor = ColorPalette.slate[500];
-    relatedRow.addChild(onPage, onPage.getPreferredWidth());
+    relatedRow.add(onPage, onPage.getPreferredWidth());
 
     const relatedPage = new PageNumberOf(anchorFor(finding.related));
     relatedPage.fontName = StandardFonts.HelveticaBold;
     relatedPage.fontSize = 9;
     relatedPage.textColor = ColorPalette.slate[600];
-    relatedRow.addChild(relatedPage);
+    relatedRow.add(relatedPage);
 
-    body.addChild(relatedRow);
+    body.add(relatedRow);
   }
 
   const row = new HorizontalStack();
   row.spacing = 12;
   row.widthDistribution = WidthDistribution.Weighted;
-  row.addChild(badge);
-  row.addChild(body, 1);
+  row.add(badge);
+  row.add(body, 1);
 
   const card = new Container();
   card.child = row;
@@ -336,13 +336,13 @@ function priorityActions(critical: Finding[]): Container {
   heading.fontSize = 13;
   heading.textColor = ColorPalette.red[800];
   heading.margin = new Thickness(0, 0, 0, 2);
-  inner.addChild(heading);
+  inner.add(heading);
 
   const lead = new TextBlock(`${critical.length} critical findings require immediate remediation:`);
   lead.fontSize = 10;
   lead.textColor = ColorPalette.slate[600];
   lead.margin = new Thickness(0, 0, 0, 4);
-  inner.addChild(lead);
+  inner.add(lead);
 
   for (const finding of critical) {
     const row = new HorizontalStack();
@@ -353,20 +353,20 @@ function priorityActions(critical: Finding[]): Container {
     link.fontName = StandardFonts.HelveticaBold;
     link.fontSize = 10.5;
     link.textColor = ColorPalette.blue[700];
-    row.addChild(link, link.getPreferredWidth());
+    row.add(link, link.getPreferredWidth());
 
     const onPage = new TextBlock('page');
     onPage.fontSize = 10;
     onPage.textColor = ColorPalette.slate[500];
-    row.addChild(onPage, onPage.getPreferredWidth());
+    row.add(onPage, onPage.getPreferredWidth());
 
     const page = new PageNumberOf(anchorFor(finding.id));
     page.fontName = StandardFonts.HelveticaBold;
     page.fontSize = 10;
     page.textColor = ColorPalette.slate[700];
-    row.addChild(page);
+    row.add(page);
 
-    inner.addChild(row);
+    inner.add(row);
   }
 
   const card = new Container();
@@ -427,7 +427,7 @@ export function generate(): Document {
 
   const register = new VerticalStack();
   for (const finding of FINDINGS) {
-    register.addChild(findingCard(finding));
+    register.add(findingCard(finding));
   }
   doc.add(register);
 

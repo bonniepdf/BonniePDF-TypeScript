@@ -61,8 +61,8 @@ export function lines(items: string[], o: CellOpts = {}): TextBlock {
  * Container so callers can add padding/background to the block. */
 export function labelled(label: string, body: IElement, accent: Color): Container {
   const stack = new VerticalStack();
-  stack.addChild(cell(label, { bold: true, size: 8, color: accent, margin: new Thickness(0, 0, 0, 5) }));
-  stack.addChild(body);
+  stack.add(cell(label, { bold: true, size: 8, color: accent, margin: new Thickness(0, 0, 0, 5) }));
+  stack.add(body);
   const box = new Container();
   box.child = stack;
   return box;
@@ -77,8 +77,8 @@ export function totalLine(
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
   row.margin = new Thickness(0, 3, 0, 3);
-  row.addChild(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
-  row.addChild(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
+  row.add(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
+  row.add(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
   return row;
 }
 

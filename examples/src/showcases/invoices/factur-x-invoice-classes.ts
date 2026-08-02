@@ -91,12 +91,12 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
-  seller.addChild(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
+  seller.add(cell('Sample Company GmbH', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
+  seller.add(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
+  seller.add(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
   const titleStack = new VerticalStack();
-  titleStack.addChild(cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: TextAlignment.Right }));
-  titleStack.addChild(
+  titleStack.add(cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: TextAlignment.Right }));
+  titleStack.add(
     cell('EN 16931 · Factur-X / ZUGFeRD', {
       size: 8,
       color: MUTED,
@@ -104,7 +104,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       margin: new Thickness(0, 2, 0, 0),
     })
   );
-  titleStack.addChild(cell('INV-2026-1001', { color: MUTED, align: TextAlignment.Right }));
+  titleStack.add(cell('INV-2026-1001', { color: MUTED, align: TextAlignment.Right }));
   header.addRow(seller, titleStack);
   doc.add(header);
 
@@ -120,10 +120,10 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', '07 Jul 2026'));
-  detailsStack.addChild(totalLine('Due date', '21 Jul 2026'));
-  detailsStack.addChild(totalLine('Buyer reference', 'PO-2026-042'));
-  detailsStack.addChild(totalLine('Terms', '14 days net'));
+  detailsStack.add(totalLine('Invoice date', '07 Jul 2026'));
+  detailsStack.add(totalLine('Due date', '21 Jul 2026'));
+  detailsStack.add(totalLine('Buyer reference', 'PO-2026-042'));
+  detailsStack.add(totalLine('Terms', '14 days net'));
   meta.addRow(buyer, labelled('DETAILS', detailsStack, ACCENT));
   doc.add(meta);
 
@@ -144,8 +144,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     const amount = it.qty * it.unitPrice;
     net += amount;
     const desc = new VerticalStack();
-    desc.addChild(cell(it.description));
-    if (it.detail) desc.addChild(cell(it.detail, { size: 8, color: MUTED }));
+    desc.add(cell(it.description));
+    if (it.detail) desc.add(cell(it.detail, { size: 8, color: MUTED }));
     table.addRow(
       desc,
       cell(String(it.qty), { align: TextAlignment.Center }),
@@ -159,10 +159,10 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────────
   const vat = net * VAT_RATE;
   const totals = new VerticalStack();
-  totals.addChild(totalLine('Total net', money(net, EUR, LOCALE)));
-  totals.addChild(totalLine('VAT (19%)', money(vat, EUR, LOCALE)));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }));
+  totals.add(totalLine('Total net', money(net, EUR, LOCALE)));
+  totals.add(totalLine('VAT (19%)', money(vat, EUR, LOCALE)));
+  totals.add(divider(INK, 0.6));
+  totals.add(totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }));
   const totalsBox = new Container();
   totalsBox.child = totals;
   totalsBox.padding = new Thickness(14, 12, 14, 12);
@@ -171,8 +171,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const totalsRow = new HorizontalStack();
   totalsRow.widthDistribution = WidthDistribution.Weighted;
   totalsRow.margin = new Thickness(0, 6, 0, 0);
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   // ── Remittance + embedded-XML panel ───────────────────────────────────────
@@ -193,9 +193,9 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   xml.cornerRadius = 6;
   xml.padding = new Thickness(12, 10, 12, 10);
   const xmlStack = new VerticalStack();
-  xmlStack.addChild(cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }));
-  xmlStack.addChild(cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }));
-  xmlStack.addChild(cell('PDF/A-3 as an associated file — /AFRelationship /Data.', { size: 8, color: MUTED }));
+  xmlStack.add(cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }));
+  xmlStack.add(cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }));
+  xmlStack.add(cell('PDF/A-3 as an associated file — /AFRelationship /Data.', { size: 8, color: MUTED }));
   xml.child = xmlStack;
   const payCell = new Container();
   payCell.child = pay;

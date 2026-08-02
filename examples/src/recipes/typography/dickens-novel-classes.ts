@@ -122,14 +122,14 @@ export function generate(): Document {
     left.fontSize = 9;
     left.textColor = ColorPalette.slate[500];
     left.alignment = TextAlignment.Left;
-    stack.addChild(left, 1);
+    stack.add(left, 1);
 
     const right = new TextBlock('Charles Dickens');
     right.fontName = StandardFonts.TimesItalic;
     right.fontSize = 9;
     right.textColor = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
-    stack.addChild(right, 1);
+    stack.add(right, 1);
 
     return stack;
   };

@@ -184,7 +184,7 @@ function renderSection(doc: Document, title: string, tocId: string, blocks: Bloc
 /** Wraps elements in a Container so they measure and page-break as one unit. */
 function group(doc: Document, ...elements: IElement[]): void {
   const stack = new VerticalStack();
-  for (const el of elements) stack.addChild(el);
+  for (const el of elements) stack.add(el);
   const unit = new Container();
   unit.child = stack;
   doc.add(unit);

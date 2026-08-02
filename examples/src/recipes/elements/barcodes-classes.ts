@@ -135,7 +135,7 @@ export function generate(): Document {
     const row = new HorizontalStack();
     row.spacing = 20;
     row.widthDistribution = WidthDistribution.Weighted;
-    row.addChild(barcodeWrap, 1);
+    row.add(barcodeWrap, 1);
 
     const details = new VerticalStack();
 
@@ -144,23 +144,23 @@ export function generate(): Document {
     heading.fontSize = 13;
     heading.textColor = ColorPalette.slate[800];
     heading.margin = new Thickness(0, 0, 0, 6);
-    details.addChild(heading);
+    details.add(heading);
 
     const desc = new TextBlock(description);
     desc.fontSize = 10;
     desc.textColor = ColorPalette.slate[600];
     desc.margin = new Thickness(0, 0, 0, 6);
-    details.addChild(desc);
+    details.add(desc);
 
     for (const line of specifics) {
       const s = new TextBlock(line);
       s.fontSize = 9;
       s.textColor = ColorPalette.slate[500];
       s.margin = new Thickness(0, 0, 0, 2);
-      details.addChild(s);
+      details.add(s);
     }
 
-    row.addChild(details, 1);
+    row.add(details, 1);
     doc.add(row);
 
     if (i < barcodeSections.length - 1) {

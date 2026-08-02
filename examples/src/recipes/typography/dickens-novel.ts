@@ -83,7 +83,7 @@ export function generate(): Document {
       headerTemplate: (pageNum: number) => {
         if (pageNum <= 1) return undefined;
         const stack = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
-        stack.addChild(
+        stack.add(
           new TextBlock('A Tale of Two Cities', {
             fontName: StandardFonts.TimesItalic,
             fontSize: 9,
@@ -92,7 +92,7 @@ export function generate(): Document {
           }),
           1
         );
-        stack.addChild(
+        stack.add(
           new TextBlock('Charles Dickens', {
             fontName: StandardFonts.TimesItalic,
             fontSize: 9,

@@ -191,7 +191,7 @@ export function generate(): Document {
 
   // ── Verification ──────────────────────────────────────────────────────────
   const verify = new HorizontalStack({ widthDistribution: 'weighted' });
-  verify.addChild(
+  verify.add(
     new VerticalStack({
       children: [
         h2('Verification'),
@@ -205,7 +205,7 @@ export function generate(): Document {
     }),
     3
   );
-  verify.addChild(
+  verify.add(
     new Container({
       horizontalAlignment: 'end',
       child: new QRCode({
@@ -257,8 +257,8 @@ function body(text: string): TextBlock {
 
 function kv(label: string, value: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 5 } });
-  row.addChild(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
-  row.addChild(new TextBlock(value, { fontSize: 10, textColor: INK }), 3);
+  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
+  row.add(new TextBlock(value, { fontSize: 10, textColor: INK }), 3);
   return row;
 }
 

@@ -92,7 +92,7 @@ export function generate(): Document {
     c.child = t;
     c.padding = new Thickness(12, 8, 12, 8);
     c.backgroundColor = bg;
-    equalStack.addChild(c);
+    equalStack.add(c);
   }
   doc.add(equalStack);
 
@@ -129,7 +129,7 @@ export function generate(): Document {
     c.child = t;
     c.padding = new Thickness(12, 8, 12, 8);
     c.backgroundColor = bg;
-    weightedStack.addChild(c, weight);
+    weightedStack.add(c, weight);
   }
   doc.add(weightedStack);
 
@@ -183,7 +183,7 @@ export function generate(): Document {
       c.padding = new Thickness(12, 6, 12, 6);
       c.backgroundColor = bg;
       c.height = boxHeight;
-      row.addChild(c);
+      row.add(c);
     }
     doc.add(row);
   }
@@ -224,8 +224,8 @@ export function generate(): Document {
     k.textColor = ColorPalette.slate[700];
     const v = new TextBlock(value);
     v.textColor = ColorPalette.slate[800];
-    kv.addChild(k, 1);
-    kv.addChild(v, 3);
+    kv.add(k, 1);
+    kv.add(v, 3);
     doc.add(kv);
   }
 
@@ -260,8 +260,8 @@ export function generate(): Document {
       'element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, ' +
       'product sheets, and comparison tables where parallel content aids comprehension.'
   );
-  twoColStack.addChild(col1);
-  twoColStack.addChild(col2);
+  twoColStack.add(col1);
+  twoColStack.add(col2);
   doc.add(twoColStack);
 
   return doc;

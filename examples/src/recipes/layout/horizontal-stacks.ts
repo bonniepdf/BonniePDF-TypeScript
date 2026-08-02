@@ -18,7 +18,7 @@ import {
  * `'weighted'`, `'start' | 'center' | 'end'`); colours are palette tokens (or
  * `'#ffffff'`); padding uses the `[horizontal, vertical]` shorthand. Equal-share
  * stacks pass their children as a `children` array; weighted stacks keep the
- * imperative `addChild(child, weight)` calls, since per-child weights have no
+ * imperative `add(child, weight)` calls, since per-child weights have no
  * options-literal form.
  */
 export function generate(): Document {
@@ -106,7 +106,7 @@ export function generate(): Document {
     ['2×', 2, 'slate-600'],
     ['3×', 3, 'slate-800'],
   ] as const) {
-    weightedStack.addChild(box(label, bg), weight);
+    weightedStack.add(box(label, bg), weight);
   }
   doc.add(weightedStack);
 
@@ -184,8 +184,8 @@ export function generate(): Document {
     ['Layout Engine:', 'BonniePDF Flow Layout'],
   ]) {
     const kv = new HorizontalStack({ spacing: 10, widthDistribution: 'weighted', margin: { bottom: 6 } });
-    kv.addChild(new TextBlock(key, { fontName: StandardFonts.HelveticaBold, textColor: 'slate-700' }), 1);
-    kv.addChild(new TextBlock(value, { textColor: 'slate-800' }), 3);
+    kv.add(new TextBlock(key, { fontName: StandardFonts.HelveticaBold, textColor: 'slate-700' }), 1);
+    kv.add(new TextBlock(value, { textColor: 'slate-800' }), 3);
     doc.add(kv);
   }
 

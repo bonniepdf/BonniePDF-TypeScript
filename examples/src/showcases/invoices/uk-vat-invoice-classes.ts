@@ -82,12 +82,10 @@ export function generate(): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
   const seller = new VerticalStack();
-  seller.addChild(cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
-  seller.addChild(lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }));
-  seller.addChild(
-    cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) })
-  );
-  seller.addChild(cell('Company No. 09182773 (England & Wales)', { size: 8, color: MUTED }));
+  seller.add(cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
+  seller.add(lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }));
+  seller.add(cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
+  seller.add(cell('Company No. 09182773 (England & Wales)', { size: 8, color: MUTED }));
   const title = new Heading('VAT INVOICE');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
@@ -95,8 +93,8 @@ export function generate(): Document {
   title.textColor = ACCENT;
   title.alignment = TextAlignment.Right;
   const titleStack = new VerticalStack();
-  titleStack.addChild(title);
-  titleStack.addChild(
+  titleStack.add(title);
+  titleStack.add(
     cell(`INV-UK-${year}-0311`, { color: MUTED, align: TextAlignment.Right, margin: new Thickness(0, 2, 0, 0) })
   );
   header.addRow(seller, titleStack);
@@ -116,10 +114,10 @@ export function generate(): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.addChild(totalLine('Invoice date', fmt.format(now)));
-  detailsStack.addChild(totalLine('Tax point', fmt.format(now)));
-  detailsStack.addChild(totalLine('Customer VAT no.', 'GB 442 8810 21'));
-  detailsStack.addChild(totalLine('Payment terms', '30 days'));
+  detailsStack.add(totalLine('Invoice date', fmt.format(now)));
+  detailsStack.add(totalLine('Tax point', fmt.format(now)));
+  detailsStack.add(totalLine('Customer VAT no.', 'GB 442 8810 21'));
+  detailsStack.add(totalLine('Payment terms', '30 days'));
   meta.addRow(customer, labelled('DETAILS', detailsStack, ACCENT));
   doc.add(meta);
 
@@ -187,10 +185,10 @@ export function generate(): Document {
 
   // ── Grand total ────────────────────────────────────────────────────────────
   const totals = new VerticalStack();
-  totals.addChild(totalLine('Total net', money(netTotal, GBP, 'en-GB')));
-  totals.addChild(totalLine('Total VAT', money(vatTotal, GBP, 'en-GB')));
-  totals.addChild(divider(INK, 0.6));
-  totals.addChild(
+  totals.add(totalLine('Total net', money(netTotal, GBP, 'en-GB')));
+  totals.add(totalLine('Total VAT', money(vatTotal, GBP, 'en-GB')));
+  totals.add(divider(INK, 0.6));
+  totals.add(
     totalLine('Total due (GBP)', money(netTotal + vatTotal, GBP, 'en-GB'), { bold: true, size: 13, color: ACCENT })
   );
   const totalsBox = new Container();
@@ -201,8 +199,8 @@ export function generate(): Document {
   const totalsRow = new HorizontalStack();
   totalsRow.widthDistribution = WidthDistribution.Weighted;
   totalsRow.margin = new Thickness(0, 10, 0, 0);
-  totalsRow.addChild(new Container(), 1);
-  totalsRow.addChild(totalsBox, 1);
+  totalsRow.add(new Container(), 1);
+  totalsRow.add(totalsBox, 1);
   doc.add(totalsRow);
 
   const key = cell('S = Standard 20%   ·   R = Reduced 5%   ·   Z = Zero-rated 0%', {

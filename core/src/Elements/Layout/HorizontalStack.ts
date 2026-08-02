@@ -23,7 +23,7 @@ export const HORIZONTAL_STACK_OWN_OPTION_KEYS = ['spacing', 'alignment', 'widthD
  *
  * `children` is deliberately absent: it is a read-only projection over the
  * internal list, and the options bag exposes it as **synthetic sugar** over
- * {@link HorizontalStack.addChild} rather than as a property. Keeping it out
+ * {@link HorizontalStack.add} rather than as a property. Keeping it out
  * here is what lets the exhaustiveness guard stay meaningful.
  */
 export const HORIZONTAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...HORIZONTAL_STACK_OWN_OPTION_KEYS] as const;
@@ -38,8 +38,8 @@ export type HorizontalStackOptions = ElementOptions &
     /** Width sharing. Accepts `'equal' | 'weighted' | 'auto'`. */
     widthDistribution?: WidthDistributionInput;
     /**
-     * Children to add, in order. Sugar over {@link HorizontalStack.addChild};
-     * use `addChild(child, weight)` directly when a per-child weight is needed.
+     * Children to add, in order. Sugar over {@link HorizontalStack.add};
+     * use `add(child, weight)` directly when a per-child weight is needed.
      */
     children?: IElement[];
   };
@@ -61,7 +61,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     const { children, ...rest } = options ?? {};
     applyOptions(this, rest);
     if (children !== undefined) {
-      for (const child of children) this.addChild(child);
+      for (const child of children) this.add(child);
     }
   }
 
@@ -114,14 +114,22 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * Adds a child element to this stack with auto width
    */
-  public addChild(child: IElement): void;
+  public add(child: IElement): void;
   /**
-   * Adds a child element to this stack with a specific width (only used when WidthDistribution is Weighted)
+   * Adds a child element to this stack with a specific weight (only used when WidthDistribution is Weighted)
    */
-  public addChild(child: IElement, width: number | null): void;
-  public addChild(child: IElement, width?: number | null): void {
+  public add(child: IElement, weight: number | null): void;
+  public add(child: IElement, weight?: number | null): void {
     this._children.push(child);
-    this.widths.push(width ?? null);
+    this.widths.push(weight ?? null);
+  }
+
+  /** @deprecated Use {@link add} instead. */
+  public addChild(child: IElement): void;
+  /** @deprecated Use {@link add} instead. */
+  public addChild(child: IElement, weight: number | null): void;
+  public addChild(child: IElement, weight?: number | null): void {
+    this.add(child, weight ?? null);
   }
 
   /**

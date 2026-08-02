@@ -58,16 +58,16 @@ function headerRow(): HorizontalStack {
   // Weighted distribution: the gutter keeps its fixed width (null weight), and the
   // 11 columns share the remaining page width equally (weight 1 each).
   const header = new HorizontalStack({ widthDistribution: 'weighted', spacing: H_GAP });
-  header.addChild(new Container({ width: LABEL_WIDTH }));
-  for (const shade of SHADES) header.addChild(headerCell(String(shade)), 1);
+  header.add(new Container({ width: LABEL_WIDTH }));
+  for (const shade of SHADES) header.add(headerCell(String(shade)), 1);
   return header;
 }
 
 /** One palette row: a fixed-width label, then 11 swatches that fill the rest equally. */
 function paletteRow(name: PaletteName): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', spacing: H_GAP });
-  row.addChild(rowLabel(name));
-  for (const shade of SHADES) row.addChild(swatch(name, shade), 1);
+  row.add(rowLabel(name));
+  for (const shade of SHADES) row.add(swatch(name, shade), 1);
   return row;
 }
 

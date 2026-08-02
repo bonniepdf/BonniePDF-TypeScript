@@ -272,7 +272,7 @@ describe('Hardening fixtures', () => {
       h.tocIdentifier = 's';
       h.level = 1;
       h.fontSize = 18;
-      stack.addChild(h);
+      stack.add(h);
 
       const t = new Table(150, 150);
       const cellA = new TableCell();
@@ -291,7 +291,7 @@ describe('Hardening fixtures', () => {
       tb2.text = '2';
       t.addRow(tb1, tb2);
 
-      stack.addChild(t);
+      stack.add(t);
       d.add(stack);
     });
 

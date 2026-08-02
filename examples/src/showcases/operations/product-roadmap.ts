@@ -100,8 +100,8 @@ function slot(height: number, month: number | 'gutter'): Container {
 // antialiasing.
 function band(height: number): Container {
   const row = new HorizontalStack({ spacing: 0, widthDistribution: 'weighted' });
-  row.addChild(slot(height, 'gutter'), LABEL_WEIGHT);
-  for (let m = 1; m <= MONTHS.length; m++) row.addChild(slot(height, m), 1);
+  row.add(slot(height, 'gutter'), LABEL_WEIGHT);
+  for (let m = 1; m <= MONTHS.length; m++) row.add(slot(height, m), 1);
 
   return new Container({ crispEdges: true, child: row });
 }
@@ -132,15 +132,15 @@ function barLayer(labelCell: IElement, segs: Seg[], team: TeamShades): Horizonta
     alignment: 'center',
     height: ROW_HEIGHT,
   });
-  row.addChild(labelCell, LABEL_WEIGHT);
+  row.add(labelCell, LABEL_WEIGHT);
 
   let cursor = 1;
   for (const seg of segs) {
-    if (seg.start > cursor) row.addChild(new Spacer(BAR_HEIGHT), seg.start - cursor);
-    row.addChild(bar(seg.label, team, seg.start > TODAY_AFTER_MONTH), seg.end - seg.start + 1);
+    if (seg.start > cursor) row.add(new Spacer(BAR_HEIGHT), seg.start - cursor);
+    row.add(bar(seg.label, team, seg.start > TODAY_AFTER_MONTH), seg.end - seg.start + 1);
     cursor = seg.end + 1;
   }
-  if (cursor <= MONTHS.length) row.addChild(new Spacer(BAR_HEIGHT), MONTHS.length - cursor + 1);
+  if (cursor <= MONTHS.length) row.add(new Spacer(BAR_HEIGHT), MONTHS.length - cursor + 1);
 
   return row;
 }
@@ -182,11 +182,11 @@ function monthHeader(): Container {
     });
   };
 
-  row.addChild(cell(tb('H1 2026 TIMELINE', 6.5, FAINT, { bold: true, top: 1 }), 'gutter'), LABEL_WEIGHT);
+  row.add(cell(tb('H1 2026 TIMELINE', 6.5, FAINT, { bold: true, top: 1 }), 'gutter'), LABEL_WEIGHT);
   // Gutter caption gets left padding to align with the team labels below.
   (row.getChildren()[0] as Container).padding = { left: 14, top: 8 };
   for (let m = 1; m <= MONTHS.length; m++) {
-    row.addChild(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: 'center' }), m), 1);
+    row.add(cell(tb(MONTHS[m - 1], 8, MUTE, { bold: true, align: 'center' }), m), 1);
   }
 
   return new Container({ crispEdges: true, child: row });
@@ -246,8 +246,8 @@ export function generate(): Document {
     alignment: 'center',
     margin: { bottom: 16 },
   });
-  titleRow.addChild(titleBlock, 4);
-  titleRow.addChild(badgeCell, 1);
+  titleRow.add(titleBlock, 4);
+  titleRow.add(badgeCell, 1);
   doc.add(titleRow);
 
   // ── Swimlane data ──────────────────────────────────────────────────────────
@@ -307,16 +307,16 @@ export function generate(): Document {
   // A single border on the card replaces the per-cell boxes of a spreadsheet
   // grid, so nothing double-strokes anywhere.
   const body = new VerticalStack({ spacing: 0 });
-  body.addChild(monthHeader());
-  body.addChild(band(10)); // breathing room under the header
+  body.add(monthHeader());
+  body.add(band(10)); // breathing room under the header
   teams.forEach((team, ti) => {
-    if (ti > 0) body.addChild(band(16)); // whitespace between sections - no rules
+    if (ti > 0) body.add(band(16)); // whitespace between sections - no rules
     team.rows.forEach((segs, ri) => {
       const label = ri === 0 ? teamLabel(team.name, team.sub, team.shades.solid) : new Container();
-      body.addChild(roadmapRow(label, segs, team.shades));
+      body.add(roadmapRow(label, segs, team.shades));
     });
   });
-  body.addChild(band(12)); // bottom breathing room
+  body.add(band(12)); // bottom breathing room
 
   doc.add(
     new Container({
@@ -350,8 +350,8 @@ export function generate(): Document {
   });
 
   const footer = new HorizontalStack({ spacing: 0, widthDistribution: 'weighted', alignment: 'center' });
-  footer.addChild(legend, 1);
-  footer.addChild(statusCell, 1);
+  footer.add(legend, 1);
+  footer.add(statusCell, 1);
   doc.add(footer);
 
   return doc;

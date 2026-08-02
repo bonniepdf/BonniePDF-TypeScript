@@ -86,7 +86,7 @@ export function generate(): Document {
   const basicWrap = new Container();
   basicWrap.padding = new Thickness(10);
   basicWrap.child = basicDm;
-  basicRow.addChild(basicWrap, 1);
+  basicRow.add(basicWrap, 1);
 
   const basicDetails = new VerticalStack();
   for (const [text, bold, mb] of [
@@ -99,9 +99,9 @@ export function generate(): Document {
     const t = new TextBlock(text);
     t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
     if (mb) t.margin = new Thickness(0, 0, 0, mb);
-    basicDetails.addChild(t);
+    basicDetails.add(t);
   }
-  basicRow.addChild(basicDetails, 2);
+  basicRow.add(basicDetails, 2);
   doc.add(basicRow);
 
   const basicDivider = new Line();
@@ -165,11 +165,11 @@ export function generate(): Document {
     dataBlock.margin = new Thickness(0, 4, 0, 0);
 
     const col = new VerticalStack();
-    col.addChild(dmWrap);
-    col.addChild(labelBlock);
-    col.addChild(detailBlock);
-    col.addChild(dataBlock);
-    encRow.addChild(col);
+    col.add(dmWrap);
+    col.add(labelBlock);
+    col.add(detailBlock);
+    col.add(dataBlock);
+    encRow.add(col);
   }
   doc.add(encRow);
 
@@ -227,10 +227,10 @@ export function generate(): Document {
     dataBlock.alignment = TextAlignment.Center;
 
     const col = new VerticalStack();
-    col.addChild(wrap);
-    col.addChild(labelBlock);
-    col.addChild(dataBlock);
-    rectRow.addChild(col);
+    col.add(wrap);
+    col.add(labelBlock);
+    col.add(dataBlock);
+    rectRow.add(col);
   }
   doc.add(rectRow);
 
@@ -285,10 +285,10 @@ export function generate(): Document {
     dataBlock.alignment = TextAlignment.Center;
 
     const col = new VerticalStack();
-    col.addChild(wrap);
-    col.addChild(titleBlock);
-    col.addChild(dataBlock);
-    colorRow.addChild(col);
+    col.add(wrap);
+    col.add(titleBlock);
+    col.add(dataBlock);
+    colorRow.add(col);
   }
   doc.add(colorRow);
 

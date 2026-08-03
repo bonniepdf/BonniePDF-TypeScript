@@ -1,7 +1,5 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
   PdfSize,
   Color,
   ColorPalette,
@@ -27,6 +25,11 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // Because the cover is one canvas the document uses a zero margin and a single
 // full-page element, so the artwork bleeds to every paper edge - exactly how a
 // printed report cover is laid out.
+//
+// The Document/settings/metadata wrapper is authored through the
+// options-object front door; the this feature vector-drawing calls inside `drawCover`
+// are the low-level drawing surface itself, with no "options vs class"
+// distinction, so they are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PAGE = PdfSize.a4;
@@ -145,20 +148,16 @@ function drawCover(canvas: ICanvas, size: Size): void {
 }
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PAGE, 0); // zero margin - full-bleed cover
-  settings.language = 'en-GB';
+  const doc = new Document({
+    settings: { pageSize: PAGE, margin: 0, language: 'en-GB' }, // zero margin - full-bleed cover
+    metadata: {
+      title: `${COMPANY} - Annual Report ${YEAR}`,
+      author: COMPANY,
+      subject: `${COMPANY} Annual Report ${YEAR} - gradient cover (vector drawing surface)`,
+    },
+  });
 
-  const metadata = new DocumentMetadata();
-  metadata.title = `${COMPANY} - Annual Report ${YEAR}`;
-  metadata.author = COMPANY;
-  metadata.subject = `${COMPANY} Annual Report ${YEAR} - gradient cover (vector drawing surface)`;
-
-  const doc = new Document(settings, metadata);
-
-  const cover = new CanvasElement(drawCover);
-  cover.drawWidth = PAGE.width;
-  cover.drawHeight = PAGE.height;
-  doc.add(cover);
+  doc.add(new CanvasElement(drawCover, { drawWidth: PAGE.width, drawHeight: PAGE.height }));
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
   addCapabilitiesPage(doc, {

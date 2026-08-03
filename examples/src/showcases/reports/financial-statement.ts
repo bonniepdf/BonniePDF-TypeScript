@@ -7,27 +7,20 @@
 // bracketed negatives, and subtotal rules. Amounts in £ thousands.
 //
 // Archival + accessible: PDF/A-2a + PDF/UA-1, en-GB. Fictional company.
+// Authored through the options-object front door.
 
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
-  PdfSize,
   TextBlock,
-  TextStyle,
   TextElementBase,
-  TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
-  Color,
   ColorPalette,
-  Thickness,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -89,28 +82,26 @@ const POSITION: Line[] = [
 ];
 
 export function generate(): Document {
-  const settings = new DocumentSettings(PdfSize.a4, 54);
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
-
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const f = new TextBlock(
-      `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
-    f.fontName = StandardFonts.Helvetica;
-    f.fontSize = 8;
-    f.textColor = MUTED;
-    return f;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Financial Statements - Sample Company Ltd';
-  metadata.author = 'Sample Company Ltd';
-  metadata.subject = 'Statutory financial statements (IFRS) for the year ended 31 March 2026 (fictional).';
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 54,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(
+          `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+        ),
+    },
+    metadata: {
+      title: 'Financial Statements - Sample Company Ltd',
+      author: 'Sample Company Ltd',
+      subject: 'Statutory financial statements (IFRS) for the year ended 31 March 2026 (fictional).',
+    },
+  });
 
   // ── Title block ───────────────────────────────────────────────────────────
   doc.add(company('Sample Company Ltd'));
@@ -150,56 +141,55 @@ export function generate(): Document {
 
 function renderLine(l: Line): IElement {
   if (l.kind === 'section') {
-    const t = new TextBlock(l.label);
-    t.fontName = StandardFonts.HelveticaBold;
-    t.fontSize = 10;
-    t.textColor = NAVY;
-    t.margin = new Thickness(0, 8, 0, 4);
-    return t;
+    return new TextBlock(l.label, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 10,
+      textColor: NAVY,
+      margin: { top: 8, bottom: 4 },
+    });
   }
 
   const bold = l.kind === 'subtotal' || l.kind === 'total';
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.margin = new Thickness(0, 2, 0, 2);
-  const label = new TextBlock(l.label);
-  label.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  label.fontSize = 10;
-  label.textColor = bold ? NAVY : INK;
-  if (l.indent) label.margin = new Thickness(14, 0, 0, 0);
-  row.add(label, 6);
-  row.add(numCell(l.note ?? '', false, MUTED, TextAlignment.Center), 1);
-  row.add(numCell(fmt(l.cur), bold, bold ? NAVY : INK, TextAlignment.Right), 2);
-  row.add(numCell(fmt(l.prior), bold, MUTED, TextAlignment.Right), 2);
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 2, bottom: 2 } });
+  row.addChild(
+    new TextBlock(l.label, {
+      fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+      fontSize: 10,
+      textColor: bold ? NAVY : INK,
+      margin: l.indent ? { left: 14 } : undefined,
+    }),
+    6
+  );
+  row.addChild(numCell(l.note ?? '', false, MUTED, 'center'), 1);
+  row.addChild(numCell(fmt(l.cur), bold, bold ? NAVY : INK, 'right'), 2);
+  row.addChild(numCell(fmt(l.prior), bold, MUTED, 'right'), 2);
 
   // Subtotals/totals get a rule above; totals a heavier one.
   if (l.kind === 'subtotal' || l.kind === 'total') {
     const stack = new VerticalStack();
-    stack.add(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
-    stack.add(row);
-    if (l.kind === 'total') stack.add(rule(NAVY, 0.5));
+    stack.addChild(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
+    stack.addChild(row);
+    if (l.kind === 'total') stack.addChild(rule(NAVY, 0.5));
     return stack;
   }
   return row;
 }
 
-function numCell(text: string, bold: boolean, color: Color, align: TextAlignment): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  b.fontSize = 10;
-  b.textColor = color;
-  b.alignment = align;
-  return b;
+function numCell(text: string, bold: boolean, color: ColorInput, align: TextAlignmentInput): TextBlock {
+  return new TextBlock(text, {
+    fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: 10,
+    textColor: color,
+    alignment: align,
+  });
 }
 
 function columnHeads(): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.margin = new Thickness(0, 2, 0, 2);
-  row.add(numCell('', false, MUTED, TextAlignment.Left), 6);
-  row.add(numCell('Note', false, MUTED, TextAlignment.Center), 1);
-  row.add(numCell('2026', true, NAVY, TextAlignment.Right), 2);
-  row.add(numCell('2025', true, MUTED, TextAlignment.Right), 2);
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 2, bottom: 2 } });
+  row.addChild(numCell('', false, MUTED, 'left'), 6);
+  row.addChild(numCell('Note', false, MUTED, 'center'), 1);
+  row.addChild(numCell('2026', true, NAVY, 'right'), 2);
+  row.addChild(numCell('2025', true, MUTED, 'right'), 2);
   return row;
 }
 
@@ -212,59 +202,52 @@ function fmt(n?: number): string {
 // ── Text helpers ──────────────────────────────────────────────────────────────
 
 function company(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 11;
-  b.textColor = MUTED;
-  b.margin = new Thickness(0, 0, 0, 4);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 11,
+    textColor: MUTED,
+    margin: { bottom: 4 },
+  });
 }
 
 function h1(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 1;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 22;
-  h.textColor = NAVY;
-  h.margin = new Thickness(0, 0, 0, 4);
-  return h;
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 22,
+    textColor: NAVY,
+    margin: { bottom: 4 },
+  });
 }
 
 function h2(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 14;
-  h.textColor = NAVY;
-  h.margin = new Thickness(0, 4, 0, 8);
-  return h;
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 14,
+    textColor: NAVY,
+    margin: { top: 4, bottom: 8 },
+  });
 }
 
 function sub(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 9;
-  b.textColor = MUTED;
-  b.margin = new Thickness(0, 0, 0, 3);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 9,
+    textColor: MUTED,
+    margin: { bottom: 3 },
+  });
 }
 
-function rule(color: Color, thickness: number): Container {
-  const c = new Container();
-  c.backgroundColor = color;
-  c.padding = new Thickness(0, thickness / 2, 0, thickness / 2);
-  c.margin = new Thickness(0, 2, 0, 2);
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  c.child = s;
-  return c;
+function rule(color: ColorInput, thickness: number): Container {
+  return new Container({
+    backgroundColor: color,
+    padding: { top: thickness / 2, bottom: thickness / 2 },
+    margin: { top: 2, bottom: 2 },
+    child: new TextBlock(' ', { fontSize: 1 }),
+  });
 }
 
 function gap(h: number): Container {
-  const c = new Container();
-  c.padding = new Thickness(0, h / 2, 0, h / 2);
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  c.child = s;
-  return c;
+  return new Container({ padding: { top: h / 2, bottom: h / 2 }, child: new TextBlock(' ', { fontSize: 1 }) });
 }

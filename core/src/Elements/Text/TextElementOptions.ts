@@ -20,7 +20,7 @@ export const TEXT_ELEMENT_OWN_OPTION_KEYS = [
   'decorationStyle',
   'letterSpacing',
   'wordSpacing',
-  'lineHeightMultiplier',
+  'lineHeight',
 ] as const;
 
 /** The full settable surface of a text element, base included. */

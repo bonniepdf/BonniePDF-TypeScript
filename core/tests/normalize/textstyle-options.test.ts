@@ -77,7 +77,7 @@ describe('TextStyle options constructor (09a Phase 2.A)', () => {
       color: 'slate-800',
       fontWeight: 'bold',
       letterSpacing: 0.04,
-      lineHeightMultiplier: 1.4,
+      lineHeight: 1.4,
     });
 
     const viaMutation = new TextStyle();
@@ -86,7 +86,7 @@ describe('TextStyle options constructor (09a Phase 2.A)', () => {
     viaMutation.color = 'slate-800';
     viaMutation.fontWeight = 'bold';
     viaMutation.letterSpacing = 0.04;
-    viaMutation.lineHeightMultiplier = 1.4;
+    viaMutation.lineHeight = 1.4;
 
     for (const key of TEXT_STYLE_OPTION_KEYS) {
       expect(viaOptions[key]).toEqual(viaMutation[key]);

@@ -351,10 +351,10 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       lines.push(currentLine);
     }
 
-    // If no content at all, add one empty line with default height
+    // If no content at all, add one empty line with default height.
     if (lines.length === 0) {
       const emptyLine = new RichTextLine();
-      emptyLine.height = this.defaultStyle.effectiveFontSize * 1.2;
+      emptyLine.height = this.getStyleLineHeight(this.defaultStyle);
       lines.push(emptyLine);
     }
 
@@ -445,17 +445,20 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     return words;
   }
 
-  /**
-   * Sets the line height to the maximum font size across all runs * 1.2.
-   */
+  /** Sets the line height to the greatest effective line height across all runs. */
   private updateLineHeight(line: RichTextLine): void {
-    let maxFontSize = this.defaultStyle.effectiveFontSize;
+    let maxLineHeight = this.getStyleLineHeight(this.defaultStyle);
     for (const run of line.runs) {
-      const fontSize = run.style.effectiveFontSize;
-      if (fontSize > maxFontSize) maxFontSize = fontSize;
+      const lineHeight = this.getStyleLineHeight(run.style);
+      if (lineHeight > maxLineHeight) maxLineHeight = lineHeight;
     }
 
-    line.height = maxFontSize * 1.2;
+    line.height = maxLineHeight;
+  }
+
+  /** Returns font size multiplied by the style's line-height multiplier (default 1.2). */
+  private getStyleLineHeight(style: TextStyle): number {
+    return style.effectiveFontSize * (style.lineHeight ?? 1.2);
   }
 
   // --- Drawing ---

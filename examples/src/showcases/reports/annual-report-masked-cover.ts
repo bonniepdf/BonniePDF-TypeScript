@@ -1,7 +1,5 @@
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
   PdfSize,
   Color,
   ColorPalette,
@@ -32,6 +30,11 @@ import { addCapabilitiesPage } from './_capabilities-page';
 //   ├──────────────────╱    │
 //   │   BRAND BAND + TITLE  │
 //   └───────────────────────┘  ← page bottom
+//
+// The Document/settings/metadata wrapper is authored through the
+// options-object front door; the this feature vector-drawing calls inside `drawCover`
+// are the low-level drawing surface itself, with no "options vs class"
+// distinction, so they are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
@@ -135,24 +138,24 @@ function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof Im
 }
 
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const settings = new DocumentSettings(PAGE, 0); // zero margin - full-bleed cover
-  settings.pageColor = Color.white;
-  settings.language = 'en-GB';
-
-  const metadata = new DocumentMetadata();
-  metadata.title = `${COMPANY} - Annual Report ${YEAR}`;
-  metadata.author = COMPANY;
-  metadata.subject = `${COMPANY} Annual Report ${YEAR} - masked hero-image cover (vector drawing surface)`;
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: { pageSize: PAGE, margin: 0, pageColor: '#ffffff', language: 'en-GB' }, // zero margin - full-bleed cover
+    metadata: {
+      title: `${COMPANY} - Annual Report ${YEAR}`,
+      author: COMPANY,
+      subject: `${COMPANY} Annual Report ${YEAR} - masked hero-image cover (vector drawing surface)`,
+    },
+  });
 
   const heroData = assets?.get(HERO_IMAGE);
   const heroImage = heroData ? ImageLoader.loadFromBytes(heroData) : undefined;
 
-  const cover = new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage));
-  cover.drawWidth = PAGE.width;
-  cover.drawHeight = PAGE.height;
-  doc.add(cover);
+  doc.add(
+    new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage), {
+      drawWidth: PAGE.width,
+      drawHeight: PAGE.height,
+    })
+  );
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
   addCapabilitiesPage(doc, {

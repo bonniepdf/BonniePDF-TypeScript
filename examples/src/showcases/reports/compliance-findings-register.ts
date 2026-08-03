@@ -1,11 +1,15 @@
+// Compliance Findings Register
+//
+// A compliance / audit findings register - the kind of report a GRC, audit, or
+// security-assessment platform produces (see the "Audit, compliance, ESG" and
+// "risk register" markets). Each finding is a severity-coloured Container card
+// built from a HorizontalStack (severity badge + heading/description), and the
+// whole register is an accessible, archival PDF/A-2a + PDF/UA-1 document.
+// Authored through the options-object front door.
+
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  AccessibilityMode,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   TextElementBase,
   VerticalStack,
   HorizontalStack,
@@ -13,23 +17,11 @@ import {
   Heading,
   SectionLink,
   PageNumberOf,
-  Color,
   ColorPalette,
-  Border,
-  BorderColors,
-  Thickness,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
+  type ColorInput,
 } from '@bonniepdf/core';
 
-/**
- * A compliance / audit findings register - the kind of report a GRC, audit, or
- * security-assessment platform produces (see the "Audit, compliance, ESG" and
- * "risk register" markets). Each finding is a severity-coloured Container card
- * built from a HorizontalStack (severity badge + heading/description), and the
- * whole register is an accessible, archival PDF/A-2a + PDF/UA-1 document.
- */
 interface Finding {
   id: string;
   category: string;
@@ -42,7 +34,7 @@ interface Finding {
 
 type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved';
 
-const SEVERITY_STYLE: Record<Severity, { label: string; badge: Color; tint: Color; border: Color }> = {
+const SEVERITY_STYLE: Record<Severity, { label: string; badge: ColorInput; tint: ColorInput; border: ColorInput }> = {
   Critical: {
     label: 'CRITICAL',
     badge: ColorPalette.red[600],
@@ -229,93 +221,84 @@ function anchorFor(id: string): string {
 function findingCard(finding: Finding): Container {
   const style = SEVERITY_STYLE[finding.severity];
 
-  const badge = new Container();
-  badge.width = 78;
-  badge.padding = new Thickness(6, 4, 6, 4);
-  badge.backgroundColor = style.badge;
-  badge.cornerRadius = 4;
-
-  const badgeText = new TextBlock(style.label);
-  badgeText.fontName = StandardFonts.HelveticaBold;
-  badgeText.fontSize = 9;
-  badgeText.textColor = Color.white;
-  badgeText.alignment = TextAlignment.Center;
-  badge.child = badgeText;
-
-  const body = new VerticalStack();
-  body.spacing = 3;
-
-  const heading = new Heading(`${finding.id} - ${finding.title}`);
-  heading.tocIdentifier = anchorFor(finding.id);
-  // anchorId makes this finding a cross-reference target for the Priority Actions
-  // summary and any "Related" links - resolved to a live page number by two-pass
-  // layout, independent of tocIdentifier's table-of-contents role.
-  heading.anchorId = anchorFor(finding.id);
-  heading.level = 2;
-  heading.fontName = StandardFonts.HelveticaBold;
-  heading.fontSize = 12;
-  heading.textColor = ColorPalette.slate[800];
-  body.add(heading);
-
-  const category = new TextBlock(finding.category);
-  category.fontName = StandardFonts.HelveticaBold;
-  category.fontSize = 9;
-  category.textColor = ColorPalette.slate[500];
-  body.add(category);
-
-  const description = new TextBlock(finding.description);
-  description.fontSize = 10.5;
-  description.textColor = ColorPalette.slate[700];
-  body.add(description);
+  const body = new VerticalStack({
+    spacing: 3,
+    children: [
+      new Heading(`${finding.id} - ${finding.title}`, {
+        tocIdentifier: anchorFor(finding.id),
+        // anchorId makes this finding a cross-reference target for the Priority
+        // Actions summary and any "Related" links - resolved to a live page
+        // number by two-pass layout, independent of tocIdentifier's
+        // table-of-contents role.
+        anchorId: anchorFor(finding.id),
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 12,
+        textColor: ColorPalette.slate[800],
+      }),
+      new TextBlock(finding.category, {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 9,
+        textColor: ColorPalette.slate[500],
+      }),
+      new TextBlock(finding.description, { fontSize: 10.5, textColor: ColorPalette.slate[700] }),
+    ],
+  });
 
   // Optional "Related: F-XXX (page N)" cross-reference - a clickable SectionLink
   // to the related finding plus its resolved page number, on one row.
   if (finding.related != null) {
-    const relatedRow = new HorizontalStack();
-    relatedRow.spacing = 4;
-    relatedRow.margin = new Thickness(0, 4, 0, 0);
+    const relatedLabel = new TextBlock('Related:', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 9,
+      textColor: ColorPalette.slate[500],
+    });
+    const relatedLink = new SectionLink(finding.related, anchorFor(finding.related), {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 9,
+      textColor: ColorPalette.blue[700],
+    });
+    const onPage = new TextBlock('on page', { fontSize: 9, textColor: ColorPalette.slate[500] });
+    const relatedPage = new PageNumberOf(anchorFor(finding.related), {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 9,
+      textColor: ColorPalette.slate[600],
+    });
 
-    const relatedLabel = new TextBlock('Related:');
-    relatedLabel.fontName = StandardFonts.HelveticaBold;
-    relatedLabel.fontSize = 9;
-    relatedLabel.textColor = ColorPalette.slate[500];
-    relatedRow.add(relatedLabel, relatedLabel.getPreferredWidth());
+    const relatedRow = new HorizontalStack({ spacing: 4, margin: { top: 4 } });
+    relatedRow.addChild(relatedLabel, relatedLabel.getPreferredWidth());
+    relatedRow.addChild(relatedLink, relatedLink.getPreferredWidth());
+    relatedRow.addChild(onPage, onPage.getPreferredWidth());
+    relatedRow.addChild(relatedPage);
 
-    const relatedLink = new SectionLink(finding.related, anchorFor(finding.related));
-    relatedLink.fontName = StandardFonts.HelveticaBold;
-    relatedLink.fontSize = 9;
-    relatedLink.textColor = ColorPalette.blue[700];
-    relatedRow.add(relatedLink, relatedLink.getPreferredWidth());
-
-    const onPage = new TextBlock('on page');
-    onPage.fontSize = 9;
-    onPage.textColor = ColorPalette.slate[500];
-    relatedRow.add(onPage, onPage.getPreferredWidth());
-
-    const relatedPage = new PageNumberOf(anchorFor(finding.related));
-    relatedPage.fontName = StandardFonts.HelveticaBold;
-    relatedPage.fontSize = 9;
-    relatedPage.textColor = ColorPalette.slate[600];
-    relatedRow.add(relatedPage);
-
-    body.add(relatedRow);
+    body.addChild(relatedRow);
   }
 
-  const row = new HorizontalStack();
-  row.spacing = 12;
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.add(badge);
-  row.add(body, 1);
+  const badge = new Container({
+    width: 78,
+    padding: [6, 4],
+    backgroundColor: style.badge,
+    cornerRadius: 4,
+    child: new TextBlock(style.label, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 9,
+      textColor: '#ffffff',
+      alignment: 'center',
+    }),
+  });
 
-  const card = new Container();
-  card.child = row;
-  card.padding = new Thickness(12);
-  card.backgroundColor = style.tint;
-  card.cornerRadius = 8;
-  card.border = new Border(1);
-  card.borderColors = new BorderColors(style.border);
-  card.margin = new Thickness(0, 0, 0, 10);
-  return card;
+  const row = new HorizontalStack({ spacing: 12, widthDistribution: 'weighted' });
+  row.addChild(badge);
+  row.addChild(body, 1);
+
+  return new Container({
+    child: row,
+    padding: 12,
+    backgroundColor: style.tint,
+    cornerRadius: 8,
+    border: { width: 1, color: style.border },
+    margin: { bottom: 10 },
+  });
 }
 
 /**
@@ -325,99 +308,98 @@ function findingCard(finding: Finding): Container {
  * so the summary stays correct no matter how the cards paginate.
  */
 function priorityActions(critical: Finding[]): Container {
-  const inner = new VerticalStack();
-  inner.spacing = 4;
+  const inner = new VerticalStack({ spacing: 4 });
 
-  const heading = new Heading('Priority Actions');
-  heading.tocIdentifier = 'priority-actions';
-  heading.anchorId = 'priority-actions';
-  heading.level = 2;
-  heading.fontName = StandardFonts.HelveticaBold;
-  heading.fontSize = 13;
-  heading.textColor = ColorPalette.red[800];
-  heading.margin = new Thickness(0, 0, 0, 2);
-  inner.add(heading);
+  inner.addChild(
+    new Heading('Priority Actions', {
+      tocIdentifier: 'priority-actions',
+      anchorId: 'priority-actions',
+      level: 2,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 13,
+      textColor: ColorPalette.red[800],
+      margin: { bottom: 2 },
+    })
+  );
 
-  const lead = new TextBlock(`${critical.length} critical findings require immediate remediation:`);
-  lead.fontSize = 10;
-  lead.textColor = ColorPalette.slate[600];
-  lead.margin = new Thickness(0, 0, 0, 4);
-  inner.add(lead);
+  inner.addChild(
+    new TextBlock(`${critical.length} critical findings require immediate remediation:`, {
+      fontSize: 10,
+      textColor: ColorPalette.slate[600],
+      margin: { bottom: 4 },
+    })
+  );
 
   for (const finding of critical) {
-    const row = new HorizontalStack();
-    row.spacing = 4;
-    row.margin = new Thickness(0, 0, 0, 2);
+    const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id), {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 10.5,
+      textColor: ColorPalette.blue[700],
+    });
+    const onPage = new TextBlock('page', { fontSize: 10, textColor: ColorPalette.slate[500] });
+    const page = new PageNumberOf(anchorFor(finding.id), {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 10,
+      textColor: ColorPalette.slate[700],
+    });
 
-    const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id));
-    link.fontName = StandardFonts.HelveticaBold;
-    link.fontSize = 10.5;
-    link.textColor = ColorPalette.blue[700];
-    row.add(link, link.getPreferredWidth());
-
-    const onPage = new TextBlock('page');
-    onPage.fontSize = 10;
-    onPage.textColor = ColorPalette.slate[500];
-    row.add(onPage, onPage.getPreferredWidth());
-
-    const page = new PageNumberOf(anchorFor(finding.id));
-    page.fontName = StandardFonts.HelveticaBold;
-    page.fontSize = 10;
-    page.textColor = ColorPalette.slate[700];
-    row.add(page);
-
-    inner.add(row);
+    const row = new HorizontalStack({ spacing: 4, margin: { bottom: 2 } });
+    row.addChild(link, link.getPreferredWidth());
+    row.addChild(onPage, onPage.getPreferredWidth());
+    row.addChild(page);
+    inner.addChild(row);
   }
 
-  const card = new Container();
-  card.child = inner;
-  card.padding = new Thickness(12);
-  card.backgroundColor = ColorPalette.red[50];
-  card.cornerRadius = 8;
-  card.border = new Border(1);
-  card.borderColors = new BorderColors(ColorPalette.red[200]);
-  card.margin = new Thickness(0, 0, 0, 16);
-  return card;
+  return new Container({
+    child: inner,
+    padding: 12,
+    backgroundColor: ColorPalette.red[50],
+    cornerRadius: 8,
+    border: { width: 1, color: ColorPalette.red[200] },
+    margin: { bottom: 16 },
+  });
 }
 
 export function generate(): Document {
-  const settings = new DocumentSettings();
-  settings.conformance = PdfAConformance.PdfA2a;
-  settings.accessibility = AccessibilityMode.PdfUa1;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: ColorPalette.slate[700] },
+      footerTemplate: (pageNumber: number) =>
+        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          textColor: ColorPalette.slate[400],
+          alignment: 'right',
+        }),
+    },
+    metadata: {
+      title: 'Compliance Findings Register',
+      author: 'BonniePDF',
+      subject: 'An accessible PDF/A-2a + PDF/UA-1 compliance findings register.',
+      keywords: 'pdf, accessibility, compliance, audit, findings register, GRC, BonniePDF',
+    },
+  });
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
-    b.fontName = StandardFonts.Helvetica;
-    b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
-    b.alignment = TextAlignment.Right;
-    return b;
-  };
-
-  const metadata = new DocumentMetadata();
-  metadata.title = 'Compliance Findings Register';
-  metadata.author = 'BonniePDF';
-  metadata.subject = 'An accessible PDF/A-2a + PDF/UA-1 compliance findings register.';
-  metadata.keywords = 'pdf, accessibility, compliance, audit, findings register, GRC, BonniePDF';
-
-  const doc = new Document(settings, metadata);
-
-  const h1 = new Heading('Compliance Findings Register');
-  h1.tocIdentifier = 'intro';
-  h1.level = 1;
-  h1.fontName = StandardFonts.HelveticaBold;
-  h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 10);
-  doc.add(h1);
-
-  const intro = new TextBlock(
-    'Findings from the quarterly security and compliance review, ordered by identifier and colour-coded by severity. Each entry records the affected control category, a summary, and the recommended remediation.'
+  doc.add(
+    new Heading('Compliance Findings Register', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      textColor: ColorPalette.slate[800],
+      margin: { bottom: 10 },
+    })
   );
-  intro.margin = new Thickness(0, 0, 0, 16);
-  doc.add(intro);
+
+  doc.add(
+    new TextBlock(
+      'Findings from the quarterly security and compliance review, ordered by identifier and colour-coded by severity. Each entry records the affected control category, a summary, and the recommended remediation.',
+      { margin: { bottom: 16 } }
+    )
+  );
 
   // Executive summary: a clickable index of the Critical findings, each showing
   // the live page number where the detail card lands (resolved by two-pass
@@ -427,7 +409,7 @@ export function generate(): Document {
 
   const register = new VerticalStack();
   for (const finding of FINDINGS) {
-    register.add(findingCard(finding));
+    register.addChild(findingCard(finding));
   }
   doc.add(register);
 

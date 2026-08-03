@@ -95,11 +95,17 @@ import { generate as movieCatalogClasses } from './showcases/catalogs/movie-cata
 import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
 import { generate as productPhotoGalleryClasses } from './showcases/catalogs/product-photo-gallery-classes';
 import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
+import { generate as financialDashboardClasses } from './showcases/reports/financial-dashboard-classes';
 import { generate as complianceFindingsRegister } from './showcases/reports/compliance-findings-register';
+import { generate as complianceFindingsRegisterClasses } from './showcases/reports/compliance-findings-register-classes';
 import { generate as annualReport } from './showcases/reports/annual-report';
+import { generate as annualReportClasses } from './showcases/reports/annual-report-classes';
 import { generate as annualReportGradientCover } from './showcases/reports/annual-report-gradient-cover';
+import { generate as annualReportGradientCoverClasses } from './showcases/reports/annual-report-gradient-cover-classes';
 import { generate as annualReportMaskedCover } from './showcases/reports/annual-report-masked-cover';
+import { generate as annualReportMaskedCoverClasses } from './showcases/reports/annual-report-masked-cover-classes';
 import { generate as annualReportGeometricCover } from './showcases/reports/annual-report-geometric-cover';
+import { generate as annualReportGeometricCoverClasses } from './showcases/reports/annual-report-geometric-cover-classes';
 import { generate as eventTicket } from './showcases/operations/event-ticket';
 import { generate as eventTicketClasses } from './showcases/operations/event-ticket-classes';
 import { generate as patientSummary } from './showcases/healthcare/patient-summary';
@@ -132,6 +138,7 @@ import { generate as shelfLabelClasses } from './showcases/retail/shelf-label-cl
 import { generate as ukDegreeTranscript } from './showcases/education/uk-degree-transcript';
 import { generate as ukDegreeTranscriptClasses } from './showcases/education/uk-degree-transcript-classes';
 import { generate as financialStatement } from './showcases/reports/financial-statement';
+import { generate as financialStatementClasses } from './showcases/reports/financial-statement-classes';
 import { generate as labReport } from './showcases/healthcare/lab-report';
 import { generate as labReportClasses } from './showcases/healthcare/lab-report-classes';
 
@@ -1516,6 +1523,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ComplianceFindingsRegisterExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'compliance-findings-register-classes',
+    name: 'Compliance Findings Register (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A GRC / audit findings register: 18 severity-coloured finding cards (badge + heading + remediation) paginating across pages. PDF/A-2a + PDF/UA-1.',
+    filename: 'compliance-findings-register-classes.pdf',
+    generate: complianceFindingsRegisterClasses,
+    dotnetClass: 'ComplianceFindingsRegisterExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'compliance-findings-register',
+    variantLabel: 'Class API',
   },
   {
     id: 'financial-dashboard',
@@ -1529,6 +1553,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FinancialDashboardExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'financial-dashboard-classes',
+    name: 'Financial Dashboard (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table - all styled with a warm earth-tone palette.',
+    filename: 'financial-dashboard-classes.pdf',
+    generate: financialDashboardClasses,
+    dotnetClass: 'FinancialDashboardExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'financial-dashboard',
+    variantLabel: 'Class API',
   },
   {
     id: 'annual-report',
@@ -1543,6 +1584,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'annual-report-classes',
+    name: 'Annual - Classic (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
+    filename: 'annual-report-classes.pdf',
+    generate: annualReportClasses,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
+    dotnetClass: 'AnnualReportExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'annual-report',
+    variantLabel: 'Class API',
   },
   {
     id: 'annual-report-gradient-cover',
@@ -1556,6 +1615,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportGradientCoverExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'annual-report-gradient-cover-classes',
+    name: 'Annual - Gradient (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A two-page annual report. Page 1 is a full-bleed cover drawn entirely on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
+    filename: 'annual-report-gradient-cover-classes.pdf',
+    generate: annualReportGradientCoverClasses,
+    dotnetClass: 'AnnualReportGradientCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'annual-report-gradient-cover',
+    variantLabel: 'Class API',
   },
   {
     id: 'annual-report-masked-cover',
@@ -1570,6 +1646,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportMaskedCoverExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'annual-report-masked-cover-classes',
+    name: 'Annual - Masked (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
+    filename: 'annual-report-masked-cover-classes.pdf',
+    generate: annualReportMaskedCoverClasses,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
+    dotnetClass: 'AnnualReportMaskedCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'annual-report-masked-cover',
+    variantLabel: 'Class API',
   },
   {
     id: 'annual-report-geometric-cover',
@@ -1583,6 +1677,23 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportGeometricCoverExample',
     thumbnails: false,
     pdfUa1: false,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'annual-report-geometric-cover-classes',
+    name: 'Annual - Geometric (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    description:
+      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
+    filename: 'annual-report-geometric-cover-classes.pdf',
+    generate: annualReportGeometricCoverClasses,
+    dotnetClass: 'AnnualReportGeometricCoverExample',
+    thumbnails: false,
+    pdfUa1: false,
+    gallery: false,
+    variantOf: 'annual-report-geometric-cover',
+    variantLabel: 'Class API',
   },
   {
     id: 'event-ticket',
@@ -2047,6 +2158,24 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FinancialStatementExample',
     thumbnails: false,
     pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'financial-statement-classes',
+    name: 'IFRS Financial Statements (Class API)',
+    category: 'Reports',
+    tier: 'showcase',
+    region: 'UK/EU',
+    description:
+      'A UK/EU statutory financial statement in the IFRS / Companies House idiom: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
+    filename: 'financial-statement-classes.pdf',
+    generate: financialStatementClasses,
+    dotnetClass: 'FinancialStatementExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'financial-statement',
+    variantLabel: 'Class API',
   },
   {
     id: 'lab-report',

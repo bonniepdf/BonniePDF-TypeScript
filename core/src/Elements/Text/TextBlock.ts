@@ -166,9 +166,9 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     let linesThatFit = 0;
     let testY = startY;
     for (let i = startLine; i < lines.length; i++) {
-      if (testY + this.spaceBeforeOf(i) + this.lineHeight > ctx.maxY) break;
+      if (testY + this.spaceBeforeOf(i) + this.effectiveLineHeight > ctx.maxY) break;
       linesThatFit++;
-      testY += this.spaceBeforeOf(i) + this.lineHeight;
+      testY += this.spaceBeforeOf(i) + this.effectiveLineHeight;
     }
 
     // If all remaining lines fit, just render them all (no break needed)
@@ -232,7 +232,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
         ctx.currentX + this.margin.left + this.indentOf(i),
         isLastLine
       );
-      y += this.lineHeight;
+      y += this.effectiveLineHeight;
     }
 
     this.lastLineRendered = endLine - 1;
@@ -263,7 +263,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
 
   protected override measureContentHeight(contentWidth: number): number {
     const lines = this.getOrComputeLines(contentWidth);
-    let height = lines.length * this.lineHeight;
+    let height = lines.length * this.effectiveLineHeight;
     for (let i = 0; i < lines.length; i++) height += this.spaceBeforeOf(i);
     return height;
   }
@@ -276,7 +276,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       const isLastLine = i === lines.length - 1;
       y += this.spaceBeforeOf(i); // this feature paragraph leading (0 when unused)
       this.drawSingleLine(ctx, lines[i], contentWidth, y, ctx.currentX + this.indentOf(i), isLastLine);
-      y += this.lineHeight;
+      y += this.effectiveLineHeight;
     }
 
     // Advance Y by the total content height

@@ -40,7 +40,7 @@ export const TEXT_STYLE_OPTION_KEYS = [
   'baselineShift',
   'letterSpacing',
   'wordSpacing',
-  'lineHeightMultiplier',
+  'lineHeight',
 ] as const;
 
 type TextStyleOptionKey = (typeof TEXT_STYLE_OPTION_KEYS)[number];
@@ -250,7 +250,7 @@ export class TextStyle {
    * Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).
    * Set to 1.5 for looser leading or 1.0 for tight leading.
    */
-  public lineHeightMultiplier?: number;
+  public lineHeight?: number;
 
   /**
    * Resolves the actual PDF font name by combining fontFamily + weight + italic
@@ -288,7 +288,7 @@ export class TextStyle {
     merged.baselineShift = this.baselineShift ?? baseStyle.baselineShift;
     merged.letterSpacing = this.letterSpacing ?? baseStyle.letterSpacing;
     merged.wordSpacing = this.wordSpacing ?? baseStyle.wordSpacing;
-    merged.lineHeightMultiplier = this.lineHeightMultiplier ?? baseStyle.lineHeightMultiplier;
+    merged.lineHeight = this.lineHeight ?? baseStyle.lineHeight;
 
     return merged;
   }
@@ -374,7 +374,7 @@ export class TextStyle {
 
   /** Sets the line-height multiplier (e.g. 1.5 for looser leading) */
   public withLineHeight(multiplier: number): TextStyle {
-    this.lineHeightMultiplier = multiplier;
+    this.lineHeight = multiplier;
     return this;
   }
 

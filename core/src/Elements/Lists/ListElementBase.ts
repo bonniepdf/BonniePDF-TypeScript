@@ -74,7 +74,7 @@ export abstract class ListElementBase extends TextElementBase {
 
     for (const item of items) {
       const lines = this.computeLines(item, itemWidth);
-      totalHeight += lines.length * this.lineHeight + this.itemSpacing;
+      totalHeight += lines.length * this.effectiveLineHeight + this.itemSpacing;
     }
 
     // Remove spacing after last item
@@ -124,7 +124,7 @@ export abstract class ListElementBase extends TextElementBase {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
 
-        ListElementBase.checkPageBreak(ctx, this.lineHeight);
+        ListElementBase.checkPageBreak(ctx, this.effectiveLineHeight);
         y = ctx.currentY;
 
         const markerX = ctx.currentX;
@@ -153,7 +153,7 @@ export abstract class ListElementBase extends TextElementBase {
           ctx.canvas.endMarkedContent();
         }
 
-        y += this.lineHeight;
+        y += this.effectiveLineHeight;
         ctx.currentY = y;
       }
 

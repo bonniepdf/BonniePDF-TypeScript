@@ -145,7 +145,7 @@ describe('TextStyle — fluent setters', () => {
     expect(new TextStyle().withBackground(ColorPalette.amber[400]).backgroundColor).toBe(ColorPalette.amber[400]);
     expect(new TextStyle().withWeight(FontWeight.Bold).fontWeight).toBe(FontWeight.Bold);
     expect(new TextStyle().withFamily('Times').fontFamily).toBe('Times');
-    expect(new TextStyle().withLineHeight(1.5).lineHeightMultiplier).toBe(1.5);
+    expect(new TextStyle().withLineHeight(1.5).lineHeight).toBe(1.5);
   });
 
   it('decoration setters are additive (OR), unlike mergeWith which replaces', () => {

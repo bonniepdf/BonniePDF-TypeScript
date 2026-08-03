@@ -1,25 +1,26 @@
+// Annual Report - Classic
+//
+// A4 portrait annual-report template: a full-bleed navy front cover with a
+// hero photograph, then inner pages whose page-background slot paints blue
+// header/footer bands carrying the BonniePDF mark, generation time, and page
+// numbers around the flowing report content. Authored through the
+// options-object front door.
+
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
   TextBlock,
-  TextStyle,
-  TextAlignment,
   HorizontalStack,
   VerticalStack,
   Container,
   Image,
-  ImageFitMode,
   Spacer,
-  Color,
-  ColorPalette,
-  Thickness,
+  PdfSize,
   Border,
   BorderColors,
+  ColorPalette,
   StandardFonts,
-  WidthDistribution,
-  PdfAConformance,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -58,51 +59,53 @@ const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
 }).format(new Date())}`;
 
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const settings = new DocumentSettings(PAGE, MARGIN);
-  settings.conformance = PdfAConformance.PdfA2b;
-  settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(INK);
-
-  // ── Page-background slot ──────────────────────────────────────────────────
-  // The cover gets a full-bleed deep-blue field; every inner page gets the
-  // light header/footer bands. The slot ignores margins, so the bands bleed to
-  // the paper edge. Content is overlaid on top of whatever the slot paints.
-  settings.pageBackground = (pageNumber: number): IElement => (pageNumber === 1 ? coverBackground() : pageBands());
-
-  // ── Header / footer slots ─────────────────────────────────────────────────
-  // Suppressed on the cover; on every inner page they sit centred inside the
-  // top/bottom margin bands painted by the background slot.
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : headerRow(pageNumber);
-  settings.footerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : footerRow(pageNumber);
-
-  const metadata = new DocumentMetadata();
-  metadata.title = `${COMPANY} - ${REPORT_TITLE}`;
-  metadata.author = COMPANY;
-  metadata.subject = `${COMPANY} ${REPORT_TITLE} - front cover, header/footer slots, and page backgrounds`;
-
-  const doc = new Document(settings, metadata);
+  const doc = new Document({
+    settings: {
+      pageSize: PAGE,
+      margin: MARGIN,
+      conformance: 'pdf/a-2b',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: INK },
+      // ── Page-background slot ──────────────────────────────────────────────
+      // The cover gets a full-bleed deep-blue field; every inner page gets the
+      // light header/footer bands. The slot ignores margins, so the bands
+      // bleed to the paper edge. Content is overlaid on top of whatever the
+      // slot paints.
+      pageBackground: (pageNumber: number): IElement => (pageNumber === 1 ? coverBackground() : pageBands()),
+      // ── Header / footer slots ─────────────────────────────────────────────
+      // Suppressed on the cover; on every inner page they sit centred inside
+      // the top/bottom margin bands painted by the background slot.
+      headerTemplate: (pageNumber: number): IElement | undefined =>
+        pageNumber === 1 ? undefined : headerRow(pageNumber),
+      footerTemplate: (pageNumber: number): IElement | undefined =>
+        pageNumber === 1 ? undefined : footerRow(pageNumber),
+    },
+    metadata: {
+      title: `${COMPANY} - ${REPORT_TITLE}`,
+      author: COMPANY,
+      subject: `${COMPANY} ${REPORT_TITLE} - front cover, header/footer slots, and page backgrounds`,
+    },
+  });
 
   // ════════════════════════════════════════════════════════════════════════
   //  Page 1 - front cover (overlaid on the deep-blue background slot)
   // ════════════════════════════════════════════════════════════════════════
   const heroData = assets?.get(HERO_IMAGE);
   if (heroData) {
-    const hero = new Image();
-    hero.imageData = heroData;
-    hero.width = PAGE.width - MARGIN * 2;
-    hero.height = 220;
-    hero.fitMode = ImageFitMode.Cover;
-    hero.isDecorative = true;
-    hero.margin = new Thickness(0, 24, 0, 24);
-    doc.add(hero);
+    doc.add(
+      new Image({
+        imageData: heroData,
+        width: PAGE.width - MARGIN * 2,
+        height: 220,
+        fitMode: 'cover',
+        isDecorative: true,
+        margin: { top: 24, bottom: 24 },
+      })
+    );
   } else {
     doc.add(new Spacer(150));
   }
-  const mark = brandMark();
-  mark.margin = new Thickness(0, 0, 0, 26);
-  doc.add(mark);
+  doc.add(brandMark());
   doc.add(coverLabel('ANNUAL REPORT'));
   doc.add(coverTitle(COMPANY));
   doc.add(triColourRule());
@@ -116,9 +119,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   //  Page 2 - letter to shareholders + performance highlights
   // ════════════════════════════════════════════════════════════════════════
   doc.addPage();
-  const shareholderHeading = sectionHeading('Letter to Shareholders');
-  shareholderHeading.margin = new Thickness(0, 10, 0, 12);
-  doc.add(shareholderHeading);
+  doc.add(sectionHeading('Letter to Shareholders', { top: 10 }));
   doc.add(
     body(
       `This past year tested our resolve and rewarded our discipline. Against a ` +
@@ -136,18 +137,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
         `flagship platform now serves more than two million daily users.`
     )
   );
-  const performanceHeading = sectionHeading('Performance Highlights');
-  performanceHeading.margin = new Thickness(0, 20, 0, 12);
-  doc.add(performanceHeading);
+  doc.add(sectionHeading('Performance Highlights', { top: 20 }));
   doc.add(kpiRow());
 
   // ════════════════════════════════════════════════════════════════════════
   //  Page 3 - operational review (flows naturally, repeating the bands)
   // ════════════════════════════════════════════════════════════════════════
   doc.addPage();
-  const operationalHeading = sectionHeading('Operational Review');
-  operationalHeading.margin = new Thickness(0, 10, 0, 12);
-  doc.add(operationalHeading);
+  doc.add(sectionHeading('Operational Review', { top: 10 }));
   doc.add(
     body(
       `Revenue grew 18% year over year, led by double-digit gains across every ` +
@@ -187,10 +184,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
 /** Full-bleed deep-blue field for the cover. */
 function coverBackground(): IElement {
-  const field = new Container();
-  field.backgroundColor = COVER_BG;
-  field.height = PAGE.height;
-  return field;
+  return new Container({ backgroundColor: COVER_BG, height: PAGE.height });
 }
 
 /**
@@ -200,30 +194,29 @@ function coverBackground(): IElement {
  * centred onto the bands by their own slots.
  */
 function pageBands(): IElement {
-  const field = new Container();
-  field.backgroundColor = BAND_BG;
-  field.height = PAGE.height;
-
-  const panel = new Container();
-  panel.backgroundColor = Color.white;
-  panel.height = PAGE.height - MARGIN * 2;
-  panel.margin = new Thickness(0, MARGIN, 0, MARGIN);
-  panel.border = new Border(0, 2, 0, 2); // top + bottom hairlines only
-  panel.borderColors = new BorderColors(undefined, SECONDARY, undefined, TERTIARY);
-  field.child = panel;
-
-  return field;
+  return new Container({
+    backgroundColor: BAND_BG,
+    height: PAGE.height,
+    child: new Container({
+      backgroundColor: '#ffffff',
+      height: PAGE.height - MARGIN * 2,
+      margin: { top: MARGIN, bottom: MARGIN },
+      // top + bottom hairlines only
+      border: new Border(0, 2, 0, 2),
+      borderColors: new BorderColors(undefined, SECONDARY, undefined, TERTIARY),
+    }),
+  });
 }
 
 // ── Header / footer rows ────────────────────────────────────────────────────
 
-function bandCell(text: string, align: TextAlignment, bold: boolean, color: Color): TextBlock {
-  const cell = new TextBlock(text);
-  cell.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  cell.fontSize = bold ? 12 : 10;
-  cell.textColor = color;
-  cell.alignment = align;
-  return cell;
+function bandCell(text: string, align: TextAlignmentInput, bold: boolean, color: ColorInput): TextBlock {
+  return new TextBlock(text, {
+    fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: bold ? 12 : 10,
+    textColor: color,
+    alignment: align,
+  });
 }
 
 function bandRow(
@@ -232,19 +225,18 @@ function bandRow(
   right: TextBlock,
   weights: [number, number, number] = [1, 1, 1]
 ): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.add(left, weights[0]);
-  row.add(center, weights[1]);
-  row.add(right, weights[2]);
+  const row = new HorizontalStack({ widthDistribution: 'weighted' });
+  row.addChild(left, weights[0]);
+  row.addChild(center, weights[1]);
+  row.addChild(right, weights[2]);
   return row;
 }
 
 function headerRow(pageNumber: number): HorizontalStack {
   return bandRow(
-    bandCell('BonniePDF', TextAlignment.Left, true, PRIMARY),
-    bandCell(REPORT_TITLE, TextAlignment.Center, false, ColorPalette.blue[700]),
-    bandCell(`Page ${pageNumber}`, TextAlignment.Right, false, ColorPalette.blue[600])
+    bandCell('BonniePDF', 'left', true, PRIMARY),
+    bandCell(REPORT_TITLE, 'center', false, ColorPalette.blue[700]),
+    bandCell(`Page ${pageNumber}`, 'right', false, ColorPalette.blue[600])
   );
 }
 
@@ -252,9 +244,9 @@ function footerRow(pageNumber: number): HorizontalStack {
   // The generation time needs a wider column than the page number, so the
   // footer leans on weighted columns rather than equal thirds.
   return bandRow(
-    bandCell(GENERATED, TextAlignment.Left, false, ColorPalette.blue[600]),
-    bandCell(`${COMPANY} - Confidential`, TextAlignment.Center, false, ColorPalette.blue[600]),
-    bandCell(`Page ${pageNumber}`, TextAlignment.Right, true, PRIMARY),
+    bandCell(GENERATED, 'left', false, ColorPalette.blue[600]),
+    bandCell(`${COMPANY} - Confidential`, 'center', false, ColorPalette.blue[600]),
+    bandCell(`Page ${pageNumber}`, 'right', true, PRIMARY),
     [5, 4, 2]
   );
 }
@@ -263,135 +255,108 @@ function footerRow(pageNumber: number): HorizontalStack {
 
 /** A small three-square brand mark drawn from the colour trio. */
 function brandMark(): HorizontalStack {
-  const row = new HorizontalStack();
-  row.spacing = 6;
+  const row = new HorizontalStack({ spacing: 6, margin: { bottom: 26 } });
   for (const color of [PRIMARY, SECONDARY, TERTIARY]) {
-    const square = new Container();
-    square.backgroundColor = color;
-    square.width = 14;
-    square.height = 14;
-    square.cornerRadius = 3;
-    row.add(square);
+    row.addChild(new Container({ backgroundColor: color, width: 14, height: 14, cornerRadius: 3 }));
   }
   return row;
 }
 
 function coverLabel(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 13;
-  b.textColor = ColorPalette.teal[300];
-  b.margin = new Thickness(0, 0, 0, 12);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 13,
+    textColor: ColorPalette.teal[300],
+    margin: { bottom: 12 },
+  });
 }
 
 function coverTitle(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 42;
-  b.textColor = Color.white;
-  return b;
+  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 42, textColor: '#ffffff' });
 }
 
 /** Three joined segments in the brand trio, sitting under the cover title. */
 function triColourRule(): HorizontalStack {
-  const row = new HorizontalStack();
-  row.spacing = 0; // joined, edge to edge
-  row.margin = new Thickness(0, 18, 0, 18);
+  const row = new HorizontalStack({ spacing: 0, margin: { top: 18, bottom: 18 } }); // joined, edge to edge
   for (const color of [PRIMARY, SECONDARY, TERTIARY]) {
-    const segment = new Container();
-    segment.backgroundColor = color;
-    segment.width = 34;
-    segment.height = 5;
-    row.add(segment);
+    row.addChild(new Container({ backgroundColor: color, width: 34, height: 5 }));
   }
   return row;
 }
 
 function coverSubtitle(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 16;
-  b.textColor = ColorPalette.blue[200];
-  return b;
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 16, textColor: ColorPalette.blue[200] });
 }
 
 function coverCredit(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 10;
-  b.textColor = ColorPalette.blue[300];
-  b.margin = new Thickness(0, 0, 0, 4);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 10,
+    textColor: ColorPalette.blue[300],
+    margin: { bottom: 4 },
+  });
 }
 
 // ── Inner content ───────────────────────────────────────────────────────────
 
-function sectionHeading(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 20;
-  b.textColor = HEADING;
-  b.margin = new Thickness(0, 0, 0, 12);
-  return b;
+function sectionHeading(text: string, opts: { top?: number } = {}): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 20,
+    textColor: HEADING,
+    margin: { top: opts.top ?? 0, bottom: 12 },
+  });
 }
 
 function subHeading(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.HelveticaBold;
-  b.fontSize = 14;
-  b.textColor = ColorPalette.blue[700];
-  b.margin = new Thickness(0, 18, 0, 8);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 14,
+    textColor: ColorPalette.blue[700],
+    margin: { top: 18, bottom: 8 },
+  });
 }
 
 function body(text: string): TextBlock {
-  const b = new TextBlock(text);
-  b.fontName = StandardFonts.Helvetica;
-  b.fontSize = 11;
-  b.textColor = INK;
-  b.alignment = TextAlignment.Justify;
-  b.margin = new Thickness(0, 0, 0, 12);
-  return b;
+  return new TextBlock(text, {
+    fontName: StandardFonts.Helvetica,
+    fontSize: 11,
+    textColor: INK,
+    alignment: 'justify',
+    margin: { bottom: 12 },
+  });
 }
 
 // ── KPI highlight cards ─────────────────────────────────────────────────────
 
 function kpiRow(): HorizontalStack {
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.spacing = 14;
-  const cards: [string, string, Color][] = [
+  const row = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14 });
+  const cards: [string, string, ColorInput][] = [
     ['£2.4B', 'Total revenue', PRIMARY],
     ['+18%', 'Year-over-year growth', SECONDARY],
     ['2.1M', 'Daily active users', TERTIARY],
   ];
   for (const [value, label, accent] of cards) {
-    row.add(kpiCard(value, label, accent), 1);
+    row.addChild(kpiCard(value, label, accent), 1);
   }
   return row;
 }
 
-function kpiCard(value: string, label: string, accent: Color): Container {
-  const stack = new VerticalStack();
-
-  const v = new TextBlock(value);
-  v.fontName = StandardFonts.HelveticaBold;
-  v.fontSize = 24;
-  v.textColor = accent;
-  v.margin = new Thickness(0, 0, 0, 4);
-  stack.add(v);
-
-  const l = new TextBlock(label);
-  l.fontName = StandardFonts.Helvetica;
-  l.fontSize = 10;
-  l.textColor = ColorPalette.slate[500];
-  stack.add(l);
-
-  const card = new Container();
-  card.backgroundColor = ColorPalette.blue[50];
-  card.cornerRadius = 10;
-  card.padding = new Thickness(18, 16, 18, 16);
-  card.child = stack;
-  return card;
+function kpiCard(value: string, label: string, accent: ColorInput): Container {
+  return new Container({
+    backgroundColor: ColorPalette.blue[50],
+    cornerRadius: 10,
+    padding: [18, 16],
+    child: new VerticalStack({
+      children: [
+        new TextBlock(value, {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 24,
+          textColor: accent,
+          margin: { bottom: 4 },
+        }),
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: ColorPalette.slate[500] }),
+      ],
+    }),
+  });
 }

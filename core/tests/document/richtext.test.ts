@@ -11,7 +11,7 @@ import { PdfSize } from '../../src/Configuration/PdfSize';
 import { Color } from '../../src/Core/Color';
 import { MockCanvas } from '../helpers/mock-canvas';
 
-// The default style is Helvetica 12pt; line height is defined as tallest-font * 1.2.
+// The default style is Helvetica 12pt; line height is font size * multiplier (default 1.2).
 const DEFAULT_FONT = 'Helvetica';
 const DEFAULT_SIZE = 12;
 const LINE_HEIGHT = DEFAULT_SIZE * 1.2; // 14.4
@@ -77,6 +77,24 @@ describe('RichText — line height and measurement', () => {
     // One line containing a 12pt and a 24pt span => height = 24 * 1.2.
     const rt = new RichText().span('small ').span('big', sized(24));
     expect(rt.measureHeight(500)).toBeCloseTo(24 * 1.2, 5);
+  });
+
+  it('honours the default style line-height multiplier', () => {
+    const defaultStyle = new TextStyle({ fontSize: 12, lineHeight: 1.5 });
+    expect(new RichText({ defaultStyle }).measureHeight(500)).toBeCloseTo(12 * 1.5, 5);
+
+    const rt = new RichText({ defaultStyle });
+    rt.line('one').line('two');
+
+    expect(rt.measureHeight(500)).toBeCloseTo(2 * 12 * 1.5, 5);
+  });
+
+  it('uses the greatest font-size and multiplier product across mixed runs', () => {
+    const loose = new TextStyle({ fontSize: 12, lineHeight: 3 });
+    const large = new TextStyle({ fontSize: 24 });
+    const rt = new RichText().span('loose ', loose).span('large', large);
+
+    expect(rt.measureHeight(500)).toBeCloseTo(12 * 3, 5);
   });
 
   it('total height is the sum of per-line heights', () => {

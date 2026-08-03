@@ -66,7 +66,7 @@ export abstract class TextElementBase extends ElementBase {
 
   private _fontSize?: number;
   private _textColor?: Color;
-  private _lineHeightMultiplier?: number;
+  private _lineHeight?: number;
   private _textDecoration?: TextDecoration;
 
   /**
@@ -142,17 +142,6 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set decorationStyle(value: DecorationStyleInput) {
     this._decorationStyle = toDecorationStyle(value);
-  }
-
-  /**
-   * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
-   * Setting this marks the property as explicitly set, preventing cascade override.
-   */
-  public get lineHeightMultiplier(): number {
-    return this._lineHeightMultiplier ?? 1.2;
-  }
-  public set lineHeightMultiplier(value: number) {
-    this._lineHeightMultiplier = value;
   }
 
   // ── Smart font getters/setters (mark _fontExplicit on assignment) ─────────
@@ -231,8 +220,8 @@ export abstract class TextElementBase extends ElementBase {
     if (this._textColor === undefined && style.color !== undefined) {
       this._textColor = style.color;
     }
-    if (this._lineHeightMultiplier === undefined && style.lineHeightMultiplier !== undefined) {
-      this._lineHeightMultiplier = style.lineHeightMultiplier;
+    if (this._lineHeight === undefined && style.lineHeight !== undefined) {
+      this._lineHeight = style.lineHeight;
     }
     if (this._textDecoration === undefined && style.decoration !== TextDecoration.None) {
       this._textDecoration = style.decoration;
@@ -282,10 +271,21 @@ export abstract class TextElementBase extends ElementBase {
   // ── Line height ───────────────────────────────────────────────────────────
 
   /**
-   * Line height calculated from font size and lineHeightMultiplier
+   * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
+   * Setting this marks the property as explicitly set, preventing cascade override.
    */
-  protected get lineHeight(): number {
-    return this.fontSize * this.lineHeightMultiplier;
+  public get lineHeight(): number {
+    return this._lineHeight ?? 1.2;
+  }
+  public set lineHeight(value: number) {
+    this._lineHeight = value;
+  }
+
+  /**
+   * Line height in points, calculated from font size and the lineHeight multiplier.
+   */
+  protected get effectiveLineHeight(): number {
+    return this.fontSize * this.lineHeight;
   }
 
   // ── Text measurement and wrapping ─────────────────────────────────────────

@@ -152,7 +152,7 @@ describe('this feature advanced typography', () => {
       clamped.maxLines = 2;
 
       // The clamped block is exactly two lines tall and shorter than the full text.
-      expect(clamped.measureHeight(160)).toBeCloseTo(2 * clamped['lineHeight'], 4);
+      expect(clamped.measureHeight(160)).toBeCloseTo(2 * clamped['effectiveLineHeight'], 4);
       expect(unclamped.measureHeight(160)).toBeGreaterThan(clamped.measureHeight(160));
 
       const lines = clamped['getOrComputeLines'](160) as string[];

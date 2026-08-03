@@ -331,6 +331,41 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'user-directory-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'compliance-findings-register',
+    variant: 'compliance-findings-register-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'financial-dashboard',
+    variant: 'financial-dashboard-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'financial-statement',
+    variant: 'financial-statement-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'annual-report',
+    variant: 'annual-report-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'annual-report-gradient-cover',
+    variant: 'annual-report-gradient-cover-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'annual-report-masked-cover',
+    variant: 'annual-report-masked-cover-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'annual-report-geometric-cover',
+    variant: 'annual-report-geometric-cover-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

@@ -124,14 +124,6 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     this.widths.push(weight ?? null);
   }
 
-  /** @deprecated Use {@link add} instead. */
-  public addChild(child: IElement): void;
-  /** @deprecated Use {@link add} instead. */
-  public addChild(child: IElement, weight: number | null): void;
-  public addChild(child: IElement, weight?: number | null): void {
-    this.add(child, weight ?? null);
-  }
-
   /**
    * Renders this horizontal stack with state tracking for pagination.
    * HorizontalStack is treated as atomic - all children render together on one page.

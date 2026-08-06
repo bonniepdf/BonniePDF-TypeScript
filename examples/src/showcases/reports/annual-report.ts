@@ -226,9 +226,9 @@ function bandRow(
   weights: [number, number, number] = [1, 1, 1]
 ): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
-  row.addChild(left, weights[0]);
-  row.addChild(center, weights[1]);
-  row.addChild(right, weights[2]);
+  row.add(left, weights[0]);
+  row.add(center, weights[1]);
+  row.add(right, weights[2]);
   return row;
 }
 
@@ -257,7 +257,7 @@ function footerRow(pageNumber: number): HorizontalStack {
 function brandMark(): HorizontalStack {
   const row = new HorizontalStack({ spacing: 6, margin: { bottom: 26 } });
   for (const color of [PRIMARY, SECONDARY, TERTIARY]) {
-    row.addChild(new Container({ backgroundColor: color, width: 14, height: 14, cornerRadius: 3 }));
+    row.add(new Container({ backgroundColor: color, width: 14, height: 14, cornerRadius: 3 }));
   }
   return row;
 }
@@ -279,7 +279,7 @@ function coverTitle(text: string): TextBlock {
 function triColourRule(): HorizontalStack {
   const row = new HorizontalStack({ spacing: 0, margin: { top: 18, bottom: 18 } }); // joined, edge to edge
   for (const color of [PRIMARY, SECONDARY, TERTIARY]) {
-    row.addChild(new Container({ backgroundColor: color, width: 34, height: 5 }));
+    row.add(new Container({ backgroundColor: color, width: 34, height: 5 }));
   }
   return row;
 }
@@ -337,7 +337,7 @@ function kpiRow(): HorizontalStack {
     ['2.1M', 'Daily active users', TERTIARY],
   ];
   for (const [value, label, accent] of cards) {
-    row.addChild(kpiCard(value, label, accent), 1);
+    row.add(kpiCard(value, label, accent), 1);
   }
   return row;
 }

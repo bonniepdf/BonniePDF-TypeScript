@@ -88,10 +88,6 @@ import { generate as facturXInvoice } from './showcases/invoices/factur-x-invoic
 import { generate as facturXInvoiceClasses } from './showcases/invoices/factur-x-invoice-classes';
 import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
 import { generate as indiaGstInvoiceClasses } from './showcases/invoices/india-gst-invoice-classes';
-import { generate as userDirectory } from './showcases/catalogs/user-directory';
-import { generate as userDirectoryClasses } from './showcases/catalogs/user-directory-classes';
-import { generate as movieCatalog } from './showcases/catalogs/movie-catalog';
-import { generate as movieCatalogClasses } from './showcases/catalogs/movie-catalog-classes';
 import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
 import { generate as productPhotoGalleryClasses } from './showcases/catalogs/product-photo-gallery-classes';
 import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
@@ -131,6 +127,8 @@ import { generate as edgeReceipt } from './showcases/edge/edge-receipt';
 import { generate as edgeReceiptClasses } from './showcases/edge/edge-receipt-classes';
 import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
 import { generate as publicLibraryMembershipLetterClasses } from './showcases/community/public-library-membership-letter-classes';
+import { generate as grantAwardLetter } from './showcases/community/grant-award-letter';
+import { generate as grantAwardLetterClasses } from './showcases/community/grant-award-letter-classes';
 import { generate as auditReport } from './showcases/compliance/audit-report';
 import { generate as auditReportClasses } from './showcases/compliance/audit-report-classes';
 import { generate as shelfLabel } from './showcases/retail/shelf-label';
@@ -141,8 +139,83 @@ import { generate as financialStatement } from './showcases/reports/financial-st
 import { generate as financialStatementClasses } from './showcases/reports/financial-statement-classes';
 import { generate as labReport } from './showcases/healthcare/lab-report';
 import { generate as labReportClasses } from './showcases/healthcare/lab-report-classes';
+import { generate as payslip } from './showcases/hr/payslip';
+import { generate as payslipClasses } from './showcases/hr/payslip-classes';
 
 export * from './recipes/svg';
+
+// ── Structured taxonomy (gallery filters, capability search) ─────────────────
+// These axes are orthogonal to the free-text {@link ExampleDef.category}: an
+// invoice is `documentType: 'invoice'` but can serve any {@link Industry}.
+// They power gallery facets ("PDF/UA", "Browser-only", "Barcodes", "Multi-page
+// tables", "PDF/A-3 attachments") without each showcase re-deriving them from
+// its own description.
+
+/** Vertical market / buyer context a document serves. */
+export type Industry =
+  | 'Legal'
+  | 'Insurance'
+  | 'Property'
+  | 'HR'
+  | 'Banking'
+  | 'Manufacturing'
+  | 'Government'
+  | 'Healthcare'
+  | 'Education'
+  | 'Retail'
+  | 'Logistics'
+  | 'Events'
+  | 'Finance'
+  | 'Technology'
+  | 'Media'
+  | 'Compliance'
+  | 'Utilities'
+  | 'General';
+
+/** The kind of document, independent of which industry it serves. */
+export type DocumentType =
+  | 'invoice'
+  | 'receipt'
+  | 'statement'
+  | 'payslip'
+  | 'contract'
+  | 'report'
+  | 'schedule'
+  | 'certificate'
+  | 'transcript'
+  | 'letter'
+  | 'label'
+  | 'ticket'
+  | 'catalog'
+  | 'dashboard'
+  | 'roadmap'
+  | 'chart';
+
+/** BonniePDF engine capabilities a document exercises. */
+export type Capability =
+  | 'crossReferences'
+  | 'encryption'
+  | 'attachments'
+  | 'watermark'
+  | 'qr'
+  | 'barcodes'
+  | 'dataMatrix'
+  | 'longTables'
+  | 'charts'
+  | 'images'
+  | 'bookmarks'
+  | 'numbering'
+  | 'signatures'
+  | 'clientSide';
+
+/** Formal compliance / conformance profiles demonstrated (registry-level mirror for filtering). */
+export type Compliance = 'pdf/a-1b' | 'pdf/a-2a' | 'pdf/a-2b' | 'pdf/a-3a' | 'pdf/a-3b' | 'pdf/a-4' | 'pdf/ua-1';
+
+/** Runtime environments the document is designed to generate in. */
+export type Runtime = 'browser' | 'node' | 'edge';
+
+/** Volume of tabular/repeated data — `'scale'` marks a deliberate stress test. */
+export type DataDensity = 'low' | 'medium' | 'high' | 'scale';
 
 export interface ExampleDef {
   id: string;
@@ -195,6 +268,26 @@ export interface ExampleDef {
   variantLabel?: string;
   /** User password for encrypted PDFs - passed to the viewer so it can open the document. */
   password?: string;
+  // ── Structured taxonomy (optional; powers gallery facets / capability search) ──
+  /** Vertical market(s) this document serves (orthogonal to {@link category}). */
+  industries?: Industry[];
+  /** The document archetype, independent of industry (e.g. `'payslip'`, `'contract'`). */
+  documentType?: DocumentType;
+  /** Engine capabilities this document exercises (e.g. `'encryption'`, `'longTables'`). */
+  capabilities?: Capability[];
+  /** Conformance profiles demonstrated. Mirrors {@link pdfUa1} + PDF/A claims for filtering. */
+  compliance?: Compliance[];
+  /** Runtime environments the document is designed to generate in. */
+  runtime?: Runtime[];
+  /** Volume of tabular/repeated data; `'scale'` marks a deliberate stress test. */
+  dataDensity?: DataDensity;
+  /**
+   * Grouping key for related variants shown as one gallery card (e.g. the four
+   * annual-report covers share `series: 'annual-report'`). Distinct from
+   * {@link variantOf} (authoring-style Options-vs-Class) — `series` groups
+   * *different documents* that belong together, like an invoice pack.
+   */
+  series?: string;
 }
 
 export const examples: ExampleDef[] = [
@@ -1404,82 +1497,14 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
   {
-    id: 'user-directory',
-    name: 'User Directory',
-    category: 'Catalogs',
-    tier: 'showcase',
-    description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
-    filename: 'user-directory.pdf',
-    generate: userDirectory,
-    dotnetClass: 'UserDirectoryExample',
-    pdfUa1: true,
-    thumbnails: false,
-    variantLabel: 'Options API',
-  },
-  {
-    id: 'user-directory-classes',
-    name: 'User Directory (Class API)',
-    category: 'Catalogs',
-    tier: 'showcase',
-    description: 'Landscape A4, 50-row table with alternating row colors, status badges, and repeated headers.',
-    filename: 'user-directory-classes.pdf',
-    generate: userDirectoryClasses,
-    dotnetClass: 'UserDirectoryExample',
-    pdfUa1: true,
-    thumbnails: false,
-    gallery: false,
-    variantOf: 'user-directory',
-    variantLabel: 'Class API',
-  },
-  {
-    id: 'movie-catalog',
-    name: 'Movie Catalog',
-    category: 'Catalogs',
-    tier: 'showcase',
-    description:
-      'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
-    filename: 'movie-catalog.pdf',
-    generate: movieCatalog,
-    dotnetClass: 'MovieCatalogExample',
-    pdfUa1: true,
-    thumbnails: false,
-    variantLabel: 'Options API',
-  },
-  {
-    id: 'movie-catalog-classes',
-    name: 'Movie Catalog (Class API)',
-    category: 'Catalogs',
-    tier: 'showcase',
-    description:
-      'Landscape A4 classic film catalog with a 47-row table, colour-coded ratings, alternating rows, and repeating headers.',
-    filename: 'movie-catalog-classes.pdf',
-    generate: movieCatalogClasses,
-    dotnetClass: 'MovieCatalogExample',
-    pdfUa1: true,
-    thumbnails: false,
-    gallery: false,
-    variantOf: 'movie-catalog',
-    variantLabel: 'Class API',
-  },
-  {
     id: 'product-photo-gallery',
-    name: 'Product Photo Gallery',
-    category: 'Catalogs',
+    name: 'Product Gallery',
+    category: 'Retail',
     tier: 'showcase',
     description:
-      'A retail look-book: products laid out two-per-row as photo cards with name, SKU, price, and blurb, paginating automatically. PDF/A-2a + PDF/UA-1. Product photographs are pending - cards show a labelled placeholder until the images are supplied.',
+      'A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.',
     filename: 'product-photo-gallery.pdf',
     generate: productPhotoGallery,
-    requiredAssets: [
-      'images/products/terracotta-planter.jpg',
-      'images/products/linen-throw.jpg',
-      'images/products/brass-reading-lamp.jpg',
-      'images/products/ceramic-pour-over.jpg',
-      'images/products/wool-floor-cushion.jpg',
-      'images/products/smoked-glass-carafe.jpg',
-      'images/products/oak-wall-shelf.jpg',
-      'images/products/rattan-pendant-shade.jpg',
-    ],
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
@@ -1487,23 +1512,13 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'product-photo-gallery-classes',
-    name: 'Product Photo Gallery (Class API)',
-    category: 'Catalogs',
+    name: 'Product Gallery (Class API)',
+    category: 'Retail',
     tier: 'showcase',
     description:
-      'A retail look-book: products laid out two-per-row as photo cards with name, SKU, price, and blurb, paginating automatically. PDF/A-2a + PDF/UA-1. Product photographs are pending - cards show a labelled placeholder until the images are supplied.',
+      'A retail look-book: products laid out two-per-row as cards with name, SKU, price, and blurb, paginating automatically. Each card leads with a deterministic colour-blocked tile drawn natively by the engine, so the catalogue is self-contained. PDF/A-2a + PDF/UA-1.',
     filename: 'product-photo-gallery-classes.pdf',
     generate: productPhotoGalleryClasses,
-    requiredAssets: [
-      'images/products/terracotta-planter.jpg',
-      'images/products/linen-throw.jpg',
-      'images/products/brass-reading-lamp.jpg',
-      'images/products/ceramic-pour-over.jpg',
-      'images/products/wool-floor-cushion.jpg',
-      'images/products/smoked-glass-carafe.jpg',
-      'images/products/oak-wall-shelf.jpg',
-      'images/products/rattan-pendant-shade.jpg',
-    ],
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
@@ -1767,7 +1782,7 @@ export const examples: ExampleDef[] = [
       "An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider's branding. PDF/A-2a + PDF/UA-1.",
     filename: 'outpatient-appointment-letter.pdf',
     generate: outpatientAppointmentLetter,
-    dotnetClass: null,
+    dotnetClass: 'OutpatientAppointmentLetterExample',
     thumbnails: false,
     pdfUa1: true,
     variantLabel: 'Options API',
@@ -1782,7 +1797,7 @@ export const examples: ExampleDef[] = [
       "An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider's branding. PDF/A-2a + PDF/UA-1.",
     filename: 'outpatient-appointment-letter-classes.pdf',
     generate: outpatientAppointmentLetterClasses,
-    dotnetClass: null,
+    dotnetClass: 'OutpatientAppointmentLetterExample',
     thumbnails: false,
     pdfUa1: true,
     gallery: false,
@@ -2207,6 +2222,82 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'lab-report',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'grant-award-letter',
+    name: 'Grant Award Letter',
+    category: 'Community',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A fictional public-sector grant funding decision: fund masthead, a headline "Awarded" decision block with key dates, a tagged award-breakdown table, next steps, a review route, contact options, and an alternative-formats notice. Bookmarked, accessibility-first PDF/A-2a + PDF/UA-1.',
+    filename: 'grant-award-letter.pdf',
+    generate: grantAwardLetter,
+    dotnetClass: 'GrantAwardLetterExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'grant-award-letter-classes',
+    name: 'Grant Award Letter (Class API)',
+    category: 'Community',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same accessible grant award letter as Grant Award Letter, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'grant-award-letter-classes.pdf',
+    generate: grantAwardLetterClasses,
+    dotnetClass: 'GrantAwardLetterExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'grant-award-letter',
+    variantLabel: 'Class API',
+  },
+  // ── HR / payroll pack (vertical: HR; security-sensitive transactional output) ─
+  {
+    id: 'payslip',
+    name: 'Payslip',
+    category: 'HR',
+    tier: 'showcase',
+    description:
+      'A high-volume, security-sensitive transactional document: earnings, deductions, taxes, employer contributions, ' +
+      'and year-to-date totals, with masked employee identifiers and AES-256 encryption. Privacy-sensitive and ' +
+      'client-side-generated — generate payslips without sending payroll data to a conversion service. PDF/UA-1 tagged ' +
+      '(no PDF/A: archival output cannot be encrypted).',
+    filename: 'payslip.pdf',
+    generate: payslip,
+    dotnetClass: 'PayslipExample',
+    thumbnails: false,
+    pdfUa1: true,
+    password: 'demo123',
+    industries: ['HR'],
+    documentType: 'payslip',
+    capabilities: ['encryption', 'clientSide', 'longTables'],
+    compliance: ['pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
+    series: 'hr-pack',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'payslip-classes',
+    name: 'Payslip (Class API)',
+    category: 'HR',
+    tier: 'showcase',
+    description:
+      'The same encrypted payslip as Payslip, authored the long way: construct each element and assign properties. ' +
+      'Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+    filename: 'payslip-classes.pdf',
+    generate: payslipClasses,
+    dotnetClass: 'PayslipExample',
+    thumbnails: false,
+    pdfUa1: true,
+    password: 'demo123',
+    gallery: false,
+    variantOf: 'payslip',
     variantLabel: 'Class API',
   },
 ];

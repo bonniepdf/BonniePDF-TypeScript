@@ -282,6 +282,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
+    canonical: 'grant-award-letter',
+    variant: 'grant-award-letter-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
     canonical: 'patient-summary',
     variant: 'patient-summary-classes',
     why: 'class/mutation companion must desugar to the options-object form',
@@ -322,16 +327,6 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
-    canonical: 'movie-catalog',
-    variant: 'movie-catalog-classes',
-    why: 'class/mutation companion must desugar to the options-object form',
-  },
-  {
-    canonical: 'user-directory',
-    variant: 'user-directory-classes',
-    why: 'class/mutation companion must desugar to the options-object form',
-  },
-  {
     canonical: 'compliance-findings-register',
     variant: 'compliance-findings-register-classes',
     why: 'class/mutation companion must desugar to the options-object form',
@@ -364,6 +359,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
   {
     canonical: 'annual-report-geometric-cover',
     variant: 'annual-report-geometric-cover-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'payslip',
+    variant: 'payslip-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
 ];

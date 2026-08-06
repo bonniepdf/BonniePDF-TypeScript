@@ -5,23 +5,21 @@ import {
   VerticalStack,
   HorizontalStack,
   Container,
-  Image,
   Heading,
   ColorPalette,
   StandardFonts,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
 /**
- * A retail product-photo gallery / look-book - the kind of branded catalogue an
- * e-commerce or marketplace platform generates (see the "Retail, e-commerce and
- * marketplaces" market). Products are laid out two-per-row as photo cards with
- * a name, SKU, price and blurb, in an accessible PDF/A-2a + PDF/UA-1 document.
+ * A retail product gallery / look-book - the kind of branded catalogue an
+ * e-commerce or marketplace platform generates. Products are laid out
+ * two-per-row as cards with a name, SKU, price and blurb, in an accessible
+ * PDF/A-2a + PDF/UA-1 document that paginates automatically.
  *
- * NOTE: the product photographs are not bundled yet. Each product references an
- * image under `images/products/`; until those assets exist the card shows a
- * labelled placeholder. When a real image is supplied via the assets map it is
- * rendered as a Figure with alt-text. See {@link ExampleDef.requiredAssets}.
+ * Each card leads with a deterministic colour-blocked tile - a per-product tint
+ * with the product's initial - drawn natively by the engine, so the catalogue
+ * is self-contained and needs no bundled photography. Swap the tile for an
+ * `Image` (Figure + alt-text) when real product shots are available.
  *
  * Authored through the options-object front door.
  */
@@ -30,7 +28,6 @@ interface Product {
   sku: string;
   price: string;
   blurb: string;
-  image: string;
 }
 
 const PRODUCTS: Product[] = [
@@ -39,56 +36,48 @@ const PRODUCTS: Product[] = [
     sku: 'HG-1042',
     price: '£28.00',
     blurb: 'Hand-thrown stoneware planter with a matte terracotta glaze.',
-    image: 'images/products/terracotta-planter.jpg',
   },
   {
     name: 'Linen Throw',
     sku: 'HG-2277',
     price: '£54.00',
     blurb: 'Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe.',
-    image: 'images/products/linen-throw.jpg',
   },
   {
     name: 'Brass Reading Lamp',
     sku: 'LT-0391',
     price: '£120.00',
     blurb: 'Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED.',
-    image: 'images/products/brass-reading-lamp.jpg',
   },
   {
     name: 'Ceramic Pour-Over',
     sku: 'KT-5108',
     price: '£36.00',
     blurb: 'Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter.',
-    image: 'images/products/ceramic-pour-over.jpg',
   },
   {
     name: 'Wool Floor Cushion',
     sku: 'HG-3315',
     price: '£95.00',
     blurb: 'Chunky hand-woven wool floor cushion with a removable, washable cover.',
-    image: 'images/products/wool-floor-cushion.jpg',
   },
   {
     name: 'Smoked-Glass Carafe',
     sku: 'KT-4420',
     price: '£42.00',
     blurb: 'Mouth-blown smoked-glass carafe and tumbler set for the bedside or table.',
-    image: 'images/products/smoked-glass-carafe.jpg',
   },
   {
     name: 'Oak Wall Shelf',
     sku: 'FN-0876',
     price: '£68.00',
     blurb: 'Solid white-oak floating shelf with concealed brackets and an oiled finish.',
-    image: 'images/products/oak-wall-shelf.jpg',
   },
   {
     name: 'Rattan Pendant Shade',
     sku: 'LT-1653',
     price: '£82.00',
     blurb: 'Open-weave rattan pendant shade that casts a soft, patterned light.',
-    image: 'images/products/rattan-pendant-shade.jpg',
   },
 ];
 
@@ -96,38 +85,36 @@ const ACCENT = ColorPalette.emerald[700];
 const CARD_HEIGHT_IMAGE = 128;
 const CARD_IMAGE_RADIUS = 6;
 
-function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>): IElement {
-  const data = assets?.get(product.image);
-  if (data && data.length > 0) {
-    return new Container({
-      height: CARD_HEIGHT_IMAGE,
-      cornerRadius: CARD_IMAGE_RADIUS,
-      clipContent: true,
-      child: new Image({
-        imageData: data,
-        height: CARD_HEIGHT_IMAGE,
-        fitMode: 'cover',
-        altText: `Product photograph of the ${product.name}`,
-      }),
-    });
-  }
+// One tint per card, cycled by position, so the catalogue reads as a deliberate
+// colour-blocked design rather than a set of missing images.
+const TILE_HUES = [
+  ColorPalette.emerald,
+  ColorPalette.amber,
+  ColorPalette.rose,
+  ColorPalette.sky,
+  ColorPalette.violet,
+  ColorPalette.teal,
+  ColorPalette.orange,
+  ColorPalette.indigo,
+];
 
-  // Placeholder until the real photograph is supplied.
+function productMedia(product: Product, index: number): Container {
+  const hue = TILE_HUES[index % TILE_HUES.length];
   return new Container({
     height: CARD_HEIGHT_IMAGE,
-    backgroundColor: ColorPalette.slate[100],
+    backgroundColor: hue[100],
     cornerRadius: CARD_IMAGE_RADIUS,
-    child: new TextBlock(product.name, {
+    child: new TextBlock(product.name.charAt(0).toUpperCase(), {
       fontName: StandardFonts.HelveticaBold,
-      fontSize: 10,
-      textColor: ColorPalette.slate[400],
+      fontSize: 40,
+      textColor: hue[600],
       alignment: 'center',
-      margin: { top: CARD_HEIGHT_IMAGE / 2 - 14 },
+      margin: { top: 40 },
     }),
   });
 }
 
-function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>): Container {
+function productCard(product: Product, index: number): Container {
   const meta = new HorizontalStack({ widthDistribution: 'weighted' });
   meta.add(new TextBlock(product.sku, { fontSize: 9, textColor: ColorPalette.slate[500] }), 1);
   meta.add(
@@ -143,7 +130,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   const body = new VerticalStack({
     spacing: 4,
     children: [
-      productMedia(product, assets),
+      productMedia(product, index),
       new Heading(product.name, {
         tocIdentifier: product.sku.toLowerCase(),
         level: 2,
@@ -166,7 +153,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   });
 }
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(): Document {
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -184,7 +171,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     metadata: {
       title: 'Product Gallery - Spring Collection',
       author: 'BonniePDF',
-      subject: 'An accessible PDF/A-2a + PDF/UA-1 retail product-photo gallery.',
+      subject: 'An accessible PDF/A-2a + PDF/UA-1 retail product gallery.',
       keywords: 'pdf, accessibility, retail, catalogue, product gallery, e-commerce, BonniePDF',
     },
   });
@@ -212,9 +199,9 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const gallery = new VerticalStack({ spacing: 16 });
   for (let i = 0; i < PRODUCTS.length; i += 2) {
     const row = new HorizontalStack({ spacing: 16, widthDistribution: 'equal' });
-    row.add(productCard(PRODUCTS[i], assets));
+    row.add(productCard(PRODUCTS[i], i));
     if (i + 1 < PRODUCTS.length) {
-      row.add(productCard(PRODUCTS[i + 1], assets));
+      row.add(productCard(PRODUCTS[i + 1], i + 1));
     }
     gallery.add(row);
   }

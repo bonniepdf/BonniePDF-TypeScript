@@ -151,7 +151,7 @@ function renderLine(l: Line): IElement {
 
   const bold = l.kind === 'subtotal' || l.kind === 'total';
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 2, bottom: 2 } });
-  row.addChild(
+  row.add(
     new TextBlock(l.label, {
       fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
       fontSize: 10,
@@ -160,16 +160,16 @@ function renderLine(l: Line): IElement {
     }),
     6
   );
-  row.addChild(numCell(l.note ?? '', false, MUTED, 'center'), 1);
-  row.addChild(numCell(fmt(l.cur), bold, bold ? NAVY : INK, 'right'), 2);
-  row.addChild(numCell(fmt(l.prior), bold, MUTED, 'right'), 2);
+  row.add(numCell(l.note ?? '', false, MUTED, 'center'), 1);
+  row.add(numCell(fmt(l.cur), bold, bold ? NAVY : INK, 'right'), 2);
+  row.add(numCell(fmt(l.prior), bold, MUTED, 'right'), 2);
 
   // Subtotals/totals get a rule above; totals a heavier one.
   if (l.kind === 'subtotal' || l.kind === 'total') {
     const stack = new VerticalStack();
-    stack.addChild(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
-    stack.addChild(row);
-    if (l.kind === 'total') stack.addChild(rule(NAVY, 0.5));
+    stack.add(rule(l.kind === 'total' ? NAVY : RULE, l.kind === 'total' ? 0.8 : 0.5));
+    stack.add(row);
+    if (l.kind === 'total') stack.add(rule(NAVY, 0.5));
     return stack;
   }
   return row;
@@ -186,10 +186,10 @@ function numCell(text: string, bold: boolean, color: ColorInput, align: TextAlig
 
 function columnHeads(): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 2, bottom: 2 } });
-  row.addChild(numCell('', false, MUTED, 'left'), 6);
-  row.addChild(numCell('Note', false, MUTED, 'center'), 1);
-  row.addChild(numCell('2026', true, NAVY, 'right'), 2);
-  row.addChild(numCell('2025', true, MUTED, 'right'), 2);
+  row.add(numCell('', false, MUTED, 'left'), 6);
+  row.add(numCell('Note', false, MUTED, 'center'), 1);
+  row.add(numCell('2026', true, NAVY, 'right'), 2);
+  row.add(numCell('2025', true, MUTED, 'right'), 2);
   return row;
 }
 

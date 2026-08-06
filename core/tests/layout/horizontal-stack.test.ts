@@ -47,12 +47,12 @@ describe('HorizontalStack', () => {
     expect((stack as any).children).toHaveLength(1);
   });
 
-  it('keeps deprecated addChild aliases as forwarding compatibility shims', () => {
+  it('keeps deprecated add aliases as forwarding compatibility shims', () => {
     const horizontal = new HorizontalStack();
     const vertical = new VerticalStack();
 
-    horizontal.addChild(new TestElement(), 1);
-    vertical.addChild(new TestElement());
+    horizontal.add(new TestElement(), 1);
+    vertical.add(new TestElement());
 
     expect(horizontal.children).toHaveLength(1);
     expect(vertical.children).toHaveLength(1);

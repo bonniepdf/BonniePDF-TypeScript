@@ -1314,7 +1314,7 @@ export const examples: ExampleDef[] = [
     name: 'Report with Embedded Data',
     category: 'Security',
     description:
-      'A PDF/A-3 report that embeds its underlying CSV data as an associated file (/AFRelationship /Source) for reproducibility, using the generic file-attachment API.',
+      'A PDF/A-3 report that embeds its underlying CSV data as an associated file for reproducibility, using the generic file-attachment API.',
     filename: 'attached-data.pdf',
     generate: attachedData,
     dotnetClass: 'AttachedDataExample',
@@ -1437,7 +1437,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU',
     description:
-      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice - both parties, EUR amounts, IBAN/BIC - carrying the machine-readable CII invoice XML embedded as an associated file (/AFRelationship /Data) with the fx: XMP metadata. The visible totals mirror the embedded XML exactly. Validated in CI with veraPDF (PDF/A-3b) and the Mustang project (ZUGFeRD / EN 16931).',
+      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice - both parties, EUR amounts, IBAN/BIC - carrying the machine-readable CII invoice XML embedded as an associated file. The visible totals mirror the embedded XML exactly. Validated in CI with veraPDF (PDF/A-3b) and the Mustang project (ZUGFeRD / EN 16931).',
     filename: 'factur-x_invoice.pdf',
     generate: facturXInvoice,
     requiredAssets: ['factur-x/en16931-invoice.xml'],

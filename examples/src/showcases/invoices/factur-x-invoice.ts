@@ -2,8 +2,8 @@
 //
 // The single EU e-invoice showcase: the polished human-readable invoice layout
 // *and* the real machine-readable half. `applyFacturX` binds the caller-supplied
-// EN 16931 CII XML - it forces PDF/A-3, embeds `factur-x.xml` as an associated
-// file (`/AFRelationship /Data`), and writes the `fx:` XMP block.
+// EN 16931 CII XML - it forces PDF/A-3 and embeds `factur-x.xml` as an associated
+// file.
 //
 // The visible totals mirror the embedded XML exactly (net 4000.00, VAT 760.00,
 // gross 4760.00) - a real e-invoice's human- and machine-readable views must
@@ -191,14 +191,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       children: [
         cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }),
         cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }),
-        cell('PDF/A-3 as an associated file — /AFRelationship /Data.', { size: 8, color: MUTED }),
+        cell('PDF/A-3 as an associated file.', { size: 8, color: MUTED }),
       ],
     }),
   });
   bottom.addRow(new Container({ child: pay, padding: { right: 20 } }), xml);
   doc.add(bottom);
 
-  // ── Bind the invoice XML: PDF/A-3 + embedded CII + fx: XMP ──
+  // ── Bind the invoice XML: PDF/A-3 + embedded CII ──
   const xmlBytes = assets?.get(ASSET_KEY);
   if (xmlBytes) {
     applyFacturX(doc, xmlBytes, { profile: FacturXProfile.En16931 });

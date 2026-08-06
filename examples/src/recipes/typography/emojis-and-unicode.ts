@@ -25,9 +25,8 @@ export function generate(): Document {
   const doc = new Document({
     settings: {
       // PDF/A intentionally not claimed — emoji fonts include COLR/CBDT tables
-      // that archival validators reject. PDF/UA-1 is still applied, and it is a
-      // PDF 1.7 standard: set the version explicitly so the pdfuaid XMP claim is
-      // emitted (PDF/A levels auto-upgrade to 1.7, but conformance is None here).
+      // that archival validators reject. PDF/UA-1 is still applied; set the
+      // version explicitly to PDF 1.7 (required for PDF/UA-1).
       version: PdfVersion.Pdf17,
       conformance: 'none',
       accessibility: 'pdf/ua-1',

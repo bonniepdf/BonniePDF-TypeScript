@@ -14,7 +14,7 @@ import { Document, Heading, TextBlock, TextElementBase, StandardFonts } from '@b
 const SECTIONS: [string, string][] = [
   [
     'Introduction',
-    'This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out. They are tagged as Artifact elements and do not appear in the accessibility structure tree.',
+    'This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out. They are marked as decorative elements and are skipped by screen readers.',
   ],
   [
     'Header Templates',
@@ -42,7 +42,7 @@ const SECTIONS: [string, string][] = [
   ],
   [
     'Accessibility',
-    'Header and footer templates are automatically tagged as Artifact elements in the PDF structure tree. This means assistive technologies skip over them when reading the document, preventing repeated announcement of decorative running headers on every page turn.',
+    'Header and footer templates are automatically marked as decorative elements. This means assistive technologies skip over them when reading the document, preventing repeated announcement of decorative running headers on every page turn.',
   ],
 ];
 
@@ -89,7 +89,7 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'Headers and footers are rendered as Artifact elements - they are visible on every page but are excluded from the accessibility structure tree. The numbered sections below describe how the template system works.',
+      'Headers and footers are rendered as decorative elements - they are visible on every page but are skipped by screen readers. The numbered sections below describe how the template system works.',
       { margin: { bottom: 12 } }
     )
   );

@@ -132,7 +132,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
-  // Running header + footer (auto-artifacted, excluded from the reading order).
+  // Running header + footer (marked as decorative, excluded from screen readers).
   settings.headerTemplate = (pageNumber: number): IElement | undefined => {
     if (pageNumber === 1) return undefined;
     return bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]);

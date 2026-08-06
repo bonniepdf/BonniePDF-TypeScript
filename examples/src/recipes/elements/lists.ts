@@ -4,7 +4,7 @@ import { Document, Heading, TextBlock, OrderedList, UnorderedList, StandardFonts
  * Ordered and unordered lists — numbering formats, bullet styles, custom start
  * numbers, coloured bullets, and nested sub-lists — authored through the
  * options-object front door. PDF/A-2a + PDF/UA-1: every item is tagged as an
- * L > LI > Lbl + LBody structure tree for screen readers.
+ * automatically structured list for screen readers.
  *
  * Each list is configured in one expression (`numberFormat`/`bulletStyle` as
  * tokens, colours as tokens/hex); items and nested lists are added imperatively
@@ -43,7 +43,7 @@ export function generate(): Document {
   const decimalList = new OrderedList({ numberFormat: 'decimal', fontSize: 12, itemSpacing: 6 });
   decimalList.addItem('Plan the document structure before writing.');
   decimalList.addItem('Apply semantic headings so assistive technology can navigate by section.');
-  decimalList.addItem('Tag every image with alternative text or mark it as an artifact.');
+  decimalList.addItem('Tag every image with alternative text or mark it as decorative.');
   decimalList.addItem('Validate the output with veraPDF before publishing.');
   doc.add(decimalList);
 

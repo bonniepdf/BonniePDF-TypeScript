@@ -50,7 +50,7 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'HorizontalStack arranges child elements side-by-side. Width distribution controls how available space is divided between columns; cross-axis alignment controls how children of differing heights line up vertically. All text inside stacks is part of the normal structure tree.',
+      'HorizontalStack arranges child elements side-by-side. Width distribution controls how available space is divided between columns; cross-axis alignment controls how children of differing heights line up vertically. All text inside stacks is accessible to screen readers.',
       { margin: { bottom: 16 } }
     )
   );

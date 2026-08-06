@@ -117,7 +117,7 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is tagged as /TH (header) or /TD (data) within the /Table structure tree.',
+      'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.',
       { margin: { bottom: 10 } }
     )
   );

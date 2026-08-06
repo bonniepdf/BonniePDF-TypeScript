@@ -20,7 +20,7 @@ import {
 /**
  * Ordered and unordered lists — numbering formats, bullet styles, custom start
  * numbers, coloured bullets, and nested sub-lists. PDF/A-2a + PDF/UA-1: every
- * item is tagged as an L > LI > Lbl + LBody structure tree for screen readers.
+ * item is tagged as an automatically structured list for screen readers.
  */
 /**
  * The **class / construct-then-mutate** companion to `lists.ts`.
@@ -69,7 +69,7 @@ export function generate(): Document {
   decimalList.itemSpacing = 6;
   decimalList.addItem('Plan the document structure before writing.');
   decimalList.addItem('Apply semantic headings so assistive technology can navigate by section.');
-  decimalList.addItem('Tag every image with alternative text or mark it as an artifact.');
+  decimalList.addItem('Tag every image with alternative text or mark it as decorative.');
   decimalList.addItem('Validate the output with veraPDF before publishing.');
   doc.add(decimalList);
 

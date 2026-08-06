@@ -404,7 +404,7 @@ export const examples: ExampleDef[] = [
     name: 'Headers & Footers',
     category: 'Layout',
     description:
-      'Dynamic running header and footer templates on every page. The templates are tagged as Artifacts (skipped by screen readers) while the numbered body sections use /H2 headings and /P paragraphs.',
+      'Dynamic running header and footer templates on every page. The templates are marked as decorative (skipped by screen readers) while the numbered body sections are semantically structured.',
     filename: 'headers-footers.pdf',
     generate: headersFooters,
     dotnetClass: 'HeadersFootersExample',
@@ -430,7 +430,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Stacks',
     category: 'Layout',
     description:
-      'Flex-like horizontal layout - equal and weighted width distribution, cross-axis (vertical) alignment, key-value pairs, and two-column text, all with /H2 section headings.',
+      'Flex-like horizontal layout - equal and weighted width distribution, cross-axis (vertical) alignment, key-value pairs, and two-column text, all structured for screen readers.',
     filename: 'horizontal-stacks.pdf',
     generate: horizontalStacks,
     thumbnails: false,
@@ -458,7 +458,7 @@ export const examples: ExampleDef[] = [
     name: 'TextBlock Overflow',
     category: 'Layout',
     description:
-      'Long-form text flowing automatically across page boundaries. Three self-documenting /H2 sections stay tagged as they paginate, with an Artifact "Page N of M" footer on every page.',
+      'Long-form text flowing automatically across page boundaries. Three self-documenting sections remain accessible as they paginate, with a decorative page-number footer on every page.',
     filename: 'text-block-overflow.pdf',
     generate: textBlockOverflow,
     dotnetClass: 'TextBlockOverflowExample',
@@ -499,7 +499,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Alignment',
     category: 'Typography',
     description:
-      'Left, centre, right, and justified text alignment including book-style paragraphs, tagged as /H2 headings and /P paragraphs. PDF/A-2a + PDF/UA-1.',
+      'Left, centre, right, and justified text alignment including book-style paragraphs, accessible to screen readers. PDF/A-2a + PDF/UA-1.',
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnails: false,
@@ -555,7 +555,7 @@ export const examples: ExampleDef[] = [
     name: 'Book Page Layout',
     category: 'Typography',
     description:
-      'A typeset chapter page in the style of an academic monograph: Times family fonts throughout, justified body text, a bordered pull-quote block inset from the text column, a mixed bold/italic emphasis break, and a chapter footer with page number and imprint. Chapter title is /H1; all body paragraphs are /P. PDF/A-2a + PDF/UA-1.',
+      'A typeset chapter page in the style of an academic monograph: Times family fonts throughout, justified body text, a bordered pull-quote block inset from the text column, a mixed bold/italic emphasis break, and a chapter footer with page number and imprint. The document is fully structured for screen readers. PDF/A-2a + PDF/UA-1.',
     filename: 'book-page-layout.pdf',
     generate: bookPageLayout,
     thumbnails: false,
@@ -721,7 +721,7 @@ export const examples: ExampleDef[] = [
     name: 'Dickens: A Tale of Two Cities',
     category: 'Typography',
     description:
-      'PDF/UA-1 tagged book layout with VisualToc, artifacted running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
+      'PDF/UA-1 tagged book layout with VisualToc, decorative running headers, footer page numbers, and justified body text across three books and fourteen chapters.',
     filename: 'dickens-novel.pdf',
     generate: dickensNovel,
     dotnetClass: 'DickensNovelExample',
@@ -748,7 +748,7 @@ export const examples: ExampleDef[] = [
     name: 'Tables',
     category: 'Elements',
     description:
-      'A 45-row employee table with repeating /TH column headers across pages, alternating row colours, and a "Page N of M" footer — all tagged /TH and /TD within the /Table structure tree. PDF/A-2a + PDF/UA-1.',
+      'A 45-row employee table with repeating /TH column headers across pages, alternating row colours, and a "Page N of M" footer — all automatically tagged for screen readers. PDF/A-2a + PDF/UA-1.',
     filename: 'tables.pdf',
     generate: tables,
     dotnetClass: 'TablesExample',
@@ -774,7 +774,7 @@ export const examples: ExampleDef[] = [
     name: 'Lists',
     category: 'Elements',
     description:
-      'Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, custom, coloured) lists including nested sub-lists. Each item is tagged as L > LI > Lbl + LBody. PDF/A-2a + PDF/UA-1.',
+      'Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, custom, coloured) lists including nested sub-lists. Each item is automatically structured for screen readers. PDF/A-2a + PDF/UA-1.',
     filename: 'lists.pdf',
     generate: lists,
     dotnetClass: 'ListsExample',
@@ -989,7 +989,7 @@ export const examples: ExampleDef[] = [
     name: 'Images',
     category: 'Elements',
     description:
-      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Every informative image carries alt text (Figure + /Alt) and a decorative divider is marked as an artifact. PDF/A-2a + PDF/UA-1.',
+      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Every informative image carries alt text (Figure + /Alt) and a decorative divider is marked as decorative. PDF/A-2a + PDF/UA-1.',
     filename: 'images.pdf',
     generate: images,
     dotnetClass: 'ImagesExample',

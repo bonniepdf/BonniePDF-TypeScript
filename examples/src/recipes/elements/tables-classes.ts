@@ -135,7 +135,7 @@ export function generate(): Document {
   doc.add(h1Dir);
 
   const tableIntro = new TextBlock(
-    'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is tagged as /TH (header) or /TD (data) within the /Table structure tree.'
+    'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.'
   );
   tableIntro.margin = new Thickness(0, 0, 0, 10);
   doc.add(tableIntro);

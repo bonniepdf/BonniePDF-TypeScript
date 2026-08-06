@@ -60,7 +60,7 @@ export function generate(): Document {
   const intro = new TextBlock(
     'RichText lets you mix bold, italic, coloured, highlighted, and differently-sized spans within a single ' +
       'flowing paragraph. All formatting is per-span while the text wraps and aligns as a unit. ' +
-      'Every RichText is tagged as a /P element in the structure tree.'
+      'Every RichText is automatically structured as a paragraph for screen readers.'
   );
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);

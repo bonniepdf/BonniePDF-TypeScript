@@ -114,7 +114,7 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
-      // Running header + footer (auto-artifacted, excluded from the reading order).
+      // Running header + footer (marked as decorative, excluded from screen readers).
       headerTemplate: (pageNumber: number) =>
         pageNumber === 1
           ? undefined

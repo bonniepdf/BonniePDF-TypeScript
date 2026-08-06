@@ -23,7 +23,7 @@ import type { IElement } from '@bonniepdf/core';
  * Raster images — fit modes, containers, alpha transparency, and accessible
  * tagging. PDF/A-2a + PDF/UA-1: every informative image carries alt text so it
  * becomes a Figure with /Alt, and the decorative divider is marked as an
- * artifact so assistive technology skips it.
+ * decorative so assistive technology skips it.
  *
  * The PNGs are generated in-memory (a single stored zlib block keeps this
  * dependency-free), so the example needs no external assets.
@@ -66,7 +66,7 @@ export function generate(): Document {
   metadata.title = 'Images';
   metadata.author = 'BonniePDF';
   metadata.subject =
-    'Raster image embedding — fit modes, containers, alpha transparency, and accessible Figure/Artifact tagging. PDF/A-2a + PDF/UA-1.';
+    'Raster image embedding — fit modes, containers, alpha transparency, and accessible accessible image tagging. PDF/A-2a + PDF/UA-1.';
   metadata.keywords = 'pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode';
 
   const doc = new Document(settings, metadata);
@@ -84,7 +84,7 @@ export function generate(): Document {
 
   const intro = new TextBlock(
     'BonniePDF embeds PNG images as PDF image XObjects. Under PDF/UA-1 every image must be either a ' +
-      'Figure carrying alternative text (informative) or an Artifact (decorative). Each informative image ' +
+      'Figure carrying alternative text (informative) or an marked decorative. Each informative image ' +
       'below carries alt text; the divider at the end is marked decorative.'
   );
   intro.margin = new Thickness(0, 0, 0, 12);
@@ -158,7 +158,10 @@ export function generate(): Document {
   divider.isDecorative = true;
 
   renderSection(doc, 'Decorative Images', 's-decorative', [
-    [caption('The light grey bar below is decorative; it is tagged as an artifact and carries no alt text.'), divider],
+    [
+      caption('The light grey bar below is decorative; it is tagged as an decorative and carries no alt text.'),
+      divider,
+    ],
   ]);
 
   return doc;

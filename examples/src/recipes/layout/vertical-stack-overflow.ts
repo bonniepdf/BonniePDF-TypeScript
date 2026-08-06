@@ -21,7 +21,7 @@ import {
  *
  * The example is a warehouse asset-label sheet - one scannable Code 128 label
  * per storage location - authored through the options-object front door. Every
- * label is a Figure with alt-text; the running footer is an Artifact.
+ * label is a Figure with alt-text; the running footer is marked as decorative.
  */
 const LOCATIONS: string[] = [
   'WH1-A01-R02-B03',

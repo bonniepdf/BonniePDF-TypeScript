@@ -10,8 +10,6 @@ import {
   VerticalStack,
   HorizontalStack,
   Container,
-  Image,
-  ImageFitMode,
   Heading,
   Color,
   ColorPalette,
@@ -22,20 +20,18 @@ import {
   WidthDistribution,
   PdfAConformance,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
 /**
  * The **class / construct-then-mutate** companion to `product-photo-gallery.ts`.
  *
- * A retail product-photo gallery / look-book - the kind of branded catalogue an
- * e-commerce or marketplace platform generates (see the "Retail, e-commerce and
- * marketplaces" market). Products are laid out two-per-row as photo cards with
- * a name, SKU, price and blurb, in an accessible PDF/A-2a + PDF/UA-1 document.
+ * A retail product gallery / look-book - the kind of branded catalogue an
+ * e-commerce or marketplace platform generates. Products are laid out
+ * two-per-row as cards with a name, SKU, price and blurb, in an accessible
+ * PDF/A-2a + PDF/UA-1 document that paginates automatically.
  *
- * NOTE: the product photographs are not bundled yet. Each product references an
- * image under `images/products/`; until those assets exist the card shows a
- * labelled placeholder. When a real image is supplied via the assets map it is
- * rendered as a Figure with alt-text. See {@link ExampleDef.requiredAssets}.
+ * Each card leads with a deterministic colour-blocked tile - a per-product tint
+ * with the product's initial - drawn natively by the engine, so the catalogue
+ * is self-contained and needs no bundled photography.
  *
  * It renders **byte-for-byte identically** to the options-style
  * `product-photo-gallery.ts` (an equivalence test binds the two). Reach for
@@ -46,7 +42,6 @@ interface Product {
   sku: string;
   price: string;
   blurb: string;
-  image: string;
 }
 
 const PRODUCTS: Product[] = [
@@ -55,56 +50,48 @@ const PRODUCTS: Product[] = [
     sku: 'HG-1042',
     price: '£28.00',
     blurb: 'Hand-thrown stoneware planter with a matte terracotta glaze.',
-    image: 'images/products/terracotta-planter.jpg',
   },
   {
     name: 'Linen Throw',
     sku: 'HG-2277',
     price: '£54.00',
     blurb: 'Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe.',
-    image: 'images/products/linen-throw.jpg',
   },
   {
     name: 'Brass Reading Lamp',
     sku: 'LT-0391',
     price: '£120.00',
     blurb: 'Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED.',
-    image: 'images/products/brass-reading-lamp.jpg',
   },
   {
     name: 'Ceramic Pour-Over',
     sku: 'KT-5108',
     price: '£36.00',
     blurb: 'Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter.',
-    image: 'images/products/ceramic-pour-over.jpg',
   },
   {
     name: 'Wool Floor Cushion',
     sku: 'HG-3315',
     price: '£95.00',
     blurb: 'Chunky hand-woven wool floor cushion with a removable, washable cover.',
-    image: 'images/products/wool-floor-cushion.jpg',
   },
   {
     name: 'Smoked-Glass Carafe',
     sku: 'KT-4420',
     price: '£42.00',
     blurb: 'Mouth-blown smoked-glass carafe and tumbler set for the bedside or table.',
-    image: 'images/products/smoked-glass-carafe.jpg',
   },
   {
     name: 'Oak Wall Shelf',
     sku: 'FN-0876',
     price: '£68.00',
     blurb: 'Solid white-oak floating shelf with concealed brackets and an oiled finish.',
-    image: 'images/products/oak-wall-shelf.jpg',
   },
   {
     name: 'Rattan Pendant Shade',
     sku: 'LT-1653',
     price: '£82.00',
     blurb: 'Open-weave rattan pendant shade that casts a soft, patterned light.',
-    image: 'images/products/rattan-pendant-shade.jpg',
   },
 ];
 
@@ -112,45 +99,42 @@ const ACCENT = ColorPalette.emerald[700];
 const CARD_HEIGHT_IMAGE = 128;
 const CARD_IMAGE_RADIUS = 6;
 
-function productMedia(product: Product, assets?: ReadonlyMap<string, Uint8Array>): IElement {
-  const data = assets?.get(product.image);
-  if (data && data.length > 0) {
-    const img = new Image();
-    img.imageData = data;
-    img.height = CARD_HEIGHT_IMAGE;
-    img.fitMode = ImageFitMode.Cover;
-    img.altText = `Product photograph of the ${product.name}`;
+// One tint per card, cycled by position, so the catalogue reads as a deliberate
+// colour-blocked design rather than a set of missing images.
+const TILE_HUES = [
+  ColorPalette.emerald,
+  ColorPalette.amber,
+  ColorPalette.rose,
+  ColorPalette.sky,
+  ColorPalette.violet,
+  ColorPalette.teal,
+  ColorPalette.orange,
+  ColorPalette.indigo,
+];
 
-    const imageMask = new Container();
-    imageMask.height = CARD_HEIGHT_IMAGE;
-    imageMask.cornerRadius = CARD_IMAGE_RADIUS;
-    imageMask.clipContent = true;
-    imageMask.child = img;
-    return imageMask;
-  }
+function productMedia(product: Product, index: number): Container {
+  const hue = TILE_HUES[index % TILE_HUES.length];
 
-  const label = new TextBlock(product.name);
-  label.fontName = StandardFonts.HelveticaBold;
-  label.fontSize = 10;
-  label.textColor = ColorPalette.slate[400];
-  label.alignment = TextAlignment.Center;
-  label.margin = new Thickness(0, CARD_HEIGHT_IMAGE / 2 - 14, 0, 0);
+  const monogram = new TextBlock(product.name.charAt(0).toUpperCase());
+  monogram.fontName = StandardFonts.HelveticaBold;
+  monogram.fontSize = 40;
+  monogram.textColor = hue[600];
+  monogram.alignment = TextAlignment.Center;
+  monogram.margin = new Thickness(0, 40, 0, 0);
 
-  // Placeholder until the real photograph is supplied.
-  const placeholder = new Container();
-  placeholder.height = CARD_HEIGHT_IMAGE;
-  placeholder.backgroundColor = ColorPalette.slate[100];
-  placeholder.cornerRadius = CARD_IMAGE_RADIUS;
-  placeholder.child = label;
-
-  return placeholder;
+  const tile = new Container();
+  tile.height = CARD_HEIGHT_IMAGE;
+  tile.backgroundColor = hue[100];
+  tile.cornerRadius = CARD_IMAGE_RADIUS;
+  tile.child = monogram;
+  return tile;
 }
 
-function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>): Container {
+function productCard(product: Product, index: number): Container {
   const body = new VerticalStack();
   body.spacing = 4;
 
-  body.add(productMedia(product, assets));
+  body.add(productMedia(product, index));
 
   const name = new Heading(product.name);
   name.tocIdentifier = product.sku.toLowerCase();
@@ -191,7 +175,7 @@ function productCard(product: Product, assets?: ReadonlyMap<string, Uint8Array>)
   return card;
 }
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -210,7 +194,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Product Gallery - Spring Collection';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'An accessible PDF/A-2a + PDF/UA-1 retail product-photo gallery.';
+  metadata.subject = 'An accessible PDF/A-2a + PDF/UA-1 retail product gallery.';
   metadata.keywords = 'pdf, accessibility, retail, catalogue, product gallery, e-commerce, BonniePDF';
 
   const doc = new Document(settings, metadata);
@@ -237,9 +221,9 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     const row = new HorizontalStack();
     row.spacing = 16;
     row.widthDistribution = WidthDistribution.Equal;
-    row.add(productCard(PRODUCTS[i], assets));
+    row.add(productCard(PRODUCTS[i], i));
     if (i + 1 < PRODUCTS.length) {
-      row.add(productCard(PRODUCTS[i + 1], assets));
+      row.add(productCard(PRODUCTS[i + 1], i + 1));
     }
     gallery.add(row);
   }

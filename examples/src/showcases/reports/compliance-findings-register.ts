@@ -266,12 +266,12 @@ function findingCard(finding: Finding): Container {
     });
 
     const relatedRow = new HorizontalStack({ spacing: 4, margin: { top: 4 } });
-    relatedRow.addChild(relatedLabel, relatedLabel.getPreferredWidth());
-    relatedRow.addChild(relatedLink, relatedLink.getPreferredWidth());
-    relatedRow.addChild(onPage, onPage.getPreferredWidth());
-    relatedRow.addChild(relatedPage);
+    relatedRow.add(relatedLabel, relatedLabel.getPreferredWidth());
+    relatedRow.add(relatedLink, relatedLink.getPreferredWidth());
+    relatedRow.add(onPage, onPage.getPreferredWidth());
+    relatedRow.add(relatedPage);
 
-    body.addChild(relatedRow);
+    body.add(relatedRow);
   }
 
   const badge = new Container({
@@ -288,8 +288,8 @@ function findingCard(finding: Finding): Container {
   });
 
   const row = new HorizontalStack({ spacing: 12, widthDistribution: 'weighted' });
-  row.addChild(badge);
-  row.addChild(body, 1);
+  row.add(badge);
+  row.add(body, 1);
 
   return new Container({
     child: row,
@@ -310,7 +310,7 @@ function findingCard(finding: Finding): Container {
 function priorityActions(critical: Finding[]): Container {
   const inner = new VerticalStack({ spacing: 4 });
 
-  inner.addChild(
+  inner.add(
     new Heading('Priority Actions', {
       tocIdentifier: 'priority-actions',
       anchorId: 'priority-actions',
@@ -322,7 +322,7 @@ function priorityActions(critical: Finding[]): Container {
     })
   );
 
-  inner.addChild(
+  inner.add(
     new TextBlock(`${critical.length} critical findings require immediate remediation:`, {
       fontSize: 10,
       textColor: ColorPalette.slate[600],
@@ -344,10 +344,10 @@ function priorityActions(critical: Finding[]): Container {
     });
 
     const row = new HorizontalStack({ spacing: 4, margin: { bottom: 2 } });
-    row.addChild(link, link.getPreferredWidth());
-    row.addChild(onPage, onPage.getPreferredWidth());
-    row.addChild(page);
-    inner.addChild(row);
+    row.add(link, link.getPreferredWidth());
+    row.add(onPage, onPage.getPreferredWidth());
+    row.add(page);
+    inner.add(row);
   }
 
   return new Container({
@@ -409,7 +409,7 @@ export function generate(): Document {
 
   const register = new VerticalStack();
   for (const finding of FINDINGS) {
-    register.addChild(findingCard(finding));
+    register.add(findingCard(finding));
   }
   doc.add(register);
 

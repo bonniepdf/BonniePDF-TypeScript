@@ -65,11 +65,6 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     this._children.push(child);
   }
 
-  /** @deprecated Use {@link add} instead. */
-  public addChild(child: IElement): void {
-    this.add(child);
-  }
-
   /**
    * Renders this vertical stack with state tracking for pagination.
    * Children that implement IStatefulElement will be rendered with overflow support.

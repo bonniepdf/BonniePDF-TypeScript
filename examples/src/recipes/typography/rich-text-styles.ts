@@ -9,8 +9,8 @@ import { Document, Heading, TextBlock, RichText, TextStyle, Line, StandardFonts 
  * `defaultStyle`) and filled with `.span(text, style)` calls; every per-span
  * `TextStyle` is itself an options object (`{ fontWeight: 'bold' }`,
  * `{ color: 'blue-600' }`, `{ decoration: 'underline' }`, `{ backgroundColor:
- * '#fef08a' }`), with colours as palette tokens or hex. Every RichText is a /P
- * element. PDF/A-2a + PDF/UA-1.
+ * '#fef08a' }`), with colours as palette tokens or hex. Each RichText is tagged
+ * as an ordinary paragraph. PDF/A-2a + PDF/UA-1.
  */
 export function generate(): Document {
   const doc = new Document({

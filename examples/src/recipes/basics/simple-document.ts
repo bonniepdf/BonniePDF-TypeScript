@@ -4,10 +4,9 @@ import { Document, Heading, TextBlock, UnorderedList, QRCode, Line, PdfSize, Sta
  * The core Document API - three pages of text, structured spacing, and a custom
  * square page - authored as an accessible, archival PDF by default:
  * `conformance = 'pdf/a-2a'` + `accessibility = 'pdf/ua-1'`. Headings use the
- * semantic `Heading` element so they surface as `/H1`../`H2` in the
- * structure tree; body copy picks up implicit `/P` tagging from
- * `TextBlock`; the feature list emits `/L` > `/LI` > `/Lbl` + `/LBody`;
- * the QR code becomes a `/Figure` with alt-text.
+ * semantic `Heading` element, so they nest correctly for a screen reader;
+ * `TextBlock` copy is tagged as paragraphs without you asking; the feature
+ * list is structured as a real list; and the QR code carries alt text.
  *
  * Everything is configured in one expression per object: settings and metadata
  * as nested literals on `Document`, elements via their options constructors,

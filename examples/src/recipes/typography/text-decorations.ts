@@ -7,7 +7,7 @@ import { Document, Heading, TextBlock, Line, StandardFonts } from '@bonniepdf/co
  * `textDecoration` is a forgiving token or list: `'underline'`, `'strikethrough'`,
  * or `['underline', 'strikethrough']` for the combined form (no bitwise-OR of
  * flag enums needed). Decorations are presentational - every decorated paragraph
- * stays a /P element. PDF/A-2a + PDF/UA-1.
+ * stays an ordinary paragraph. PDF/A-2a + PDF/UA-1.
  */
 export function generate(): Document {
   const doc = new Document({
@@ -42,7 +42,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock(
       'Underline and strikethrough are presentational properties on TextBlock. ' +
-        'They do not change the structure-tree role — all decorated paragraphs remain /P elements.',
+        'They do not change how the text is tagged — a decorated paragraph is still a paragraph.',
       { margin: { bottom: 14 } }
     )
   );

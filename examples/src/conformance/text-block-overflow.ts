@@ -19,8 +19,8 @@ import {
  * Automatic pagination for long-form text in an accessible, archival document
  * (PDF/A-2a + PDF/UA-1). Three self-documenting sections describe what the
  * reader is seeing; the body is long enough to flow across several pages.
- * Headings stay semantic (`/H1`, `/H2`), paragraphs stay `/P`, and the
- * running "Page N of M" footer is marked as decorative.
+ * Headings and paragraphs keep their semantic roles as the text flows, and
+ * the running "Page N of M" footer is marked as decorative.
  */
 const SECTIONS: [title: string, intro: string][] = [
   [

@@ -2,9 +2,9 @@
 //
 // The accessibility-first public-sector award showcase. A funding decision is a
 // document a recipient must be able to read, act on, and query, so it is
-// generated as a fully tagged PDF/UA-1 + PDF/A-2a file: real /H1-/H2 headings,
-// /P paragraphs, a tagged award-breakdown table, and a bookmarked reading order
-// a screen reader can navigate. It uses a fictional community-fund visual
+// generated as a fully tagged PDF/UA-1 + PDF/A-2a file: real headings, real
+// paragraphs, a properly structured award-breakdown table, and a bookmarked
+// reading order a screen reader can navigate. It uses a fictional community-fund visual
 // language rather than any real funder's brand, and states plainly that it is
 // not an official record and not financial advice.
 //

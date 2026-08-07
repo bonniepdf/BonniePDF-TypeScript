@@ -68,7 +68,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       title: 'E-Invoice INV-2026-1001',
       author: 'Sample Company GmbH',
       subject:
-        'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.',
+        'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded inside it.',
     },
   });
 
@@ -191,7 +191,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       children: [
         cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }),
         cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }),
-        cell('PDF/A-3 as an associated file.', { size: 8, color: MUTED }),
+        cell('PDF/A-3 invoice.', { size: 8, color: MUTED }),
       ],
     }),
   });

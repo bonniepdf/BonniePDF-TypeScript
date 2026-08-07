@@ -77,8 +77,8 @@ const OVERVIEW_SECTIONS: [string, string][] = [
  *
  * The `Table` is configured in one expression (`columns`, `repeatHeadersOnNewPage`,
  * header colours as tokens); rows are built in a loop because their zebra fill
- * alternates. Each cell is tagged `/TH` or `/TD` within the `/Table` structure
- * tree. Colours are palette tokens (`'slate-600'`) or hex (`'#ffffff'`).
+ * alternates. Header cells and data cells are tagged for screen readers
+ * automatically. Colours are palette tokens (`'slate-600'`) or hex (`'#ffffff'`).
  */
 export function generate(): Document {
   const doc = new Document({

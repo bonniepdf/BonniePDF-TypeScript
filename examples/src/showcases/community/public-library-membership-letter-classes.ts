@@ -2,8 +2,8 @@
 //
 // The accessibility-first public-service showcase. UK public-sector documents
 // must meet the Public Sector Bodies Accessibility Regulations 2018, so this is
-// generated as a fully tagged PDF/UA-1 + PDF/A-2a file: real /H1-/H2 headings,
-// /P paragraphs, and tagged tables a screen reader can navigate. It uses a
+// generated as a fully tagged PDF/UA-1 + PDF/A-2a file: real headings, real
+// paragraphs, and tables a screen reader can navigate. It uses a
 // fictional local-library visual language rather than any real government brand.
 //
 // Fictional member, library authority, and locations throughout.

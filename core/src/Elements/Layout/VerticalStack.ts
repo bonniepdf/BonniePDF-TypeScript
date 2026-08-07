@@ -216,7 +216,8 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     // that calls child.render() directly. Children are still tagged so a
     // role-bearing leaf nested under a non-paginating container is not left
     // as untagged content (PDF/UA 7.1).
-    for (const child of this._children) {
+    for (let i = 0; i < this._children.length; i++) {
+      const child = this._children[i];
       const token = beginChildTag(ctx, child);
       try {
         // Stateless (atomic) render of each child, matching the .NET reference
@@ -224,7 +225,15 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
         // RenderStateful path drives stateful continuation; using it here would
         // set one-shot flags on nested elements that nothing resets, collapsing
         // content on a second export pass.
+        const yBefore = ctx.currentY;
         child.render(ctx, contentWidth);
+        // Some children (Container, Image) do not advance Y themselves.
+        if (ctx.currentY === yBefore) ctx.currentY += child.measureHeight(contentWidth);
+        // `spacing` has to be consumed here as well as on the stateful path:
+        // measureHeight() reserves (n-1) * spacing regardless of which path
+        // renders, so skipping it here leaves the children bunched together and
+        // dumps the reserved space as a gap below the stack.
+        if (this.spacing > 0 && i < this._children.length - 1) ctx.currentY += this.spacing;
       } finally {
         endChildTag(ctx, token);
       }

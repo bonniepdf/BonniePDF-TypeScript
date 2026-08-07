@@ -58,7 +58,7 @@ export function generate(): Document {
 
   const intro = new TextBlock(
     'Underline and strikethrough are presentational properties on TextBlock. ' +
-      'They do not change the structure-tree role — all decorated paragraphs remain /P elements.'
+      'They do not change how the text is tagged — a decorated paragraph is still a paragraph.'
   );
   intro.margin = new Thickness(0, 0, 0, 14);
   doc.add(intro);

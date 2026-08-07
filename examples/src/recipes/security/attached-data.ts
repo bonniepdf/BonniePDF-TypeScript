@@ -1,4 +1,4 @@
-// ── Report with Embedded Data (PDF/A-3 associated file) ──────────────
+// ── Report with Embedded Data (PDF/A-3 with an embedded CSV) ─────────
 //
 // A PDF/A-3 report that carries its underlying data as an embedded associated
 // file. The rendered table is the human-readable view; the same numbers are
@@ -63,7 +63,7 @@ export function generate(): Document {
   }
   doc.add(table);
 
-  // ── Embed the source data as an associated file ──
+  // ── Embed the source data as an attachment ──
   doc.attach({
     fileName: 'quarterly-revenue.csv',
     content: buildCsv(),

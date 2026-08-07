@@ -81,7 +81,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   doc.metadata.title = 'E-Invoice INV-2026-1001';
   doc.metadata.author = 'Sample Company GmbH';
   doc.metadata.subject =
-    'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded as an associated file.';
+    'EU e-invoice (Factur-X / ZUGFeRD, EN 16931): a PDF/A-3 invoice with the machine-readable CII XML embedded inside it.';
 
   doc.add(accentBar(ACCENT));
 
@@ -195,7 +195,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const xmlStack = new VerticalStack();
   xmlStack.add(cell('STRUCTURED DATA', { bold: true, size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 4) }));
   xmlStack.add(cell('factur-x.xml (EN 16931 CII) is embedded in this', { size: 8, color: MUTED }));
-  xmlStack.add(cell('PDF/A-3 as an associated file.', { size: 8, color: MUTED }));
+  xmlStack.add(cell('PDF/A-3 invoice.', { size: 8, color: MUTED }));
   xml.child = xmlStack;
   const payCell = new Container();
   payCell.child = pay;

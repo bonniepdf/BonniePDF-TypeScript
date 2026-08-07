@@ -15,9 +15,9 @@ import {
 } from '@bonniepdf/core';
 
 /**
- * Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1: the
- * heading is /H1, section titles /H2, and every aligned paragraph is a /P —
- * alignment is purely presentational and does not change the structure-tree role.
+ * Left, centre, right, and justified text alignment. PDF/A-2a + PDF/UA-1:
+ * headings and paragraphs are tagged the same whatever the alignment, because
+ * alignment is purely presentational.
  *
  * All text is set in standard-14 Times Roman. For a demonstration of why an
  * embedded font makes right/centre/justified edges exact, see embedded-font-metrics.
@@ -82,7 +82,7 @@ export function generate(): Document {
 
   const intro = new TextBlock(
     'The four standard alignments are shown below. Each paragraph carries the same text and the ' +
-      'same /P structure-tree role — alignment is a purely visual property.'
+      'same tagging — alignment is a purely visual property.'
   );
   intro.margin = new Thickness(0, 0, 0, 14);
   doc.add(intro);

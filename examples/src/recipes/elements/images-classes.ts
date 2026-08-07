@@ -21,9 +21,8 @@ import type { IElement } from '@bonniepdf/core';
 
 /**
  * Raster images — fit modes, containers, alpha transparency, and accessible
- * tagging. PDF/A-2a + PDF/UA-1: every informative image carries alt text so it
- * becomes a Figure with /Alt, and the decorative divider is marked as an
- * decorative so assistive technology skips it.
+ * tagging. PDF/A-2a + PDF/UA-1: every informative image carries alt text, and
+ * the plain grey divider is flagged decorative so screen readers skip it.
  *
  * The PNGs are generated in-memory (a single stored zlib block keeps this
  * dependency-free), so the example needs no external assets.
@@ -66,7 +65,7 @@ export function generate(): Document {
   metadata.title = 'Images';
   metadata.author = 'BonniePDF';
   metadata.subject =
-    'Raster image embedding — fit modes, containers, alpha transparency, and accessible accessible image tagging. PDF/A-2a + PDF/UA-1.';
+    'Raster image embedding — fit modes, containers, alpha transparency, and alt text for screen readers. PDF/A-2a + PDF/UA-1.';
   metadata.keywords = 'pdf, pdf/ua, pdf/a, accessibility, image, png, figure, alt-text, transparency, fit-mode';
 
   const doc = new Document(settings, metadata);
@@ -83,9 +82,9 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'BonniePDF embeds PNG images as PDF image XObjects. Under PDF/UA-1 every image must be either a ' +
-      'Figure carrying alternative text (informative) or an marked decorative. Each informative image ' +
-      'below carries alt text; the divider at the end is marked decorative.'
+    'BonniePDF embeds PNG images straight into the document. Under PDF/UA-1 an image is either informative — in ' +
+      'which case it needs alt text — or decorative, in which case screen readers skip it. Each image ' +
+      'below carries alt text; the divider at the end does not.'
   );
   intro.margin = new Thickness(0, 0, 0, 12);
   doc.add(intro);
@@ -159,7 +158,7 @@ export function generate(): Document {
 
   renderSection(doc, 'Decorative Images', 's-decorative', [
     [
-      caption('The light grey bar below is decorative; it is tagged as an decorative and carries no alt text.'),
+      caption('The light grey bar below is purely decorative, so it carries no alt text and screen readers skip it.'),
       divider,
     ],
   ]);

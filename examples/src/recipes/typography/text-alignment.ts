@@ -2,9 +2,9 @@ import { Document, Heading, TextBlock, StandardFonts, type TextAlignmentInput } 
 
 /**
  * Left, centre, right, and justified text alignment, authored through the
- * options-object front door. PDF/A-2a + PDF/UA-1: the heading is /H1, section
- * titles /H2, and every aligned paragraph is a /P — alignment is purely
- * presentational and does not change the structure-tree role.
+ * options-object front door. PDF/A-2a + PDF/UA-1: headings and paragraphs are
+ * tagged the same whatever the alignment, because alignment is purely
+ * presentational.
  *
  * Alignment is a forgiving token (`'left' | 'center' | 'right' | 'justify'`),
  * the page is set up with `pageSize: 'a4'` + a uniform `margin`, and all text is
@@ -61,7 +61,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock(
       'The four standard alignments are shown below. Each paragraph carries the same text and the ' +
-        'same /P structure-tree role — alignment is a purely visual property.',
+        'same tagging — alignment is a purely visual property.',
       { margin: { bottom: 14 } }
     )
   );

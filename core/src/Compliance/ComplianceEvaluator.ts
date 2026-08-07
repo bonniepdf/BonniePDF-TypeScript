@@ -102,7 +102,7 @@ export function evaluateCompliance(snapshot: LayoutSnapshot): ComplianceReport {
       standard: UA,
       clause: 'ISO 14289-1:2014 §7.2',
       message:
-        'The document declares no natural language (/Lang). Screen readers cannot ' +
+        'The document does not declare what language it is written in. Screen readers cannot ' +
         'choose the right pronunciation rules for the text.',
       fixHint: 'Set settings.language to a BCP-47 tag, e.g. "en-GB".',
     });
@@ -194,7 +194,7 @@ function checkFigure(node: LayoutNode, a11y: NodeAccessibility, out: ComplianceF
       severity: ComplianceSeverity.Error,
       standard: UA,
       clause: 'ISO 14289-1:2014 §7.3',
-      message: `${node.type} is tagged as a Figure but has no /Alt alternate text.`,
+      message: `${node.type} is tagged as a figure but has no alternative text.`,
       fixHint: "Set the element's altText.",
       nodeId: node.id,
       role: a11y.role,

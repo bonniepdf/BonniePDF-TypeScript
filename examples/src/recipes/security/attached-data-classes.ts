@@ -1,4 +1,4 @@
-// ── Report with Embedded Data (PDF/A-3 associated file) ──────────────
+// ── Report with Embedded Data (PDF/A-3 with an embedded CSV) ─────────
 //
 // A PDF/A-3 report that carries its underlying data as an embedded associated
 // file. The rendered table is the human-readable view; the same numbers are
@@ -39,7 +39,7 @@ const ROWS: Array<[string, number, number]> = [
 /**
  * The **class / construct-then-mutate** companion to `attached-data.ts`.
  *
- * Same PDF/A-3 report with an embedded CSV associated file, authored the long
+ * Same PDF/A-3 report with an embedded CSV, authored the long
  * way: `new` each element and assign properties, using `Border.none`, the
  * `TextAlignment` enum, `TextStyle` and `ColorPalette` directly. The attachment
  * itself uses the same `doc.attach()` call in both variants. This is the escape
@@ -82,7 +82,7 @@ export function generate(): Document {
   }
   doc.add(table);
 
-  // ── Embed the source data as an associated file ──
+  // ── Embed the source data as an attachment ──
   doc.attach({
     fileName: 'quarterly-revenue.csv',
     content: buildCsv(),

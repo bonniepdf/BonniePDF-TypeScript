@@ -4,9 +4,9 @@ import { Document, Heading, TextBlock, TextElementBase, StandardFonts } from '@b
  * Page header/footer templates in an accessible, archival document
  * (PDF/A-2a + PDF/UA-1), authored through the options-object front door.
  *
- * Header and footer template content is tagged as `/Artifact` - visible on
- * every page but excluded from the structure tree - while the numbered body
- * sections use semantic `Heading` (`/H2`) and `TextBlock` (`/P`) elements. The
+ * Header and footer content is marked decorative - visible on every page, but
+ * skipped by screen readers - while the numbered body sections use semantic
+ * `Heading` and `TextBlock` elements. The
  * running header/footer are `headerTemplate` / `footerTemplate` functions on
  * `settings` (`pageNumber => element`), given inline; `TotalPagesToken` resolves
  * to the final page count after layout.

@@ -297,7 +297,7 @@ export const examples: ExampleDef[] = [
     name: 'Simple Document',
     category: 'Basic',
     description:
-      'A 3-page PDF/UA-1 tagged document demonstrating the core Document API - semantic headings, text, spacers, a custom square page, and a QR Figure with alt-text.',
+      'A three-page tour of the core Document API: semantic headings, text, spacers, a custom square page, and a QR code with alt text. Tagged PDF/UA-1.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
     dotnetClass: 'SimpleDocumentExample',
@@ -309,7 +309,7 @@ export const examples: ExampleDef[] = [
     name: 'Simple Document (Class API)',
     category: 'Basic',
     description:
-      'The same document as Simple Document, authored the long way: construct each object with `new`, then set properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same document as Simple Document, authored the long way: construct each object with `new`, then set properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'simple-document-classes.pdf',
     generate: simpleDocumentClasses,
     dotnetClass: 'SimpleDocumentExample',
@@ -364,7 +364,7 @@ export const examples: ExampleDef[] = [
     name: 'Margins and Padding (Class API)',
     category: 'Basic',
     description:
-      'The same margins-and-padding tour as Margins and Padding, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same margins-and-padding tour as Margins and Padding, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'margins-classes.pdf',
     generate: marginsClasses,
     dotnetClass: 'MarginsAndPadding',
@@ -389,7 +389,7 @@ export const examples: ExampleDef[] = [
     name: 'Page Settings (Class API)',
     category: 'Basic',
     description:
-      'The same standard-page-formats gallery as Page Settings, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same standard-page-formats gallery as Page Settings, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'page-settings-classes.pdf',
     generate: pageSettingsClasses,
     dotnetClass: 'PageSettingsExample',
@@ -416,7 +416,7 @@ export const examples: ExampleDef[] = [
     name: 'Headers & Footers (Class API)',
     category: 'Layout',
     description:
-      'The same running-header/footer document as Headers & Footers, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same running-header/footer document as Headers & Footers, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'headers-footers-classes.pdf',
     generate: headersFootersClasses,
     dotnetClass: 'HeadersFootersExample',
@@ -443,7 +443,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Stacks (Class API)',
     category: 'Layout',
     description:
-      'The same HorizontalStack tour as Horizontal Stacks, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same HorizontalStack tour as Horizontal Stacks, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'horizontal-stacks-classes.pdf',
     generate: horizontalStacksClasses,
     thumbnails: false,
@@ -484,7 +484,7 @@ export const examples: ExampleDef[] = [
     name: 'VerticalStack Overflow (Class API)',
     category: 'Layout',
     description:
-      'The same warehouse asset-label sheet as VerticalStack Overflow, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same warehouse asset-label sheet as VerticalStack Overflow, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'vertical-stack-overflow-classes.pdf',
     generate: verticalStackOverflowClasses,
     dotnetClass: 'VerticalStackOverflowExample',
@@ -512,7 +512,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Alignment (Class API)',
     category: 'Typography',
     description:
-      'The same alignment tour as Text Alignment, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same alignment tour as Text Alignment, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'text-alignment-classes.pdf',
     generate: textAlignmentClasses,
     thumbnails: false,
@@ -540,7 +540,7 @@ export const examples: ExampleDef[] = [
     name: 'Embedded-Font Metrics (Class API)',
     category: 'Typography',
     description:
-      'The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'embedded-font-metrics-classes.pdf',
     generate: embeddedFontMetricsClasses,
     thumbnails: false,
@@ -568,7 +568,7 @@ export const examples: ExampleDef[] = [
     name: 'Book Page Layout (Class API)',
     category: 'Typography',
     description:
-      'The same typeset chapter page as Book Page Layout, authored the long way: construct each element and assign properties. Shows the class/mutation surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same typeset chapter page as Book Page Layout, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'book-page-layout-classes.pdf',
     generate: bookPageLayoutClasses,
     thumbnails: false,
@@ -595,7 +595,7 @@ export const examples: ExampleDef[] = [
     name: 'Rich Text Styles (Class API)',
     category: 'Typography',
     description:
-      'The same inline mixed-style RichText tour as Rich Text Styles, authored the long way: fluent per-span TextStyle builders and construct-then-mutate. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same inline mixed-style RichText tour as Rich Text Styles, authored the long way: fluent per-span TextStyle builders and construct-then-mutate. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'rich-text-styles-classes.pdf',
     generate: richTextStylesClasses,
     dotnetClass: 'RichTextExample',
@@ -622,7 +622,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Decorations (Class API)',
     category: 'Typography',
     description:
-      'The same underline/strikethrough tour as Text Decorations, authored the long way: construct each element and assign properties, using the TextDecoration flag enum. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same underline/strikethrough tour as Text Decorations, authored the long way: construct each element and assign properties, using the TextDecoration flag enum. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'text-decorations-classes.pdf',
     generate: textDecorationsClasses,
     thumbnails: false,
@@ -650,7 +650,7 @@ export const examples: ExampleDef[] = [
     name: 'Custom Fonts (Class API)',
     category: 'Typography',
     description:
-      'The same TrueType-embedding / Unicode-coverage tour as Custom Fonts, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same TrueType-embedding / Unicode-coverage tour as Custom Fonts, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'custom-fonts-classes.pdf',
     generate: customFontsClasses,
     thumbnails: false,
@@ -678,7 +678,7 @@ export const examples: ExampleDef[] = [
     name: 'Emojis & Unicode (Class API)',
     category: 'Typography',
     description:
-      'The same full-Unicode / emoji tour as Emojis & Unicode, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same full-Unicode / emoji tour as Emojis & Unicode, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'emojis-and-unicode-classes.pdf',
     generate: emojisAndUnicodeClasses,
     thumbnails: false,
@@ -706,7 +706,7 @@ export const examples: ExampleDef[] = [
     name: 'Advanced Typography (Class API)',
     category: 'Typography',
     description:
-      'The same super/subscript + decoration-styling tour as Advanced Typography, authored the long way: construct each element and assign properties, per-span TextStyles via the fluent builders. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same super/subscript + decoration-styling tour as Advanced Typography, authored the long way: construct each element and assign properties, per-span TextStyles via the fluent builders. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'advanced-typography-classes.pdf',
     generate: advancedTypographyClasses,
     thumbnails: false,
@@ -733,7 +733,7 @@ export const examples: ExampleDef[] = [
     name: 'Dickens: A Tale of Two Cities (Class API)',
     category: 'Typography',
     description:
-      'The same multi-page book layout as Dickens: A Tale of Two Cities, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same multi-page book layout as Dickens: A Tale of Two Cities, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'dickens-novel-classes.pdf',
     generate: dickensNovelClasses,
     dotnetClass: 'DickensNovelExample',
@@ -748,7 +748,7 @@ export const examples: ExampleDef[] = [
     name: 'Tables',
     category: 'Elements',
     description:
-      'A 45-row employee table with repeating /TH column headers across pages, alternating row colours, and a "Page N of M" footer — all automatically tagged for screen readers. PDF/A-2a + PDF/UA-1.',
+      'A 45-row employee table whose column headers repeat on every page, with alternating row colours and a "Page N of M" footer. Tagged for screen readers automatically. PDF/A-2a + PDF/UA-1.',
     filename: 'tables.pdf',
     generate: tables,
     dotnetClass: 'TablesExample',
@@ -760,7 +760,7 @@ export const examples: ExampleDef[] = [
     name: 'Tables (Class API)',
     category: 'Elements',
     description:
-      'The same multi-page employee table + prose as Tables, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same multi-page employee table + prose as Tables, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'tables-classes.pdf',
     generate: tablesClasses,
     dotnetClass: 'TablesExample',
@@ -786,7 +786,7 @@ export const examples: ExampleDef[] = [
     name: 'Lists (Class API)',
     category: 'Elements',
     description:
-      'The same ordered/unordered list tour as Lists, authored the long way: construct each list and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same ordered/unordered list tour as Lists, authored the long way: construct each list and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'lists-classes.pdf',
     generate: listsClasses,
     dotnetClass: 'ListsExample',
@@ -812,7 +812,7 @@ export const examples: ExampleDef[] = [
     name: 'Hyperlinks (Class API)',
     category: 'Elements',
     description:
-      'The same hyperlink tour as Hyperlinks, authored the long way: construct each link and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same hyperlink tour as Hyperlinks, authored the long way: construct each link and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'hyperlinks-classes.pdf',
     generate: hyperlinksClasses,
     thumbnails: false,
@@ -840,7 +840,7 @@ export const examples: ExampleDef[] = [
     name: 'Cross-References (Class API)',
     category: 'Elements',
     description:
-      'The same cross-reference field guide as Cross-References, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same cross-reference field guide as Cross-References, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'cross-references-classes.pdf',
     generate: crossReferencesClasses,
     thumbnails: false,
@@ -866,7 +866,7 @@ export const examples: ExampleDef[] = [
     name: 'Shapes & Borders (Class API)',
     category: 'Elements',
     description:
-      'The same rounded-rectangle / borders / cards / banners tour as Shapes & Borders, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same rounded-rectangle / borders / cards / banners tour as Shapes & Borders, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'shapes-and-borders-classes.pdf',
     generate: shapesAndBordersClasses,
     dotnetClass: 'ShapesAndBordersExample',
@@ -893,7 +893,7 @@ export const examples: ExampleDef[] = [
     name: 'Colour Palette (Class API)',
     category: 'Elements',
     description:
-      'The same 22-ramp swatch grid as Colour Palette, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same 22-ramp swatch grid as Colour Palette, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'color-palette-classes.pdf',
     generate: colorPaletteClasses,
     thumbnails: false,
@@ -921,7 +921,7 @@ export const examples: ExampleDef[] = [
     name: 'QR Codes (Class API)',
     category: 'Elements',
     description:
-      'The same native vector-QR tour as QR Codes, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same native vector-QR tour as QR Codes, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'qr-codes-classes.pdf',
     generate: qrCodesClasses,
     dotnetClass: 'QRCodesExampleFluent',
@@ -948,7 +948,7 @@ export const examples: ExampleDef[] = [
     name: 'Barcodes (Class API)',
     category: 'Elements',
     description:
-      'The same native 1D-barcode tour as Barcodes, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same native 1D-barcode tour as Barcodes, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'barcodes-classes.pdf',
     generate: barcodesClasses,
     dotnetClass: 'BarcodesExampleFluent',
@@ -975,7 +975,7 @@ export const examples: ExampleDef[] = [
     name: 'Data Matrix (Class API)',
     category: 'Elements',
     description:
-      'The same native Data Matrix tour as Data Matrix, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same native Data Matrix tour as Data Matrix, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'data-matrix-classes.pdf',
     generate: dataMatrixClasses,
     dotnetClass: 'DataMatrixExampleFluent',
@@ -989,7 +989,7 @@ export const examples: ExampleDef[] = [
     name: 'Images',
     category: 'Elements',
     description:
-      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Every informative image carries alt text (Figure + /Alt) and a decorative divider is marked as decorative. PDF/A-2a + PDF/UA-1.',
+      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Every informative image carries alt text; the divider at the end is decorative, so screen readers skip it. PDF/A-2a + PDF/UA-1.',
     filename: 'images.pdf',
     generate: images,
     dotnetClass: 'ImagesExample',
@@ -1001,7 +1001,7 @@ export const examples: ExampleDef[] = [
     name: 'Images (Class API)',
     category: 'Elements',
     description:
-      'The same raster-image tour as Images, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same raster-image tour as Images, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'images-classes.pdf',
     generate: imagesClasses,
     dotnetClass: 'ImagesExample',
@@ -1015,8 +1015,7 @@ export const examples: ExampleDef[] = [
     id: 'chart-showcase',
     name: 'Chart Showcase',
     category: 'Charting',
-    description:
-      'PDF/UA-1 tagged eight-page landscape showcase of all chart types, each tagged as a Figure with alt text.',
+    description: 'Eight landscape pages covering every chart type, each one carrying alt text. Tagged PDF/UA-1.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
@@ -1028,7 +1027,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase (Class API)',
     category: 'Charting',
     description:
-      'The same eight-page all-chart-types showcase as Chart Showcase, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same eight-page all-chart-types showcase as Chart Showcase, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'chart-showcase-classes.pdf',
     generate: chartShowcaseClasses,
     dotnetClass: 'ChartShowcaseExample',
@@ -1054,7 +1053,7 @@ export const examples: ExampleDef[] = [
     name: 'Bar Chart (Class API)',
     category: 'Charting',
     description:
-      'The same monthly-sales bar chart as Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same monthly-sales bar chart as Bar Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'bar-chart-classes.pdf',
     generate: barChartClasses,
     dotnetClass: 'BarChartExample',
@@ -1081,7 +1080,7 @@ export const examples: ExampleDef[] = [
     name: 'Grouped Bar Chart (Class API)',
     category: 'Charting',
     description:
-      'The same three-series grouped bar chart as Grouped Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same three-series grouped bar chart as Grouped Bar Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'grouped-bar-chart-classes.pdf',
     generate: groupedBarChartClasses,
     dotnetClass: 'GroupedBarChartExample',
@@ -1108,7 +1107,7 @@ export const examples: ExampleDef[] = [
     name: 'Line Chart (Class API)',
     category: 'Charting',
     description:
-      'The same monthly-revenue line chart as Line Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same monthly-revenue line chart as Line Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'line-chart-classes.pdf',
     generate: lineChartClasses,
     dotnetClass: 'LineChartExample',
@@ -1135,7 +1134,7 @@ export const examples: ExampleDef[] = [
     name: 'Area Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Area Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Area Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'area-chart-classes.pdf',
     generate: areaChartClasses,
     dotnetClass: 'AreaChartExample',
@@ -1162,7 +1161,7 @@ export const examples: ExampleDef[] = [
     name: 'Lollipop Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Lollipop Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Lollipop Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'lollipop-chart-classes.pdf',
     generate: lollipopChartClasses,
     dotnetClass: 'LollipopChartExample',
@@ -1189,7 +1188,7 @@ export const examples: ExampleDef[] = [
     name: 'Dot Plot Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Dot Plot Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Dot Plot Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'dot-plot-chart-classes.pdf',
     generate: dotPlotChartClasses,
     dotnetClass: 'DotPlotChartExample',
@@ -1216,7 +1215,7 @@ export const examples: ExampleDef[] = [
     name: 'Pie Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Pie Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Pie Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'pie-chart-classes.pdf',
     generate: pieChartClasses,
     dotnetClass: 'PieChartExample',
@@ -1243,7 +1242,7 @@ export const examples: ExampleDef[] = [
     name: 'Multi-Series Line Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Multi-Series Line Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Multi-Series Line Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'multi-series-line-chart-classes.pdf',
     generate: multiSeriesLineChartClasses,
     dotnetClass: 'MultiSeriesLineChartExample',
@@ -1271,7 +1270,7 @@ export const examples: ExampleDef[] = [
     name: 'Watermarking (Class API)',
     category: 'Security',
     description:
-      'The same DRAFT-watermarked draft document as Watermarking, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same DRAFT-watermarked draft document as Watermarking, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'watermarking-classes.pdf',
     generate: watermarkingClasses,
     dotnetClass: 'WatermarkDraftExample',
@@ -1299,7 +1298,7 @@ export const examples: ExampleDef[] = [
     name: 'Encryption (Class API)',
     category: 'Security',
     description:
-      'The same AES-256 encrypted document as Encryption, authored the long way: construct settings/elements and assign properties (encryption uses the same preset builder). Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same AES-256 encrypted document as Encryption, authored the long way: construct settings/elements and assign properties (encryption uses the same preset builder). This is the class API the options form is built on, and it produces an identical file.',
     filename: 'encryption-classes.pdf',
     generate: encryptionClasses,
     pdfUa1: true,
@@ -1314,7 +1313,7 @@ export const examples: ExampleDef[] = [
     name: 'Report with Embedded Data',
     category: 'Security',
     description:
-      'A PDF/A-3 report that embeds its underlying CSV data as an associated file for reproducibility, using the generic file-attachment API.',
+      'A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them. Uses the general-purpose attachment API.',
     filename: 'attached-data.pdf',
     generate: attachedData,
     dotnetClass: 'AttachedDataExample',
@@ -1326,7 +1325,7 @@ export const examples: ExampleDef[] = [
     name: 'Report with Embedded Data (Class API)',
     category: 'Security',
     description:
-      'The same PDF/A-3 report with embedded CSV as Report with Embedded Data, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same PDF/A-3 report with embedded CSV as Report with Embedded Data, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'attached-data-classes.pdf',
     generate: attachedDataClasses,
     dotnetClass: 'AttachedDataExample',
@@ -1356,7 +1355,7 @@ export const examples: ExampleDef[] = [
     category: 'Invoices',
     tier: 'showcase',
     description:
-      'The same branded invoice as Business Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same branded invoice as Business Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'business-invoice-classes.pdf',
     generate: businessInvoiceClasses,
     dotnetClass: 'BusinessInvoiceExample',
@@ -1388,7 +1387,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'US',
     description:
-      'The same US sales-tax invoice as US Sales-Tax Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same US sales-tax invoice as US Sales-Tax Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'us-sales-invoice-classes.pdf',
     generate: usSalesInvoiceClasses,
     dotnetClass: 'UsSalesInvoiceExample',
@@ -1420,7 +1419,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'The same UK VAT invoice as UK VAT Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same UK VAT invoice as UK VAT Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'uk-vat-invoice-classes.pdf',
     generate: ukVatInvoiceClasses,
     dotnetClass: 'UkVatInvoiceExample',
@@ -1437,7 +1436,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU',
     description:
-      'A cross-border EU e-invoice in the EN 16931 / Factur-X idiom: a polished PDF/A-3 invoice - both parties, EUR amounts, IBAN/BIC - carrying the machine-readable CII invoice XML embedded as an associated file. The visible totals mirror the embedded XML exactly. Validated in CI with veraPDF (PDF/A-3b) and the Mustang project (ZUGFeRD / EN 16931).',
+      'A cross-border EU e-invoice following EN 16931 / Factur-X: a polished PDF/A-3 invoice - both parties, EUR amounts, IBAN/BIC - with the machine-readable CII invoice XML carried inside it. The printed totals match that XML exactly. Checked in CI by veraPDF (PDF/A-3b) and by the Mustang project (ZUGFeRD / EN 16931).',
     filename: 'factur-x_invoice.pdf',
     generate: facturXInvoice,
     requiredAssets: ['factur-x/en16931-invoice.xml'],
@@ -1453,7 +1452,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU',
     description:
-      'The same EU Factur-X e-invoice as EU E-Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same EU Factur-X e-invoice as EU E-Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'factur-x_invoice-classes.pdf',
     generate: facturXInvoiceClasses,
     requiredAssets: ['factur-x/en16931-invoice.xml'],
@@ -1486,7 +1485,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'India',
     description:
-      'The same India GST e-invoice as India GST E-Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same India GST e-invoice as India GST E-Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'india-gst-invoice-classes.pdf',
     generate: indiaGstInvoiceClasses,
     dotnetClass: 'IndiaGstInvoiceExample',
@@ -1855,7 +1854,7 @@ export const examples: ExampleDef[] = [
     category: 'Invoices',
     tier: 'showcase',
     description:
-      'The same accessible subscription invoice as SaaS Invoice, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same accessible subscription invoice as SaaS Invoice, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'saas-invoice-classes.pdf',
     generate: saasInvoiceClasses,
     dotnetClass: 'SaasInvoiceExample',
@@ -1912,7 +1911,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Bar Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Horizontal Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Horizontal Bar Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'horizontal-bar-chart-classes.pdf',
     generate: horizontalBarChartClasses,
     dotnetClass: 'HorizontalBarChartExample',
@@ -1939,7 +1938,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Grouped Bar Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Horizontal Grouped Bar Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Horizontal Grouped Bar Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'horizontal-grouped-bar-chart-classes.pdf',
     generate: horizontalGroupedBarChartClasses,
     dotnetClass: 'HorizontalGroupedBarChartExample',
@@ -1966,7 +1965,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Lollipop Chart (Class API)',
     category: 'Charting',
     description:
-      'The same chart as Horizontal Lollipop Chart, authored the long way: construct each chart model and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same chart as Horizontal Lollipop Chart, authored the long way: construct each chart model and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'horizontal-lollipop-chart-classes.pdf',
     generate: horizontalLollipopChartClasses,
     dotnetClass: 'HorizontalLollipopChartExample',
@@ -1993,7 +1992,7 @@ export const examples: ExampleDef[] = [
     name: 'Watermarking - Confidential (Class API)',
     category: 'Security',
     description:
-      'The same red CONFIDENTIAL watermarked report as Watermarking - Confidential, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same red CONFIDENTIAL watermarked report as Watermarking - Confidential, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'watermarking-confidential-classes.pdf',
     generate: watermarkingConfidentialClasses,
     dotnetClass: 'WatermarkConfidentialExample',
@@ -2008,7 +2007,7 @@ export const examples: ExampleDef[] = [
     category: 'Retail',
     tier: 'showcase',
     description:
-      'The browser/edge flagship: a point-of-sale receipt on a custom 80mm thermal-printer page, in Courier with a native vector QR digital-receipt link and a Code 128 order barcode. Zero dependencies, no WASM - a few KB, generated client-side or in a Cloudflare Worker via generateBytesAsync(). PDF/A-2a + PDF/UA-1.',
+      'A point-of-sale receipt on a custom 80mm thermal-printer page, set in Courier with a native vector QR receipt link and a Code 128 order barcode. No dependencies and no WASM, so it weighs a few KB and runs client-side or inside a Cloudflare Worker via generateBytesAsync(). PDF/A-2a + PDF/UA-1.',
     filename: 'edge-receipt.pdf',
     generate: edgeReceipt,
     dotnetClass: 'EdgeReceiptExample',
@@ -2022,7 +2021,7 @@ export const examples: ExampleDef[] = [
     category: 'Retail',
     tier: 'showcase',
     description:
-      'The same 80mm thermal-printer receipt as Point-of-Sale Receipt, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same 80mm thermal-printer receipt as Point-of-Sale Receipt, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'edge-receipt-classes.pdf',
     generate: edgeReceiptClasses,
     dotnetClass: 'EdgeReceiptExample',
@@ -2039,7 +2038,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional UK public-library membership confirmation: local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. Accessibility-first PDF/A-2a + PDF/UA-1.',
+      'A fictional UK public-library membership confirmation: local-service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1 throughout.',
     filename: 'public-library-membership-letter.pdf',
     generate: publicLibraryMembershipLetter,
     dotnetClass: 'PublicLibraryMembershipLetterExample',
@@ -2054,7 +2053,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'The same accessible public-library membership letter as Public Library Membership, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same accessible public-library membership letter as Public Library Membership, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'public-library-membership-letter-classes.pdf',
     generate: publicLibraryMembershipLetterClasses,
     dotnetClass: 'PublicLibraryMembershipLetterExample',
@@ -2071,7 +2070,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'An enterprise data-protection & security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. Archival PDF/A-2a + PDF/UA-1.',
+      'An enterprise data-protection and security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. PDF/A-2a + PDF/UA-1.',
     filename: 'audit-report.pdf',
     generate: auditReport,
     dotnetClass: 'AuditReportExample',
@@ -2086,7 +2085,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'An enterprise data-protection & security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. Archival PDF/A-2a + PDF/UA-1.',
+      'An enterprise data-protection and security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. PDF/A-2a + PDF/UA-1.',
     filename: 'audit-report-classes.pdf',
     generate: auditReportClasses,
     dotnetClass: 'AuditReportExample',
@@ -2118,7 +2117,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'The same EU/UK shelf-edge label as Retail Shelf Label, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same EU/UK shelf-edge label as Retail Shelf Label, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'shelf-label-classes.pdf',
     generate: shelfLabelClasses,
     dotnetClass: 'ShelfLabelExample',
@@ -2167,7 +2166,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK/EU',
     description:
-      'A UK/EU statutory financial statement in the IFRS / Companies House idiom: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
+      'A UK/EU statutory financial statement in the IFRS / Companies House style: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
     filename: 'financial-statement.pdf',
     generate: financialStatement,
     dotnetClass: 'FinancialStatementExample',
@@ -2182,7 +2181,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK/EU',
     description:
-      'A UK/EU statutory financial statement in the IFRS / Companies House idiom: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
+      'A UK/EU statutory financial statement in the IFRS / Companies House style: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
     filename: 'financial-statement-classes.pdf',
     generate: financialStatementClasses,
     dotnetClass: 'FinancialStatementExample',
@@ -2199,7 +2198,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. Privacy-sensitive and client-side-generated. PDF/A-2a + PDF/UA-1.',
+      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser. PDF/A-2a + PDF/UA-1.',
     filename: 'lab-report.pdf',
     generate: labReport,
     dotnetClass: 'LabReportExample',
@@ -2214,7 +2213,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. Privacy-sensitive and client-side-generated. PDF/A-2a + PDF/UA-1.',
+      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser. PDF/A-2a + PDF/UA-1.',
     filename: 'lab-report-classes.pdf',
     generate: labReportClasses,
     dotnetClass: 'LabReportExample',
@@ -2231,7 +2230,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional public-sector grant funding decision: fund masthead, a headline "Awarded" decision block with key dates, a tagged award-breakdown table, next steps, a review route, contact options, and an alternative-formats notice. Bookmarked, accessibility-first PDF/A-2a + PDF/UA-1.',
+      'A fictional public-sector grant funding decision: fund masthead, a headline "Awarded" decision block with key dates, an award-breakdown table, next steps, a review route, contact options, and an alternative-formats notice. Bookmarked, and PDF/A-2a + PDF/UA-1 throughout.',
     filename: 'grant-award-letter.pdf',
     generate: grantAwardLetter,
     dotnetClass: 'GrantAwardLetterExample',
@@ -2246,7 +2245,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'The same accessible grant award letter as Grant Award Letter, authored the long way: construct each element and assign properties. Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'The same accessible grant award letter as Grant Award Letter, authored the long way: construct each element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
     filename: 'grant-award-letter-classes.pdf',
     generate: grantAwardLetterClasses,
     dotnetClass: 'GrantAwardLetterExample',
@@ -2263,10 +2262,9 @@ export const examples: ExampleDef[] = [
     category: 'HR',
     tier: 'showcase',
     description:
-      'A high-volume, security-sensitive transactional document: earnings, deductions, taxes, employer contributions, ' +
-      'and year-to-date totals, with masked employee identifiers and AES-256 encryption. Privacy-sensitive and ' +
-      'client-side-generated — generate payslips without sending payroll data to a conversion service. PDF/UA-1 tagged ' +
-      '(no PDF/A: archival output cannot be encrypted).',
+      'A payslip run: earnings, deductions, taxes, employer contributions, and year-to-date totals, with masked ' +
+      'employee identifiers and AES-256 encryption. Everything is generated client-side, so payroll data never ' +
+      'goes near a conversion service. Tagged PDF/UA-1 (no PDF/A - archival output cannot be encrypted).',
     filename: 'payslip.pdf',
     generate: payslip,
     dotnetClass: 'PayslipExample',
@@ -2289,7 +2287,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     description:
       'The same encrypted payslip as Payslip, authored the long way: construct each element and assign properties. ' +
-      'Shows the class surface the options-object front door desugars to - and renders byte-for-byte identically.',
+      'This is the class API the options form is built on, and it produces an identical file.',
     filename: 'payslip-classes.pdf',
     generate: payslipClasses,
     dotnetClass: 'PayslipExample',

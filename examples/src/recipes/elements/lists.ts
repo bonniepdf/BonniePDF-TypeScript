@@ -33,8 +33,8 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'Ordered lists number each item. Every item maps to an LI structure element ' +
-        'containing a Lbl (the marker) and an LBody (the text).',
+      'Ordered lists number each item. The marker and the item text are held ' +
+        'separately, so a screen reader can announce where an item sits in the list.',
       { margin: { bottom: 8 } }
     )
   );
@@ -59,7 +59,7 @@ export function generate(): Document {
   const alphaList = new OrderedList({ numberFormat: 'lower-alpha', fontSize: 12, itemSpacing: 6 });
   alphaList.addItem('Provide document language metadata.');
   alphaList.addItem('Embed all fonts used in the file.');
-  alphaList.addItem('Include an OutputIntent colour profile.');
+  alphaList.addItem('Include a colour profile so colours reproduce reliably.');
   doc.add(alphaList);
 
   section(doc, 'Custom start number', 's-start');
@@ -99,9 +99,12 @@ export function generate(): Document {
   category(doc, 'Unordered Lists', 'unordered');
 
   doc.add(
-    new TextBlock('Bullet items follow the same L > LI > Lbl + LBody structure. Several bullet styles are available.', {
-      margin: { bottom: 8 },
-    })
+    new TextBlock(
+      'Bullet items are structured the same way; only the marker changes. Several bullet styles are available.',
+      {
+        margin: { bottom: 8 },
+      }
+    )
   );
 
   section(doc, 'Disc (•)', 's-disc');

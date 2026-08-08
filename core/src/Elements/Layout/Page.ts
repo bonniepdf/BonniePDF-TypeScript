@@ -96,6 +96,15 @@ export class Page {
   }
 
   /**
+   * Whether this page carries a margin of its own. When `false` the renderer
+   * takes `settings.margin` instead, so a `DocumentSettings` assigned after the
+   * document was constructed still reaches the first page. Set by
+   * {@link Document.addPage} for pages whose margin came from the settings.
+   * @internal
+   */
+  public hasExplicitMargin: boolean = true;
+
+  /**
    * Gets the page width in points
    */
   get width(): number {

@@ -73,17 +73,21 @@ export class SvgRenderPipeline {
         ctx.pages.push('');
       }
 
-      ctx.pageSize = page.size;
-      ctx.margin = page.margin;
-      ctx.switchToPage(currentOutputIndex);
-      ctx.currentX = page.margin;
-      ctx.currentY = page.margin;
+      // Pages created from document settings inherit the margin lazily, so a
+      // DocumentSettings assigned after construction still reaches page 1.
+      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
 
-      const contentWidth = page.width - page.margin * 2;
+      ctx.pageSize = page.size;
+      ctx.margin = pageMargin;
+      ctx.switchToPage(currentOutputIndex);
+      ctx.currentX = pageMargin;
+      ctx.currentY = pageMargin;
+
+      const contentWidth = page.width - pageMargin * 2;
       pageDimensions.set(currentOutputIndex, {
         width: page.width,
         height: page.height,
-        margin: page.margin,
+        margin: pageMargin,
         pageColor: page.pageColor,
         pageBackground: page.pageBackground,
         pageForeground: page.pageForeground,
@@ -92,7 +96,7 @@ export class SvgRenderPipeline {
       // Layout capture: wrap each input page's body content in a Page node so
       // the snapshot tree reads Document → Page → content. Overflow onto further
       // physical pages splits the Page node's rect via ctx.newPage().
-      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, page.margin, page.margin, contentWidth);
+      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, pageMargin, pageMargin, contentWidth);
       PdfRenderPipeline.layoutElements(page.getElements(), ctx, contentWidth);
       ctx.layoutRecorder?.closeNode(page, ctx.currentPageIndex, ctx.currentY, true);
 
@@ -100,7 +104,7 @@ export class SvgRenderPipeline {
         pageDimensions.set(i, {
           width: page.width,
           height: page.height,
-          margin: page.margin,
+          margin: pageMargin,
           pageColor: page.pageColor,
           pageBackground: page.pageBackground,
           pageForeground: page.pageForeground,

@@ -210,6 +210,7 @@ export class Document {
       // Default: use document settings
       const size = this.settings.getOrientedPageSize();
       const page = new Page(size, this.settings.margin);
+      page.hasExplicitMargin = false;
       this._pages.push(page);
       return page;
     }
@@ -226,12 +227,14 @@ export class Document {
       const oriented = pageSize.getOrientedSize(orientationOrMargin);
       const m = margin ?? this.settings.margin;
       const page = new Page(oriented, m);
+      page.hasExplicitMargin = margin !== undefined;
       this._pages.push(page);
       return page;
     }
 
     // addPage(size) - document margin
     const page = new Page(pageSize, this.settings.margin);
+    page.hasExplicitMargin = false;
     this._pages.push(page);
     return page;
   }
@@ -249,6 +252,7 @@ export class Document {
           : this.settings.getOrientedPageSize();
     }
     const page = new Page(size, margin);
+    page.hasExplicitMargin = options.margin !== undefined;
     this._pages.push(page);
     return page;
   }

@@ -39,7 +39,9 @@ export class PdfRenderPipeline {
       }
 
       const pageWidth = page.width;
-      const pageMargin = page.margin;
+      // Pages created from document settings inherit the margin lazily, so a
+      // DocumentSettings assigned after construction still reaches page 1.
+      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
 
       ctx.pageSize = page.size;
       ctx.margin = pageMargin;
@@ -182,18 +184,21 @@ export class PdfRenderPipeline {
         ctx.pages.push('');
       }
 
+      // See above: settings-derived pages resolve their margin at render time.
+      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
+
       ctx.pageSize = page.size;
-      ctx.margin = page.margin;
+      ctx.margin = pageMargin;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
-      ctx.currentX = page.margin;
-      ctx.currentY = page.margin;
+      ctx.currentX = pageMargin;
+      ctx.currentY = pageMargin;
 
-      const contentWidth = page.width - page.margin * 2;
+      const contentWidth = page.width - pageMargin * 2;
 
       pageDimensions.set(currentOutputIndex, {
         size: page.size,
-        margin: page.margin,
+        margin: pageMargin,
         pageColor: page.pageColor,
         pageBackground: page.pageBackground,
         pageForeground: page.pageForeground,
@@ -204,7 +209,7 @@ export class PdfRenderPipeline {
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         pageDimensions.set(i, {
           size: page.size,
-          margin: page.margin,
+          margin: pageMargin,
           pageColor: page.pageColor,
           pageBackground: page.pageBackground,
           pageForeground: page.pageForeground,

@@ -28,8 +28,9 @@ const INTERNAL = {
   verticalStack: ['lastChildRendered'],
   pageBreak: ['triggered'],
   // Internal children list, plus the readonly identity fields (constructor-only,
-  // never options).
-  page: ['elements', 'size', 'margin'],
+  // never options). `hasExplicitMargin` is set by Document.addPage to mark a page
+  // whose margin came from the settings, so the renderer can resolve it lazily.
+  page: ['elements', 'size', 'margin', 'hasExplicitMargin'],
   layers: ['backgroundLayersList', 'foregroundLayersList'],
 } as const;
 

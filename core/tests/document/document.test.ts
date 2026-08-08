@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { Document } from '../../src/Document';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { PdfSize } from '../../src/Configuration/PdfSize';
+import { TextBlock } from '../../src/Elements/Text/TextBlock';
 
 describe('Document', () => {
   let doc: Document;
@@ -49,5 +50,32 @@ describe('Document', () => {
     expect(doc.settings).toBeDefined();
     // Document auto-creates the first page
     expect(doc.pages).toHaveLength(1);
+  });
+
+  // The constructor creates page 1 before any post-construction assignment can
+  // land, so a page whose margin came from the settings must resolve it at
+  // render time rather than freezing the value it saw at construction.
+  // Otherwise `doc.settings = ...` (and C#'s object-initializer idiom) is
+  // silently ignored on the first page only.
+  it('applies a margin from settings assigned after construction', async () => {
+    doc = new Document();
+    expect(doc.pages[0].hasExplicitMargin).toBe(false);
+
+    doc.settings = new DocumentSettings();
+    doc.settings.margin = 72;
+    doc.add(new TextBlock('Body copy.'));
+
+    const { pages } = await doc.generateSvgDocumentAsync();
+    const firstX = /<text[^>]*\sx="([\d.]+)/.exec(pages[0]);
+    expect(Number(firstX![1])).toBeCloseTo(72, 3);
+  });
+
+  it('keeps an explicit per-page margin in preference to the document margin', () => {
+    doc = new Document();
+    doc.addPage(PdfSize.a4, 20);
+    expect(doc.pages[1].hasExplicitMargin).toBe(true);
+
+    doc.settings.margin = 72;
+    expect(doc.pages[1].margin).toBe(20);
   });
 });

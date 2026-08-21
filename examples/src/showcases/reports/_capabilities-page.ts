@@ -6,6 +6,9 @@
 // KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a
 // financial-summary table - so every cover showcase reads as a two-page report:
 // a striking cover, then a page that demonstrates tables and charts together.
+// The charts deliberately use the full editorial column. Annual-report charts
+// need room for axes, legends and data labels; squeezing two plots into equal
+// half-page cards makes the decoration win over the information.
 //
 // The covers use a zero-margin document (the artwork bleeds to the paper edge),
 // so this page supplies its own inset via a padded container.
@@ -86,6 +89,10 @@ function chartCard(title: string, body: IElement, accent: Color): Container {
   card.border = new Border(0.75);
   card.borderColors = new BorderColors(RULE);
   card.cornerRadius = 8;
+  // A card is also a hard visual boundary. Responsive chart layout should keep
+  // the drawing inside it, while clipping provides a final guard against a long
+  // label or future chart configuration painting over neighbouring content.
+  card.clipContent = true;
   card.padding = new Thickness(14, 14, 14, 14);
   card.child = stack;
   return card;
@@ -103,7 +110,8 @@ function quarterlyBarChart(primary: Color): ChartBase {
     return p;
   });
   const data = new ChartData();
-  data.title = 'Quarterly revenue';
+  // The card supplies the visible title; repeating it inside the plot wastes a
+  // sizeable title band that is better used by the data.
   data.series = [series];
   data.yAxis.prefix = '£';
   data.yAxis.maxValue = 320;
@@ -113,7 +121,7 @@ function quarterlyBarChart(primary: Color): ChartBase {
     data,
     altText: 'Column chart of quarterly revenue in £m rising from 182 in Q1 to 288 in Q4.',
   });
-  chart.height = 190;
+  chart.height = 130;
   chart.stretchToFit = true;
   chart.barColor = primary;
   chart.fontFamily = StandardFonts.Helvetica;
@@ -133,14 +141,15 @@ function segmentDonut(colors: string[]): ChartBase {
     return p;
   });
   const data = new ChartData();
-  data.title = 'Revenue by segment';
+  // The enclosing card is the chart title, leaving the canvas to the plot and
+  // its legend rather than presenting the same heading twice.
   data.series = [series];
 
   const chart = new PieChart({
     data,
     altText: 'Donut chart of revenue by segment: Platform, Services, Hardware, and Licensing.',
   });
-  chart.height = 190;
+  chart.height = 130;
   chart.stretchToFit = true;
   chart.isDonut = true;
   chart.totalLabel = 'Total';
@@ -219,13 +228,15 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
   kpis.add(kpiCard('21.4%', 'Operating margin', brand.primary, brand.tint), 1);
   content.add(kpis);
 
-  // Charts row: column chart | donut
-  const charts = new HorizontalStack();
-  charts.widthDistribution = WidthDistribution.Weighted;
-  charts.spacing = 14;
+  // Full-width editorial charts. The chart implementations reserve space for
+  // axes and a right-hand legend, so two half-width cards leave almost no plot
+  // area and can force legend content beyond the card. Stacking mirrors real
+  // annual-report layouts: one clear visual per reading row.
+  const charts = new VerticalStack();
+  charts.spacing = 12;
   charts.margin = new Thickness(0, 0, 0, 18);
-  charts.add(chartCard('Quarterly revenue (£m)', quarterlyBarChart(brand.primary), brand.accent), 1);
-  charts.add(chartCard('Revenue by segment', segmentDonut(brand.segmentColors), brand.accent), 1);
+  charts.add(chartCard('Quarterly revenue (£m)', quarterlyBarChart(brand.primary), brand.accent));
+  charts.add(chartCard('Revenue by segment', segmentDonut(brand.segmentColors), brand.accent));
   content.add(charts);
 
   // Financial summary table

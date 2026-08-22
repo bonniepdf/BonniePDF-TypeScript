@@ -237,11 +237,11 @@ BonniePDF core is **source available** under the
 [BonniePDF Community License 1.0](./LICENSE). It is not OSI-approved open
 source. Each version remains governed by the licence supplied with it.
 
-| Use case | Licence |
-| --- | --- |
-| Non-production evaluation and qualifying personal, charity, education, research, and open-source use | [Community License](./LICENSE) - free |
-| Commercial production by one named developer for one business | [Solo commercial licence](./COMMERCIAL-LICENSE.txt) |
-| Commercial production by a team or company group | [Professional or Enterprise commercial licence](./COMMERCIAL-LICENSE.txt) |
+| Use case                                                                                                                         | Licence                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Non-production evaluation, independent non-commercial projects, and qualifying charity, education, research, and open-source use | [Community License](./LICENSE) - free                                     |
+| Commercial production by one named developer for one business                                                                    | [Solo commercial licence](./COMMERCIAL-LICENSE.txt)                       |
+| Commercial production by a team or company group                                                                                 | [Professional or Enterprise commercial licence](./COMMERCIAL-LICENSE.txt) |
 
 Evaluation excludes live use, live customer data, and external distribution.
 Commercial production requires a paid licence before it begins.

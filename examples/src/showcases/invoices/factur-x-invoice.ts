@@ -54,7 +54,7 @@ const ITEMS: LineItem[] = [
   { description: 'Software license (annual)', detail: '12-month term', qty: 1, unitPrice: 600 },
 ];
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -199,10 +199,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(bottom);
 
   // ── Bind the invoice XML: PDF/A-3 + embedded CII ──
-  const xmlBytes = assets?.get(ASSET_KEY);
-  if (xmlBytes) {
-    applyFacturX(doc, xmlBytes, { profile: FacturXProfile.En16931 });
-  }
+  const xmlBytes = assets.get(ASSET_KEY);
+  // Without the CII XML this is a plain PDF wearing a Factur-X label, so the
+  // absence is an error rather than something to render around.
+  if (!xmlBytes) throw new Error(`Missing required asset: ${ASSET_KEY}`);
+  applyFacturX(doc, xmlBytes, { profile: FacturXProfile.En16931 });
 
   return doc;
 }

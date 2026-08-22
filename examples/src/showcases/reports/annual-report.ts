@@ -8,6 +8,7 @@
 
 import {
   Document,
+  Heading,
   TextBlock,
   HorizontalStack,
   VerticalStack,
@@ -58,12 +59,13 @@ const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
   minute: '2-digit',
 }).format(new Date())}`;
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       pageSize: PAGE,
       margin: MARGIN,
-      conformance: 'pdf/a-2b',
+      conformance: 'pdf/a-2a', // the accessible archival level - requires tagging
+      accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: INK },
       // ── Page-background slot ──────────────────────────────────────────────
@@ -90,28 +92,24 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   // ════════════════════════════════════════════════════════════════════════
   //  Page 1 - front cover (overlaid on the deep-blue background slot)
   // ════════════════════════════════════════════════════════════════════════
-  const heroData = assets?.get(HERO_IMAGE);
-  if (heroData) {
-    doc.add(
-      new Image({
-        imageData: heroData,
-        width: PAGE.width - MARGIN * 2,
-        height: 220,
-        fitMode: 'cover',
-        isDecorative: true,
-        margin: { top: 24, bottom: 24 },
-      })
-    );
-  } else {
-    doc.add(new Spacer(150));
-  }
+  const heroData = assets.get(HERO_IMAGE);
+  if (!heroData) throw new Error(`Missing required asset: ${HERO_IMAGE}`);
+  doc.add(
+    new Image({
+      imageData: heroData,
+      width: PAGE.width - MARGIN * 2,
+      height: 220,
+      fitMode: 'cover',
+      isDecorative: true,
+      margin: { top: 24, bottom: 24 },
+    })
+  );
   doc.add(brandMark());
   doc.add(coverLabel('ANNUAL REPORT'));
   doc.add(coverTitle(COMPANY));
   doc.add(triColourRule());
   doc.add(coverSubtitle(`Fiscal Year ${YEAR}`));
-  if (!heroData) doc.add(new Spacer(210));
-  else doc.add(new Spacer(40));
+  doc.add(new Spacer(40));
   doc.add(coverCredit('Prepared with BonniePDF'));
   doc.add(coverCredit(GENERATED));
 
@@ -271,8 +269,14 @@ function coverLabel(text: string): TextBlock {
   });
 }
 
-function coverTitle(text: string): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 42, textColor: '#ffffff' });
+/** The company name on the cover is the document's H1. */
+function coverTitle(text: string): Heading {
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 42,
+    textColor: '#ffffff',
+  });
 }
 
 /** Three joined segments in the brand trio, sitting under the cover title. */
@@ -299,8 +303,9 @@ function coverCredit(text: string): TextBlock {
 
 // ── Inner content ───────────────────────────────────────────────────────────
 
-function sectionHeading(text: string, opts: { top?: number } = {}): TextBlock {
-  return new TextBlock(text, {
+function sectionHeading(text: string, opts: { top?: number } = {}): Heading {
+  return new Heading(text, {
+    level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 20,
     textColor: HEADING,
@@ -308,8 +313,9 @@ function sectionHeading(text: string, opts: { top?: number } = {}): TextBlock {
   });
 }
 
-function subHeading(text: string): TextBlock {
-  return new TextBlock(text, {
+function subHeading(text: string): Heading {
+  return new Heading(text, {
+    level: 3,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
     textColor: ColorPalette.blue[700],

@@ -3,13 +3,15 @@ import {
   PdfSize,
   Color,
   ColorPalette,
-  Point,
   Size,
   StandardFonts,
-  TextAlignment,
   CanvasElement,
+  Container,
+  Heading,
   ImageLoader,
-  LinearGradientPaint,
+  TextBlock,
+  VerticalStack,
+  type IElement,
   type ICanvas,
 } from '@bonniepdf/core';
 import { addCapabilitiesPage } from './_capabilities-page';
@@ -47,19 +49,7 @@ const YEAR = 2025;
 const BAND = ColorPalette.emerald[900]; // brand band behind the title
 const SEAM = ColorPalette.amber[400]; // gold seam along the diagonal cut
 
-/** Neutral fallback fill for the hero region when no photograph is supplied. */
-function drawPlaceholderImage(canvas: ICanvas, w: number, photoBottom: number): void {
-  canvas.beginPath();
-  canvas.addRect(0, 0, w, photoBottom);
-  canvas.fillCurrentPath(
-    new LinearGradientPaint(new Point(0, 0), new Point(0, photoBottom), [
-      { offset: 0, color: ColorPalette.emerald[700] },
-      { offset: 1, color: ColorPalette.emerald[900] },
-    ])
-  );
-}
-
-function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof ImageLoader.loadFromBytes>): void {
+function drawCover(canvas: ICanvas, size: Size, heroImage: ReturnType<typeof ImageLoader.loadFromBytes>): void {
   const w = size.width;
   const h = size.height;
 
@@ -84,11 +74,7 @@ function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof Im
   canvas.closePath();
   canvas.clipToCurrentPath();
 
-  if (heroImage) {
-    canvas.drawImage(heroImage, 0, 0, w, photoBottom);
-  } else {
-    drawPlaceholderImage(canvas, w, photoBottom);
-  }
+  canvas.drawImage(heroImage, 0, 0, w, photoBottom);
 
   canvas.restoreState();
 
@@ -97,49 +83,97 @@ function drawCover(canvas: ICanvas, size: Size, heroImage?: ReturnType<typeof Im
   canvas.moveTo(0, cutLeft);
   canvas.lineTo(w, cutRight);
   canvas.strokeCurrentPath({ paint: SEAM, width: 6, lineCap: 'butt' });
-
-  // 4. Title block in the band below the seam.
-  const titleY = h * 0.74;
-  canvas.drawText(
-    72,
-    titleY - 30,
-    `ANNUAL REPORT ${YEAR}`,
-    ColorPalette.emerald[200],
-    15,
-    StandardFonts.HelveticaBold,
-    TextAlignment.Left
-  );
-  canvas.drawText(72, titleY, COMPANY, Color.white, 46, StandardFonts.HelveticaBold, TextAlignment.Left);
-
-  // Gold rule + tagline.
-  canvas.beginPath();
-  canvas.addRect(74, titleY + 58, 120, 4);
-  canvas.fillCurrentPath(SEAM);
-  canvas.drawText(
-    72,
-    titleY + 72,
-    'Building resilient infrastructure across three continents',
-    ColorPalette.emerald[100],
-    13,
-    StandardFonts.Helvetica,
-    TextAlignment.Left
-  );
-
-  // 5. Footer credit.
-  canvas.drawText(
-    72,
-    h * 0.94,
-    `Prepared with BonniePDF · Fiscal Year ${YEAR}`,
-    ColorPalette.emerald[200],
-    10,
-    StandardFonts.Helvetica,
-    TextAlignment.Left
-  );
 }
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+// ── Cover type ───────────────────────────────────────────────────────────────
+// Real text elements, not canvas glyphs: the company name is the document's H1
+// and everything here lands in the structure tree, so a screen reader reads the
+// cover in order instead of meeting one opaque figure.
+
+function coverType(): Container {
+  const stack = new VerticalStack();
+
+  stack.add(
+    new TextBlock(`ANNUAL REPORT ${YEAR}`, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 15,
+      textColor: ColorPalette.emerald[200],
+      margin: { bottom: 6 },
+    })
+  );
+
+  stack.add(
+    new Heading(COMPANY, {
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 46,
+      lineHeight: 1,
+      textColor: Color.white,
+      margin: { bottom: 18 },
+    })
+  );
+
+  // The gold rule under the title is decoration, so it stays a drawn box.
+  stack.add(
+    new Container({
+      width: 120,
+      height: 4,
+      backgroundColor: SEAM,
+      margin: { left: 2, bottom: 14 },
+    })
+  );
+
+  stack.add(
+    new TextBlock('Building resilient infrastructure across three continents', {
+      fontSize: 13,
+      textColor: ColorPalette.emerald[100],
+      margin: { bottom: 106 },
+    })
+  );
+
+  stack.add(
+    new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`, {
+      fontSize: 10,
+      textColor: ColorPalette.emerald[200],
+    })
+  );
+
+  // Anchored to the foot of the page rather than positioned by a top padding
+  // measured against the font's metrics: the block keeps its footing if the
+  // title wraps or a face changes.
+  return new Container({
+    height: PAGE.height,
+    verticalAlignment: 'bottom',
+    padding: { left: 72, right: 72, bottom: 49 },
+    child: stack,
+  });
+}
+
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const heroData = assets.get(HERO_IMAGE);
+  if (!heroData) throw new Error(`Missing required asset: ${HERO_IMAGE}`);
+  const heroImage = ImageLoader.loadFromBytes(heroData);
+
   const doc = new Document({
-    settings: { pageSize: PAGE, margin: 0, pageColor: '#ffffff', language: 'en-GB' }, // zero margin - full-bleed cover
+    settings: {
+      pageSize: PAGE,
+      margin: 0, // zero margin - full-bleed cover
+      pageColor: '#ffffff',
+      language: 'en-GB',
+      accessibility: 'pdf/ua-1',
+      // The cover artwork lives in the page-background slot. Slots are painted
+      // inside an /Artifact marked-content section, so the band, the photo and
+      // the seam stay out of the structure tree where decoration belongs - and
+      // the cover type above flows as ordinary tagged content.
+      pageBackground: (pageNumber: number): IElement | undefined =>
+        pageNumber === 1
+          ? new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage), {
+              drawWidth: PAGE.width,
+              drawHeight: PAGE.height,
+              isDecorative: true,
+            })
+          : undefined,
+    },
     metadata: {
       title: `${COMPANY} - Annual Report ${YEAR}`,
       author: COMPANY,
@@ -147,15 +181,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     },
   });
 
-  const heroData = assets?.get(HERO_IMAGE);
-  const heroImage = heroData ? ImageLoader.loadFromBytes(heroData) : undefined;
-
-  doc.add(
-    new CanvasElement((canvas, size) => drawCover(canvas, size, heroImage), {
-      drawWidth: PAGE.width,
-      drawHeight: PAGE.height,
-    })
-  );
+  doc.add(coverType());
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
   addCapabilitiesPage(doc, {

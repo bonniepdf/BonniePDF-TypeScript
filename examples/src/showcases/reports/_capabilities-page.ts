@@ -12,6 +12,7 @@
 
 import {
   Document,
+  Heading,
   TextBlock,
   TextAlignment,
   VerticalStack,
@@ -189,7 +190,13 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
   eyebrow.margin = new Thickness(0, 0, 0, 4);
   content.add(eyebrow);
 
-  const heading = tb('Performance at a glance', 22, brand.primary, true);
+  // A real H2 under the cover's H1: the section title carries structure, not
+  // just 22pt of bold type.
+  const heading = new Heading('Performance at a glance');
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 22;
+  heading.textColor = brand.primary;
   heading.margin = new Thickness(0, 0, 0, 6);
   content.add(heading);
 
@@ -222,7 +229,11 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
   content.add(charts);
 
   // Financial summary table
-  const tableHeading = tb('Five-year financial summary', 11, brand.accent, true);
+  const tableHeading = new Heading('Five-year financial summary');
+  tableHeading.level = 3;
+  tableHeading.fontName = StandardFonts.HelveticaBold;
+  tableHeading.fontSize = 11;
+  tableHeading.textColor = brand.accent;
   tableHeading.margin = new Thickness(0, 0, 0, 8);
   content.add(tableHeading);
   content.add(financialTable(brand.primary));

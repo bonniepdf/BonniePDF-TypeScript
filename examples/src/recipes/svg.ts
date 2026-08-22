@@ -115,7 +115,7 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
 
   for (const def of defs) {
     try {
-      const assets = options.loadAssets ? await options.loadAssets(def) : undefined;
+      const assets = options.loadAssets ? await options.loadAssets(def) : new Map<string, Uint8Array>();
       const doc = def.generate(assets);
       const { pages: renderedPages, fontFaceCss } = await doc.generateSvgDocumentAsync({
         maxPages,

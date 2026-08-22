@@ -72,7 +72,7 @@ function field(label: string, value: string, color: Color, labelColor: Color): V
  * perforation-style tear-off stub. Proves QR + barcode + visual polish on a
  * custom ticket page size. The event name is the document's H1.
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   // Landscape boarding-pass style ticket: 640 x 300 pt.
   const settings = new DocumentSettings(new PdfSize(640, 300, 'Event Ticket'), 0);
   settings.orientation = PageOrientation.Landscape;
@@ -86,21 +86,20 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   metadata.author = 'Sample Live';
   metadata.subject = 'Event ticket - accessible (PDF/UA) and archival (PDF/A-2a)';
 
-  const bgData = assets?.get(BG_IMAGE);
-  if (bgData) {
-    settings.pageBackground = (): Container => {
-      const bg = new Container();
-      bg.height = 300;
-      const img = new Image();
-      img.imageData = bgData;
-      img.width = 640;
-      img.height = 300;
-      img.fitMode = ImageFitMode.Cover;
-      img.isDecorative = true;
-      bg.child = img;
-      return bg;
-    };
-  }
+  const bgData = assets.get(BG_IMAGE);
+  if (!bgData) throw new Error(`Missing required asset: ${BG_IMAGE}`);
+  settings.pageBackground = (): Container => {
+    const bg = new Container();
+    bg.height = 300;
+    const img = new Image();
+    img.imageData = bgData;
+    img.width = 640;
+    img.height = 300;
+    img.fitMode = ImageFitMode.Cover;
+    img.isDecorative = true;
+    bg.child = img;
+    return bg;
+  };
 
   const doc = new Document(settings, metadata);
 
@@ -146,7 +145,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   info.add(barcodeWrap);
 
   const body = new Container();
-  body.backgroundColor = bgData ? INK.withAlpha(0.82) : INK;
+  body.backgroundColor = INK.withAlpha(0.82);
   body.height = 300;
   body.padding = new Thickness(22, 18, 22, 16);
   body.child = info;

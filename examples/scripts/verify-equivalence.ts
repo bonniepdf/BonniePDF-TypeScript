@@ -15,6 +15,8 @@
 //
 // Adding a pair: append its two example ids to EQUIVALENCE_PAIRS below.
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { examples, type ExampleDef } from '../src/index.ts';
 import { registerBundledFonts } from './register-bundled-fonts.ts';
 
@@ -378,8 +380,20 @@ function findExample(id: string): ExampleDef {
 // The render `title` is a preview parameter (it becomes the SVG <title>), not
 // part of the example's document. Hold it constant across a pair so the
 // comparison reflects the generated document, not the two entries' names.
+// Examples that declare `requiredAssets` are handed them here, exactly as the
+// demo/website pre-generators do. This guard used to call `generate()` bare, so
+// the asset-backed examples compared their placeholder renderings against each
+// other and the real documents went unchecked.
+function loadAssets(def: ExampleDef): ReadonlyMap<string, Uint8Array> {
+  const map = new Map<string, Uint8Array>();
+  for (const rel of def.requiredAssets ?? []) {
+    map.set(rel, new Uint8Array(readFileSync(resolve(import.meta.dirname, '..', 'assets', rel))));
+  }
+  return map;
+}
+
 async function svgFingerprint(def: ExampleDef, title: string): Promise<{ hash: string; len: number; pages: number }> {
-  const doc = def.generate();
+  const doc = def.generate(loadAssets(def));
   const { pages } = await doc.generateSvgDocumentAsync({
     precision: 3,
     includeAccessibilityMetadata: true,

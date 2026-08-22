@@ -60,8 +60,9 @@ function field(label: string, value: string, color: ColorInput, labelColor: Colo
  * perforation-style tear-off stub. Proves QR + barcode + visual polish on a
  * custom ticket page size. The event name is the document's H1.
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const bgData = assets?.get(BG_IMAGE);
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const bgData = assets.get(BG_IMAGE);
+  if (!bgData) throw new Error(`Missing required asset: ${BG_IMAGE}`);
 
   const doc = new Document({
     settings: {
@@ -73,19 +74,17 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: BODY },
-      pageBackground: bgData
-        ? () =>
-            new Container({
-              height: 300,
-              child: new Image({
-                imageData: bgData,
-                width: 640,
-                height: 300,
-                fitMode: 'cover',
-                isDecorative: true,
-              }),
-            })
-        : undefined,
+      pageBackground: () =>
+        new Container({
+          height: 300,
+          child: new Image({
+            imageData: bgData,
+            width: 640,
+            height: 300,
+            fitMode: 'cover',
+            isDecorative: true,
+          }),
+        }),
     },
     metadata: {
       title: 'Event Ticket - Sample Sound Festival',
@@ -134,7 +133,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   });
 
   const body = new Container({
-    backgroundColor: bgData ? INK.withAlpha(0.82) : INK,
+    backgroundColor: INK.withAlpha(0.82),
     height: 300,
     padding: [22, 18, 22, 16],
     child: info,

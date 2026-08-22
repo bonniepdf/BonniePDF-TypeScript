@@ -232,7 +232,14 @@ export interface ExampleDef {
   /** Target market for market-specific showcases (e.g. 'US', 'UK', 'EU', 'India'). */
   region?: string;
   filename: string;
-  generate: (assets?: ReadonlyMap<string, Uint8Array>) => Document;
+  /**
+   * Builds the document. Callers always pass the asset map (empty when the
+   * example declares no `requiredAssets`), so an example that needs a file can
+   * declare a required parameter and fail loudly when it is absent rather than
+   * quietly rendering a stand-in. Examples needing nothing simply declare
+   * `generate()` and ignore the argument.
+   */
+  generate: (assets: ReadonlyMap<string, Uint8Array>) => Document;
   /** Asset paths (relative to examples/assets/) that must be pre-loaded before generate() is called. */
   requiredAssets?: string[];
   /** Should the associated viewer show thumbnails by default */
@@ -1597,7 +1604,7 @@ export const examples: ExampleDef[] = [
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     variantLabel: 'Options API',
   },
   {
@@ -1612,7 +1619,7 @@ export const examples: ExampleDef[] = [
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     gallery: false,
     variantOf: 'annual-report',
     variantLabel: 'Class API',
@@ -1628,7 +1635,7 @@ export const examples: ExampleDef[] = [
     generate: annualReportGradientCover,
     dotnetClass: 'AnnualReportGradientCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     variantLabel: 'Options API',
   },
   {
@@ -1642,7 +1649,7 @@ export const examples: ExampleDef[] = [
     generate: annualReportGradientCoverClasses,
     dotnetClass: 'AnnualReportGradientCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     gallery: false,
     variantOf: 'annual-report-gradient-cover',
     variantLabel: 'Class API',
@@ -1659,7 +1666,7 @@ export const examples: ExampleDef[] = [
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportMaskedCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     variantLabel: 'Options API',
   },
   {
@@ -1674,7 +1681,7 @@ export const examples: ExampleDef[] = [
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportMaskedCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     gallery: false,
     variantOf: 'annual-report-masked-cover',
     variantLabel: 'Class API',
@@ -1685,12 +1692,13 @@ export const examples: ExampleDef[] = [
     category: 'Reports',
     tier: 'showcase',
     description:
-      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
+      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a photo cropped to a circular badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-geometric-cover.pdf',
     generate: annualReportGeometricCover,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportGeometricCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     variantLabel: 'Options API',
   },
   {
@@ -1699,12 +1707,13 @@ export const examples: ExampleDef[] = [
     category: 'Reports',
     tier: 'showcase',
     description:
-      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a circular masked image badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
+      'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a photo cropped to a circular badge ringed in gold). Page 2 is the "inside the report" spread - KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-geometric-cover-classes.pdf',
     generate: annualReportGeometricCoverClasses,
+    requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],
     dotnetClass: 'AnnualReportGeometricCoverExample',
     thumbnails: false,
-    pdfUa1: false,
+    pdfUa1: true,
     gallery: false,
     variantOf: 'annual-report-geometric-cover',
     variantLabel: 'Class API',

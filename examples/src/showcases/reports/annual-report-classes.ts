@@ -25,6 +25,8 @@ import {
   BorderColors,
   StandardFonts,
   WidthDistribution,
+  AccessibilityMode,
+  Heading,
   PdfAConformance,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
@@ -63,9 +65,10 @@ const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
   minute: '2-digit',
 }).format(new Date())}`;
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PAGE, MARGIN);
-  settings.conformance = PdfAConformance.PdfA2b;
+  settings.conformance = PdfAConformance.PdfA2a; // the accessible archival level - requires tagging
+  settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(INK);
 
@@ -93,19 +96,16 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   // ════════════════════════════════════════════════════════════════════════
   //  Page 1 - front cover (overlaid on the deep-blue background slot)
   // ════════════════════════════════════════════════════════════════════════
-  const heroData = assets?.get(HERO_IMAGE);
-  if (heroData) {
-    const hero = new Image();
-    hero.imageData = heroData;
-    hero.width = PAGE.width - MARGIN * 2;
-    hero.height = 220;
-    hero.fitMode = ImageFitMode.Cover;
-    hero.isDecorative = true;
-    hero.margin = new Thickness(0, 24, 0, 24);
-    doc.add(hero);
-  } else {
-    doc.add(new Spacer(150));
-  }
+  const heroData = assets.get(HERO_IMAGE);
+  if (!heroData) throw new Error(`Missing required asset: ${HERO_IMAGE}`);
+  const hero = new Image();
+  hero.imageData = heroData;
+  hero.width = PAGE.width - MARGIN * 2;
+  hero.height = 220;
+  hero.fitMode = ImageFitMode.Cover;
+  hero.isDecorative = true;
+  hero.margin = new Thickness(0, 24, 0, 24);
+  doc.add(hero);
   const mark = brandMark();
   mark.margin = new Thickness(0, 0, 0, 26);
   doc.add(mark);
@@ -113,8 +113,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(coverTitle(COMPANY));
   doc.add(triColourRule());
   doc.add(coverSubtitle(`Fiscal Year ${YEAR}`));
-  if (!heroData) doc.add(new Spacer(210));
-  else doc.add(new Spacer(40));
+  doc.add(new Spacer(40));
   doc.add(coverCredit('Prepared with BonniePDF'));
   doc.add(coverCredit(GENERATED));
 
@@ -291,8 +290,10 @@ function coverLabel(text: string): TextBlock {
   return b;
 }
 
-function coverTitle(text: string): TextBlock {
-  const b = new TextBlock(text);
+/** The company name on the cover is the document's H1. */
+function coverTitle(text: string): Heading {
+  const b = new Heading(text);
+  b.level = 1;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 42;
   b.textColor = Color.white;
@@ -333,8 +334,9 @@ function coverCredit(text: string): TextBlock {
 
 // ── Inner content ───────────────────────────────────────────────────────────
 
-function sectionHeading(text: string): TextBlock {
-  const b = new TextBlock(text);
+function sectionHeading(text: string): Heading {
+  const b = new Heading(text);
+  b.level = 2;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 20;
   b.textColor = HEADING;
@@ -342,8 +344,9 @@ function sectionHeading(text: string): TextBlock {
   return b;
 }
 
-function subHeading(text: string): TextBlock {
-  const b = new TextBlock(text);
+function subHeading(text: string): Heading {
+  const b = new Heading(text);
+  b.level = 3;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 14;
   b.textColor = ColorPalette.blue[700];

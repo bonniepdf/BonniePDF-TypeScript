@@ -1,4 +1,5 @@
 import { ICanvas } from './ICanvas';
+import { ellipseToBeziers } from './EllipseGeometry';
 import { Color } from '../Core/Color';
 import { Point, Size } from '../Core';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
@@ -389,6 +390,17 @@ export class PdfCanvas implements ICanvas {
 
   public closePath(): void {
     this.currentPath.push({ type: 'h', args: [] });
+  }
+
+  public addEllipse(cx: number, cy: number, rx: number, ry: number): void {
+    const { startX, startY, segments } = ellipseToBeziers(cx, cy, rx, ry);
+    this.moveTo(startX, startY);
+    for (const s of segments) this.cubicBezierTo(s.c1x, s.c1y, s.c2x, s.c2y, s.x, s.y);
+    this.closePath();
+  }
+
+  public addCircle(cx: number, cy: number, radius: number): void {
+    this.addEllipse(cx, cy, radius, radius);
   }
 
   // -- Painting the current path ------------------------------------

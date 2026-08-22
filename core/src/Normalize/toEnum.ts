@@ -8,6 +8,7 @@
 
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { HorizontalAlignment } from '../Core/HorizontalAlignment';
+import { VerticalAlignment } from '../Core/VerticalAlignment';
 import { PageOrientation } from '../Core/PageOrientation';
 import { ImageFitMode } from '../Elements/Media/ImageFitMode';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
@@ -26,6 +27,7 @@ import { FontWeight } from '../Typography/FontWeight';
 import type {
   TextAlignmentToken,
   HorizontalAlignmentToken,
+  VerticalAlignmentToken,
   PageOrientationToken,
   ImageFitModeToken,
   PdfAConformanceToken,
@@ -67,6 +69,14 @@ export const toHorizontalAlignment = resolver<HorizontalAlignmentToken, Horizont
   center: HorizontalAlignment.Center,
   end: HorizontalAlignment.End,
   stretch: HorizontalAlignment.Stretch,
+});
+
+export type VerticalAlignmentInput = VerticalAlignment | VerticalAlignmentToken;
+export const toVerticalAlignment = resolver<VerticalAlignmentToken, VerticalAlignment>({
+  top: VerticalAlignment.Start,
+  middle: VerticalAlignment.Center,
+  bottom: VerticalAlignment.End,
+  stretch: VerticalAlignment.Stretch,
 });
 
 export type PageOrientationInput = PageOrientation | PageOrientationToken;

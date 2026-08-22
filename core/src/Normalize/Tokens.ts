@@ -75,6 +75,7 @@ export type PageSizeToken =
 
 export type TextAlignmentToken = 'left' | 'center' | 'right' | 'middle' | 'justify';
 export type HorizontalAlignmentToken = 'start' | 'center' | 'end' | 'stretch';
+export type VerticalAlignmentToken = 'top' | 'middle' | 'bottom' | 'stretch';
 export type PageOrientationToken = 'portrait' | 'landscape';
 export type ImageFitModeToken = 'contain' | 'cover' | 'fill' | 'fit-height' | 'actual-size';
 

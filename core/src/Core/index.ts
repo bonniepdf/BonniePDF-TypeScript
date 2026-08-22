@@ -3,6 +3,7 @@ export * from './BorderColors';
 export * from './BorderStyle';
 export * from './Color';
 export * from './HorizontalAlignment';
+export * from './VerticalAlignment';
 export * from './Hyperlink';
 export * from './PageOrientation';
 export * from './Point';

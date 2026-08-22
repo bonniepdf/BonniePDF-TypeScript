@@ -13,6 +13,7 @@ export * from './Core/BorderStyle';
 export * from './Core/BorderColors';
 export * from './Core/Thickness';
 export * from './Core/HorizontalAlignment';
+export * from './Core/VerticalAlignment';
 export * from './Core/Hyperlink';
 export * from './Core/SectionLink';
 

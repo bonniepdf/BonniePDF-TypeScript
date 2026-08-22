@@ -7,6 +7,8 @@ import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
 import { toHorizontalAlignment, type HorizontalAlignmentInput } from '../../Normalize/toEnum';
+import { toVerticalAlignment, type VerticalAlignmentInput } from '../../Normalize/toEnum';
+import { VerticalAlignment } from '../../Core/VerticalAlignment';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 import {
   BORDERED_ELEMENT_OPTION_KEYS,
@@ -27,6 +29,7 @@ export const CONTAINER_OWN_OPTION_KEYS = [
   'clipContent',
   'crispEdges',
   'horizontalAlignment',
+  'verticalAlignment',
 ] as const;
 
 /** The full settable surface of a container, bases included. */
@@ -40,11 +43,12 @@ type ContainerOwnKey = (typeof CONTAINER_OWN_OPTION_KEYS)[number];
  * `applyBorderedElementOptions`).
  */
 export type ContainerOptions = BorderedElementOptions &
-  Partial<Omit<Pick<Container, ContainerOwnKey>, 'padding' | 'horizontalAlignment'>> & {
+  Partial<Omit<Pick<Container, ContainerOwnKey>, 'padding' | 'horizontalAlignment' | 'verticalAlignment'>> & {
     /** Padding inside the border. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
     padding?: ThicknessInput;
     /** Child placement. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
     horizontalAlignment?: HorizontalAlignmentInput;
+    verticalAlignment?: VerticalAlignmentInput;
   };
 
 export class Container extends BorderedElementBase implements IContentContainer {
@@ -133,6 +137,25 @@ export class Container extends BorderedElementBase implements IContentContainer 
   }
   public set horizontalAlignment(value: HorizontalAlignmentInput | undefined) {
     this._horizontalAlignment = value === undefined ? undefined : toHorizontalAlignment(value);
+  }
+
+  private _verticalAlignment?: VerticalAlignment;
+
+  /**
+   * Vertical alignment of the child within the container's available height.
+   * Only has an effect when the container is taller than its child needs -
+   * normally because {@link height} is set - so it is the way to anchor content
+   * to the bottom (or middle) of a fixed box without hand-computing a top
+   * padding against a font's metrics. `undefined`/`Start` keep the default top
+   * placement; `Stretch` is treated as "fill" (no offset).
+   *
+   * Accepts `'top' | 'middle' | 'bottom' | 'stretch'` on write.
+   */
+  public get verticalAlignment(): VerticalAlignment | undefined {
+    return this._verticalAlignment;
+  }
+  public set verticalAlignment(value: VerticalAlignmentInput | undefined) {
+    this._verticalAlignment = value === undefined ? undefined : toVerticalAlignment(value);
   }
 
   /**
@@ -261,6 +284,18 @@ export class Container extends BorderedElementBase implements IContentContainer 
         ctx.currentX += align === HorizontalAlignment.Center ? slack / 2 : slack;
         childWidth = preferred;
       }
+    }
+
+    // Vertical alignment consumes the slack between the child's measured height
+    // and the container's own, so a fixed-height box can anchor its content to
+    // the bottom instead of being positioned by a hand-tuned top padding.
+    const vAlign = this.verticalAlignment;
+    if (vAlign === VerticalAlignment.Center || vAlign === VerticalAlignment.End) {
+      const innerHeight =
+        containerHeight - this.padding.top - this.padding.bottom - this.border.verticalWidth;
+      const childHeight = this.child.measureHeight(childWidth);
+      const slack = innerHeight - childHeight;
+      if (slack > 0) ctx.currentY += vAlign === VerticalAlignment.Center ? slack / 2 : slack;
     }
 
     const yBeforeChildRender = ctx.currentY;

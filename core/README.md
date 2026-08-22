@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3)](https://www.npmjs.com/package/@bonniepdf/core)
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core)](https://www.npmjs.com/package/@bonniepdf/core)
 [![CI](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml/badge.svg)](https://github.com/bonniepdf/bonniepdf-typescript/actions/workflows/ci.yml)
-[![License](<https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg>)](./LICENSE)
+[![License](https://img.shields.io/badge/License-BonniePDF%20Community%201.0-blue.svg)](./LICENSE)
 
 High-performance, zero-dependency PDF generation for TypeScript and JavaScript - runs in the **browser** and **Node.js**.
 
@@ -233,18 +233,30 @@ configurePlatform(new BrowserPlatformIO());
 
 ## License
 
-BonniePDF is **source-available** (BonniePDF Community License 1.0) - not OSI open source. The full source
-is included.
+BonniePDF core is **source available** under the
+[BonniePDF Community License 1.0](./LICENSE). It is not OSI-approved open
+source. Each version remains governed by the licence supplied with it.
 
-| Use case                                      | License                                             |
-| --------------------------------------------- | --------------------------------------------------- |
-| Individuals, non-profits, education           | [BonniePDF Community License 1.0](./LICENSE) - free       |
-| Commercial use under $1M USD annual revenue   | [BonniePDF Community License 1.0](./LICENSE) - free       |
-| Commercial use at or above $1M annual revenue | [Commercial License](https://bonniepdf.dev/license) |
+| Use case | Licence |
+| --- | --- |
+| Non-production evaluation and qualifying personal, charity, education, research, and open-source use | [Community License](./LICENSE) - free |
+| Commercial production by one named developer for one business | [Solo commercial licence](./COMMERCIAL-LICENSE.txt) |
+| Commercial production by a team or company group | [Professional or Enterprise commercial licence](./COMMERCIAL-LICENSE.txt) |
 
-The only restriction, for everyone, is that you may not resell BonniePDF itself as
-a competing PDF library or PDF-generation service.
+Evaluation excludes live use, live customer data, and external distribution.
+Commercial production requires a paid licence before it begins.
+The competing-product restriction prevents redistributing BonniePDF as a
+general-purpose PDF library, SDK, or hosted PDF generation service; ordinary
+applications and domain-specific SaaS products may generate their own PDFs
+under a paid licence.
 
-Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for Commercial license details.
+One commercial core licence covers both TypeScript/JavaScript and .NET. Solo is
+limited to one named developer; broader tiers have no developer-seat, document,
+server, deployment, or end-user fees. The core has no activation or telemetry.
+Digital signing is included with every paid core licence at no extra charge and
+is governed by its own agreement.
+
+Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for current
+evaluation rights, commercial editions, and pricing.
 
 © 2026-present BonniePDF Contributors

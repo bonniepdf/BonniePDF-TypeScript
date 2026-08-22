@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3&style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
 [![npm downloads](https://img.shields.io/npm/dm/@bonniepdf/core?style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)
-[![License: source-available](<https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square>)](./core/LICENSE)
+[![License: BonniePDF Community](https://img.shields.io/badge/license-BonniePDF%20Community%201.0-blue.svg?style=flat-square)](./core/LICENSE)
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core?style=flat-square)](https://bundlephobia.com/package/@bonniepdf/core)
 ![coverage](./badges/coverage.svg)
 
@@ -181,9 +181,9 @@ pnpm typecheck
 
 ## Licence
 
-BonniePDF is distributed under the BonniePDF Community License 1.0. It is free for individuals, education, non-profits, open-source projects and organisations below the stated annual-revenue threshold. A commercial licence is required for larger organisations.
+Current versions are source-available under the [BonniePDF Community License 1.0](./core/LICENSE). Anyone may evaluate the complete core in non-production. Qualifying personal non-commercial, charity, education, research, and open-source-project use is also free. Commercial production—including live internal-business and client use—requires a [commercial licence](./core/COMMERCIAL-LICENSE.txt) before production begins.
 
-There are no licence keys, activation servers or runtime feature gates. See [`core/LICENSE`](./core/LICENSE) and the [licensing page](https://www.bonniepdf.dev/license/) for the complete terms.
+Solo covers commercial production for one named developer and one business. Professional and Enterprise provide broader organisational coverage. One paid core licence covers both TypeScript/JavaScript and .NET without document, server, deployment, or end-user fees. The core has no licence keys, activation servers, telemetry, or runtime feature gates. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
 
 ## Contributing
 

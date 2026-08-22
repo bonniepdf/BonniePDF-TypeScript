@@ -13,6 +13,8 @@
   "files": [
     "dist",
     "assets",
+    "LICENSE",
+    "COMMERCIAL-LICENSE.txt",
     "THIRD-PARTY-NOTICES.md"
   ],
   "exports": {

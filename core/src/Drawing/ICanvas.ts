@@ -78,6 +78,15 @@ export interface ICanvas {
   cubicBezierTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): void;
   quadraticBezierTo(cx: number, cy: number, x: number, y: number): void;
   addRect(x: number, y: number, width: number, height: number): void;
+  /**
+   * Appends a closed axis-aligned ellipse to the current path, as four cubic
+   * Béziers (PDF has no arc operator). Unlike {@link fillEllipse} this is a path
+   * primitive, so the result can be stroked with a full {@link StrokeStyle},
+   * filled with a gradient, or pushed as a clip.
+   */
+  addEllipse(cx: number, cy: number, rx: number, ry: number): void;
+  /** Appends a closed circle to the current path. See {@link addEllipse}. */
+  addCircle(cx: number, cy: number, radius: number): void;
   closePath(): void;
 
   // -- Painting the current path -----------------------------------

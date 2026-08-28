@@ -34,6 +34,11 @@ import type { IElement } from '../Elements/IElement';
 import type { IContentContainer } from '../Elements/IContentContainer';
 import type { ViewerPreferencesSettings } from './Writers/IPdfWriter';
 import type { DocumentSettings } from '../Configuration/DocumentSettings';
+import {
+  beginDocumentFontMetricScope,
+  getRegistryFontInstances,
+  getRegistryFontPaths,
+} from '../Typography/DocumentFontMetricScope';
 
 export class PdfDocumentSerializer {
   constructor(
@@ -52,6 +57,20 @@ export class PdfDocumentSerializer {
    *                            are encoded correctly in the content streams.
    */
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
+    const settings = this.document.settings;
+    const fontScope = beginDocumentFontMetricScope(
+      settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+      getRegistryFontInstances(preloadedResources),
+      getRegistryFontPaths(preloadedResources)
+    );
+    try {
+      this.serializeWithinFontScope(writer, preloadedResources);
+    } finally {
+      fontScope.dispose();
+    }
+  }
+
+  private serializeWithinFontScope(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
     let conformancePlan = ConformancePlan.fromSettings(settings);
 

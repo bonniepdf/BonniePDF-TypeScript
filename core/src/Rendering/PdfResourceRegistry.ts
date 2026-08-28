@@ -10,7 +10,7 @@ import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { FontManager, FallbackFont } from '../Typography/FontManager';
-import { FontMetrics } from '../Typography/FontMetrics';
+import { recordRegistryFontInstance, recordRegistryFontPath } from '../Typography/DocumentFontMetricScope';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
@@ -105,6 +105,14 @@ export class PdfResourceRegistry {
   private shadingCounter = 0;
   private softMaskGsCounter = 0;
 
+  private registerMetricFontInstance(identifier: string, font: TtfFont): void {
+    recordRegistryFontInstance(this, identifier, font);
+  }
+
+  private registerMetricFontAlias(identifier: string, path: string): void {
+    recordRegistryFontPath(this, identifier, path);
+  }
+
   public registerFont(fontIdentifier: string): string {
     // (A) Direct TTF/OTF path
     if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
@@ -133,7 +141,7 @@ export class PdfResourceRegistry {
         // Register the TtfFont instance (not a file path) so FontMetrics can measure accurately.
         const info = this.embeddedFonts.get(virtualKey);
         if (info?.font instanceof TtfFont) {
-          FontMetrics.registerFontInstance(fontIdentifier, info.font);
+          this.registerMetricFontInstance(fontIdentifier, info.font);
         }
         return resourceName;
       }
@@ -144,7 +152,7 @@ export class PdfResourceRegistry {
         const resourceName = this.registerEmbeddedFont(ttfPath);
         this.fontNameMap.set(fontIdentifier, resourceName);
         this.fontAliasMap.set(fontIdentifier, ttfPath);
-        FontMetrics.registerFontAlias(fontIdentifier, ttfPath);
+        this.registerMetricFontAlias(fontIdentifier, ttfPath);
         return resourceName;
       }
     }
@@ -184,7 +192,7 @@ export class PdfResourceRegistry {
         // `fontName`. Without this, layout falls back to the ASCII-only width
         // stub and under-measures supplementary-plane glyphs (e.g. emoji),
         // preventing word-wrap from triggering.
-        FontMetrics.registerFontInstance(filePath, font);
+        this.registerMetricFontInstance(filePath, font);
       } catch (err) {
         // Not loadable synchronously (file missing, parse error, browser env, etc.).
         // The document will still render; the font falls back to a standard Type1.
@@ -305,7 +313,7 @@ export class PdfResourceRegistry {
       // Mirror the sync path: make the parsed font visible to FontMetrics
       // under the same key so the synchronous measurement path uses real
       // per-glyph advances during the subsequent render pass.
-      FontMetrics.registerFontInstance(filePath, font);
+      this.registerMetricFontInstance(filePath, font);
     } catch (err) {
       // Don't reject the whole render - record the failure so the caller can
       // surface it via `Document.diagnostics`, and leave the font with no
@@ -331,7 +339,7 @@ export class PdfResourceRegistry {
       try {
         font = TtfFont.loadFromBytes(bytes);
         tracker = new GlyphUsageTracker(font);
-        FontMetrics.registerFontInstance(key, font);
+        this.registerMetricFontInstance(key, font);
       } catch (err) {
         this.diagnostics.addWarning('font', `Could not parse font bytes: ${(err as Error).message}`, key, err);
       }

@@ -183,10 +183,10 @@ export function generate(): Document {
   kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
-  // ── Charts: control status donut + findings-by-severity column ────────────
-  const charts = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14, margin: { bottom: 6 } });
-  charts.add(card('Control status (93 controls)', controlDonut()), 1);
-  charts.add(card('Findings by severity', severityBars()), 1);
+  // ── Charts: full-width control status + findings-by-severity ──────────────
+  const charts = new VerticalStack({ spacing: 12, margin: { bottom: 6 } });
+  charts.add(card('Control status (93 controls)', controlDonut()));
+  charts.add(card('Findings by severity', severityBars()));
   doc.add(charts);
 
   // ── Findings register (flows to page 2, repeating header) ────────────────
@@ -245,14 +245,13 @@ function controlDonut(): ChartBase {
   const values = [71, 15, 5, 2];
 
   const data = new ChartData({
-    title: 'Control status',
     series: [{ dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
   });
 
   const chart = new PieChart({
     data,
     altText: 'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.',
-    height: 180,
+    height: 130,
     stretchToFit: true,
     isDonut: true,
     totalLabel: 'Controls',
@@ -268,7 +267,6 @@ function severityBars(): ChartBase {
   const counts = order.map(s => FINDINGS.filter(f => f.severity === s).length);
 
   const data = new ChartData({
-    title: 'Findings by severity',
     series: [{ dataPoints: order.map((label, i) => ({ label, value: counts[i] })) }],
     yAxis: { maxValue: 6, stepCount: 3 },
   });
@@ -276,7 +274,7 @@ function severityBars(): ChartBase {
   const chart = new BarChart({
     data,
     altText: 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.',
-    height: 180,
+    height: 130,
     stretchToFit: true,
     barColor: PRIMARY,
     fontFamily: StandardFonts.Helvetica,
@@ -379,6 +377,7 @@ function card(title: string, chart: IElement): Container {
   return new Container({
     border: { width: 0.75, color: RULE },
     cornerRadius: 8,
+    clipContent: true,
     padding: 14,
     child: new VerticalStack({
       children: [

@@ -200,13 +200,12 @@ export function generate(): Document {
   kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
-  // ── Charts: control status donut + findings-by-severity column ────────────
-  const charts = new HorizontalStack();
-  charts.widthDistribution = WidthDistribution.Weighted;
-  charts.spacing = 14;
+  // ── Charts: full-width control status + findings-by-severity ──────────────
+  const charts = new VerticalStack();
+  charts.spacing = 12;
   charts.margin = new Thickness(0, 0, 0, 6);
-  charts.add(card('Control status (93 controls)', controlDonut()), 1);
-  charts.add(card('Findings by severity', severityBars()), 1);
+  charts.add(card('Control status (93 controls)', controlDonut()));
+  charts.add(card('Findings by severity', severityBars()));
   doc.add(charts);
 
   // ── Findings register (flows to page 2, repeating header) ────────────────
@@ -270,11 +269,10 @@ function controlDonut(): ChartBase {
     return p;
   });
   const data = new ChartData();
-  data.title = 'Control status';
   data.series = [series];
 
   const chart = new PieChart();
-  chart.height = 180;
+  chart.height = 130;
   chart.stretchToFit = true;
   chart.isDonut = true;
   chart.totalLabel = 'Controls';
@@ -297,13 +295,12 @@ function severityBars(): ChartBase {
     return p;
   });
   const data = new ChartData();
-  data.title = 'Findings by severity';
   data.series = [series];
   data.yAxis.maxValue = 6;
   data.yAxis.stepCount = 3;
 
   const chart = new BarChart();
-  chart.height = 180;
+  chart.height = 130;
   chart.stretchToFit = true;
   chart.barColor = PRIMARY;
   chart.fontFamily = StandardFonts.Helvetica;
@@ -422,6 +419,7 @@ function card(title: string, chart: IElement): Container {
   c.border = new Border(0.75);
   c.borderColors = new BorderColors(RULE);
   c.cornerRadius = 8;
+  c.clipContent = true;
   c.padding = new Thickness(14, 14, 14, 14);
   c.child = stack;
   return c;

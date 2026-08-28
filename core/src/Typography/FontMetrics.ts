@@ -1,4 +1,13 @@
 import { TtfFont } from './TrueType/TtfFont';
+import {
+  cacheDocumentFontInstance,
+  getFontInstanceAlias,
+  getFontPathAlias,
+  registerFontInstanceAlias,
+  registerFontPathAlias,
+  resolveStandardFontMetric,
+  shouldUseEmbeddedStandardMetrics,
+} from './DocumentFontMetricScope';
 
 /**
  * Provides font metrics for calculating text width in PDF documents.
@@ -10,9 +19,6 @@ export class FontMetrics {
    * A cached `null` records a path that failed to load so we don't retry it.
    */
   private static readonly TtfInstanceCache: Map<string, TtfFont | null> = new Map();
-  private static readonly FontPathAliases: Map<string, string> = new Map();
-  /** Bytes-based font instances registered when FontManager provides bytes (no file path available). */
-  private static readonly FontInstanceAliases: Map<string, TtfFont> = new Map();
 
   /**
    * Registers a logical font name alias pointing to a specific TTF file path.
@@ -23,7 +29,7 @@ export class FontMetrics {
    * @param ttfPath - The path to the TTF file
    */
   public static registerFontAlias(logicalName: string, ttfPath: string): void {
-    this.FontPathAliases.set(logicalName, ttfPath);
+    registerFontPathAlias(logicalName, ttfPath);
   }
 
   /**
@@ -32,7 +38,7 @@ export class FontMetrics {
    * than a file path, so file-based caching is bypassed entirely.
    */
   public static registerFontInstance(logicalName: string, font: TtfFont): void {
-    this.FontInstanceAliases.set(logicalName, font);
+    registerFontInstanceAlias(logicalName, font);
   }
 
   // ── Standard-14 advance-width tables ──────────────────────────────────────
@@ -149,8 +155,9 @@ export class FontMetrics {
     // populated by PdfResourceRegistry after async font preloading, or
     // explicitly by `loadFontFromUrl(url)`. Falling through to `getTtfWidth`
     // uses a stub width table that under-measures supplementary-plane glyphs.
-    if (fontIdentifier.toLowerCase().endsWith('.ttf')) {
-      const pathInstance = this.FontInstanceAliases.get(fontIdentifier);
+    const lowerIdentifier = fontIdentifier.toLowerCase();
+    if (lowerIdentifier.endsWith('.ttf') || lowerIdentifier.endsWith('.otf')) {
+      const pathInstance = getFontInstanceAlias(fontIdentifier);
       if (pathInstance) {
         return this.getKernedStringWidth(text, pathInstance, fontSize);
       }
@@ -158,17 +165,21 @@ export class FontMetrics {
     }
 
     // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
-    const fontInstance = this.FontInstanceAliases.get(fontIdentifier);
-    if (fontInstance) {
-      return this.getKernedStringWidth(text, fontInstance, fontSize);
-    }
+    const fontInstance = getFontInstanceAlias(fontIdentifier);
+    if (fontInstance) return this.getKernedStringWidth(text, fontInstance, fontSize);
 
-    // B2. IS IT A REGISTERED ALIAS TO A TTF FILE?
-    // When PDF/A mode embeds a real TTF for a logical name (e.g. "Helvetica-Bold" → arialbd.ttf),
-    // measure using the actual TTF metrics so layout matches rendering.
-    const ttfPath = this.FontPathAliases.get(fontIdentifier);
-    if (ttfPath) {
-      return this.getTtfWidth(text, ttfPath, fontSize);
+    const ttfPath = getFontPathAlias(fontIdentifier);
+    if (ttfPath) return this.getTtfWidth(text, ttfPath, fontSize);
+
+    // PDF/A and PDF/UA embed registered substitutes for the standard 12 Latin
+    // Type-1 fonts. Resolve the exact face before layout makes its first
+    // wrapping or pagination decision.
+    if (shouldUseEmbeddedStandardMetrics()) {
+      const embedded = resolveStandardFontMetric(fontIdentifier);
+      if (embedded) {
+        cacheDocumentFontInstance(fontIdentifier, embedded);
+        return this.getKernedStringWidth(text, embedded, fontSize);
+      }
     }
 
     // C. IS IT A STANDARD FONT? (approximate hardcoded tables)

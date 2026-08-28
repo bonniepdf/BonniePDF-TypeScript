@@ -115,6 +115,7 @@ export class FontManager {
     const weight = normalizeWeight(opts?.subfamily ?? font.fontSubfamily ?? 'Regular');
     const key = `${family}:${weight}`;
     this.registry.set(key, { kind: 'bytes', bytes });
+    this.fallbackCache.delete(key);
     if (opts?.identifier) this.identifierRegistry.set(opts.identifier, bytes);
   }
 
@@ -136,6 +137,7 @@ export class FontManager {
     const weight = normalizeWeight(opts?.subfamily ?? font.fontSubfamily ?? 'Regular');
     const key = `${family}:${weight}`;
     this.registry.set(key, { kind: 'file', path });
+    this.fallbackCache.delete(key);
   }
 
   /**
@@ -144,6 +146,7 @@ export class FontManager {
    */
   public static registerFontFilePath(key: string, filePath: string): void {
     this.registry.set(key, { kind: 'file', path: filePath });
+    this.fallbackCache.delete(key);
   }
 
   /**
@@ -201,15 +204,7 @@ export class FontManager {
       const bytes = this.getBytesForKey(key);
       if (!bytes) continue;
 
-      let font = this.fallbackCache.get(key);
-      if (font === undefined) {
-        try {
-          font = TtfFont.loadFromBytes(bytes);
-        } catch {
-          font = null;
-        }
-        this.fallbackCache.set(key, font);
-      }
+      const font = this.getParsedFont(key, bytes);
       if (font) result.push({ key, bytes, font });
     }
     return result;
@@ -221,6 +216,19 @@ export class FontManager {
     if (entry.kind === 'bytes') return entry.bytes;
     if (!entry.bytes) entry.bytes = this.loadFileBytes(entry.path);
     return entry.bytes ?? null;
+  }
+
+  private static getParsedFont(key: string, bytes: Uint8Array): TtfFont | null {
+    let font = this.fallbackCache.get(key);
+    if (font !== undefined) return font;
+
+    try {
+      font = TtfFont.loadFromBytes(bytes);
+    } catch {
+      font = null;
+    }
+    this.fallbackCache.set(key, font);
+    return font;
   }
 
   /** Removes all registered fonts (primarily for test isolation). */

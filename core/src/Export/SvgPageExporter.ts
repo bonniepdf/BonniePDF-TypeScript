@@ -14,8 +14,14 @@ import { TtfSubsetter } from '../Typography/TrueType/TtfSubsetter';
 import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportOptions';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { LayoutRecorder, LayoutSnapshot } from '../Rendering/LayoutRecorder';
 import { debugSourceOf } from '../Rendering/DebugSource';
+import {
+  beginDocumentFontMetricScope,
+  getRegistryFontInstances,
+  getRegistryFontPaths,
+} from '../Typography/DocumentFontMetricScope';
 
 /** A rendered SVG document: one standalone SVG string per page, plus `@font-face`
  * CSS that embeds (as subsetted data URIs) the fonts the document used, so a host
@@ -117,34 +123,43 @@ export async function exportSvgDocumentAsync(
   };
   const orientedSize = settings.getOrientedPageSize();
 
-  // ── Two-pass TOC resolution ─────────────────────────────────────────────────
-  // A VisualToc renders before the headings it references, so on a single pass
-  // its page numbers resolve to "XX" and its links target page 1. Mirror the
-  // PDF serializer: run a throw-away layout pass first (through the same SVG
-  // pipeline, so pagination - and therefore the resolved page numbers - is
-  // identical) to populate tocEntries, then seed the real context with it. Only
-  // paid for when the document actually contains a VisualToc.
-  const resolvedTocEntries = new Map<string, number>();
-  if (documentRequiresTwoPassLayout(document)) {
-    const dryRunCtx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
-    SvgRenderPipeline.renderPages(pages, settings, dryRunCtx);
-    for (const [identifier, pageNumber] of dryRunCtx.tocEntries) {
-      resolvedTocEntries.set(identifier, pageNumber);
+  let outputs!: SvgPageRenderOutput[];
+  let recorder: LayoutRecorder | undefined;
+  const fontScope = beginDocumentFontMetricScope(
+    settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+    getRegistryFontInstances(registry),
+    getRegistryFontPaths(registry)
+  );
+  try {
+    // ── Two-pass TOC resolution ───────────────────────────────────────────────
+    // A VisualToc renders before the headings it references, so on a single pass
+    // its page numbers resolve to "XX" and its links target page 1. Mirror the
+    // PDF serializer: run a throw-away layout pass first (through the same SVG
+    // pipeline, so pagination - and therefore the resolved page numbers - is
+    // identical) to populate tocEntries, then seed the real context with it.
+    const resolvedTocEntries = new Map<string, number>();
+    if (documentRequiresTwoPassLayout(document)) {
+      const dryRunCtx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
+      SvgRenderPipeline.renderPages(pages, settings, dryRunCtx);
+      for (const [identifier, pageNumber] of dryRunCtx.tocEntries) {
+        resolvedTocEntries.set(identifier, pageNumber);
+      }
     }
+
+    const ctx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
+    for (const [identifier, pageNumber] of resolvedTocEntries) {
+      ctx.tocEntries.set(identifier, pageNumber);
+    }
+
+    // Opt-in layout capture. Attached before rendering so the pipeline's
+    // openNode/closeNode/pageBreak hooks populate it; left undefined otherwise.
+    recorder = opts.captureLayout ? new LayoutRecorder() : undefined;
+    if (recorder) ctx.layoutRecorder = recorder;
+
+    outputs = SvgRenderPipeline.renderPages(pages, settings, ctx);
+  } finally {
+    fontScope.dispose();
   }
-
-  const ctx = new RenderContext(orientedSize, settings.margin, true, registry, canvasOptions);
-  for (const [identifier, pageNumber] of resolvedTocEntries) {
-    ctx.tocEntries.set(identifier, pageNumber);
-  }
-
-  // Opt-in layout capture. Attached before rendering so the pipeline's
-  // openNode/closeNode/pageBreak hooks populate it; left undefined otherwise so
-  // capture is a guarded no-op and output is unchanged.
-  const recorder = opts.captureLayout ? new LayoutRecorder() : undefined;
-  if (recorder) ctx.layoutRecorder = recorder;
-
-  const outputs = SvgRenderPipeline.renderPages(pages, settings, ctx);
 
   // The full document is laid out above (so pagination is correct); only the
   // first maxPages pages are serialized when a limit is requested.

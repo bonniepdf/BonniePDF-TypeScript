@@ -124,11 +124,10 @@ export class Container extends BorderedElementBase implements IContentContainer 
   private _horizontalAlignment?: HorizontalAlignment;
 
   /**
-   * Horizontal alignment of the child within the container's available width
-   * (`AlignCenter`/`AlignRight`/`AlignLeft`). When the child is
-   * narrower than the container, it is positioned accordingly; otherwise it
-   * fills the width as before. `undefined`/`Start` keep the default left
-   * placement. `Stretch` is treated as "fill" (no offset).
+   * Horizontal alignment of the child within the container's available width.
+   * When the child is narrower than the container, it is positioned
+   * accordingly; otherwise it fills the width as before. `undefined`/`Start`
+   * keep the default left placement. `Stretch` is treated as "fill" (no offset).
    *
    * Accepts `'start' | 'center' | 'end' | 'stretch'` on write.
    */
@@ -291,8 +290,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
     // the bottom instead of being positioned by a hand-tuned top padding.
     const vAlign = this.verticalAlignment;
     if (vAlign === VerticalAlignment.Center || vAlign === VerticalAlignment.End) {
-      const innerHeight =
-        containerHeight - this.padding.top - this.padding.bottom - this.border.verticalWidth;
+      const innerHeight = containerHeight - this.padding.top - this.padding.bottom - this.border.verticalWidth;
       const childHeight = this.child.measureHeight(childWidth);
       const slack = innerHeight - childHeight;
       if (slack > 0) ctx.currentY += vAlign === VerticalAlignment.Center ? slack / 2 : slack;

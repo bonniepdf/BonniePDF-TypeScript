@@ -80,8 +80,11 @@ jobs:
       - name: Generate conformance PDFs
         run: pnpm generate-tagged
 
-      - name: Verify PDF/A-4 fixture is present
-        run: test -s generated-pdfs/pdfa4_baseline.pdf
+      - name: Verify hand-written fixtures are present
+        run: |
+          test -s generated-pdfs/pdfa3a_baseline.pdf
+          test -s generated-pdfs/pdfa4_baseline.pdf
+          test -s generated-pdfs/factur-x_invoice.pdf
 
       # Fail fast with a clear message if validate.sh lost its executable bit
       # (mode 100644 instead of 100755) - otherwise the validate step below
@@ -97,6 +100,28 @@ jobs:
 
       - name: Validate with veraPDF (auto-detected claims)
         run: tools/verapdf/validate.sh generated-pdfs auto
+
+      # ── ZUGFeRD / Factur-X gate (Mustang) ────────────────────────────────
+      # veraPDF proves PDF/A-3b; Mustang additionally validates the embedded
+      # CII XML against the EN 16931 schematron. PDF/A passing alone is not a
+      # valid e-invoice claim. This mirrors the same gate in the .NET repo, so
+      # the two implementations are held to the same e-invoice bar.
+      - name: Cache Mustang CLI
+        uses: actions/cache@v4
+        with:
+          path: tools/mustang/*.jar
+          key: mustang-${{ runner.os }}-${{ hashFiles('tools/mustang/validate.sh') }}
+
+      - name: Verify mustang validate.sh is executable
+        run: |
+          mode=$(git ls-files -s tools/mustang/validate.sh | cut -d' ' -f1)
+          if [ "$mode" != "100755" ]; then
+            echo "::error::tools/mustang/validate.sh has mode $mode, expected 100755. Fix with: git update-index --chmod=+x tools/mustang/validate.sh"
+            exit 1
+          fi
+
+      - name: Validate ZUGFeRD / Factur-X with Mustang
+        run: tools/mustang/validate.sh generated-pdfs/factur-x_invoice.pdf
 
       - name: Upload generated PDFs
         uses: actions/upload-artifact@v4

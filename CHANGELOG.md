@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to `@bonniepdf/core` are documented here. Versions use
-CalVer (`yyyy.m.minor`), decided by the BonniePDF tool and released
+CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 This file is maintained by hand. Add an entry under **Unreleased** with each

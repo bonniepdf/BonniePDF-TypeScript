@@ -373,6 +373,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'quotation-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'employment-contract',
+    variant: 'employment-contract-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

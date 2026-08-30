@@ -1,0 +1,324 @@
+// ── Course completion certificate (education / training) — class companion ───
+//
+// The **class / construct-then-mutate** companion to `course-certificate.ts`.
+// Same certificate, same drawn frame and seal — but every element is created
+// with `new` and configured by assigning properties, rather than through the
+// options-object front door. This is the escape hatch the options form
+// desugars to.
+//
+// It renders **byte-for-byte identically** to `course-certificate.ts` (an
+// equivalence test binds the two). Reach for the options form first; this
+// variant exists to show what it desugars to. See `course-certificate.ts` for
+// the narrated walkthrough.
+
+import {
+  CanvasElement,
+  Color,
+  Container,
+  Document,
+  DocumentMetadata,
+  DocumentSettings,
+  Heading,
+  HorizontalStack,
+  Layers,
+  Line,
+  QRCode,
+  Spacer,
+  StandardFonts,
+  TextAlignment,
+  TextBlock,
+  Thickness,
+  VerticalStack,
+  WidthDistribution,
+  ColorPalette,
+  type ColorInput,
+} from '@bonniepdf/core';
+
+// ── Design tokens ────────────────────────────────────────────────────────────
+const INK = ColorPalette.slate[800];
+const MUTED = ColorPalette.slate[500];
+const FAINT = ColorPalette.slate[400];
+const ACCENT = ColorPalette.indigo[700];
+const ACCENT_MID = ColorPalette.indigo[400];
+const ACCENT_SOFT = ColorPalette.indigo[100];
+const GOLD = ColorPalette.amber[500];
+
+const SERIF_BOLD = StandardFonts.TimesBold;
+const SERIF_ITALIC = StandardFonts.TimesItalic;
+const SANS = StandardFonts.Helvetica;
+
+const PAGE_MARGIN = 34;
+const FRAME_HEIGHT = 595.276 - PAGE_MARGIN * 2;
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface CertificateData {
+  institution: { name: string; department: string };
+  recipient: string;
+  course: { title: string; creditHours: number; grade: string };
+  award: { statement: string; awarded: string; certificateId: string };
+  signatories: { name: string; role: string }[];
+  verificationUrl: string;
+  locale: string;
+}
+
+// ── Deterministic sample fixture ─────────────────────────────────────────────
+export const sampleCertificate: CertificateData = {
+  institution: { name: 'Westbrook Institute', department: 'School of Applied Computing' },
+  recipient: 'Sample Recipient',
+  course: { title: 'Accessible Document Engineering', creditHours: 45, grade: 'Distinction' },
+  award: {
+    statement: 'has successfully completed the programme of study and assessment in',
+    awarded: '30 August 2026',
+    certificateId: 'WI-ADE-2026-04188',
+  },
+  signatories: [
+    { name: 'Sample Registrar', role: 'Registrar' },
+    { name: 'Sample Programme Lead', role: 'Programme Lead' },
+  ],
+  verificationUrl: 'https://example.com/verify/WI-ADE-2026-04188',
+  locale: 'en-GB',
+};
+
+// ── Small formatting helpers ─────────────────────────────────────────────────
+
+interface CellStyle {
+  font?: string;
+  size?: number;
+  color?: ColorInput;
+  align?: TextAlignment;
+}
+
+function text(content: string, style: CellStyle = {}): TextBlock {
+  const block = new TextBlock(content);
+  block.fontName = style.font ?? StandardFonts.TimesRoman;
+  block.fontSize = style.size ?? 11;
+  block.textColor = style.color ?? INK;
+  if (style.align !== undefined) block.alignment = style.align;
+  return block;
+}
+
+function caption(content: string, size = 7.5, color: ColorInput = MUTED): TextBlock {
+  return text(content, { font: SANS, size, color, align: TextAlignment.Center });
+}
+
+// ── Ornament ─────────────────────────────────────────────────────────────────
+
+function ornamentalFrame(): CanvasElement {
+  const element = new CanvasElement((canvas, size) => {
+    const outer = 10;
+    const inner = 16;
+    const line = ACCENT;
+    const hair = ACCENT_MID;
+
+    canvas.strokeRect(outer, outer, size.width - outer * 2, size.height - outer * 2, line, 1.6);
+    canvas.strokeRect(inner, inner, size.width - inner * 2, size.height - inner * 2, hair, 0.5);
+
+    const r = 4.5;
+    for (const [cx, cy] of [
+      [inner, inner],
+      [size.width - inner, inner],
+      [inner, size.height - inner],
+      [size.width - inner, size.height - inner],
+    ] as [number, number][]) {
+      canvas.fillPath(
+        [
+          { x: cx, y: cy - r },
+          { x: cx + r, y: cy },
+          { x: cx, y: cy + r },
+          { x: cx - r, y: cy },
+        ],
+        line
+      );
+    }
+  });
+  // `drawWidth = 0` means "take the full width available".
+  element.drawWidth = 0;
+  element.drawHeight = FRAME_HEIGHT;
+  element.isDecorative = true;
+  return element;
+}
+
+function sealMedallion(grade: string): CanvasElement {
+  const element = new CanvasElement((canvas, size) => {
+    const cx = size.width / 2;
+    const cy = size.height / 2;
+    const outer = Math.min(cx, cy) - 1;
+
+    const points = 16;
+    for (let i = 0; i < points; i++) {
+      const a = (i / points) * Math.PI * 2;
+      const half = Math.PI / points;
+      canvas.fillPath(
+        [
+          { x: cx + Math.cos(a) * outer, y: cy + Math.sin(a) * outer },
+          { x: cx + Math.cos(a + half) * (outer * 0.72), y: cy + Math.sin(a + half) * (outer * 0.72) },
+          { x: cx + Math.cos(a - half) * (outer * 0.72), y: cy + Math.sin(a - half) * (outer * 0.72) },
+        ],
+        GOLD
+      );
+    }
+
+    canvas.fillCircle(cx, cy, outer * 0.74, ACCENT_SOFT);
+    canvas.fillCircle(cx, cy, outer * 0.66, Color.white);
+
+    const label = grade.toUpperCase();
+    const fontSize = 7.5;
+    const width = canvas.measureText(label, fontSize, SERIF_BOLD).width;
+    canvas.drawText(cx - width / 2, cy + fontSize / 3, label, ACCENT, fontSize, SERIF_BOLD, 0);
+  });
+  element.drawWidth = 74;
+  element.drawHeight = 74;
+  element.isDecorative = true;
+  return element;
+}
+
+// ── Section builders ─────────────────────────────────────────────────────────
+
+function signatureColumn(name: string, role: string): VerticalStack {
+  const rule = new Line();
+  rule.thickness = 0.6;
+  rule.color = FAINT;
+
+  const stack = new VerticalStack();
+  stack.spacing = 3;
+  stack.add(new Spacer(16));
+  stack.add(rule);
+  stack.add(text(name, { font: SERIF_BOLD, size: 9.5, align: TextAlignment.Center }));
+  stack.add(caption(role));
+  return stack;
+}
+
+function citation(data: CertificateData): VerticalStack {
+  const stack = new VerticalStack();
+
+  stack.add(
+    text(data.institution.name.toUpperCase(), { font: SANS, size: 9, color: ACCENT, align: TextAlignment.Center })
+  );
+
+  const department = caption(data.institution.department);
+  department.margin = new Thickness(0, 2, 0, 14);
+  stack.add(department);
+
+  const title = new Heading('Certificate of Completion');
+  title.level = 1;
+  title.tocIdentifier = 'certificate';
+  title.fontName = SERIF_BOLD;
+  title.fontSize = 26;
+  title.textColor = INK;
+  title.alignment = TextAlignment.Center;
+  title.margin = new Thickness(0, 0, 0, 4);
+  stack.add(title);
+
+  const rule = new Container();
+  rule.height = 1;
+  rule.backgroundColor = ACCENT_MID;
+  rule.margin = new Thickness(210, 0, 210, 16);
+  stack.add(rule);
+
+  stack.add(
+    text('This is to certify that', { font: SERIF_ITALIC, size: 11, color: MUTED, align: TextAlignment.Center })
+  );
+
+  const recipient = text(data.recipient, { font: SERIF_BOLD, size: 24, color: ACCENT, align: TextAlignment.Center });
+  recipient.margin = new Thickness(0, 6, 0, 6);
+  stack.add(recipient);
+
+  stack.add(text(data.award.statement, { font: SERIF_ITALIC, size: 11, color: MUTED, align: TextAlignment.Center }));
+
+  const course = text(data.course.title, { font: SERIF_BOLD, size: 16, align: TextAlignment.Center });
+  course.margin = new Thickness(0, 6, 0, 6);
+  stack.add(course);
+
+  stack.add(
+    text(`${data.course.creditHours} credit hours · Awarded with ${data.course.grade} · ${data.award.awarded}`, {
+      font: SANS,
+      size: 9,
+      color: MUTED,
+      align: TextAlignment.Center,
+    })
+  );
+
+  return stack;
+}
+
+function attestation(data: CertificateData): HorizontalStack {
+  const seal = new Container();
+  seal.child = sealMedallion(data.course.grade);
+  seal.margin = new Thickness(0, 6, 0, 0);
+
+  const signatures = new HorizontalStack();
+  signatures.widthDistribution = WidthDistribution.Weighted;
+  signatures.spacing = 28;
+  for (const signatory of data.signatories) {
+    signatures.add(signatureColumn(signatory.name, signatory.role), 1);
+  }
+
+  const qr = new QRCode();
+  qr.data = data.verificationUrl;
+  qr.size = 52;
+  qr.foregroundColor = INK;
+  qr.altText = `Verification code linking to ${data.verificationUrl}`;
+
+  const verification = new VerticalStack();
+  verification.spacing = 3;
+  verification.add(qr);
+  verification.add(caption('Verify online', 7));
+  verification.add(caption(data.award.certificateId, 7, FAINT));
+
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.spacing = 24;
+  row.margin = new Thickness(0, 74, 0, 0);
+  row.add(seal, 0.9);
+  row.add(signatures, 2.4);
+  row.add(verification, 0.9);
+  return row;
+}
+
+// ── buildDocument: pure data → Document ──────────────────────────────────────
+
+export function createCertificateSettings(): DocumentSettings {
+  // The settings and metadata bags stay in options form here, as they do in
+  // every other class companion: the construct-then-mutate convention is about
+  // the element tree, not the document's configuration.
+  return new DocumentSettings({
+    pageSize: 'a4',
+    orientation: 'landscape',
+    margin: PAGE_MARGIN,
+    conformance: 'pdf/a-2a',
+    accessibility: 'pdf/ua-1',
+    language: 'en-GB',
+    defaultTextStyle: { fontFamily: 'Times', fontSize: 11, color: INK },
+  });
+}
+
+export function buildDocument(
+  data: CertificateData,
+  settings: DocumentSettings = createCertificateSettings()
+): Document {
+  const doc = new Document(
+    settings,
+    new DocumentMetadata({
+      title: `Certificate of Completion — ${data.recipient} — ${data.course.title}`,
+      author: data.institution.name,
+      subject: 'Course completion certificate (fictional sample data).',
+    })
+  );
+
+  const body = new VerticalStack();
+  body.add(new Spacer(46));
+  body.add(citation(data));
+  body.add(attestation(data));
+
+  const framed = new Layers();
+  framed.addBackground(ornamentalFrame());
+  framed.primaryLayer = body;
+
+  doc.add(framed);
+  return doc;
+}
+
+export function generate(): Document {
+  return buildDocument(sampleCertificate);
+}

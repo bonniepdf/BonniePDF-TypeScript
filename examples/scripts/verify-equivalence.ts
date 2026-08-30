@@ -383,6 +383,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'utility-bill-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'course-certificate',
+    variant: 'course-certificate-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

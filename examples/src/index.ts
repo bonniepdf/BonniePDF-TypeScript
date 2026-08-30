@@ -147,6 +147,8 @@ import { generate as employmentContract } from './showcases/hr/employment-contra
 import { generate as employmentContractClasses } from './showcases/hr/employment-contract-classes';
 import { generate as utilityBill } from './showcases/utilities/utility-bill';
 import { generate as utilityBillClasses } from './showcases/utilities/utility-bill-classes';
+import { generate as courseCertificate } from './showcases/education/course-certificate';
+import { generate as courseCertificateClasses } from './showcases/education/course-certificate-classes';
 
 export * from './recipes/svg';
 
@@ -2426,6 +2428,45 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'grant-award-letter',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'course-certificate',
+    name: 'Course Certificate',
+    category: 'Education',
+    tier: 'showcase',
+    description:
+      'A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a rosette ' +
+      'seal built from paths rather than a bitmap, centred serif typography, and a verification code that makes ' +
+      'the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.',
+    filename: 'course-certificate.pdf',
+    generate: courseCertificate,
+    dotnetClass: 'CourseCertificateExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Education'],
+    documentType: 'certificate',
+    capabilities: ['qr'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'course-certificate-classes',
+    name: 'Course Certificate (Class API)',
+    category: 'Education',
+    tier: 'showcase',
+    description:
+      'The same certificate as Course Certificate, authored the long way: construct each element and assign ' +
+      'properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'course-certificate-classes.pdf',
+    generate: courseCertificateClasses,
+    dotnetClass: 'CourseCertificateExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'course-certificate',
     variantLabel: 'Class API',
   },
   // ── Utilities (vertical: high-volume consumer billing) ──────────────────────

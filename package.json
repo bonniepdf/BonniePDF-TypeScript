@@ -16,7 +16,6 @@
     "generate-tagged": "tsx scripts/generate-tagged-pdfs.ts"
   },
   "lint-staged": {
-    "core/{src,tests}/**/*.ts": "eslint --fix",
     "*.{ts,tsx,json,md}": "prettier --write"
   },
   "devDependencies": {

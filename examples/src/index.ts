@@ -143,6 +143,8 @@ import { generate as payslip } from './showcases/hr/payslip';
 import { generate as payslipClasses } from './showcases/hr/payslip-classes';
 import { generate as quotation } from './showcases/sales/quotation';
 import { generate as quotationClasses } from './showcases/sales/quotation-classes';
+import { generate as employmentContract } from './showcases/hr/employment-contract';
+import { generate as employmentContractClasses } from './showcases/hr/employment-contract-classes';
 
 export * from './recipes/svg';
 
@@ -2462,6 +2464,47 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'quotation',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'employment-contract',
+    name: 'Employment Contract',
+    category: 'HR',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A multi-page written statement of employment particulars: numbered clauses with indented sub-clauses, a ' +
+      'defined-terms section, a running header, a schedule on its own page, and an execution block with ' +
+      'signature and witness fields. Carries a document outline so a reader can jump to a clause. PDF/A-2a + PDF/UA-1.',
+    filename: 'employment-contract.pdf',
+    generate: employmentContract,
+    dotnetClass: 'EmploymentContractExample',
+    thumbnails: true,
+    pdfUa1: true,
+    industries: ['HR', 'Legal'],
+    documentType: 'contract',
+    capabilities: ['bookmarks', 'longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'employment-contract-classes',
+    name: 'Employment Contract (Class API)',
+    category: 'HR',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same statement of employment particulars as Employment Contract, authored the long way: construct each ' +
+      'element and assign properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'employment-contract-classes.pdf',
+    generate: employmentContractClasses,
+    dotnetClass: 'EmploymentContractExample',
+    thumbnails: true,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'employment-contract',
     variantLabel: 'Class API',
   },
   // ── HR / payroll pack (vertical: HR; security-sensitive transactional output) ─

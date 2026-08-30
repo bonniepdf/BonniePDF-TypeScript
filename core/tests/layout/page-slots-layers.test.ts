@@ -10,6 +10,8 @@ import { Layers } from '../../src/Elements/Layout/Layers';
 import { Container } from '../../src/Elements/Layout/Container';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { Watermark } from '../../src/Configuration/Watermark';
+import { CanvasElement } from '../../src/Elements/Drawing/CanvasElement';
+import { Color } from '../../src/Core/Color';
 
 /**
  * Page slots (Background / Foreground) and the Layers primitive.
@@ -20,6 +22,35 @@ function text(content: string): TextBlock {
   return new TextBlock(content, 12, StandardFonts.Helvetica);
 }
 
+/**
+ * A `CanvasElement` that fills its whole box with `color`. Used as a slot's
+ * content to exercise the `getCanvas()` + `flushExternalCanvas()` path a
+ * `TextBlock` marker does not: `CanvasElement` always draws onto a *separate*
+ * canvas obtained via `ctx.getCanvas(...)`, never directly onto `ctx.canvas`.
+ */
+function canvasFill(color: Color): CanvasElement {
+  return new CanvasElement((canvas, size) => canvas.fillRect(0, 0, size.width, size.height, color), {
+    drawWidth: 10,
+    drawHeight: 10,
+  });
+}
+
+/**
+ * The `rg` (set fill colour) operator line `canvasFill`'s draw produces, to
+ * search for in a full page stream. Only the colour operator is
+ * position-independent - the `re` (rectangle) operator that follows it bakes
+ * in absolute page coordinates that depend on where the element lands, which
+ * differs between this isolated render and the real document.
+ */
+function canvasFillOpsColorLine(color: Color): string {
+  const ctx = new RenderContext(PdfSize.a4, 50);
+  canvasFill(color).render(ctx, 10);
+  const ops = (ctx.canvas as { getStream(): string[] }).getStream().join('');
+  const match = ops.match(/[\d.]+ [\d.]+ [\d.]+ rg/);
+  if (!match) throw new Error(`no rg operator found in: ${ops}`);
+  return match[0];
+}
+
 /** Renders one page's stream through the streaming pipeline. */
 function renderPageStream(pages: Page[], settings: DocumentSettings, index = 0): string {
   const ctx = new RenderContext(settings.getOrientedPageSize(), settings.margin);
@@ -28,6 +59,65 @@ function renderPageStream(pages: Page[], settings: DocumentSettings, index = 0):
 }
 
 describe('this feature page slots (DocumentSettings)', () => {
+  // Regression: a CanvasElement (or ChartElement/GroupedBarChartElement,
+  // which draw the same way) used as a pageBackground slot painted OVER the
+  // page's body content in PDF output instead of behind it - the artwork
+  // simply disappeared behind whatever the SVG export happened to layer
+  // correctly by accident. Root cause: flushExternalCanvas wrote a
+  // CanvasElement's operators straight into pages[currentPageIndex],
+  // bypassing the fixed canvas the slot mechanism reads back and prepends -
+  // so the prepend step ran on an empty buffer while the CanvasElement's
+  // real output landed, unprepended, wherever the page stream already was.
+  it('paints a CanvasElement background slot behind page content', () => {
+    const marker = Color.fromHex('#123456');
+    const doc = new Document();
+    doc.add(text('BODYMARKER'));
+    doc.settings.pageBackground = () => canvasFill(marker);
+
+    const stream = renderPageStream(doc.pages as Page[], doc.settings);
+    const bgOps = canvasFillOpsColorLine(marker);
+
+    expect(stream).toContain(bgOps);
+    expect(stream).toContain('BODYMARKER');
+    expect(stream.indexOf(bgOps)).toBeLessThan(stream.indexOf('BODYMARKER'));
+  });
+
+  it('paints a CanvasElement foreground slot on top of page content', () => {
+    const marker = Color.fromHex('#654321');
+    const doc = new Document();
+    doc.add(text('BODYMARKER'));
+    doc.settings.pageForeground = () => canvasFill(marker);
+
+    const stream = renderPageStream(doc.pages as Page[], doc.settings);
+    const fgOps = canvasFillOpsColorLine(marker);
+
+    expect(stream).toContain(fgOps);
+    expect(stream.indexOf('BODYMARKER')).toBeLessThan(stream.indexOf(fgOps));
+  });
+
+  // Same underlying fix, exercised without the slot mechanism at all: a
+  // CanvasElement placed between two ordinary elements in normal document
+  // flow must keep its position in the painter's-model order, not jump to
+  // wherever flushExternalCanvas happened to write relative to content still
+  // buffered in ctx.canvas.
+  it('keeps a CanvasElement in document order among ordinary body content', () => {
+    const marker = Color.fromHex('#0f9d58');
+    const doc = new Document();
+    doc.add(text('BEFOREMARKER'));
+    doc.add(canvasFill(marker));
+    doc.add(text('AFTERMARKER'));
+
+    const stream = renderPageStream(doc.pages as Page[], doc.settings);
+    const midOps = canvasFillOpsColorLine(marker);
+
+    const before = stream.indexOf('BEFOREMARKER');
+    const mid = stream.indexOf(midOps);
+    const after = stream.indexOf('AFTERMARKER');
+    expect(before).toBeGreaterThanOrEqual(0);
+    expect(mid).toBeGreaterThan(before);
+    expect(after).toBeGreaterThan(mid);
+  });
+
   it('paints the background slot behind page content', () => {
     const doc = new Document();
     doc.add(text('BODYMARKER'));

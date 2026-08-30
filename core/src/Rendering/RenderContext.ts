@@ -347,8 +347,29 @@ export class RenderContext implements RenderContextContract {
 
   /**
    * Flushes an externally-created canvas (e.g. from getCanvas) into the
-   * current page stream. Necessary for chart elements that draw to a
+   * *currently active* canvas (`this.canvas`) - not directly into
+   * `pages[currentPageIndex]`. Necessary for chart elements that draw to a
    * positioned canvas rather than ctx.canvas.
+   *
+   * This distinction matters whenever `this.canvas` is not the page's own
+   * live canvas - most notably the fixed canvas a page background/foreground
+   * slot renders into (see `PdfRenderPipeline.renderPageSlotElement`), which
+   * accumulates its own operators separately and is prepended/appended to the
+   * page stream only after the slot element finishes rendering. A chart or
+   * `CanvasElement` used as that slot's content calls `getCanvas()` to get a
+   * positioned child canvas, exactly like any other caller of this method; if
+   * this method wrote straight into `pages[]`, that write would land
+   * immediately - ahead of the slot's own prepend/append step, and outside
+   * the fixed canvas entirely, so the slot's rendered background would land
+   * in the wrong place in the painter's-model order (observed: a
+   * `CanvasElement` used as `pageBackground` painted over already-rendered
+   * page content instead of behind it, in PDF output only - SVG export
+   * writes into `this.canvas` already, via `appendRawMarkup` below, so it
+   * never exhibited the bug). Writing into `this.canvas`'s own stream keeps
+   * this method's PDF behaviour symmetric with its SVG branch: both append
+   * into whatever canvas is currently active, letting the caller (ordinary
+   * page rendering, or a slot's fixed-canvas redirect) decide where that
+   * ends up.
    */
   public flushExternalCanvas(canvas: ICanvas): void {
     if (this.isSvgMode) {
@@ -367,7 +388,12 @@ export class RenderContext implements RenderContextContract {
     if (!pdfCanvas || typeof pdfCanvas.getStream !== 'function') return;
     const ops = pdfCanvas.getStream();
     if (ops.length === 0) return;
-    this.pages[this.currentPageIndex] = (this.pages[this.currentPageIndex] ?? '') + ops.join('');
+    const activeCanvas = this.canvas as PdfCanvas;
+    if (activeCanvas && typeof activeCanvas.getStream === 'function' && activeCanvas !== pdfCanvas) {
+      activeCanvas.getStream().push(...ops);
+    } else {
+      this.pages[this.currentPageIndex] = (this.pages[this.currentPageIndex] ?? '') + ops.join('');
+    }
   }
 
   public setCanvas(canvas: ICanvas): void {

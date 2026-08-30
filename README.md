@@ -8,7 +8,7 @@
 
 [Live examples](https://www.bonniepdf.dev/examples) · [Documentation](https://www.bonniepdf.dev/docs/typescript/getting-started) · [npm](https://www.npmjs.com/package/@bonniepdf/core) · [.NET package](https://www.nuget.org/packages/BonniePDF)
 
-Create polished, accessible and archival-ready PDFs directly from TypeScript and JavaScript. BonniePDF is a pure TypeScript document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A conformance. It runs in browsers, Node.js, Bun, Deno and edge runtimes with zero dependencies—and requires no Chromium, headless browser, canvas library, native add-ons or print server.
+Create polished, tagged and preservation-focused PDFs directly from TypeScript and JavaScript. BonniePDF is a pure TypeScript document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A profile support. It runs in browsers, Node.js, Bun, Deno and edge runtimes with zero dependencies—and requires no Chromium, headless browser, canvas library, native add-ons or print server.
 
 BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, form filler or editor for existing files.
 
@@ -109,7 +109,7 @@ title.fontSize = 24;
 title.textColor = ColorPalette.slate[800];
 document.add(title);
 
-document.add(new TextBlock('Generated as an accessible, archival PDF with no server required.'));
+document.add(new TextBlock('Generated as a tagged, PDF/A document with no server required.'));
 
 const bytes: Uint8Array = await document.generateBytesAsync();
 ```
@@ -154,7 +154,7 @@ Because BonniePDF writes the PDF byte stream directly, a browser can generate an
 
 BonniePDF generates structure while it lays out the document, so accessibility information is part of the authoring model rather than a post-processing pass. The optional layout snapshot and compliance preflight can identify missing language, title, alternative text and heading issues before delivery. The live previewer visualises both the structure tree and findings directly over the generated pages.
 
-The repository includes veraPDF-backed validation coverage for supported PDF/A and PDF/UA claims. As with any standards-sensitive workflow, validate your final documents and fonts against the profile required by your organisation.
+The repository includes veraPDF-backed validation coverage for supported PDF/A and PDF/UA claims. Machine validation does not judge whether content is meaningful or establish legal compliance. Validate final documents, fonts, and configuration against the required profile, including human accessibility review where appropriate.
 
 ## Workspace
 

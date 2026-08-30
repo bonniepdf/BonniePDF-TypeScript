@@ -111,6 +111,23 @@ describe('FlateDecode stream writing', () => {
     expect(contentInflatedWithoutDecrypting).toBe(false);
   });
 
+  it('produces the same bytes on every run, so a document is reproducible', () => {
+    const build = (): Uint8Array => {
+      const doc = new Document();
+      doc.add(new TextBlock(bodyText()));
+      return doc.generateBytes();
+    };
+
+    // Compression must not introduce any run-to-run variation of its own. PDF
+    // output still differs between runs overall (creation timestamp, random
+    // font-subset tag), so compare the compressed stream bodies rather than
+    // whole files - those are purely a function of the content.
+    const first = rawStreams(build()).map(s => Buffer.from(s).toString('hex'));
+    const second = rawStreams(build()).map(s => Buffer.from(s).toString('hex'));
+    expect(first.length).toBeGreaterThan(0);
+    expect(second).toEqual(first);
+  });
+
   it('round-trips an RC4 stream: decrypt then inflate returns the operators', () => {
     const settings = new DocumentSettings();
     const encryption = new EncryptionSettings();

@@ -14,9 +14,9 @@
 // exported SVG uses. No bottom-left↔top-left flip happens here; the PDF flip is
 // applied later, inside PdfCanvas.
 //
-// This is the TypeScript reference for the shared `LayoutSnapshot` spec
-// (BonniePDF/the specification). The .NET implementation
-// mirrors it; both are verified against the shared conformance fixtures.
+// This is the TypeScript implementation of the shared `LayoutSnapshot`
+// specification. The .NET implementation mirrors it; both are verified
+// against the shared conformance fixtures.
 // ---------------------------------------------------------------------------
 
 import { debugSourceOf } from './DebugSource';

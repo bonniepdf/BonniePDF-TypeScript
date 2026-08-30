@@ -14,12 +14,11 @@
  * PDF 2.0 output. BonniePDF currently emits PDF 1.4 and PDF 1.7 only -
  * there is no PDF 2.0 writer. Adding a `PdfUa2` value before that writer
  * lands would create a "lying enum" - the same kind of claim-without-
- * substance the this feature honest-claim guard exists to prevent. The value
- * lands when the PDF 2.0 writer does. Roadmap, not launch - do not add
- * it speculatively.
+ * substance the honest-claim guard exists to prevent. The value lands
+ * when the PDF 2.0 writer does - do not add it speculatively.
  *
- * See `the specification` for the full design
- * and `this feature-implementation-plan.md` for the staged implementation.
+ * Tagged-PDF behaviour is defined by the shared specification, which both
+ * implementations conform to.
  */
 export enum AccessibilityMode {
   /**

@@ -9,8 +9,7 @@ import { FacturXMetadata, FACTUR_X_NAMESPACE_URI, FACTUR_X_PREFIX } from '../EIn
  * emits them all into the same RDF description, each with its own XML
  * namespace prefix.
  *
- * Per the this feature design (`the specification`),
- * XMP injection must be additive - every conformance feature
+ * By design, XMP injection must be additive - every conformance feature
  * (current PDF/A, PDF/UA from this feature, ZUGFeRD's `fx` later) registers
  * through this same hook so no one feature has to rewrite the packet.
  */

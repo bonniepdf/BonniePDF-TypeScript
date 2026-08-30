@@ -12,8 +12,6 @@
  * not require structure tagging and so are the safe upgrade path for
  * documents that have not yet adopted PDF/UA-1.
  *
- * See `the specification` (in the .NET project)
- * for the cross-language design.
  */
 export enum PdfAConformance {
   /** No PDF/A claim. Default. The document is a normal PDF. */

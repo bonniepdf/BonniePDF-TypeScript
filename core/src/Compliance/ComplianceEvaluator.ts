@@ -14,8 +14,8 @@
 // back to `/Artifact` for want of alt text; this evaluator flags exactly that.
 //
 // The evaluator is deterministic, side-effect-free, and dependency-light (it reads
-// only the snapshot). The .NET implementation mirrors it against the shared spec
-// (BonniePDF/the specification) and shared fixtures.
+// only the snapshot). The .NET implementation mirrors it; both conform to the
+// shared compliance-preflight specification and the shared fixtures.
 // ---------------------------------------------------------------------------
 
 import type { LayoutNode, LayoutSnapshot, NodeAccessibility } from '../Rendering/LayoutRecorder';

@@ -319,7 +319,7 @@ export class DocumentSettings {
    *
    * Orthogonal to {@link pdfAEnabled}: a document can be PDF/A, PDF/UA,
    * both, or neither. See
-   * `the specification`.
+   * the shared specification.
    */
   private _accessibility!: AccessibilityMode;
 

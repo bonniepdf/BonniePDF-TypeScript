@@ -84,11 +84,7 @@ function addStar(canvas: ICanvas, cx: number, cy: number, outer: number, inner: 
   canvas.closePath();
 }
 
-function drawCover(
-  canvas: ICanvas,
-  size: Size,
-  badgeImage: ReturnType<typeof ImageLoader.loadFromBytes>
-): void {
+function drawCover(canvas: ICanvas, size: Size, badgeImage: ReturnType<typeof ImageLoader.loadFromBytes>): void {
   const w = size.width;
   const h = size.height;
 
@@ -157,7 +153,6 @@ function drawCover(
   canvas.beginPath();
   canvas.addCircle(bx, by, br);
   canvas.strokeCurrentPath({ paint: ACCENT, width: 5 });
-
 }
 
 // ── Cover type ───────────────────────────────────────────────────────────────

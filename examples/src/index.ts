@@ -175,6 +175,8 @@ export type Industry =
 /** The kind of document, independent of which industry it serves. */
 export type DocumentType =
   | 'invoice'
+  | 'quote'
+  | 'bill'
   | 'receipt'
   | 'statement'
   | 'payslip'
@@ -1354,6 +1356,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'BusinessInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['General', 'Finance'],
+    documentType: 'invoice',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1385,6 +1393,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UsSalesInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['General', 'Finance'],
+    documentType: 'invoice',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1417,6 +1431,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UkVatInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['General', 'Finance'],
+    documentType: 'invoice',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1450,6 +1470,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FacturXInvoiceExample',
     thumbnails: false,
     pdfUa1: false,
+    industries: ['General', 'Finance', 'Compliance'],
+    documentType: 'invoice',
+    capabilities: ['attachments', 'longTables'],
+    compliance: ['pdf/a-3b'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1483,6 +1509,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'IndiaGstInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['General', 'Finance'],
+    documentType: 'invoice',
+    capabilities: ['qr', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1514,6 +1546,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Retail', 'Media'],
+    documentType: 'catalog',
+    capabilities: ['images', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1544,6 +1582,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ComplianceFindingsRegisterExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Compliance', 'Legal'],
+    documentType: 'report',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
     variantLabel: 'Options API',
   },
   {
@@ -1574,6 +1618,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FinancialDashboardExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance'],
+    documentType: 'dashboard',
+    capabilities: ['charts', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
     variantLabel: 'Options API',
   },
   {
@@ -1605,6 +1655,13 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance', 'Media'],
+    documentType: 'report',
+    capabilities: ['images', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'high',
+    series: 'annual-report',
     variantLabel: 'Options API',
   },
   {
@@ -1636,6 +1693,13 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportGradientCoverExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance', 'Media'],
+    documentType: 'report',
+    capabilities: ['images', 'numbering'],
+    compliance: ['pdf/ua-1'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'high',
+    series: 'annual-report',
     variantLabel: 'Options API',
   },
   {
@@ -1667,6 +1731,13 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportMaskedCoverExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance', 'Media'],
+    documentType: 'report',
+    capabilities: ['images', 'numbering'],
+    compliance: ['pdf/ua-1'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'high',
+    series: 'annual-report',
     variantLabel: 'Options API',
   },
   {
@@ -1699,6 +1770,13 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AnnualReportGeometricCoverExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance', 'Media'],
+    documentType: 'report',
+    capabilities: ['images', 'numbering'],
+    compliance: ['pdf/ua-1'],
+    runtime: ['browser', 'node'],
+    dataDensity: 'high',
+    series: 'annual-report',
     variantLabel: 'Options API',
   },
   {
@@ -1731,6 +1809,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'EventTicketExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Events'],
+    documentType: 'ticket',
+    capabilities: ['qr', 'barcodes', 'images'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -1762,6 +1846,11 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PatientSummaryExample',
     thumbnails: false,
     pdfUa1: false,
+    industries: ['Healthcare'],
+    documentType: 'report',
+    capabilities: ['longTables'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1793,6 +1882,11 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'OutpatientAppointmentLetterExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Healthcare'],
+    documentType: 'letter',
+    capabilities: ['numbering'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -1824,6 +1918,10 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ProductRoadmapExample',
     thumbnails: false,
     pdfUa1: false,
+    industries: ['Technology'],
+    documentType: 'roadmap',
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -1855,6 +1953,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'SaasInvoiceExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Technology', 'Finance'],
+    documentType: 'invoice',
+    capabilities: ['qr', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -1885,6 +1989,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ShippingLabelExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Logistics', 'Retail'],
+    documentType: 'label',
+    capabilities: ['qr', 'barcodes'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -2022,6 +2132,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'EdgeReceiptExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Retail'],
+    documentType: 'receipt',
+    capabilities: ['qr', 'barcodes'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -2053,6 +2169,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'PublicLibraryMembershipLetterExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Government', 'Education'],
+    documentType: 'letter',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -2085,6 +2207,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'AuditReportExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Compliance', 'Legal'],
+    documentType: 'report',
+    capabilities: ['charts', 'longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
     variantLabel: 'Options API',
   },
   {
@@ -2117,6 +2245,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'ShelfLabelExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Retail'],
+    documentType: 'label',
+    capabilities: ['barcodes'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'low',
     variantLabel: 'Options API',
   },
   {
@@ -2149,6 +2283,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'UkDegreeTranscriptExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Education'],
+    documentType: 'transcript',
+    capabilities: ['qr', 'longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -2181,6 +2321,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'FinancialStatementExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Finance', 'Banking'],
+    documentType: 'statement',
+    capabilities: ['numbering', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
     variantLabel: 'Options API',
   },
   {
@@ -2213,6 +2359,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'LabReportExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Healthcare'],
+    documentType: 'report',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -2245,6 +2397,12 @@ export const examples: ExampleDef[] = [
     dotnetClass: 'GrantAwardLetterExample',
     thumbnails: false,
     pdfUa1: true,
+    industries: ['Government'],
+    documentType: 'letter',
+    capabilities: ['longTables', 'bookmarks', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
     variantLabel: 'Options API',
   },
   {
@@ -2317,3 +2475,21 @@ export const examples: ExampleDef[] = [
  * enumerate this; CI/validation/smoke tooling should use the full {@link examples}.
  */
 export const galleryExamples: ExampleDef[] = examples.filter(e => e.gallery !== false);
+
+// An authoring-style variant renders the *same document* as its parent, so it
+// necessarily has the same industry, document type, capabilities, and
+// compliance profile. Carrying those by hand on both entries invites drift, so
+// a variant inherits any taxonomy field it does not set for itself. Applied
+// once, at module load, over the same objects `examples` exposes.
+for (const variant of examples) {
+  if (!variant.variantOf) continue;
+  const parent = examples.find(e => e.id === variant.variantOf);
+  if (!parent) continue;
+  variant.industries ??= parent.industries;
+  variant.documentType ??= parent.documentType;
+  variant.capabilities ??= parent.capabilities;
+  variant.compliance ??= parent.compliance;
+  variant.runtime ??= parent.runtime;
+  variant.dataDensity ??= parent.dataDensity;
+  variant.series ??= parent.series;
+}

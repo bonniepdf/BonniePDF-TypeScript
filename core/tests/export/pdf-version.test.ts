@@ -5,6 +5,7 @@ import { EncryptionSettings } from '../../src/Security/Models/EncryptionSettings
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { asPdf17, asPdf20, asPdfA, asPdfA4 } from '../../src/Configuration/DocumentSettingsPresets';
+import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { pdfToText } from '../helpers/test-base';
 
 describe('PdfVersion', () => {
@@ -95,6 +96,23 @@ describe('PdfVersion', () => {
     const text = pdfToText(doc.generateBytes());
     expect(doc.settings.version).toBe(PdfVersion.Pdf20);
     expect(text.startsWith('%PDF-2.0')).toBe(true);
+  });
+
+  // Regression: settings.accessibility = PdfUa1 with the Pdf14 default left
+  // untouched used to silently skip tagging entirely - ConformancePlan gates
+  // the structure tree on version === Pdf17 exactly, and unlike PDF/A above,
+  // nothing upgraded the version for an accessibility-only request. No
+  // error, no diagnostic, just a document that silently claimed nothing.
+  it('PdfUa1_DirectAccessibilityAutoUpgradesToPdf17', () => {
+    doc = new Document();
+    doc.add(new TextBlock('hello'));
+    doc.settings.language = 'en-US';
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    const text = pdfToText(doc.generateBytes());
+    expect(doc.settings.version).toBe(PdfVersion.Pdf17);
+    expect(text.startsWith('%PDF-1.7')).toBe(true);
+    expect(text).toContain('/StructTreeRoot');
+    expect(text).toContain('/MarkInfo');
   });
 
   it('PdfA_ContainsOutputIntents', () => {

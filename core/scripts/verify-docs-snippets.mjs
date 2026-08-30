@@ -28,7 +28,8 @@ const onlyFile = process.argv[2]
 // Free variables the doc prose assumes are already in scope ("a long
 // paragraph you already have"), not something to import. Declared ambiently
 // so real undefined-identifier typos are still caught.
-const PRELUDE = 'declare const longParagraph: string\ndeclare const longText: string\ndeclare const photoBytes: Uint8Array\n'
+const PRELUDE =
+  'declare const longParagraph: string\ndeclare const longText: string\ndeclare const photoBytes: Uint8Array\ndeclare const totalsBox: import("../index").IElement\n'
 
 // Continuation blocks (see the module doc comment) sometimes carry their own
 // import line for a *type* while still assuming a same-named instance from an
@@ -37,7 +38,7 @@ const PRELUDE = 'declare const longParagraph: string\ndeclare const longText: st
 // anything this script actually authored: every self-contained pair this
 // repo's docs are built from constructs its own `table`, so the ambient
 // declaration below only ever fills in for blocks that don't.
-const ASSUMED_INSTANCE_NAMES = ['table']
+const ASSUMED_INSTANCE_NAMES = ['table', 'list']
 
 rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })

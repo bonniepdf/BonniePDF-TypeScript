@@ -12,6 +12,10 @@ section below following the same format: name the component, state where
 the derived files live, link to the upstream project, and reproduce the
 upstream licence text in full and unmodified.
 
+This file covers the published `@bonniepdf/core` package. Fonts bundled with the
+example catalogue (the Noto families under `examples/assets/fonts/`) are not part
+of that package; their licence travels with them as `OFL.txt` in the same folder.
+
 ---
 
 ## QR Code encoder
@@ -26,7 +30,7 @@ upstream licence text in full and unmodified.
   of Project Nayuki's `qrcodegen.ts` QR Code encoder (ISO/IEC 18004 Model 2).
   This mirrors the porting relationship of the .NET reference implementation,
   whose `QrCodeEncoder.cs` / `QrSegment.cs` are derived from the same
-  upstream source - see `../BonniePDF-NET/THIRD-PARTY-NOTICES.md`. The
+  upstream source - see the [.NET notices](https://github.com/BonniePDF/BonniePDF-NET/blob/master/THIRD-PARTY-NOTICES.md). The
   encoding algorithms - version selection, Reed-Solomon error correction,
   mask penalty scoring, function-pattern drawing, and codeword interleaving -
   originate from the upstream project.
@@ -70,8 +74,8 @@ to the following conditions:
   the standard-14 PDF fonts (Helvetica/Times/Courier). They are bundled so that
   PDF/A and PDF/UA output can embed real glyph outlines without relying on
   machine-installed fonts. The fonts are redistributed unmodified. This mirrors
-  the .NET reference implementation, which embeds the same fonts - see
-  `../../BonniePDF-NET/THIRD-PARTY-NOTICES.md`.
+  the .NET implementation, which embeds the same fonts - see the
+  [.NET notices](https://github.com/BonniePDF/BonniePDF-NET/blob/master/THIRD-PARTY-NOTICES.md).
 
 ### Licence text
 

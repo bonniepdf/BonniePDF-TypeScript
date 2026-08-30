@@ -1,8 +1,8 @@
-# BonniePDF (TypeScript) - agent guide
+# BonniePDF (TypeScript) — agent guide
 
-The TypeScript implementation of BonniePDF. Runs in the **browser** (no WASM for generation), **Node**, **Bun**, and **Deno**. Published on npm as `@bonniepdf/core`. Built with `tsup`, tested with `vitest`.
+The TypeScript implementation of BonniePDF. Runs in the **browser** (no WASM for generation), **Node**, **Bun**, and **Deno**. npm package name: `@bonniepdf/core`. Built with `tsup`, tested with `vitest`.
 
-For the cross-project picture, see [`../AGENTS.md`](../AGENTS.md). The .NET implementation lives at [`../BonniePDF-NET/`](../BonniePDF-NET/).
+> **This repository is public.** Keep this file, the README, and code comments useful to an outside contributor who has cloned only this repo. Don't reference internal documents, private sibling repositories, or unshipped plans here.
 
 ## What BonniePDF is
 
@@ -10,13 +10,13 @@ BonniePDF generates PDF documents from code using an object-composition layout m
 
 ## The parity principle (read this first)
 
-**BonniePDF is one library with two co-equal, first-class implementations.** TypeScript and .NET are peers. Neither is a port of the other; neither is "the reference" the other chases. Both implement the same **language-neutral specification** (`the shared specification` — the document model, the layout/pagination algorithm, the element catalogue, the compliance rules, and the expected PDF output). The spec is the source of truth; the two codebases are siblings that conform to it.
+**BonniePDF is one library with two co-equal, first-class implementations.** TypeScript and .NET are peers. Neither is a port of the other; neither is "the reference" the other chases. Both implement the same **language-neutral specification** — the document model, the layout/pagination algorithm, the element catalogue, the compliance rules, and the expected PDF output. The spec is the source of truth; the two codebases are siblings that conform to it.
 
 This has three consequences that govern almost every decision in this repo:
 
-1. **Behavioural parity is the contract.** The same logical document produces the same PDF output in both implementations, byte-for-byte where the spec defines bytes (object structure, content streams, XMP, font subsetting), modulo the platform-mandated differences listed below. The shared conformance suite — not the other language's source — is what verifies this. If TS and .NET disagree on output for equivalent input, one of them has a bug against the spec.
+1. **Behavioural parity is the contract.** The same logical document produces the same PDF output in both implementations, byte-for-byte where the spec defines bytes (object structure, content streams, XMP, font subsetting), modulo the platform-mandated differences listed below. The shared conformance suite — not the other language's source — is what verifies this. If TypeScript and .NET disagree on output for equivalent input, one of them has a bug against the spec.
 
-2. **The API surface is idiomatic, not transliterated.** TypeScript code must read like TypeScript and .NET code like C#. We do **not** copy the other language's casing, overload style, or naming. A C# `AddRow(TableRow)` overload does not become a TS `addRowRow`; a C# property does not keep its PascalCase in TS. Idiomatic divergence in _spelling_ is expected and correct. Behavioural divergence is a bug. See [`the shared specification`](the shared specification) for the conventions that define "idiomatic" here.
+2. **The API surface is idiomatic, not transliterated.** TypeScript code must read like TypeScript and .NET code like C#. We do **not** copy the other language's casing, overload style, or naming. A C# `AddRow(TableRow)` overload does not become a TS `addRowRow`; a C# property does not keep its PascalCase in TS. Idiomatic divergence in _spelling_ is expected and correct. Behavioural divergence is a bug.
 
 3. **Features land in lockstep against the spec.** A capability is not "done" until it exists in the spec, in both implementations, and in the shared conformance suite. Adding a feature to one language only is a parity break — flag it, don't ship it silently.
 
@@ -37,16 +37,18 @@ The public API targets the shape a TypeScript developer expects. Authoring code 
 - **camelCase everywhere** for properties, methods, and accessors. No PascalCase members on the public surface — ever. (`fontSize`, not `FontFamily`; `children`, not `Children`.)
 - **Options objects over positional overloads.** Constructors and factories take a single typed options object; positional forms are convenience sugar, not the primary surface.
 - **Factory functions as the front door.** `text(...)`, `container(...)`, `table(...)`, `document(...)` build elements without `new` and without per-property mutation. The underlying classes remain public for power users and parity, but the docs lead with factories.
-- **Two tiers, not three.** Factories are the front door; the classes are the escape hatch. The TypeScript fluent builder (`Pdf.create`) and the transliterated static `Extensions/` classes have been **deleted** — do not reintroduce either, and do not "restore parity" by mirroring the C# ones, which are idiomatic there. See §2.4 of the guide.
+- **Two tiers, not three.** Factories are the front door; the classes are the escape hatch. There is no TypeScript fluent builder (`Pdf.create`) and no transliterated static `Extensions/` classes — do not add either, and do not "restore parity" by mirroring the C# ones, which are idiomatic there and not here.
 - **Forgiving inputs, normalised internally.** Colours accept palette tokens, `Color` instances, or hex strings; spacing accepts a number, a `[h, v]` pair, or a per-side object; enums accept their string-literal union. All are normalised to the canonical value object inside the engine. `ColorPalette` remains the single source of truth for token hex values.
 
-The current code does not yet meet this bar in every place. [`the shared specification`](the shared specification) is the authoritative description of the target surface and the migration to it. When you touch public API, move it toward that guide; do not add new surface that violates it.
+When you touch public API, move it toward this shape; do not add new surface that violates it.
 
 ## Repository layout
 
 - `core/` — the published `@bonniepdf/core` package (engine + public API). Tests in `core/tests/`.
-- `examples/src/` — the shared example catalogue (`@bonniepdf/examples`) consumed by the website, split into `recipes/`, `showcases/`, and `conformance/`. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not legacy mutation patterns. **One deliberate exception:** a `*-classes.ts` file (e.g. `recipes/basics/simple-document-classes.ts`) is a construct-then-mutate _companion_ to its options-object sibling, kept to document the underlying class/escape-hatch surface. Do **not** "fix" it to the front-door style — `scripts/verify-equivalence.ts` asserts each companion renders byte-for-byte identically to its canonical form (run `pnpm --filter @bonniepdf/examples verify-equivalence`).
-- There is **no `docs/` directory here.** The API refactoring guide lives in the neutral spec repo at [`the shared specification`](the shared specification), and no copy may be made in this repo. `@bonniepdf/ui-shared` lives in its own `BonniePDF` repo, not here.
+- `examples/src/` — the shared example catalogue (`@bonniepdf/examples`), split into `recipes/`, `showcases/`, and `conformance/`. Examples double as smoke tests of the public surface; they must use the idiomatic front-door API, not construct-then-mutate patterns. **One deliberate exception:** a `*-classes.ts` file (e.g. `recipes/basics/simple-document-classes.ts`) is a construct-then-mutate _companion_ to its options-object sibling, kept to document the underlying class/escape-hatch surface. Do **not** "fix" it to the front-door style — `scripts/verify-equivalence.ts` asserts each companion renders byte-for-byte identically to its canonical form.
+- There is **no `docs/` directory here**, and none should be added.
+
+**Example copy style:** example descriptions, headers, and in-PDF prose must not expose PDF internals (`/H1`, `/Artifact`, "structure tree", "associated file"). Write for someone who wants a document, not for someone reading the spec.
 
 ## Engineering invariants (spec-level — both implementations honour these)
 
@@ -67,7 +69,7 @@ These are not TS quirks; they are correctness requirements of the format and the
 - **`OutputIntent` is conditional:** PDF/A → only when no non-embedded standard fonts remain (matches the guard); PDF/UA-1-only → always, for colour management.
 - **XMP extension schema is required** for any non-predefined namespace (e.g. `pdfuaid`) per ISO 19005-2/3 §6.6.2.3. Don't strip it — veraPDF `2a`+ fails without it.
 - **Resources live on the page, not the `/Pages` parent** (PDF/A-2b 6.2.2.2). Don't "fix" this to inheritance.
-- **The `.notdef` guard.** The encoder must never emit GID 0 for a real code point (PDF/A-2 6.2.11.8, PDF/UA-1 7.21.8). `resolveTextRuns` splits text into per-font runs, routes uncovered code points to registered fallback fonts in registration order, drops control/default-ignorable code points before shaping, and drops truly uncovered code points with a `font` diagnostic rather than emitting `.notdef`. Plain Latin in a covering primary font stays a single run, byte-identical to the pre-fallback path.
+- **The `.notdef` guard.** The encoder must never emit GID 0 for a real code point (PDF/A-2 6.2.11.8, PDF/UA-1 7.21.8). `resolveTextRuns` splits text into per-font runs, routes uncovered code points to registered fallback fonts in registration order, drops control/default-ignorable code points before shaping, and drops truly uncovered code points with a `font` diagnostic rather than emitting `.notdef`. Plain Latin in a covering primary font stays a single run, byte-identical to the non-fallback path.
 
 ### Writers
 
@@ -79,14 +81,36 @@ These are not TS quirks; they are correctness requirements of the format and the
 
 ## Implementation status
 
-Encryption (RC4 40/128, AES-256 V5/R6) and PDF/A XMP are **shipped and serialized**, verified by `core/tests/encryption.test.ts` and the conformance suite. Treat them as implemented and verify against tests, not against assumptions. PDF/UA-2 and PDF/A-4e/4f are not implemented in either language (tracked in the spec roadmap).
+Encryption (RC4 40/128, AES-256 V5/R6) and PDF/A XMP are implemented and serialized, verified by `core/tests/encryption.test.ts` and the conformance suite. Verify against the tests, not against assumptions. PDF/UA-2 and PDF/A-4e/4f are not implemented in either language.
+
+## Commands
+
+This repo is a nested pnpm workspace (`core`, `examples`) orchestrated by **turbo**.
+
+```bash
+# from this repo
+pnpm build          # turbo run build   (tsup + emitDeclarationOnly)
+pnpm typecheck
+pnpm lint           # eslint core/src core/tests
+pnpm generate-tagged
+
+# from core/
+pnpm test           # vitest run
+pnpm test:watch
+pnpm test:coverage
+pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
+```
+
+`pnpm --filter @bonniepdf/examples verify-equivalence` asserts each `*-classes.ts` companion renders byte-for-byte identically to its options-object sibling.
 
 ## Tests
 
 - `pnpm test` from `core/`. The vitest suite and the .NET xUnit suite are both derived from the **shared conformance fixtures**, not from each other. When you change behaviour, update the fixtures and both suites together — that is how parity is enforced.
 - `helpers/test-base.ts` and `helpers/mock-canvas.ts` set up the browser-ish environment for chart/font tests.
+- **The suite is on strict TypeScript.** Keep it that way; don't loosen `tsconfig` to land a change.
+- **This repo builds with the TypeScript 7 native compiler**, which does not expose the classic compiler API (`ts.createProgram`, `ts.ScriptTarget`, …). Tooling that needs the classic API must pin its own alias; don't assume `import ts from 'typescript'` provides it.
 
 ## When in doubt
 
 - The **spec** is the authority, not the other language's source. If a change here would force a behavioural divergence from the spec (and therefore from .NET), surface it — it likely needs a spec change applied to both implementations.
-- For anything touching the public API shape, consult [`the shared specification`](the shared specification) before adding surface.
+- `README.md` is the authoritative user-facing description. Keep it in sync with public-API changes.

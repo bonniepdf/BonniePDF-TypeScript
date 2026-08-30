@@ -368,6 +368,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'payslip-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'quotation',
+    variant: 'quotation-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

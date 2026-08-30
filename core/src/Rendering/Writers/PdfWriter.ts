@@ -7,6 +7,7 @@ import { CatalogOptions } from './CatalogOptions';
 import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
 import type { DocumentSettings } from '../../Configuration/DocumentSettings';
 import type { RegisteredLink } from '../RegisteredLink';
+import { deflateSync } from '../Compression/Deflate';
 
 // ─── Encoding helper ─────────────────────────────────────────────────────────
 
@@ -132,12 +133,13 @@ export class PdfWriter implements IPdfWriter {
   }
 
   /**
-   * Writes a compressed content stream.
-   * Currently writes uncompressed (no zlib) but correctly sets /Length.
-   * Compression (FlateDecode) will be added in Session 4.
+   * Writes a content stream compressed with `/FlateDecode`.
+   *
+   * Content streams are the bulk of most documents and compress heavily, so
+   * this is where the file size is won.
    */
   public writeCompressedObject(id: number, dictionary: Map<string, string>, stream: string): void {
-    this.writeObject(id, dictionary, stream);
+    this.writeFlateStream(id, dictionary, encodeIso88591(stream));
   }
 
   /**
@@ -157,11 +159,35 @@ export class PdfWriter implements IPdfWriter {
   }
 
   /**
-   * Writes a compressed binary object.
-   * Currently delegates to writeBinaryObject (no zlib yet).
+   * Writes a binary object compressed with `/FlateDecode` — embedded font
+   * programs, CIDSets, and ToUnicode maps.
    */
   public writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void {
-    this.writeBinaryObject(id, dictionary, bytes);
+    this.writeFlateStream(id, dictionary, bytes);
+  }
+
+  /**
+   * Deflates `raw`, declares `/Filter /FlateDecode`, and writes the object.
+   *
+   * Order matters: PDF applies the stream filters first and encrypts the
+   * *result*, so compression has to happen before the encryptor sees the bytes.
+   * `/Length` therefore describes the encrypted, compressed stream, while
+   * entries the caller supplied (`/Length1` on a font program, say) keep
+   * describing the original data, which is what consumers expect.
+   */
+  private writeFlateStream(id: number, dictionary: Map<string, string>, raw: Uint8Array): void {
+    const compressed = deflateSync(raw);
+    const toWrite = this.encryptor?.encryptData ? this.encryptor.encryptData(compressed, id) : compressed;
+
+    this._offsets.set(id, this._output.bytePosition);
+    this._output.writeString(`${id} 0 obj\n<<\n`);
+    for (const [key, value] of dictionary) {
+      this._output.writeString(`  ${key} ${value}\n`);
+    }
+    this._output.writeString('  /Filter /FlateDecode\n');
+    this._output.writeString(`  /Length ${toWrite.length}\n>>\nstream\n`);
+    this._output.writeBytes(toWrite);
+    this._output.writeString('\nendstream\nendobj\n');
   }
 
   /**

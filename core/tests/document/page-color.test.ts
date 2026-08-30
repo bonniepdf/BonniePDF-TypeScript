@@ -5,31 +5,16 @@ import { Color } from '../../src/Core/Color';
 import { ColorPalette } from '../../src/Core/ColorPalette';
 import { Container } from '../../src/Elements/Layout/Container';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
+import { contentStreams, firstContentStream } from '../helpers/test-base';
 
-/** Decodes the PDF as latin1 and extracts the first content stream. */
+/** The first content stream, inflated. */
 function firstPageStream(bytes: Uint8Array): string {
-  const text = new TextDecoder('latin1').decode(bytes);
-  const start = text.indexOf('stream\n');
-  const contentStart = start + 'stream\n'.length;
-  const end = text.indexOf('endstream', contentStart);
-  return text.slice(contentStart, end);
+  return firstContentStream(bytes);
 }
 
-/** Returns every content stream that contains a fill-rectangle, in file order. */
+/** Every content stream containing a fill-rectangle, in file order. */
 function fillStreams(bytes: Uint8Array): string[] {
-  const text = new TextDecoder('latin1').decode(bytes);
-  const streams: string[] = [];
-  let idx = 0;
-  for (;;) {
-    const start = text.indexOf('stream\n', idx);
-    if (start === -1) break;
-    const contentStart = start + 'stream\n'.length;
-    const end = text.indexOf('endstream', contentStart);
-    const s = text.slice(contentStart, end);
-    if (s.includes(' re')) streams.push(s);
-    idx = end + 'endstream'.length;
-  }
-  return streams;
+  return contentStreams(bytes).filter(s => s.includes(' re'));
 }
 
 describe('DocumentSettings.pageColor', () => {

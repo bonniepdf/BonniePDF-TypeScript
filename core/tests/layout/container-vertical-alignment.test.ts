@@ -45,16 +45,12 @@ describe('Container.verticalAlignment', () => {
   it('is a no-op when the child fills the container', async () => {
     const doc = (align: 'top' | 'bottom'): Document => {
       const d = new Document({ settings: { margin: 0 } });
-      d.add(
-        new Container({ height: 24, verticalAlignment: align, child: new TextBlock('Fill', { fontSize: 20 }) })
-      );
+      d.add(new Container({ height: 24, verticalAlignment: align, child: new TextBlock('Fill', { fontSize: 20 }) }));
       return d;
     };
     const a = await doc('top').generateSvgDocumentAsync({ precision: 3 });
     const b = await doc('bottom').generateSvgDocumentAsync({ precision: 3 });
-    expect(/<text[^>]*y="([0-9.]+)"/.exec(a.pages[0])![1]).toBe(
-      /<text[^>]*y="([0-9.]+)"/.exec(b.pages[0])![1]
-    );
+    expect(/<text[^>]*y="([0-9.]+)"/.exec(a.pages[0])![1]).toBe(/<text[^>]*y="([0-9.]+)"/.exec(b.pages[0])![1]);
   });
 
   it('accepts the string token form', async () => {

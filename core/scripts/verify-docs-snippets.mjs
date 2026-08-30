@@ -38,7 +38,7 @@ const PRELUDE =
 // anything this script actually authored: every self-contained pair this
 // repo's docs are built from constructs its own `table`, so the ambient
 // declaration below only ever fills in for blocks that don't.
-const ASSUMED_INSTANCE_NAMES = ['table', 'list']
+const ASSUMED_INSTANCE_NAMES = ['table', 'list', 'data']
 
 rmSync(outDir, { recursive: true, force: true })
 mkdirSync(outDir, { recursive: true })

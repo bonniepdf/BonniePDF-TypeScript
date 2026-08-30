@@ -224,7 +224,7 @@ export interface ExampleDef {
   description: string;
   /**
    * Which layer of the gallery this belongs to (see the example-gallery revenue
-   * strategy in BonniePDF). `'showcase'` = a finished industry/vertical
+   * strategy). `'showcase'` = a finished industry/vertical
    * document for the public gallery; `'recipe'` = a technical primitive demo for
    * the docs cookbook. Defaults to `'recipe'` when omitted.
    */

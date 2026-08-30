@@ -18,6 +18,7 @@ import {
   DocumentMetadata,
   DocumentSettings,
   Grid,
+  Heading,
   HorizontalStack,
   Line,
   NumberFormat,
@@ -185,10 +186,20 @@ function money(value: number, data: QuotationData): string {
   }).format(value);
 }
 
-function sectionTitle(text: string): TextBlock {
-  const block = cell(text, { bold: true, size: 11 });
-  block.margin = new Thickness(0, 0, 0, 6);
-  return block;
+/**
+ * Section titles are real level-2 headings rather than styled body text, so
+ * assistive technology gets a navigable outline of the quotation instead of a
+ * flat wall of paragraphs. They nest under the level-1 masthead.
+ */
+function sectionTitle(text: string, id: string): Heading {
+  const h = new Heading(text);
+  h.level = 2;
+  h.tocIdentifier = id;
+  h.fontName = StandardFonts.HelveticaBold;
+  h.fontSize = 11;
+  h.textColor = INK;
+  h.margin = new Thickness(0, 0, 0, 6);
+  return h;
 }
 
 function columnHead(text: string, align: TextAlignment = TextAlignment.Left): TextBlock {
@@ -209,7 +220,13 @@ function field(label: string, value: string): VerticalStack {
 function masthead(data: QuotationData): VerticalStack {
   const identity = new VerticalStack();
   identity.spacing = 2;
-  identity.add(cell(data.supplier.name, { bold: true, size: 15, color: ACCENT }));
+  const title = new Heading(data.supplier.name);
+  title.level = 1;
+  title.tocIdentifier = 'quotation';
+  title.fontName = StandardFonts.HelveticaBold;
+  title.fontSize = 15;
+  title.textColor = ACCENT;
+  identity.add(title);
   identity.add(cell(data.supplier.address, { size: 7.5, color: MUTED }));
   identity.add(cell(data.supplier.registration, { size: 7.5, color: FAINT }));
 
@@ -267,7 +284,7 @@ function scopeSection(data: QuotationData): VerticalStack {
 
   const stack = new VerticalStack();
   stack.margin = new Thickness(0, 0, 0, 14);
-  stack.add(sectionTitle('Scope of work'));
+  stack.add(sectionTitle('Scope of work', 'scope'));
   stack.add(list);
   return stack;
 }
@@ -323,7 +340,7 @@ function tierColumns(data: QuotationData): VerticalStack {
 
   const stack = new VerticalStack();
   stack.margin = new Thickness(0, 0, 0, 14);
-  stack.add(sectionTitle('Pricing options'));
+  stack.add(sectionTitle('Pricing options', 'pricing'));
   stack.add(row);
   return stack;
 }
@@ -345,7 +362,7 @@ function addOnTable(data: QuotationData): VerticalStack {
 
   const stack = new VerticalStack();
   stack.margin = new Thickness(0, 0, 0, 14);
-  stack.add(sectionTitle('Optional add-ons'));
+  stack.add(sectionTitle('Optional add-ons', 'add-ons'));
   stack.add(table);
   return stack;
 }
@@ -384,7 +401,7 @@ function assumptionsSection(data: QuotationData): VerticalStack {
 
   const stack = new VerticalStack();
   stack.margin = new Thickness(0, 0, 0, 16);
-  stack.add(sectionTitle('Assumptions and exclusions'));
+  stack.add(sectionTitle('Assumptions and exclusions', 'assumptions'));
   stack.add(list);
   return stack;
 }
@@ -417,7 +434,7 @@ function acceptanceBlock(data: QuotationData): Container {
   intro.margin = new Thickness(0, 0, 0, 4);
 
   const body = new VerticalStack();
-  body.add(sectionTitle('Acceptance'));
+  body.add(sectionTitle('Acceptance', 'acceptance'));
   body.add(intro);
   body.add(fields);
 

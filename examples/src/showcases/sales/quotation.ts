@@ -21,6 +21,7 @@ import {
   DocumentMetadata,
   DocumentSettings,
   Grid,
+  Heading,
   HorizontalStack,
   Line,
   OrderedList,
@@ -54,12 +55,21 @@ const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, textColor
 const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK };
 const mutedText: TextBlockOptions = { ...bodyText, textColor: MUTED };
 const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: FAINT };
-const sectionTitle: TextBlockOptions = {
-  fontName: HELVETICA_BOLD,
-  fontSize: 11,
-  textColor: INK,
-  margin: { bottom: 6 },
-};
+/**
+ * Section titles are real level-2 headings rather than styled body text, so
+ * assistive technology gets a navigable outline of the quotation instead of a
+ * flat wall of paragraphs. They nest under the level-1 masthead.
+ */
+function sectionTitle(text: string, id: string): Heading {
+  return new Heading(text, {
+    level: 2,
+    tocIdentifier: id,
+    fontName: HELVETICA_BOLD,
+    fontSize: 11,
+    textColor: INK,
+    margin: { bottom: 6 },
+  });
+}
 const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED };
 const moneyRight: TextBlockOptions = { ...bodyText, alignment: 'right' };
 
@@ -201,7 +211,13 @@ function masthead(data: QuotationData): VerticalStack {
   const identity = new VerticalStack({
     spacing: 2,
     children: [
-      new TextBlock(data.supplier.name, { fontName: HELVETICA_BOLD, fontSize: 15, textColor: ACCENT }),
+      new Heading(data.supplier.name, {
+        level: 1,
+        tocIdentifier: 'quotation',
+        fontName: HELVETICA_BOLD,
+        fontSize: 15,
+        textColor: ACCENT,
+      }),
       new TextBlock(data.supplier.address, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
       new TextBlock(data.supplier.registration, { fontName: HELVETICA, fontSize: 7.5, textColor: FAINT }),
     ],
@@ -255,7 +271,7 @@ function scopeSection(data: QuotationData): VerticalStack {
   return new VerticalStack({
     margin: { bottom: 14 },
     children: [
-      new TextBlock('Scope of work', sectionTitle),
+      sectionTitle('Scope of work', 'scope'),
       new OrderedList({
         items: data.scope,
         numberFormat: 'decimal',
@@ -345,7 +361,7 @@ function tierColumns(data: QuotationData): VerticalStack {
 
   return new VerticalStack({
     margin: { bottom: 14 },
-    children: [new TextBlock('Pricing options', sectionTitle), row],
+    children: [sectionTitle('Pricing options', 'pricing'), row],
   });
 }
 
@@ -370,7 +386,7 @@ function addOnTable(data: QuotationData): VerticalStack {
   }
   return new VerticalStack({
     margin: { bottom: 14 },
-    children: [new TextBlock('Optional add-ons', sectionTitle), table],
+    children: [sectionTitle('Optional add-ons', 'add-ons'), table],
   });
 }
 
@@ -403,7 +419,7 @@ function assumptionsSection(data: QuotationData): VerticalStack {
   return new VerticalStack({
     margin: { bottom: 16 },
     children: [
-      new TextBlock('Assumptions and exclusions', sectionTitle),
+      sectionTitle('Assumptions and exclusions', 'assumptions'),
       new UnorderedList({
         items: data.assumptions,
         fontName: HELVETICA,
@@ -442,7 +458,7 @@ function acceptanceBlock(data: QuotationData): Container {
     ...cardBase,
     child: new VerticalStack({
       children: [
-        new TextBlock('Acceptance', sectionTitle),
+        sectionTitle('Acceptance', 'acceptance'),
         new TextBlock(
           `To accept, please sign below and return to ${data.supplier.email}, quoting ${data.reference.quoteNumber}.`,
           { ...mutedText, margin: { bottom: 4 } }

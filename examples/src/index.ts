@@ -145,6 +145,8 @@ import { generate as quotation } from './showcases/sales/quotation';
 import { generate as quotationClasses } from './showcases/sales/quotation-classes';
 import { generate as employmentContract } from './showcases/hr/employment-contract';
 import { generate as employmentContractClasses } from './showcases/hr/employment-contract-classes';
+import { generate as utilityBill } from './showcases/utilities/utility-bill';
+import { generate as utilityBillClasses } from './showcases/utilities/utility-bill-classes';
 
 export * from './recipes/svg';
 
@@ -2424,6 +2426,48 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'grant-award-letter',
+    variantLabel: 'Class API',
+  },
+  // ── Utilities (vertical: high-volume consumer billing) ──────────────────────
+  {
+    id: 'utility-bill',
+    name: 'Utility Bill',
+    category: 'Utilities',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A domestic energy bill that derives every figure from meter readings rather than asserting a total: a ' +
+      'headline amount due, a full tariff breakdown, a twelve-month consumption chart, and a detachable payment ' +
+      'slip below a dashed cut line carrying a scannable payment reference. PDF/A-2a + PDF/UA-1.',
+    filename: 'utility-bill.pdf',
+    generate: utilityBill,
+    dotnetClass: 'UtilityBillExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Utilities', 'General'],
+    documentType: 'bill',
+    capabilities: ['barcodes', 'charts', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'utility-bill-classes',
+    name: 'Utility Bill (Class API)',
+    category: 'Utilities',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same energy bill as Utility Bill, authored the long way: construct each element and assign properties. ' +
+      'This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'utility-bill-classes.pdf',
+    generate: utilityBillClasses,
+    dotnetClass: 'UtilityBillExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'utility-bill',
     variantLabel: 'Class API',
   },
   // ── Sales (horizontal: pre-sales commercial documents) ──────────────────────

@@ -461,6 +461,20 @@ export class Document {
       throw new Error('PDF/A mode cannot be combined with encryption.');
     }
 
+    // PDF/UA-1 tagging requires PDF 1.7 too, and nothing else upgrades the
+    // version for an accessibility-only request (PDF/A above already covers
+    // its own conformance levels). Silently upgrade the default rather than
+    // silently dropping tagging - the caller asked for accessible output, so
+    // honour that intent, same as the PDF/A branch above. An explicit
+    // PdfVersion.Pdf20 request is left alone and still hits the throw below.
+    if (
+      s.accessibility === AccessibilityMode.PdfUa1 &&
+      s.version !== PdfVersion.Pdf17 &&
+      s.version !== PdfVersion.Pdf20
+    ) {
+      s.version = PdfVersion.Pdf17;
+    }
+
     if (s.accessibility === AccessibilityMode.PdfUa1 && s.version === PdfVersion.Pdf20) {
       throw new Error(
         'PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.'

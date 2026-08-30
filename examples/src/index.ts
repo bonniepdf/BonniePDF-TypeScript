@@ -141,6 +141,8 @@ import { generate as labReport } from './showcases/healthcare/lab-report';
 import { generate as labReportClasses } from './showcases/healthcare/lab-report-classes';
 import { generate as payslip } from './showcases/hr/payslip';
 import { generate as payslipClasses } from './showcases/hr/payslip-classes';
+import { generate as quotation } from './showcases/sales/quotation';
+import { generate as quotationClasses } from './showcases/sales/quotation-classes';
 
 export * from './recipes/svg';
 
@@ -2420,6 +2422,46 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'grant-award-letter',
+    variantLabel: 'Class API',
+  },
+  // ── Sales (horizontal: pre-sales commercial documents) ──────────────────────
+  {
+    id: 'quotation',
+    name: 'Quotation',
+    category: 'Sales',
+    tier: 'showcase',
+    description:
+      'A B2B sales quotation built around a three-tier pricing comparison rather than a flat line-item table, ' +
+      'with the recommended tier promoted. Adds a numbered scope of work, priced optional add-ons, a validity ' +
+      'band, and an acceptance block with ruled signature fields. PDF/A-2a + PDF/UA-1.',
+    filename: 'quotation.pdf',
+    generate: quotation,
+    dotnetClass: 'QuotationExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['General', 'Technology', 'Finance'],
+    documentType: 'quote',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'quotation-classes',
+    name: 'Quotation (Class API)',
+    category: 'Sales',
+    tier: 'showcase',
+    description:
+      'The same tiered quotation as Quotation, authored the long way: construct each element and assign ' +
+      'properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'quotation-classes.pdf',
+    generate: quotationClasses,
+    dotnetClass: 'QuotationExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'quotation',
     variantLabel: 'Class API',
   },
   // ── HR / payroll pack (vertical: HR; security-sensitive transactional output) ─

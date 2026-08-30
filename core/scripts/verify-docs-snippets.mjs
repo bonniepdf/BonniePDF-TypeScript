@@ -29,7 +29,7 @@ const onlyFile = process.argv[2]
 // paragraph you already have"), not something to import. Declared ambiently
 // so real undefined-identifier typos are still caught.
 const PRELUDE =
-  'declare const longParagraph: string\ndeclare const longText: string\ndeclare const photoBytes: Uint8Array\ndeclare const totalsBox: import("../index").IElement\n'
+  'declare const longParagraph: string\ndeclare const longText: string\ndeclare const photoBytes: Uint8Array\ndeclare const chartBytes: Uint8Array\ndeclare const ornamentBytes: Uint8Array\ndeclare const totalsBox: import("../index").IElement\n'
 
 // Continuation blocks (see the module doc comment) sometimes carry their own
 // import line for a *type* while still assuming a same-named instance from an

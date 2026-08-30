@@ -24,8 +24,14 @@ export type CanvasElementOptions = ElementOptions &
   Partial<Pick<CanvasElement, (typeof CANVAS_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
 export class CanvasElement extends ElementBase implements IRoleProvider, IAltTextProvider {
-  public drawWidth: number = 400;
-  public drawHeight: number = 300;
+  /**
+   * Width of the drawing box in points. `0` (the default) fills the available
+   * content width; a positive value fixes the width and is clamped to the space
+   * available.
+   */
+  public drawWidth: number = 0;
+  /** Height of the drawing box in points. Always explicit — a canvas cannot measure itself. */
+  public drawHeight: number = 100;
   public altText: string = '';
   public isDecorative: boolean = false;
   private readonly drawHandler: CanvasDrawHandler;

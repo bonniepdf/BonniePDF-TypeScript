@@ -45,17 +45,18 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     this._inner.writeRawObject(id, body);
   }
 
+  /**
+   * Delegates to the synchronous writer, which compresses with the bundled
+   * DEFLATE encoder.
+   *
+   * These used to compress through the platform's async `deflate` instead,
+   * which meant two different compressors could produce two different files
+   * from one document depending on which path a caller took. Compression is
+   * deterministic and identical everywhere precisely because there is one
+   * encoder; keep it that way.
+   */
   public async writeCompressedObjectAsync(id: number, dictionary: Map<string, string>, stream: string): Promise<void> {
-    // Encode as ISO-8859-1 then compress via the configured platform
-    const rawBytes = new Uint8Array(stream.length);
-    for (let i = 0; i < stream.length; i++) rawBytes[i] = stream.charCodeAt(i) & 0xff;
-
-    const { deflate } = await import('../../Platform/PlatformIO');
-    const compressed = await deflate(rawBytes);
-
-    const dict = new Map(dictionary);
-    dict.set('/Filter', '/FlateDecode');
-    this._inner.writeBinaryObject(id, dict, compressed);
+    this._inner.writeCompressedObject(id, dictionary, stream);
   }
 
   public async writeBinaryObjectAsync(
@@ -77,11 +78,7 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     _ct?: unknown
   ): Promise<void> {
     const slice = length != null ? bytes.slice(0, length) : bytes;
-    const { deflate } = await import('../../Platform/PlatformIO');
-    const compressed = await deflate(slice);
-    const dict = new Map(dictionary);
-    dict.set('/Filter', '/FlateDecode');
-    this._inner.writeBinaryObject(id, dict, compressed);
+    this._inner.writeCompressedBinaryObject(id, dictionary, slice);
   }
 
   public async writeLinkAnnotationAsync(

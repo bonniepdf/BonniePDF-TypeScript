@@ -91,7 +91,7 @@ This repo is a nested pnpm workspace (`core`, `examples`) orchestrated by **turb
 # from this repo
 pnpm build          # turbo run build   (tsup + emitDeclarationOnly)
 pnpm typecheck
-pnpm lint           # eslint core/src core/tests
+pnpm lint           # eslint core/src core/tests  (currently fails - see below)
 pnpm generate-tagged
 
 # from core/
@@ -102,6 +102,8 @@ pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
 ```
 
 `pnpm --filter @bonniepdf/examples verify-equivalence` asserts each `*-classes.ts` companion renders byte-for-byte identically to its options-object sibling.
+
+**`pnpm lint` does not currently run.** typescript-eslint refuses to load against the TypeScript 7 native compiler this repo builds with, and throws before linting anything ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)). The `eslint --fix` step has been removed from the lint-staged pre-commit config for the same reason - it blocked every commit touching `core/src` instead of catching defects. Restore both once upstream supports the TypeScript version pinned in `core/package.json`; the reasoning is repeated in `.husky/pre-commit`.
 
 ## Tests
 

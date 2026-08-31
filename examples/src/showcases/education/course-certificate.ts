@@ -335,7 +335,10 @@ export function buildDocument(
   // as the primary layer, which is also what sets the block's flow height.
   // A leading spacer settles the wording into the frame rather than letting it
   // start hard against the top rule; the frame's fixed height does the rest.
-  const body = new VerticalStack({ children: [new Spacer(14), citation(data), attestation(data)] });
+  // 30pt clears the crest's own lozenge points (which reach to the very top of
+  // its 52pt box) past the frame's inner rule at 16pt inset - without this the
+  // crest visually crosses the border instead of sitting inside it.
+  const body = new VerticalStack({ children: [new Spacer(30), citation(data), attestation(data)] });
 
   const framed = new Layers();
   framed.addBackground(ornamentalFrame());

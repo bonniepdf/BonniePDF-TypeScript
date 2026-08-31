@@ -325,8 +325,11 @@ export function buildDocument(
     })
   );
 
+  // 30pt clears the crest's own lozenge points (which reach to the very top of
+  // its 52pt box) past the frame's inner rule at 16pt inset - without this the
+  // crest visually crosses the border instead of sitting inside it.
   const body = new VerticalStack();
-  body.add(new Spacer(14));
+  body.add(new Spacer(30));
   body.add(citation(data));
   body.add(attestation(data));
 

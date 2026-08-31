@@ -296,11 +296,19 @@ function attestation(data: CertificateData): VerticalStack {
   const verification = new VerticalStack({
     spacing: 3,
     children: [
-      new QRCode({
-        data: data.verificationUrl,
-        size: 42,
-        foregroundColor: INK,
-        altText: `Verification code linking to ${data.verificationUrl}`,
+      // QRCode always renders flush to the left of whatever width it is
+      // given - unlike TextBlock, it has no alignment of its own, so a
+      // Container with horizontalAlignment: 'center' is what actually centres
+      // it under the (wider) captions below. Without this the QR sits offset
+      // from text that otherwise looks centred.
+      new Container({
+        horizontalAlignment: 'center',
+        child: new QRCode({
+          data: data.verificationUrl,
+          size: 42,
+          foregroundColor: INK,
+          altText: `Verification code linking to ${data.verificationUrl}`,
+        }),
       }),
       new TextBlock('Verify online', { ...caption, fontSize: 6.5 }),
       new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, textColor: FAINT }),

@@ -19,6 +19,7 @@ import {
   DocumentMetadata,
   DocumentSettings,
   Heading,
+  HorizontalAlignment,
   HorizontalStack,
   Layers,
   Line,
@@ -293,9 +294,18 @@ function attestation(data: CertificateData): VerticalStack {
   qr.foregroundColor = INK;
   qr.altText = `Verification code linking to ${data.verificationUrl}`;
 
+  // QRCode always renders flush to the left of whatever width it is given -
+  // unlike TextBlock, it has no alignment of its own, so a Container with
+  // horizontalAlignment: Center is what actually centres it under the (wider)
+  // captions below. Without this the QR sits offset from text that otherwise
+  // looks centred.
+  const qrBox = new Container();
+  qrBox.horizontalAlignment = HorizontalAlignment.Center;
+  qrBox.child = qr;
+
   const verification = new VerticalStack();
   verification.spacing = 3;
-  verification.add(qr);
+  verification.add(qrBox);
   verification.add(caption('Verify online', 6.5));
   verification.add(caption(data.award.certificateId, 6.5, FAINT));
 

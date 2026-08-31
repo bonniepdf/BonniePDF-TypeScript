@@ -86,13 +86,13 @@ export interface ContractData {
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleContract: ContractData = {
   employer: {
-    name: 'Northwind Document Systems Ltd',
+    name: 'Sample Company Ltd',
     address: '12 Harbour Square, Bristol BS1 4QA, United Kingdom',
     registration: 'Company No. 09876543',
   },
   employee: {
     name: 'Sample Employee',
-    address: '48 Cotham Road, Bristol BS6 6DR, United Kingdom',
+    address: '48 Sample Road, Bristol BS6 6DR, United Kingdom',
   },
   role: {
     title: 'Senior Platform Engineer',

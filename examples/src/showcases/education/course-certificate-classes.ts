@@ -65,19 +65,19 @@ export interface CertificateData {
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleCertificate: CertificateData = {
-  institution: { name: 'Westbrook Institute', department: 'School of Applied Computing' },
+  institution: { name: 'Sample Institute', department: 'School of Applied Computing' },
   recipient: 'Sample Recipient',
   course: { title: 'Accessible Document Engineering', creditHours: 45, grade: 'Distinction' },
   award: {
     statement: 'has successfully completed the programme of study and assessment in',
     awarded: '30 August 2026',
-    certificateId: 'WI-ADE-2026-04188',
+    certificateId: 'SI-ADE-2026-04188',
   },
   signatories: [
     { name: 'Sample Registrar', role: 'Registrar' },
     { name: 'Sample Programme Lead', role: 'Programme Lead' },
   ],
-  verificationUrl: 'https://example.com/verify/WI-ADE-2026-04188',
+  verificationUrl: 'https://example.com/verify/SI-ADE-2026-04188',
   locale: 'en-GB',
 };
 

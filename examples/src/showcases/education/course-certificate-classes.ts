@@ -269,30 +269,49 @@ function citation(data: CertificateData): VerticalStack {
   return stack;
 }
 
-function attestation(data: CertificateData): HorizontalStack {
+/**
+ * Signatures and verification, kept as two separate concerns rather than one
+ * crowded row: the two signatories read as a centred pair — the shape a
+ * certificate is signed in — and the verification code sits in its own
+ * bottom-right corner as a checkable detail, not a third column competing
+ * with the people who signed.
+ */
+function attestation(data: CertificateData): VerticalStack {
+  const [registrar, programmeLead] = data.signatories;
+  const signatures = new HorizontalStack();
+  signatures.widthDistribution = WidthDistribution.Weighted;
+  signatures.spacing = 56;
+  signatures.margin = new Thickness(0, 74, 0, 26);
+  signatures.add(new Spacer(1), 1);
+  signatures.add(signatureColumn(registrar.name, registrar.role), 1.3);
+  signatures.add(signatureColumn(programmeLead.name, programmeLead.role), 1.3);
+  signatures.add(new Spacer(1), 1);
+
   const qr = new QRCode();
   qr.data = data.verificationUrl;
-  qr.size = 52;
+  qr.size = 42;
   qr.foregroundColor = INK;
   qr.altText = `Verification code linking to ${data.verificationUrl}`;
 
   const verification = new VerticalStack();
   verification.spacing = 3;
-  verification.margin = new Thickness(0, 16, 0, 0);
   verification.add(qr);
-  verification.add(caption('Verify online', 7));
-  verification.add(caption(data.award.certificateId, 7, FAINT));
+  verification.add(caption('Verify online', 6.5));
+  verification.add(caption(data.award.certificateId, 6.5, FAINT));
 
-  const [registrar, programmeLead] = data.signatories;
-  const detailsRow = new HorizontalStack();
-  detailsRow.widthDistribution = WidthDistribution.Weighted;
-  detailsRow.spacing = 32;
-  detailsRow.margin = new Thickness(0, 74, 0, 0);
-  detailsRow.add(signatureColumn(registrar.name, registrar.role), 1);
-  detailsRow.add(signatureColumn(programmeLead.name, programmeLead.role), 1);
-  detailsRow.add(verification, 0.5);
+  // The trailing spacer is deliberate, not decorative: the certificate ID
+  // caption is wider than the QR code, and without room held clear on the
+  // right the wider caption pokes past the frame's inner rule.
+  const verificationRow = new HorizontalStack();
+  verificationRow.widthDistribution = WidthDistribution.Weighted;
+  verificationRow.add(new Spacer(1), 1);
+  verificationRow.add(verification, 0.1);
+  verificationRow.add(new Spacer(1), 0.04);
 
-  return detailsRow;
+  const stack = new VerticalStack();
+  stack.add(signatures);
+  stack.add(verificationRow);
+  return stack;
 }
 
 // ── buildDocument: pure data → Document ──────────────────────────────────────

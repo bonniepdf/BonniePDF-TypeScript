@@ -274,34 +274,47 @@ function citation(data: CertificateData): VerticalStack {
   });
 }
 
-/** A balanced signature and verification row. */
-function attestation(data: CertificateData): HorizontalStack {
+/**
+ * Signatures and verification, kept as two separate concerns rather than one
+ * crowded row: the two signatories read as a centred pair — the shape a
+ * certificate is signed in — and the verification code sits in its own
+ * bottom-right corner as a checkable detail, not a third column competing
+ * with the people who signed.
+ */
+function attestation(data: CertificateData): VerticalStack {
+  const [registrar, programmeLead] = data.signatories;
+  const signatures = new HorizontalStack({
+    widthDistribution: 'weighted',
+    spacing: 56,
+    margin: { top: 74, bottom: 26 },
+  });
+  signatures.add(new Spacer(1), 1);
+  signatures.add(signatureColumn(registrar.name, registrar.role), 1.3);
+  signatures.add(signatureColumn(programmeLead.name, programmeLead.role), 1.3);
+  signatures.add(new Spacer(1), 1);
+
   const verification = new VerticalStack({
     spacing: 3,
-    margin: { top: 16 },
     children: [
       new QRCode({
         data: data.verificationUrl,
-        size: 52,
+        size: 42,
         foregroundColor: INK,
         altText: `Verification code linking to ${data.verificationUrl}`,
       }),
-      new TextBlock('Verify online', { ...caption, fontSize: 7 }),
-      new TextBlock(data.award.certificateId, { ...caption, fontSize: 7, textColor: FAINT }),
+      new TextBlock('Verify online', { ...caption, fontSize: 6.5 }),
+      new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, textColor: FAINT }),
     ],
   });
+  // The trailing spacer is deliberate, not decorative: the certificate ID
+  // caption is wider than the QR code, and without room held clear on the
+  // right the wider caption pokes past the frame's inner rule.
+  const verificationRow = new HorizontalStack({ widthDistribution: 'weighted' });
+  verificationRow.add(new Spacer(1), 1);
+  verificationRow.add(verification, 0.1);
+  verificationRow.add(new Spacer(1), 0.04);
 
-  const [registrar, programmeLead] = data.signatories;
-  const detailsRow = new HorizontalStack({
-    widthDistribution: 'weighted',
-    spacing: 32,
-    margin: { top: 74 },
-  });
-  detailsRow.add(signatureColumn(registrar.name, registrar.role), 1);
-  detailsRow.add(signatureColumn(programmeLead.name, programmeLead.role), 1);
-  detailsRow.add(verification, 0.5);
-
-  return detailsRow;
+  return new VerticalStack({ children: [signatures, verificationRow] });
 }
 
 // ── buildDocument: pure data → Document ──────────────────────────────────────

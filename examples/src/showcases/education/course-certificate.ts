@@ -9,8 +9,8 @@
 //   - `Layers` puts a drawn ornamental frame behind the wording, so the border
 //     and the content are independent — the frame does not have to be sliced up
 //     and interleaved with the text to sit behind it;
-//   - `sealMedallion` draws a rosette with overlapping circles and radiating
-//     points on a canvas, rather than shipping a bitmap of one;
+//   - `sealMedallion` draws a compact monogram crest from circles and lozenges
+//     on a canvas, rather than shipping a bitmap of one;
 //   - a verification QR code makes the certificate checkable, which is what
 //     separates a credential from a decoration;
 //   - landscape orientation and centred composition throughout.
@@ -45,7 +45,7 @@ const FAINT = ColorPalette.slate[400];
 const ACCENT = ColorPalette.indigo[700];
 const ACCENT_MID = ColorPalette.indigo[400];
 const ACCENT_SOFT = ColorPalette.indigo[100];
-const GOLD = ColorPalette.amber[500];
+const GOLD = ColorPalette.amber[600];
 
 const SERIF_BOLD = StandardFonts.TimesBold;
 const SERIF_ITALIC = StandardFonts.TimesItalic;
@@ -68,7 +68,7 @@ export interface CertificateData {
   recipient: string;
   course: { title: string; creditHours: number; grade: string };
   award: { statement: string; awarded: string; certificateId: string };
-  signatories: { name: string; role: string }[];
+  signatories: [{ name: string; role: string }, { name: string; role: string }];
   /** Where a holder can check this certificate is genuine. */
   verificationUrl: string;
   locale: string;
@@ -136,45 +136,65 @@ function ornamentalFrame(): CanvasElement {
 }
 
 /**
- * The seal: concentric rings with a ring of radiating points between them, then
- * the grade struck across the middle. Drawn rather than embedded so it scales
- * cleanly and carries no bitmap payload.
+ * The crest: a restrained circular monogram with four small gold lozenges.
+ * Drawn rather than embedded so it scales cleanly and carries no bitmap payload.
  */
-function sealMedallion(grade: string): CanvasElement {
+function sealMedallion(institutionName: string): CanvasElement {
   return new CanvasElement(
     (canvas, size) => {
       const cx = size.width / 2;
       const cy = size.height / 2;
-      const outer = Math.min(cx, cy) - 1;
+      const outer = Math.min(cx, cy) - 6;
       const gold = GOLD;
       const soft = ACCENT_SOFT;
       const deep = ACCENT;
 
-      // Radiating points, drawn first so the discs above cover their roots.
-      const points = 16;
-      for (let i = 0; i < points; i++) {
-        const a = (i / points) * Math.PI * 2;
-        const half = Math.PI / points;
+      // Four restrained lozenges give the crest a ceremonial detail without
+      // the visual noise of a full starburst.
+      for (const a of [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2]) {
+        const distance = outer + 3.5;
+        const px = cx + Math.cos(a) * distance;
+        const py = cy + Math.sin(a) * distance;
+        const tangentX = Math.cos(a + Math.PI / 2) * 2.5;
+        const tangentY = Math.sin(a + Math.PI / 2) * 2.5;
+        const radialX = Math.cos(a) * 3.5;
+        const radialY = Math.sin(a) * 3.5;
         canvas.fillPath(
           [
-            { x: cx + Math.cos(a) * outer, y: cy + Math.sin(a) * outer },
-            { x: cx + Math.cos(a + half) * (outer * 0.72), y: cy + Math.sin(a + half) * (outer * 0.72) },
-            { x: cx + Math.cos(a - half) * (outer * 0.72), y: cy + Math.sin(a - half) * (outer * 0.72) },
+            { x: px + radialX, y: py + radialY },
+            { x: px + tangentX, y: py + tangentY },
+            { x: px - radialX, y: py - radialY },
+            { x: px - tangentX, y: py - tangentY },
           ],
           gold
         );
       }
 
-      canvas.fillCircle(cx, cy, outer * 0.74, soft);
-      canvas.fillCircle(cx, cy, outer * 0.66, Color.white);
+      canvas.fillCircle(cx, cy, outer, deep);
+      canvas.fillCircle(cx, cy, outer - 1.5, Color.white);
+      canvas.fillCircle(cx, cy, outer - 4.5, soft);
 
-      const label = grade.toUpperCase();
-      const fontSize = 7.5;
-      const width = canvas.measureText(label, fontSize, SERIF_BOLD).width;
-      canvas.drawText(cx - width / 2, cy + fontSize / 3, label, deep, fontSize, SERIF_BOLD, 0);
+      const monogram = institutionName
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(word => word[0])
+        .join('')
+        .toUpperCase();
+      const fontSize = 13;
+      const width = canvas.measureText(monogram, fontSize, SERIF_BOLD).width;
+      canvas.drawText(cx - width / 2, cy - fontSize / 2, monogram, deep, fontSize, SERIF_BOLD, 0);
     },
-    { drawWidth: 74, drawHeight: 74, isDecorative: true }
+    { drawWidth: 52, drawHeight: 52, isDecorative: true }
   );
+}
+
+function institutionCrest(name: string): HorizontalStack {
+  const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 7 } });
+  row.add(new Spacer(1), 1);
+  row.add(new Container({ child: sealMedallion(name) }), 0.15);
+  row.add(new Spacer(1), 1);
+  return row;
 }
 
 // ── Section builders ─────────────────────────────────────────────────────────
@@ -196,6 +216,7 @@ function signatureColumn(name: string, role: string): VerticalStack {
 function citation(data: CertificateData): VerticalStack {
   return new VerticalStack({
     children: [
+      institutionCrest(data.institution.name),
       new TextBlock(data.institution.name.toUpperCase(), {
         fontName: SANS,
         fontSize: 9,
@@ -253,20 +274,11 @@ function citation(data: CertificateData): VerticalStack {
   });
 }
 
-/** Seal on the left, signatures in the middle, verification code on the right. */
+/** A balanced signature and verification row. */
 function attestation(data: CertificateData): HorizontalStack {
-  const seal = new Container({
-    child: sealMedallion(data.course.grade),
-    margin: { top: 6 },
-  });
-
-  const signatures = new HorizontalStack({ widthDistribution: 'weighted', spacing: 28 });
-  for (const signatory of data.signatories) {
-    signatures.add(signatureColumn(signatory.name, signatory.role), 1);
-  }
-
   const verification = new VerticalStack({
     spacing: 3,
+    margin: { top: 16 },
     children: [
       new QRCode({
         data: data.verificationUrl,
@@ -279,11 +291,17 @@ function attestation(data: CertificateData): HorizontalStack {
     ],
   });
 
-  const row = new HorizontalStack({ widthDistribution: 'weighted', spacing: 24, margin: { top: 74 } });
-  row.add(seal, 0.9);
-  row.add(signatures, 2.4);
-  row.add(verification, 0.9);
-  return row;
+  const [registrar, programmeLead] = data.signatories;
+  const detailsRow = new HorizontalStack({
+    widthDistribution: 'weighted',
+    spacing: 32,
+    margin: { top: 74 },
+  });
+  detailsRow.add(signatureColumn(registrar.name, registrar.role), 1);
+  detailsRow.add(signatureColumn(programmeLead.name, programmeLead.role), 1);
+  detailsRow.add(verification, 0.5);
+
+  return detailsRow;
 }
 
 // ── buildDocument: pure data → Document ──────────────────────────────────────
@@ -317,7 +335,7 @@ export function buildDocument(
   // as the primary layer, which is also what sets the block's flow height.
   // A leading spacer settles the wording into the frame rather than letting it
   // start hard against the top rule; the frame's fixed height does the rest.
-  const body = new VerticalStack({ children: [new Spacer(46), citation(data), attestation(data)] });
+  const body = new VerticalStack({ children: [new Spacer(14), citation(data), attestation(data)] });
 
   const framed = new Layers();
   framed.addBackground(ornamentalFrame());

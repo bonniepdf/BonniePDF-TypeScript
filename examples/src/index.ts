@@ -2436,8 +2436,8 @@ export const examples: ExampleDef[] = [
     category: 'Education',
     tier: 'showcase',
     description:
-      'A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a rosette ' +
-      'seal built from paths rather than a bitmap, centred serif typography, and a verification code that makes ' +
+      'A landscape course completion certificate: a drawn ornamental frame layered behind the wording, a compact ' +
+      'monogram crest built from vectors, centred serif typography, and a verification code that makes ' +
       'the credential checkable. Decorative artwork is kept out of the reading order. PDF/A-2a + PDF/UA-1.',
     filename: 'course-certificate.pdf',
     generate: courseCertificate,

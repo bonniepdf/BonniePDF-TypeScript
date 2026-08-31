@@ -76,15 +76,15 @@ export interface UtilityBillData {
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleUtilityBill: UtilityBillData = {
   supplier: {
-    name: 'Westbrook Energy',
+    name: 'Sample Energy',
     address: 'PO Box 4120, Cardiff CF10 3RT',
     phone: '0800 000 0000',
     regulator: 'Supply licence held with the energy regulator',
   },
   customer: {
     name: 'Sample Customer',
-    address: '48 Cotham Road, Bristol BS6 6DR',
-    accountNumber: 'WE-8842-01773',
+    address: '48 Sample Road, Bristol BS6 6DR',
+    accountNumber: 'SE-8842-01773',
   },
   period: { from: '1 May 2026', to: '31 July 2026', issued: '5 August 2026', dueBy: '19 August 2026' },
   charges: [
@@ -123,7 +123,7 @@ export const sampleUtilityBill: UtilityBillData = {
     { month: 'Jun', units: 798 },
     { month: 'Jul', units: 810 },
   ],
-  payment: { reference: 'WE884201773', sortCode: '20-00-00', accountNumber: '41827734' },
+  payment: { reference: 'SE884201773', sortCode: '20-00-00', accountNumber: '41827734' },
   locale: 'en-GB',
   currency: 'GBP',
 };

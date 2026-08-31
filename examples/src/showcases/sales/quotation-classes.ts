@@ -86,15 +86,15 @@ export interface QuotationData {
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleQuotation: QuotationData = {
   supplier: {
-    name: 'Northwind Document Systems Ltd',
+    name: 'Sample Company Ltd',
     address: '12 Harbour Square, Bristol BS1 4QA, United Kingdom',
     email: 'proposals@example.com',
     registration: 'Company No. 09876543 · VAT GB 123 4567 89',
   },
   customer: {
-    company: 'Meridian Logistics plc',
+    company: 'Sample Customer Ltd',
     contact: 'Sample Recipient, Head of Platform',
-    address: 'Ashford Distribution Park, Kent TN23 7HL',
+    address: 'Sample Business Park, Kent TN23 7HL',
   },
   reference: {
     quoteNumber: 'QTE-2026-0417',

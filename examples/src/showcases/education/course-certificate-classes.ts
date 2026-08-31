@@ -41,7 +41,7 @@ const FAINT = ColorPalette.slate[400];
 const ACCENT = ColorPalette.indigo[700];
 const ACCENT_MID = ColorPalette.indigo[400];
 const ACCENT_SOFT = ColorPalette.indigo[100];
-const GOLD = ColorPalette.amber[500];
+const GOLD = ColorPalette.amber[600];
 
 const SERIF_BOLD = StandardFonts.TimesBold;
 const SERIF_ITALIC = StandardFonts.TimesItalic;
@@ -57,7 +57,7 @@ export interface CertificateData {
   recipient: string;
   course: { title: string; creditHours: number; grade: string };
   award: { statement: string; awarded: string; certificateId: string };
-  signatories: { name: string; role: string }[];
+  signatories: [{ name: string; role: string }, { name: string; role: string }];
   verificationUrl: string;
   locale: string;
 }
@@ -139,38 +139,63 @@ function ornamentalFrame(): CanvasElement {
   return element;
 }
 
-function sealMedallion(grade: string): CanvasElement {
+function sealMedallion(institutionName: string): CanvasElement {
   const element = new CanvasElement((canvas, size) => {
     const cx = size.width / 2;
     const cy = size.height / 2;
-    const outer = Math.min(cx, cy) - 1;
+    const outer = Math.min(cx, cy) - 6;
 
-    const points = 16;
-    for (let i = 0; i < points; i++) {
-      const a = (i / points) * Math.PI * 2;
-      const half = Math.PI / points;
+    for (const a of [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2]) {
+      const distance = outer + 3.5;
+      const px = cx + Math.cos(a) * distance;
+      const py = cy + Math.sin(a) * distance;
+      const tangentX = Math.cos(a + Math.PI / 2) * 2.5;
+      const tangentY = Math.sin(a + Math.PI / 2) * 2.5;
+      const radialX = Math.cos(a) * 3.5;
+      const radialY = Math.sin(a) * 3.5;
       canvas.fillPath(
         [
-          { x: cx + Math.cos(a) * outer, y: cy + Math.sin(a) * outer },
-          { x: cx + Math.cos(a + half) * (outer * 0.72), y: cy + Math.sin(a + half) * (outer * 0.72) },
-          { x: cx + Math.cos(a - half) * (outer * 0.72), y: cy + Math.sin(a - half) * (outer * 0.72) },
+          { x: px + radialX, y: py + radialY },
+          { x: px + tangentX, y: py + tangentY },
+          { x: px - radialX, y: py - radialY },
+          { x: px - tangentX, y: py - tangentY },
         ],
         GOLD
       );
     }
 
-    canvas.fillCircle(cx, cy, outer * 0.74, ACCENT_SOFT);
-    canvas.fillCircle(cx, cy, outer * 0.66, Color.white);
+    canvas.fillCircle(cx, cy, outer, ACCENT);
+    canvas.fillCircle(cx, cy, outer - 1.5, Color.white);
+    canvas.fillCircle(cx, cy, outer - 4.5, ACCENT_SOFT);
 
-    const label = grade.toUpperCase();
-    const fontSize = 7.5;
-    const width = canvas.measureText(label, fontSize, SERIF_BOLD).width;
-    canvas.drawText(cx - width / 2, cy + fontSize / 3, label, ACCENT, fontSize, SERIF_BOLD, 0);
+    const monogram = institutionName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+    const fontSize = 13;
+    const width = canvas.measureText(monogram, fontSize, SERIF_BOLD).width;
+    canvas.drawText(cx - width / 2, cy - fontSize / 2, monogram, ACCENT, fontSize, SERIF_BOLD, 0);
   });
-  element.drawWidth = 74;
-  element.drawHeight = 74;
+  element.drawWidth = 52;
+  element.drawHeight = 52;
   element.isDecorative = true;
   return element;
+}
+
+function institutionCrest(name: string): HorizontalStack {
+  const crest = new Container();
+  crest.child = sealMedallion(name);
+
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 0, 0, 7);
+  row.add(new Spacer(1), 1);
+  row.add(crest, 0.15);
+  row.add(new Spacer(1), 1);
+  return row;
 }
 
 // ── Section builders ─────────────────────────────────────────────────────────
@@ -191,6 +216,8 @@ function signatureColumn(name: string, role: string): VerticalStack {
 
 function citation(data: CertificateData): VerticalStack {
   const stack = new VerticalStack();
+
+  stack.add(institutionCrest(data.institution.name));
 
   stack.add(
     text(data.institution.name.toUpperCase(), { font: SANS, size: 9, color: ACCENT, align: TextAlignment.Center })
@@ -243,17 +270,6 @@ function citation(data: CertificateData): VerticalStack {
 }
 
 function attestation(data: CertificateData): HorizontalStack {
-  const seal = new Container();
-  seal.child = sealMedallion(data.course.grade);
-  seal.margin = new Thickness(0, 6, 0, 0);
-
-  const signatures = new HorizontalStack();
-  signatures.widthDistribution = WidthDistribution.Weighted;
-  signatures.spacing = 28;
-  for (const signatory of data.signatories) {
-    signatures.add(signatureColumn(signatory.name, signatory.role), 1);
-  }
-
   const qr = new QRCode();
   qr.data = data.verificationUrl;
   qr.size = 52;
@@ -262,18 +278,21 @@ function attestation(data: CertificateData): HorizontalStack {
 
   const verification = new VerticalStack();
   verification.spacing = 3;
+  verification.margin = new Thickness(0, 16, 0, 0);
   verification.add(qr);
   verification.add(caption('Verify online', 7));
   verification.add(caption(data.award.certificateId, 7, FAINT));
 
-  const row = new HorizontalStack();
-  row.widthDistribution = WidthDistribution.Weighted;
-  row.spacing = 24;
-  row.margin = new Thickness(0, 74, 0, 0);
-  row.add(seal, 0.9);
-  row.add(signatures, 2.4);
-  row.add(verification, 0.9);
-  return row;
+  const [registrar, programmeLead] = data.signatories;
+  const detailsRow = new HorizontalStack();
+  detailsRow.widthDistribution = WidthDistribution.Weighted;
+  detailsRow.spacing = 32;
+  detailsRow.margin = new Thickness(0, 74, 0, 0);
+  detailsRow.add(signatureColumn(registrar.name, registrar.role), 1);
+  detailsRow.add(signatureColumn(programmeLead.name, programmeLead.role), 1);
+  detailsRow.add(verification, 0.5);
+
+  return detailsRow;
 }
 
 // ── buildDocument: pure data → Document ──────────────────────────────────────
@@ -307,7 +326,7 @@ export function buildDocument(
   );
 
   const body = new VerticalStack();
-  body.add(new Spacer(46));
+  body.add(new Spacer(14));
   body.add(citation(data));
   body.add(attestation(data));
 

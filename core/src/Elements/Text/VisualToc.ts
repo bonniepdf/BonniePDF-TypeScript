@@ -3,7 +3,7 @@ import { applyOptions } from '../../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { ElementBase } from '../ElementBase';
-import { IStatefulElement } from '../IElement';
+import { IElement, IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import type { RegisteredLink } from '../../Rendering/RegisteredLink';
@@ -13,6 +13,7 @@ import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 
 /**
  * Renders a visual Table of Contents with dotted leaders and right-aligned page numbers,
@@ -233,7 +234,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     // the identifier was never resolved (single-pass / missing heading).
     const resolvedPageNumber = ctx.tocEntries.get(identifier);
     const targetPage = resolvedPageNumber != null ? resolvedPageNumber - 1 : 0;
-    const link: RegisteredLink = {
+    const link: RegisteredLink & { semanticRole: SemanticRole } = {
       identifier,
       // Mirror the visible entry text into the annotation /Contents (PDF/UA 7-18),
       // matching the .NET TOC link which is a Hyperlink(identifier).
@@ -243,6 +244,14 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
       renderY: pdfY,
       renderWidth: contentWidth,
       renderHeight: lineHeight,
+      // Declared so beginChildTag (below) recognises this as a Link-role
+      // element via isRoleProvider and wires linkedStructElement onto it,
+      // exactly as it would for a real Hyperlink instance. Must be present
+      // as an actual key (not just typed optional) - beginChildTag checks
+      // `'linkedStructElement' in child`, which is false for a key that was
+      // never assigned, even as undefined.
+      semanticRole: SemanticRole.Link,
+      linkedStructElement: undefined,
       setRenderBounds(rx: number, ry: number, rw: number, rh: number) {
         this.renderX = rx;
         this.renderY = ry;
@@ -259,7 +268,19 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
         );
       },
     };
-    ctx.registerHyperlink(link);
+
+    // Unlike a Hyperlink added as a document child, this one is a plain
+    // RegisteredLink built and registered directly rather than going through
+    // Hyperlink.render(), so it never passes through the pipeline's
+    // per-element beginChildTag/endChildTag wrap that assigns
+    // linkedStructElement (PDF/UA 14.8.4.4.2 requires every Link annotation
+    // to be tagged). Open/close that wrap explicitly here. Mirrors VisualToc.cs.
+    const token = beginChildTag(ctx, link as unknown as IElement);
+    try {
+      ctx.registerHyperlink(link);
+    } finally {
+      endChildTag(ctx, token);
+    }
   }
 
   /**

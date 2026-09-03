@@ -68,7 +68,6 @@ The suite is on strict TypeScript — do not loosen `tsconfig` to land a change.
 TypeScript 7 native compiler this repo builds with. That is a known upstream
 issue, not something your pull request needs to fix.
 
-
 ## Parity is the contract
 
 BonniePDF has two co-equal implementations, TypeScript and .NET, both conforming
@@ -77,8 +76,8 @@ specification and the shared conformance fixtures first, then in both
 implementations. A pull request that changes behaviour in one language only is a
 parity break and will not be merged on its own.
 
-Differences in *spelling* between the two languages are expected and correct:
-each surface is idiomatic to its language. Differences in *behaviour* are bugs.
+Differences in _spelling_ between the two languages are expected and correct:
+each surface is idiomatic to its language. Differences in _behaviour_ are bugs.
 See `AGENTS.md` for how to classify one before acting on it.
 
 ## Code of conduct

@@ -29,6 +29,7 @@ const CONTAINER_ROLE_TAGS = new Set([
   'LI',
 ]);
 
+/** Describes an external object whose content is written after page rendering. */
 export class DeferredXObjectInfo {
   public resourceName!: string;
   public fontIdentifier!: string;
@@ -39,6 +40,7 @@ export class DeferredXObjectInfo {
 
 // `implements` the structural contract elements program against
 // (Elements/IElement.ts) so any drift between the two is a compile error.
+/** Carries page, canvas, resource, navigation, tagging, and cursor state through layout. */
 export class RenderContext implements RenderContextContract {
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];

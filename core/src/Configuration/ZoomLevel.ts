@@ -1,6 +1,4 @@
-/**
- * Defines the default zoom level when a PDF is opened
- */
+/** Defines the initial magnification used when a PDF is opened. */
 export class ZoomLevel {
   /**
    * Fit the entire page within the window

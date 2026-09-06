@@ -34,6 +34,7 @@ export type VisualTocOptions = ElementOptions &
     textColor?: ColorInput;
   };
 
+/** Renders a table of contents from headings collected during document layout. */
 export class VisualToc extends ElementBase implements IStatefulElement, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {

@@ -52,6 +52,7 @@ export type QRCodeOptions = ElementOptions &
     errorCorrection?: QrEccInput;
   };
 
+/** Renders text or binary data as a vector QR Code symbol. */
 export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The data/text to encode in the QR Code. */
   /** Creates a QR code, optionally configured in one expression. */

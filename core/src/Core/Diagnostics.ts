@@ -22,10 +22,10 @@ export interface IDiagnostic {
 }
 
 /**
- * Collects diagnostics during PDF generation. The Document owns one instance
- * for the lifetime of a `generateBytes*()` call; subsystems push diagnostics
- * into it instead of calling `console.warn` directly so the library never
- * writes to a global sink the caller did not opt into.
+ * Collects diagnostics during PDF generation. The Document owns one instance for
+ * the lifetime of a `generateBytes*()` call; subsystems push diagnostics into it
+ * instead of calling `console.warn` directly, so the library never writes to a
+ * global sink the caller did not opt into.
  */
 export class DiagnosticsCollector {
   private readonly entries: IDiagnostic[] = [];

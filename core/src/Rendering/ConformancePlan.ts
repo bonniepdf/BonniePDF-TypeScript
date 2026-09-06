@@ -12,13 +12,12 @@ interface PdfAResourceAudit {
 }
 
 /**
- * Centralizes standards-related serialization decisions so the PDF writer can
- * grow PDF 2.0 / PDF/A-4 / PDF/UA-2 support without scattering conformance
- * branching through {@link PdfDocumentSerializer}.
+ * Centralizes PDF version and conformance decisions used during serialization,
+ * so {@link PdfDocumentSerializer} can grow PDF 2.0 / PDF/A-4 / PDF/UA-2
+ * support without scattering conformance branching through the writer.
  *
- * The current implementation deliberately preserves the existing PDF 1.7
- * behaviour: PDF/A claims are requests that may be suppressed by the this feature font
- * guard, and PDF/UA tagging is emitted only for PDF/UA-1 on PDF 1.7.
+ * PDF/A claims are requests that the unembedded-standard-font guard may
+ * suppress, and PDF/UA tagging is emitted only for PDF/UA-1 on PDF 1.7.
  */
 export class ConformancePlan {
   public readonly requestedPdfA: PdfAConformance;

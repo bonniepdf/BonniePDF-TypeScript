@@ -1,9 +1,7 @@
 import { TtfFont } from './TrueType/TtfFont';
 import { GlyphUsageTracker } from './GlyphUsageTracker';
 
-/**
- * Contains all information about an embedded TrueType font
- */
+/** Contains the objects, metrics, and mappings needed to write an embedded TrueType font. */
 export class EmbeddedFontInfo {
   /**
    * The parsed TrueType font. `null` until the font bytes have been loaded

@@ -1,6 +1,4 @@
-/**
- * Defines how the PDF document should be displayed when opened
- */
+/** Defines how a PDF viewer initially presents the document. */
 export class PageModeEnum {
   /**
    * Neither document outline nor thumbnail images visible

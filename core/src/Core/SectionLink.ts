@@ -25,6 +25,7 @@ export const SECTION_LINK_OPTION_KEYS = [...HYPERLINK_OPTION_KEYS, 'anchorTarget
 /** Options for {@link SectionLink}. Intersects {@link HyperlinkOptions}. */
 export type SectionLinkOptions = HyperlinkOptions & Partial<Pick<SectionLink, 'anchorTarget'>>;
 
+/** Renders linked text that navigates to a named section in the document. */
 export class SectionLink extends Hyperlink {
   /** The anchor id this link jumps to (a {@link Section} or anchored {@link Heading}). */
   public anchorTarget: string;

@@ -33,6 +33,7 @@ export type LollipopChartOptions = CartesianChartOptions &
     lollipopColor?: ColorInput;
   };
 
+/** Renders each data value as a marker connected to its baseline by a stem. */
 export class LollipopChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_HEAD_RADIUS_VALUE = 8;

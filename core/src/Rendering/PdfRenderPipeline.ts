@@ -20,6 +20,7 @@ function isStatefulElement(element: IElement): element is IStatefulElement {
   return typeof (element as Partial<IStatefulElement>).renderStateful === 'function';
 }
 
+/** Measures, paginates, and renders document elements into PDF page content streams. */
 export class PdfRenderPipeline {
   public static renderPages(pages: readonly Page[], settings: DocumentSettings): PdfRenderResult {
     if (!pages || pages.length === 0) {

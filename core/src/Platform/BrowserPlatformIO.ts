@@ -1,17 +1,11 @@
-import { IPlatformIO } from './PlatformIO';
+import { deflateWithCompressionStream, IPlatformIO } from './PlatformIO';
 
 /**
- * Browser platform I/O implementation.
- * Uses the Fetch API to load files by URL and CompressionStream for DEFLATE.
+ * Provides URL-based file reads and DEFLATE compression in browser environments,
+ * using the Fetch API and `CompressionStream`.
  *
- * Usage:
- *   import { configurePlatform } from './Platform/PlatformIO';
- *   import { BrowserPlatformIO } from './Platform/BrowserPlatformIO';
- *   configurePlatform(new BrowserPlatformIO());
- *
- * Font loading:
- *   Pass a URL (relative or absolute) to TtfFont.fromFile() - the font
- *   bytes are fetched via the Fetch API and parsed in-memory.
+ * Font loading: pass a URL (relative or absolute) to `TtfFont.fromFile()` - the
+ * font bytes are fetched via the Fetch API and parsed in memory.
  */
 export class BrowserPlatformIO implements IPlatformIO {
   async readFile(url: string): Promise<Uint8Array> {
@@ -37,27 +31,6 @@ export class BrowserPlatformIO implements IPlatformIO {
       return data;
     }
 
-    const cs = new CompressionStream('deflate');
-    const writer = cs.writable.getWriter();
-    const reader = cs.readable.getReader();
-
-    const buf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
-    writer.write(buf).then(() => writer.close());
-
-    const chunks: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-
-    const total = chunks.reduce((n, c) => n + c.length, 0);
-    const result = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      result.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return result;
+    return deflateWithCompressionStream(data);
   }
 }

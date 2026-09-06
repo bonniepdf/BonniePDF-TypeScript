@@ -35,6 +35,7 @@ export type TableCellOptions = BorderedElementOptions &
     padding?: ThicknessInput;
   };
 
+/** Contains the content and styling for one table cell. */
 export class TableCell extends BorderedElementBase implements IRoleProvider {
   /** The content element to display in this cell */
   public content!: IElement;

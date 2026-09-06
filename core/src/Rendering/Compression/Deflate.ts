@@ -70,7 +70,7 @@ const CODE_LENGTH_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2
  *
  * Huffman codes are written MSB-first *within* the code while the stream itself
  * is filled LSB-first, which is why `writeHuffman` reverses and `writeBits`
- * does not — a detail that is easy to get backwards and produces a stream that
+ * does not - a detail that is easy to get backwards and produces a stream that
  * inflates to garbage rather than failing loudly.
  */
 class BitWriter {

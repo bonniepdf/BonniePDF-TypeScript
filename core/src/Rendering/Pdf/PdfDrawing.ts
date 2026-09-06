@@ -2,6 +2,7 @@ import { PdfOperators } from './PdfOperators';
 import { Color } from '../../Core/Color';
 import { Point } from '../../Core/Point';
 
+/** Provides higher-level PDF drawing helpers over raw canvas operations. */
 export class PdfDrawing {
   public static fillRect(stream: string[], x: number, y: number, width: number, height: number, color: Color): void {
     PdfOperators.saveState(stream);

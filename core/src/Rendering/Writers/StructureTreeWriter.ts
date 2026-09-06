@@ -10,16 +10,16 @@ import { toPdfTag } from '../Tagging/SemanticRole';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 
 /**
- * Translates the in-memory {@link StructureTreeBuilder} tree into the
- * PDF object graph: one object per structure element, a `/ParentTree`
- * number tree for MCID→StructElem reverse lookup, and a
- * `/StructTreeRoot` dictionary that points to both.
+ * Serializes the in-memory {@link StructureTreeBuilder} tree into the PDF object
+ * graph: one object per structure element, a `/ParentTree` number tree for
+ * MCID-to-StructElem reverse lookup, and a `/StructTreeRoot` dictionary that
+ * points to both.
  *
  * Each StructElem with MCIDs gets either:
- * - `/K [int int …]` + `/Pg <page-ref>` when all its MCIDs are on the
- *   same page (the common case);
- * - `/K [<</Type /MCR /Pg p1 /MCID m1>> …]` when MCIDs span pages
- *   (an element that page-broke after the page-break fix runs).
+ * - `/K [int int ...]` + `/Pg <page-ref>` when all its MCIDs are on the same
+ *   page (the common case);
+ * - `/K [<</Type /MCR /Pg p1 /MCID m1>> ...]` when MCIDs span pages, which
+ *   happens when an element page-breaks.
  */
 export class StructureTreeWriter {
   private readonly _writer?: IPdfWriter;

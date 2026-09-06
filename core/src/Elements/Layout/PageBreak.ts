@@ -12,6 +12,7 @@ export type PageBreakOptions = ElementOptions;
 /** The full settable surface - inherited only. */
 export const PAGE_BREAK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS] as const;
 
+/** Forces subsequent content to begin on a new page. */
 export class PageBreak extends ElementBase {
   private triggered: boolean = false;
 

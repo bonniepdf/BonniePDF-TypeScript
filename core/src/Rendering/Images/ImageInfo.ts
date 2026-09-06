@@ -10,6 +10,7 @@ export enum ImageFormat {
   Png = 'Png',
 }
 
+/** Contains decoded image metadata and the byte streams needed for PDF embedding. */
 export class ImageInfo {
   public data: Uint8Array = new Uint8Array();
   public originalData: Uint8Array = new Uint8Array();

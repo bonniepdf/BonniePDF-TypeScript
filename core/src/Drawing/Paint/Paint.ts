@@ -8,10 +8,12 @@ export interface GradientStop {
   readonly color: Color;
 }
 
+/** Paints an area with a single color. */
 export class SolidPaint {
   constructor(public readonly color: Color) {}
 }
 
+/** Paints an area with colors interpolated along a straight line. */
 export class LinearGradientPaint {
   constructor(
     public readonly start: Point,
@@ -20,6 +22,7 @@ export class LinearGradientPaint {
   ) {}
 }
 
+/** Paints an area with colors interpolated outward from a center point. */
 export class RadialGradientPaint {
   constructor(
     public readonly center: Point,

@@ -1,8 +1,7 @@
 /**
  * Generates a minimal valid sRGB ICC v2 profile for PDF/A-1b compliance.
- * Mirrors the .NET implementation in `BonniePDF/Metadata/SRgbIccProfile.cs`
- * byte-for-byte (same tag set, same colorimetry, same fixed-point
- * math). Required for the /OutputIntent /DestOutputProfile stream
+ * Its deterministic tag set, colorimetry, and fixed-point arithmetic produce
+ * the profile required for the /OutputIntent /DestOutputProfile stream
  * referenced by the compliance writer.
  */
 
@@ -66,6 +65,7 @@ const FixedPointMath = {
   U8Fixed8Multiplier: 256.0,
 } as const;
 
+/** Builds the deterministic sRGB ICC profile used by PDF output intents. */
 export class SRgbIccProfile {
   /** Generates a minimal sRGB ICC v2 profile. */
   public static generate(): Uint8Array {

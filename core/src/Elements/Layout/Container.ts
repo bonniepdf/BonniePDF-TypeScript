@@ -51,6 +51,7 @@ export type ContainerOptions = BorderedElementOptions &
     verticalAlignment?: VerticalAlignmentInput;
   };
 
+/** Wraps one child with optional sizing, alignment, padding, borders, background, and layers. */
 export class Container extends BorderedElementBase implements IContentContainer {
   public child?: IElement;
 

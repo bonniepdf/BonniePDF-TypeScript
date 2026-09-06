@@ -3,9 +3,10 @@ import type { ICanvas } from './ICanvas';
 const K = 0.5522847498;
 
 /**
- * Factory methods that draw common shapes onto a canvas path.
- * Each method adds sub-path commands to the current path on the given canvas
- * (moveTo, lineTo, cubicBezierTo, closePath). The caller is responsible for
+ * Adds common geometric shapes to the current canvas path.
+ *
+ * Each method appends sub-path commands (moveTo, lineTo, cubicBezierTo,
+ * closePath) to the given canvas's current path. The caller is responsible for
  * calling beginPath() beforehand and fillCurrentPath()/strokeCurrentPath()
  * afterwards.
  */

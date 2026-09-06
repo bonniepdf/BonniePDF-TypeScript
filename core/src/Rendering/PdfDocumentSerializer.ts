@@ -40,6 +40,7 @@ import {
   getRegistryFontPaths,
 } from '../Typography/DocumentFontMetricScope';
 
+/** Coordinates layout and writes a complete PDF document to bytes. */
 export class PdfDocumentSerializer {
   constructor(
     private document: Document,
@@ -453,32 +454,7 @@ export class PdfDocumentSerializer {
     const settings = this.document.settings;
 
     // ── Phase 1: Scan element tree for embedded font paths ───────────────────
-    const embeddedPaths = new Set<string>();
-    const pages = this.document.pages;
-    for (const page of pages) {
-      for (const el of page.getElements()) {
-        collectEmbeddedFonts(el, embeddedPaths);
-      }
-    }
-
-    // Also check header/footer templates (call with page numbers 1 and 2 to
-    // cover even/odd alternating templates).
-    for (const pageNum of [1, 2]) {
-      if (settings.headerTemplate) {
-        const el = settings.headerTemplate(pageNum);
-        if (el) collectEmbeddedFonts(el, embeddedPaths);
-      }
-      if (settings.footerTemplate) {
-        const el = settings.footerTemplate(pageNum);
-        if (el) collectEmbeddedFonts(el, embeddedPaths);
-      }
-    }
-
-    // Watermark font
-    const wmFont = settings.watermark?.fontName;
-    if (wmFont && PdfResourceRegistry.isEmbeddedFont(wmFont)) {
-      embeddedPaths.add(wmFont);
-    }
+    const { embeddedPaths, imagesToDecode } = collectDocumentPreloadResources(this.document);
 
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
@@ -495,22 +471,6 @@ export class PdfDocumentSerializer {
     // need async decode, then prepare them all in parallel via
     // `DecompressionStream`.  After this completes, the sync render pass can
     // read the cached ImageInfo on each Image directly.
-    const imagesToDecode: Image[] = [];
-    for (const page of pages) {
-      for (const el of page.getElements()) {
-        collectImagesNeedingDecode(el, imagesToDecode);
-      }
-    }
-    for (const pageNum of [1, 2]) {
-      if (settings.headerTemplate) {
-        const el = settings.headerTemplate(pageNum);
-        if (el) collectImagesNeedingDecode(el, imagesToDecode);
-      }
-      if (settings.footerTemplate) {
-        const el = settings.footerTemplate(pageNum);
-        if (el) collectImagesNeedingDecode(el, imagesToDecode);
-      }
-    }
     if (imagesToDecode.length > 0) {
       await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
     }
@@ -532,6 +492,36 @@ export class PdfDocumentSerializer {
 }
 
 // ─── Module-level helpers ────────────────────────────────────────────────────
+
+export interface DocumentPreloadResources {
+  embeddedPaths: Set<string>;
+  imagesToDecode: Image[];
+}
+
+/** Collects fonts and images that must be prepared before a document render. */
+export function collectDocumentPreloadResources(document: Document): DocumentPreloadResources {
+  const embeddedPaths = new Set<string>();
+  const imagesToDecode: Image[] = [];
+  const collect = (element: unknown): void => {
+    collectEmbeddedFonts(element, embeddedPaths);
+    collectImagesNeedingDecode(element, imagesToDecode);
+  };
+
+  for (const page of document.pages) {
+    for (const element of page.getElements()) collect(element);
+  }
+
+  // Calling each template with both page parities discovers alternating content.
+  for (const pageNumber of [1, 2]) {
+    collect(document.settings.headerTemplate?.(pageNumber));
+    collect(document.settings.footerTemplate?.(pageNumber));
+  }
+
+  const watermarkFont = document.settings.watermark?.fontName;
+  if (watermarkFont && PdfResourceRegistry.isEmbeddedFont(watermarkFont)) embeddedPaths.add(watermarkFont);
+
+  return { embeddedPaths, imagesToDecode };
+}
 
 /**
  * Returns true if any non-default viewer preferences are configured,

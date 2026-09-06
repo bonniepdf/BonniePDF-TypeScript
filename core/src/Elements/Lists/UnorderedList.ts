@@ -27,6 +27,7 @@ export type UnorderedListOptions = ListElementOptions &
     items?: string[];
   };
 
+/** Renders a sequence of items with bullet markers. */
 export class UnorderedList extends ListElementBase {
   private readonly items: string[] = [];
 
@@ -86,15 +87,7 @@ export class UnorderedList extends ListElementBase {
   }
 
   protected override measureContentHeight(contentWidth: number): number {
-    const itemWidth = contentWidth - this.indent;
-    let totalHeight = this.measureItemsHeight(this.items, itemWidth);
-
-    // Measure nested lists
-    for (const nestedList of this.nestedLists) {
-      totalHeight += nestedList.measureHeight(contentWidth - this.indent) + this.itemSpacing;
-    }
-
-    return totalHeight;
+    return this.measureListHeight(this.items, this.nestedLists, contentWidth);
   }
 
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
@@ -117,16 +110,7 @@ export class UnorderedList extends ListElementBase {
       );
     }
 
-    // Render nested lists
-    for (const nestedList of this.nestedLists) {
-      const originalX = ctx.currentX;
-      ctx.currentX += this.indent;
-
-      nestedList.render(ctx, contentWidth - this.indent);
-
-      ctx.currentX = originalX;
-      ctx.currentY += this.itemSpacing;
-    }
+    this.renderNestedLists(ctx, this.nestedLists, contentWidth);
   }
 
   private getBulletCharacter(): string {

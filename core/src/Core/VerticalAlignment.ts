@@ -1,10 +1,10 @@
 /**
- * Vertical alignment options for layout elements.
+ * Defines vertical alignment within an available layout region.
  *
  * The counterpart to {@link HorizontalAlignment}. Meaningful on a container that
  * has more vertical room than its child needs - typically one given an explicit
- * `height` - which is what makes it possible to anchor content to the bottom of a
- * fixed box without hand-computing a top padding.
+ * `height` - which is what makes it possible to anchor content to the bottom of
+ * a fixed box without hand-computing a top padding.
  */
 export class VerticalAlignment {
   /**

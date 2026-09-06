@@ -8,6 +8,7 @@ export const CHART_DATA_POINT_OPTION_KEYS = ['label', 'value', 'labelFormat'] as
 /** Options for {@link ChartDataPoint}. */
 export type ChartDataPointOptions = Partial<Pick<ChartDataPoint, (typeof CHART_DATA_POINT_OPTION_KEYS)[number]>>;
 
+/** Represents one named numeric value in a chart series. */
 export class ChartDataPoint {
   /** Creates a data point, optionally configured in one expression. */
   constructor(options?: ChartDataPointOptions) {

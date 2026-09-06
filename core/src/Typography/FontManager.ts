@@ -90,6 +90,7 @@ export interface FontRegistrationOptions {
   identifier?: string;
 }
 
+/** Registers font bytes and resolves font families, weights, fallbacks, and bundled substitutes. */
 export class FontManager {
   // Keys: `${family.toLowerCase()}:${normalizedWeight}`
   private static readonly registry = new Map<string, FontEntry>();

@@ -12,6 +12,7 @@ export const SPACER_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...SPACER_OWN_OPTION_
 /** Options for {@link Spacer}. */
 export type SpacerOptions = ElementOptions & Partial<Pick<Spacer, 'height'>>;
 
+/** Reserves a fixed amount of vertical space in the document flow. */
 export class Spacer extends ElementBase {
   public height: number;
 

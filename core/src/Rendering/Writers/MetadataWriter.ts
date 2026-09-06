@@ -87,9 +87,7 @@ export class MetadataWriter {
 
   /**
    * Build the list of conformance-namespace blocks the document claims,
-   * based on `settings`. Currently PDF/A and PDF/UA-1; ZUGFeRD/Factur-X
-   * will register here too once implemented. See the this feature this feature design
-   * note for the additive-hook rationale.
+   * based on `settings`. Each supported standard contributes an additive block.
    */
   private static buildConformanceBlocks(settings: DocumentSettings): XmpConformanceBlock[] {
     const blocks: XmpConformanceBlock[] = [];
@@ -97,7 +95,7 @@ export class MetadataWriter {
     if (pdfA) blocks.push(pdfA);
     if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
 
-    // ZUGFeRD / Factur-X: only claim it on a PDF/A-3 document. Gating on the
+    // ZUGFeRD / Factur-X is only valid on a PDF/A-3 document. Gating on the
     // (possibly guard-reset) conformance means a suppressed PDF/A claim also
     // suppresses the fx block - Factur-X without PDF/A-3 is meaningless, so
     // the honest-claim guard cascades for free.

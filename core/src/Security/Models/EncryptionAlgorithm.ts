@@ -1,3 +1,4 @@
+/** Provides the encryption algorithms supported by document security settings. */
 export class EncryptionAlgorithm {
   static readonly RC4_40 = 'RC4_40' as const;
   static readonly RC4_128 = 'RC4_128' as const;

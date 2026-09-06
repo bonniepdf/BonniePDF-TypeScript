@@ -154,7 +154,7 @@ export class FontMetrics {
     // Prefer a pre-loaded TtfFont instance registered under this exact path -
     // populated by PdfResourceRegistry after async font preloading, or
     // explicitly by `loadFontFromUrl(url)`. Falling through to `getTtfWidth`
-    // uses a stub width table that under-measures supplementary-plane glyphs.
+    // uses an approximate width table that under-measures supplementary-plane glyphs.
     const lowerIdentifier = fontIdentifier.toLowerCase();
     if (lowerIdentifier.endsWith('.ttf') || lowerIdentifier.endsWith('.otf')) {
       const pathInstance = getFontInstanceAlias(fontIdentifier);
@@ -232,7 +232,7 @@ export class FontMetrics {
 
   private static getTtfWidth(text: string, filepath: string, fontSize: number): number {
     // Parse the TTF (once per path) and measure with real per-glyph advances and
-    // kern pairs. This replaces the former stub that returned a flat 500-unit
+    // kern pairs. This replaces the former approximation that returned a flat 500-unit
     // advance for every character, which mis-measured every embedded-by-path font
     // and broke wrapping/alignment. In non-Node contexts (no filesystem) the
     // sync load throws and we fall back to a coarse estimate.

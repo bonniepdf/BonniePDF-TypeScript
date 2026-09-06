@@ -30,6 +30,7 @@ export type GridOptions = TableOptions;
 /** The full settable surface, identical to {@link Table}. */
 export const GRID_OPTION_KEYS = TABLE_OPTION_KEYS;
 
+/** Builds a table from a rectangular collection of cells. */
 export class Grid extends Table {
   /** @inheritdoc — always a layout grid (`Div`), independent of `presentation`. */
   protected override get isLayoutGrid(): boolean {

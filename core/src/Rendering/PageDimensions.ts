@@ -2,6 +2,7 @@ import { PdfSize } from '../Configuration/PdfSize';
 import { RenderContext } from './RenderContext';
 import type { RegisteredLink } from './RegisteredLink';
 
+/** Describes the width and height of a rendered page in points. */
 export class PageDimensions {
   public size: PdfSize;
   public margin: number;
@@ -12,6 +13,7 @@ export class PageDimensions {
   }
 }
 
+/** Contains the content stream and dimensions produced for one rendered page. */
 export class PageRenderOutput {
   public contentStream: string;
   public size: PdfSize;
@@ -24,6 +26,7 @@ export class PageRenderOutput {
   }
 }
 
+/** Contains all rendered pages and the resources collected during layout. */
 export class PdfRenderResult {
   public pageContentStreams: string[] = [];
   public pageDimensions: Map<number, PageDimensions> = new Map();

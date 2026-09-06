@@ -44,6 +44,7 @@ export type HorizontalStackOptions = ElementOptions &
     children?: IElement[];
   };
 
+/** Arranges child elements from left to right with configurable spacing and width distribution. */
 export class HorizontalStack extends ElementBase implements IStatefulElement {
   private readonly _children: IElement[] = [];
   private readonly widths: (number | null)[] = [];
@@ -234,8 +235,8 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       } else if (this.alignment === HorizontalAlignment.End) {
         verticalOffset = maxHeight - childHeight;
       }
-      // Note: Stretch is not implemented for horizontal stack as it would require
-      // modifying the child's height, which is not supported by the IElement interface
+      // Stretch keeps the child's measured height because IElement does not expose
+      // a mutable height; children that support stretching derive it from their width.
 
       // Save state and render child. Tag role-bearing children so their
       // content isn't emitted untagged (PDF/UA 7.1) - the stack itself renders

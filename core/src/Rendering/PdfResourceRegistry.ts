@@ -44,6 +44,7 @@ export interface PdfAResourceIssue {
   resource?: string;
 }
 
+/** Registers and writes the fonts, images, graphics states, and deferred objects used by a PDF. */
 export class PdfResourceRegistry {
   private fontCounter = 0;
   private imageCounter = 0;
@@ -190,7 +191,7 @@ export class PdfResourceRegistry {
         // Make the parsed font available to the synchronous measurement path
         // (FontMetrics) keyed by the same identifier the element uses for
         // `fontName`. Without this, layout falls back to the ASCII-only width
-        // stub and under-measures supplementary-plane glyphs (e.g. emoji),
+        // approximation and under-measures supplementary-plane glyphs (e.g. emoji),
         // preventing word-wrap from triggering.
         this.registerMetricFontInstance(filePath, font);
       } catch (err) {

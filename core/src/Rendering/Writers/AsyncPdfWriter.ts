@@ -7,9 +7,7 @@ import type { DocumentSettings } from '../../Configuration/DocumentSettings';
 import type { RegisteredLink } from '../RegisteredLink';
 import type { ViewerPreferencesSettings } from './IPdfWriter';
 
-// Full async implementation is out of scope (see SESSION_PLAN.md Session 4).
-// Methods delegate to synchronous equivalents wrapped in Promise.resolve().
-
+/** Async facade over the deterministic, in-memory PDF writer. */
 export class AsyncPdfWriter implements IAsyncPdfWriter {
   private readonly _inner: PdfWriter;
 

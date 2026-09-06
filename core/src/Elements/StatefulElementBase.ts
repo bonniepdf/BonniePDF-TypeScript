@@ -1,6 +1,7 @@
 import { ElementBase } from './ElementBase';
 import { RenderContext, RenderStatus } from './IElement';
 
+/** Provides lifecycle state for elements that continue rendering across page boundaries. */
 export abstract class StatefulElementBase extends ElementBase {
   protected hasPendingContent: boolean = false;
 

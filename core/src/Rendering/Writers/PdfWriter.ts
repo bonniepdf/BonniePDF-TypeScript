@@ -236,9 +236,7 @@ export class PdfWriter implements IPdfWriter {
     return id;
   }
 
-  /**
-   * Writes the encryption dictionary. Stub - full encryption in Session 4.
-   */
+  /** Writes the encryption dictionary configured on this writer. */
   public writeEncryptDictionary(id: number): number {
     this._encryptId = id;
     if (this.encryptor?.getEncryptDictionary) {

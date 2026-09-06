@@ -19,6 +19,7 @@ export type EncryptionSettingsOptions = Partial<
   Pick<EncryptionSettings, (typeof ENCRYPTION_SETTINGS_OPTION_KEYS)[number]>
 >;
 
+/** Contains validated passwords, permissions, and algorithm choices for PDF encryption. */
 export class EncryptionSettings {
   /**
    * Gets or sets the encryption algorithm to use.

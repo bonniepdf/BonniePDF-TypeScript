@@ -17,6 +17,7 @@ export const AXIS_OPTIONS_OPTION_KEYS = [
 /** Options for {@link AxisOptions}. */
 export type AxisOptionsOptions = Partial<Pick<AxisOptions, (typeof AXIS_OPTIONS_OPTION_KEYS)[number]>>;
 
+/** Configures the labels, range, interval, and appearance of a chart axis. */
 export class AxisOptions {
   /**
    * Prefix for value labels (e.g., "£", "$")

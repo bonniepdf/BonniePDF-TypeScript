@@ -122,6 +122,7 @@ export type DocumentSettingsOptions = Partial<
   bookmarks?: (BookmarkItem | BookmarkItemOptions)[];
 };
 
+/** Configures document-wide page, output, security, accessibility, and metadata behavior. */
 export class DocumentSettings {
   /**
    * Template function for generating page headers.

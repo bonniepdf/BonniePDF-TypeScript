@@ -2,12 +2,7 @@ import type { Document } from '../Document';
 import { RenderContext } from '../Rendering/RenderContext';
 import { SvgRenderPipeline, SvgPageRenderOutput } from '../Rendering/SvgRenderPipeline';
 import { PdfResourceRegistry } from '../Rendering/PdfResourceRegistry';
-import {
-  collectEmbeddedFonts,
-  collectImagesNeedingDecode,
-  documentRequiresTwoPassLayout,
-} from '../Rendering/PdfDocumentSerializer';
-import { Image } from '../Elements/Media/Image';
+import { collectDocumentPreloadResources, documentRequiresTwoPassLayout } from '../Rendering/PdfDocumentSerializer';
 import { SvgCanvas, SvgCanvasOptions, embeddedFontFamily, toBase64 } from '../Drawing/SvgCanvas';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../Typography/TrueType/TtfSubsetter';
@@ -70,22 +65,7 @@ export async function exportSvgDocumentAsync(
   }
 
   // ── Phase 1: discover embedded fonts (pages + header/footer templates) ──────
-  const embeddedPaths = new Set<string>();
-  for (const page of pages) {
-    for (const el of page.getElements()) collectEmbeddedFonts(el, embeddedPaths);
-  }
-  for (const pageNum of [1, 2]) {
-    if (settings.headerTemplate) {
-      const el = settings.headerTemplate(pageNum);
-      if (el) collectEmbeddedFonts(el, embeddedPaths);
-    }
-    if (settings.footerTemplate) {
-      const el = settings.footerTemplate(pageNum);
-      if (el) collectEmbeddedFonts(el, embeddedPaths);
-    }
-  }
-  const wmFont = settings.watermark?.fontName;
-  if (wmFont && PdfResourceRegistry.isEmbeddedFont(wmFont)) embeddedPaths.add(wmFont);
+  const { embeddedPaths, imagesToDecode } = collectDocumentPreloadResources(document);
 
   // ── Phase 2: preload font bytes ─────────────────────────────────────────────
   const registry = new PdfResourceRegistry();
@@ -97,20 +77,6 @@ export async function exportSvgDocumentAsync(
   await registry.preloadAllFontsAsync();
 
   // ── Phase 2b: async-decode PNGs that need it ────────────────────────────────
-  const imagesToDecode: Image[] = [];
-  for (const page of pages) {
-    for (const el of page.getElements()) collectImagesNeedingDecode(el, imagesToDecode);
-  }
-  for (const pageNum of [1, 2]) {
-    if (settings.headerTemplate) {
-      const el = settings.headerTemplate(pageNum);
-      if (el) collectImagesNeedingDecode(el, imagesToDecode);
-    }
-    if (settings.footerTemplate) {
-      const el = settings.footerTemplate(pageNum);
-      if (el) collectImagesNeedingDecode(el, imagesToDecode);
-    }
-  }
   if (imagesToDecode.length > 0) {
     await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
   }

@@ -13,6 +13,7 @@ type TextSpanKey = (typeof TEXT_SPAN_OPTION_KEYS)[number];
 /** Options for {@link TextSpan}. */
 export type TextSpanOptions = Partial<Pick<TextSpan, TextSpanKey>>;
 
+/** Contains one run of text and its optional style overrides. */
 export class TextSpan {
   /** The text content of this span. */
   public text?: string;

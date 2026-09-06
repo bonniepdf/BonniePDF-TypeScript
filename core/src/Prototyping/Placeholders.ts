@@ -200,6 +200,7 @@ export interface InvoiceLineItem {
   total: number;
 }
 
+/** Generates deterministic sample values for document prototypes. */
 class PlaceholderSource {
   private index = 0;
 

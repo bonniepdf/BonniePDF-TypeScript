@@ -36,6 +36,7 @@ type PageNumberOfOwnKey = (typeof PAGE_NUMBER_OF_OWN_OPTION_KEYS)[number];
 /** Options for {@link PageNumberOf}. Intersects {@link TextBlockOptions}. */
 export type PageNumberOfOptions = TextBlockOptions & Partial<Pick<PageNumberOf, PageNumberOfOwnKey>>;
 
+/** Renders the resolved page number of a named section or a fallback placeholder. */
 export class PageNumberOf extends TextBlock {
   /** The anchor id whose page number is printed. */
   public anchorTarget: string;

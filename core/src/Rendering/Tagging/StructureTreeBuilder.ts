@@ -4,15 +4,14 @@ import { StructureTreeException } from './StructureTreeException';
 import type { IStructureVisitor } from './IStructureVisitor';
 
 /**
- * Stack-based builder for the PDF structure tree. The renderer pushes
- * a structure element when it starts emitting a tagged region (heading,
- * paragraph, figure, …) and pops it when the region ends. The canvas
- * attaches MCIDs to the current top-of-stack element as marked-content
- * is written.
+ * Stack-based builder for the PDF structure tree. The renderer pushes a
+ * structure element when it starts emitting a tagged region (heading, paragraph,
+ * figure, ...) and pops it when the region ends. The canvas attaches MCIDs to
+ * the current top-of-stack element as marked content is written.
  *
- * A new builder starts with an implicit {@link SemanticRole.Document}
- * root already open and at the top of the stack - every element added
- * is a descendant of Document.
+ * A new builder starts with an implicit {@link SemanticRole.Document} root
+ * already open and at the top of the stack - every element added is a
+ * descendant of Document.
  */
 export class StructureTreeBuilder {
   private readonly _stack: StructureElement[] = [];

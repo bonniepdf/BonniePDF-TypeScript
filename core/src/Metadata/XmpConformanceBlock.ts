@@ -3,15 +3,14 @@ import { XmpExtensionSchema, XmpExtensionSchemaProperty } from './XmpExtensionSc
 import { FacturXMetadata, FACTUR_X_NAMESPACE_URI, FACTUR_X_PREFIX } from '../EInvoice/FacturXMetadata';
 
 /**
- * A conformance-namespace block emitted inside the document-level
- * `rdf:Description` in the XMP packet. One block per claim (PDF/A,
- * PDF/UA, ZUGFeRD/Factur-X, …). Multiple blocks compose: the writer
- * emits them all into the same RDF description, each with its own XML
- * namespace prefix.
+ * Describes one standards namespace and its values in an XMP metadata packet:
+ * a conformance-namespace block emitted inside the document-level
+ * `rdf:Description`. One block per claim (PDF/A, PDF/UA, ZUGFeRD/Factur-X, ...).
+ * Multiple blocks compose - the writer emits them all into the same RDF
+ * description, each with its own XML namespace prefix.
  *
- * By design, XMP injection must be additive - every conformance feature
- * (current PDF/A, PDF/UA from this feature, ZUGFeRD's `fx` later) registers
- * through this same hook so no one feature has to rewrite the packet.
+ * By design, XMP injection is additive: every conformance feature registers
+ * through this same hook, so no one feature has to rewrite the packet.
  */
 export class XmpConformanceBlock {
   /** XML namespace prefix (e.g. `"pdfuaid"`, `"pdfaid"`, `"fx"`). */

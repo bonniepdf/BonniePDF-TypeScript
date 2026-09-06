@@ -14,6 +14,7 @@ export type BookmarkItemOptions = Partial<
   children?: (BookmarkItem | BookmarkItemOptions)[];
 };
 
+/** Represents one bookmark and its optional child bookmarks in the document outline. */
 export class BookmarkItem {
   /**
    * The display title of the bookmark.

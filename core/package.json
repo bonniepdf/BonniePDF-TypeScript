@@ -51,7 +51,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup && tsc --noEmit false --emitDeclarationOnly --declaration --declarationMap --outDir dist",
+    "build": "tsup && tsup --config tsup.cjs.config.ts && node scripts/fix-esm-extensions.mjs dist && tsc --noEmit false --emitDeclarationOnly --declaration --declarationMap --outDir dist",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "prepack": "pnpm run build",

@@ -9,6 +9,15 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+- The ESM build now preserves module structure, one output file per source
+  module, so a bundler can drop what an application does not use. Previously
+  the ESM output was bundled, which welded the optional subsystems into the
+  core chunk: importing only `Document` also paid for charts, QR codes, Data
+  Matrix and barcodes, none of which `Document` uses. Bundled and gzipped, an
+  application importing the elements a typical document needs goes from about
+  97 KB to about 75 KB. The CommonJS build stays bundled, because `require`
+  is dynamic and cannot tree-shake either way. Published output is unchanged
+  in behaviour and byte-identical in the PDFs it produces.
 - Consolidated duplicated internal logic with no change in behaviour:
   letter/word spacing advance is now calculated in one place shared by the
   text elements and both canvases, the nested-list measure and render loops

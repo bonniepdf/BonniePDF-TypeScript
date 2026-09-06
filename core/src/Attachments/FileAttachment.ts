@@ -8,8 +8,8 @@ import { AttachmentRelationship } from './AttachmentRelationship';
  * `/AF` array so conforming readers surface it.
  *
  * Attaching a file only affects generated documents; it does not read or
- * modify an existing PDF (that is the separate document-operations feature,
- * this feature).
+ * modify an existing PDF (that is the separate document-operations
+ * feature).
  */
 export interface FileAttachment {
   /**

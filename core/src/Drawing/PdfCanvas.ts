@@ -53,7 +53,7 @@ export class PdfCanvas implements ICanvas {
   /** Fully transparent black; the implicit backdrop beyond a radial gradient's rim. */
   private static readonly TRANSPARENT = Color.fromScRgb(0, 0, 0, 0);
 
-  // -- this feature path + transform state ----------------------------------------
+  // -- Path + transform state ----------------------------------------
   private currentPath: PathCmd[] = [];
   private ctm: number[] = [1, 0, 0, 1, 0, 0];
   private ctmStack: number[][] = [];
@@ -626,7 +626,7 @@ export class PdfCanvas implements ICanvas {
       this._glyphTracker(run.fontIdentifier, run.text);
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       if (run.embeddedFont != null) {
-        // word spacing (Tw) does not apply to composite fonts, so when it
+        // Word spacing (Tw) does not apply to composite fonts, so when it
         // is set, inject it into the TJ array (combined with any kerning).
         // Letter spacing is handled universally by Tc, above.
         if (this._wordSpacing !== 0 && run.text.includes(' ')) {
@@ -636,9 +636,9 @@ export class PdfCanvas implements ICanvas {
           );
           continue;
         }
-        // embedded fonts with kern pairs paint with `TJ` so the PDF
+        // Embedded fonts with kern pairs paint with `TJ` so the PDF
         // matches the kerned widths the layout engine reserved (and the
-        // kerned this feature SVG export). Unkerned strings keep the `Tj` path.
+        // kerned SVG export). Unkerned strings keep the `Tj` path.
         const kerned = run.embeddedFont.hasKerning ? PdfSyntax.toKernedGlyphArray(run.text, run.embeddedFont) : null;
         if (kerned != null) {
           PdfOperators.showTextPositioned(this.stream, kerned);
@@ -694,7 +694,7 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(color.scA));
   }
 
-  // -- Private: this feature path helpers -----------------------------------------
+  // -- Private: path helpers -----------------------------------------
 
   private getLastPoint(): { x: number; y: number } {
     for (let i = this.currentPath.length - 1; i >= 0; i--) {

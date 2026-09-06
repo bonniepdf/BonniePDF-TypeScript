@@ -134,7 +134,7 @@ export class SvgRenderPipeline {
       const canvas = ctx.getSvgPage(i);
       if (!canvas) continue;
 
-      // this feature page slots, mirroring PdfRenderPipeline: the background is prepended
+      // Page slots, mirroring PdfRenderPipeline: the background is prepended
       // so it paints behind everything, and the foreground is appended so it
       // paints on top of all content. Both ignore margins and span the full page.
       // A per-page Page.pageBackground/pageForeground element overrides the

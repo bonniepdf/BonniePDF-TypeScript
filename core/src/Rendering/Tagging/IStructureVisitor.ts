@@ -6,7 +6,7 @@ import type { StructureElement } from './StructureElement';
  * tree depth-first, calling {@link visitEnter} as each node is entered
  * and {@link visitLeave} as it is left.
  *
- * The writer (this feature) uses this to translate the in-memory tree
+ * The writer uses this to translate the in-memory tree
  * into the PDF object graph: assign object IDs on enter, populate
  * `/K` arrays on leave.
  */

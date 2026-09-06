@@ -106,7 +106,7 @@ export abstract class TextElementBase extends ElementBase {
   private _decorationColor?: Color;
 
   /**
-   * Colour of the decoration lines. Undefined = use {@link textColor} (pre-G-39 behaviour).
+   * Colour of the decoration lines. Undefined = use {@link textColor}, the default.
    */
   public get decorationColor(): Color | undefined {
     return this._decorationColor;
@@ -136,7 +136,7 @@ export abstract class TextElementBase extends ElementBase {
   private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
 
   /**
-   * Line style for decorations (solid/wavy/dashed/dotted) - this feature. Default solid.
+   * Line style for decorations (solid/wavy/dashed/dotted). Default solid.
    */
   public get decorationStyle(): DecorationStyle {
     return this._decorationStyle;

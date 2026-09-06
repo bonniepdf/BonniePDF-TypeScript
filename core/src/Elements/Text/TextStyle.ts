@@ -184,7 +184,7 @@ export class TextStyle {
 
   /**
    * Colour of the decoration lines (underline/strikethrough/overline).
-   * Undefined = use the text {@link color}, matching the pre-G-39 behaviour.
+   * Undefined = use the text {@link color}, which is the default.
    * Accepts a palette token or hex.
    */
   public get decorationColor(): Color | undefined {

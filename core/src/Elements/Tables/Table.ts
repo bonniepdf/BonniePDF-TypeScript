@@ -645,7 +645,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[]): void {
     const rowHeight = this.measureRowHeight(row, widths);
 
-    // this feature tagging: pushes /TR around the row and /TH or /TD around each
+    // Tagging: pushes /TR around the row and /TH or /TD around each
     // cell when the document opts into PDF/UA. ColumnSpan surfaces as
     // /Attributes /ColSpan on the cell's StructElem; header-ness is
     // inherited from the row when the cell doesn't already declare it.

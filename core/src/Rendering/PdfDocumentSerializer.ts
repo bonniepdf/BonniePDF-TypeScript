@@ -155,7 +155,7 @@ export class PdfDocumentSerializer {
       : undefined;
     ctx.tagging = taggingContext;
 
-    // annotation bindings for /StructParent + /OBJR wiring.
+    // Annotation bindings for /StructParent + /OBJR wiring.
     // Keys start at 10_000 above page keys so the /ParentTree number tree
     // has no collision between page keys (0..N-1) and annotation keys.
     const ANNOT_STRUCT_PARENT_BASE = 10_000;
@@ -212,7 +212,7 @@ export class PdfDocumentSerializer {
       // the same number so MCID→StructElem reverse lookup works.
       if (taggingContext) {
         pageDict.set('/StructParents', String(pageIndex - 1));
-        pageDict.set('/Tabs', '/S'); // follow structure order for tab navigation
+        pageDict.set('/Tabs', '/S'); // Follow structure order for tab navigation
       }
 
       // Write link annotations if present
@@ -320,7 +320,7 @@ export class PdfDocumentSerializer {
     }
 
     // 11. Write PDF/A output intents.
-    // this feature guard (§6.3.4): for PDF/A, suppress the OutputIntent (and the pdfaid XMP claim)
+    // Honest-claim guard (§6.3.4): for PDF/A, suppress the OutputIntent (and the pdfaid XMP claim)
     // when standard-14 fonts are not embedded - the claim would be dishonest.
     // For PDF/UA-1 the OutputIntent is needed for colour management regardless of font
     // embedding status (font embedding is a separate §6.3.4 violation on its own).
@@ -334,15 +334,9 @@ export class PdfDocumentSerializer {
       catalogOptions.outputIntentIds = [outputIntentId];
     }
 
-    // 11b. Write PDF/UA structure tree. The in-memory tree currently only
-    // contains the implicit Document root - actual semantic tagging arrives
-    // once the renderer populates the tree. What lands here in this feature
-    // is the catalog wiring: a valid empty StructTreeRoot referencing a
-    // Document StructElem, plus /MarkInfo and /Lang.
-    // 11b. Write PDF/UA structure tree. The tree was populated during
-    // the render pass via taggingContext (this feature wire MCIDs and
-    // semantic roles through the canvas). For this feature the tree is still a
-    // Document-only skeleton; this feature adds the renderer-driven population.
+    // 11b. Write the PDF/UA structure tree. The tree was populated during the
+    // render pass via taggingContext, which wires MCIDs and semantic roles
+    // through the canvas and threads annotation bindings for /OBJR.
     if (taggingContext) {
       const structureTreeWriter = new StructureTreeWriter(writer);
       catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds, annotBindings);

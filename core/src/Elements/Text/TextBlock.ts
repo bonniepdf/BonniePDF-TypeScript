@@ -82,7 +82,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public minLinesAfterBreak = 2;
 
   /**
-   * this feature line clamp: maximum number of lines to render. When set and the text
+   * Line clamp: maximum number of lines to render. When set and the text
    * wraps to more lines, the block is truncated to this many lines and
    * {@link ellipsis} is appended to the last visible line. Null = no clamp.
    */
@@ -95,13 +95,13 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public ellipsis = '…';
 
   /**
-   * this feature paragraph layout: horizontal indent (points) applied to the first line
+   * Paragraph layout: horizontal indent (points) applied to the first line
    * of each paragraph (a paragraph = text between hard `\n` breaks). Default 0.
    */
   public firstLineIndent = 0;
 
   /**
-   * this feature paragraph layout: extra vertical space (points) inserted before each
+   * Paragraph layout: extra vertical space (points) inserted before each
    * paragraph after the first. Default 0.
    */
   public paragraphSpacing = 0;
@@ -162,7 +162,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     const startY = ctx.currentY;
 
     // Calculate how many lines fit on this page. Each line's slot is the base
-    // line height plus any paragraph leading above it (this feature; zero when unused).
+    // line height plus any paragraph leading above it (zero when unused).
     let linesThatFit = 0;
     let testY = startY;
     for (let i = startLine; i < lines.length; i++) {
@@ -223,7 +223,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     let y = startY;
     for (let i = startLine; i < endLine; i++) {
       const isLastLine = i === lines.length - 1;
-      y += this.spaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+      y += this.spaceBeforeOf(i); // paragraph leading (0 when unused)
       this.drawSingleLine(
         ctx,
         lines[i],
@@ -274,7 +274,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
 
     for (let i = 0; i < lines.length; i++) {
       const isLastLine = i === lines.length - 1;
-      y += this.spaceBeforeOf(i); // this feature paragraph leading (0 when unused)
+      y += this.spaceBeforeOf(i); // paragraph leading (0 when unused)
       this.drawSingleLine(ctx, lines[i], contentWidth, y, ctx.currentX + this.indentOf(i), isLastLine);
       y += this.effectiveLineHeight;
     }
@@ -294,7 +294,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     baseX: number,
     isLastLine: boolean
   ): void {
-    // apply letter/word spacing as canvas state around this line so the
+    // Apply letter/word spacing as canvas state around this line so the
     // painters advance by the same amount the layout reserved. No-op (and
     // byte-identical) when both are zero.
     const spaced = this.letterSpacing !== 0 || this.wordSpacing !== 0;
@@ -501,7 +501,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   }
 
   /**
-   * this feature paragraph-aware line layout. Splits on hard `\n` breaks; the first line
+   * Paragraph-aware line layout. Splits on hard `\n` breaks; the first line
    * of each paragraph wraps to a narrower column (by {@link firstLineIndent}) and
    * carries that indent, and every paragraph after the first carries
    * {@link paragraphSpacing} of leading before its first line.
@@ -554,7 +554,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   }
 
   /**
-   * this feature line clamp: keeps the first {@link maxLines} lines and appends
+   * Line clamp: keeps the first {@link maxLines} lines and appends
    * {@link ellipsis} to the last visible one, trimming whole words (then
    * characters) until `line + ellipsis` fits `contentWidth`. The dropped lines
    * are never drawn, so no hidden text reaches the content stream or the

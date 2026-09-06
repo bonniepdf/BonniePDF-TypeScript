@@ -170,7 +170,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
    * spanning the full line width so the user can navigate directly to the heading.
    */
   /**
-   * wraps drawTocEntry in a /TOCI struct element + marked-content
+   * Wraps drawTocEntry in a /TOCI struct element + marked-content
    * scope so each entry is its own addressable item in the PDF/UA
    * structure tree. The outer /TOC wrap comes from the pipeline's
    * IRoleProvider hook using {@link semanticRole}. No-op when tagging

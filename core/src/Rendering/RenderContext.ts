@@ -297,7 +297,7 @@ export class RenderContext implements RenderContextContract {
     // before the reset below so open nodes can close their rect at the boundary.
     const outgoingBottomY = this.currentY;
 
-    // this feature page-break-aware tagging: marked-content scopes (BDC/EMC)
+    // Page-break-aware tagging: marked-content scopes (BDC/EMC)
     // cannot cross a page boundary per PDF spec, but structure
     // elements can. Snapshot any marked-content currently open, emit
     // EMC on the outgoing page so the marks are balanced, then on the

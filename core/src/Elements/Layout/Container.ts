@@ -111,8 +111,8 @@ export class Container extends BorderedElementBase implements IContentContainer 
   public clipContent = false;
 
   /**
-   * When `true`, the container's subtree renders inside a crisp-edge region
-   *: on SVG page export it emits `<g shape-rendering="crispEdges">`, so
+   * When `true`, the container's subtree renders inside a crisp-edge region:
+   * on SVG page export it emits `<g shape-rendering="crispEdges">`, so
    * thin axis-aligned strokes and rectangles (grid/table lines, dividers) snap
    * to the device pixel grid instead of being antialiased into a soft blur. It
    * is a no-op on PDF output (the bytes are unchanged; crispness there is the

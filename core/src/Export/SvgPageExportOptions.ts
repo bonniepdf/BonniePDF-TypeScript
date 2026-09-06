@@ -1,8 +1,7 @@
 /**
  * Options controlling how a document page is exported to SVG.
  *
- * Mirrors the public surface documented in api-gap this feature (faithful page SVG
- * export). All fields are optional; the defaults produce compact, deterministic,
+ * All fields are optional; the defaults produce compact, deterministic,
  * standalone SVG suitable for website thumbnails and CI snapshots.
  */
 export interface SvgPageExportOptions {

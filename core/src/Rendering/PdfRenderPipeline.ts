@@ -101,7 +101,7 @@ export class PdfRenderPipeline {
   private static readonly maxPageGuard = 500;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
-    // when tagging is on and the element declares a structure role, wrap
+    // When tagging is on and the element declares a structure role, wrap
     // its render in a marked-content sequence (BDC/EMC) or /Artifact region.
     // Shared with the layout containers via beginChildTag/endChildTag so every
     // child-render site tags consistently. No-op when tagging is off or the
@@ -233,7 +233,7 @@ export class PdfRenderPipeline {
       ctx.margin = dimensions?.margin || settings.margin;
       ctx.switchToPage(i);
 
-      // full-page background slot. Painted behind everything, ignoring
+      // Full-page background slot. Painted behind everything, ignoring
       // margins. Prepended so it ends up at the very back of the
       // painter's-model stream. A per-page Page.pageBackground element overrides
       // the document-level template for this page.
@@ -258,7 +258,7 @@ export class PdfRenderPipeline {
       // opaque page elements. Only the explicit foreground slot sits above it.
       this.renderWatermark(ctx, settings, i, pageSize.width, pageSize.height);
 
-      // full-page foreground slot. Painted on top of everything, ignoring
+      // Full-page foreground slot. Painted on top of everything, ignoring
       // margins (explicit stamps / overlays). A per-page Page.pageForeground
       // element overrides the document-level template for this page.
       if (dimensions?.pageForeground) {
@@ -296,7 +296,7 @@ export class PdfRenderPipeline {
 
     const textWidth = FontMetrics.getStringWidth(wm.text, StandardFonts.Helvetica, wm.fontSize);
 
-    // kern the watermark like body text (the this feature SVG export already
+    // Kern the watermark like body text (the SVG export already
     // kerns it), falling back to a plain `Tj` operand when the font has no
     // kern pairs for this string.
     const embeddedFont = ctx.resolveEmbeddedFont(wm.fontName);
@@ -338,7 +338,7 @@ export class PdfRenderPipeline {
     PdfOperators.endText(wmOps);
     PdfOperators.restoreState(wmOps);
 
-    // wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
+    // Wrap watermark in /Artifact BMC ... EMC so screen readers skip it.
     if (ctx.tagging) {
       wmOps.unshift('/Artifact BMC\n');
       wmOps.push('EMC\n');
@@ -408,7 +408,7 @@ export class PdfRenderPipeline {
   }
 
   /**
-   * Renders a full-page slot element (this feature page background / foreground). The
+   * Renders a full-page slot element (page background / foreground). The
    * slot spans the entire page and ignores the margins, so the element is
    * rendered at the page origin (0, 0) with the full page width.
    *

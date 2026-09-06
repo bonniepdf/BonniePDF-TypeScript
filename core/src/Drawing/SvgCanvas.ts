@@ -168,10 +168,10 @@ export class SvgCanvas implements ICanvas {
   private readonly embeddedFontUsage = new Map<string, { font: TtfFont; codePoints: Set<number> }>();
   private readonly idAllocator: SvgIdAllocator;
 
-  // track save depths so restoreState closes transform groups too
+  // Track save depths so restoreState closes transform groups too
   private saveDepths: number[] = [];
 
-  // path construction
+  // Path construction
   private currentPathData: string[] = [];
 
   constructor(
@@ -327,7 +327,7 @@ export class SvgCanvas implements ICanvas {
     const anchor = align === TextAlignment.Center ? 'middle' : align === TextAlignment.Right ? 'end' : 'start';
     const opacity = this.formatOpacity(color.scA);
     const fillOpacityAttr = opacity < 1 ? ` fill-opacity="${opacity}"` : '';
-    // letter/word spacing map directly onto the SVG presentation
+    // Letter/word spacing map directly onto the SVG presentation
     // attributes for the standard-14 (viewer-font) path.
     const spacingAttr =
       (this.letterSpacing !== 0 ? ` letter-spacing="${this.n(this.letterSpacing)}"` : '') +
@@ -779,7 +779,7 @@ export class SvgCanvas implements ICanvas {
         this.embeddedFontUsage.set(run.fontFamily, usage);
       }
 
-      // apply kern pairs between adjacent glyphs so the preview matches
+      // Apply kern pairs between adjacent glyphs so the preview matches
       // the kerned `TJ` output the PDF painter now emits (and the kerned widths
       // the layout engine reserves).
       let prevGid = 0;
@@ -798,7 +798,7 @@ export class SvgCanvas implements ICanvas {
         xs.push(this.n(cursor));
         chars += rune;
         cursor += font.getGlyphWidth(gid) * scale;
-        // letter spacing after every glyph; word spacing after spaces
+        // Letter spacing after every glyph; word spacing after spaces
         // (extraPerSpace also carries justification spacing when present).
         cursor += letterSpacing;
         if (rune === ' ') cursor += extraPerSpace;
@@ -826,7 +826,7 @@ export class SvgCanvas implements ICanvas {
   /** Total advance width of a resolved run list, matching what
    * {@link glyphPositionedRuns} paints. */
   private getRunsWidth(runs: readonly SvgTextRun[], fontSize: number, extraPerSpace = 0, letterSpacing = 0): number {
-    // kerned, mirroring both the layout engine's reserved widths and the
+    // Kerned, mirroring both the layout engine's reserved widths and the
     // kerned glyph positions painted by glyphPositionedRuns / the PDF `TJ` path.
     let width = 0;
     for (const run of runs) {
@@ -842,7 +842,7 @@ export class SvgCanvas implements ICanvas {
           width += font.getKerning(prevGid, gid) * scale;
         }
         width += font.getGlyphWidth(gid) * scale;
-        // match glyphPositionedRuns' per-glyph and per-space advances.
+        // Match glyphPositionedRuns' per-glyph and per-space advances.
         width += letterSpacing;
         if (rune === ' ') width += extraPerSpace;
         prevGid = gid;

@@ -524,7 +524,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       const shift = resolveBaselineShift(style.baselineAlignment, style.baselineShift, fontSize);
       const runY = y - shift;
 
-      // letter/word spacing as canvas state for this run.
+      // Letter/word spacing as canvas state for this run.
       const ls = style.letterSpacing ?? 0;
       const ws = style.wordSpacing ?? 0;
       const spaced = ls !== 0 || ws !== 0;

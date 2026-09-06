@@ -2,7 +2,7 @@ import { ICanvas } from '../../Drawing/ICanvas';
 import { Color } from '../../Core/Color';
 
 /**
- * Line style for text decorations (underline/strikethrough/overline) - this feature.
+ * Line style for text decorations (underline/strikethrough/overline).
  * All variants are painted with straight {@link ICanvas.drawLine} segments so
  * they render identically on the PDF and SVG canvases.
  */
@@ -24,8 +24,8 @@ export enum DecorationStyle {
  * Paints a horizontal decoration line from `x` to `x + width` at baseline `y`
  * in the requested {@link DecorationStyle}. Wavy/dashed/dotted are approximated
  * with short straight segments so the output is canvas-agnostic and PDF/UA-safe
- * (paths only, no fonts). `Solid` emits a single segment, byte-identical to the
- * pre-G-39 decoration output.
+ * (paths only, no fonts). `Solid` emits a single segment, byte-identical to a
+ * plain single-segment line.
  */
 export function paintDecorationLine(
   canvas: ICanvas,

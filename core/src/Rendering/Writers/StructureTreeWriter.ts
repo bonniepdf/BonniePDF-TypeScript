@@ -155,7 +155,7 @@ interface ParentTreeEntry {
   elem: StructureElement;
 }
 
-/** annotation binding record for /StructParent + /OBJR wiring. */
+/** Annotation binding record for /StructParent + /OBJR wiring. */
 interface AnnotBinding {
   structElem: StructureElement;
   annotId: number;

@@ -9,6 +9,13 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+- Consolidated duplicated internal logic with no change in behaviour:
+  letter/word spacing advance is now calculated in one place shared by the
+  text elements and both canvases, the nested-list measure and render loops
+  moved to a common base, and `GroupedBarChartElement` extends `ChartElement`
+  rather than repeating it. `GroupedBarChartElement` continues to report no
+  preferred content width, so auto-sizing inside horizontal stacks and
+  shrink-to-fit containers is unchanged.
 - Add file attachments and ZUGFeRD / Factur-X e-invoice support.
   `Document.attach(...)` / `document.attachments` and fluent `PdfBuilder.attach(...)`
   embed files as associated files (`/EmbeddedFile`, `/Filespec` with `/AFRelationship`,

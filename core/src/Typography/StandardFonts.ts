@@ -1,6 +1,4 @@
-/**
- * Standard PDF font names (14 Type 1 fonts built into every PDF reader)
- */
+/** Provides the names of the 14 standard Type 1 PDF fonts. */
 export class StandardFonts {
   // Serif
   /**

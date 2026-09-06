@@ -33,6 +33,7 @@ export type LineChartOptions = CartesianChartOptions &
     lineColor?: ColorInput;
   };
 
+/** Renders one or more data series as lines against Cartesian axes. */
 export class LineChart extends CartesianChartBase {
   private static readonly DEFAULT_LINE_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DATA_POINT_RADIUS = 5;

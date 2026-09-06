@@ -21,6 +21,7 @@ export type CircleOptions = ElementOptions &
     fillColor?: ColorInput;
   };
 
+/** Renders a circle with optional fill and stroke. */
 export class Circle extends ElementBase {
   /** Diameter of the circle in points */
   /** Creates a circle, optionally configured in one expression. */

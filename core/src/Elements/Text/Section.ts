@@ -29,6 +29,7 @@ export const SECTION_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...SECTION_OWN_OPTIO
 /** Options for {@link Section}. Intersects {@link ElementOptions}. */
 export type SectionOptions = ElementOptions & Partial<Pick<Section, 'anchorId'>>;
 
+/** Marks a named document location and optionally renders section content. */
 export class Section extends ElementBase {
   /**
    * The unique anchor identifier. A {@link SectionLink} or {@link PageNumberOf}

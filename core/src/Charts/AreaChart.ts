@@ -33,6 +33,7 @@ export type AreaChartOptions = CartesianChartOptions &
     areaColor?: ColorInput;
   };
 
+/** Renders one or more data series as filled areas against Cartesian axes. */
 export class AreaChart extends CartesianChartBase {
   private static readonly DEFAULT_AREA_COLOR_HEX = '#4f46e5';
 

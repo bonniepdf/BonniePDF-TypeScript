@@ -44,6 +44,7 @@ export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'text
   margin?: ThicknessInput;
 };
 
+/** Renders linked text that opens a URI or navigates to another page. */
 export class Hyperlink implements IElement, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {

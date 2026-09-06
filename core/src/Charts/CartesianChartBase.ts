@@ -38,6 +38,7 @@ export type CartesianChartOptions = ChartBaseOptions &
     yAxis?: AxisOptions | AxisOptionsOptions;
   };
 
+/** Provides shared axis, scale, grid, and label behavior for Cartesian charts. */
 export abstract class CartesianChartBase extends ChartBase {
   // Layout constants (relative to chart height)
   protected static readonly TITLE_AREA_HEIGHT = 60;

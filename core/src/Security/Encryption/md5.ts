@@ -77,6 +77,7 @@ function _md5(data: Uint8Array): Uint8Array {
   return result;
 }
 
+/** Computes MD5 digests required by legacy PDF encryption algorithms. */
 export class Md5Hash {
   public static compute(data: Uint8Array): Uint8Array {
     return _md5(data);

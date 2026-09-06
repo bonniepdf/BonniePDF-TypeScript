@@ -27,6 +27,7 @@ export type DocumentMetadataOptions = Partial<
   customProperties?: Map<string, string> | Record<string, string>;
 };
 
+/** Contains descriptive metadata written to the PDF information and XMP records. */
 export class DocumentMetadata {
   /**
    * Creates a new instance of DocumentMetadata with default values

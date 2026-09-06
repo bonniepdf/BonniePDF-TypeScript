@@ -7,13 +7,13 @@ import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { EncryptionAlgorithm } from '../Models/EncryptionAlgorithm';
 
 /**
- * Main orchestrator for PDF encryption.
- * Handles encryption of streams and generation of the encryption dictionary.
- * Supports RC4 (40/128-bit) and AES-256 encryption.
+ * Encrypts PDF strings and streams and builds the document encryption
+ * dictionary. Supports RC4 (40/128-bit) and AES-256.
  *
- * Sync construction (`new PdfEncryptor(settings)`) fully initialises RC4 encryption.
- * For AES-256, use `await PdfEncryptor.create(settings)` to get correct key material;
- * sync construction for AES-256 will have uninitialised keys and is not safe to use.
+ * Sync construction (`new PdfEncryptor(settings)`) fully initialises RC4
+ * encryption. For AES-256, use `await PdfEncryptor.create(settings)` to get
+ * correct key material; sync construction for AES-256 leaves the keys
+ * uninitialised and is not safe to use.
  */
 export class PdfEncryptor {
   private readonly key?: PdfEncryptionKey;

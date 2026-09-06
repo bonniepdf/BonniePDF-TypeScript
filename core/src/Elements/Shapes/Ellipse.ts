@@ -18,6 +18,7 @@ export type EllipseOptions = ElementOptions &
     fillColor?: ColorInput;
   };
 
+/** Renders an ellipse with optional fill and stroke. */
 export class Ellipse extends ElementBase {
   /** Creates an ellipse, optionally configured in one expression. */
   constructor(options?: EllipseOptions) {

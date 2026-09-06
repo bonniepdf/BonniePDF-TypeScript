@@ -36,6 +36,7 @@ export type TableRowOptions = Partial<
   backgroundColor?: ColorInput;
 };
 
+/** Contains the cells and styling for one table row. */
 export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /** @inheritdoc */
   get semanticRole(): SemanticRole {

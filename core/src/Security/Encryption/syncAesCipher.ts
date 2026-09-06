@@ -147,6 +147,7 @@ function mixColumns(state: Uint8Array): void {
   }
 }
 
+/** Encrypts PDF data with the library's synchronous AES-256 implementation. */
 export class SyncAesCipher {
   private readonly expandedKey: Uint32Array;
 

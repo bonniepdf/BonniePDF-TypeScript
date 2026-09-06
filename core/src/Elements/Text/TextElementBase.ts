@@ -16,6 +16,7 @@ import {
   type FontWeightInput,
 } from '../../Normalize/toEnum';
 import { TextStyle } from './TextStyle';
+import { getTextSpacingWidth } from '../../Typography/TextSpacing';
 
 /**
  * Base class for text-based PDF elements that provides common functionality for
@@ -374,15 +375,6 @@ export abstract class TextElementBase extends ElementBase {
    * Zero when no spacing is set.
    */
   protected spacingWidth(text: string): number {
-    if (this.letterSpacing === 0 && this.wordSpacing === 0) return 0;
-    let glyphs = 0;
-    let spaces = 0;
-    for (const rune of text) {
-      const cp = rune.codePointAt(0) ?? 0;
-      if (cp < 32) continue;
-      glyphs++;
-      if (rune === ' ') spaces++;
-    }
-    return glyphs * this.letterSpacing + spaces * this.wordSpacing;
+    return getTextSpacingWidth(text, this.letterSpacing, this.wordSpacing);
   }
 }

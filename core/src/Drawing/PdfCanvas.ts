@@ -30,6 +30,7 @@ interface PathCmd {
   args: number[];
 }
 
+/** Translates drawing operations into a PDF page content stream. */
 export class PdfCanvas implements ICanvas {
   public readonly width: number = 0;
   public readonly height: number;

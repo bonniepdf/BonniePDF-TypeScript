@@ -12,6 +12,7 @@ import { ImageFormat } from '../Rendering/Images/ImageInfo';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
+import { getTextSpacingWidth } from '../Typography/TextSpacing';
 
 /**
  * A maximal substring of a draw call renderable by one embedded font, as
@@ -127,14 +128,14 @@ export interface SvgCanvasOptions {
 }
 
 /**
- * Source of unique `clip`/`grad` id suffixes for one or more {@link SvgCanvas}
- * instances. A page's SVG can be composited from several canvases (the main
- * canvas plus positioned child canvases for charts/images - see
- * {@link RenderContext.getCanvas}), so ids must stay unique across all of
+ * Allocates deterministic, document-scoped `clip`/`grad` id suffixes for one or
+ * more {@link SvgCanvas} instances. A page's SVG can be composited from several
+ * canvases (the main canvas plus positioned child canvases for charts/images -
+ * see {@link RenderContext.getCanvas}), so ids must stay unique across all of
  * them, not just within one instance. Sharing one allocator across those
  * canvases achieves that; a fresh, un-shared allocator (the constructor
- * default) is correct for a standalone canvas whose output is never
- * composited with another's.
+ * default) is correct for a standalone canvas whose output is never composited
+ * with another's.
  *
  * Deliberately *not* a static/process-wide counter: that would make a
  * document's SVG output depend on how many other documents were rendered
@@ -152,6 +153,7 @@ export class SvgIdAllocator {
   }
 }
 
+/** Translates drawing operations into SVG markup. */
 export class SvgCanvas implements ICanvas {
   public readonly width: number;
   public readonly height: number;
@@ -452,16 +454,7 @@ export class SvgCanvas implements ICanvas {
    * string, matching {@link getRunsWidth}'s per-glyph and per-space additions.
    */
   private standardSpacingWidth(text: string): number {
-    if (this.letterSpacing === 0 && this.wordSpacing === 0) return 0;
-    let glyphs = 0;
-    let spaces = 0;
-    for (const rune of text) {
-      const cp = rune.codePointAt(0) ?? 0;
-      if (cp < 32) continue;
-      glyphs++;
-      if (rune === ' ') spaces++;
-    }
-    return glyphs * this.letterSpacing + spaces * this.wordSpacing;
+    return getTextSpacingWidth(text, this.letterSpacing, this.wordSpacing);
   }
 
   // -- Images -------------------------------------------------------------

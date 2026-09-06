@@ -26,6 +26,7 @@ export const GROUPED_BAR_CHART_OPTION_KEYS = [
 export type GroupedBarChartOptions = CartesianChartOptions &
   Partial<Pick<GroupedBarChart, (typeof GROUPED_BAR_CHART_OWN_OPTION_KEYS)[number]>>;
 
+/** Renders multiple data series as groups of adjacent bars. */
 export class GroupedBarChart extends CartesianChartBase {
   /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
   override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';

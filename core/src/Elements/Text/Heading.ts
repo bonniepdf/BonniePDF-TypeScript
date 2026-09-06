@@ -27,6 +27,7 @@ type HeadingOwnKey = (typeof HEADING_OWN_OPTION_KEYS)[number];
  */
 export type HeadingOptions = TextBlockOptions & Partial<Pick<Heading, HeadingOwnKey>>;
 
+/** Renders heading text and registers it for navigation and table-of-contents generation. */
 export class Heading extends TextBlock implements IStatefulElement {
   /**
    * Gets or sets the unique identifier used to look up this heading in the TOC entries dictionary.

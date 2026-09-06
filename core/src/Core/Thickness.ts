@@ -1,6 +1,4 @@
-/**
- * Represents padding or margin values for the four sides of an element
- */
+/** Stores the top, right, bottom, and left values of padding or a margin. */
 export class Thickness {
   public readonly left: number;
   public readonly top: number;

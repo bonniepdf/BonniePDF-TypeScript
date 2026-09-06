@@ -15,6 +15,7 @@ import { FontMetrics } from '../../Typography/FontMetrics';
 import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { getTextSpacingWidth } from '../../Typography/TextSpacing';
 
 /**
  * A rich text element that supports mixed styling within a single flowing paragraph.
@@ -41,6 +42,7 @@ export type RichTextOptions = ElementOptions &
     alignment?: TextAlignmentInput;
   };
 
+/** Lays out styled text spans with wrapping and pagination. */
 export class RichText extends ElementBase implements IStatefulElement, IRoleProvider {
   /**
    * RichText renders one flowing paragraph, so it tags as /P. Without a role
@@ -652,18 +654,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
    * every glyph plus word spacing after every space. Zero when neither is set.
    */
   private static styleSpacing(text: string, style: TextStyle): number {
-    const ls = style.letterSpacing ?? 0;
-    const ws = style.wordSpacing ?? 0;
-    if (ls === 0 && ws === 0) return 0;
-    let glyphs = 0;
-    let spaces = 0;
-    for (const rune of text) {
-      const cp = rune.codePointAt(0) ?? 0;
-      if (cp < 32) continue;
-      glyphs++;
-      if (rune === ' ') spaces++;
-    }
-    return glyphs * ls + spaces * ws;
+    return getTextSpacingWidth(text, style.letterSpacing ?? 0, style.wordSpacing ?? 0);
   }
 
   private stylesEqual(a: TextStyle, b: TextStyle): boolean {

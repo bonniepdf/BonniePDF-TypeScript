@@ -1,6 +1,4 @@
-/**
- * Horizontal alignment options for layout elements
- */
+/** Defines horizontal alignment within an available layout region. */
 export class HorizontalAlignment {
   /**
    * Align to the start (left for LTR languages)

@@ -5,15 +5,7 @@ import { IPlatformIO } from './PlatformIO';
 // callers import it).
 import * as fs from 'node:fs';
 
-/**
- * Node.js platform I/O implementation.
- * Uses `node:fs/promises` for file operations and `node:zlib` for DEFLATE compression.
- *
- * Usage:
- *   import { configurePlatform } from './Platform/PlatformIO';
- *   import { NodePlatformIO } from './Platform/NodePlatformIO';
- *   configurePlatform(new NodePlatformIO());
- */
+/** Provides asynchronous and synchronous file I/O and DEFLATE compression in Node.js. */
 export class NodePlatformIO implements IPlatformIO {
   async readFile(path: string): Promise<Uint8Array> {
     const { readFile } = await import('node:fs/promises');

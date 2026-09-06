@@ -1,3 +1,4 @@
+/** Reads integers and byte ranges from a big-endian binary buffer. */
 export class BigEndianReader {
   private data: Uint8Array;
   private position: number = 0;

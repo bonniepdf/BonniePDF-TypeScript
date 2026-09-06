@@ -24,6 +24,7 @@ export type WatermarkOptions = Partial<Omit<Pick<Watermark, (typeof WATERMARK_OP
   textColor?: ColorInput;
 };
 
+/** Configures text drawn over or behind every page of a document. */
 export class Watermark {
   /**
    * The watermark text to display (e.g. "DRAFT", "CONFIDENTIAL").

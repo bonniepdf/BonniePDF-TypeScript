@@ -18,6 +18,7 @@ export const CHART_SERIES_STYLE_OPTION_KEYS = [
 /** Options for {@link ChartSeriesStyle}. */
 export type ChartSeriesStyleOptions = Partial<Pick<ChartSeriesStyle, (typeof CHART_SERIES_STYLE_OPTION_KEYS)[number]>>;
 
+/** Configures the colors and stroke used to render a chart series. */
 export class ChartSeriesStyle {
   /**
    * Line width for Line and Area charts (default: 2f).
@@ -73,6 +74,7 @@ export type ChartSeriesOptions = Partial<
   style?: ChartSeriesStyle | ChartSeriesStyleOptions;
 };
 
+/** Contains the name, values, and optional style for one chart series. */
 export class ChartSeries {
   /**
    * Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")

@@ -28,9 +28,10 @@ export interface SvgPageRenderOutput {
 }
 
 /**
- * The SVG sibling of {@link PdfRenderPipeline}. It runs the exact same layout
+ * Measures, paginates, and renders document elements into standalone SVG pages:
+ * the SVG sibling of {@link PdfRenderPipeline}. It runs the exact same layout
  * and pagination loop as PDF output - so page count, overflow, and stateful
- * continuation match byte-for-byte in terms of layout decisions - but drives an
+ * continuation make identical layout decisions - but drives an
  * {@link SvgCanvas} per page and finalises each page with watermark, header,
  * and footer drawn through the canvas rather than via raw PDF operators.
  *

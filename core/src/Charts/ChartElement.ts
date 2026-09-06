@@ -19,7 +19,10 @@ export const CHART_ELEMENT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...CHART_ELEME
 export type ChartElementOptions = ElementOptions &
   Partial<Pick<ChartElement, (typeof CHART_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
-/** @deprecated Charts are document elements; set `chart.data` and add the chart directly. */
+/**
+ * Compatibility wrapper that assigns data to a chart before rendering it.
+ * @deprecated Set `chart.data` and add the chart directly.
+ */
 export class ChartElement extends ElementBase {
   private readonly chart: ChartBase;
   private readonly data: ChartData;

@@ -30,6 +30,7 @@ export type LayersOptions = ElementOptions &
     foreground?: IElement[];
   };
 
+/** Paints child elements in declaration order within the same layout region. */
 export class Layers extends ElementBase {
   private readonly backgroundLayersList: IElement[] = [];
   private readonly foregroundLayersList: IElement[] = [];

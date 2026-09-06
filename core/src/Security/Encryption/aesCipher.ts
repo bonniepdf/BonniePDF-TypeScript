@@ -20,6 +20,7 @@ function concatBytes(...arrays: Uint8Array[]): Uint8Array {
   return out;
 }
 
+/** Encrypts PDF data with AES through the runtime Web Crypto implementation. */
 export class AesCipher {
   private readonly key: Uint8Array;
 

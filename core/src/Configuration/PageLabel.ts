@@ -33,6 +33,7 @@ export const PAGE_LABEL_OPTION_KEYS = ['style', 'startAt', 'prefix'] as const;
 /** Options for {@link PageLabel}. */
 export type PageLabelOptions = Partial<Pick<PageLabel, (typeof PAGE_LABEL_OPTION_KEYS)[number]>>;
 
+/** Defines the numbering style and optional prefix applied to a range of pages. */
 export class PageLabel {
   /** Numbering style. Defaults to `'decimal'`. */
   public style: PageLabelStyle = 'decimal';

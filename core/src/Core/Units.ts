@@ -3,6 +3,7 @@
  */
 import { Unit } from './Unit';
 
+/** Converts measurements between points and common physical units. */
 export class Units {
   private static readonly PointsPerInch = 72;
   private static readonly PointsPerCentimeter = 72 / 2.54;

@@ -1,8 +1,6 @@
 import { Color } from './Color';
 
-/**
- * Represents border colors for the four sides of an element
- */
+/** Stores the colors of an element’s four borders. */
 export class BorderColors {
   public readonly left?: Color;
   public readonly top?: Color;

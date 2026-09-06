@@ -1,4 +1,5 @@
 import { PdfSyntax } from './PdfSyntax';
+/** Creates PDF content-stream operators for text, paths, graphics state, and marked content. */
 export class PdfOperators {
   public static saveState(s: string[]): void {
     s.push('q\n');

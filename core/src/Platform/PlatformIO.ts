@@ -30,6 +30,7 @@ export interface IPlatformIO {
 
 // ─── Default implementation (browser / modern runtimes) ──────────────────────
 
+/** Provides browser-compatible defaults when no platform-specific I/O adapter is configured. */
 class DefaultPlatformIO implements IPlatformIO {
   async readFile(_path: string): Promise<Uint8Array> {
     throw new Error(
@@ -90,7 +91,8 @@ export function deflate(data: Uint8Array): Promise<Uint8Array> {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-async function deflateWithCompressionStream(data: Uint8Array): Promise<Uint8Array> {
+/** Compresses bytes with the runtime's zlib-wrapped CompressionStream implementation. */
+export async function deflateWithCompressionStream(data: Uint8Array): Promise<Uint8Array> {
   // 'deflate' format = zlib-wrapped DEFLATE (RFC 1950) - required by PDF /FlateDecode
   const cs = new CompressionStream('deflate');
   const writer = cs.writable.getWriter();

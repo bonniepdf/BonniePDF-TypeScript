@@ -1,10 +1,7 @@
 import { ChartData } from './Models/ChartData';
-import { applyOptions } from '../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../Elements/ElementOptions';
 import { GroupedBarChart } from './GroupedBarChart';
-import { ElementBase } from '../Elements/ElementBase';
-import { RenderContext } from '../Rendering/RenderContext';
-import { renderTaggedChart } from './ChartTagging';
+import { ChartElement } from './ChartElement';
 
 /**
  * Element that renders a GroupedBarChart to the document.
@@ -22,58 +19,32 @@ export const GROUPED_BAR_CHART_ELEMENT_OPTION_KEYS = [
 export type GroupedBarChartElementOptions = ElementOptions &
   Partial<Pick<GroupedBarChartElement, (typeof GROUPED_BAR_CHART_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
-/** @deprecated GroupedBarChart is a document element; set its data and add it directly. */
-export class GroupedBarChartElement extends ElementBase {
-  private readonly chart: GroupedBarChart;
-  private readonly data: ChartData;
-
-  /**
-   * Creates a new GroupedBarChartElement.
-   * @param chart The grouped bar chart to render
-   * @param data The chart data containing series, axis options, and title
-   */
-  /**
-   * Alternate text used when the document is generated as PDF/UA-1.
-   * A chart with alt text is tagged as a Figure; without alt text it is
-   * treated as decorative artifact content.
-   */
-  public altText: string = '';
-
-  /** Marks the chart as decorative even when altText is set. */
-  public isDecorative = false;
-
+/**
+ * Compatibility wrapper that assigns data to a grouped bar chart before rendering it.
+ * @deprecated Set `chart.data` and add the chart directly.
+ */
+export class GroupedBarChartElement extends ChartElement {
   /** Creates the chart element from its chart and data, with optional alt text. */
   constructor(chart: GroupedBarChart, data: ChartData, altText?: string);
   /** Creates the chart element with options (alt text, decorative flag, margin). */
   constructor(chart: GroupedBarChart, data: ChartData, options: GroupedBarChartElementOptions);
   constructor(chart: GroupedBarChart, data: ChartData, altTextOrOptions: string | GroupedBarChartElementOptions = '') {
-    super();
-    this.chart = chart;
-    this.data = data;
+    // The branches are identical by design: `super` resolves against ChartElement's
+    // real overloads, which take alt text or an options object but not the union.
     if (typeof altTextOrOptions === 'string') {
-      this.altText = altTextOrOptions;
+      super(chart, data, altTextOrOptions);
     } else {
-      applyOptions(this, altTextOrOptions);
+      super(chart, data, altTextOrOptions);
     }
   }
 
   /**
-   * Measures the height of the chart content.
+   * Reports no preferred width, unlike {@link ChartElement}. This wrapper has never
+   * contributed the chart's width to auto-sizing containers, and the spec keeps it
+   * that way: reporting one here would change how horizontal stacks and shrink-to-fit
+   * containers size an existing document.
    */
-  protected override measureContentHeight(_contentWidth: number): number {
-    return this.chart.height;
-  }
-
-  /**
-   * Renders the grouped bar chart to the document.
-   */
-  protected override renderContent(ctx: RenderContext, contentWidth: number): void {
-    if (this.chart.stretchToFit) this.chart.width = contentWidth;
-
-    const canvas = ctx.getCanvas(ctx.currentX, ctx.currentY);
-    renderTaggedChart(ctx, canvas, this.altText, this.isDecorative, () => this.chart.draw(canvas, this.data));
-    ctx.flushExternalCanvas(canvas);
-
-    ctx.currentY += this.chart.height;
+  protected override getPreferredContentWidth(): number {
+    return 0;
   }
 }

@@ -23,6 +23,7 @@ export const CANVAS_ELEMENT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...CANVAS_ELE
 export type CanvasElementOptions = ElementOptions &
   Partial<Pick<CanvasElement, (typeof CANVAS_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
+/** Invokes a caller-provided drawing function within the document layout. */
 export class CanvasElement extends ElementBase implements IRoleProvider, IAltTextProvider {
   /**
    * Width of the drawing box in points. `0` (the default) fills the available

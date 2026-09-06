@@ -45,6 +45,7 @@ export type ChartBaseOptions = ElementOptions &
     backgroundColor?: import('../Core/Color').Color | ColorInput;
   };
 
+/** Provides sizing, styling, accessibility, and canvas helpers shared by all charts. */
 export abstract class ChartBase extends ElementBase implements IRoleProvider, IAltTextProvider {
   // Title styling constants (matching SVG chart implementation)
   private static readonly TITLE_FONT_SIZE = 20;

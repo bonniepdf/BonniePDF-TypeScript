@@ -180,18 +180,19 @@ interface OpenFrame {
 }
 
 /**
- * Collects a {@link LayoutSnapshot} during a render pass.
+ * Captures element rectangles and hierarchy as the render pipeline lays out each
+ * page, collecting a {@link LayoutSnapshot}.
  *
  * Lifecycle expected from the render pipeline:
  * - `open(element, type, name, page, x, y, width)` at the start of an element's
  *   render. Re-entrant for the same element instance (a stateful element that
- *   pauses and resumes across pages calls `open` again — it is coalesced into
+ *   pauses and resumes across pages calls `open` again - it is coalesced into
  *   the existing node, not duplicated).
  * - `close(element, page, endY, complete)` at the end. When `complete` is false
  *   the element overflowed and will resume after a page break, so the node is
  *   left open and its current rect is finalised by `pageBreak` instead.
  * - `pageBreak(outgoingPage, outgoingBottomY, newPage, newTopY)` from
- *   `RenderContext.newPage()` — finalises the current rect of every open node on
+ *   `RenderContext.newPage()` - finalises the current rect of every open node on
  *   the outgoing page and starts a fresh rect on the new page.
  *
  * `capturing` gates everything: the pipeline turns it off while rendering page

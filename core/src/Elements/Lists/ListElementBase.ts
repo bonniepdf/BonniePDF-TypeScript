@@ -21,6 +21,7 @@ export const LIST_ELEMENT_OPTION_KEYS = [...TEXT_ELEMENT_OPTION_KEYS, ...LIST_EL
 export type ListElementOptions = TextElementOptions &
   Partial<Pick<ListElementBase, (typeof LIST_ELEMENT_OWN_OPTION_KEYS)[number]>>;
 
+/** Provides shared marker, indentation, spacing, and pagination behavior for lists. */
 export abstract class ListElementBase extends TextElementBase {
   /** Indentation for nested lists (in points) */
   public indent = 20;
@@ -81,6 +82,26 @@ export abstract class ListElementBase extends TextElementBase {
     if (totalHeight > 0) totalHeight -= this.itemSpacing;
 
     return totalHeight;
+  }
+
+  /** Measures text items and nested lists using the shared list indentation rules. */
+  protected measureListHeight(items: string[], nestedLists: readonly ListElementBase[], contentWidth: number): number {
+    let totalHeight = this.measureItemsHeight(items, contentWidth - this.indent);
+    for (const nestedList of nestedLists) {
+      totalHeight += nestedList.measureHeight(contentWidth - this.indent) + this.itemSpacing;
+    }
+    return totalHeight;
+  }
+
+  /** Renders nested lists at the shared indentation and restores the parent cursor. */
+  protected renderNestedLists(ctx: RenderContext, nestedLists: readonly ListElementBase[], contentWidth: number): void {
+    for (const nestedList of nestedLists) {
+      const originalX = ctx.currentX;
+      ctx.currentX += this.indent;
+      nestedList.render(ctx, contentWidth - this.indent);
+      ctx.currentX = originalX;
+      ctx.currentY += this.itemSpacing;
+    }
   }
 
   /**

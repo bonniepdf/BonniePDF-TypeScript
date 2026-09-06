@@ -1,11 +1,11 @@
 /**
- * Describes one entry in the PDF/A `pdfaExtension:schemas` bag - the
- * mechanism ISO 19005-2/3 §6.6.2.3 provides for declaring XMP
- * namespaces that are NOT predefined by the standard (e.g. `pdfuaid`
- * for PDF/UA-1 identification, `fx` for ZUGFeRD / Factur-X).
+ * Describes one entry in the PDF/A `pdfaExtension:schemas` bag - the mechanism
+ * ISO 19005-2/3 section 6.6.2.3 provides for declaring XMP namespaces that are
+ * NOT predefined by the standard (e.g. `pdfuaid` for PDF/UA-1 identification,
+ * `fx` for ZUGFeRD / Factur-X).
  *
- * veraPDF profile `2b` rule 6.6.2.3.1 rejects any non-predefined XMP
- * property whose namespace is not described here.
+ * veraPDF profile `2b` rule 6.6.2.3.1 rejects any non-predefined XMP property
+ * whose namespace is not described here.
  */
 export class XmpExtensionSchema {
   /** Namespace URI being described. */

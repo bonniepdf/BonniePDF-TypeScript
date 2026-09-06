@@ -2,30 +2,26 @@ import { DocumentMetadata } from '../Configuration/DocumentMetadata';
 import { XmpConformanceBlock } from './XmpConformanceBlock';
 
 /**
- * Generates the XMP metadata packet for PDF documents.
+ * Builds the XMP metadata packet from document properties and active
+ * conformance claims. The packet body is composed of:
  *
- * The packet body is composed of:
+ *   1. **Conformance blocks** - pdfaid, pdfuaid, and any further additive
+ *      namespace, emitted via the `conformanceBlocks` hook. Required by
+ *      PDF/A and PDF/UA-1.
  *
- *   1. **Conformance blocks** - pdfaid, pdfuaid, and any future
- *      additive namespace (ZUGFeRD's fx, etc.) emitted via the
- *      `conformanceBlocks` hook. These are PDF/A and PDF/UA-1
- *      requirements.
+ *   2. **Dublin Core (dc)** - title, creator (author), description (subject).
+ *      Required by Matterhorn Protocol section 6 for PDF/UA-1 and by
+ *      ISO 19005-1 section 6.7.3 for PDF/A: every key in the document-info
+ *      dictionary that has an analogous XMP property must be mirrored.
  *
- *   2. **Dublin Core (dc)** - title, creator (author), description
- *      (subject). Required by Matterhorn Protocol §6 for PDF/UA-1
- *      and by ISO 19005-1 §6.7.3 for PDF/A - every key in the
- *      document-info dictionary that has an analogous XMP property
- *      must be mirrored.
+ *   3. **PDF schema (pdf)** - Keywords, Producer. Mirrors the /Keywords and
+ *      /Producer entries from the info dictionary.
  *
- *   3. **PDF schema (pdf)** - Keywords, Producer. Mirrors the
- *      /Keywords and /Producer entries from the info dict.
+ *   4. **XMP basic schema (xmp)** - CreatorTool, CreateDate, ModifyDate.
+ *      Mirrors /Creator, /CreationDate, /ModDate.
  *
- *   4. **XMP basic schema (xmp)** - CreatorTool, CreateDate,
- *      ModifyDate. Mirrors /Creator, /CreationDate, /ModDate.
- *
- * Returns an empty string when no conformance blocks are provided -
- * preserves existing behaviour for the pre-T-14 "no XMP body" code
- * path used by plain (non-tagged, non-PDF/A) documents.
+ * Returns an empty string when no conformance blocks are provided, which is the
+ * "no XMP body" path plain (non-tagged, non-PDF/A) documents rely on.
  */
 export class XmpMetadataWriter {
   public static generateXmpXml(

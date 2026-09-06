@@ -20,6 +20,7 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  */
 export type SemanticGroupOptions = VerticalStackOptions;
 
+/** Groups child elements under an explicit accessibility role without adding visual styling. */
 export class SemanticGroup extends VerticalStack implements IRoleProvider {
   private readonly _role: SemanticRole;
 

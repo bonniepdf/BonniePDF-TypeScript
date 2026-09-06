@@ -27,6 +27,7 @@ export type BarChartOptions = CartesianChartOptions &
     barColor?: ColorInput;
   };
 
+/** Renders a data series as vertical or horizontal bars. */
 export class BarChart extends CartesianChartBase {
   private static readonly BAR_COLOR_HEX = '#4f46e5';
 

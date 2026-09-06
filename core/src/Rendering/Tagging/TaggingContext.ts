@@ -1,17 +1,15 @@
 import { StructureTreeBuilder } from './StructureTreeBuilder';
 
 /**
- * Carries the per-document tagging state through the render pipeline:
- * the in-memory {@link StructureTreeBuilder} being populated, a per-page
- * MCID counter that the canvas uses to label each marked-content
- * sequence, and a stack of currently-open marked-content roles used by
- * the page-break handler to keep BDC/EMC balanced per page (this feature /
- * this feature / this feature stage 0).
+ * Carries the per-document tagging state through the render pipeline: the
+ * in-memory {@link StructureTreeBuilder} being populated, a per-page MCID
+ * counter that the canvas uses to label each marked-content sequence, and a
+ * stack of currently-open marked-content roles that the page-break handler uses
+ * to keep BDC/EMC balanced per page.
  *
- * One instance per Document render; `RenderContext` hands it to each
- * per-page `PdfCanvas`. When tagging is disabled, the context is
- * undefined and the canvas's beginMarkedContent/endMarkedContent are
- * no-ops.
+ * One instance per Document render; `RenderContext` hands it to each per-page
+ * `PdfCanvas`. When tagging is disabled the context is undefined and the
+ * canvas's beginMarkedContent/endMarkedContent are no-ops.
  */
 export class TaggingContext {
   /** The structure-tree builder being populated. */

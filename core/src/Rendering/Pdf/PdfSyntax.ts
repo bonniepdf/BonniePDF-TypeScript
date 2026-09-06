@@ -1,5 +1,6 @@
 import type { TtfFont } from '../../Typography/TrueType/TtfFont';
 
+/** Encodes primitive values, strings, dates, and text for PDF serialization. */
 export class PdfSyntax {
   public static encodeMetadataString(input: string): string {
     if (!input) return '()';

@@ -50,6 +50,7 @@ export type BarcodeOptions = ElementOptions &
     backgroundColor?: ColorInput;
   };
 
+/** Renders a supported one-dimensional barcode as vector graphics. */
 export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The value to encode. Content rules depend on {@link symbology}. */
   /** Creates a barcode, optionally configured in one expression. */

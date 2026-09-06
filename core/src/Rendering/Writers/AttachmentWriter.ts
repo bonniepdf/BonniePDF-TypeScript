@@ -21,7 +21,7 @@ export interface AttachmentWriteResult {
  * stream and one `/Filespec` per attachment, plus the shared `/EmbeddedFiles`
  * name tree the catalog references from `/Names`. The filespec object IDs are
  * returned so the caller can list them in the catalog's `/AF` array
- * (PDF/A-3 §6.8).
+ * (PDF/A-3 section 6.8).
  *
  * Attachment bytes are plain data, so the sync `writeBinaryObject` covers both
  * the sync and async serialize paths (the async path delegates to the same

@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { ImageLoader } from '../../src/Rendering/Images/ImageLoader';
 import { ImageFormat, ImageColorSpace } from '../../src/Rendering/Images/ImageInfo';
 import { createMinimalJpeg } from '../helpers/test-base';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, mkdtempSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 function pngCrc32(data: Uint8Array): number {
   let crc = 0xffffffff >>> 0;
@@ -561,8 +563,23 @@ describe('ImageLoader', () => {
     });
   });
 
-  describe('load() stub', () => {
-    it('load from file path throws (not implemented)', () => {
+  describe('load()', () => {
+    it('loads an image from a file path', () => {
+      const directory = mkdtempSync(join(tmpdir(), 'bonniepdf-image-loader-'));
+      const filePath = join(directory, 'image.jpg');
+      try {
+        writeFileSync(filePath, createMinimalJpeg());
+        const info = ImageLoader.load(filePath);
+
+        expect(info.format).toBe(ImageFormat.Jpeg);
+        expect(info.width).toBeGreaterThan(0);
+        expect(info.height).toBeGreaterThan(0);
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    });
+
+    it('reports file-system errors', () => {
       expect(() => ImageLoader.load('nonexistent.jpg')).toThrow();
     });
   });

@@ -2,10 +2,10 @@ import { SemanticRole, toPdfTag } from './SemanticRole';
 import type { IStructureVisitor } from './IStructureVisitor';
 
 /**
- * A node in the PDF structure tree. Carries a {@link SemanticRole}, a
- * parent reference, an ordered list of children, and the list of
- * marked-content identifiers (MCIDs) this element claims from the
- * content stream.
+ * Represents one semantic node and its marked-content references in the PDF
+ * structure tree. Carries a {@link SemanticRole}, a parent reference, an ordered
+ * list of children, and the marked-content identifiers (MCIDs) this element
+ * claims from the content stream.
  *
  * Optional metadata ({@link alt}, {@link actualText}, {@link lang},
  * {@link title}) is written into the PDF structure dictionary when set.

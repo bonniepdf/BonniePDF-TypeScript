@@ -22,6 +22,7 @@ export type LineOptions = ElementOptions &
     color?: ColorInput;
   };
 
+/** Renders a straight line with configurable color, width, and dash pattern. */
 export class Line extends ElementBase {
   /** Thickness of the line in points. Default is 1. */
   /** Creates a line (divider), optionally configured in one expression. */

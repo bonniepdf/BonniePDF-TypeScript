@@ -78,6 +78,7 @@ export type TableOptions = BorderedElementOptions &
     footer?: TableRow;
   };
 
+/** Lays out rows and cells with column sizing, headers, footers, borders, and pagination. */
 export class Table extends BorderedElementBase implements IRoleProvider {
   /**
    * When `true`, the table is a **layout (presentation) table**: it arranges

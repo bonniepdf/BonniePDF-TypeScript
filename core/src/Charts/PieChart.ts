@@ -34,6 +34,7 @@ export const PIE_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...PIE_CHART_OW
 /** Options for {@link PieChart}. Intersects {@link ChartBaseOptions}. */
 export type PieChartOptions = ChartBaseOptions & Partial<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>>;
 
+/** Renders a data series as proportional slices of a circle. */
 export class PieChart extends ChartBase {
   // Layout proportions (relative to chart dimensions)
   private static readonly TITLE_AREA_HEIGHT = 60;

@@ -1,9 +1,23 @@
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
+import { getPlatformIO } from '../../Platform/PlatformIO';
 
+/** Parses JPEG and PNG metadata from bytes or a platform-supported file path. */
 export class ImageLoader {
-  public static load(_filePath: string): ImageInfo {
-    // Stub: would load from file system
-    throw new Error('ImageLoader.load not implemented - use loadFromBytes instead');
+  /** Loads and parses an image from a file on platforms with synchronous file I/O. */
+  public static load(filePath: string): ImageInfo {
+    if (!filePath) {
+      throw new Error('Image file path cannot be empty');
+    }
+
+    const platformIO = getPlatformIO();
+    const readFileSync = platformIO.readFileSync;
+    if (!readFileSync) {
+      throw new Error(
+        'ImageLoader.load is only available on platforms with synchronous file I/O; use imageData instead'
+      );
+    }
+
+    return this.loadFromBytes(readFileSync.call(platformIO, filePath));
   }
 
   public static loadFromBytes(data: Uint8Array): ImageInfo {

@@ -40,6 +40,7 @@ export type ImageOptions = ElementOptions &
     fitMode?: ImageFitModeInput;
   };
 
+/** Renders JPEG or PNG image data as a document element. */
 export class Image extends ElementBase implements IRoleProvider, IAltTextProvider {
   private cachedInfo: ImageInfo | undefined;
 
@@ -124,7 +125,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
     return this.displayHeight.value;
   }
 
-  // Temporary storage for calculated dimensions
+  // Mutable result holders avoid allocating a tuple during repeated layout passes.
   private displayWidth = { value: 0 };
   private displayHeight = { value: 0 };
 
@@ -192,7 +193,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
     } else if (this.filePath !== '') {
       this.cachedInfo = ImageLoader.load(this.filePath);
     } else {
-      throw new Error('Either FilePath or ImageData must be specified');
+      throw new Error('Either filePath or imageData must be specified');
     }
 
     return this.cachedInfo;

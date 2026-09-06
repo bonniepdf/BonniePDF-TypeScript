@@ -7,12 +7,13 @@ function asBuffer(data: Uint8Array): ArrayBuffer {
 }
 
 /**
- * Generates encryption keys for PDF AES-256 encryption (V5, R6).
- * Implements the key derivation algorithm from PDF 2.0 / Extension Level 3.
+ * Derives the keys and validation values required by PDF AES-256 encryption
+ * (V5, R6), implementing the key derivation algorithm from PDF 2.0 /
+ * Extension Level 3.
  *
- * Construction is async because SHA-256 (SubtleCrypto) and AES-CBC (SubtleCrypto)
- * are strictly Promise-based in the Web Crypto API.
- * Use `Aes256EncryptionKey.create(settings)` instead of `new Aes256EncryptionKey(settings)`.
+ * Construction is async because SHA-256 and AES-CBC are strictly Promise-based
+ * in the Web Crypto API. Use `Aes256EncryptionKey.create(settings)` rather than
+ * `new Aes256EncryptionKey(settings)`.
  */
 export class Aes256EncryptionKey {
   /** The 32-byte file encryption key (randomly generated). */

@@ -26,6 +26,7 @@ export type VerticalStackOptions = ElementOptions &
     children?: IElement[];
   };
 
+/** Arranges child elements from top to bottom with configurable spacing. */
 export class VerticalStack extends ElementBase implements IStatefulElement {
   private readonly _children: IElement[] = [];
   private lastChildRendered: number = -1;

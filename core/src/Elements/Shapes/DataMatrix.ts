@@ -49,6 +49,7 @@ export type DataMatrixOptions = ElementOptions &
     backgroundColor?: ColorInput;
   };
 
+/** Renders text or binary data as a vector Data Matrix ECC200 symbol. */
 export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextProvider {
   /** The data/text to encode. Any Unicode string is accepted. */
   /** Creates a Data Matrix symbol, optionally configured in one expression. */

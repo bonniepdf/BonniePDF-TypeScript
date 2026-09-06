@@ -22,6 +22,7 @@ export type ChartDataOptions = Partial<Pick<ChartData, 'title'>> & {
   xAxis?: AxisOptions | AxisOptionsOptions;
 };
 
+/** Contains the categories and series rendered by a chart. */
 export class ChartData {
   /**
    * Chart title displayed at the top

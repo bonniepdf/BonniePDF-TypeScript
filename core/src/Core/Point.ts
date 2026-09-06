@@ -1,6 +1,4 @@
-/**
- * Represents a 2D point with X and Y coordinates
- */
+/** Represents a two-dimensional coordinate. */
 export class Point {
   public readonly x: number;
   public readonly y: number;

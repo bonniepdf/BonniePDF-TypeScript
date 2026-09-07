@@ -13,7 +13,8 @@
     "lint": "eslint core/src core/tests",
     "lint:fix": "eslint core/src core/tests --fix",
     "prepare": "husky",
-    "generate-tagged": "tsx scripts/generate-tagged-pdfs.ts"
+    "generate-tagged": "tsx scripts/generate-tagged-pdfs.ts",
+    "generate-showcase": "tsx scripts/generate-showcase-assets.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,json,md}": "prettier --write"

@@ -102,6 +102,11 @@ export class PdfCanvas implements ICanvas {
     return this.stream;
   }
 
+  /** @inheritdoc */
+  public get graphicsStateDepth(): number {
+    return this.stateDepth;
+  }
+
   public saveState(): void {
     PdfOperators.saveState(this.stream);
     this.stateDepth++;

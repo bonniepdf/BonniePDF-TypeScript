@@ -84,9 +84,10 @@ async function main(): Promise<void> {
       const { pages, fontFaceCss } = await doc.generateSvgDocumentAsync({ maxPages: 1 });
       const [page] = pages;
       if (!page) throw new Error('exported no pages');
-      writeFileSync(resolve(svgDir, `${asset}.svg`), inlineFonts(page, fontFaceCss), 'utf-8');
+      const svg = inlineFonts(page, fontFaceCss);
+      writeFileSync(resolve(svgDir, `${asset}.svg`), svg, 'utf-8');
 
-      console.log(`  + ${asset.padEnd(28)} pdf ${kb(pdf.length)}   svg ${kb(Buffer.byteLength(page))}`);
+      console.log(`  + ${asset.padEnd(28)} pdf ${kb(pdf.length)}   svg ${kb(Buffer.byteLength(svg))}`);
     } catch (err) {
       console.error(`  x ${asset}: ${err instanceof Error ? err.message : String(err)}`);
       failures++;

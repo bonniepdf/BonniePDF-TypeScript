@@ -190,6 +190,15 @@ export class SvgCanvas implements ICanvas {
 
   // -- Graphics state -----------------------------------------------------
 
+  /**
+   * Outstanding `saveState` scopes. Unwinding this many `restoreState` calls closes
+   * every group they opened, nested clips included, since each restore unwinds to
+   * the depth its matching save recorded.
+   */
+  public get graphicsStateDepth(): number {
+    return this.saveDepths.length;
+  }
+
   public saveState(): void {
     this.saveDepths.push(this.groupDepth);
     this.svgElements.push('<g>');

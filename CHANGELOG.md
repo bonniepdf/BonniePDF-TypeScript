@@ -9,6 +9,17 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Fixed
+
+- Page breaks left graphics state unbalanced. The render pipeline wraps each
+  element in `saveState`/`restoreState`; when an element broke the page from
+  inside its own `render`, the restore ran against the new page and the page the
+  element started on kept an unclosed `q` - an invalid content stream per ISO
+  32000-1. SVG export hid this, because its group-balancing sweep closed the
+  stray `<g>`; the PDF was affected all the same. `newPage` now closes open
+  graphics-state scopes on the outgoing page and reopens them on the new one, as
+  it already did for marked content.
+
 - The ESM build now preserves module structure, one output file per source
   module, so a bundler can drop what an application does not use. Previously
   the ESM output was bundled, which welded the optional subsystems into the

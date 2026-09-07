@@ -10,6 +10,15 @@ export interface ICanvas {
   readonly width: number;
   readonly height: number;
 
+  /**
+   * How many graphics-state scopes are currently open (PDF `q` without its `Q`;
+   * SVG `<g>` without its `</g>`). A page break has to close these on the outgoing
+   * page and reopen them on the new one, the same way marked content is handled,
+   * because neither may cross a page boundary. Canvases that do not track
+   * graphics state may omit this.
+   */
+  readonly graphicsStateDepth?: number;
+
   saveState(): void;
   restoreState(): void;
 

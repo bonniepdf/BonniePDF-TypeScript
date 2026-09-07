@@ -312,6 +312,16 @@ export class RenderContext implements RenderContextContract {
       }
     }
 
+    // Graphics state gets the same treatment, and for the same reason: a `q`
+    // without its `Q` (or a `<g>` without its `</g>`) may not cross a page
+    // boundary. An element that breaks the page from inside its own render leaves
+    // the caller's saveState open here — the caller's finally will restoreState
+    // against the *new* page, which would otherwise silently drop the close and
+    // leave the outgoing page unbalanced. Close them here, reopen below, so both
+    // pages balance and the caller's restoreState still has a scope to close.
+    const reopenStateDepth = this.canvas.graphicsStateDepth ?? 0;
+    for (let i = 0; i < reopenStateDepth; i++) this.canvas.restoreState();
+
     this.flushCanvasToPage(); // save current page before moving on
     this.pages.push('');
     this.currentPageIndex++;
@@ -325,6 +335,8 @@ export class RenderContext implements RenderContextContract {
 
     // Layout capture: split every open node's rect across the page boundary.
     this.layoutRecorder?.pageBreak(outgoingBottomY, this.currentPageIndex, this.currentY);
+
+    for (let i = 0; i < reopenStateDepth; i++) this.canvas.saveState();
 
     if (reopenRoles) {
       for (const role of reopenRoles) {

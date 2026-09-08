@@ -9,6 +9,34 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Added
+
+- The accessibility preflight now checks **text colour contrast** against the
+  WCAG 2.2 AA thresholds (4.5:1, or 3:1 for text at 18pt and above, or 14pt and
+  above when bold). `evaluateCompliance` reports `contrast-insufficient` as a
+  warning, with the measured ratio and the threshold that applied, so the fix is
+  a colour change rather than an investigation.
+
+  Contrast is measured wherever the background can be determined from the
+  document model: text inside a container with a fill, a table cell under its
+  row/header/footer colour, a page colour, or the default white page. Where it
+  cannot — text over layered or freely drawn content, a page painted with a
+  background element, or anything partly transparent — the preflight reports
+  `contrast-unknown` (info) instead of assuming a colour. Reporting a confident
+  wrong verdict would be worse than reporting none.
+
+  These are the first findings that do not cite PDF/UA-1: ISO 14289-1 states no
+  numeric contrast requirement, so they carry `standard: 'WCAG 2.2'` and clause
+  `WCAG 2.2 SC 1.4.3 (AA)`. Existing findings are unchanged, and because the new
+  findings are warnings and info, `report.passed` keeps its meaning.
+
+  Supporting this, the layout snapshot moves to **schema version 4**: nodes carry
+  an optional `paint` block (text colour, size, weight, background fill, alpha)
+  and pages carry their resolved fill and whether they paint a background
+  element. Capture remains opt-in and observational — output is byte-identical
+  with and without it. `contrastRatio`, `relativeLuminance` and `requiredRatio`
+  are exported for callers that want the maths directly.
+
 ### Fixed
 
 - Page breaks left graphics state unbalanced. The render pipeline wraps each

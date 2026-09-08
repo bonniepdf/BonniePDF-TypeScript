@@ -18,7 +18,15 @@
 // shared compliance-preflight specification and the shared fixtures.
 // ---------------------------------------------------------------------------
 
-import type { LayoutNode, LayoutSnapshot, NodeAccessibility } from '../Rendering/LayoutRecorder';
+import type { LayoutNode, LayoutSnapshot, NodeAccessibility, SnapshotPage } from '../Rendering/LayoutRecorder';
+import {
+  contrastRatio,
+  parseHexRgb,
+  requiredRatio,
+  roundRatio,
+  type ContrastUnknownReason,
+  type ContrastVerdict,
+} from './Contrast';
 
 /** Severity of a compliance finding, most-severe first. */
 export enum ComplianceSeverity {
@@ -64,6 +72,19 @@ export interface ComplianceReport {
 
 /** ISO 14289-1 (PDF/UA-1). */
 const UA = 'PDF/UA-1';
+
+/**
+ * WCAG 2.2. Contrast findings cite this rather than PDF/UA-1 because ISO 14289-1
+ * states **no numeric contrast requirement** — its §7.1 only forbids conveying
+ * information by contrast or colour *alone*. The 4.5:1 / 3:1 thresholds are
+ * WCAG's (SC 1.4.3), reaching PDF work via EN 301 549 and the European
+ * Accessibility Act. Attributing them to an ISO 14289 clause would be a false
+ * citation.
+ */
+const WCAG = 'WCAG 2.2';
+
+/** The clause both contrast rules cite. */
+const WCAG_CONTRAST_CLAUSE = 'WCAG 2.2 SC 1.4.3 (AA)';
 
 /**
  * Evaluates a layout snapshot against the PDF/UA-1 accessibility rules and
@@ -125,7 +146,9 @@ export function evaluateCompliance(snapshot: LayoutSnapshot): ComplianceReport {
   let headingCount = 0;
   let lastHeadingLevel = 0;
 
-  const visit = (node: LayoutNode): void => {
+  // Ancestors, nearest-first, are threaded through the walk because backdrop
+  // resolution (§4.3.1) is the one rule that needs to look upward.
+  const visit = (node: LayoutNode, ancestors: LayoutNode[]): void => {
     const a11y = node.a11y;
     if (a11y) {
       checkFigure(node, a11y, findings);
@@ -136,9 +159,11 @@ export function evaluateCompliance(snapshot: LayoutSnapshot): ComplianceReport {
       }
       if (a11y.role === 'Table') checkTableHeaders(node, findings);
     }
-    for (const child of node.children) visit(child);
+    checkContrast(node, ancestors, snapshot.pages, findings);
+    const chain = [node, ...ancestors];
+    for (const child of node.children) visit(child, chain);
   };
-  visit(snapshot.root);
+  visit(snapshot.root, []);
 
   if (headingCount === 0 && hasContent(snapshot.root)) {
     findings.push({
@@ -260,6 +285,131 @@ function checkTableHeaders(table: LayoutNode, out: ComplianceFinding[]): void {
     role: 'Table',
     page: pageOf(table),
   });
+}
+
+/**
+ * Resolves the colour painted behind a text node, walking ancestors nearest-first
+ * per `spec/08` §4.3.1.
+ *
+ * The important property of this function is that it is willing to say "I don't
+ * know". A confident wrong verdict is worse than no verdict: it trains authors to
+ * ignore the checker, and this estate has already watched a contrast harness
+ * inflate a few hundred real findings into tens of thousands of phantom ones.
+ */
+function resolveBackdrop(
+  ancestors: LayoutNode[],
+  pages: SnapshotPage[],
+  page: number | undefined
+): { hex: string } | { unknown: ContrastUnknownReason } {
+  for (const ancestor of ancestors) {
+    const paint = ancestor.paint;
+    if (!paint) continue;
+    // An element that paints arbitrary content behind its children (layers, a
+    // drawing surface) makes everything below it unmeasurable.
+    if (paint.backdropUnknown) return { unknown: 'unmodelled-backdrop' };
+    if (paint.background !== undefined) {
+      // A translucent fill composites with whatever is beneath it, which the
+      // snapshot does not model.
+      if (paint.backgroundAlpha !== undefined && paint.backgroundAlpha < 1) {
+        return { unknown: 'translucent' };
+      }
+      return { hex: paint.background };
+    }
+  }
+
+  // No coloured ancestor: fall through to the page.
+  const pageInfo = page === undefined ? undefined : pages[page];
+  if (pageInfo?.backdropUnknown) return { unknown: 'page-backdrop' };
+  if (pageInfo?.color !== undefined) return { hex: pageInfo.color };
+
+  // PDF viewers render pages on white paper, so this is a defined default rather
+  // than a guess.
+  return { hex: '#ffffff' };
+}
+
+/** Compares a text node's colour to its resolved backdrop. */
+function evaluateContrast(
+  node: LayoutNode,
+  ancestors: LayoutNode[],
+  pages: SnapshotPage[]
+): ContrastVerdict | undefined {
+  const paint = node.paint;
+  if (!paint?.text) return undefined;
+
+  if (paint.textAlpha !== undefined && paint.textAlpha < 1) {
+    return { kind: 'indeterminate', reason: 'translucent' };
+  }
+
+  const backdrop = resolveBackdrop(ancestors, pages, pageOf(node));
+  if ('unknown' in backdrop) return { kind: 'indeterminate', reason: backdrop.unknown };
+
+  const fg = parseHexRgb(paint.text);
+  const bg = parseHexRgb(backdrop.hex);
+  // A malformed colour degrades to "unknown" rather than to a wrong verdict.
+  if (!fg || !bg) return { kind: 'indeterminate', reason: 'unmodelled-backdrop' };
+
+  const ratio = roundRatio(contrastRatio(fg, bg));
+  const required = requiredRatio(paint.fontSize, paint.bold === true);
+  return { kind: ratio >= required ? 'pass' : 'fail', ratio, required };
+}
+
+/** Author-facing explanation of why a backdrop could not be resolved. */
+const UNKNOWN_REASON_TEXT: Record<ContrastUnknownReason, string> = {
+  'unmodelled-backdrop': 'it sits over layered or freely drawn content, so what is behind it is not a single colour',
+  'page-backdrop': 'the page paints a background element rather than a flat colour',
+  translucent: 'the text or its background is partly transparent, so the result depends on what is beneath',
+};
+
+/**
+ * WCAG 2.2 SC 1.4.3 (AA) text contrast.
+ *
+ * Reported as a **warning**, not an error: `passed` is defined as
+ * `errorCount === 0`, so promoting contrast to an error would silently change
+ * what `passed` means for every existing consumer.
+ */
+function checkContrast(
+  node: LayoutNode,
+  ancestors: LayoutNode[],
+  pages: SnapshotPage[],
+  out: ComplianceFinding[]
+): void {
+  const verdict = evaluateContrast(node, ancestors, pages);
+  if (!verdict) return;
+
+  if (verdict.kind === 'indeterminate') {
+    out.push({
+      code: 'contrast-unknown',
+      severity: ComplianceSeverity.Info,
+      standard: WCAG,
+      clause: WCAG_CONTRAST_CLAUSE,
+      message: `${node.type} text contrast could not be measured because ` + `${UNKNOWN_REASON_TEXT[verdict.reason]}.`,
+      fixHint:
+        'Check this text against its background by eye, or place it over a solid ' +
+        'colour so the contrast can be measured automatically.',
+      nodeId: node.id,
+      role: node.a11y?.role,
+      page: pageOf(node),
+    });
+    return;
+  }
+
+  if (verdict.kind === 'fail') {
+    out.push({
+      code: 'contrast-insufficient',
+      severity: ComplianceSeverity.Warning,
+      standard: WCAG,
+      clause: WCAG_CONTRAST_CLAUSE,
+      message:
+        `${node.type} text contrast is ${verdict.ratio.toFixed(2)}:1 against its ` +
+        `background, below the ${verdict.required}:1 required at this text size.`,
+      fixHint:
+        `Darken or lighten the text colour, or change its background, until the ` +
+        `ratio reaches ${verdict.required}:1.`,
+      nodeId: node.id,
+      role: node.a11y?.role,
+      page: pageOf(node),
+    });
+  }
 }
 
 /** True when any descendant node carries the given role. */

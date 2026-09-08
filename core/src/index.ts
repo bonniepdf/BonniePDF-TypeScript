@@ -181,15 +181,19 @@ export type {
   LayoutNode,
   LayoutRect,
   NodeAccessibility,
+  NodePaint,
   SnapshotMeta,
+  SnapshotPage,
 } from './Rendering/LayoutRecorder';
-export { LAYOUT_SNAPSHOT_VERSION, accessibilityOf } from './Rendering/LayoutRecorder';
+export { LAYOUT_SNAPSHOT_VERSION, accessibilityOf, paintOf } from './Rendering/LayoutRecorder';
 export { markDebugSource, debugSourceOf } from './Rendering/DebugSource';
 
 // Accessibility / compliance preflight — evaluates the layout snapshot against
 // PDF/UA-1 rules at authoring time and reports per-element findings.
 export { evaluateCompliance, ComplianceSeverity } from './Compliance/ComplianceEvaluator';
 export type { ComplianceFinding, ComplianceReport } from './Compliance/ComplianceEvaluator';
+export { contrastRatio, relativeLuminance, requiredRatio } from './Compliance/Contrast';
+export type { ContrastVerdict, ContrastUnknownReason } from './Compliance/Contrast';
 
 // Presets that write several coupled settings fields at once, and the
 // synchronous element-level SVG exporters.

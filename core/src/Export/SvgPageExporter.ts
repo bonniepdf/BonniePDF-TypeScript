@@ -10,7 +10,7 @@ import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportO
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
-import { LayoutRecorder, LayoutSnapshot } from '../Rendering/LayoutRecorder';
+import { LayoutRecorder, LayoutSnapshot, SnapshotPage, colorToHex } from '../Rendering/LayoutRecorder';
 import { debugSourceOf } from '../Rendering/DebugSource';
 import {
   beginDocumentFontMetricScope,
@@ -155,7 +155,14 @@ export async function exportSvgDocumentAsync(
   let snapshot: LayoutSnapshot | undefined;
   if (recorder) {
     // Page sizes align with the emitted SVG pages.
-    recorder.setPages(limited.map(o => ({ width: o.width, height: o.height })));
+    recorder.setPages(
+      limited.map(o => {
+        const page: SnapshotPage = { width: o.width, height: o.height };
+        if (o.pageColor) page.color = colorToHex(o.pageColor);
+        if (o.pageBackdropUnknown) page.backdropUnknown = true;
+        return page;
+      })
+    );
     // Document-level accessibility/compliance context for the evaluator.
     const metaTitle = document.metadata?.title;
     recorder.setMeta({

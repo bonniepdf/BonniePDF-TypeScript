@@ -14,7 +14,7 @@ import { TextBlock } from '../Text/TextBlock';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
 import { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
-import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
+import { captureTypeOf, captureNameOf, paintForBackground } from '../../Rendering/LayoutRecorder';
 import { beginChildTag, endChildTag, ChildTagToken } from '../../Rendering/Tagging/ChildTagging';
 
 /**
@@ -578,6 +578,12 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       (row.isHeader ? this.headerBackgroundColor : undefined) ??
       (row.isFooter ? this.footerBackgroundColor : undefined) ??
       this.rowBackgroundColor;
+
+    // The cascade above is the only place a cell's effective fill is known — the
+    // cell element itself carries no `backgroundColor` when the colour came from
+    // the row or the table. Hand it to the recorder so the contrast rules measure
+    // the cell's text against its real backdrop rather than against the page.
+    if (bgColor) ctx.layoutRecorder?.annotatePaint(cell, paintForBackground(bgColor));
 
     const textColor =
       cell.textColor ??

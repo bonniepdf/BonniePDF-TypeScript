@@ -20,10 +20,12 @@
 // ---------------------------------------------------------------------------
 
 import { debugSourceOf } from './DebugSource';
+import type { Color } from '../Core/Color';
 
 /** Schema version emitted in every snapshot, so consumers can feature-detect.
- * v2 adds accessibility metadata; v3 adds optional preview-only source ids. */
-export const LAYOUT_SNAPSHOT_VERSION = 3;
+ * v2 adds accessibility metadata; v3 adds optional preview-only source ids;
+ * v4 adds paint capture (colour/typography) and per-page backdrop facts. */
+export const LAYOUT_SNAPSHOT_VERSION = 4;
 
 /** Reads an element's canonical capture type without depending on ElementBase. */
 export function captureTypeOf(element: object): string {
@@ -113,6 +115,109 @@ export function accessibilityOf(element: object, type: string): NodeAccessibilit
   return a11y;
 }
 
+/**
+ * What an element paints, captured so the compliance preflight can evaluate
+ * colour contrast ({@link ../Compliance/ComplianceEvaluator}) without a second
+ * render pass or any inspection of the rendered output.
+ *
+ * Colours are `"#rrggbb"` strings with alpha carried separately, so an opaque
+ * document produces no alpha fields at all and fixtures stay readable across
+ * languages. Nodes that paint nothing relevant omit `paint` entirely.
+ */
+export interface NodePaint {
+  /** Resolved text colour, `"#rrggbb"`. */
+  text?: string;
+  /** Text alpha in `[0,1)`; omitted when fully opaque. */
+  textAlpha?: number;
+  /** The element's own resolved background fill, `"#rrggbb"`. */
+  background?: string;
+  /** Background alpha in `[0,1)`; omitted when fully opaque. */
+  backgroundAlpha?: number;
+  /** Rendered text size in points. */
+  fontSize?: number;
+  /** True when the resolved font weight is 700 or heavier. */
+  bold?: boolean;
+  /**
+   * The node paints something behind its children that cannot be reduced to one
+   * opaque colour — a background *element* rather than a colour, layers, a
+   * gradient, or a drawing surface. Descendant text is reported as
+   * `contrast-unknown` rather than measured against a guess.
+   */
+  backdropUnknown?: boolean;
+}
+
+/** Formats a colour as `"#rrggbb"` (alpha is carried separately). */
+export function colorToHex(color: Color): string {
+  const channel = (v: number): string => v.toString(16).padStart(2, '0');
+  return `#${channel(color.R)}${channel(color.G)}${channel(color.B)}`;
+}
+
+/** Alpha in `[0,1]`, rounded to 3 decimals so fixtures compare cleanly. */
+function alphaOf(color: Color): number {
+  return Math.round(color.scA * 1000) / 1000;
+}
+
+/**
+ * Element types that draw arbitrary content behind whatever is stacked on them,
+ * so a descendant's backdrop cannot be reduced to one opaque colour.
+ *
+ * `Layers` is how `Container.layers(...)` materialises (it builds a Layers child),
+ * and a drawing surface can paint anything at all. Image-like elements are leaves
+ * — text is never their descendant — so they are not listed here.
+ */
+const UNMODELLED_BACKDROP_TYPES = new Set(['Layers', 'CanvasElement']);
+
+/**
+ * Builds a {@link NodePaint} carrying just a resolved background colour, for
+ * callers that compute a fill outside the element (see
+ * {@link LayoutRecorder.annotatePaint}).
+ */
+export function paintForBackground(color: Color): NodePaint {
+  const paint: NodePaint = { background: colorToHex(color) };
+  const alpha = alphaOf(color);
+  if (alpha < 1) paint.backgroundAlpha = alpha;
+  return paint;
+}
+
+/**
+ * Derives {@link NodePaint} from an element instance by reading its already
+ * resolved `textColor` / `fontSize` / `fontWeight` / `backgroundColor` — the same
+ * values the canvas is about to draw with. Returns `undefined` when the element
+ * paints nothing the contrast rules care about, so most nodes stay unannotated.
+ *
+ * Purely observational: it reads existing properties and never triggers layout.
+ */
+export function paintOf(element: object, type: string): NodePaint | undefined {
+  const el = element as {
+    textColor?: Color;
+    fontSize?: number;
+    fontWeight?: number;
+    backgroundColor?: Color;
+  };
+  const paint: NodePaint = {};
+
+  // Text side. `textColor` has a black default on text elements, so gate on the
+  // element actually being text-bearing (it exposes a numeric fontSize).
+  if (el.textColor && typeof el.fontSize === 'number') {
+    paint.text = colorToHex(el.textColor);
+    const alpha = alphaOf(el.textColor);
+    if (alpha < 1) paint.textAlpha = alpha;
+    paint.fontSize = el.fontSize;
+    if (typeof el.fontWeight === 'number' && el.fontWeight >= 700) paint.bold = true;
+  }
+
+  // Background side.
+  if (el.backgroundColor) {
+    paint.background = colorToHex(el.backgroundColor);
+    const alpha = alphaOf(el.backgroundColor);
+    if (alpha < 1) paint.backgroundAlpha = alpha;
+  }
+
+  if (UNMODELLED_BACKDROP_TYPES.has(type)) paint.backdropUnknown = true;
+
+  return Object.keys(paint).length > 0 ? paint : undefined;
+}
+
 /** A single rectangle an element occupied on one page (top-left origin, points). */
 export interface LayoutRect {
   /** 0-based page index, aligned with {@link LayoutSnapshot.pages} and SVG page order. */
@@ -137,6 +242,8 @@ export interface LayoutNode {
   rects: LayoutRect[];
   /** Intrinsic accessibility facts, when the element declares a role. */
   a11y?: NodeAccessibility;
+  /** Intrinsic colour/typography facts, when the element paints any. */
+  paint?: NodePaint;
   children: LayoutNode[];
 }
 
@@ -157,10 +264,25 @@ export interface SnapshotMeta {
 }
 
 /** The captured layout of a whole document. */
+/**
+ * One rendered page's size and backdrop facts. `color` is the resolved page fill
+ * (a per-page `pageColor` overriding the document default); `backdropUnknown`
+ * marks a page that paints a background *element*, whose backdrop the contrast
+ * rules must not guess at.
+ */
+export interface SnapshotPage {
+  width: number;
+  height: number;
+  /** Resolved page fill, `"#rrggbb"`, when one is set. */
+  color?: string;
+  /** The page paints a background element, so its backdrop is unmodellable. */
+  backdropUnknown?: boolean;
+}
+
 export interface LayoutSnapshot {
   version: number;
   /** Page sizes in points, index-aligned with the rendered pages. */
-  pages: { width: number; height: number }[];
+  pages: SnapshotPage[];
   /** Root node (the Document). Its children form the element tree in render order. */
   root: LayoutNode;
   /** Document-level accessibility/compliance context. */
@@ -207,12 +329,17 @@ export class LayoutRecorder {
   /** Open nodes keyed by element identity, so resumed segments coalesce. */
   private readonly open = new Map<object, OpenFrame>();
   private nextId = 1;
-  private pageSizes: { width: number; height: number }[] = [];
+  private pageSizes: SnapshotPage[] = [];
   private meta: SnapshotMeta | undefined;
 
   /** Records the page sizes (index-aligned with rendered pages). */
-  public setPages(pages: { width: number; height: number }[]): void {
-    this.pageSizes = pages.map(p => ({ width: p.width, height: p.height }));
+  public setPages(pages: SnapshotPage[]): void {
+    this.pageSizes = pages.map(p => {
+      const page: SnapshotPage = { width: p.width, height: p.height };
+      if (p.color !== undefined) page.color = p.color;
+      if (p.backdropUnknown) page.backdropUnknown = true;
+      return page;
+    });
   }
 
   /** Records the document-level accessibility/compliance context. */
@@ -240,12 +367,32 @@ export class LayoutRecorder {
     if (sourceId) node.sourceId = sourceId;
     const a11y = accessibilityOf(element, type);
     if (a11y) node.a11y = a11y;
+    const paint = paintOf(element, type);
+    if (paint) node.paint = paint;
     const parent = this.stack[this.stack.length - 1];
     parent.node.children.push(node);
 
     const frame: OpenFrame = { node, x, width, page, startY: y };
     this.stack.push(frame);
     this.open.set(element, frame);
+  }
+
+  /**
+   * Merges additional paint facts into an already-open node.
+   *
+   * Needed where the value a node paints is not one of its own properties: a
+   * table cell's background comes from the header/footer/row cascade resolved in
+   * the row renderer, so the cell element itself has no `backgroundColor` to
+   * read. Without this the cell would appear unpainted and its text would be
+   * measured against the page instead of its actual fill.
+   *
+   * A no-op when no node is open for `element`, so callers need no guard.
+   */
+  public annotatePaint(element: object, paint: NodePaint): void {
+    if (!this.capturing) return;
+    const frame = this.open.get(element);
+    if (!frame) return;
+    frame.node.paint = { ...frame.node.paint, ...paint };
   }
 
   /** Closes a node. When `complete` is false the node stays open for resumption. */

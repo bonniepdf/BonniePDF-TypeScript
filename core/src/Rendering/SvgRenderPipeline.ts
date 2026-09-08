@@ -19,6 +19,17 @@ export interface SvgPageRenderOutput {
   /** The page's render surface, ready to be serialized to a standalone SVG. */
   canvas: SvgCanvas;
   /**
+   * The page's resolved solid fill (per-page `pageColor` overriding the document
+   * default), when one is set. Recorded for the layout snapshot so the contrast
+   * preflight can resolve a backdrop for text with no coloured ancestor.
+   */
+  pageColor?: Color;
+  /**
+   * True when this page paints a background *element* rather than (or as well as)
+   * a flat colour, so its backdrop cannot be reduced to one opaque colour.
+   */
+  pageBackdropUnknown?: boolean;
+  /**
    * Clickable link-overlay markup for this page (external `<a>` anchors and
    * internal `data-bp-link-page` rects), kept separate from the canvas body so
    * the assembler can position it above — but outside — the atomic-image group.
@@ -164,7 +175,19 @@ export class SvgRenderPipeline {
       const linkOverlays = this.renderLinkOverlays(ctx.pageHyperlinks.get(i) ?? [], dim.height);
 
       canvas.resolveTotalPages(totalPages);
-      outputs.push({ pageNumber: i + 1, width: dim.width, height: dim.height, canvas, linkOverlays });
+      const output: SvgPageRenderOutput = {
+        pageNumber: i + 1,
+        width: dim.width,
+        height: dim.height,
+        canvas,
+        linkOverlays,
+      };
+      const resolvedPageColor = dim.pageColor ?? settings.pageColor;
+      if (resolvedPageColor) output.pageColor = resolvedPageColor;
+      // A background *element* can paint anything, so a page carrying one has an
+      // unmodellable backdrop for contrast purposes (spec/07 §9.4).
+      if (dim.pageBackground ?? settings.pageBackground) output.pageBackdropUnknown = true;
+      outputs.push(output);
     }
 
     return outputs;

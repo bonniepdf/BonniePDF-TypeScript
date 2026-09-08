@@ -74,6 +74,14 @@ jobs:
       - name: Build
         run: pnpm turbo build
 
+      # The authoring-time gate, run before the file-level one because it is fast
+      # (no Java, no veraPDF download) and because it reports which *element* is
+      # at fault rather than which object number. Fails on error severity only —
+      # contrast findings are warnings and must not block a build over a
+      # deliberately styled showcase.
+      - name: Accessibility preflight over the example catalogue
+        run: pnpm check:preflight
+
       # The example set is derived from the shared registry (examples/src/index.ts):
       # every example with `pdfUa1: true` (and no password) is generated, along
       # with the mandatory PDF/A-4 baseline fixture.

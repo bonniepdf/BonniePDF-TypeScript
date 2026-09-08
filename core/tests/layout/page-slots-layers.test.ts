@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Document } from '../../src/Document';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { PdfSize } from '../../src/Configuration/PdfSize';
+import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
 import { RenderContext } from '../../src/Rendering/RenderContext';
 import { PdfRenderPipeline } from '../../src/Rendering/PdfRenderPipeline';
 import { Page } from '../../src/Elements/Layout/Page';
@@ -19,7 +20,7 @@ import { Color } from '../../src/Core/Color';
  */
 
 function text(content: string): TextBlock {
-  return new TextBlock(content, 12, StandardFonts.Helvetica);
+  return new TextBlock(content, { fontSize: 12, fontName: StandardFonts.Helvetica });
 }
 
 /**
@@ -45,7 +46,9 @@ function canvasFill(color: Color): CanvasElement {
 function canvasFillOpsColorLine(color: Color): string {
   const ctx = new RenderContext(PdfSize.a4, 50);
   canvasFill(color).render(ctx, 10);
-  const ops = (ctx.canvas as { getStream(): string[] }).getStream().join('');
+  const canvas = ctx.canvas;
+  if (!(canvas instanceof PdfCanvas)) throw new Error('expected the render context to hold a PdfCanvas');
+  const ops = canvas.getStream().join('');
   const match = ops.match(/[\d.]+ [\d.]+ [\d.]+ rg/);
   if (!match) throw new Error(`no rg operator found in: ${ops}`);
   return match[0];

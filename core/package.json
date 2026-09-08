@@ -53,7 +53,7 @@
   "scripts": {
     "build": "tsup && tsup --config tsup.cjs.config.ts && node scripts/fix-esm-extensions.mjs dist && tsc --noEmit false --emitDeclarationOnly --declaration --declarationMap --outDir dist",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tests.json",
     "prepack": "pnpm run build",
     "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist', { recursive: true, force: true });\"",
     "test": "vitest run",

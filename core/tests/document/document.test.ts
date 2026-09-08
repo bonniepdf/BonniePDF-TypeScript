@@ -45,7 +45,7 @@ describe('Document', () => {
   });
 
   it('creates document with custom settings', () => {
-    const settings = new DocumentSettings(PdfSize.a4);
+    const settings = new DocumentSettings({ pageSize: PdfSize.a4 });
     doc = new Document(settings);
     expect(doc.settings).toBeDefined();
     // Document auto-creates the first page

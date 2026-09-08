@@ -136,6 +136,7 @@ class FakeWriter implements IPdfWriter {
   }
 
   // Unused-by-tests interface fillers - return sensible defaults.
+  writeRawObject(): void {}
   writeCompressedObject(): void {}
   writeBinaryObject(): void {}
   writeCompressedBinaryObject(): void {}

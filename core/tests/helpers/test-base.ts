@@ -1,3 +1,4 @@
+import { expect } from 'vitest';
 import { inflateSync } from 'node:zlib';
 import { ChartData } from '../../src/Charts/Models/ChartData';
 import { ChartSeries } from '../../src/Charts/Models/ChartSeries';

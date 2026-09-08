@@ -3,6 +3,8 @@ import { Color } from '../../src/Core/Color';
 import { Size } from '../../src/Core/Size';
 import { Point } from '../../src/Core/Point';
 import { TextAlignment } from '../../src/Elements/Text/TextAlignment';
+import type { Paint } from '../../src/Drawing/Paint/Paint';
+import type { FillRule, StrokeStyle } from '../../src/Drawing/StrokeStyle';
 
 export class MockCanvas implements ICanvas {
   public readonly operations: string[] = [];
@@ -147,5 +149,81 @@ export class MockCanvas implements ICanvas {
 
   endCrispEdges(): void {
     this.operations.push('EndCrispEdges()');
+  }
+
+  // ── Path construction and transforms ──────────────────────────────────────
+  //
+  // Recorded in the same shape as everything else rather than left off the
+  // double. These were previously absent, so `MockCanvas` did not actually
+  // satisfy `ICanvas` and any element that built a path would have thrown a
+  // TypeError mid-test instead of recording an operation. Nothing exercised
+  // them, because the tests were never typechecked.
+
+  beginPath(): void {
+    this.operations.push('BeginPath()');
+  }
+
+  moveTo(x: number, y: number): void {
+    this.operations.push(`MoveTo(${x},${y})`);
+  }
+
+  lineTo(x: number, y: number): void {
+    this.operations.push(`LineTo(${x},${y})`);
+  }
+
+  quadraticBezierTo(cx: number, cy: number, x: number, y: number): void {
+    this.operations.push(`QuadraticBezierTo(${cx},${cy},${x},${y})`);
+  }
+
+  cubicBezierTo(c1x: number, c1y: number, c2x: number, c2y: number, x: number, y: number): void {
+    this.operations.push(`CubicBezierTo(${c1x},${c1y},${c2x},${c2y},${x},${y})`);
+  }
+
+  closePath(): void {
+    this.operations.push('ClosePath()');
+  }
+
+  addRect(x: number, y: number, width: number, height: number): void {
+    this.operations.push(`AddRect(${x},${y},${width},${height})`);
+  }
+
+  addCircle(cx: number, cy: number, radius: number): void {
+    this.operations.push(`AddCircle(${cx},${cy},${radius})`);
+  }
+
+  addEllipse(cx: number, cy: number, rx: number, ry: number): void {
+    this.operations.push(`AddEllipse(${cx},${cy},${rx},${ry})`);
+  }
+
+  fillCurrentPath(_paint: Paint | Color, rule?: FillRule): void {
+    this.operations.push(`FillCurrentPath(${rule ?? 'nonzero'})`);
+  }
+
+  strokeCurrentPath(style: StrokeStyle): void {
+    this.operations.push(`StrokeCurrentPath(${style.width})`);
+  }
+
+  clipToCurrentPath(rule?: FillRule): void {
+    this.operations.push(`ClipToCurrentPath(${rule ?? 'nonzero'})`);
+  }
+
+  translate(tx: number, ty: number): void {
+    this.operations.push(`Translate(${tx},${ty})`);
+  }
+
+  scale(sx: number, sy: number): void {
+    this.operations.push(`Scale(${sx},${sy})`);
+  }
+
+  rotate(angleDegrees: number): void {
+    this.operations.push(`Rotate(${angleDegrees})`);
+  }
+
+  transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this.operations.push(`Transform(${a},${b},${c},${d},${e},${f})`);
+  }
+
+  setGlobalAlpha(alpha: number): void {
+    this.operations.push(`SetGlobalAlpha(${alpha})`);
   }
 }

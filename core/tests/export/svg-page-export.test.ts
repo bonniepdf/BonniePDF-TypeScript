@@ -22,8 +22,8 @@ import { embeddedFontFamily } from '../../src/Drawing/SvgCanvas';
 
 function simpleDoc(): Document {
   const doc = new Document();
-  doc.add(new TextBlock('Hello, SVG world!', 14, StandardFonts.Helvetica));
-  doc.add(new TextBlock('Second line of text.', 11, StandardFonts.Helvetica));
+  doc.add(new TextBlock('Hello, SVG world!', { fontSize: 14, fontName: StandardFonts.Helvetica }));
+  doc.add(new TextBlock('Second line of text.', { fontSize: 11, fontName: StandardFonts.Helvetica }));
   return doc;
 }
 
@@ -89,7 +89,7 @@ describe('SVG page export', () => {
     bg.backgroundColor = Color.fromHex('#123456');
     bg.height = 841.89;
     doc.settings.pageBackground = () => bg;
-    doc.add(new TextBlock('On top of the background', 14, StandardFonts.Helvetica));
+    doc.add(new TextBlock('On top of the background', { fontSize: 14, fontName: StandardFonts.Helvetica }));
 
     const svg = await doc.generateFirstPageSvgAsync();
     // A full-page rect with the background fill is present…
@@ -108,7 +108,7 @@ describe('SVG page export', () => {
     doc = new Document();
     for (let i = 0; i < 3; i++) {
       if (i > 0) doc.addPage();
-      doc.add(new TextBlock(`Page ${i + 1}`, 12, StandardFonts.Helvetica));
+      doc.add(new TextBlock(`Page ${i + 1}`, { fontSize: 12, fontName: StandardFonts.Helvetica }));
     }
     const pages = await doc.generateSvgPagesAsync();
     expect(pages.length).toBeGreaterThanOrEqual(3);
@@ -119,7 +119,7 @@ describe('SVG page export', () => {
     doc = new Document();
     for (let i = 0; i < 4; i++) {
       if (i > 0) doc.addPage();
-      doc.add(new TextBlock(`Page ${i + 1}`, 12, StandardFonts.Helvetica));
+      doc.add(new TextBlock(`Page ${i + 1}`, { fontSize: 12, fontName: StandardFonts.Helvetica }));
     }
     const pages = await doc.generateSvgPagesAsync({ maxPages: 2 });
     expect(pages).toHaveLength(2);
@@ -170,8 +170,8 @@ describe('SVG page export', () => {
     doc = new Document();
     const table = new Table(80, 80);
     table.addRow(
-      new TextBlock('Cell A', 10, StandardFonts.Helvetica),
-      new TextBlock('Cell B', 10, StandardFonts.Helvetica)
+      new TextBlock('Cell A', { fontSize: 10, fontName: StandardFonts.Helvetica }),
+      new TextBlock('Cell B', { fontSize: 10, fontName: StandardFonts.Helvetica })
     );
     doc.add(table);
     const svg = await doc.generateFirstPageSvgAsync();
@@ -193,7 +193,7 @@ describe('SVG page export', () => {
 
   it('renders header and footer templates on every page', async () => {
     doc = new Document();
-    doc.add(new TextBlock('Body', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Body', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     doc.settings.headerTemplate = pageNum => {
       const tb = new TextBlock();
       tb.text = `Header ${pageNum}`;
@@ -217,7 +217,7 @@ describe('SVG page export', () => {
     doc = new Document();
     for (let i = 0; i < 3; i++) {
       if (i > 0) doc.addPage();
-      doc.add(new TextBlock(`Body ${i + 1}`, 12, StandardFonts.Helvetica));
+      doc.add(new TextBlock(`Body ${i + 1}`, { fontSize: 12, fontName: StandardFonts.Helvetica }));
     }
     doc.settings.footerTemplate = pageNum => {
       const tb = new TextBlock();
@@ -244,7 +244,7 @@ describe('SVG page export', () => {
 
   it('escapes XML special characters in text', async () => {
     doc = new Document();
-    doc.add(new TextBlock('a < b & c > d', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('a < b & c > d', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     const svg = await doc.generateFirstPageSvgAsync();
     expect(svg).toContain('&lt;');
     expect(svg).toContain('&amp;');
@@ -253,7 +253,7 @@ describe('SVG page export', () => {
 
   it('supports right and center aligned text', async () => {
     doc = new Document();
-    const center = new TextBlock('Centered', 12, StandardFonts.Helvetica);
+    const center = new TextBlock('Centered', { fontSize: 12, fontName: StandardFonts.Helvetica });
     center.alignment = TextAlignment.Center;
     doc.add(center);
     const svg = await doc.generateFirstPageSvgAsync();
@@ -468,7 +468,7 @@ describe('SVG page export — embedded standard-font alignment', () => {
     link.targetPageIndex = 1; // 0-based target -> 1-based in the marker
     doc.add(link);
     doc.addPage();
-    doc.add(new TextBlock('Appendix', 11, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Appendix', { fontSize: 11, fontName: StandardFonts.Helvetica }));
 
     const pages = await doc.generateSvgPagesAsync();
     expect(pages[0]).toContain('data-bp-link-page="2"');

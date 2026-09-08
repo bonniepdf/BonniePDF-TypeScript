@@ -25,6 +25,24 @@ class MockPdfWriter implements IPdfWriter {
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void {
     this.writeBinaryObject(id, dictionary, bytes);
   }
+
+  // Unused-by-tests interface fillers - return sensible defaults. ImageWriter
+  // only ever reaches the four members above; anything it wrote through these
+  // would go unrecorded and fail the assertions on writtenObjects.
+  writeRawObject(): void {}
+  writeCompressedObject(): void {}
+  writeCompressedBinaryObject(): void {}
+  writeLinkAnnotation(id: number): number {
+    return id;
+  }
+  writeEncryptDictionary(id: number): number {
+    return id;
+  }
+  writeViewerPreferences(id: number): number {
+    return id;
+  }
+  writeCatalog(): void {}
+  close(): void {}
 }
 
 function createJpegInfo(): ImageInfo {

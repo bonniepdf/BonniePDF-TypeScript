@@ -110,7 +110,7 @@ describe('Compliance preflight evaluator', () => {
 
   it('flags missing language and title for an untagged document (as warnings)', async () => {
     doc = new Document();
-    doc.add(new TextBlock('Body text', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Body text', { fontSize: 12, fontName: StandardFonts.Helvetica }));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
     const report = evaluateCompliance(snapshot!);

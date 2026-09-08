@@ -8,7 +8,7 @@ import { assertValidPdf, assertPdfHasFonts } from '../helpers/test-base';
 async function generateDocumentBytes(text: string): Promise<Uint8Array> {
   const doc = new Document();
   try {
-    doc.add(new TextBlock(text, 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock(text, { fontSize: 12, fontName: StandardFonts.Helvetica }));
     return doc.generateBytes();
   } finally {
     doc.dispose();
@@ -49,7 +49,7 @@ describe('Concurrency', () => {
     const tasks = Array.from({ length: 5 }, async (_, i) => {
       const doc = new Document();
       try {
-        doc.add(new TextBlock(`Encrypted doc ${i}`, 12, StandardFonts.Helvetica));
+        doc.add(new TextBlock(`Encrypted doc ${i}`, { fontSize: 12, fontName: StandardFonts.Helvetica }));
         withPassword(doc.settings, `password${i}`);
         return doc.generateBytes();
       } finally {

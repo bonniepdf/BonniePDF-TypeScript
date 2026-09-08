@@ -34,6 +34,7 @@ describe('StructureTreeWriter - /Pg + /ParentTree', () => {
     writeObject(id: number, dict: Map<string, string>): void {
       this.objects.push({ id, dict: new Map(dict) });
     }
+    writeRawObject(): void {}
     writeCompressedObject(): void {}
     writeBinaryObject(): void {}
     writeCompressedBinaryObject(): void {}

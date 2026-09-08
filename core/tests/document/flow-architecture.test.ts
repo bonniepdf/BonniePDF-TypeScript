@@ -76,14 +76,14 @@ describe('RenderStatus', () => {
 describe('TextBlock stateful rendering', () => {
   it('TextBlock renders and returns Complete status for short text', () => {
     const ctx = new RenderContext(PdfSize.a4, 20);
-    const textBlock = new TextBlock('Short text', 12, StandardFonts.Helvetica);
+    const textBlock = new TextBlock('Short text', { fontSize: 12, fontName: StandardFonts.Helvetica });
     const status = textBlock.renderStateful(ctx, 400);
     expect(status).toBe(RenderStatus.Complete);
   });
 
   it('TextBlock resetState allows re-render', () => {
     const ctx = new RenderContext(PdfSize.a4, 20);
-    const textBlock = new TextBlock('Hello world', 12, StandardFonts.Helvetica);
+    const textBlock = new TextBlock('Hello world', { fontSize: 12, fontName: StandardFonts.Helvetica });
     textBlock.renderStateful(ctx, 400);
     textBlock.resetState();
     // After reset, should be renderable again

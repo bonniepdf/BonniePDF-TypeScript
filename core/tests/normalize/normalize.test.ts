@@ -87,9 +87,9 @@ describe('toColor (spec 06 §4A.2)', () => {
     // to yield NaN channels and emit "NaN NaN NaN rg" into the content stream.
     for (const bad of ['#gg0000', '#zzzzzz', '#zzz', '#12345g', '#gggggggg']) {
       const c = toColor(bad as `#${string}`);
-      expect(Number.isNaN(c.r)).toBe(false);
-      expect(Number.isNaN(c.g)).toBe(false);
-      expect(Number.isNaN(c.b)).toBe(false);
+      expect(Number.isNaN(c.R)).toBe(false);
+      expect(Number.isNaN(c.G)).toBe(false);
+      expect(Number.isNaN(c.B)).toBe(false);
       expect(c).toEqual(Color.black);
     }
   });

@@ -109,7 +109,7 @@ pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
 
 - `pnpm test` from `core/`. The vitest suite and the .NET xUnit suite are both derived from the **shared conformance fixtures**, not from each other. When you change behaviour, update the fixtures and both suites together — that is how parity is enforced.
 - `helpers/test-base.ts` and `helpers/mock-canvas.ts` set up the browser-ish environment for chart/font tests.
-- **The suite is on strict TypeScript.** Keep it that way; don't loosen `tsconfig` to land a change.
+- **The suite is on strict TypeScript, and `pnpm typecheck` covers it.** Two configs, because one cannot do both jobs: `tsconfig.json` has `rootDir: "src"` and drives the build's declaration emit, so it cannot include `tests/`; [`core/tsconfig.tests.json`](core/tsconfig.tests.json) typechecks the suite. `typecheck` runs both — keep it that way, and don't loosen either to land a change. (Until Sept 2026 only the first ran, so the suite was never typechecked and had accumulated 132 errors. Most were calls passing three arguments to two-argument constructors, where the extras were silently dropped: tests naming `HelveticaBold` or a 48pt size were in fact rendering 12pt Helvetica.)
 - **This repo builds with the TypeScript 7 native compiler**, which does not expose the classic compiler API (`ts.createProgram`, `ts.ScriptTarget`, …). Tooling that needs the classic API must pin its own alias; don't assume `import ts from 'typescript'` provides it.
 
 ## When in doubt

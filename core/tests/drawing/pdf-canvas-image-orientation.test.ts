@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
+import { ImageInfo } from '../../src/Rendering/Images/ImageInfo';
+
+/** An ImageInfo carrying only the EXIF orientation these tests vary. */
+function imageWithOrientation(orientation?: number): ImageInfo {
+  const info = new ImageInfo();
+  if (orientation !== undefined) info.orientation = orientation;
+  return info;
+}
 
 /**
  * Verifies the EXIF orientation transform emitted by PdfCanvas.drawImage.
@@ -11,7 +19,7 @@ import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
 describe('PdfCanvas.drawImage - EXIF orientation', () => {
   function emit(orientation: number): string {
     const canvas = new PdfCanvas(1000, 0, 0, undefined, () => '/Im1');
-    canvas.drawImage({ orientation }, 10, 20, 100, 50);
+    canvas.drawImage(imageWithOrientation(orientation), 10, 20, 100, 50);
     return canvas.getStream().join('');
   }
 
@@ -41,7 +49,7 @@ describe('PdfCanvas.drawImage - EXIF orientation', () => {
 
   it('image with no orientation field falls back to orientation 1', () => {
     const canvas = new PdfCanvas(1000, 0, 0, undefined, () => '/Im1');
-    canvas.drawImage({} /* no orientation */, 10, 20, 100, 50);
+    canvas.drawImage(imageWithOrientation(), 10, 20, 100, 50);
     expect(canvas.getStream().join('')).toContain('100 0 0 50 0 0 cm');
   });
 });

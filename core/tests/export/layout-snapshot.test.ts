@@ -25,7 +25,7 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
 
   it('does not produce a snapshot unless captureLayout is requested', async () => {
     doc = new Document();
-    doc.add(new TextBlock('Hello', 14, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Hello', { fontSize: 14, fontName: StandardFonts.Helvetica }));
     const result = await doc.generateSvgDocumentAsync();
     expect(result.snapshot).toBeUndefined();
   });
@@ -33,11 +33,11 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
   it('carries opaque source ids only for preview-marked elements', async () => {
     doc = new Document();
     const marked = markDebugSource(
-      markDebugSource(new TextBlock('Marked', 14, StandardFonts.Helvetica), 'src:test-title'),
+      markDebugSource(new TextBlock('Marked', { fontSize: 14, fontName: StandardFonts.Helvetica }), 'src:test-title'),
       'src:outer-factory'
     );
     doc.add(marked);
-    doc.add(new TextBlock('Unmarked', 11, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Unmarked', { fontSize: 11, fontName: StandardFonts.Helvetica }));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
     const nodes = collect(snapshot!.root).filter(n => n.type === 'TextBlock');
@@ -47,9 +47,9 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
 
   it('maps the Document root and its auto-created Page to the document declaration', async () => {
     doc = markDebugSource(new Document(), 'src:document-declaration');
-    doc.add(new TextBlock('First page', 14, StandardFonts.Helvetica));
+    doc.add(new TextBlock('First page', { fontSize: 14, fontName: StandardFonts.Helvetica }));
     const explicitPage = doc.addPage();
-    explicitPage.add(new TextBlock('Second page', 14, StandardFonts.Helvetica));
+    explicitPage.add(new TextBlock('Second page', { fontSize: 14, fontName: StandardFonts.Helvetica }));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
     expect(snapshot!.root.sourceId).toBe('src:document-declaration');
@@ -59,8 +59,8 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
 
   it('captures a Document → Page → content tree', async () => {
     doc = new Document();
-    doc.add(new TextBlock('First', 14, StandardFonts.Helvetica));
-    doc.add(new TextBlock('Second', 11, StandardFonts.Helvetica));
+    doc.add(new TextBlock('First', { fontSize: 14, fontName: StandardFonts.Helvetica }));
+    doc.add(new TextBlock('Second', { fontSize: 11, fontName: StandardFonts.Helvetica }));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
     expect(snapshot).toBeDefined();
@@ -80,7 +80,7 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
 
   it('rectangles use a top-left, in-bounds, points coordinate space', async () => {
     doc = new Document();
-    doc.add(new TextBlock('Measure me', 14, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Measure me', { fontSize: 14, fontName: StandardFonts.Helvetica }));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
     const { width, height } = snapshot!.pages[0];
@@ -99,8 +99,8 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
   it('nests children under a VerticalStack', async () => {
     doc = new Document();
     const stack = new VerticalStack();
-    stack.add(new TextBlock('A', 12, StandardFonts.Helvetica));
-    stack.add(new TextBlock('B', 12, StandardFonts.Helvetica));
+    stack.add(new TextBlock('A', { fontSize: 12, fontName: StandardFonts.Helvetica }));
+    stack.add(new TextBlock('B', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     doc.add(stack);
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -114,7 +114,7 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     // its own snapshot node - a regression here makes links invisible to the
     // previewer's structure and accessibility views.
     doc = new Document();
-    doc.add(new TextBlock('Before', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Before', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     doc.add(new Hyperlink('Visit example', 'https://example.com'));
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -129,7 +129,7 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     doc = new Document();
     // Enough content to overflow a single A4 page several times over.
     for (let i = 0; i < 120; i++) {
-      doc.add(new TextBlock(`Line ${i + 1}`, 14, StandardFonts.Helvetica));
+      doc.add(new TextBlock(`Line ${i + 1}`, { fontSize: 14, fontName: StandardFonts.Helvetica }));
     }
 
     const { snapshot, pages } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -151,8 +151,8 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
   it('node ids are unique and deterministic across runs', async () => {
     const build = () => {
       const d = new Document();
-      d.add(new TextBlock('X', 12, StandardFonts.Helvetica));
-      d.add(new TextBlock('Y', 12, StandardFonts.Helvetica));
+      d.add(new TextBlock('X', { fontSize: 12, fontName: StandardFonts.Helvetica }));
+      d.add(new TextBlock('Y', { fontSize: 12, fontName: StandardFonts.Helvetica }));
       return d;
     };
     const a = build();
@@ -172,10 +172,11 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     const build = () => {
       const d = new Document();
       const stack = new VerticalStack();
-      stack.add(new TextBlock('Alpha', 14, StandardFonts.Helvetica));
-      stack.add(new TextBlock('Beta', 11, StandardFonts.Helvetica));
+      stack.add(new TextBlock('Alpha', { fontSize: 14, fontName: StandardFonts.Helvetica }));
+      stack.add(new TextBlock('Beta', { fontSize: 11, fontName: StandardFonts.Helvetica }));
       d.add(stack);
-      for (let i = 0; i < 60; i++) d.add(new TextBlock(`Row ${i}`, 12, StandardFonts.Helvetica));
+      for (let i = 0; i < 60; i++)
+        d.add(new TextBlock(`Row ${i}`, { fontSize: 12, fontName: StandardFonts.Helvetica }));
       return d;
     };
     const plain = build();

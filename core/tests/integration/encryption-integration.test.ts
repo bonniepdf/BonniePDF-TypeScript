@@ -20,7 +20,7 @@ describe('Encryption integration', () => {
 
   it('withPassword generates valid PDF', () => {
     doc = new Document();
-    doc.add(new TextBlock('Encrypted content', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('Encrypted content', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     withPassword(doc.settings, 'secret');
     assertValidPdf(doc.generateBytes());
   });
@@ -55,7 +55,7 @@ describe('Encryption integration', () => {
 
   it('AES256 document with content generates valid PDF', () => {
     doc = new Document();
-    doc.add(new TextBlock('AES encrypted content', 12, StandardFonts.Helvetica));
+    doc.add(new TextBlock('AES encrypted content', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     withEncryptionAes256(doc.settings, opt => opt.withUserPassword('aes256').withOwnerPassword('aes256'));
     const bytes = doc.generateBytes();
     expect(bytes.length).toBeGreaterThan(0);

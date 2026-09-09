@@ -59,6 +59,27 @@ export interface ComplianceFinding {
   page?: number;
 }
 
+/**
+ * Selects which rule families run. It never changes how a rule that does run
+ * behaves, so a filtered report is always a subset of the unfiltered one.
+ */
+export interface CompliancePreflightOptions {
+  /**
+   * Run the WCAG 2.2 contrast rules (`contrast-insufficient`,
+   * `contrast-unknown`). Defaults to `true`.
+   *
+   * With `false` those findings are absent from `findings` *and* from the counts,
+   * as if the document had no contrast problems; the PDF/UA-1 rules are
+   * untouched, and `passed` cannot change because no WCAG rule emits an error.
+   *
+   * The two families answer different questions — PDF/UA-1 findings are
+   * conformance to a claim the document makes, contrast is an adjacent standard
+   * an author may be tracking separately — and on a colour-rich document the
+   * contrast findings can bury the structural ones.
+   */
+  includeWcag?: boolean;
+}
+
 /** The result of evaluating a snapshot. */
 export interface ComplianceReport {
   /** Findings, ordered document-level first, then in document order. */
@@ -95,8 +116,16 @@ const WCAG_CONTRAST_CLAUSE = 'WCAG 2.2 SC 1.4.3 (AA)';
  * accessible, and if not, where?" for any document. When the document did not opt
  * into tagging, a single document-level {@link ComplianceSeverity.Info} finding
  * frames the rest as advisory rather than hard violations.
+ *
+ * `options` selects which rule *families* run — see
+ * {@link CompliancePreflightOptions}. Omitting it runs everything, so the
+ * one-argument call is unchanged.
  */
-export function evaluateCompliance(snapshot: LayoutSnapshot): ComplianceReport {
+export function evaluateCompliance(
+  snapshot: LayoutSnapshot,
+  options: CompliancePreflightOptions = {}
+): ComplianceReport {
+  const includeWcag = options.includeWcag ?? true;
   const findings: ComplianceFinding[] = [];
   const meta = snapshot.meta;
   const tagged = (meta?.accessibilityMode ?? 0) !== 0;
@@ -159,7 +188,9 @@ export function evaluateCompliance(snapshot: LayoutSnapshot): ComplianceReport {
       }
       if (a11y.role === 'Table') checkTableHeaders(node, findings);
     }
-    checkContrast(node, ancestors, snapshot.pages, findings);
+    // Suppression is at rule level: with the family off the contrast walk (and
+    // its backdrop resolution) never runs at all.
+    if (includeWcag) checkContrast(node, ancestors, snapshot.pages, findings);
     const chain = [node, ...ancestors];
     for (const child of node.children) visit(child, chain);
   };

@@ -8,6 +8,7 @@ import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { Color } from '../../src/Core/Color';
 import { LayoutNode, paintOf, LAYOUT_SNAPSHOT_VERSION } from '../../src/Rendering/LayoutRecorder';
 import { evaluateCompliance, ComplianceSeverity } from '../../src/Compliance/ComplianceEvaluator';
+import type { ComplianceReport } from '../../src/Compliance/ComplianceEvaluator';
 import { contrastRatio, relativeLuminance, requiredRatio, parseHexRgb } from '../../src/Compliance/Contrast';
 
 function findAll(node: LayoutNode, pred: (n: LayoutNode) => boolean): LayoutNode[] {
@@ -285,6 +286,52 @@ describe('contrast preflight — end to end', () => {
     });
 
     expect(report.findings.some(f => f.standard === 'WCAG 2.2')).toBe(false);
+  });
+});
+
+// Mirrors the shared fixture compliance-preflight/contrast-suppressed: the WCAG
+// family is a rule family the caller can switch off, and switching it off must
+// remove the findings from the counts too — not merely from a rendered list.
+describe('includeWcag option', () => {
+  /** The fixture document: mid-grey text on a light container fill. */
+  async function suppressedFixture(): Promise<{ on: ComplianceReport; off: ComplianceReport }> {
+    const build = (): Document => {
+      const doc = baselineDocument();
+      const caption = new TextBlock('Muted caption', { fontSize: 11, fontName: StandardFonts.Helvetica });
+      caption.textColor = new Color(0x99, 0x99, 0x99);
+      const card = new Container({ child: caption });
+      card.backgroundColor = new Color(0xf1, 0xf5, 0xf9);
+      doc.add(card);
+      return doc;
+    };
+    const { snapshot } = await build().generateSvgDocumentAsync({ captureLayout: true });
+    return { on: evaluateCompliance(snapshot!), off: evaluateCompliance(snapshot!, { includeWcag: false }) };
+  }
+
+  it('runs the WCAG rules by default, so the one-argument call is unchanged', async () => {
+    const { on } = await suppressedFixture();
+    expect(on.findings.filter(f => f.code === 'contrast-insufficient')).toHaveLength(1);
+    expect(on.warningCount).toBe(1);
+  });
+
+  it('suppresses every WCAG finding and its contribution to the counts', async () => {
+    const { off } = await suppressedFixture();
+    expect(off.findings.filter(f => f.standard === 'WCAG 2.2')).toHaveLength(0);
+    expect(off.warningCount).toBe(0);
+  });
+
+  it('leaves the PDF/UA-1 findings and `passed` untouched', async () => {
+    const { on, off } = await suppressedFixture();
+    const ua = (report: ComplianceReport): string[] =>
+      report.findings.filter(f => f.standard === 'PDF/UA-1').map(f => f.code);
+    expect(ua(off)).toEqual(ua(on));
+    expect(off.errorCount).toBe(on.errorCount);
+    expect(off.passed).toBe(on.passed);
+  });
+
+  it('is exactly the unfiltered report minus its WCAG findings', async () => {
+    const { on, off } = await suppressedFixture();
+    expect(off.findings).toEqual(on.findings.filter(f => f.standard !== 'WCAG 2.2'));
   });
 });
 

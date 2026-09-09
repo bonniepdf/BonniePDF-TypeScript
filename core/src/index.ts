@@ -191,7 +191,7 @@ export { markDebugSource, debugSourceOf } from './Rendering/DebugSource';
 // Accessibility / compliance preflight — evaluates the layout snapshot against
 // PDF/UA-1 rules at authoring time and reports per-element findings.
 export { evaluateCompliance, ComplianceSeverity } from './Compliance/ComplianceEvaluator';
-export type { ComplianceFinding, ComplianceReport } from './Compliance/ComplianceEvaluator';
+export type { ComplianceFinding, ComplianceReport, CompliancePreflightOptions } from './Compliance/ComplianceEvaluator';
 export { contrastRatio, relativeLuminance, requiredRatio } from './Compliance/Contrast';
 export type { ContrastVerdict, ContrastUnknownReason } from './Compliance/Contrast';
 

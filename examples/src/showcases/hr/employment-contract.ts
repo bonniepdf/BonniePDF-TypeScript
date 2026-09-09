@@ -41,7 +41,9 @@ import {
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
 const MUTED = ColorPalette.slate[500];
-const FAINT = ColorPalette.slate[400];
+// 600, not 400: 400 never clears 4.5:1 as text (2.51:1 on this document's
+// background).
+const FAINT = ColorPalette.slate[600];
 const LINE = ColorPalette.slate[200];
 const PANEL = ColorPalette.slate[50];
 const ACCENT = ColorPalette.teal[700];

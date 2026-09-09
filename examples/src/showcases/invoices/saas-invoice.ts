@@ -195,8 +195,7 @@ export function generate(): Document {
 function rule(mtop: number): Container {
   return new Container({
     backgroundColor: RULE,
-    padding: { top: 0.4, bottom: 0.4 },
+    height: 0.8,
     margin: { top: mtop, bottom: 8 },
-    child: new TextBlock(' ', { fontSize: 0.5 }),
   });
 }

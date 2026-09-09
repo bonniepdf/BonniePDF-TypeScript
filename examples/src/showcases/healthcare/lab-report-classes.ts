@@ -44,11 +44,11 @@ import {
 
 const CLINICAL_BLUE = Color.fromHex('#2563eb');
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
-const LOW = ColorPalette.amber[600];
+const LOW = ColorPalette.amber[700];
 
 type Flag = 'H' | 'L' | '';
 
@@ -146,11 +146,8 @@ export function generate(): Document {
 
   const blueRule = new Container();
   blueRule.backgroundColor = CLINICAL_BLUE;
-  blueRule.padding = new Thickness(0, 1.5, 0, 0);
+  blueRule.height = 1.5;
   blueRule.margin = new Thickness(0, 6, 0, 16);
-  const rs = new TextBlock(' ');
-  rs.fontSize = 1;
-  blueRule.child = rs;
   doc.add(blueRule);
 
   // ── Patient + specimen block ──────────────────────────────────────────────

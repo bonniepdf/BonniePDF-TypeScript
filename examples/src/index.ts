@@ -108,8 +108,6 @@ import { generate as patientSummary } from './showcases/healthcare/patient-summa
 import { generate as patientSummaryClasses } from './showcases/healthcare/patient-summary-classes';
 import { generate as outpatientAppointmentLetter } from './showcases/healthcare/outpatient-appointment-letter';
 import { generate as outpatientAppointmentLetterClasses } from './showcases/healthcare/outpatient-appointment-letter-classes';
-import { generate as productRoadmap } from './showcases/operations/product-roadmap';
-import { generate as productRoadmapClasses } from './showcases/operations/product-roadmap-classes';
 // ── Vertical-market gallery follow-up (registrations + new showcases) ────────
 import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
 import { generate as saasInvoiceClasses } from './showcases/invoices/saas-invoice-classes';
@@ -1912,40 +1910,6 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'outpatient-appointment-letter',
-    variantLabel: 'Class API',
-  },
-  {
-    id: 'product-roadmap',
-    name: 'Product Roadmap',
-    category: 'Operations',
-    tier: 'showcase',
-    description:
-      'Landscape A4 Gantt-style product roadmap: a six-month timeline header over team swimlanes (Development, Design, Marketing), with rounded task bars positioned by month using weighted horizontal stacks.',
-    filename: 'product-roadmap.pdf',
-    generate: productRoadmap,
-    dotnetClass: 'ProductRoadmapExample',
-    thumbnails: false,
-    pdfUa1: false,
-    industries: ['Technology'],
-    documentType: 'roadmap',
-    runtime: ['browser', 'node', 'edge'],
-    dataDensity: 'low',
-    variantLabel: 'Options API',
-  },
-  {
-    id: 'product-roadmap-classes',
-    name: 'Product Roadmap (Class API)',
-    category: 'Operations',
-    tier: 'showcase',
-    description:
-      'Landscape A4 Gantt-style product roadmap: a six-month timeline header over team swimlanes (Development, Design, Marketing), with rounded task bars positioned by month using weighted horizontal stacks.',
-    filename: 'product-roadmap-classes.pdf',
-    generate: productRoadmapClasses,
-    dotnetClass: 'ProductRoadmapExample',
-    thumbnails: false,
-    pdfUa1: false,
-    gallery: false,
-    variantOf: 'product-roadmap',
     variantLabel: 'Class API',
   },
   // ── Vertical-market gallery follow-up ─────────────────────────────────────

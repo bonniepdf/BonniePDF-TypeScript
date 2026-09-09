@@ -127,7 +127,7 @@ export function generate(): Document {
               }),
               new TextBlock(label, { fontName: StandardFonts.HelveticaBold, alignment: 'center', margin: { top: 8 } }),
               new TextBlock(detail, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
-              new TextBlock(data, { fontSize: 8, textColor: 'slate-400', alignment: 'center', margin: { top: 4 } }),
+              new TextBlock(data, { fontSize: 8, textColor: 'slate-600', alignment: 'center', margin: { top: 4 } }),
             ],
           })
       ),

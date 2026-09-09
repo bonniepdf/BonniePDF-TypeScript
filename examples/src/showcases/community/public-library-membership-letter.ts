@@ -104,9 +104,8 @@ export function generate(): Document {
   doc.add(
     new Container({
       backgroundColor: LIBRARY_GREEN,
-      padding: { top: 1.5 },
+      height: 1.5,
       margin: { bottom: 20 },
-      child: spacerLine(),
     })
   );
 
@@ -262,8 +261,4 @@ function td(text: string, color: ColorInput = LIBRARY_INK, bold = false): TextBl
     textColor: color,
     alignment: 'left',
   });
-}
-
-function spacerLine(): TextBlock {
-  return new TextBlock(' ', { fontSize: 1 });
 }

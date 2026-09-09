@@ -219,12 +219,9 @@ export function generate(): Document {
 
   doc.add(kpiTable);
 
-  const kpiRuleSpacer = new TextBlock(' ');
-  kpiRuleSpacer.fontSize = 1;
   const kpiRule = new Container();
   kpiRule.backgroundColor = SAND;
-  kpiRule.padding = new Thickness(0, 0.75, 0, 0);
-  kpiRule.child = kpiRuleSpacer;
+  kpiRule.height = 0.75;
   doc.add(kpiRule);
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -236,7 +233,7 @@ export function generate(): Document {
   const monthlyRevenueTitleText = new TextBlock('MONTHLY REVENUE  (£000s)');
   monthlyRevenueTitleText.fontName = StandardFonts.HelveticaBold;
   monthlyRevenueTitleText.fontSize = 7;
-  monthlyRevenueTitleText.textColor = TERRA;
+  monthlyRevenueTitleText.textColor = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
   chartTitleCell.child = monthlyRevenueTitleText;
   doc.add(chartTitleCell);
 
@@ -273,12 +270,9 @@ export function generate(): Document {
   // 4.  Top products table
   // ════════════════════════════════════════════════════════════════════════════
 
-  const productRuleSpacer = new TextBlock(' ');
-  productRuleSpacer.fontSize = 1;
   const productRule = new Container();
   productRule.backgroundColor = SAND;
-  productRule.padding = new Thickness(0, 0.75, 0, 0);
-  productRule.child = productRuleSpacer;
+  productRule.height = 0.75;
   doc.add(productRule);
 
   const tableTitleCell = new Container();
@@ -286,7 +280,7 @@ export function generate(): Document {
   const topProductsText = new TextBlock('TOP PRODUCTS');
   topProductsText.fontName = StandardFonts.HelveticaBold;
   topProductsText.fontSize = 7;
-  topProductsText.textColor = TERRA;
+  topProductsText.textColor = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
   tableTitleCell.child = topProductsText;
   doc.add(tableTitleCell);
 

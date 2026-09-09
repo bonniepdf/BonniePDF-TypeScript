@@ -41,7 +41,7 @@ const INK = ColorPalette.slate[900];
 const CREAM = ColorPalette.slate[100];
 const MUTE = ColorPalette.slate[400];
 const BODY = ColorPalette.slate[300];
-const ACCENT = ColorPalette.violet[500];
+const ACCENT = ColorPalette.violet[400];
 const STUB = ColorPalette.slate[800];
 
 function tb(

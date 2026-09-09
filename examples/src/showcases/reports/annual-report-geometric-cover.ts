@@ -236,11 +236,14 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(coverType());
 
   // Page 2 - the "inside the report" capabilities spread (tables + charts + donut).
+  // amber[700], not [500]: the KPI card paints this as 24pt bold text on the
+  // sky-50 tile, where [500] only reaches 2.00:1 against the 3:1 large-text
+  // threshold. The cover's own ACCENT (canvas fills above) is unaffected.
   addCapabilitiesPage(doc, {
     company: COMPANY,
     year: YEAR,
     primary: ColorPalette.sky[700],
-    accent: ColorPalette.amber[500],
+    accent: ColorPalette.amber[700],
     tint: ColorPalette.sky[50],
     segmentColors: ['#0369a1', '#4f46e5', '#f59e0b', '#059669'],
   });

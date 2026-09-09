@@ -141,19 +141,19 @@ export function generate(): Document {
     [
       'Feature A',
       'Rounded corners make UI elements feel modern and approachable.',
-      ColorPalette.blue[500],
+      ColorPalette.blue[600],
       ColorPalette.blue[50],
     ],
     [
       'Feature B',
       'Bezier curves approximate perfect quarter-circle arcs.',
-      ColorPalette.purple[500],
+      ColorPalette.purple[600],
       Color.fromHex('#faf5ff'),
     ],
     [
       'Feature C',
       'Works with backgrounds, borders, or both combined.',
-      ColorPalette.teal[500],
+      ColorPalette.teal[700],
       Color.fromHex('#f0fdfa'),
     ],
   ] as [string, string, Color, Color][]) {

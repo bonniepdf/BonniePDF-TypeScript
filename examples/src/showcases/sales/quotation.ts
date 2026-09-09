@@ -39,8 +39,10 @@ import {
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
-const MUTED = ColorPalette.slate[500];
-const FAINT = ColorPalette.slate[400];
+// 600, not 500/400: both fall short of 4.5:1 on this document's backgrounds
+// (500 to 4.34:1 on a violet-tinted panel, 400 to 2.51-2.63:1 everywhere).
+const MUTED = ColorPalette.slate[600];
+const FAINT = ColorPalette.slate[600];
 const LINE = ColorPalette.slate[200];
 const PANEL = ColorPalette.slate[50];
 const ACCENT = ColorPalette.violet[600];

@@ -42,7 +42,7 @@ const INK = ColorPalette.slate[900];
 const BODY = ColorPalette.slate[600];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
-const PROMO = ColorPalette.rose[600];
+const PROMO = ColorPalette.rose[700];
 const AMBER = ColorPalette.amber[500];
 
 // 110 mm x 75 mm shelf-edge card.

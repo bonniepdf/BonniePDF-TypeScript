@@ -211,9 +211,7 @@ export function generate(): Document {
 function rule(mtop: number): Container {
   const r = new Container();
   r.backgroundColor = RULE;
-  r.child = new TextBlock(' ');
-  (r.child as TextBlock).fontSize = 0.5;
-  r.padding = new Thickness(0, 0.4, 0, 0.4);
+  r.height = 0.8;
   r.margin = new Thickness(0, mtop, 0, 8);
   return r;
 }

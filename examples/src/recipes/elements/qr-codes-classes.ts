@@ -162,7 +162,7 @@ export function generate(): Document {
 
     const url = new TextBlock(urlData);
     url.fontSize = 8;
-    url.textColor = ColorPalette.slate[400];
+    url.textColor = ColorPalette.slate[600];
     url.alignment = TextAlignment.Center;
     url.margin = new Thickness(0, 4, 0, 0);
 

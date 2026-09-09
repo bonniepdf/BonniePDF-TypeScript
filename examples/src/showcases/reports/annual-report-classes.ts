@@ -38,6 +38,8 @@ import type { IElement } from '@bonniepdf/core';
 const PRIMARY = ColorPalette.blue[800]; // deep corporate blue
 const SECONDARY = ColorPalette.teal[500]; // teal accent
 const TERTIARY = ColorPalette.amber[400]; // warm gold accent
+const SECONDARY_TEXT = ColorPalette.teal[600];
+const TERTIARY_TEXT = ColorPalette.amber[700];
 
 const COVER_BG = ColorPalette.blue[900]; // deepest primary tint - cover field
 const BAND_BG = ColorPalette.blue[100]; // lightest primary tint - header/footer bands
@@ -372,8 +374,8 @@ function kpiRow(): HorizontalStack {
   row.spacing = 14;
   const cards: [string, string, Color][] = [
     ['£2.4B', 'Total revenue', PRIMARY],
-    ['+18%', 'Year-over-year growth', SECONDARY],
-    ['2.1M', 'Daily active users', TERTIARY],
+    ['+18%', 'Year-over-year growth', SECONDARY_TEXT],
+    ['2.1M', 'Daily active users', TERTIARY_TEXT],
   ];
   for (const [value, label, accent] of cards) {
     row.add(kpiCard(value, label, accent), 1);
@@ -394,7 +396,7 @@ function kpiCard(value: string, label: string, accent: Color): Container {
   const l = new TextBlock(label);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 10;
-  l.textColor = ColorPalette.slate[500];
+  l.textColor = ColorPalette.slate[600];
   stack.add(l);
 
   const card = new Container();

@@ -117,7 +117,7 @@ export function generate(): Document {
   weightedStack.spacing = 10;
   weightedStack.widthDistribution = WidthDistribution.Weighted;
   for (const [label, weight, bg] of [
-    ['1×', 1, ColorPalette.slate[400]],
+    ['1×', 1, ColorPalette.slate[500]],
     ['2×', 2, ColorPalette.slate[600]],
     ['3×', 3, ColorPalette.slate[800]],
   ] as [string, number, Color][]) {

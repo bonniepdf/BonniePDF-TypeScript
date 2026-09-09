@@ -160,7 +160,7 @@ export function generate(): Document {
 
     const dataBlock = new TextBlock(data);
     dataBlock.fontSize = 8;
-    dataBlock.textColor = ColorPalette.slate[400];
+    dataBlock.textColor = ColorPalette.slate[600];
     dataBlock.alignment = TextAlignment.Center;
     dataBlock.margin = new Thickness(0, 4, 0, 0);
 

@@ -124,9 +124,8 @@ export function generate(): Document {
   doc.add(
     new Container({
       backgroundColor: BRAND,
-      padding: { top: 1.5 },
+      height: 1.5,
       margin: { bottom: 20 },
-      child: spacerLine(),
     })
   );
 
@@ -359,8 +358,4 @@ function td(text: string, color: ColorInput = INK, align: TextAlignmentInput = '
     textColor: color,
     alignment: align,
   });
-}
-
-function spacerLine(): TextBlock {
-  return new TextBlock(' ', { fontSize: 1 });
 }

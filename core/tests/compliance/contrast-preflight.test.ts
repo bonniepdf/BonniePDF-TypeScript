@@ -3,6 +3,7 @@ import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Container } from '../../src/Elements/Layout/Container';
 import { Table } from '../../src/Elements/Tables/Table';
+import { Hyperlink } from '../../src/Core/Hyperlink';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { Color } from '../../src/Core/Color';
@@ -202,6 +203,44 @@ describe('contrast preflight — end to end', () => {
     const cells = findAll(snapshot!.root, n => n.type === 'TableCell');
     expect(cells.length).toBeGreaterThan(0);
     expect(cells[0].paint?.background).toBe('#1f2a37');
+  });
+
+  // Hyperlink paints text but is not a text element, so paint capture has to reach it on its own terms.
+  it('captures paint from a hyperlink, which is not a text element', async () => {
+    const doc = baselineDocument();
+    doc.add(
+      new Hyperlink('Terms and conditions', 'https://example.com', {
+        fontSize: 11,
+        textColor: new Color(0x99, 0x99, 0x99),
+      })
+    );
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+
+    const links = findAll(snapshot!.root, n => n.type === 'Hyperlink');
+    expect(links.length).toBeGreaterThan(0);
+    expect(links[0].paint?.text).toBe('#999999');
+    expect(links[0].paint?.fontSize).toBe(11);
+    // Hyperlink exposes no weight, so it is never reported bold.
+    expect(links[0].paint?.bold).toBeUndefined();
+  });
+
+  it('flags low-contrast hyperlink text', async () => {
+    const doc = baselineDocument();
+    doc.add(
+      new Hyperlink('Terms and conditions', 'https://example.com', {
+        fontSize: 11,
+        textColor: new Color(0x99, 0x99, 0x99),
+      })
+    );
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    const report = evaluateCompliance(snapshot!);
+
+    const finding = report.findings.find(f => f.code === 'contrast-insufficient');
+    expect(finding).toBeDefined();
+    expect(finding!.severity).toBe(ComplianceSeverity.Warning);
+    expect(finding!.standard).toBe('WCAG 2.2');
   });
 
   it('reports unknown rather than guessing when the page paints a background element', async () => {

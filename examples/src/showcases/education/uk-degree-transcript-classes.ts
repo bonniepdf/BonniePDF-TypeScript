@@ -46,9 +46,9 @@ import {
 
 const NAVY = ColorPalette.blue[900]; // academic navy
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
-const GOLD = ColorPalette.amber[500];
+const GOLD = ColorPalette.amber[700];
 
 interface Module {
   level: number;
@@ -128,9 +128,8 @@ export function generate(): Document {
 
   const navyRule = new Container();
   navyRule.backgroundColor = NAVY;
-  navyRule.padding = new Thickness(0, 1.5, 0, 0);
+  navyRule.height = 1.5;
   navyRule.margin = new Thickness(0, 0, 0, 16);
-  navyRule.child = thinSpacer();
   doc.add(navyRule);
 
   // ── Student details ───────────────────────────────────────────────────────
@@ -200,7 +199,7 @@ export function generate(): Document {
       td(m.code, TextAlignment.Left, INK),
       td(m.title, TextAlignment.Left, INK),
       td(String(m.credits), TextAlignment.Right, INK),
-      td(`${m.mark}%`, TextAlignment.Right, m.mark >= 70 ? ColorPalette.emerald[600] : INK)
+      td(`${m.mark}%`, TextAlignment.Right, m.mark >= 70 ? ColorPalette.emerald[700] : INK)
     );
   }
   doc.add(table);
@@ -299,10 +298,4 @@ function td(text: string, align: TextAlignment, color: Color): TextBlock {
   b.textColor = color;
   b.alignment = align;
   return b;
-}
-
-function thinSpacer(): TextBlock {
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  return s;
 }

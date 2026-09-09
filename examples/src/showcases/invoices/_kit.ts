@@ -21,8 +21,11 @@ import {
 import type { IElement, TextAlignmentInput } from '@bonniepdf/core';
 
 export const INK = ColorPalette.slate[700];
-export const MUTED = ColorPalette.slate[500];
-export const FAINT = ColorPalette.slate[400];
+// 600, not 500: reads against tinted panels in the invoices that use it, and 500
+// falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+export const MUTED = ColorPalette.slate[600];
+// 600, not 400: 400 never clears 4.5:1 as text (2.40-2.63:1).
+export const FAINT = ColorPalette.slate[600];
 export const HEADER_BG = ColorPalette.slate[100];
 export const RULE = ColorPalette.slate[200];
 
@@ -86,11 +89,8 @@ export function totalLine(
 export function divider(color: Color = INK, thickness = 0.6): Container {
   const d = new Container();
   d.backgroundColor = color;
-  d.padding = new Thickness(0, thickness, 0, 0);
+  d.height = thickness;
   d.margin = new Thickness(0, 5, 0, 5);
-  const spacer = new TextBlock(' ');
-  spacer.fontSize = 1;
-  d.child = spacer;
   return d;
 }
 
@@ -98,10 +98,7 @@ export function divider(color: Color = INK, thickness = 0.6): Container {
 export function accentBar(color: Color, height = 5): Container {
   const bar = new Container();
   bar.backgroundColor = color;
-  bar.padding = new Thickness(0, height / 2, 0, height / 2);
-  const spacer = new TextBlock(' ');
-  spacer.fontSize = 1;
-  bar.child = spacer;
+  bar.height = height;
   return bar;
 }
 

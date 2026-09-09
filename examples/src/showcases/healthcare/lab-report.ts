@@ -29,11 +29,14 @@ import {
 
 const CLINICAL_BLUE = '#2563eb';
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+// 600, not 500: reads against a tinted panel elsewhere in the document, and 500
+// falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
-const LOW = ColorPalette.amber[600];
+// 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
+const LOW = ColorPalette.amber[700];
 
 type Flag = 'H' | 'L' | '';
 
@@ -133,9 +136,8 @@ export function generate(): Document {
   doc.add(
     new Container({
       backgroundColor: CLINICAL_BLUE,
-      padding: { top: 1.5 },
+      height: 1.5,
       margin: { top: 6, bottom: 16 },
-      child: new TextBlock(' ', { fontSize: 1 }),
     })
   );
 

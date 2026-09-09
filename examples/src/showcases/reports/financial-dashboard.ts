@@ -58,7 +58,7 @@ function kpiCard(value: string, label: string, delta: string, deltaColor: ColorI
 }
 
 function rule(): Container {
-  return new Container({ backgroundColor: SAND, padding: { top: 0.75 }, child: new TextBlock(' ', { fontSize: 1 }) });
+  return new Container({ backgroundColor: SAND, height: 0.75 });
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -130,7 +130,8 @@ export function generate(): Document {
   // 3.  Monthly revenue bar chart
   // ════════════════════════════════════════════════════════════════════════════
 
-  doc.add(new Container({ padding: [24, 14, 24, 6], child: tb('MONTHLY REVENUE  (£000s)', 7, TERRA, { bold: true }) }));
+  // BROWN, not TERRA: TERRA fails at 4.15:1 on cream (needs 4.5:1).
+  doc.add(new Container({ padding: [24, 14, 24, 6], child: tb('MONTHLY REVENUE  (£000s)', 7, BROWN, { bold: true }) }));
 
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
@@ -155,7 +156,8 @@ export function generate(): Document {
   // ════════════════════════════════════════════════════════════════════════════
 
   doc.add(rule());
-  doc.add(new Container({ padding: [24, 14, 24, 6], child: tb('TOP PRODUCTS', 7, TERRA, { bold: true }) }));
+  // BROWN, not TERRA: TERRA fails at 4.15:1 on cream (needs 4.5:1).
+  doc.add(new Container({ padding: [24, 14, 24, 6], child: tb('TOP PRODUCTS', 7, BROWN, { bold: true }) }));
 
   const productTable = new Table({
     columns: [2.2, 1, 1.4, 0.8],

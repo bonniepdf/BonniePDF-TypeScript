@@ -118,9 +118,8 @@ export function generate(): Document {
 
   const rule = new Container();
   rule.backgroundColor = LIBRARY_GREEN;
-  rule.padding = new Thickness(0, 1.5, 0, 0);
+  rule.height = 1.5;
   rule.margin = new Thickness(0, 0, 0, 20);
-  rule.child = spacerLine();
   doc.add(rule);
 
   const top = new Grid(1, 1);
@@ -298,10 +297,4 @@ function td(text: string, align: TextAlignment, color: Color = LIBRARY_INK, bold
   b.textColor = color;
   b.alignment = align;
   return b;
-}
-
-function spacerLine(): TextBlock {
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  return s;
 }

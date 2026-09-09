@@ -266,7 +266,7 @@ export function buildDocument(data: PolicyScheduleData): Document {
     statusBox
   );
   doc.add(masthead);
-  doc.add(new Container({ backgroundColor: BRAND, padding: { top: 1.5 }, child: new TextBlock(' ', { fontSize: 1 }) }));
+  doc.add(new Container({ backgroundColor: BRAND, height: 1.5 }));
 
   // ── Policy + policyholder + risk (three-column block) ─────────────────────
   const riskGrid = new Grid({ columns: [1, 1, 1], cellPadding: 12, border: 0 });

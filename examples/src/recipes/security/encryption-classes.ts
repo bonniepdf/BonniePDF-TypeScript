@@ -124,10 +124,10 @@ export function generate(): Document {
   doc.add(encryptionSupportsGranularPermissionFlagsText);
 
   const printingAllowedText = new TextBlock('  - Printing: Allowed');
-  printingAllowedText.textColor = ColorPalette.green[600];
+  printingAllowedText.textColor = ColorPalette.green[700];
   doc.add(printingAllowedText);
   const copyingAllowedText = new TextBlock('  - Copying: Allowed');
-  copyingAllowedText.textColor = ColorPalette.green[600];
+  copyingAllowedText.textColor = ColorPalette.green[700];
   doc.add(copyingAllowedText);
   const modifyingDeniedText = new TextBlock('  - Modifying: Denied');
   modifyingDeniedText.textColor = ColorPalette.red[600];
@@ -177,10 +177,10 @@ export function generate(): Document {
   doc.add(restrictedPermissionsInScenarioText);
 
   const lowQualityPrintingAllowedText = new TextBlock('  - Low-quality printing: Allowed');
-  lowQualityPrintingAllowedText.textColor = ColorPalette.green[600];
+  lowQualityPrintingAllowedText.textColor = ColorPalette.green[700];
   doc.add(lowQualityPrintingAllowedText);
   const accessibilityExtractionAllowedText = new TextBlock('  - Accessibility extraction: Allowed');
-  accessibilityExtractionAllowedText.textColor = ColorPalette.green[600];
+  accessibilityExtractionAllowedText.textColor = ColorPalette.green[700];
   doc.add(accessibilityExtractionAllowedText);
   const copyingTextDeniedText = new TextBlock('  - Copying text: Denied');
   copyingTextDeniedText.textColor = ColorPalette.red[600];

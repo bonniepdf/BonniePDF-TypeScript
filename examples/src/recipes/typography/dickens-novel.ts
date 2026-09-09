@@ -142,11 +142,15 @@ export function generate(): Document {
     })
   );
 
+  // The ornamental rule and attribution lines below were slate-300/400 -
+  // legible as decoration at a glance, but slate-400 never clears 4.5:1 as
+  // text (2.51-2.63:1) and slate-300 falls to 1.49:1. slate-600 keeps the
+  // quiet title-page tone while meeting WCAG 2.2 AA.
   doc.add(
     new TextBlock('---------------', {
       fontName: StandardFonts.TimesRoman,
       fontSize: 13,
-      textColor: 'slate-400',
+      textColor: 'slate-600',
       alignment: 'center',
       margin: { bottom: 40 },
     })
@@ -166,7 +170,7 @@ export function generate(): Document {
     new TextBlock('Project Gutenberg Edition · eBook #98', {
       fontName: StandardFonts.TimesRoman,
       fontSize: 10,
-      textColor: 'slate-400',
+      textColor: 'slate-600',
       alignment: 'center',
       margin: { bottom: 4 },
     })
@@ -176,7 +180,7 @@ export function generate(): Document {
     new TextBlock('Public domain - free to read, copy, and share.', {
       fontName: StandardFonts.TimesItalic,
       fontSize: 9,
-      textColor: 'slate-400',
+      textColor: 'slate-600',
       alignment: 'center',
     })
   );
@@ -218,7 +222,7 @@ export function generate(): Document {
       new TextBlock('---------------', {
         fontName: StandardFonts.TimesRoman,
         fontSize: 11,
-        textColor: 'slate-300',
+        textColor: 'slate-600',
         alignment: 'center',
         margin: { top: 56, bottom: 14 },
       })
@@ -239,7 +243,7 @@ export function generate(): Document {
       new TextBlock('---------------', {
         fontName: StandardFonts.TimesRoman,
         fontSize: 11,
-        textColor: 'slate-300',
+        textColor: 'slate-600',
         alignment: 'center',
         margin: { bottom: 32 },
       })

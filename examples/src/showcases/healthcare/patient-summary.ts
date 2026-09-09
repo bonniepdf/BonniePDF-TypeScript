@@ -26,7 +26,10 @@ const MUTE = '#64748b'; // slate-500  labels / captions
 const HAIRLINE = '#e2e8f0'; // slate-200  card border / rules
 const CARD = '#ffffff'; // card surface
 const TINT = '#f8fafc'; // slate-50   page tint
-const TEAL = '#0d9488'; // patient band
+// #0a7164, not #0d9488: this teal doubles as the band fill (behind white/cream
+// text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
+// either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
+const TEAL = '#0a7164'; // patient band
 const INDIGO = '#4f46e5'; // vitals band
 const ROSE = '#e11d48'; // allergy band / alerts
 const CREAM = '#f1f5f9'; // band caption text

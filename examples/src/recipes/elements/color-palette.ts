@@ -76,6 +76,7 @@ export function generate(): Document {
     settings: {
       pageSize: 'a4',
       margin: 36,
+      language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
     },
     metadata: {

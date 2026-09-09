@@ -34,6 +34,9 @@ interface Finding {
 
 type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved';
 
+// Badge is 700, not 600: white bold 9pt text on orange/amber/green 600 falls to
+// 3.20-3.60:1 against the 4.5:1 WCAG AA threshold. 700 clears it on all three
+// (red[600] already did, so it stays). Tint/border are unaffected.
 const SEVERITY_STYLE: Record<Severity, { label: string; badge: ColorInput; tint: ColorInput; border: ColorInput }> = {
   Critical: {
     label: 'CRITICAL',
@@ -43,20 +46,20 @@ const SEVERITY_STYLE: Record<Severity, { label: string; badge: ColorInput; tint:
   },
   High: {
     label: 'HIGH',
-    badge: ColorPalette.orange[600],
+    badge: ColorPalette.orange[700],
     tint: ColorPalette.orange[50],
     border: ColorPalette.orange[200],
   },
   Medium: {
     label: 'MEDIUM',
-    badge: ColorPalette.amber[600],
+    badge: ColorPalette.amber[700],
     tint: ColorPalette.amber[50],
     border: ColorPalette.amber[200],
   },
   Low: { label: 'LOW', badge: ColorPalette.slate[500], tint: ColorPalette.slate[50], border: ColorPalette.slate[200] },
   Resolved: {
     label: 'RESOLVED',
-    badge: ColorPalette.green[600],
+    badge: ColorPalette.green[700],
     tint: ColorPalette.green[50],
     border: ColorPalette.green[200],
   },
@@ -239,7 +242,9 @@ function findingCard(finding: Finding): Container {
       new TextBlock(finding.category, {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 9,
-        textColor: ColorPalette.slate[500],
+        // 600, not 500: this card always sits on a coloured tint (red/orange-50),
+        // and 500 falls to 4.35-4.49:1 against the 4.5:1 WCAG AA threshold there.
+        textColor: ColorPalette.slate[600],
       }),
       new TextBlock(finding.description, { fontSize: 10.5, textColor: ColorPalette.slate[700] }),
     ],
@@ -251,14 +256,14 @@ function findingCard(finding: Finding): Container {
     const relatedLabel = new TextBlock('Related:', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
-      textColor: ColorPalette.slate[500],
+      textColor: ColorPalette.slate[600],
     });
     const relatedLink = new SectionLink(finding.related, anchorFor(finding.related), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
       textColor: ColorPalette.blue[700],
     });
-    const onPage = new TextBlock('on page', { fontSize: 9, textColor: ColorPalette.slate[500] });
+    const onPage = new TextBlock('on page', { fontSize: 9, textColor: ColorPalette.slate[600] });
     const relatedPage = new PageNumberOf(anchorFor(finding.related), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
@@ -336,7 +341,7 @@ function priorityActions(critical: Finding[]): Container {
       fontSize: 10.5,
       textColor: ColorPalette.blue[700],
     });
-    const onPage = new TextBlock('page', { fontSize: 10, textColor: ColorPalette.slate[500] });
+    const onPage = new TextBlock('page', { fontSize: 10, textColor: ColorPalette.slate[600] });
     const page = new PageNumberOf(anchorFor(finding.id), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 10,

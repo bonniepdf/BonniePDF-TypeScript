@@ -101,8 +101,11 @@ export function generate(): Document {
 
   // Per-child weights have no options-literal form, so build imperatively.
   const weightedStack = new HorizontalStack({ spacing: 10, widthDistribution: 'weighted' });
+  // slate-500, not slate-400: white text on slate-400 falls to 2.63:1 against
+  // the 4.5:1 WCAG AA threshold; slate-500 clears it (4.76:1) and still reads
+  // lighter than the 600/800 boxes beside it.
   for (const [label, weight, bg] of [
-    ['1×', 1, 'slate-400'],
+    ['1×', 1, 'slate-500'],
     ['2×', 2, 'slate-600'],
     ['3×', 3, 'slate-800'],
   ] as const) {

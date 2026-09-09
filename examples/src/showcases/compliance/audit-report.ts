@@ -30,15 +30,15 @@ import type { IElement } from '@bonniepdf/core';
 
 const PRIMARY = ColorPalette.indigo[700];
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 
 // Severity palette.
 const SEV = {
   Critical: ColorPalette.rose[600],
-  High: ColorPalette.amber[500],
-  Medium: ColorPalette.blue[500],
-  Low: ColorPalette.emerald[500],
+  High: ColorPalette.amber[700],
+  Medium: ColorPalette.blue[600],
+  Low: ColorPalette.emerald[700],
 };
 
 type Severity = keyof typeof SEV;
@@ -137,9 +137,8 @@ export function generate(): Document {
   doc.add(
     new Container({
       backgroundColor: PRIMARY,
-      padding: { top: 3 },
+      height: 3,
       margin: { bottom: 14 },
-      child: thinSpacer(),
     })
   );
 
@@ -179,7 +178,9 @@ export function generate(): Document {
   const kpis = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { top: 6, bottom: 20 } });
   kpis.add(kpi('82%', 'Overall conformance', PRIMARY), 1);
   kpis.add(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
-  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
+  // 700, not 600: 600 falls to 2.86:1 against the indigo-50 tile panel, below
+  // the 3:1 large-text threshold this 20pt bold value gets.
+  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[700]), 1);
   kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
@@ -210,7 +211,7 @@ export function generate(): Document {
       td(f.area, INK),
       td(f.requirement, MUTED),
       severityCell(f.severity),
-      td(f.status, f.status === 'Remediated' ? ColorPalette.emerald[600] : INK)
+      td(f.status, f.status === 'Remediated' ? ColorPalette.emerald[700] : INK)
     );
   }
   doc.add(table);
@@ -404,8 +405,4 @@ function td(text: string, color: ColorInput): TextBlock {
 /** A severity cell: a coloured dot label pill effect via bold coloured text. */
 function severityCell(sev: Severity): TextBlock {
   return new TextBlock(sev, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: SEV[sev] });
-}
-
-function thinSpacer(): TextBlock {
-  return new TextBlock(' ', { fontSize: 1 });
 }

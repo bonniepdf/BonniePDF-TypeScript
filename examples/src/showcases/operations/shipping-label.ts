@@ -57,9 +57,8 @@ function band(
 function hrule(mt: number, mb: number): Container {
   return new Container({
     backgroundColor: LINE,
-    padding: { top: 0.5, bottom: 0.5 },
+    height: 1,
     margin: { top: mt, bottom: mb },
-    child: new TextBlock(' ', { fontSize: 0.5 }),
   });
 }
 

@@ -35,6 +35,7 @@ export function generate(): Document {
       pageSize: 'a4',
       margin: 48,
       conformance: 'pdf/a-3b',
+      language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: BODY },
     },
     metadata: {

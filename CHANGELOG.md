@@ -11,6 +11,19 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Added
 
+- `evaluateCompliance` takes an options object selecting which **rule families**
+  run: `evaluateCompliance(snapshot, { includeWcag: false })` skips the WCAG 2.2
+  contrast rules entirely. The suppressed findings are absent from `findings`
+  _and_ from the counts, as if the document had no contrast problems; the
+  PDF/UA-1 findings are untouched, and `passed` cannot change, because no WCAG
+  rule emits an error. Omitting the argument runs everything, so the existing
+  one-argument call is unchanged.
+
+  The two families answer different questions — PDF/UA-1 findings are conformance
+  to a claim the document makes, contrast is an adjacent standard an author may
+  be tracking separately — and on a colour-rich document the contrast findings
+  can bury the structural ones.
+
 - The accessibility preflight now checks **text colour contrast** against the
   WCAG 2.2 AA thresholds (4.5:1, or 3:1 for text at 18pt and above, or 14pt and
   above when bold). `evaluateCompliance` reports `contrast-insufficient` as a

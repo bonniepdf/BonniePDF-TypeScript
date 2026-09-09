@@ -28,9 +28,12 @@ import {
 
 const NAVY = ColorPalette.blue[900]; // academic navy
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+// 600, not 500: reads against a blue-50 panel elsewhere in the document, and
+// 500 falls to 4.38:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
-const GOLD = ColorPalette.amber[500];
+// 700, not 500: bold 12pt text on white needs 4.5:1 and 500 falls to 2.13:1.
+const GOLD = ColorPalette.amber[700];
 
 interface Module {
   level: number;
@@ -107,9 +110,8 @@ export function generate(): Document {
   doc.add(
     new Container({
       backgroundColor: NAVY,
-      padding: { top: 1.5 },
+      height: 1.5,
       margin: { bottom: 16 },
-      child: thinSpacer(),
     })
   );
 
@@ -184,7 +186,9 @@ export function generate(): Document {
       td(m.code, 'left', INK),
       td(m.title, 'left', INK),
       td(String(m.credits), 'right', INK),
-      td(`${m.mark}%`, 'right', m.mark >= 70 ? ColorPalette.emerald[600] : INK)
+      // emerald[700], not [600]: regular-weight text on white needs 4.5:1 and
+      // 600 falls to 3.65:1.
+      td(`${m.mark}%`, 'right', m.mark >= 70 ? ColorPalette.emerald[700] : INK)
     );
   }
   doc.add(table);
@@ -273,8 +277,4 @@ function th(text: string, align: TextAlignmentInput): TextBlock {
 
 function td(text: string, align: TextAlignmentInput, color: ColorInput): TextBlock {
   return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9.5, textColor: color, alignment: align });
-}
-
-function thinSpacer(): TextBlock {
-  return new TextBlock(' ', { fontSize: 1 });
 }

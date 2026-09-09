@@ -30,7 +30,9 @@ const INK = ColorPalette.slate[900];
 const CREAM = ColorPalette.slate[100];
 const MUTE = ColorPalette.slate[400];
 const BODY = ColorPalette.slate[300];
-const ACCENT = ColorPalette.violet[500];
+// 400, not 500: this text reads against the dark stub panel, where 500 falls
+// to 3.32:1 against the 4.5:1 WCAG AA threshold; 400 clears it (5.13:1).
+const ACCENT = ColorPalette.violet[400];
 const STUB = ColorPalette.slate[800];
 
 function tb(

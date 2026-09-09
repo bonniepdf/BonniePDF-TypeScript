@@ -49,16 +49,16 @@ import type { IElement } from '@bonniepdf/core';
 
 const PRIMARY = ColorPalette.indigo[700];
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 const HEADER_BG = ColorPalette.slate[100];
 
 // Severity palette.
 const SEV = {
   Critical: ColorPalette.rose[600],
-  High: ColorPalette.amber[500],
-  Medium: ColorPalette.blue[500],
-  Low: ColorPalette.emerald[500],
+  High: ColorPalette.amber[700],
+  Medium: ColorPalette.blue[600],
+  Low: ColorPalette.emerald[700],
 };
 
 type Severity = keyof typeof SEV;
@@ -150,9 +150,8 @@ export function generate(): Document {
   // ── Title block ───────────────────────────────────────────────────────────
   const bar = new Container();
   bar.backgroundColor = PRIMARY;
-  bar.padding = new Thickness(0, 3, 0, 0);
+  bar.height = 3;
   bar.margin = new Thickness(0, 0, 0, 14);
-  bar.child = thinSpacer();
   doc.add(bar);
 
   doc.add(eyebrow('AUDIT REPORT · CONFIDENTIAL'));
@@ -196,7 +195,7 @@ export function generate(): Document {
   kpis.margin = new Thickness(0, 6, 0, 20);
   kpis.add(kpi('82%', 'Overall conformance', PRIMARY), 1);
   kpis.add(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
-  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[600]), 1);
+  kpis.add(kpi('12', 'Open findings', ColorPalette.amber[700]), 1);
   kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
   doc.add(kpis);
 
@@ -228,7 +227,7 @@ export function generate(): Document {
       td(f.area, INK),
       td(f.requirement, MUTED),
       severityCell(f.severity),
-      td(f.status, f.status === 'Remediated' ? ColorPalette.emerald[600] : INK)
+      td(f.status, f.status === 'Remediated' ? ColorPalette.emerald[700] : INK)
     );
   }
   doc.add(table);
@@ -448,10 +447,4 @@ function severityCell(sev: Severity): TextBlock {
   b.fontSize = 9;
   b.textColor = SEV[sev];
   return b;
-}
-
-function thinSpacer(): TextBlock {
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  return s;
 }

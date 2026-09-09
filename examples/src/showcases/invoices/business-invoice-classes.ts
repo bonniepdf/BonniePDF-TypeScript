@@ -25,12 +25,13 @@ import {
 
 // ── Brand colors ──────────────────────────────────────────────────────────────
 const ACCENT_GREEN = Color.fromHex('#0B9444');
+const ACCENT_GREEN_TEXT = Color.fromHex('#097636');
 const ACCENT_GREEN_LIGHT = Color.fromHex('#E8F5EC');
 const HEADER_GRAY = Color.fromHex('#F5F5F5');
 const BORDER_GRAY = Color.fromHex('#D9D9D9');
 const TEXT_DARK = Color.fromHex('#333333');
 const TEXT_MEDIUM = Color.fromHex('#555555');
-const TEXT_LIGHT = Color.fromHex('#888888');
+const TEXT_LIGHT = Color.fromHex('#707070');
 
 // ── Local helpers ───────────────────────────────────────────────────────────
 // Small builders in the style of the sibling invoice showcases: a styled text
@@ -57,13 +58,12 @@ function tb(content: string, o: TextOpts = {}): TextBlock {
   return t;
 }
 
-/** A full-width coloured strip (accent bars and dividers). The 1pt space gives it height. */
-function bar(color: Color, padding: Thickness, margin?: Thickness): Container {
+/** A full-width coloured strip (accent bars and dividers). */
+function bar(color: Color, thickness: number, margin?: Thickness): Container {
   const c = new Container();
   c.backgroundColor = color;
-  c.padding = padding;
+  c.height = thickness;
   if (margin) c.margin = margin;
-  c.child = tb(' ', { size: 1 });
   return c;
 }
 
@@ -100,7 +100,7 @@ function moneyRow(
 /** A payment-method column: green eyebrow over a multi-line body (one paragraph). */
 function paymentColumn(title: string, body: string): VerticalStack {
   const s = new VerticalStack();
-  s.add(tb(title, { size: 8, bold: true, color: ACCENT_GREEN, mb: 4 }));
+  s.add(tb(title, { size: 8, bold: true, color: ACCENT_GREEN_TEXT, mb: 4 }));
   s.add(tb(body, { size: 8 }));
   return s;
 }
@@ -142,7 +142,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Green accent bar ──────────────────────────────────────────────────────
-  doc.add(bar(ACCENT_GREEN, new Thickness(0, 4, 0, 4)));
+  doc.add(bar(ACCENT_GREEN, 8));
 
   // ── Header: Company | Invoice title ──────────────────────────────────────
   // A single row of two proportional columns → HorizontalStack (weighted). It is
@@ -241,7 +241,7 @@ export function generate(): Document {
   }
   doc.add(lineItemsTable);
 
-  doc.add(bar(ACCENT_GREEN, new Thickness(0, 0.75, 0, 0), new Thickness(0, 0, 0, 12)));
+  doc.add(bar(ACCENT_GREEN, 0.75, new Thickness(0, 0, 0, 12)));
 
   // ── Footer: message + totals ──────────────────────────────────────────────
   const tax = subtotal * 0.0825;
@@ -262,9 +262,12 @@ export function generate(): Document {
   totalsStack.add(moneyRow('Subtotal', usd(subtotal)));
   totalsStack.add(moneyRow('Sales tax (8.25%)', usd(tax)));
   totalsStack.add(
-    moneyRow('Discount (early payment)', '-$1,400.00', { labelColor: ACCENT_GREEN, valueColor: ACCENT_GREEN })
+    moneyRow('Discount (early payment)', '-$1,400.00', {
+      labelColor: ACCENT_GREEN_TEXT,
+      valueColor: ACCENT_GREEN_TEXT,
+    })
   );
-  totalsStack.add(bar(TEXT_DARK, new Thickness(0, 0.5, 0, 0), new Thickness(0, 4, 0, 4)));
+  totalsStack.add(bar(TEXT_DARK, 0.5, new Thickness(0, 4, 0, 4)));
   totalsStack.add(
     moneyRow('Total', usd(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 })
   );
@@ -297,7 +300,7 @@ export function generate(): Document {
   doc.add(paymentSection);
 
   // ── Footer bar ────────────────────────────────────────────────────────────
-  doc.add(bar(ACCENT_GREEN, new Thickness(0, 0.5, 0, 0), new Thickness(0, 20, 0, 0)));
+  doc.add(bar(ACCENT_GREEN, 0.5, new Thickness(0, 20, 0, 0)));
   doc.add(
     tb('Thank you for your business  |  hello@example.com  |  www.example.com', {
       size: 8,

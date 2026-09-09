@@ -137,7 +137,7 @@ export function generate(): Document {
 
   const original = new TextBlock('Original Price: £199.99');
   original.fontSize = 14;
-  original.textColor = ColorPalette.slate[400];
+  original.textColor = ColorPalette.slate[600];
   original.textDecoration = TextDecoration.Strikethrough;
   original.margin = new Thickness(0, 0, 0, 4);
   doc.add(original);
@@ -152,7 +152,7 @@ export function generate(): Document {
 
   const saving = new TextBlock('You save £50.00!');
   saving.fontSize = 11;
-  saving.textColor = ColorPalette.green[600];
+  saving.textColor = ColorPalette.green[700];
   doc.add(saving);
 
   return doc;

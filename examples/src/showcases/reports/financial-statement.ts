@@ -17,6 +17,7 @@ import {
   VerticalStack,
   HorizontalStack,
   Container,
+  Spacer,
   ColorPalette,
   StandardFonts,
   type ColorInput,
@@ -242,12 +243,11 @@ function sub(text: string): TextBlock {
 function rule(color: ColorInput, thickness: number): Container {
   return new Container({
     backgroundColor: color,
-    padding: { top: thickness / 2, bottom: thickness / 2 },
+    height: thickness,
     margin: { top: 2, bottom: 2 },
-    child: new TextBlock(' ', { fontSize: 1 }),
   });
 }
 
-function gap(h: number): Container {
-  return new Container({ padding: { top: h / 2, bottom: h / 2 }, child: new TextBlock(' ', { fontSize: 1 }) });
+function gap(h: number): Spacer {
+  return new Spacer(h);
 }

@@ -7,7 +7,6 @@ import {
   TextStyle,
   Heading,
   Hyperlink,
-  Color,
   ColorPalette,
   Thickness,
   StandardFonts,
@@ -89,14 +88,14 @@ export function generate(): Document {
 
   // Green
   const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
-  greenLink.textColor = ColorPalette.green[500];
+  greenLink.textColor = ColorPalette.green[700];
   greenLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(greenLink);
 
   // Large purple
   const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
   purpleLink.fontSize = 16;
-  purpleLink.textColor = ColorPalette.purple[500];
+  purpleLink.textColor = ColorPalette.purple[600];
   purpleLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(purpleLink);
 
@@ -104,7 +103,7 @@ export function generate(): Document {
   const redLink = new Hyperlink('Bold Red Link', 'https://stackoverflow.com');
   redLink.fontName = StandardFonts.HelveticaBold;
   redLink.fontSize = 14;
-  redLink.textColor = Color.red;
+  redLink.textColor = ColorPalette.red[700];
   redLink.margin = new Thickness(0, 0, 0, 16);
   doc.add(redLink);
 

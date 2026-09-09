@@ -242,7 +242,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     company: COMPANY,
     year: YEAR,
     primary: ColorPalette.sky[700],
-    accent: ColorPalette.amber[500],
+    accent: ColorPalette.amber[700],
     tint: ColorPalette.sky[50],
     segmentColors: ['#0369a1', '#4f46e5', '#f59e0b', '#059669'],
   });

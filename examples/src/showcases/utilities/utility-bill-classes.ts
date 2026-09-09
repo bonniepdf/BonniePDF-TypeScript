@@ -41,7 +41,7 @@ import {
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
 const MUTED = ColorPalette.slate[500];
-const FAINT = ColorPalette.slate[400];
+const FAINT = ColorPalette.slate[600];
 const LINE = ColorPalette.slate[200];
 const PANEL = ColorPalette.slate[50];
 const ACCENT = ColorPalette.amber[600];

@@ -55,24 +55,31 @@ export function generate(): Document {
   // Default blue
   doc.add(new Hyperlink('Default Blue Link', 'https://github.com', { margin: { bottom: 8 } }));
 
-  // Green
-  doc.add(new Hyperlink('Green Link', 'https://microsoft.com', { textColor: 'green-500', margin: { bottom: 8 } }));
+  // Green. green-700, not green-500: Hyperlink exposes no bold/weight property
+  // for the compliance preflight to detect, so this always needs the
+  // regular-text 4.5:1 threshold regardless of fontName; green-500 only reaches
+  // 2.22:1.
+  doc.add(new Hyperlink('Green Link', 'https://microsoft.com', { textColor: 'green-700', margin: { bottom: 8 } }));
 
-  // Large purple
+  // Large purple. purple-600, not purple-500: 16pt isn't large enough to relax
+  // the threshold (needs 18pt regular or 14pt bold), and purple-500 only
+  // reaches 4.12:1.
   doc.add(
     new Hyperlink('Large Purple Link', 'https://google.com', {
       fontSize: 16,
-      textColor: 'purple-500',
+      textColor: 'purple-600',
       margin: { bottom: 8 },
     })
   );
 
-  // Bold red
+  // Bold red. red-700, not pure red: fontName alone doesn't register as bold
+  // for Hyperlink (see above), so this needs 4.5:1 too, and pure red only
+  // reaches 4.00:1.
   doc.add(
     new Hyperlink('Bold Red Link', 'https://stackoverflow.com', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: '#ff0000',
+      textColor: 'red-700',
       margin: { bottom: 16 },
     })
   );

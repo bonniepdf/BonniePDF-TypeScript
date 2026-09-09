@@ -58,20 +58,20 @@ const SEVERITY_STYLE: Record<Severity, { label: string; badge: Color; tint: Colo
   },
   High: {
     label: 'HIGH',
-    badge: ColorPalette.orange[600],
+    badge: ColorPalette.orange[700],
     tint: ColorPalette.orange[50],
     border: ColorPalette.orange[200],
   },
   Medium: {
     label: 'MEDIUM',
-    badge: ColorPalette.amber[600],
+    badge: ColorPalette.amber[700],
     tint: ColorPalette.amber[50],
     border: ColorPalette.amber[200],
   },
   Low: { label: 'LOW', badge: ColorPalette.slate[500], tint: ColorPalette.slate[50], border: ColorPalette.slate[200] },
   Resolved: {
     label: 'RESOLVED',
-    badge: ColorPalette.green[600],
+    badge: ColorPalette.green[700],
     tint: ColorPalette.green[50],
     border: ColorPalette.green[200],
   },
@@ -267,7 +267,7 @@ function findingCard(finding: Finding): Container {
   const category = new TextBlock(finding.category);
   category.fontName = StandardFonts.HelveticaBold;
   category.fontSize = 9;
-  category.textColor = ColorPalette.slate[500];
+  category.textColor = ColorPalette.slate[600];
   body.add(category);
 
   const description = new TextBlock(finding.description);
@@ -285,7 +285,7 @@ function findingCard(finding: Finding): Container {
     const relatedLabel = new TextBlock('Related:');
     relatedLabel.fontName = StandardFonts.HelveticaBold;
     relatedLabel.fontSize = 9;
-    relatedLabel.textColor = ColorPalette.slate[500];
+    relatedLabel.textColor = ColorPalette.slate[600];
     relatedRow.add(relatedLabel, relatedLabel.getPreferredWidth());
 
     const relatedLink = new SectionLink(finding.related, anchorFor(finding.related));
@@ -296,7 +296,7 @@ function findingCard(finding: Finding): Container {
 
     const onPage = new TextBlock('on page');
     onPage.fontSize = 9;
-    onPage.textColor = ColorPalette.slate[500];
+    onPage.textColor = ColorPalette.slate[600];
     relatedRow.add(onPage, onPage.getPreferredWidth());
 
     const relatedPage = new PageNumberOf(anchorFor(finding.related));
@@ -364,7 +364,7 @@ function priorityActions(critical: Finding[]): Container {
 
     const onPage = new TextBlock('page');
     onPage.fontSize = 10;
-    onPage.textColor = ColorPalette.slate[500];
+    onPage.textColor = ColorPalette.slate[600];
     row.add(onPage, onPage.getPreferredWidth());
 
     const page = new PageNumberOf(anchorFor(finding.id));

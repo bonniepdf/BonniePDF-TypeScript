@@ -64,10 +64,7 @@ function band(text: string, size: number, bg: Color, fg: Color, align = TextAlig
 function hrule(mt: number, mb: number): Container {
   const r = new Container();
   r.backgroundColor = LINE;
-  const s = new TextBlock(' ');
-  s.fontSize = 0.5;
-  r.child = s;
-  r.padding = new Thickness(0, 0.5, 0, 0.5);
+  r.height = 1;
   r.margin = new Thickness(0, mt, 0, mb);
   return r;
 }

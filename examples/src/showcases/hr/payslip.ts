@@ -30,8 +30,12 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
-const MUTED = ColorPalette.slate[500];
-const FAINT = ColorPalette.slate[400];
+// 600, not 500/400: both read against panel/net-panel (slate-100/blue-50) as
+// well as the plain page, and 500 falls to 4.35-4.38:1 there while 400 never
+// clears 4.5:1 anywhere (2.40-2.63:1). 600 clears 4.5:1 on every background
+// this document uses.
+const MUTED = ColorPalette.slate[600];
+const FAINT = ColorPalette.slate[600];
 const LINE = ColorPalette.slate[200];
 const PANEL = ColorPalette.slate[100];
 const ACCENT = ColorPalette.blue[600];

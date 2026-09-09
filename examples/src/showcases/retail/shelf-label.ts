@@ -32,7 +32,9 @@ const INK = ColorPalette.slate[900];
 const BODY = ColorPalette.slate[600];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
-const PROMO = ColorPalette.rose[600];
+// 700, not 600: this text reads against a slate-50 panel, and 600 falls to
+// 4.33:1 there against the 4.5:1 WCAG AA threshold.
+const PROMO = ColorPalette.rose[700];
 
 // 110 mm x 75 mm shelf-edge card.
 const PAGE = new PdfSize(311.8, 212.6, 'Shelf Label 110x75');

@@ -54,6 +54,7 @@ export function generate(): Document {
   settings.pageSize = PdfSize.a4;
   settings.margin = 48;
   settings.conformance = PdfAConformance.PdfA3b;
+  settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(BODY);
 
   const doc = new Document(settings);

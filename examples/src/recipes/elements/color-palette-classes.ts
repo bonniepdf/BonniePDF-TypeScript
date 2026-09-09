@@ -82,6 +82,7 @@ function headerCell(label: string): TextBlock {
  */
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 36);
+  settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();

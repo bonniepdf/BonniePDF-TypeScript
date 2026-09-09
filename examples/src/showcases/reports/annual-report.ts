@@ -33,6 +33,13 @@ const PRIMARY = ColorPalette.blue[800]; // deep corporate blue
 const SECONDARY = ColorPalette.teal[500]; // teal accent
 const TERTIARY = ColorPalette.amber[400]; // warm gold accent
 
+// Darker steps of SECONDARY/TERTIARY for the KPI card value, which paints 24pt
+// bold text on the blue-50 card panel: the accent's own shade only clears 3:1
+// large-text at PRIMARY's depth (SECONDARY falls to 2.23:1, TERTIARY to
+// 1.58:1). The swatches/rule/border above keep the lighter brand trio.
+const SECONDARY_TEXT = ColorPalette.teal[600];
+const TERTIARY_TEXT = ColorPalette.amber[700];
+
 const COVER_BG = ColorPalette.blue[900]; // deepest primary tint - cover field
 const BAND_BG = ColorPalette.blue[100]; // lightest primary tint - header/footer bands
 const INK = ColorPalette.slate[700]; // body copy
@@ -339,8 +346,8 @@ function kpiRow(): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14 });
   const cards: [string, string, ColorInput][] = [
     ['£2.4B', 'Total revenue', PRIMARY],
-    ['+18%', 'Year-over-year growth', SECONDARY],
-    ['2.1M', 'Daily active users', TERTIARY],
+    ['+18%', 'Year-over-year growth', SECONDARY_TEXT],
+    ['2.1M', 'Daily active users', TERTIARY_TEXT],
   ];
   for (const [value, label, accent] of cards) {
     row.add(kpiCard(value, label, accent), 1);
@@ -361,7 +368,9 @@ function kpiCard(value: string, label: string, accent: ColorInput): Container {
           textColor: accent,
           margin: { bottom: 4 },
         }),
-        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: ColorPalette.slate[500] }),
+        // 600, not 500: this card sits on the blue-50 panel, where 500 falls to
+        // 4.38:1 against the 4.5:1 WCAG AA threshold.
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: ColorPalette.slate[600] }),
       ],
     }),
   });

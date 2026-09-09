@@ -118,7 +118,9 @@ function productMedia(product: Product, index: number): Container {
   const monogram = new TextBlock(product.name.charAt(0).toUpperCase());
   monogram.fontName = StandardFonts.HelveticaBold;
   monogram.fontSize = 40;
-  monogram.textColor = hue[600];
+  // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
+  // [100] tint (2.87:1); every other hue already clears it at [600].
+  monogram.textColor = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
   monogram.alignment = TextAlignment.Center;
   monogram.margin = new Thickness(0, 40, 0, 0);
 

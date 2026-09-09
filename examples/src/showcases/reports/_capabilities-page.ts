@@ -52,7 +52,9 @@ export interface ReportBrand {
 }
 
 const INK = ColorPalette.slate[700];
-const MUTED = ColorPalette.slate[500];
+// 600, not 500: this label sits on each cover's own brand tint panel, and 500
+// falls to 4.26-4.47:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 
 function tb(text: string, size: number, color: Color, bold = false, align?: TextAlignment): TextBlock {

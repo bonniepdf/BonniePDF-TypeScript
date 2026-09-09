@@ -172,7 +172,7 @@ export function generate(): Document {
   const titlePageRule = new TextBlock('---------------');
   titlePageRule.fontName = StandardFonts.TimesRoman;
   titlePageRule.fontSize = 13;
-  titlePageRule.textColor = ColorPalette.slate[400];
+  titlePageRule.textColor = ColorPalette.slate[600];
   titlePageRule.alignment = TextAlignment.Center;
   titlePageRule.margin = new Thickness(0, 0, 0, 40);
   doc.add(titlePageRule);
@@ -188,7 +188,7 @@ export function generate(): Document {
   const titlePageEdition = new TextBlock('Project Gutenberg Edition · eBook #98');
   titlePageEdition.fontName = StandardFonts.TimesRoman;
   titlePageEdition.fontSize = 10;
-  titlePageEdition.textColor = ColorPalette.slate[400];
+  titlePageEdition.textColor = ColorPalette.slate[600];
   titlePageEdition.alignment = TextAlignment.Center;
   titlePageEdition.margin = new Thickness(0, 0, 0, 4);
   doc.add(titlePageEdition);
@@ -196,7 +196,7 @@ export function generate(): Document {
   const titlePagePublicDomain = new TextBlock('Public domain - free to read, copy, and share.');
   titlePagePublicDomain.fontName = StandardFonts.TimesItalic;
   titlePagePublicDomain.fontSize = 9;
-  titlePagePublicDomain.textColor = ColorPalette.slate[400];
+  titlePagePublicDomain.textColor = ColorPalette.slate[600];
   titlePagePublicDomain.alignment = TextAlignment.Center;
   doc.add(titlePagePublicDomain);
   doc.addPage();
@@ -232,7 +232,7 @@ export function generate(): Document {
     const bookTopRule = new TextBlock('---------------');
     bookTopRule.fontName = StandardFonts.TimesRoman;
     bookTopRule.fontSize = 11;
-    bookTopRule.textColor = ColorPalette.slate[300];
+    bookTopRule.textColor = ColorPalette.slate[600];
     bookTopRule.alignment = TextAlignment.Center;
     bookTopRule.margin = new Thickness(0, 56, 0, 14);
     doc.add(bookTopRule);
@@ -249,7 +249,7 @@ export function generate(): Document {
     const bookBottomRule = new TextBlock('---------------');
     bookBottomRule.fontName = StandardFonts.TimesRoman;
     bookBottomRule.fontSize = 11;
-    bookBottomRule.textColor = ColorPalette.slate[300];
+    bookBottomRule.textColor = ColorPalette.slate[600];
     bookBottomRule.alignment = TextAlignment.Center;
     bookBottomRule.margin = new Thickness(0, 0, 0, 32);
     doc.add(bookBottomRule);

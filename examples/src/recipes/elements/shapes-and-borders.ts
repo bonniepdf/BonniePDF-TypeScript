@@ -101,10 +101,13 @@ export function generate(): Document {
   doc.add(sectionHeader('Card Layout'));
 
   const cardRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { bottom: 12 } });
+  // Each title is bold 14pt text on its own tint - blue/purple-500 and teal-500
+  // all fall short of 4.5:1 there (3.46/3.84/2.32:1); one step darker clears it
+  // in every case.
   for (const [cardTitle, description, accent, bg] of [
-    ['Feature A', 'Rounded corners make UI elements feel modern and approachable.', 'blue-500', 'blue-50'],
-    ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', 'purple-500', '#faf5ff'],
-    ['Feature C', 'Works with backgrounds, borders, or both combined.', 'teal-500', '#f0fdfa'],
+    ['Feature A', 'Rounded corners make UI elements feel modern and approachable.', 'blue-600', 'blue-50'],
+    ['Feature B', 'Bezier curves approximate perfect quarter-circle arcs.', 'purple-600', '#faf5ff'],
+    ['Feature C', 'Works with backgrounds, borders, or both combined.', 'teal-700', '#f0fdfa'],
   ] as const) {
     cardRow.add(
       new Container({

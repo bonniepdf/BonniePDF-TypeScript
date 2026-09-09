@@ -96,8 +96,8 @@ export function generate(): Document {
     })
   );
 
-  doc.add(new TextBlock('  - Printing: Allowed', { textColor: 'green-600' }));
-  doc.add(new TextBlock('  - Copying: Allowed', { textColor: 'green-600' }));
+  doc.add(new TextBlock('  - Printing: Allowed', { textColor: 'green-700' }));
+  doc.add(new TextBlock('  - Copying: Allowed', { textColor: 'green-700' }));
   doc.add(new TextBlock('  - Modifying: Denied', { textColor: 'red-600' }));
   doc.add(new TextBlock('  - Annotations: Denied', { textColor: 'red-600' }));
 
@@ -136,8 +136,8 @@ export function generate(): Document {
   );
   doc.add(new TextBlock('Restricted permissions in this scenario:', { fontSize: 12 }));
 
-  doc.add(new TextBlock('  - Low-quality printing: Allowed', { textColor: 'green-600' }));
-  doc.add(new TextBlock('  - Accessibility extraction: Allowed', { textColor: 'green-600' }));
+  doc.add(new TextBlock('  - Low-quality printing: Allowed', { textColor: 'green-700' }));
+  doc.add(new TextBlock('  - Accessibility extraction: Allowed', { textColor: 'green-700' }));
   doc.add(new TextBlock('  - Copying text: Denied', { textColor: 'red-600' }));
   doc.add(new TextBlock('  - Modifying: Denied', { textColor: 'red-600' }));
   doc.add(new TextBlock('  - High-quality printing: Denied', { textColor: 'red-600' }));

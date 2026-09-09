@@ -138,7 +138,7 @@ export function generate(): Document {
                 margin: { top: 8 },
               }),
               new TextBlock(eccDetail, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
-              new TextBlock(urlData, { fontSize: 8, textColor: 'slate-400', alignment: 'center', margin: { top: 4 } }),
+              new TextBlock(urlData, { fontSize: 8, textColor: 'slate-600', alignment: 'center', margin: { top: 4 } }),
             ],
           })
       ),

@@ -112,7 +112,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Original Price: £199.99', {
       fontSize: 14,
-      textColor: 'slate-400',
+      textColor: 'slate-600',
       textDecoration: 'strikethrough',
       margin: { bottom: 4 },
     })
@@ -128,7 +128,7 @@ export function generate(): Document {
     })
   );
 
-  doc.add(new TextBlock('You save £50.00!', { fontSize: 11, textColor: 'green-600' }));
+  doc.add(new TextBlock('You save £50.00!', { fontSize: 11, textColor: 'green-700' }));
 
   return doc;
 }

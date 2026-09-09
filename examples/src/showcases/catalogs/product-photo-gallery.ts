@@ -100,6 +100,9 @@ const TILE_HUES = [
 
 function productMedia(product: Product, index: number): Container {
   const hue = TILE_HUES[index % TILE_HUES.length];
+  // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
+  // [100] tint (2.87:1); every other hue already clears it at [600].
+  const monogramColor = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
   return new Container({
     height: CARD_HEIGHT_IMAGE,
     backgroundColor: hue[100],
@@ -107,7 +110,7 @@ function productMedia(product: Product, index: number): Container {
     child: new TextBlock(product.name.charAt(0).toUpperCase(), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 40,
-      textColor: hue[600],
+      textColor: monogramColor,
       alignment: 'center',
       margin: { top: 40 },
     }),

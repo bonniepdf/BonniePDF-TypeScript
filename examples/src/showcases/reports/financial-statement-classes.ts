@@ -29,6 +29,7 @@ import {
   VerticalStack,
   HorizontalStack,
   Container,
+  Spacer,
   Color,
   ColorPalette,
   Thickness,
@@ -259,19 +260,11 @@ function sub(text: string): TextBlock {
 function rule(color: Color, thickness: number): Container {
   const c = new Container();
   c.backgroundColor = color;
-  c.padding = new Thickness(0, thickness / 2, 0, thickness / 2);
+  c.height = thickness;
   c.margin = new Thickness(0, 2, 0, 2);
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  c.child = s;
   return c;
 }
 
-function gap(h: number): Container {
-  const c = new Container();
-  c.padding = new Thickness(0, h / 2, 0, h / 2);
-  const s = new TextBlock(' ');
-  s.fontSize = 1;
-  c.child = s;
-  return c;
+function gap(h: number): Spacer {
+  return new Spacer(h);
 }

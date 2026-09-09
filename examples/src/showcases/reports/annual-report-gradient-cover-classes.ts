@@ -149,13 +149,13 @@ function coverType(): Container {
 
   const credit = new TextBlock('Prepared with BonniePDF');
   credit.fontSize = 10;
-  credit.textColor = ColorPalette.violet[200];
+  credit.textColor = ColorPalette.violet[100];
   credit.margin = new Thickness(0, 0, 0, 7);
   stack.add(credit);
 
   const confidential = new TextBlock(`Fiscal Year ${YEAR} · Confidential`);
   confidential.fontSize = 10;
-  confidential.textColor = ColorPalette.violet[300];
+  confidential.textColor = ColorPalette.violet[100];
   stack.add(confidential);
 
   const block = new Container();

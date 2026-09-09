@@ -102,6 +102,31 @@ describe('paintOf — intrinsic paint capture', () => {
   it('returns undefined for an element that paints nothing relevant', () => {
     expect(paintOf({}, 'VerticalStack')).toBeUndefined();
   });
+
+  it('marks bold from fontWeight', () => {
+    const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.Helvetica });
+    tb.textColor = new Color(0x33, 0x33, 0x33);
+    tb.fontWeight = 700;
+    expect(paintOf(tb, 'TextBlock')).toMatchObject({ bold: true });
+  });
+
+  // Most examples in both catalogues (and Hyperlink, which exposes no
+  // fontWeight at all) style bold by setting fontName directly to a bold
+  // PostScript name rather than through fontWeight - that idiom must be
+  // detected too, or link/text contrast is checked against the wrong
+  // threshold.
+  it('marks bold from a bold PostScript font name, independent of fontWeight', () => {
+    const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.HelveticaBold });
+    tb.textColor = new Color(0x33, 0x33, 0x33);
+    expect(tb.fontWeight).toBeLessThan(700);
+    expect(paintOf(tb, 'TextBlock')).toMatchObject({ bold: true });
+  });
+
+  it('does not mark bold for a regular-weight font name', () => {
+    const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.Helvetica });
+    tb.textColor = new Color(0x33, 0x33, 0x33);
+    expect(paintOf(tb, 'TextBlock')!.bold).toBeUndefined();
+  });
 });
 
 describe('contrast preflight — end to end', () => {
@@ -241,6 +266,27 @@ describe('contrast preflight — end to end', () => {
     expect(finding).toBeDefined();
     expect(finding!.severity).toBe(ComplianceSeverity.Warning);
     expect(finding!.standard).toBe('WCAG 2.2');
+  });
+
+  // Hyperlink exposes no fontWeight at all - bold styling can only be
+  // authored by setting fontName to a bold PostScript name. Without that
+  // being recognised as bold, this 14pt link would be held to the 4.5:1
+  // regular-text threshold and wrongly flagged even though it clears the 3:1
+  // large-text threshold it actually qualifies for.
+  it('applies the large-text threshold to a bold hyperlink styled via fontName', async () => {
+    const doc = baselineDocument();
+    doc.add(
+      new Hyperlink('Terms and conditions', 'https://example.com', {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 14,
+        textColor: new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
+      })
+    );
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    const report = evaluateCompliance(snapshot!);
+
+    expect(report.findings.filter(f => f.code === 'contrast-insufficient')).toHaveLength(0);
   });
 
   it('reports unknown rather than guessing when the page paints a background element', async () => {

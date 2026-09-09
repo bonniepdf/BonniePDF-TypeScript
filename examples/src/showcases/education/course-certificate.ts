@@ -311,7 +311,10 @@ function attestation(data: CertificateData): VerticalStack {
         }),
       }),
       new TextBlock('Verify online', { ...caption, fontSize: 6.5 }),
-      new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, textColor: FAINT }),
+      // MUTED, not FAINT: this sits inside a Layers composition, so the preflight
+      // can't verify it - but FAINT (slate-400) is 2.63:1 against the white it
+      // actually renders on, well under 4.5:1 at this tiny 6.5pt size.
+      new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, textColor: MUTED }),
     ],
   });
   // The trailing spacer is deliberate, not decorative: the certificate ID

@@ -143,6 +143,7 @@ import { generate as quotation } from './showcases/sales/quotation';
 import { generate as quotationClasses } from './showcases/sales/quotation-classes';
 import { generate as employmentContract } from './showcases/hr/employment-contract';
 import { generate as employmentContractClasses } from './showcases/hr/employment-contract-classes';
+import { generate as policySchedule } from './showcases/insurance/policy-schedule';
 import { generate as utilityBill } from './showcases/utilities/utility-bill';
 import { generate as utilityBillClasses } from './showcases/utilities/utility-bill-classes';
 import { generate as courseCertificate } from './showcases/education/course-certificate';
@@ -2598,6 +2599,28 @@ export const examples: ExampleDef[] = [
     gallery: false,
     variantOf: 'payslip',
     variantLabel: 'Class API',
+  },
+  {
+    id: 'policy-schedule',
+    name: 'Policy Schedule',
+    category: 'Insurance',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A regulated-document flagship for the Insurance vertical: policyholder and insured-property details, ' +
+      'coverage limits and deductibles, a premium breakdown, endorsements/exclusions, claims contacts, a renewal ' +
+      'date, a QR link to a self-service portal, and accessible long tables. PDF/A-2a + PDF/UA-1.',
+    filename: 'policy-schedule.pdf',
+    generate: policySchedule,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Insurance'],
+    documentType: 'schedule',
+    capabilities: ['qr', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
   },
 ];
 

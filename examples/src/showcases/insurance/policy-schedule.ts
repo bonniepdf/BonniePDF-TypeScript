@@ -32,12 +32,16 @@ import {
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
 const MUTED = ColorPalette.slate[500];
-const FAINT = ColorPalette.slate[400];
+// 600, not 400: 400 never clears 4.5:1 as text (2.63:1 on this document's
+// backgrounds).
+const FAINT = ColorPalette.slate[600];
 const HEADER_BG = ColorPalette.slate[100];
 const RULE = ColorPalette.slate[200];
 const BRAND = ColorPalette.teal[700];
 const BRAND_SOFT = ColorPalette.teal[50];
-const ACCENT = ColorPalette.amber[600];
+// 700, not 600: this table cell text on white needs 4.5:1 and 600 falls to
+// 3.20:1.
+const ACCENT = ColorPalette.amber[700];
 const DANGER = ColorPalette.rose[700];
 
 // ── Domain model ─────────────────────────────────────────────────────────────

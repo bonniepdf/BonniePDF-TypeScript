@@ -180,6 +180,18 @@ export function paintForBackground(color: Color): NodePaint {
 }
 
 /**
+ * Secondary bold signal for elements styled by setting `fontName` directly to a
+ * bold PostScript name (e.g. "Helvetica-Bold") rather than through a
+ * weight/family builder - the idiom most examples in this codebase still use,
+ * and the only one `Hyperlink` exposes at all. Every bold standard-14 name
+ * contains "Bold" (see `StandardFonts`), so a case-insensitive substring check
+ * is a reliable fallback where `fontWeight` was never touched.
+ */
+function fontNameLooksBold(fontName: string | undefined): boolean {
+  return typeof fontName === 'string' && /bold/i.test(fontName);
+}
+
+/**
  * Derives {@link NodePaint} from an element instance by reading its already
  * resolved `textColor` / `fontSize` / `fontWeight` / `backgroundColor` — the same
  * values the canvas is about to draw with. Returns `undefined` when the element
@@ -192,6 +204,7 @@ export function paintOf(element: object, type: string): NodePaint | undefined {
     textColor?: Color;
     fontSize?: number;
     fontWeight?: number;
+    fontName?: string;
     backgroundColor?: Color;
   };
   const paint: NodePaint = {};
@@ -203,7 +216,9 @@ export function paintOf(element: object, type: string): NodePaint | undefined {
     const alpha = alphaOf(el.textColor);
     if (alpha < 1) paint.textAlpha = alpha;
     paint.fontSize = el.fontSize;
-    if (typeof el.fontWeight === 'number' && el.fontWeight >= 700) paint.bold = true;
+    if ((typeof el.fontWeight === 'number' && el.fontWeight >= 700) || fontNameLooksBold(el.fontName)) {
+      paint.bold = true;
+    }
   }
 
   // Background side.

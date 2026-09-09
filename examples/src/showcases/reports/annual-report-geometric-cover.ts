@@ -183,10 +183,12 @@ function coverType(): Container {
     })
   );
 
+  // slate[600], not [400]: this footer sits on the flat page background, where
+  // slate[400] is 2.51:1 against the 4.5:1 WCAG AA threshold.
   stack.add(
     new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`, {
       fontSize: 10,
-      textColor: ColorPalette.slate[400],
+      textColor: ColorPalette.slate[600],
       alignment: TextAlignment.Center,
     })
   );

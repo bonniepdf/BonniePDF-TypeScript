@@ -307,7 +307,10 @@ function attestation(data: CertificateData): VerticalStack {
   verification.spacing = 3;
   verification.add(qrBox);
   verification.add(caption('Verify online', 6.5));
-  verification.add(caption(data.award.certificateId, 6.5, FAINT));
+  // MUTED, not FAINT: this sits inside a Layers composition, so the preflight
+  // can't verify it - but FAINT (slate-400) is 2.63:1 against the white it
+  // actually renders on, well under 4.5:1 at this tiny 6.5pt size.
+  verification.add(caption(data.award.certificateId, 6.5, MUTED));
 
   // The trailing spacer is deliberate, not decorative: the certificate ID
   // caption is wider than the QR code, and without room held clear on the

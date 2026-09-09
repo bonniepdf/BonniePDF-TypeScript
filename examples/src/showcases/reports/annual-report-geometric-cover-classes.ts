@@ -192,7 +192,7 @@ function coverType(): Container {
 
   const credit = new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`);
   credit.fontSize = 10;
-  credit.textColor = ColorPalette.slate[400];
+  credit.textColor = ColorPalette.slate[600];
   credit.alignment = TextAlignment.Center;
   stack.add(credit);
 

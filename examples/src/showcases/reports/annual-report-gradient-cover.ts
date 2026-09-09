@@ -142,10 +142,15 @@ function coverType(): Container {
     })
   );
 
+  // violet[100], not [200]/[300]: this footer sits near the foot of the page,
+  // where the background gradient has shifted to its brightest stop (#a800b7).
+  // violet[300] is 3.38:1 there - well under 4.5:1 - and violet[200] is only a
+  // rounding error above it (4.52:1). violet[100], already used for the
+  // headline above, holds a comfortable 5.28:1 at that same point.
   stack.add(
     new TextBlock('Prepared with BonniePDF', {
       fontSize: 10,
-      textColor: ColorPalette.violet[200],
+      textColor: ColorPalette.violet[100],
       margin: { bottom: 7 },
     })
   );
@@ -153,7 +158,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock(`Fiscal Year ${YEAR} · Confidential`, {
       fontSize: 10,
-      textColor: ColorPalette.violet[300],
+      textColor: ColorPalette.violet[100],
     })
   );
 

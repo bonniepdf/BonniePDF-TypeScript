@@ -673,16 +673,19 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       const startX = ctx.currentX;
       let currentX = startX;
 
+      // `col` tracks the column the cell starts in, which runs ahead of the cell
+      // index `i` once any cell in the row spans more than one column.
+      let col = 0;
+
       for (let i = 0; i < row.cells.length; i++) {
         const cell = row.cells[i];
 
         if (row.isHeader && !cell.isHeader) cell.isHeader = true;
 
-        let colWidth = widths[i];
-        if (cell.columnSpan > 1) {
-          for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
-            colWidth += widths[i + j];
-          }
+        const span = Math.max(1, cell.columnSpan);
+        let colWidth = 0;
+        for (let j = 0; j < span && col + j < widths.length; j++) {
+          colWidth += widths[col + j];
         }
 
         capture.openCell(cell, currentX, colWidth);
@@ -716,7 +719,8 @@ export class Table extends BorderedElementBase implements IRoleProvider {
           capture.closeCell(cell);
         }
 
-        currentX += widths[i];
+        currentX += colWidth;
+        col += span;
       }
 
       ctx.currentX = startX;
@@ -731,24 +735,59 @@ export class Table extends BorderedElementBase implements IRoleProvider {
   }
 
   private calculateColumnWidths(totalWidth: number): number[] {
-    const totalWeight = this.columnWeights.reduce((sum, w) => sum + w, 0);
-    return this.columnWeights.map(w => (w / totalWeight) * totalWidth);
+    const weights = this.effectiveColumnWeights();
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    return weights.map(w => (w / totalWeight) * totalWidth);
+  }
+
+  /**
+   * The declared column weights, extended with equal weights out to the widest
+   * row. A table may be built with no weights at all, or with fewer than some
+   * row actually fills; the columns those rows imply share the width evenly
+   * rather than being left without one.
+   */
+  private effectiveColumnWeights(): number[] {
+    const columns = this.columnCount();
+    if (columns <= this.columnWeights.length) return this.columnWeights;
+
+    const weights = [...this.columnWeights];
+    while (weights.length < columns) weights.push(1);
+    return weights;
+  }
+
+  /**
+   * The number of columns the table spans: the declared weight count, widened to
+   * the most columns any single row occupies once column spans are counted.
+   */
+  private columnCount(): number {
+    let columns = this.columnWeights.length;
+
+    for (const row of [...this.headers, ...this.rows, ...this.footers]) {
+      let spanned = 0;
+      for (const cell of row.cells) spanned += Math.max(1, cell.columnSpan);
+      if (spanned > columns) columns = spanned;
+    }
+
+    return columns;
   }
 
   private measureRowHeight(row: TableRow, widths: number[]): number {
     let maxHeight = row.minHeight ?? 0;
 
-    for (let i = 0; i < row.cells.length; i++) {
-      const cell = row.cells[i];
+    // `col` tracks the column the cell starts in, which runs ahead of the cell's
+    // position in the row once any cell in the row spans more than one column.
+    let col = 0;
+
+    for (const cell of row.cells) {
       const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
 
       // Calculate effective width considering column span
-      let cellWidth = widths[i];
-      if (cell.columnSpan > 1) {
-        for (let j = 1; j < cell.columnSpan && i + j < widths.length; j++) {
-          cellWidth += widths[i + j];
-        }
+      const span = Math.max(1, cell.columnSpan);
+      let cellWidth = 0;
+      for (let j = 0; j < span && col + j < widths.length; j++) {
+        cellWidth += widths[col + j];
       }
+      col += span;
 
       // Measure content height with padding
       const contentWidth = cellWidth - padding.left - padding.right;

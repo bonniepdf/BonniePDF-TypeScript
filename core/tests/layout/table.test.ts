@@ -85,6 +85,82 @@ describe('Table — column widths', () => {
     expect(b.renderedX).toBeCloseTo(100 + PAD, 4);
     expect(b.renderedWidth).toBeCloseTo(300 - 2 * PAD, 4);
   });
+
+  it('infers even columns when no weights are declared', () => {
+    const { ctx } = makeContext();
+    const a = new Probe();
+    const b = new Probe();
+    const t = new Table(); // no weights: two cells => two even columns
+    t.addRow(a, b);
+    t.render(ctx, 500);
+
+    expect(a.renderedX).toBeCloseTo(PAD, 4);
+    expect(a.renderedWidth).toBeCloseTo(250 - 2 * PAD, 4);
+    expect(b.renderedX).toBeCloseTo(250 + PAD, 4);
+    expect(b.renderedWidth).toBeCloseTo(250 - 2 * PAD, 4);
+  });
+
+  it('extends declared weights with even columns for extra cells', () => {
+    const { ctx } = makeContext();
+    const a = new Probe();
+    const b = new Probe();
+    const t = new Table(3); // one weight, two cells => weights 3 and 1 over 400
+    t.addRow(a, b);
+    t.render(ctx, 400);
+
+    expect(a.renderedWidth).toBeCloseTo(300 - 2 * PAD, 4);
+    expect(b.renderedX).toBeCloseTo(300 + PAD, 4);
+    expect(b.renderedWidth).toBeCloseTo(100 - 2 * PAD, 4);
+  });
+
+  it('counts column spans when inferring columns', () => {
+    const { ctx } = makeContext();
+    const spanned = new Probe();
+    const t = new Table(); // a span-2 cell plus one more => three even columns of 100
+    t.addRow(TableCell.from(spanned).withColumnSpan(2), TableCell.from(new Probe()));
+    t.render(ctx, 300);
+
+    expect(spanned.renderedWidth).toBeCloseTo(200 - 2 * PAD, 4); // columns 0+1
+  });
+
+  it('places the next cell after the columns a span covers', () => {
+    const { ctx } = makeContext();
+    const spanned = new Probe();
+    const next = new Probe();
+    const t = new Table(1, 1, 1); // 300 => 100 / 100 / 100
+    t.addRow(TableCell.from(spanned).withColumnSpan(2), TableCell.from(next));
+    t.render(ctx, 300);
+
+    expect(spanned.renderedX).toBeCloseTo(PAD, 4);
+    expect(spanned.renderedWidth).toBeCloseTo(200 - 2 * PAD, 4); // columns 0+1
+    expect(next.renderedX).toBeCloseTo(200 + PAD, 4); // starts after column 1
+    expect(next.renderedWidth).toBeCloseTo(100 - 2 * PAD, 4); // column 2
+  });
+
+  it("takes the next cell's width from its own column, not its cell index", () => {
+    const { ctx } = makeContext();
+    const spanned = new Probe();
+    const next = new Probe();
+    const t = new Table(1, 2, 3); // 600 => 100 / 200 / 300
+    t.addRow(TableCell.from(spanned).withColumnSpan(2), TableCell.from(next));
+    t.render(ctx, 600);
+
+    expect(spanned.renderedWidth).toBeCloseTo(300 - 2 * PAD, 4); // columns 0+1 = 100+200
+    expect(next.renderedX).toBeCloseTo(300 + PAD, 4);
+    expect(next.renderedWidth).toBeCloseTo(300 - 2 * PAD, 4); // column 2, not column 1
+  });
+
+  it('widens to the widest row across headers, rows and footers', () => {
+    const { ctx } = makeContext();
+    const only = new Probe();
+    const t = new Table();
+    t.addRow(only); // 1 cell
+    t.addFooter(new Probe(), new Probe(), new Probe()); // 3 cells wins
+    t.render(ctx, 300);
+
+    // The single-cell row still occupies just its own first column.
+    expect(only.renderedWidth).toBeCloseTo(100 - 2 * PAD, 4);
+  });
 });
 
 describe('Table — height measurement', () => {

@@ -9,6 +9,15 @@ export { RenderStatus };
 export interface RenderContext {
   maxY: number;
   margin: number;
+  /**
+   * Top of the body content band on the current page: the margin, or the
+   * header's height where the header is taller than the margin. Elements test
+   * "am I at the top of the page?" against this rather than against `margin`,
+   * so a page whose header reserves extra space still recognises its own top.
+   */
+  readonly contentTop: number;
+  /** Usable body height on the current page (`maxY - contentTop`). */
+  readonly contentHeight: number;
   canvas: ICanvas;
   currentY: number;
   currentX: number;

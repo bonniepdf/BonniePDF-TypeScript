@@ -101,8 +101,8 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
           const childHeight = child.measureHeight(contentWidth);
           const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
-          const notAtTop = ctx.currentY > ctx.margin;
-          const wouldFitOnFreshPage = childHeight <= ctx.maxY - ctx.margin;
+          const notAtTop = ctx.currentY > ctx.contentTop;
+          const wouldFitOnFreshPage = childHeight <= ctx.contentHeight;
 
           if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
             ctx.currentX = originalX;
@@ -151,7 +151,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
         } else {
           const childHeight = child.measureHeight(contentWidth);
           const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
-          const notAtTop = ctx.currentY > ctx.margin;
+          const notAtTop = ctx.currentY > ctx.contentTop;
 
           if (wouldOverflow && notAtTop) {
             ctx.currentX = originalX;

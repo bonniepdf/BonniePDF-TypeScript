@@ -14,6 +14,7 @@ import { FontMetrics } from '../Typography/FontMetrics';
 import { StandardFonts } from '../Typography/StandardFonts';
 import { RenderStatus } from '../Elements/RenderStatus';
 import { beginChildTag, endChildTag } from './Tagging/ChildTagging';
+import { chromeReservationFor } from './ChromeReservation';
 
 /** True when the element supports stateful rendering across page boundaries. */
 function isStatefulElement(element: IElement): element is IStatefulElement {
@@ -29,6 +30,10 @@ export class PdfRenderPipeline {
 
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin);
+    // Header/footer consume body content height (spec: Layout & Pagination
+    // §5.1). Installed before any layout so the very first page's cursor and
+    // break threshold already account for the chrome.
+    ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
     const result = new PdfRenderResult(ctx, orientedPageSize);
 
@@ -48,8 +53,7 @@ export class PdfRenderPipeline {
       ctx.margin = pageMargin;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
-      ctx.currentX = pageMargin;
-      ctx.currentY = pageMargin;
+      ctx.resetCursorToContentTop();
 
       const contentWidth = pageWidth - pageMargin * 2;
 
@@ -174,6 +178,11 @@ export class PdfRenderPipeline {
       throw new Error('Pages and context cannot be null');
     }
 
+    // Header/footer consume body content height (spec: Layout & Pagination
+    // §5.1). The context is supplied by the caller here, so the reservation is
+    // installed at the top of the run rather than at construction.
+    ctx.setChromeReservation(chromeReservationFor(settings, ctx));
+
     const pageDimensions = new Map<
       number,
       { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
@@ -192,8 +201,7 @@ export class PdfRenderPipeline {
       ctx.margin = pageMargin;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
-      ctx.currentX = pageMargin;
-      ctx.currentY = pageMargin;
+      ctx.resetCursorToContentTop();
 
       const contentWidth = page.width - pageMargin * 2;
 
@@ -360,8 +368,12 @@ export class PdfRenderPipeline {
     const originalCanvas = ctx.canvas;
     const originalX = ctx.currentX;
     const originalY = ctx.currentY;
+    const originalSuspended = ctx.chromeReservationSuspended;
 
     ctx.setCanvas(ctx.getFixedCanvas());
+    // A header is not laid out inside the band it reserves for the body: while
+    // the chrome itself paints, the content band is the plain margin box.
+    ctx.chromeReservationSuspended = true;
 
     try {
       const contentWidth = ctx.pageSize.width - ctx.margin * 2;
@@ -383,7 +395,10 @@ export class PdfRenderPipeline {
         const footerElement = settings.footerTemplate!(pageNumber);
         if (footerElement) {
           const footerHeight = footerElement.measureHeight(contentWidth);
-          const bandTop = ctx.pageSize.height - ctx.margin;
+          // Centred in the bottom margin band while it fits there, flush to the
+          // bottom page edge once it outgrows it - continuous at footerHeight ==
+          // margin, and it never runs off the page (spec: Layout & Pagination §5.1).
+          const bandTop = ctx.pageSize.height - Math.max(ctx.margin, footerHeight);
           ctx.currentX = startX;
           ctx.currentY = bandTop + Math.max(0, (ctx.margin - footerHeight) / 2);
           if (ctx.tagging) ctx.canvas.beginArtifact();
@@ -404,6 +419,7 @@ export class PdfRenderPipeline {
       ctx.setCanvas(originalCanvas);
       ctx.currentX = originalX;
       ctx.currentY = originalY;
+      ctx.chromeReservationSuspended = originalSuspended;
     }
   }
 

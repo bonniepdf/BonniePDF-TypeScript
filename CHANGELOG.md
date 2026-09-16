@@ -52,6 +52,26 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Fixed
 
+- **A page header or footer now reserves body content space.** Previously the
+  header and footer were painted into the margin band while body layout still
+  ran from the top margin to the bottom margin, so page chrome taller than the
+  margin silently overlapped the content underneath it. The body content band is
+  now inset per page by `max(margin, headerHeight)` at the top and
+  `max(margin, footerHeight)` at the bottom, on every page including pages
+  created by overflow — the cursor reset that accompanies a page break uses the
+  new page's own content top rather than the margin.
+
+  Chrome that fits inside its margin band reserves nothing beyond the margin the
+  page already had, so documents whose header and footer are shorter than the
+  margin — which is essentially all of them — produce byte-identical output. A
+  header or footer that outgrows the margin is also now flush against its own
+  page edge instead of being centred in a band it no longer fits, which is what
+  stops an oversized footer running off the bottom of the page.
+
+  A header and footer that between them leave no usable body height now throw,
+  naming the page and both measured heights, rather than paginating against a
+  content band of zero or negative height.
+
 - The accessibility preflight now detects bold text styled by setting
   `fontName` directly to a bold PostScript name (`"Helvetica-Bold"`,
   `"Times-BoldItalic"`, …), not only via the `fontWeight` property. That idiom

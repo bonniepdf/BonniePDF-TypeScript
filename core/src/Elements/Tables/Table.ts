@@ -341,7 +341,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       for (const headerRow of this.headers) {
         const headerHeight = this.measureRowHeight(headerRow, widths);
 
-        if (ctx.currentY + headerHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+        if (ctx.currentY + headerHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
           if (rowGroupOpen && groupTagging) tagging!.tree.end();
           return this.lastRowRendered < 0 ? RenderStatus.WrapRequired : RenderStatus.Overflow;
         }
@@ -374,7 +374,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       const rowHeight = this.measureRowHeight(row, widths);
 
       // Pagination check
-      if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+      if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
         if (tbodyOpen && groupTagging) tagging!.tree.end();
         this.lastRowRendered = i - 1;
         this.headersPending = this.repeatHeadersOnNewPage && this.headers.length > 0;
@@ -483,7 +483,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
           const rowHeight = this.measureRowHeight(row, widths);
 
           // Pagination check
-          if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+          if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
             ctx.newPage();
             isFirstPage = false;
 
@@ -556,7 +556,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     const rowHeight = this.measureRowHeight(row, widths);
 
     // Pagination check
-    if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+    if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
       ctx.newPage();
     }
 

@@ -4,6 +4,7 @@ import { IElement } from '../Elements/IElement';
 import { Color } from '../Core/Color';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
+import { chromeReservationFor } from './ChromeReservation';
 import { SvgCanvas } from '../Drawing/SvgCanvas';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import type { RegisteredLink } from './RegisteredLink';
@@ -66,6 +67,10 @@ export class SvgRenderPipeline {
       throw new Error('SvgRenderPipeline requires a RenderContext created with isSvgMode = true');
     }
 
+    // Header/footer consume body content height (spec: Layout & Pagination
+    // §5.1), so the SVG preview paginates exactly where the PDF does.
+    ctx.setChromeReservation(chromeReservationFor(settings, ctx));
+
     const pageDimensions = new Map<
       number,
       {
@@ -92,8 +97,7 @@ export class SvgRenderPipeline {
       ctx.pageSize = page.size;
       ctx.margin = pageMargin;
       ctx.switchToPage(currentOutputIndex);
-      ctx.currentX = pageMargin;
-      ctx.currentY = pageMargin;
+      ctx.resetCursorToContentTop();
 
       const contentWidth = page.width - pageMargin * 2;
       pageDimensions.set(currentOutputIndex, {
@@ -108,7 +112,7 @@ export class SvgRenderPipeline {
       // Layout capture: wrap each input page's body content in a Page node so
       // the snapshot tree reads Document → Page → content. Overflow onto further
       // physical pages splits the Page node's rect via ctx.newPage().
-      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, pageMargin, pageMargin, contentWidth);
+      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, pageMargin, ctx.currentY, contentWidth);
       PdfRenderPipeline.layoutElements(page.getElements(), ctx, contentWidth);
       ctx.layoutRecorder?.closeNode(page, ctx.currentPageIndex, ctx.currentY, true);
 
@@ -365,8 +369,12 @@ export class SvgRenderPipeline {
 
     const originalX = ctx.currentX;
     const originalY = ctx.currentY;
+    const originalSuspended = ctx.chromeReservationSuspended;
     const contentWidth = pageWidth - margin * 2;
     const startX = margin;
+
+    // A header is not laid out inside the band it reserves for the body.
+    ctx.chromeReservationSuspended = true;
 
     try {
       if (hasHeader) {
@@ -383,7 +391,7 @@ export class SvgRenderPipeline {
         const footerElement = settings.footerTemplate!(pageNumber);
         if (footerElement) {
           const footerHeight = footerElement.measureHeight(contentWidth);
-          const bandTop = pageHeight - margin;
+          const bandTop = pageHeight - Math.max(margin, footerHeight);
           ctx.currentX = startX;
           ctx.currentY = bandTop + Math.max(0, (margin - footerHeight) / 2);
           footerElement.render(ctx, contentWidth);
@@ -392,6 +400,7 @@ export class SvgRenderPipeline {
     } finally {
       ctx.currentX = originalX;
       ctx.currentY = originalY;
+      ctx.chromeReservationSuspended = originalSuspended;
     }
   }
 }

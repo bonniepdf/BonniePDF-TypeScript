@@ -203,7 +203,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
 
     // Pagination: if the whole container would not fit and we are not already at
     // the top of the page, break first so the border/background stay intact.
-    if (ctx.currentY + containerHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+    if (ctx.currentY + containerHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
       ctx.newPage();
     }
 

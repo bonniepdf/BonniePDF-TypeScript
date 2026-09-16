@@ -10,6 +10,7 @@ import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { BarcodeSymbology } from './BarcodeSymbology';
 import { BarcodeEncoder, EncodedBarcode } from './BarcodeEncoder';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 const STANDARD_FONT_FAMILY = 'Helvetica';
 
@@ -43,7 +44,18 @@ export const BARCODE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...BARCODE_OWN_OPTIO
 
 /** Options for {@link Barcode}. */
 export type BarcodeOptions = ElementOptions &
-  Partial<Omit<Pick<Barcode, (typeof BARCODE_OWN_OPTION_KEYS)[number]>, 'foregroundColor' | 'backgroundColor'>> & {
+  Partial<
+    Omit<
+      Pick<Barcode, (typeof BARCODE_OWN_OPTION_KEYS)[number]>,
+      'foregroundColor' | 'backgroundColor' | 'height' | 'moduleWidth' | 'textLabelFontSize'
+    >
+  > & {
+    /** Height. Accepts a length: a number of points, `'2cm'`, or `{ value, unit }`. */
+    height?: LengthInput;
+    /** Width of one bar module. Accepts a length: `1.5`, `'0.5mm'`, or `{ value, unit }`. */
+    moduleWidth?: LengthInput;
+    /** Caption font size. Accepts a length: `9`, `'9pt'`, or `{ value, unit }`. */
+    textLabelFontSize?: LengthInput;
     /** Bar colour. Accepts a palette token or hex. */
     foregroundColor?: ColorInput;
     /** Quiet-zone colour. Accepts a palette token or hex. */
@@ -78,11 +90,31 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
     return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
   }
 
-  /** Height of the bars in points (excludes the text label). Default 60. */
-  public height = 60;
+  private _height: number = 60;
 
-  /** Width of the narrowest bar (one module) in points. Default 1.5. */
-  public moduleWidth = 1.5;
+  /** Height of the bars in points (excludes the text label). Default 60.
+   *
+   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get height(): number {
+    return this._height;
+  }
+  public set height(value: LengthInput) {
+    this._height = toLength(value);
+  }
+
+  private _moduleWidth: number = 1.5;
+
+  /** Width of the narrowest bar (one module) in points. Default 1.5.
+   *
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get moduleWidth(): number {
+    return this._moduleWidth;
+  }
+  public set moduleWidth(value: LengthInput) {
+    this._moduleWidth = toLength(value);
+  }
 
   /** Number of quiet-zone modules on each side. Negative means the per-symbology default. */
   public quietZone = -1;
@@ -90,8 +122,18 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
   /** Whether to render the human-readable value beneath the bars. Default true. */
   public includeTextLabel = true;
 
-  /** Font size of the human-readable text label, in points. Default 9. */
-  public textLabelFontSize = 9;
+  private _textLabelFontSize: number = 9;
+
+  /** Font size of the human-readable text label, in points. Default 9.
+   *
+   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }` (§4A.3).
+   */
+  public get textLabelFontSize(): number {
+    return this._textLabelFontSize;
+  }
+  public set textLabelFontSize(value: LengthInput) {
+    this._textLabelFontSize = toLength(value);
+  }
 
   /** The colour of the bars. Default black. */
   private _foregroundColor: Color = new Color(0, 0, 0);

@@ -8,6 +8,7 @@ import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Area chart that renders a filled polygon with a line overlay.
@@ -28,7 +29,9 @@ export const AREA_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...AREA_C
 
 /** Options for {@link AreaChart}. */
 export type AreaChartOptions = CartesianChartOptions &
-  Partial<Omit<Pick<AreaChart, (typeof AREA_CHART_OWN_OPTION_KEYS)[number]>, 'areaColor'>> & {
+  Partial<Omit<Pick<AreaChart, (typeof AREA_CHART_OWN_OPTION_KEYS)[number]>, 'areaColor' | 'lineWidth'>> & {
+    /** Line thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
+    lineWidth?: LengthInput;
     /** areaColor colour. Accepts a palette token or hex. */
     areaColor?: ColorInput;
   };
@@ -73,10 +76,19 @@ export class AreaChart extends CartesianChartBase {
    */
   fillOpacity: number = 0.3;
 
+  private _lineWidth: number = 2;
+
   /**
    * Width of the line stroke (backward compatibility for single-series charts).
+   *
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
    */
-  lineWidth: number = 2;
+  public get lineWidth(): number {
+    return this._lineWidth;
+  }
+  public set lineWidth(value: LengthInput) {
+    this._lineWidth = toLength(value);
+  }
 
   /**
    * Draws the area chart elements for a single series (area fill and connecting line).

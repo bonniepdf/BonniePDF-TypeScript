@@ -2,6 +2,7 @@ import type { TextElementBase } from './TextElementBase';
 import type { ColorInput } from '../../Normalize/toColor';
 import type { TextDecorationInput, DecorationStyleInput, FontWeightInput } from '../../Normalize/toEnum';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import type { LengthInput } from '../../Normalize/toLength';
 
 /**
  * Settable properties declared by {@link TextElementBase} itself - not counting
@@ -29,7 +30,16 @@ export const TEXT_ELEMENT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...TEXT_ELEMENT
 type TextElementOwnKey = (typeof TEXT_ELEMENT_OWN_OPTION_KEYS)[number];
 
 /** Keys whose accepted input is wider than the stored type (asymmetric accessor). */
-type TextElementWidenedKey = 'fontWeight' | 'textColor' | 'textDecoration' | 'decorationColor' | 'decorationStyle';
+type TextElementWidenedKey =
+  | 'fontWeight'
+  | 'textColor'
+  | 'textDecoration'
+  | 'decorationColor'
+  | 'decorationStyle'
+  | 'fontSize'
+  | 'letterSpacing'
+  | 'wordSpacing'
+  | 'decorationThickness';
 
 /**
  * Options shared by every text element (`TextBlock`, `Heading`, `PageNumberOf`,
@@ -45,6 +55,14 @@ type TextElementWidenedKey = 'fontWeight' | 'textColor' | 'textDecoration' | 'de
  */
 export type TextElementOptions = ElementOptions &
   Partial<Omit<Pick<TextElementBase, TextElementOwnKey>, TextElementWidenedKey>> & {
+    /** Font size. Accepts a length: `12`, `'12pt'`, `'4mm'`, or `{ value, unit }`. */
+    fontSize?: LengthInput;
+    /** Letter spacing (tracking). Accepts a length: `0.4`, `'0.2mm'`, or `{ value, unit }`. */
+    letterSpacing?: LengthInput;
+    /** Word spacing. Accepts a length: `1`, `'0.5mm'`, or `{ value, unit }`. */
+    wordSpacing?: LengthInput;
+    /** Decoration line thickness. Accepts a length: `0.75`, `'0.5pt'`, or `{ value, unit }`. */
+    decorationThickness?: LengthInput;
     /** Font weight. Accepts `'bold'`, `'semi-bold'`, … or the numeric value. */
     fontWeight?: FontWeightInput;
     /** Text colour. Accepts a palette token (`'slate-800'`) or hex (`'#ff00aa'`). */

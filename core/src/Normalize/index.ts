@@ -10,6 +10,7 @@
 
 export * from './Tokens';
 export * from './toColor';
+export * from './toLength';
 export * from './toThickness';
 export * from './toBorder';
 export * from './toPageSize';

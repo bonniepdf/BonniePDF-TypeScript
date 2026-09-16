@@ -2,6 +2,7 @@ import { TextElementBase } from '../Text/TextElementBase';
 import { TEXT_ELEMENT_OPTION_KEYS, type TextElementOptions } from '../Text/TextElementOptions';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Base class for list elements (ordered and unordered) that provides common functionality
@@ -19,15 +20,40 @@ export const LIST_ELEMENT_OPTION_KEYS = [...TEXT_ELEMENT_OPTION_KEYS, ...LIST_EL
  * property here.
  */
 export type ListElementOptions = TextElementOptions &
-  Partial<Pick<ListElementBase, (typeof LIST_ELEMENT_OWN_OPTION_KEYS)[number]>>;
+  Partial<Omit<Pick<ListElementBase, (typeof LIST_ELEMENT_OWN_OPTION_KEYS)[number]>, 'indent' | 'itemSpacing'>> & {
+    /** Marker indent. Accepts a length: `20`, `'7mm'`, or `{ value, unit }`. */
+    indent?: LengthInput;
+    /** Gap between items. Accepts a length: `5`, `'2mm'`, or `{ value, unit }`. */
+    itemSpacing?: LengthInput;
+  };
 
 /** Provides shared marker, indentation, spacing, and pagination behavior for lists. */
 export abstract class ListElementBase extends TextElementBase {
-  /** Indentation for nested lists (in points) */
-  public indent = 20;
+  private _indent: number = 20;
 
-  /** Spacing between list items (in points) */
-  public itemSpacing = 5;
+  /** Indentation for nested lists (in points)
+   *
+   * Accepts a length: a number of points, `'7mm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get indent(): number {
+    return this._indent;
+  }
+  public set indent(value: LengthInput) {
+    this._indent = toLength(value);
+  }
+
+  private _itemSpacing: number = 5;
+
+  /** Spacing between list items (in points)
+   *
+   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get itemSpacing(): number {
+    return this._itemSpacing;
+  }
+  public set itemSpacing(value: LengthInput) {
+    this._itemSpacing = toLength(value);
+  }
 
   /** Child lists rendered as nested list content. */
   public getNestedLists(): readonly ListElementBase[] {

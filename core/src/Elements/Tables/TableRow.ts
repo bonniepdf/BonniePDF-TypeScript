@@ -26,8 +26,10 @@ type TableRowKey = (typeof TABLE_ROW_OPTION_KEYS)[number];
 
 /** Options for {@link TableRow}. */
 export type TableRowOptions = Partial<
-  Omit<Pick<TableRow, TableRowKey>, 'textColor' | 'padding' | 'backgroundColor'>
+  Omit<Pick<TableRow, TableRowKey>, 'textColor' | 'padding' | 'backgroundColor' | 'minHeight'>
 > & {
+  /** Minimum row height. Accepts a length: `24`, `'1cm'`, or `{ value, unit }`. */
+  minHeight?: LengthInput;
   /** Row text colour. Accepts a palette token or hex. */
   textColor?: ColorInput;
   /** Row padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
@@ -74,8 +76,18 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /** Whether this is a footer row */
   public isFooter = false;
 
-  /** Minimum height for this row (optional) */
-  public minHeight?: number;
+  private _minHeight?: number;
+
+  /** Minimum height for this row (optional)
+   *
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get minHeight(): number | undefined {
+    return this._minHeight;
+  }
+  public set minHeight(value: LengthInput | undefined) {
+    this._minHeight = toOptionalLength(value);
+  }
 
   /** Background color for this row (applied to cells without their own background) */
   private _backgroundColor?: Color;
@@ -193,3 +205,4 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
 }
 
 import { TableCell } from './TableCell';
+import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';

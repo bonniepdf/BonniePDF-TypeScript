@@ -2,6 +2,7 @@ import { BorderColors } from '../../Core/BorderColors';
 import { applyOptions } from '../../Core/applyOptions';
 import { toBorder, type BorderInput } from '../../Normalize/toBorder';
 import type { ColorInput } from '../../Normalize/toColor';
+import type { LengthInput } from '../../Normalize/toLength';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import type { BorderedElementBase } from './BorderedElementBase';
 
@@ -18,7 +19,7 @@ export const BORDERED_ELEMENT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...BORDERED
 type BorderedOwnKey = (typeof BORDERED_ELEMENT_OWN_OPTION_KEYS)[number];
 
 /** Keys whose accepted input is wider than the stored type (asymmetric accessor). */
-type BorderedWidenedKey = 'border' | 'backgroundColor';
+type BorderedWidenedKey = 'border' | 'backgroundColor' | 'cornerRadius';
 
 /**
  * Options for elements with borders and backgrounds (`Container`, `Table`,
@@ -43,6 +44,8 @@ export type BorderedElementOptions = ElementOptions &
     border?: BorderInput;
     /** Background fill. Accepts a palette token (`'slate-100'`) or hex. */
     backgroundColor?: ColorInput;
+    /** Corner radius. Accepts a length: `6`, `'2mm'`, or `{ value, unit }`. */
+    cornerRadius?: LengthInput;
   };
 
 /**

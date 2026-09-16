@@ -2,6 +2,7 @@ import { applyOptions } from '../Core/applyOptions';
 import { Color } from '../Core/Color';
 import { toColor, type ColorInput } from '../Normalize/toColor';
 import { ColorPalette } from '../Core/ColorPalette';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Configuration for rendering a text watermark
@@ -19,7 +20,11 @@ export const WATERMARK_OPTION_KEYS = [
 ] as const;
 
 /** Options for {@link Watermark}. */
-export type WatermarkOptions = Partial<Omit<Pick<Watermark, (typeof WATERMARK_OPTION_KEYS)[number]>, 'textColor'>> & {
+export type WatermarkOptions = Partial<
+  Omit<Pick<Watermark, (typeof WATERMARK_OPTION_KEYS)[number]>, 'textColor' | 'fontSize'>
+> & {
+  /** Font size. Accepts a length: `72`, `'1cm'`, or `{ value, unit }`. */
+  fontSize?: LengthInput;
   /** Text colour. Accepts a palette token (`'slate-400'`) or hex. */
   textColor?: ColorInput;
 };
@@ -34,10 +39,19 @@ export class Watermark {
    * Font family name for the watermark text (default: "Helvetica").
    */
   public fontName: string;
+  private _fontSize = 72;
+
   /**
    * Font size in points for the watermark text (default: 72).
+   *
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
    */
-  public fontSize: number;
+  public get fontSize(): number {
+    return this._fontSize;
+  }
+  public set fontSize(value: LengthInput) {
+    this._fontSize = toLength(value);
+  }
   private _textColor: Color = ColorPalette.gray[500];
 
   /**

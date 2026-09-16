@@ -6,6 +6,7 @@ import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
+import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';
 import { toHorizontalAlignment, type HorizontalAlignmentInput } from '../../Normalize/toEnum';
 import { toVerticalAlignment, type VerticalAlignmentInput } from '../../Normalize/toEnum';
 import { VerticalAlignment } from '../../Core/VerticalAlignment';
@@ -43,7 +44,13 @@ type ContainerOwnKey = (typeof CONTAINER_OWN_OPTION_KEYS)[number];
  * `applyBorderedElementOptions`).
  */
 export type ContainerOptions = BorderedElementOptions &
-  Partial<Omit<Pick<Container, ContainerOwnKey>, 'padding' | 'horizontalAlignment' | 'verticalAlignment'>> & {
+  Partial<
+    Omit<Pick<Container, ContainerOwnKey>, 'padding' | 'horizontalAlignment' | 'verticalAlignment' | 'width' | 'height'>
+  > & {
+    /** Fixed width. Accepts a length: `240`, `'8cm'`, or `{ value, unit }`. */
+    width?: LengthInput;
+    /** Fixed height. Accepts a length: `120`, `'1in'`, or `{ value, unit }`. */
+    height?: LengthInput;
     /** Padding inside the border. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
     padding?: ThicknessInput;
     /** Child placement. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
@@ -90,14 +97,33 @@ export class Container extends BorderedElementBase implements IContentContainer 
   public set padding(value: ThicknessInput) {
     this._padding = toThickness(value);
   }
+  private _width?: number;
+
   /**
-   * Optional fixed width for the container (null = use available width)
+   * Optional fixed width for the container (null = use available width).
+   *
+   * Accepts a length: `240`, `'8cm'`, or `{ value, unit }` (§4A.3).
    */
-  public width?: number;
+  public get width(): number | undefined {
+    return this._width;
+  }
+  public set width(value: LengthInput | undefined) {
+    this._width = toOptionalLength(value);
+  }
+
+  private _height?: number;
+
   /**
-   * Optional fixed height for the container (null = auto-size based on content)
+   * Optional fixed height for the container (null = auto-size based on content).
+   *
+   * Accepts a length: `120`, `'1in'`, or `{ value, unit }` (§4A.3).
    */
-  public height?: number;
+  public get height(): number | undefined {
+    return this._height;
+  }
+  public set height(value: LengthInput | undefined) {
+    this._height = toOptionalLength(value);
+  }
 
   /**
    * When `true` and {@link BorderedElementBase.cornerRadius} is positive, the

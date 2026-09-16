@@ -14,6 +14,7 @@ import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Renders a visual Table of Contents with dotted leaders and right-aligned page numbers,
@@ -29,7 +30,9 @@ export const VISUAL_TOC_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VISUAL_TOC_OWN
 
 /** Options for {@link VisualToc}. */
 export type VisualTocOptions = ElementOptions &
-  Partial<Omit<Pick<VisualToc, (typeof VISUAL_TOC_OWN_OPTION_KEYS)[number]>, 'textColor'>> & {
+  Partial<Omit<Pick<VisualToc, (typeof VISUAL_TOC_OWN_OPTION_KEYS)[number]>, 'textColor' | 'fontSize'>> & {
+    /** Entry font size. Accepts a length: `12`, `'12pt'`, or `{ value, unit }`. */
+    fontSize?: LengthInput;
     /** Entry text colour. Accepts a palette token or hex. */
     textColor?: ColorInput;
   };
@@ -58,10 +61,19 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
    */
   public fontName: string = StandardFonts.Helvetica;
 
+  private _fontSize: number = 12;
+
   /**
    * Gets or sets the font size (in points) used to render TOC entry text.
+   *
+   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }` (§4A.3).
    */
-  public fontSize = 12;
+  public get fontSize(): number {
+    return this._fontSize;
+  }
+  public set fontSize(value: LengthInput) {
+    this._fontSize = toLength(value);
+  }
 
   /**
    * Gets or sets the text color used for TOC entries.

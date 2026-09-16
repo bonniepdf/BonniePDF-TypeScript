@@ -4,6 +4,7 @@ import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging
 import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
 import { applyOptions } from '../../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * A layout element that stacks children vertically with automatic pagination.
@@ -20,11 +21,12 @@ export const VERTICAL_STACK_OWN_OPTION_KEYS = ['spacing'] as const;
 export const VERTICAL_STACK_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VERTICAL_STACK_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link VerticalStack}. */
-export type VerticalStackOptions = ElementOptions &
-  Partial<Pick<VerticalStack, 'spacing'>> & {
-    /** Children to add, in order. Sugar over {@link VerticalStack.add}. */
-    children?: IElement[];
-  };
+export type VerticalStackOptions = ElementOptions & {
+  /** Gap between adjacent children. Accepts a length: `8`, `'4mm'`, or `{ value, unit }`. */
+  spacing?: LengthInput;
+  /** Children to add, in order. Sugar over {@link VerticalStack.add}. */
+  children?: IElement[];
+};
 
 /** Arranges child elements from top to bottom with configurable spacing. */
 export class VerticalStack extends ElementBase implements IStatefulElement {
@@ -47,7 +49,19 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
     }
   }
 
-  public spacing: number = 0;
+  private _spacing: number = 0;
+
+  /**
+   * Uniform gap between adjacent children.
+   *
+   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get spacing(): number {
+    return this._spacing;
+  }
+  public set spacing(value: LengthInput) {
+    this._spacing = toLength(value);
+  }
 
   /**
    * The children elements in this stack (exposed for collection initializer syntax)

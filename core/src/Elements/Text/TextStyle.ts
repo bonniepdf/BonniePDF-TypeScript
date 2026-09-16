@@ -16,6 +16,7 @@ import {
   type BaselineAlignmentInput,
   type FontWeightInput,
 } from '../../Normalize/toEnum';
+import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Every settable {@link TextStyle} property, as a runtime list.
@@ -58,7 +59,12 @@ type TextStyleWidenedKey =
   | 'decoration'
   | 'decorationColor'
   | 'decorationStyle'
-  | 'baselineAlignment';
+  | 'baselineAlignment'
+  | 'fontSize'
+  | 'letterSpacing'
+  | 'wordSpacing'
+  | 'decorationThickness'
+  | 'baselineShift';
 
 /**
  * Options for constructing a {@link TextStyle}.
@@ -68,6 +74,16 @@ type TextStyleWidenedKey =
  * autocomplete with no second declaration to keep in step.
  */
 export type TextStyleOptions = Partial<Omit<Pick<TextStyle, TextStyleOptionKey>, TextStyleWidenedKey>> & {
+  /** Font size. Accepts a length: `12`, `'12pt'`, `'4mm'`, or `{ value, unit }`. */
+  fontSize?: LengthInput;
+  /** Letter spacing (tracking). Accepts a length: `0.4`, `'0.2mm'`, or `{ value, unit }`. */
+  letterSpacing?: LengthInput;
+  /** Word spacing. Accepts a length: `1`, `'0.5mm'`, or `{ value, unit }`. */
+  wordSpacing?: LengthInput;
+  /** Decoration line thickness. Accepts a length: `0.75`, `'0.5pt'`, or `{ value, unit }`. */
+  decorationThickness?: LengthInput;
+  /** Baseline shift. Accepts a length: `2`, `'2pt'`, or `{ value, unit }`. */
+  baselineShift?: LengthInput;
   /** Font weight. Accepts `'bold'`, `'semi-bold'`, … or the numeric value. */
   fontWeight?: FontWeightInput;
   /** Text colour. Accepts a palette token (`'slate-600'`) or hex (`'#ff00aa'`). */
@@ -137,8 +153,18 @@ export class TextStyle {
   /** Whether the text should be rendered in italic/oblique style. */
   public italic = false;
 
-  /** Font size in points. Null = inherit from parent. */
-  public fontSize?: number;
+  private _fontSize?: number;
+
+  /** Font size in points. Null = inherit from parent.
+   *
+   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }` (§4A.3).
+   */
+  public get fontSize(): number | undefined {
+    return this._fontSize;
+  }
+  public set fontSize(value: LengthInput | undefined) {
+    this._fontSize = toOptionalLength(value);
+  }
 
   private _color?: Color;
 
@@ -194,11 +220,20 @@ export class TextStyle {
     this._decorationColor = value === undefined ? undefined : toColor(value);
   }
 
+  private _decorationThickness?: number;
+
   /**
    * Thickness of the decoration lines in points. Null = the default derived from
    * font size (`max(0.5, fontSize / 18)`).
+   *
+   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3).
    */
-  public decorationThickness?: number;
+  public get decorationThickness(): number | undefined {
+    return this._decorationThickness;
+  }
+  public set decorationThickness(value: LengthInput | undefined) {
+    this._decorationThickness = toOptionalLength(value);
+  }
 
   private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
 
@@ -228,23 +263,50 @@ export class TextStyle {
     this._baselineAlignment = toBaselineAlignment(value);
   }
 
+  private _baselineShift?: number;
+
   /**
    * Explicit baseline shift in points (positive = up). Overrides the magnitude
    * implied by {@link baselineAlignment}. Null = derive from the alignment.
+   *
+   * Accepts a length: a number of points, `'2pt'`, or `{ value, unit }` (§4A.3).
    */
-  public baselineShift?: number;
+  public get baselineShift(): number | undefined {
+    return this._baselineShift;
+  }
+  public set baselineShift(value: LengthInput | undefined) {
+    this._baselineShift = toOptionalLength(value);
+  }
+
+  private _letterSpacing?: number;
 
   /**
    * Extra spacing in points added after every glyph (tracking). Null = 0.
    * Changes advances, so it flows through measurement, PDF (`Tc`), and SVG.
+   *
+   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (§4A.3).
    */
-  public letterSpacing?: number;
+  public get letterSpacing(): number | undefined {
+    return this._letterSpacing;
+  }
+  public set letterSpacing(value: LengthInput | undefined) {
+    this._letterSpacing = toOptionalLength(value);
+  }
+
+  private _wordSpacing?: number;
 
   /**
    * Extra spacing in points added after every space (word spacing). Null = 0.
    * Changes advances, so it flows through measurement, PDF, and SVG.
+   *
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
    */
-  public wordSpacing?: number;
+  public get wordSpacing(): number | undefined {
+    return this._wordSpacing;
+  }
+  public set wordSpacing(value: LengthInput | undefined) {
+    this._wordSpacing = toOptionalLength(value);
+  }
 
   /**
    * Line-height multiplier applied to font size. Null = inherit (1.2 if not set anywhere).

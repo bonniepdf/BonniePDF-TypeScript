@@ -11,6 +11,7 @@ import {
   type WidthDistributionInput,
 } from '../../Normalize/toEnum';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
+import { toLength, type LengthInput, toOptionalLength } from '../../Normalize/toLength';
 
 /**
  * A layout element that arranges children horizontally with spacing and alignment options
@@ -32,7 +33,13 @@ type HorizontalStackOwnKey = (typeof HORIZONTAL_STACK_OWN_OPTION_KEYS)[number];
 
 /** Options for {@link HorizontalStack}. */
 export type HorizontalStackOptions = ElementOptions &
-  Partial<Omit<Pick<HorizontalStack, HorizontalStackOwnKey>, 'alignment' | 'widthDistribution'>> & {
+  Partial<
+    Omit<Pick<HorizontalStack, HorizontalStackOwnKey>, 'alignment' | 'widthDistribution' | 'spacing' | 'height'>
+  > & {
+    /** Gap between adjacent columns. Accepts a length: `10`, `'4mm'`, or `{ value, unit }`. */
+    spacing?: LengthInput;
+    /** Fixed row height. Accepts a length: `120`, `'1in'`, or `{ value, unit }`. */
+    height?: LengthInput;
     /** Cross-axis alignment. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
     alignment?: HorizontalAlignmentInput;
     /** Width sharing. Accepts `'equal' | 'weighted' | 'auto'`. */
@@ -66,7 +73,19 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     }
   }
 
-  public spacing: number = 10;
+  private _spacing: number = 10;
+
+  /**
+   * Uniform gap between adjacent columns.
+   *
+   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get spacing(): number {
+    return this._spacing;
+  }
+  public set spacing(value: LengthInput) {
+    this._spacing = toLength(value);
+  }
   /**
    * Horizontal alignment of children within the stack
    */
@@ -95,10 +114,19 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   public set widthDistribution(value: WidthDistributionInput) {
     this._widthDistribution = toWidthDistribution(value);
   }
+  private _height?: number;
+
   /**
    * Optional fixed height for the stack. If null, height is determined by the tallest child.
+   *
+   * Accepts a length: a number of points, `'1in'`, or `{ value, unit }` (§4A.3).
    */
-  public height?: number;
+  public get height(): number | undefined {
+    return this._height;
+  }
+  public set height(value: LengthInput | undefined) {
+    this._height = toOptionalLength(value);
+  }
 
   /**
    * The children elements in this stack (exposed for collection initializer syntax)

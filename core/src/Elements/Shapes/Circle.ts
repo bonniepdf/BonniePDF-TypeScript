@@ -4,6 +4,7 @@ import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * A filled circle element, useful for status indicators, bullets, etc.
@@ -16,7 +17,9 @@ export const CIRCLE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...CIRCLE_OWN_OPTION_
 
 /** Options for {@link Circle}. */
 export type CircleOptions = ElementOptions &
-  Partial<Omit<Pick<Circle, (typeof CIRCLE_OWN_OPTION_KEYS)[number]>, 'fillColor'>> & {
+  Partial<Omit<Pick<Circle, (typeof CIRCLE_OWN_OPTION_KEYS)[number]>, 'fillColor' | 'diameter'>> & {
+    /** Diameter. Accepts a length: `8`, `'4mm'`, or `{ value, unit }`. */
+    diameter?: LengthInput;
     /** Fill colour. Accepts a palette token or hex. */
     fillColor?: ColorInput;
   };
@@ -30,7 +33,15 @@ export class Circle extends ElementBase {
     applyOptions(this, options);
   }
 
-  public diameter = 8;
+  private _diameter: number = 8;
+
+  /** diameter. Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3). */
+  public get diameter(): number {
+    return this._diameter;
+  }
+  public set diameter(value: LengthInput) {
+    this._diameter = toLength(value);
+  }
 
   /** Fill color of the circle */
   private _fillColor: Color = Color.black;

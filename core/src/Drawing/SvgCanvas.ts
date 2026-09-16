@@ -268,10 +268,14 @@ export class SvgCanvas implements ICanvas {
   }
 
   public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+    // `ry` is written alongside `rx` even though SVG defaults it to `rx`: the
+    // .NET exporter writes both, and the shared specification names SVG as the
+    // artefact the conformance tooling compares, so the attribute set is part
+    // of the contract rather than a formatting preference.
     this.svgElements.push(
       `<rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(height)}" rx="${this.n(
         radius
-      )}" ${this.getFillAttributes(color)}/>`
+      )}" ry="${this.n(radius)}" ${this.getFillAttributes(color)}/>`
     );
   }
 
@@ -287,7 +291,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(
       `<rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(height)}" rx="${this.n(
         radius
-      )}" fill="none" ${this.getStrokeAttributes(color)} stroke-width="${this.n(strokeWidth)}"/>`
+      )}" ry="${this.n(radius)}" fill="none" ${this.getStrokeAttributes(color)} stroke-width="${this.n(strokeWidth)}"/>`
     );
   }
 
@@ -692,6 +696,18 @@ export class SvgCanvas implements ICanvas {
     if (markup) this.svgElements.push(markup);
   }
 
+  /**
+   * Formats a coordinate the way this canvas formats every other number.
+   *
+   * For the caller that composites a child canvas: the translate on the group
+   * has to be rounded like the coordinates inside it, or the offset prints its
+   * full double expansion - `translate(44 491.59999999999997)` against the
+   * `491.6` the .NET exporter emits for the same chart.
+   */
+  public formatNumber(value: number): string {
+    return this.n(value);
+  }
+
   public prependRawMarkup(markup: string): void {
     if (markup) this.svgElements.unshift(markup);
   }
@@ -774,7 +790,7 @@ export class SvgCanvas implements ICanvas {
   ): string {
     const transformAttr = transform ? ` transform="${transform}"` : '';
     const elements: string[] = [];
-    let cursor = startX;
+    let cursor = this.q(startX);
 
     for (const run of runs) {
       const { font } = run;
@@ -885,6 +901,24 @@ export class SvgCanvas implements ICanvas {
     if (this.options.precision === undefined) return `${value}`;
     if (!Number.isFinite(value)) return '0';
     return `${Number(value.toFixed(this.options.precision))}`;
+  }
+
+  /**
+   * The numeric value `n` would print, used as the origin a glyph run
+   * accumulates from.
+   *
+   * The origin is emitted rounded, so accumulating from the unrounded value
+   * makes every later glyph position inconsistent with the origin printed
+   * beside it. Snapping first also removes the last parity difference against
+   * the .NET exporter: its layout arithmetic is single-precision, so a run
+   * origin arrives a fraction of a thousandth away from this one, which was
+   * enough to flip whichever glyph in the run happened to sit on a rounding
+   * boundary. Both exporters now start from the same decimal.
+   */
+  private q(value: number): number {
+    if (this.options.precision === undefined) return value;
+    if (!Number.isFinite(value)) return 0;
+    return Number(value.toFixed(this.options.precision));
   }
 
   private emitGradientDef(paint: LinearGradientPaint | RadialGradientPaint): string {

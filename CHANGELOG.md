@@ -9,6 +9,26 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Changed
+
+- **SVG export now agrees with the .NET implementation, element for element.**
+  The shared specification names SVG as the artefact the conformance tooling
+  compares, so four differences between the two exporters were defects in that
+  contract rather than formatting preferences. Three of them are fixed here:
+
+  - A rounded rectangle writes `ry` alongside `rx`. SVG defaults `ry` to `rx`,
+    so nothing renders differently; .NET already wrote both.
+  - A composited child canvas — a chart, or a `CanvasElement` — has its
+    translate rounded to the export precision, instead of printing the full
+    double expansion of the offset (`translate(44 491.59999999999997)`).
+  - A glyph run accumulates its advance cursor from the _rounded_ origin. The
+    origin is emitted rounded, so accumulating from the unrounded value left
+    every later position in the run inconsistent with the origin printed
+    beside it.
+
+  The fourth, hex colour case, was already lower case here and is fixed on the
+  .NET side.
+
 ### Added
 
 - **Any measurement can now be written in a unit.** Every public authoring

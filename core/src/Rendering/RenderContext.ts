@@ -514,7 +514,10 @@ export class RenderContext implements RenderContextContract {
       const pageCanvas = this.canvas as SvgCanvas;
       const tx = child.offsetX;
       const ty = child.offsetY;
-      const wrapped = tx !== 0 || ty !== 0 ? `<g transform="translate(${tx} ${ty})">${inner}</g>` : `<g>${inner}</g>`;
+      const wrapped =
+        tx !== 0 || ty !== 0
+          ? `<g transform="translate(${pageCanvas.formatNumber(tx)} ${pageCanvas.formatNumber(ty)})">${inner}</g>`
+          : `<g>${inner}</g>`;
       pageCanvas.appendRawMarkup(wrapped);
       return;
     }

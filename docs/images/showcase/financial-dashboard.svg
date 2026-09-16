@@ -4,7 +4,7 @@
 <text x="24 33.338 41.124 53.572 62.124 66.014 73.8 77.689 87.8 96.352 108.8 117.352 125.138 133.689" y="34" fill="#f4f1ef" font-size="14" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Sample Company</text>
 <text x="24 29.777 34.227 38.676 40.898 42.676 47.125 51.574 56.023 58.246 60.023 64.473 66.25 68.473 71.137 73.359 75.582 80.031 82.254 86.703 89.367 93.816 98.266 100.043 102.266 108.043 112.043 116.492 118.715 124.938 129.387 131.164" y="49.8" fill="#b99a88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Confidential - Internal Use Only</text>
 <text x="662.556 672.668 679.898 683.51 690.74 697.97 705.2 712.43 716.042 723.983 727.594 735.535 742.765 750.706 757.936 761.548 768.778 772.39 776.002 785.39 792.62 800.561 808.502 813.561" y="33" fill="#f4f1ef" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Q2 2026 Financial Report</text>
-<text x="712.038 718.261 722.71 727.159 731.609 734.273 738.722 740.944 745.394 749.843 752.066 756.515 758.737 764.073 768.523 772.972 775.194 779.644 786.308 790.757 795.206 797.87 800.093 804.542 808.991 813.441" y="48.6" fill="#b99a88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Generated 7 September 2026</text>
+<text x="707.589 713.812 718.261 722.71 727.159 729.823 734.273 736.495 740.944 745.394 747.616 752.066 756.515 758.737 764.073 768.523 772.972 775.194 779.644 786.308 790.757 795.206 797.87 800.093 804.542 808.991 813.441" y="48.6" fill="#b99a88" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Generated 10 September 2026</text>
 </g>
 <g>
 <text x="20 30.011 40.021 45.022 55.033 65.044" y="105.4" fill="#442714" font-size="18" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£2.41M</text>
@@ -24,13 +24,13 @@
 <text x="652.167 655.667 657.612 661.505 663.45 667.343" y="132.4" fill="#b94040" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">↓ 0.8%</text>
 </g>
 <g>
-<rect x="0" y="149.8" width="841.89" height="1.95" fill="#d2c8b7"/>
+<rect x="0" y="149.8" width="841.89" height="0.75" fill="#d2c8b7"/>
 </g>
 <g>
-<text x="24 29.831 35.276 40.331 44.607 49.662 53.295 57.838 59.783 64.838 69.507 74.176 78.845 83.9 88.955 93.624 95.569 97.514 99.845 103.738 107.631 111.524 115.417 119.31" y="172.75" fill="#956b51" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">MONTHLY REVENUE  (£000s)</text>
+<text x="24 29.831 35.276 40.331 44.607 49.662 53.295 57.838 59.783 64.838 69.507 74.176 78.845 83.9 88.955 93.624 95.569 97.514 99.845 103.738 107.631 111.524 115.417 119.31" y="171.55" fill="#805e48" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">MONTHLY REVENUE  (£000s)</text>
 </g>
 <g>
-<g transform="translate(0 180.15)"><line x1="80" y1="140" x2="801.89" y2="140" stroke="#e0e0e0" stroke-width="0.5"/>
+<g transform="translate(0 178.95000000000002)"><line x1="80" y1="140" x2="801.89" y2="140" stroke="#e0e0e0" stroke-width="0.5"/>
 <line x1="80" y1="110" x2="801.89" y2="110" stroke="#e0e0e0" stroke-width="0.5"/>
 <line x1="80" y1="80" x2="801.89" y2="80" stroke="#e0e0e0" stroke-width="0.5"/>
 <line x1="80" y1="50" x2="801.89" y2="50" stroke="#e0e0e0" stroke-width="0.5"/>
@@ -83,34 +83,34 @@
 </g></g>
 </g>
 <g>
-<rect x="0" y="380.15" width="841.89" height="1.95" fill="#d2c8b7"/>
+<rect x="0" y="378.95" width="841.89" height="0.75" fill="#d2c8b7"/>
 </g>
 <g>
-<text x="24 28.149 33.594 38.137 40.082 44.75 49.806 55.25 60.306 65.361 70.416 74.692" y="403.1" fill="#956b51" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">TOP PRODUCTS</text>
+<text x="24 28.149 33.594 38.137 40.082 44.75 49.806 55.25 60.306 65.361 70.416 74.692" y="400.7" fill="#805e48" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">TOP PRODUCTS</text>
 </g>
 <g>
-<rect x="24" y="410.5" width="323.437" height="25.6" fill="#e8e0d8"/>
-<text x="32 37.336 40.449 45.336 50.223 55.109 59.559" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Product</text>
-<rect x="347.437" y="410.5" width="147.017" height="25.6" fill="#e8e0d8"/>
-<text x="466.453 472.231 477.117 479.34 482.004" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
-<rect x="494.453" y="410.5" width="205.823" height="25.6" fill="#e8e0d8"/>
-<text x="658.929 664.706 669.155 673.605 678.054 682.941 687.827" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Revenue</text>
-<rect x="700.276" y="410.5" width="117.613" height="25.6" fill="#e8e0d8"/>
-<text x="783.667 790.331 794.78 797.894 802.78 805.003" y="426.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Margin</text>
-<text x="32 37.336 41.785 44.008 48.457 51.121 55.57 58.234 60.012 64.012 68.461 70.684 76.02 77.797 82.246" y="452.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Enterprise Plan</text>
-<text x="473.106 477.555 482.004" y="452.1" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">142</text>
-<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="452.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£890,400</text>
-<text x="793.878 798.327 802.776" y="452.1" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">71%</text>
-<text x="32 37.336 40 44.449 46.672 52.008 53.785 58.234" y="477.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Pro Plan</text>
-<text x="466.434 470.883 473.106 477.555 482.004" y="477.7" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1,204</text>
-<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="477.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£722,400</text>
-<text x="793.878 798.327 802.776" y="477.7" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">64%</text>
-<text x="32 37.336 39.559 44.008 46.672 48.895 53.344 56.008 58.23 63.566 65.344 69.793" y="503.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Starter Plan</text>
-<text x="466.434 470.883 473.106 477.555 482.004" y="503.3" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2,468</text>
-<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="503.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£493,600</text>
-<text x="793.878 798.327 802.776" y="503.3" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">58%</text>
-<text x="32 37.336 41.785 46.234 48.898 53.348 57.797" y="528.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Add-ons</text>
-<text x="483.789" y="528.9" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">-</text>
-<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="528.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£304,000</text>
-<text x="793.878 798.327 802.776" y="528.9" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">82%</text>
+<rect x="24" y="408.1" width="323.437" height="25.6" fill="#e8e0d8"/>
+<text x="32 37.336 40.449 45.336 50.223 55.109 59.559" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Product</text>
+<rect x="347.437" y="408.1" width="147.017" height="25.6" fill="#e8e0d8"/>
+<text x="466.453 472.231 477.117 479.34 482.004" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
+<rect x="494.453" y="408.1" width="205.823" height="25.6" fill="#e8e0d8"/>
+<text x="658.929 664.706 669.155 673.605 678.054 682.941 687.827" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Revenue</text>
+<rect x="700.276" y="408.1" width="117.613" height="25.6" fill="#e8e0d8"/>
+<text x="783.667 790.331 794.78 797.894 802.78 805.003" y="424.1" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Margin</text>
+<text x="32 37.336 41.785 44.008 48.457 51.121 55.57 58.234 60.012 64.012 68.461 70.684 76.02 77.797 82.246" y="449.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Enterprise Plan</text>
+<text x="473.106 477.555 482.004" y="449.7" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">142</text>
+<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="449.7" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£890,400</text>
+<text x="793.878 798.327 802.776" y="449.7" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">71%</text>
+<text x="32 37.336 40 44.449 46.672 52.008 53.785 58.234" y="475.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Pro Plan</text>
+<text x="466.434 470.883 473.106 477.555 482.004" y="475.3" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1,204</text>
+<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="475.3" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£722,400</text>
+<text x="793.878 798.327 802.776" y="475.3" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">64%</text>
+<text x="32 37.336 39.559 44.008 46.672 48.895 53.344 56.008 58.23 63.566 65.344 69.793" y="500.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Starter Plan</text>
+<text x="466.434 470.883 473.106 477.555 482.004" y="500.9" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2,468</text>
+<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="500.9" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£493,600</text>
+<text x="793.878 798.327 802.776" y="500.9" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">58%</text>
+<text x="32 37.336 41.785 46.234 48.898 53.348 57.797" y="526.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Add-ons</text>
+<text x="483.789" y="526.5" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">-</text>
+<text x="658.909 663.358 667.808 672.257 676.706 678.929 683.378 687.827" y="526.5" fill="#442714" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">£304,000</text>
+<text x="793.878 798.327 802.776" y="526.5" fill="#805e48" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">82%</text>
 </g></g></svg>

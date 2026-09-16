@@ -9,7 +9,7 @@
 <g>
 <rect x="12" y="55.6" width="264" height="20" fill="#1d293d"/>
 <text x="22 28.67 35.34 42.01 49.231 55.901 62.571 69.241 72.02 75.35 78.128 85.35 92.02 98.689 104.798 107.576 114.798 121.102" y="69.6" fill="#ffffff" font-size="10" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">EXPRESS - NEXT DAY</text>
-<text x="237.65 243.212 245.99 251.552 254.33 259.892" y="69.6" fill="#ffffff" font-size="10" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">1.4 kg</text>
+<text x="237.65 243.212 245.99 251.551 254.33 259.891" y="69.6" fill="#ffffff" font-size="10" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">1.4 kg</text>
 </g>
 <g>
 <rect x="12" y="80.6" width="264" height="1" fill="#cad5e2"/>
@@ -34,7 +34,7 @@
 </g>
 <g>
 <rect x="12" y="219" width="264" height="25.6" fill="#0f172b"/>
-<text x="76.102 85.49 92.72 96.332 99.944 104.273 107.885 111.497 119.438 129.55 138.938 147.609 151.22 158.45 165.68 169.292 172.904 177.233 180.845 184.457 192.398 202.51" y="237" fill="#ffffff" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">N1  -  ZONE 24  -  LON</text>
+<text x="76.102 85.49 92.72 96.332 99.944 104.273 107.885 111.497 119.437 129.549 138.937 147.608 151.22 158.45 165.68 169.292 172.904 177.233 180.845 184.456 192.397 202.509" y="237" fill="#ffffff" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">N1  -  ZONE 24  -  LON</text>
 </g>
 <g>
 <rect x="12" y="249.6" width="264" height="1" fill="#cad5e2"/>
@@ -110,7 +110,7 @@
 <rect x="257.834" y="269" width="1.012" height="46" fill="#000000"/>
 <rect x="259.858" y="269" width="2.024" height="46" fill="#000000"/>
 </g>
-<text x="97.708 102.713 108.211 113.216 118.222 123.227 129.23 135.233 140.238 145.244 150.249 155.254 160.26 165.265 170.271 175.276 180.281 185.287" y="326" fill="#000000" font-size="9" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1Z999AA10123456784</text>
+<text x="97.708 102.713 108.211 113.216 118.222 123.227 129.23 135.233 140.238 145.244 150.249 155.254 160.26 165.265 170.27 175.276 180.281 185.287" y="326" fill="#000000" font-size="9" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1Z999AA10123456784</text>
 </g>
 <g>
 <rect x="12" y="334" width="264" height="1" fill="#cad5e2"/>
@@ -160,8 +160,8 @@
 <rect x="175.51" y="349.4" width="1.135" height="40" fill="#000000"/>
 <rect x="13.135" y="350.535" width="173.729" height="37.729" fill="none" stroke="#000000" stroke-width="2.271"/>
 </g>
-<text x="64.962 69.968 74.973 79.979 84.984 89.989 94.995 100 105.005 110.011 115.016 120.021 125.027 130.032" y="400.4" fill="#000000" font-size="9" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">15401412537214</text>
-<text x="256.166 260.834 265.89 270.945" y="346" fill="#62748e" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">SCAN</text>
+<text x="64.962 69.967 74.973 79.978 84.983 89.989 94.994 100 105.005 110.01 115.016 120.021 125.026 130.032" y="400.4" fill="#000000" font-size="9" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">15401412537214</text>
+<text x="256.166 260.835 265.89 270.945" y="346" fill="#62748e" font-size="7" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">SCAN</text>
 <rect x="210" y="349.4" width="66" height="66" fill="#ffffff"/>
 <g shape-rendering="crispEdges">
 <rect x="211.886" y="351.286" width="13.2" height="1.886" fill="#000000"/>

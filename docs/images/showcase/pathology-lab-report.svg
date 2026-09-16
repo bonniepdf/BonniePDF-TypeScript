@@ -3,8 +3,8 @@
 <text x="50 60.11 64 68.662 76.448 80.338 91.228 99.014 107.565 115.352 120.8 128.586 132.476 136.365 146.476 155.027 162.813 171.365 175.255 179.917 187.703 191.593 195.482 204.82 212.606 217.269 225.82 234.372 238.262 246.813 255.365 263.151 267.041 276.379 284.165 289.613 297.399 301.289 309.075 316.861" y="64" fill="#2563eb" font-size="14" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">City General Hospital Pathology Services</text>
 <text x="50 56.5 61.505 66.51 71.516 74.513 77.013 84.51 89.516 94.521 97.021 99.522 104.527 107.028 109.528 114.534 119.539 124.544 129.55 132.547 137.552 140.053 145.058 148.055 152.555 155.056 162.553 167.558 172.563 174.563 179.063 181.063 186.068 191.073 193.574 196.571 199.071 205.571 210.576 215.582 223.079 228.084 230.584 235.59 237.589 242.595 247.6 252.1 254.601 260.604 263.104 269.604 271.603 273.603 278.608 280.607 285.107 290.113 292.112 294.613 301.112 306.118 311.123 318.62 320.62 325.12 327.62 330.617" y="77.8" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Department of Laboratory Medicine - Haematology &amp; Clinical Chemistry</text>
 <text x="50 55.777 61.113 66.449 71.785 74.008 80.672 85.121 89.57 91.348 95.348 99.797 101.574 103.797 108.246 112.695 117.145 121.594 124.258 128.707 130.93 135.379 138.043 142.043 144.266 148.715 153.164 157.613 162.063 164.285 166.949 169.172 173.621 177.621 181.621 184.285 188.734 193.184 194.961 197.184 201.633 206.082 208.305 210.527 214.977 217.199 219.422 224.758 230.98 233.203 237.652 242.102 246.551 251" y="88.6" fill="#45556c" font-size="8" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">UKAS Medical Laboratory 8842 - accredited to ISO 15189</text>
-<text x="455.24 463.181 472.57 481.958 492.07 501.458 509.881 517.587 527.699 536.605" y="63" fill="#314158" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">LABORATORY</text>
-<text x="491.105 500.493 509.164 517.835 527.946 537.335" y="78.6" fill="#314158" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">REPORT</text>
+<text x="455.24 463.181 472.569 481.957 492.069 501.457 509.881 517.587 527.698 536.604" y="63" fill="#314158" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">LABORATORY</text>
+<text x="491.105 500.493 509.164 517.835 527.947 537.335" y="78.6" fill="#314158" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">REPORT</text>
 </g>
 <g>
 <rect x="50" y="96.2" width="495.276" height="1.5" fill="#2563eb"/>
@@ -12,26 +12,26 @@
 <g>
 <text x="62 66.742 71.926 76.813 79.035 84.371 90.148" y="133.7" fill="#2563eb" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">PATIENT</text>
 <text x="62 68.5 73.505 81.507" y="150.3" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Name</text>
-<text x="157.455 166.422 172.758 179.095 184.726 192.115 198.976 201.615 204.255 211.115 216.399 219.562 224.846 226.956" y="150.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">WESTON, Harold</text>
+<text x="157.455 166.422 172.758 179.094 184.726 192.115 198.976 201.615 204.255 211.115 216.399 219.562 224.846 226.956" y="150.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">WESTON, Harold</text>
 <text x="62 68.5 73.505 76.502 81.507 84.008 89.505 92.502 95.003 100.5 103.001 106.503 109.5" y="165.7" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Date of birth</text>
-<text x="157.455 162.739 168.022 170.661 177.522 182.805 187.555 190.195 195.478 200.762 206.045 211.329 213.968 217.132 222.415 227.699 232.449" y="166.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">02 Nov 1951 (74y)</text>
+<text x="157.455 162.738 168.022 170.661 177.522 182.805 187.555 190.195 195.478 200.762 206.045 211.329 213.968 217.132 222.415 227.698 232.448" y="166.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">02 Nov 1951 (74y)</text>
 <text x="62 68.003 73.008" y="181.1" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Sex</text>
 <text x="157.455 165.369 170.652 172.763" y="181.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Male</text>
 <text x="62 68.003 73.008 76.005 78.506 83.511 89.009 92.006 94.506 97.007" y="196.5" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Patient ID</text>
-<text x="157.455 164.316 171.705 178.566 181.729 187.013 192.296 197.58 202.863 208.147 213.43 218.713 223.997 229.28" y="197" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">CGH-9434765919</text>
+<text x="157.455 164.316 171.705 178.566 181.729 187.013 192.296 197.58 202.863 208.146 213.43 218.713 223.997 229.28" y="197" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">CGH-9434765919</text>
 <text x="62 68.5 73.997 79.002 84.5 87 89.998 95.003 97.503 100.004 105.501 110.999" y="211.9" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Hospital no.</text>
-<text x="157.455 164.316 171.705 178.566 181.729 187.013 192.296 197.58 202.863 208.147 213.43" y="212.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">CGH-2208814</text>
+<text x="157.455 164.316 171.705 178.566 181.729 187.013 192.296 197.58 202.863 208.146 213.43" y="212.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">CGH-2208814</text>
 <text x="309.638 314.974 320.31 325.646 331.423 333.646 340.31 345.646" y="133.7" fill="#2563eb" font-size="8" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">SPECIMEN</text>
-<text x="309.638 315.641 321.138 326.144 331.149 333.65 341.652 346.657 352.155 354.655 357.156" y="150.3" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Specimen ID</text>
+<text x="309.638 315.641 321.138 326.144 331.149 333.65 341.652 346.658 352.155 354.656 357.156" y="150.3" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Specimen ID</text>
 <text x="405.093 410.376 415.66 420.943 424.107 428.685 433.969 439.252 444.536 449.819" y="150.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">L26-118842</text>
-<text x="309.638 316.137 321.635 324.135 326.636 331.641 336.647 339.644 344.649" y="165.7" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Collected</text>
-<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.216 456.856 462.139 467.423 470.062 475.346" y="166.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 08:14</text>
-<text x="309.638 316.137 321.143 326.148 331.153 333.654 338.659 343.665" y="181.1" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Received</text>
-<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.216 456.856 462.139 467.423 470.062 475.346" y="181.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 09:02</text>
-<text x="309.638 316.137 321.143 326.64 332.138 335.64 338.637 343.643" y="196.5" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reported</text>
-<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.216 456.856 461.434 466.718 469.357 474.641" y="197" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 11:37</text>
-<text x="309.638 316.137 321.143 326.64 332.138 337.143 342.149 345.146 350.151 355.649 358.149 363.647" y="211.9" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Requested by</text>
-<text x="405.093 411.954 415.117 417.232 423.569 426.208 428.848 435.184 440.467 445.751 448.39 451.03 453.669 462.283 467.567 470.73 476.014 478.653 483.936" y="212.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Dr A. Kaur, Ward 12</text>
+<text x="309.638 316.138 321.635 324.136 326.636 331.641 336.647 339.644 344.649" y="165.7" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Collected</text>
+<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.217 456.856 462.139 467.423 470.062 475.346" y="166.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 08:14</text>
+<text x="309.638 316.138 321.143 326.148 331.154 333.654 338.659 343.665" y="181.1" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Received</text>
+<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.217 456.856 462.139 467.423 470.062 475.346" y="181.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 09:02</text>
+<text x="309.638 316.138 321.143 326.64 332.138 335.64 338.638 343.643" y="196.5" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reported</text>
+<text x="405.093 410.376 415.66 418.299 423.049 428.333 430.443 433.083 438.366 443.65 448.933 454.217 456.856 461.434 466.718 469.357 474.641" y="197" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">06 Jul 2026 11:37</text>
+<text x="309.638 316.138 321.143 326.64 332.138 337.143 342.149 345.146 350.151 355.649 358.149 363.647" y="211.9" fill="#45556c" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Requested by</text>
+<text x="405.093 411.954 415.117 417.232 423.569 426.208 428.848 435.184 440.468 445.751 448.39 451.03 453.669 462.283 467.567 470.73 476.014 478.653 483.937" y="212.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Dr A. Kaur, Ward 12</text>
 </g>
 <g>
 <text x="50 57.941 65.882 69.494 73.105 76.717 86.105 89.717 97.658 105.599 113.54 117.152 126.54 134.481 142.422 150.363 154.692 158.304 162.633 170.574 179.962 189.35" y="265.3" fill="#2563eb" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Full Blood Count (FBC)</text>
@@ -40,44 +40,44 @@
 <rect x="50" y="277.9" width="186.626" height="24.8" fill="#f1f5f9"/>
 <text x="57 63.5 68.997 74.002 76.503 81.508 84.505" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Analyte</text>
 <rect x="236.626" y="277.9" width="71.779" height="24.8" fill="#f1f5f9"/>
-<text x="273.899 280.399 285.404 290.41 295.907 298.408" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Result</text>
+<text x="273.899 280.399 285.404 290.409 295.907 298.407" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Result</text>
 <rect x="308.405" y="277.9" width="86.135" height="24.8" fill="#f1f5f9"/>
-<text x="315.405 321.904 327.402 329.902 332.899" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
+<text x="315.405 321.905 327.402 329.903 332.9" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
 <rect x="394.54" y="277.9" width="100.491" height="24.8" fill="#f1f5f9"/>
-<text x="401.54 408.039 413.044 416.041 421.047 424.549 429.555 435.052 440.058 445.063 447.563 451.066 456.071 461.569 467.066" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reference range</text>
+<text x="401.54 408.04 413.045 416.042 421.047 424.55 429.555 435.053 440.058 445.063 447.564 451.066 456.072 461.569 467.067" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reference range</text>
 <rect x="495.03" y="277.9" width="50.245" height="24.8" fill="#f1f5f9"/>
-<text x="510.902 516.4 518.9 523.906" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Flag</text>
+<text x="510.902 516.4 518.9 523.905" y="293.9" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Flag</text>
 <text x="57 63.861 69.144 74.427 82.341 87.625 92.908 95.019 100.302 105.585 107.696" y="319.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Haemoglobin</text>
-<text x="286.078 290.838 296.121" y="319.2" fill="#bb4d00" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">118</text>
+<text x="286.078 290.837 296.121" y="319.2" fill="#bb4d00" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">118</text>
 <text x="315.405 320.688 323.328" y="319.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">g/L</text>
-<text x="401.54 406.823 412.106 417.39 420.029 423.193 425.832 431.116 436.399" y="319.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">120 - 150</text>
+<text x="401.54 406.823 412.107 417.39 420.03 423.193 425.833 431.116 436.4" y="319.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">120 - 150</text>
 <text x="517.251" y="319.2" fill="#bb4d00" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">L</text>
 <text x="57 65.967 71.25 73.361 76 81.283 83.923 88.673 93.956 96.067 98.177 100.817 105.567 110.85 116.134 121.417" y="344.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">White cell count</text>
 <text x="283.439 288.198 293.482 296.121" y="344.6" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">11.8</text>
-<text x="315.405 320.155 325.438 330.722 335.179 340.463 343.102" y="344.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
-<text x="401.54 406.823 409.462 414.746 417.385 420.549 423.188 427.767 433.05 435.689" y="344.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">4.0 - 11.0</text>
+<text x="315.405 320.155 325.438 330.722 335.18 340.463 343.103" y="344.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
+<text x="401.54 406.823 409.463 414.746 417.386 420.549 423.189 427.767 433.05 435.69" y="344.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">4.0 - 11.0</text>
 <text x="516.723" y="344.6" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">H</text>
 <text x="57 63.336 65.447 70.73 73.37 78.653 80.764 86.047 88.687" y="370" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Platelets</text>
-<text x="285.554 290.838 296.121" y="370" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">265</text>
-<text x="315.405 320.155 325.438 330.722 335.179 340.463 343.102" y="370" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
-<text x="401.54 406.823 412.106 417.39 420.029 423.193 425.832 431.116 436.399" y="370" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">150 - 400</text>
+<text x="285.554 290.837 296.121" y="370" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">265</text>
+<text x="315.405 320.155 325.438 330.722 335.18 340.463 343.103" y="370" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
+<text x="401.54 406.823 412.107 417.39 420.03 423.193 425.833 431.116 436.4" y="370" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">150 - 400</text>
 <text x="57 63.861 69.144 74.427 82.341 87.625 90.264 95.547 100.297 103.461 105.572" y="395.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Haematocrit</text>
 <text x="282.915 288.198 290.838 296.121" y="395.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">0.37</text>
 <text x="315.405 320.688 323.328" y="395.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">L/L</text>
-<text x="401.54 406.823 409.462 414.746 420.029 422.669 425.832 428.472 433.755 436.395 441.678" y="395.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">0.36 - 0.46</text>
+<text x="401.54 406.823 409.463 414.746 420.03 422.669 425.833 428.472 433.756 436.395 441.678" y="395.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">0.36 - 0.46</text>
 <text x="57 64.914 70.197 75.48 80.764 83.403 88.153 93.437 95.547 97.658 100.297 105.047 110.331 112.441 117.725 125.638 130.922 133.561 136.725 144.638 151.499 157.835" y="420.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Mean cell volume (MCV)</text>
 <text x="290.838 296.121" y="420.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">88</text>
 <text x="315.405 318.044" y="420.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">fL</text>
-<text x="401.54 406.823 412.106 414.746 417.909 420.549 425.832 431.116" y="420.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">80 - 100</text>
+<text x="401.54 406.823 412.107 414.746 417.91 420.549 425.833 431.116" y="420.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">80 - 100</text>
 <text x="57 63.861 69.144 74.427 77.067 80.23 85.514 90.797 96.081 98.191 100.302" y="446.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Neutrophils</text>
-<text x="288.198 293.482 296.121" y="446.2" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">8.9</text>
-<text x="315.405 320.155 325.438 330.722 335.179 340.463 343.102" y="446.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
-<text x="401.54 406.823 409.462 414.746 417.385 420.549 423.188 428.472 431.111" y="446.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.0 - 7.5</text>
+<text x="288.198 293.481 296.121" y="446.2" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">8.9</text>
+<text x="315.405 320.155 325.438 330.722 335.18 340.463 343.103" y="446.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
+<text x="401.54 406.823 409.463 414.746 417.386 420.549 423.189 428.472 431.112" y="446.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.0 - 7.5</text>
 <text x="516.723" y="446.2" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">H</text>
 <text x="57 61.931 66.681 74.594 79.878 85.161 90.445 95.195 99.945 102.584 107.868" y="471.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Lymphocytes</text>
-<text x="288.198 293.482 296.121" y="471.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.1</text>
-<text x="315.405 320.155 325.438 330.722 335.179 340.463 343.102" y="471.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
-<text x="401.54 406.823 409.462 414.746 417.385 420.549 423.188 428.472 431.111" y="471.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1.0 - 4.0</text>
+<text x="288.198 293.481 296.121" y="471.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.1</text>
+<text x="315.405 320.155 325.438 330.722 335.18 340.463 343.103" y="471.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">x10^9/L</text>
+<text x="401.54 406.823 409.463 414.746 417.386 420.549 423.189 428.472 431.112" y="471.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">1.0 - 4.0</text>
 </g>
 <g>
 <text x="50 59.388 64.447 71.677 78.907 82.519 91.907 95.519 104.19 107.802 115.032 122.262 126.591 131.65 139.591 143.203 150.433 154.762 161.992 169.222 172.833 177.163 186.551 195.939 204.61" y="511.5" fill="#2563eb" font-size="13" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Urea &amp; Electrolytes (U&amp;E)</text>
@@ -86,34 +86,34 @@
 <rect x="50" y="524.1" width="186.626" height="24.8" fill="#f1f5f9"/>
 <text x="57 63.5 68.997 74.002 76.503 81.508 84.505" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Analyte</text>
 <rect x="236.626" y="524.1" width="71.779" height="24.8" fill="#f1f5f9"/>
-<text x="273.899 280.399 285.404 290.41 295.907 298.408" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Result</text>
+<text x="273.899 280.399 285.404 290.409 295.907 298.407" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Result</text>
 <rect x="308.405" y="524.1" width="86.135" height="24.8" fill="#f1f5f9"/>
-<text x="315.405 321.904 327.402 329.902 332.899" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
+<text x="315.405 321.905 327.402 329.903 332.9" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Units</text>
 <rect x="394.54" y="524.1" width="100.491" height="24.8" fill="#f1f5f9"/>
-<text x="401.54 408.039 413.044 416.041 421.047 424.549 429.555 435.052 440.058 445.063 447.563 451.066 456.071 461.569 467.066" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reference range</text>
+<text x="401.54 408.04 413.045 416.042 421.047 424.55 429.555 435.053 440.058 445.063 447.564 451.066 456.072 461.569 467.067" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Reference range</text>
 <rect x="495.03" y="524.1" width="50.245" height="24.8" fill="#f1f5f9"/>
-<text x="510.902 516.4 518.9 523.906" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Flag</text>
+<text x="510.902 516.4 518.9 523.905" y="540.1" fill="#314158" font-size="9" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">Flag</text>
 <text x="57 63.336 68.62 73.903 76.014 81.297" y="565.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Sodium</text>
-<text x="285.554 290.838 296.121" y="565.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">139</text>
-<text x="315.405 323.318 331.232 336.515 338.626 341.265" y="565.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
-<text x="401.54 406.823 412.106 417.39 420.029 423.193 425.832 431.116 436.399" y="565.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">133 - 146</text>
+<text x="285.554 290.837 296.121" y="565.4" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">139</text>
+<text x="315.405 323.319 331.232 336.516 338.626 341.266" y="565.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
+<text x="401.54 406.823 412.107 417.39 420.03 423.193 425.833 431.116 436.4" y="565.4" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">133 - 146</text>
 <text x="57 63.336 68.62 71.259 76.543 81.293 86.043 88.153 93.437" y="590.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Potassium</text>
-<text x="288.198 293.482 296.121" y="590.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">5.3</text>
-<text x="315.405 323.318 331.232 336.515 338.626 341.265" y="590.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
-<text x="401.54 406.823 409.462 414.746 417.385 420.549 423.188 428.472 431.111" y="590.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">3.5 - 5.3</text>
+<text x="288.198 293.481 296.121" y="590.8" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">5.3</text>
+<text x="315.405 323.319 331.232 336.516 338.626 341.266" y="590.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
+<text x="401.54 406.823 409.463 414.746 417.386 420.549 423.189 428.472 431.112" y="590.8" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">3.5 - 5.3</text>
 <text x="57 63.861 67.024 72.308" y="616.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Urea</text>
-<text x="288.198 293.482 296.121" y="616.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">7.8</text>
-<text x="315.405 323.318 331.232 336.515 338.626 341.265" y="616.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
-<text x="401.54 406.823 409.462 414.746 417.385 420.549 423.188 428.472 431.111" y="616.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.5 - 7.8</text>
+<text x="288.198 293.481 296.121" y="616.2" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">7.8</text>
+<text x="315.405 323.319 331.232 336.516 338.626 341.266" y="616.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mmol/L</text>
+<text x="401.54 406.823 409.463 414.746 417.386 420.549 423.189 428.472 431.112" y="616.2" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">2.5 - 7.8</text>
 <text x="57 63.861 67.024 72.308 77.591 80.23 82.341 87.625 89.735 95.019" y="641.6" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">Creatinine</text>
 <text x="290.838 296.121" y="641.6" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">96</text>
-<text x="315.405 320.878 328.792 334.075 336.186 338.825" y="641.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">µmol/L</text>
-<text x="401.54 406.823 412.106 414.746 417.909 420.549 425.832" y="641.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">49 - 90</text>
+<text x="315.405 320.879 328.792 334.076 336.186 338.826" y="641.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">µmol/L</text>
+<text x="401.54 406.823 412.107 414.746 417.91 420.549 425.833" y="641.6" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">49 - 90</text>
 <text x="516.723" y="641.6" fill="#ec003f" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">H</text>
 <text x="57 62.283 69.673 75.476" y="667" fill="#314158" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">eGFR</text>
 <text x="290.838 296.121" y="667" fill="#bb4d00" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">62</text>
-<text x="315.405 323.318 328.602 331.241 339.155 341.265 346.549 349.188 354.472 357.111 362.394 367.678 375.591" y="667" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mL/min/1.73m²</text>
-<text x="401.54 407.087 409.727 415.01" y="667" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">&gt; 90</text>
+<text x="315.405 323.319 328.602 331.241 339.155 341.266 346.549 349.188 354.472 357.111 362.395 367.678 375.592" y="667" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">mL/min/1.73m²</text>
+<text x="401.54 407.088 409.727 415.011" y="667" fill="#45556c" font-size="9.5" style="font-family:'bpf-helvetica',sans-serif" xml:space="preserve">&gt; 90</text>
 <text x="517.251" y="667" fill="#bb4d00" font-size="9.5" style="font-family:'bpf-helvetica-bold',sans-serif" xml:space="preserve">L</text>
 </g>
 <g>

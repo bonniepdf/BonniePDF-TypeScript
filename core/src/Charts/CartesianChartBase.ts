@@ -9,6 +9,7 @@ import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { StandardFonts } from '../Typography/StandardFonts';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Base class for Cartesian charts (charts with X and Y axes).
@@ -31,7 +32,14 @@ export const CARTESIAN_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...CARTES
 
 /** Options common to cartesian charts. Intersects {@link ChartBaseOptions}. */
 export type CartesianChartOptions = ChartBaseOptions &
-  Partial<Omit<Pick<CartesianChartBase, (typeof CARTESIAN_CHART_OWN_OPTION_KEYS)[number]>, 'xAxis' | 'yAxis'>> & {
+  Partial<
+    Omit<
+      Pick<CartesianChartBase, (typeof CARTESIAN_CHART_OWN_OPTION_KEYS)[number]>,
+      'xAxis' | 'yAxis' | 'labelFontSize'
+    >
+  > & {
+    /** Axis label font size. Accepts a length: `9`, `'9pt'`, or `{ value, unit }`. */
+    labelFontSize?: LengthInput;
     /** Category axis presentation; accepts an AxisOptions instance or literal. */
     xAxis?: AxisOptions | AxisOptionsOptions;
     /** Value axis presentation; accepts an AxisOptions instance or literal. */
@@ -94,10 +102,19 @@ export abstract class CartesianChartBase extends ChartBase {
    */
   showValueLabels: boolean = true;
 
+  private _labelFontSize: number = 9;
+
   /**
    * Font size for value labels above data points
+   *
+   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }` (§4A.3).
    */
-  labelFontSize: number = 9;
+  public get labelFontSize(): number {
+    return this._labelFontSize;
+  }
+  public set labelFontSize(value: LengthInput) {
+    this._labelFontSize = toLength(value);
+  }
 
   /**
    * Whether to show a legend for multiple series (default: true).

@@ -10,6 +10,7 @@ import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * A native, vector-based QR Code element.
@@ -41,9 +42,11 @@ export type QRCodeOptions = ElementOptions &
   Partial<
     Omit<
       Pick<QRCode, (typeof QR_CODE_OWN_OPTION_KEYS)[number]>,
-      'foregroundColor' | 'backgroundColor' | 'errorCorrection'
+      'foregroundColor' | 'backgroundColor' | 'errorCorrection' | 'size'
     >
   > & {
+    /** Symbol size. Accepts a length: `100`, `'3cm'`, or `{ value, unit }`. */
+    size?: LengthInput;
     /** Module colour. Accepts a palette token or hex. */
     foregroundColor?: ColorInput;
     /** Quiet-zone colour. Accepts a palette token or hex. */
@@ -81,8 +84,18 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
     return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
   }
 
-  /** The display size of the QR code (QR codes are always square). */
-  public size = 100;
+  private _size: number = 100;
+
+  /** The display size of the QR code (QR codes are always square).
+   *
+   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get size(): number {
+    return this._size;
+  }
+  public set size(value: LengthInput) {
+    this._size = toLength(value);
+  }
 
   /** The color of the QR code modules (usually black). */
   private _foregroundColor: Color = new Color(0, 0, 0);

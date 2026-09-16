@@ -8,6 +8,7 @@ import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { DataMatrixEncoder, EncodedDataMatrix } from './DataMatrixEncoder';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * A native, vector-based Data Matrix (ECC200) element.
@@ -41,8 +42,10 @@ export const DATA_MATRIX_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...DATA_MATRIX_O
 /** Options for {@link DataMatrix}. */
 export type DataMatrixOptions = ElementOptions &
   Partial<
-    Omit<Pick<DataMatrix, (typeof DATA_MATRIX_OWN_OPTION_KEYS)[number]>, 'foregroundColor' | 'backgroundColor'>
+    Omit<Pick<DataMatrix, (typeof DATA_MATRIX_OWN_OPTION_KEYS)[number]>, 'foregroundColor' | 'backgroundColor' | 'size'>
   > & {
+    /** Symbol size. Accepts a length: `100`, `'3cm'`, or `{ value, unit }`. */
+    size?: LengthInput;
     /** Module colour. Accepts a palette token or hex. */
     foregroundColor?: ColorInput;
     /** Quiet-zone colour. Accepts a palette token or hex. */
@@ -74,12 +77,21 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
     return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
   }
 
+  private _size: number = 100;
+
   /**
    * The display width of the symbol in points (the quiet zone is included). For
    * square symbols the height equals the width; for rectangular symbols the
    * height is derived from the symbol's aspect ratio.
+   *
+   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }` (§4A.3).
    */
-  public size = 100;
+  public get size(): number {
+    return this._size;
+  }
+  public set size(value: LengthInput) {
+    this._size = toLength(value);
+  }
 
   /**
    * Request a rectangular symbol for short messages where one is available.

@@ -4,6 +4,7 @@ import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { Color } from '../../Core/Color';
+import { toLength, type LengthInput, toOptionalLength } from '../../Normalize/toLength';
 
 /**
  * Represents a simple line element that can be horizontal or vertical.
@@ -17,7 +18,11 @@ export const LINE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...LINE_OWN_OPTION_KEYS
 
 /** Options for {@link Line}. */
 export type LineOptions = ElementOptions &
-  Partial<Omit<Pick<Line, (typeof LINE_OWN_OPTION_KEYS)[number]>, 'color'>> & {
+  Partial<Omit<Pick<Line, (typeof LINE_OWN_OPTION_KEYS)[number]>, 'color' | 'thickness' | 'length'>> & {
+    /** Line thickness. Accepts a length: `1`, `'0.5pt'`, or `{ value, unit }`. */
+    thickness?: LengthInput;
+    /** Line length. Accepts a length: `120`, `'5cm'`, or `{ value, unit }`. */
+    length?: LengthInput;
     /** Stroke colour. Accepts a palette token or hex. */
     color?: ColorInput;
   };
@@ -31,7 +36,15 @@ export class Line extends ElementBase {
     applyOptions(this, options);
   }
 
-  public thickness = 1;
+  private _thickness: number = 1;
+
+  /** thickness. Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3). */
+  public get thickness(): number {
+    return this._thickness;
+  }
+  public set thickness(value: LengthInput) {
+    this._thickness = toLength(value);
+  }
 
   /** Color of the line. Default is Black. */
   private _color: Color = Color.black;
@@ -47,12 +60,21 @@ export class Line extends ElementBase {
   /** Orientation of the line. Default is Horizontal. */
   public orientation: LineOrientation = LineOrientation.Horizontal;
 
+  private _length?: number;
+
   /**
    * Length of the line.
    * For Horizontal lines, if null (default), it takes the full available width.
    * For Vertical lines, this determines the height. If null, defaults to 100.
+   *
+   * Accepts a length: a number of points, `'5cm'`, or `{ value, unit }` (§4A.3).
    */
-  public length?: number;
+  public get length(): number | undefined {
+    return this._length;
+  }
+  public set length(value: LengthInput | undefined) {
+    this._length = toOptionalLength(value);
+  }
 
   protected override measureContentHeight(_contentWidth: number): number {
     if (this.orientation === LineOrientation.Horizontal) {

@@ -11,6 +11,7 @@ import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { applyOptions } from '../../Core/applyOptions';
 import { TEXT_ELEMENT_OPTION_KEYS, type TextElementOptions } from './TextElementOptions';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /** Settable properties declared by {@link TextBlock} itself. */
 export const TEXT_BLOCK_OWN_OPTION_KEYS = [
@@ -31,7 +32,11 @@ type TextBlockOwnKey = (typeof TEXT_BLOCK_OWN_OPTION_KEYS)[number];
 
 /** Options for {@link TextBlock}. Intersects {@link TextElementOptions}. */
 export type TextBlockOptions = TextElementOptions &
-  Partial<Omit<Pick<TextBlock, TextBlockOwnKey>, 'alignment'>> & {
+  Partial<Omit<Pick<TextBlock, TextBlockOwnKey>, 'alignment' | 'firstLineIndent' | 'paragraphSpacing'>> & {
+    /** First-line indent. Accepts a length: `18`, `'1cm'`, or `{ value, unit }`. */
+    firstLineIndent?: LengthInput;
+    /** Gap after each paragraph. Accepts a length: `8`, `'3mm'`, or `{ value, unit }`. */
+    paragraphSpacing?: LengthInput;
     /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
     alignment?: TextAlignmentInput;
   };
@@ -94,17 +99,35 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    */
   public ellipsis = '…';
 
+  private _firstLineIndent: number = 0;
+
   /**
    * Paragraph layout: horizontal indent (points) applied to the first line
    * of each paragraph (a paragraph = text between hard `\n` breaks). Default 0.
+   *
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
    */
-  public firstLineIndent = 0;
+  public get firstLineIndent(): number {
+    return this._firstLineIndent;
+  }
+  public set firstLineIndent(value: LengthInput) {
+    this._firstLineIndent = toLength(value);
+  }
+
+  private _paragraphSpacing: number = 0;
 
   /**
    * Paragraph layout: extra vertical space (points) inserted before each
    * paragraph after the first. Default 0.
+   *
+   * Accepts a length: a number of points, `'3mm'`, or `{ value, unit }` (§4A.3).
    */
-  public paragraphSpacing = 0;
+  public get paragraphSpacing(): number {
+    return this._paragraphSpacing;
+  }
+  public set paragraphSpacing(value: LengthInput) {
+    this._paragraphSpacing = toLength(value);
+  }
 
   /** Per-line horizontal indent, parallel to {@link cachedLines}. */
   private cachedIndents?: number[];

@@ -8,6 +8,7 @@ import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
 import { StandardFonts } from '../Typography/StandardFonts';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Pie chart that renders pie slices with a legend on the right side.
@@ -32,7 +33,15 @@ export const PIE_CHART_OWN_OPTION_KEYS = [
 export const PIE_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...PIE_CHART_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link PieChart}. Intersects {@link ChartBaseOptions}. */
-export type PieChartOptions = ChartBaseOptions & Partial<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>>;
+export type PieChartOptions = ChartBaseOptions &
+  Partial<
+    Omit<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>, 'totalLabelFontSize' | 'totalValueFontSize'>
+  > & {
+    /** Centre label font size. Accepts a length: `11`, `'11pt'`, or `{ value, unit }`. */
+    totalLabelFontSize?: LengthInput;
+    /** Centre value font size. Accepts a length: `16`, `'16pt'`, or `{ value, unit }`. */
+    totalValueFontSize?: LengthInput;
+  };
 
 /** Renders a data series as proportional slices of a circle. */
 export class PieChart extends ChartBase {
@@ -101,17 +110,35 @@ export class PieChart extends ChartBase {
    */
   totalLabel: string = 'Total';
 
+  private _totalLabelFontSize: number = 11;
+
   /**
    * Font size for the total label in the donut hole.
    * @deprecated No longer used - the total is now shown in the legend. Kept for API compatibility.
+   *
+   * Accepts a length: a number of points, `'11pt'`, or `{ value, unit }` (§4A.3).
    */
-  totalLabelFontSize: number = 11;
+  public get totalLabelFontSize(): number {
+    return this._totalLabelFontSize;
+  }
+  public set totalLabelFontSize(value: LengthInput) {
+    this._totalLabelFontSize = toLength(value);
+  }
+
+  private _totalValueFontSize: number = 16;
 
   /**
    * Font size for the total value in the donut hole.
    * @deprecated No longer used - the total is now shown in the legend. Kept for API compatibility.
+   *
+   * Accepts a length: a number of points, `'16pt'`, or `{ value, unit }` (§4A.3).
    */
-  totalValueFontSize: number = 16;
+  public get totalValueFontSize(): number {
+    return this._totalValueFontSize;
+  }
+  public set totalValueFontSize(value: LengthInput) {
+    this._totalValueFontSize = toLength(value);
+  }
 
   /**
    * Format string for the total value.

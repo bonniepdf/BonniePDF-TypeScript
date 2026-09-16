@@ -28,6 +28,7 @@ import {
 import { PageLabel, type PageLabelOptions } from './PageLabel';
 import { FacturXMetadata } from '../EInvoice/FacturXMetadata';
 import type { IElement } from '../Elements/IElement';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Configuration settings for PDF document creation and display
@@ -84,7 +85,8 @@ type DocumentSettingsSpecialKey =
   | 'encryption'
   | 'pageLabel'
   | 'defaultTextStyle'
-  | 'bookmarks';
+  | 'bookmarks'
+  | 'margin';
 
 /**
  * Options for {@link DocumentSettings} - the largest options bag in the library.
@@ -98,6 +100,8 @@ export type DocumentSettingsOptions = Partial<
 > & {
   /** Page size. Accepts `'a4'`, `'letter'`, … or `{ width, height }`. */
   pageSize?: PageSizeInput;
+  /** Uniform page margin. Accepts a length: `50`, `'2cm'`, or `{ value, unit }`. */
+  margin?: LengthInput;
   /** Page background fill. Accepts a palette token or hex. */
   pageColor?: ColorInput;
   /** Page orientation. Accepts `'portrait' | 'landscape'`. */
@@ -199,10 +203,19 @@ export class DocumentSettings {
   public set orientation(value: PageOrientationInput) {
     this._orientation = toPageOrientation(value);
   }
+  private _margin = 50;
+
   /**
-   * The margin size in points for all pages (default: 50)
+   * The margin size in points for all pages (default: 50).
+   *
+   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }` (§4A.3).
    */
-  public margin: number;
+  public get margin(): number {
+    return this._margin;
+  }
+  public set margin(value: LengthInput) {
+    this._margin = toLength(value);
+  }
   /**
    * The default zoom level when the PDF is opened (default: FitPage)
    */

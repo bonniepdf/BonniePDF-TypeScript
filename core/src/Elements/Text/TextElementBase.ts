@@ -17,6 +17,7 @@ import {
 } from '../../Normalize/toEnum';
 import { TextStyle } from './TextStyle';
 import { getTextSpacingWidth } from '../../Typography/TextSpacing';
+import { toLength, toOptionalLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Base class for text-based PDF elements that provides common functionality for
@@ -77,8 +78,8 @@ export abstract class TextElementBase extends ElementBase {
   public get fontSize(): number {
     return this._fontSize ?? 12;
   }
-  public set fontSize(value: number) {
-    this._fontSize = value;
+  public set fontSize(value: LengthInput) {
+    this._fontSize = toLength(value);
   }
 
   /**
@@ -115,23 +116,50 @@ export abstract class TextElementBase extends ElementBase {
     this._decorationColor = value === undefined ? undefined : toColor(value);
   }
 
+  private _decorationThickness?: number;
+
   /**
    * Thickness of the decoration lines in points. Null = the default derived from
    * font size (`max(0.5, fontSize / 18)`).
+   *
+   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3).
    */
-  public decorationThickness?: number;
+  public get decorationThickness(): number | undefined {
+    return this._decorationThickness;
+  }
+  public set decorationThickness(value: LengthInput | undefined) {
+    this._decorationThickness = toOptionalLength(value);
+  }
+
+  private _letterSpacing = 0;
 
   /**
    * Letter spacing (tracking) in points, added after every glyph.
    * Default 0. Changes advances, so it is reflected in measurement and both
    * PDF and SVG output.
+   *
+   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (§4A.3).
    */
-  public letterSpacing = 0;
+  public get letterSpacing(): number {
+    return this._letterSpacing;
+  }
+  public set letterSpacing(value: LengthInput) {
+    this._letterSpacing = toLength(value);
+  }
+
+  private _wordSpacing = 0;
 
   /**
    * Word spacing in points, added after every space. Default 0.
+   *
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
    */
-  public wordSpacing = 0;
+  public get wordSpacing(): number {
+    return this._wordSpacing;
+  }
+  public set wordSpacing(value: LengthInput) {
+    this._wordSpacing = toLength(value);
+  }
 
   private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
 

@@ -9,6 +9,7 @@ import { toImageFitMode, type ImageFitModeInput } from '../../Normalize/toEnum';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
+import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * An image element that displays JPEG or PNG images in the PDF
@@ -35,7 +36,11 @@ export const IMAGE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...IMAGE_OWN_OPTION_KE
  * `filePath` is Node-only (`05 §4`); `imageData` is universal.
  */
 export type ImageOptions = ElementOptions &
-  Partial<Omit<Pick<Image, (typeof IMAGE_OWN_OPTION_KEYS)[number]>, 'fitMode'>> & {
+  Partial<Omit<Pick<Image, (typeof IMAGE_OWN_OPTION_KEYS)[number]>, 'fitMode' | 'width' | 'height'>> & {
+    /** Width. Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`. */
+    width?: LengthInput;
+    /** Height. Accepts a length: a number of points, `'2cm'`, or `{ value, unit }`. */
+    height?: LengthInput;
     /** How the image fills its box. Accepts `'contain' | 'cover' | 'fill' | 'fit-height' | 'actual-size'`. */
     fitMode?: ImageFitModeInput;
   };
@@ -80,15 +85,33 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
     return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
   }
 
-  /**
-   * Desired display width in points (null = auto)
-   */
-  width: number | undefined;
+  private _width?: number;
 
   /**
-   * Desired display height in points (null = auto-scale)
+   * Desired display width in points (null = auto).
+   *
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
    */
-  height: number | undefined;
+  public get width(): number | undefined {
+    return this._width;
+  }
+  public set width(value: LengthInput | undefined) {
+    this._width = toOptionalLength(value);
+  }
+
+  private _height?: number;
+
+  /**
+   * Desired display height in points (null = auto-scale).
+   *
+   * Accepts a length: a number of points, `'6cm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get height(): number | undefined {
+    return this._height;
+  }
+  public set height(value: LengthInput | undefined) {
+    this._height = toOptionalLength(value);
+  }
 
   /**
    * How to fit the image within bounds

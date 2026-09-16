@@ -11,6 +11,36 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Added
 
+- **Any measurement can now be written in a unit.** Every public authoring
+  position that takes a length — widths, heights, padding and margin sides,
+  spacing, corner radii, font sizes, letter and word spacing, decoration
+  thickness, stroke widths, shape and barcode dimensions, chart sizes, and the
+  page margin — accepts a number of points (as before), a unit-suffixed token,
+  or `{ value, unit }`:
+
+  ```typescript
+  new Container({ height: '1in', padding: { top: '10mm' }, cornerRadius: '2mm' });
+  new TextBlock('Heading', { fontSize: { value: 14, unit: Unit.Point } });
+  doc.settings.margin = '2cm';
+  ```
+
+  The four units are `pt` `in` `cm` `mm`, matching the `Unit` enumeration; the
+  unit is case-insensitive and a space before it is allowed. Lengths compose
+  with the spacing forms, so `['1cm', 12]` and `{ top: '0.5in' }` are both
+  well-formed.
+
+  Lengths normalise to points **on write** and read back as a plain `number`, so
+  engine code, measurement, and the layout snapshot never see a unit, and a
+  document authored entirely in inches produces byte-identical output to the
+  same document in points. A bare number still means points, so no existing code
+  changes.
+
+  An unrecognised unit throws, naming the accepted forms, rather than resolving
+  to zero — a silent zero is the one outcome a measurement grammar must never
+  produce. Dimensionless numbers are deliberately **not** widened: `lineHeight`
+  is a multiple of the font size, `opacity` a ratio, `rotationDegrees` an angle,
+  and a weighted column width a share rather than a distance.
+
 - `evaluateCompliance` takes an options object selecting which **rule families**
   run: `evaluateCompliance(snapshot, { includeWcag: false })` skips the WCAG 2.2
   contrast rules entirely. The suppressed findings are absent from `findings`

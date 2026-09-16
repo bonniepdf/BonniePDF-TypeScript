@@ -3,6 +3,7 @@ import { IElement } from '../IElement';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { PdfSize } from '../../Configuration/PdfSize';
 import { Color } from '../../Core/Color';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Represents a single page in a PDF document
@@ -70,29 +71,31 @@ export class Page {
    * @param height - Page height in points
    * @param margin - Page margin in points
    */
-  constructor(width: number, height: number, margin: number, options?: PageOptions);
+  constructor(width: LengthInput, height: LengthInput, margin: LengthInput, options?: PageOptions);
   /**
    * Creates a new instance of Page with the specified page size and margin
    * @param pageSize - The page size
-   * @param margin - Page margin in points
+   * @param margin - Page margin. Accepts a length (`36`, `'2cm'`).
    */
-  constructor(pageSize: PdfSize, margin: number, options?: PageOptions);
+  constructor(pageSize: PdfSize, margin: LengthInput, options?: PageOptions);
   constructor(
-    widthOrPageSize: number | PdfSize,
-    height: number,
-    marginOrOptions?: number | PageOptions,
+    widthOrPageSize: LengthInput | PdfSize,
+    height: LengthInput,
+    marginOrOptions?: LengthInput | PageOptions,
     options?: PageOptions
   ) {
     // The explicit-dimensions form puts margin third and options fourth; the
-    // PdfSize form puts margin second and options third.
-    if (typeof widthOrPageSize === 'number') {
-      this.size = new PdfSize(widthOrPageSize, height);
-      this.margin = typeof marginOrOptions === 'number' ? marginOrOptions : 0;
+    // PdfSize form puts margin second and options third. Discriminating on
+    // `PdfSize` rather than `typeof number` keeps both forms working now that
+    // every measurement here also accepts a length token or `{ value, unit }`.
+    if (!(widthOrPageSize instanceof PdfSize)) {
+      this.size = new PdfSize(toLength(widthOrPageSize), toLength(height));
+      this.margin = isLength(marginOrOptions) ? toLength(marginOrOptions) : 0;
       applyOptions(this, options);
     } else {
       this.size = widthOrPageSize;
-      this.margin = height;
-      applyOptions(this, typeof marginOrOptions === 'number' ? options : marginOrOptions);
+      this.margin = toLength(height);
+      applyOptions(this, isLength(marginOrOptions) ? options : marginOrOptions);
     }
   }
 
@@ -166,4 +169,14 @@ export class Page {
   public contentFits(): boolean {
     return this.measureContentHeight() <= this.contentHeight;
   }
+}
+
+/**
+ * Whether a positional argument is a length rather than a `PageOptions` bag.
+ * `{ value, unit }` is a length too, so a plain `typeof` check is not enough.
+ */
+function isLength(value: LengthInput | PageOptions | undefined): value is LengthInput {
+  if (value === undefined) return false;
+  if (typeof value === 'number' || typeof value === 'string') return true;
+  return 'unit' in value && 'value' in value;
 }

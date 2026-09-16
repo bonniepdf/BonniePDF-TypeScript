@@ -11,6 +11,7 @@ import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
 import { renderTaggedChart } from './ChartTagging';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Base class for all charts that provides common functionality for drawing charts
@@ -36,9 +37,13 @@ export type ChartBaseOptions = ElementOptions &
   Partial<
     Omit<
       Pick<ChartBase, Exclude<(typeof CHART_BASE_OPTION_KEYS)[number], (typeof ELEMENT_OPTION_KEYS)[number]>>,
-      'backgroundColor' | 'data'
+      'backgroundColor' | 'data' | 'width' | 'height'
     >
   > & {
+    /** Chart width. Accepts a length: `800`, `'20cm'`, or `{ value, unit }`. */
+    width?: LengthInput;
+    /** Chart height. Accepts a length: `450`, `'12cm'`, or `{ value, unit }`. */
+    height?: LengthInput;
     /** Chart content; accepts a ChartData instance or a nested options literal. */
     data?: ChartData | ChartDataOptions;
     /** Background fill. Accepts a palette token or hex. */
@@ -87,15 +92,33 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
     return this.isDecorative || !this.altText ? SemanticRole.Artifact : SemanticRole.Figure;
   }
 
+  private _width: number = 800;
+
   /**
    * Width of the chart canvas in points
+   *
+   * Accepts a length: a number of points, `'20cm'`, or `{ value, unit }` (§4A.3).
    */
-  width: number = 800;
+  public get width(): number {
+    return this._width;
+  }
+  public set width(value: LengthInput) {
+    this._width = toLength(value);
+  }
+
+  private _height: number = 450;
 
   /**
    * Height of the chart canvas in points
+   *
+   * Accepts a length: a number of points, `'12cm'`, or `{ value, unit }` (§4A.3).
    */
-  height: number = 450;
+  public get height(): number {
+    return this._height;
+  }
+  public set height(value: LengthInput) {
+    this._height = toLength(value);
+  }
 
   /**
    * Background color for the chart (default: null/transparent).

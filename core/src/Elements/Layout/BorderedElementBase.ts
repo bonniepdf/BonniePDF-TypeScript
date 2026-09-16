@@ -4,6 +4,7 @@ import { Border, BorderColors, Color } from '../../Core';
 import { RenderContext } from '../IElement';
 import { toBorder, type BorderInput } from '../../Normalize/toBorder';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * Base class for elements with borders and background colors.
@@ -43,15 +44,23 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   public set backgroundColor(value: ColorInput | undefined) {
     this._backgroundColor = value === undefined ? undefined : toColor(value);
   }
+  private _cornerRadius = 0;
+
   /**
    * Corner radius for rounded rectangles. 0 = sharp corners (default).
+   *
+   * Accepts a length: `6`, `'2mm'`, or `{ value, unit }` (§4A.3).
    */
-  public cornerRadius: number;
+  public get cornerRadius(): number {
+    return this._cornerRadius;
+  }
+  public set cornerRadius(value: LengthInput) {
+    this._cornerRadius = toLength(value);
+  }
 
   constructor() {
     super();
     this.borderColors = new BorderColors();
-    this.cornerRadius = 0;
   }
 
   /**

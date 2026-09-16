@@ -16,6 +16,7 @@ import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
 import { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
 import { captureTypeOf, captureNameOf, paintForBackground } from '../../Rendering/LayoutRecorder';
 import { beginChildTag, endChildTag, ChildTagToken } from '../../Rendering/Tagging/ChildTagging';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
  * A table element with support for column weights, cell padding, borders, headers, and footers
@@ -55,7 +56,9 @@ type TableColorKey =
  * rows/header/footer route through `addRow` / `addHeader` / `addFooter`.
  */
 export type TableOptions = BorderedElementOptions &
-  Partial<Omit<Pick<Table, TableOwnKey>, TableColorKey>> & {
+  Partial<Omit<Pick<Table, TableOwnKey>, TableColorKey | 'cellPadding'>> & {
+    /** Padding inside every cell. Accepts a length: `5`, `'2mm'`, or `{ value, unit }`. */
+    cellPadding?: LengthInput;
     /** Header row fill. Accepts a palette token or hex. */
     headerBackgroundColor?: ColorInput;
     /** Header row text colour. Accepts a palette token or hex. */
@@ -148,10 +151,19 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     for (const row of rows ?? []) this.addRow(row);
   }
 
+  private _cellPadding: number = 5;
+
   /**
    * Default padding for all cells
+   *
+   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
    */
-  public cellPadding = 5;
+  public get cellPadding(): number {
+    return this._cellPadding;
+  }
+  public set cellPadding(value: LengthInput) {
+    this._cellPadding = toLength(value);
+  }
   /**
    * Whether to repeat headers on each new page
    */

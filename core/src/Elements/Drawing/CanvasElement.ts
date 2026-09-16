@@ -7,6 +7,7 @@ import type { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import type { IAltTextProvider } from '../../Rendering/Tagging/IAltTextProvider';
 import { applyOptions } from '../../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
+import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 export type CanvasDrawHandler = (canvas: ICanvas, size: Size) => void;
 
@@ -21,18 +22,42 @@ export const CANVAS_ELEMENT_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...CANVAS_ELE
  * constructor value (it is stored `readonly`, not a settable property).
  */
 export type CanvasElementOptions = ElementOptions &
-  Partial<Pick<CanvasElement, (typeof CANVAS_ELEMENT_OWN_OPTION_KEYS)[number]>>;
+  Partial<Omit<Pick<CanvasElement, (typeof CANVAS_ELEMENT_OWN_OPTION_KEYS)[number]>, 'drawWidth' | 'drawHeight'>> & {
+    /** Drawing-surface width. Accepts a length: `240`, `'8cm'`, or `{ value, unit }`. */
+    drawWidth?: LengthInput;
+    /** Drawing-surface height. Accepts a length: `160`, `'8cm'`, or `{ value, unit }`. */
+    drawHeight?: LengthInput;
+  };
 
 /** Invokes a caller-provided drawing function within the document layout. */
 export class CanvasElement extends ElementBase implements IRoleProvider, IAltTextProvider {
+  private _drawWidth: number = 0;
+
   /**
    * Width of the drawing box in points. `0` (the default) fills the available
    * content width; a positive value fixes the width and is clamped to the space
    * available.
+   *
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
    */
-  public drawWidth: number = 0;
-  /** Height of the drawing box in points. Always explicit — a canvas cannot measure itself. */
-  public drawHeight: number = 100;
+  public get drawWidth(): number {
+    return this._drawWidth;
+  }
+  public set drawWidth(value: LengthInput) {
+    this._drawWidth = toLength(value);
+  }
+  private _drawHeight: number = 100;
+
+  /** Height of the drawing box in points. Always explicit — a canvas cannot measure itself.
+   *
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
+   */
+  public get drawHeight(): number {
+    return this._drawHeight;
+  }
+  public set drawHeight(value: LengthInput) {
+    this._drawHeight = toLength(value);
+  }
   public altText: string = '';
   public isDecorative: boolean = false;
   private readonly drawHandler: CanvasDrawHandler;

@@ -12,6 +12,7 @@ import { applyOptions } from './applyOptions';
 import { toColor, type ColorInput } from '../Normalize/toColor';
 import { toThickness, type ThicknessInput } from '../Normalize/toThickness';
 import type { StructureElement } from '../Rendering/Tagging/StructureElement';
+import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Represents a hyperlink annotation in a PDF document.
@@ -37,7 +38,9 @@ export const HYPERLINK_OPTION_KEYS = [
 type HyperlinkKey = (typeof HYPERLINK_OPTION_KEYS)[number];
 
 /** Options for {@link Hyperlink}. */
-export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'textColor' | 'margin'>> & {
+export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'textColor' | 'margin' | 'fontSize'>> & {
+  /** Font size. Accepts a length: `12`, `'12pt'`, `'4mm'`, or `{ value, unit }`. */
+  fontSize?: LengthInput;
   /** Link text colour. Accepts a palette token or hex. */
   textColor?: ColorInput;
   /** Margin around the link. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
@@ -67,10 +70,19 @@ export class Hyperlink implements IElement, IRoleProvider {
    * Gets or sets the font name for the link text
    */
   fontName: string = StandardFonts.Helvetica;
+  private _fontSize = 12;
+
   /**
-   * Gets or sets the font size for the link text
+   * Gets or sets the font size for the link text.
+   *
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
    */
-  fontSize: number = 12;
+  public get fontSize(): number {
+    return this._fontSize;
+  }
+  public set fontSize(value: LengthInput) {
+    this._fontSize = toLength(value);
+  }
   /**
    * Gets or sets the text color for the link
    */

@@ -41,6 +41,22 @@ change to `core/`; on release, rename it to the version being tagged.
   is a multiple of the font size, `opacity` a ratio, `rotationDegrees` an angle,
   and a weighted column width a share rather than a distance.
 
+- **`Container.fillHeight`** takes the body content height left on the current
+  page instead of sizing to content. This is the piece that was missing for the
+  header / body / footer page shape: the middle band is whatever the page chrome
+  leaves over, which an author cannot compute up front because both templates
+  are functions of the page number.
+
+  ```typescript
+  new Container({ fillHeight: true, verticalAlignment: 'bottom', child: body });
+  ```
+
+  An explicit `height` wins outright, and fill never _shrinks_ content — a
+  container whose child outgrows the space left keeps the child's height and
+  paginates normally. Measurement is unchanged: it reports the natural content
+  height, because a pure measure has no cursor to measure from. Fill re-resolves
+  after a page break, against the new page's own reserved band.
+
 - `evaluateCompliance` takes an options object selecting which **rule families**
   run: `evaluateCompliance(snapshot, { includeWcag: false })` skips the WCAG 2.2
   contrast rules entirely. The suppressed findings are absent from `findings`

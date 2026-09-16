@@ -27,6 +27,7 @@ export const CONTAINER_OWN_OPTION_KEYS = [
   'padding',
   'width',
   'height',
+  'fillHeight',
   'clipContent',
   'crispEdges',
   'horizontalAlignment',
@@ -126,6 +127,24 @@ export class Container extends BorderedElementBase implements IContentContainer 
   }
 
   /**
+   * When `true`, the container takes the body content height left on the
+   * current page instead of sizing to its content. This is the primitive behind
+   * the header / body / footer page shape: the middle band is whatever the page
+   * chrome leaves over, a figure an author cannot compute up front because both
+   * templates are functions of the page number.
+   *
+   * {@link height} wins outright — fill is only consulted when no height is
+   * pinned — and fill never *shrinks* content: a container whose child is taller
+   * than the space left keeps the child's height and paginates normally.
+   * Measurement is unaffected (it reports the natural content height, because a
+   * pure measure has no cursor to measure from); only arrangement expands.
+   *
+   * Combines with {@link verticalAlignment}: the slack fill creates is exactly
+   * the space it gained, so `'bottom'` anchors content to the foot of the band.
+   */
+  public fillHeight = false;
+
+  /**
    * When `true` and {@link BorderedElementBase.cornerRadius} is positive, the
    * container's content (background, border, and child) is clipped to the
    * rounded-rectangle outline. This is what turns a rounded background
@@ -222,15 +241,35 @@ export class Container extends BorderedElementBase implements IContentContainer 
     return childHeight + this.padding.top + this.padding.bottom + this.border.verticalWidth;
   }
 
+  /**
+   * The arranged height for this render. A pinned {@link height} wins outright;
+   * {@link fillHeight} then expands to the body content height left below the
+   * cursor, never below the natural content height. Resolved here rather than in
+   * `measureContentHeight` because fill is a property of *where* the container
+   * lands, and measurement has no cursor - see the shared specification,
+   * "Layout & Pagination" §3.1.
+   */
+  private resolveHeight(ctx: RenderContext, effectiveWidth: number): number {
+    if (this.height !== undefined) return this.height;
+
+    const natural = this.measureContentHeight(effectiveWidth);
+    if (!this.fillHeight) return natural;
+
+    return Math.max(natural, ctx.maxY - ctx.currentY);
+  }
+
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
     // Use the fixed width/height if specified, otherwise size to content.
     const effectiveWidth = this.width ?? contentWidth;
-    const containerHeight = this.height ?? this.measureContentHeight(effectiveWidth);
+    let containerHeight = this.resolveHeight(ctx, effectiveWidth);
 
     // Pagination: if the whole container would not fit and we are not already at
     // the top of the page, break first so the border/background stay intact.
     if (ctx.currentY + containerHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
       ctx.newPage();
+      // Fill resolves per page: the band below the cursor on the new page is a
+      // different one, and may be measured against different chrome.
+      containerHeight = this.resolveHeight(ctx, effectiveWidth);
     }
 
     // Crisp-edge hint: render the subtree inside a crisp-edge region so

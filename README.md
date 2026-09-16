@@ -83,6 +83,18 @@ pnpm, Bun and Yarn work too. The package ships ESM and CommonJS entry points and
 
 ## Quick start
 
+First, declare which licence applies to you — once, at application startup. It
+is a self-declaration: no key, no activation, no telemetry. See
+[Licence](#licence).
+
+```typescript
+import { settings } from '@bonniepdf/core';
+
+settings.license = 'community'; // or 'evaluation' / 'professional' / 'enterprise'
+```
+
+Then build a document:
+
 ```typescript
 import {
   AccessibilityMode,
@@ -181,9 +193,36 @@ pnpm typecheck
 
 ## Licence
 
-Current versions are source-available under the [BonniePDF Community License 1.0](./core/LICENSE). Anyone may evaluate the complete core in non-production. Personal and independent non-commercial projects, qualifying charity and education use, and qualifying OSI-licensed open-source project work are also free. Commercial production—including live internal-business and client use—requires a [commercial licence](./core/COMMERCIAL-LICENSE.txt) before production begins.
+Current versions are source-available under the [BonniePDF Community License 1.0](./core/LICENSE).
 
-Solo covers commercial production for one named developer and one business. Professional and Enterprise provide broader organisational coverage. One paid core licence covers both TypeScript/JavaScript and .NET without document, server, deployment, or end-user fees. The core has no licence keys, activation servers, telemetry, or runtime feature gates. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
+The Community licence is free for: evaluation of the complete core in non-production; personal and independent non-commercial projects; qualifying charity, education and research use; qualifying OSI-licensed open-source work; **and commercial production while the benefiting organisation's annual gross revenue is below US $1,000,000**, measured together with its affiliates. Where documents are produced for a client, the client is the benefiting organisation, not the contractor. Crossing the threshold allows ninety days to obtain a [commercial licence](./core/COMMERCIAL-LICENSE.txt).
+
+Professional covers one named legal entity with unlimited developers; Enterprise additionally covers the affiliates named in your Order. One paid core licence covers both TypeScript/JavaScript and .NET, with no document, server, deployment, or end-user fees. Digital signing is included with every paid core licence at no extra charge and is governed by its own agreement. See the [licensing overview](https://www.bonniepdf.dev/license/) for details.
+
+### Declaring your licence
+
+BonniePDF asks your application to state which tier applies to it, once at startup:
+
+```typescript
+import { settings } from '@bonniepdf/core';
+
+settings.license = 'community';
+```
+
+Or set `BONNIEPDF_LICENSE=community` in the environment, which is often easier in a monorepo, a container, or CI. An in-code declaration takes precedence over the environment variable.
+
+**This is a declaration, not an enforcement mechanism.** There is no licence key, no activation server, no telemetry, no fingerprinting, and no runtime feature gate. Nothing is sent anywhere, and every tier includes the complete feature set — tiers differ only in usage rights. The declaration exists so the terms reach the developer integrating the library, rather than nobody at all.
+
+If you generate a document without declaring a tier:
+
+| Where                                            | What happens                                      |
+| ------------------------------------------------ | ------------------------------------------------- |
+| Development, test, or CI                         | A `BonniePdfLicenseError` explaining the tiers    |
+| Production, or an environment we cannot classify | A single warning on `stderr`; generation proceeds |
+
+The check runs at most once per process, and **never changes a byte of output** — there is no watermark and no free-tier degradation, and the test suite asserts byte-identical output across every tier. A live workload that never declared a tier will warn, not fail.
+
+`BONNIEPDF_LICENSE_ENFORCEMENT=throw` makes the notice fatal everywhere; `=warn` makes it non-fatal everywhere, including in CI. There is deliberately no way to switch it off — declaring a tier is the supported way to silence it, and takes one line.
 
 ## Contributing
 

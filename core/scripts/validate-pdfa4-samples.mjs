@@ -17,7 +17,12 @@ if (!existsSync(distEntry)) {
   process.exit(1);
 }
 
-const { Color, Document, FontManager, Image, Line, StandardFonts, TextBlock, asPdfA4 } = await import(distEntry);
+const { Color, Document, FontManager, Image, Line, StandardFonts, TextBlock, asPdfA4, settings } =
+  await import(distEntry);
+
+// Declare a licence tier for this script. Producing validation samples is not
+// production use, so `evaluation` is the honest declaration.
+settings.license = 'evaluation';
 
 function uint32be(value) {
   return [(value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff];

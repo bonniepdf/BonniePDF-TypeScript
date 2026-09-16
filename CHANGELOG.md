@@ -57,6 +57,28 @@ change to `core/`; on release, rename it to the version being tagged.
   height, because a pure measure has no cursor to measure from. Fill re-resolves
   after a page break, against the new page's own reserved band.
 
+- **Licence declaration.** Applications now declare which BonniePDF licence
+  applies to them, once at startup:
+  `settings.license = 'community'` (or `'evaluation'`, `'professional'`,
+  `'enterprise'`), or `BONNIEPDF_LICENSE=community` in the environment. An
+  in-code declaration takes precedence.
+
+  It is a **declaration, not an enforcement mechanism**: no licence key, no
+  activation, no network call, no telemetry, and no tier-dependent feature
+  gating. Every tier includes the complete feature set.
+
+  Generating a document without a declaration throws `BonniePdfLicenseError` in
+  an environment positively identified as development, test, or CI, and
+  otherwise writes a single warning to the console and continues — a production
+  workload that never declared a tier warns rather than failing. `'evaluation'`
+  warns once. Declaring any other tier is silent. The notice appears at most
+  once per process. `BONNIEPDF_LICENSE_ENFORCEMENT=throw|warn` moves it between
+  fatal and non-fatal; there is deliberately no way to switch it off.
+
+  The declared tier **never changes a byte of generated output** — no watermark,
+  no metadata field, no free-tier degradation — and the test suite asserts
+  byte-identical output across every tier.
+
 - `evaluateCompliance` takes an options object selecting which **rule families**
   run: `evaluateCompliance(snapshot, { includeWcag: false })` skips the WCAG 2.2
   contrast rules entirely. The suppressed findings are absent from `findings`

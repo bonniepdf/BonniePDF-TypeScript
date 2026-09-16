@@ -211,4 +211,4 @@ To complete the implementation:
 
 ## License
 
-Same as the original BonniePDF .NET project.
+Part of `@bonniepdf/core`, source-available under the [BonniePDF Community License 1.0](../LICENSE). See the package [README](../README.md#license) for the full licence summary.

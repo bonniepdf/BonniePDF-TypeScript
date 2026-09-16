@@ -27,7 +27,10 @@ yarn add @bonniepdf/core
 ## Quick start
 
 ```typescript
-import { Document, Heading, TextBlock, StandardFonts } from '@bonniepdf/core';
+import { Document, Heading, TextBlock, StandardFonts, settings } from '@bonniepdf/core';
+
+// Declare which licence applies to you, once at startup (see License below).
+settings.license = 'community';
 
 const doc = new Document();
 
@@ -256,8 +259,30 @@ under a paid licence.
 One commercial core licence covers both TypeScript/JavaScript and .NET. Paid
 tiers have no developer-seat, document, server, deployment, or end-user fees.
 The core has no activation or telemetry.
-Digital signing is included with every paid core licence at no extra charge and
-is governed by its own agreement.
+Digital signing is included with every paid core licence at no extra charge,
+under the same Commercial License Agreement. The signing packages are not
+covered by the Community License.
+
+### Declaring your licence
+
+BonniePDF asks your application to state which tier applies to it, once at
+startup:
+
+```typescript
+import { settings } from '@bonniepdf/core';
+
+settings.license = 'community'; // or 'evaluation' / 'professional' / 'enterprise'
+```
+
+Or set `BONNIEPDF_LICENSE=community` in the environment. An in-code declaration
+takes precedence.
+
+This is a declaration, not an enforcement mechanism: there is no licence key,
+activation, telemetry, or feature gate, and the declared tier never changes a
+byte of output. Generating a document without a declaration throws
+`BonniePdfLicenseError` in development, test, or CI, and otherwise logs a single
+warning and continues. `BONNIEPDF_LICENSE_ENFORCEMENT=throw` or `=warn` makes
+the notice fatal or non-fatal everywhere.
 
 Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for current
 evaluation rights, commercial editions, and pricing.

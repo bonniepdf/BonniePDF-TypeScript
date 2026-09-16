@@ -148,6 +148,38 @@ import { generate as utilityBill } from './showcases/utilities/utility-bill';
 import { generate as utilityBillClasses } from './showcases/utilities/utility-bill-classes';
 import { generate as courseCertificate } from './showcases/education/course-certificate';
 import { generate as courseCertificateClasses } from './showcases/education/course-certificate-classes';
+import { generate as jobSheet } from './showcases/field/job-sheet';
+import { generate as jobSheetClasses } from './showcases/field/job-sheet-classes';
+import { generate as siteInspectionReport } from './showcases/field/site-inspection-report';
+import { generate as siteInspectionReportClasses } from './showcases/field/site-inspection-report-classes';
+import { generate as permitToWork } from './showcases/field/permit-to-work';
+import { generate as permitToWorkClasses } from './showcases/field/permit-to-work-classes';
+import { generate as inventoryScheduleOfCondition } from './showcases/field/inventory-schedule-of-condition';
+import { generate as inventoryScheduleOfConditionClasses } from './showcases/field/inventory-schedule-of-condition-classes';
+import { generate as customerAccountStatement } from './showcases/invoices/customer-account-statement';
+import { generate as customerAccountStatementClasses } from './showcases/invoices/customer-account-statement-classes';
+import { generate as purchaseOrder } from './showcases/invoices/purchase-order';
+import { generate as purchaseOrderClasses } from './showcases/invoices/purchase-order-classes';
+import { generate as creditNote } from './showcases/invoices/credit-note';
+import { generate as creditNoteClasses } from './showcases/invoices/credit-note-classes';
+import { generate as deliveryNote } from './showcases/operations/delivery-note';
+import { generate as deliveryNoteClasses } from './showcases/operations/delivery-note-classes';
+import { generate as dischargeSummary } from './showcases/healthcare/discharge-summary';
+import { generate as dischargeSummaryClasses } from './showcases/healthcare/discharge-summary-classes';
+import { generate as exhibitBundleIndex } from './showcases/legal/exhibit-bundle-index';
+import { generate as exhibitBundleIndexClasses } from './showcases/legal/exhibit-bundle-index-classes';
+import { generate as propertyParticulars } from './showcases/property/property-particulars';
+import { generate as propertyParticularsClasses } from './showcases/property/property-particulars-classes';
+import { generate as serverEndpoint } from './recipes/integration/server-endpoint';
+import { generate as batchGeneration } from './recipes/integration/batch-generation';
+import { generate as billOfCosts } from './showcases/legal/bill-of-costs';
+import { generate as billOfCostsClasses } from './showcases/legal/bill-of-costs-classes';
+import { generate as remittanceAdvice } from './showcases/invoices/remittance-advice';
+import { generate as remittanceAdviceClasses } from './showcases/invoices/remittance-advice-classes';
+import { generate as dunningLetter } from './showcases/invoices/dunning-letter';
+import { generate as dunningLetterClasses } from './showcases/invoices/dunning-letter-classes';
+import { generate as timesheet } from './showcases/hr/timesheet';
+import { generate as timesheetClasses } from './showcases/hr/timesheet-classes';
 
 export * from './recipes/svg';
 
@@ -163,6 +195,9 @@ export type Industry =
   | 'Legal'
   | 'Insurance'
   | 'Property'
+  | 'Construction'
+  | 'Facilities'
+  | 'FieldService'
   | 'HR'
   | 'Banking'
   | 'Manufacturing'
@@ -198,7 +233,9 @@ export type DocumentType =
   | 'catalog'
   | 'dashboard'
   | 'roadmap'
-  | 'chart';
+  | 'chart'
+  | 'worksheet'
+  | 'permit';
 
 /** BonniePDF engine capabilities a document exercises. */
 export type Capability =
@@ -2621,6 +2658,659 @@ export const examples: ExampleDef[] = [
     compliance: ['pdf/a-2a', 'pdf/ua-1'],
     runtime: ['browser', 'node', 'edge'],
     dataDensity: 'medium',
+  },
+  {
+    id: 'job-sheet',
+    name: 'Field service job sheet',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The document a field-service or facilities-management platform produces at the end of every visit: the ' +
+      'reported fault, the work carried out, labour and parts, the defects found but not fixed, and the ruled ' +
+      'signature block the customer signs. Predictable pagination and a signature block that lands on the page ' +
+      'rather than wherever the flow leaves it. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'job-sheet.pdf',
+    generate: jobSheet,
+    dotnetClass: 'JobSheetExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['FieldService', 'Facilities', 'Construction'],
+    documentType: 'worksheet',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'job-sheet-classes',
+    name: 'Job sheet (Class API)',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same job sheet as Job sheet, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'job-sheet-classes.pdf',
+    generate: jobSheetClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'job-sheet',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'site-inspection-report',
+    name: 'Site inspection report',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The snagging register a construction, surveying, or property platform issues after a site walk: every ' +
+      'defect with its location, trade, severity, owner, target date, and evidence plate. A long register that ' +
+      'carries its header onto every page it flows across, so a printed copy reads the same as the screen. ' +
+      'Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'site-inspection-report.pdf',
+    generate: siteInspectionReport,
+    dotnetClass: 'SiteInspectionReportExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Construction', 'Property', 'Facilities'],
+    documentType: 'report',
+    capabilities: ['longTables', 'charts', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'high',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'site-inspection-report-classes',
+    name: 'Site inspection report (Class API)',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same site inspection report as Site inspection report, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'site-inspection-report-classes.pdf',
+    generate: siteInspectionReportClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'site-inspection-report',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'permit-to-work',
+    name: 'Permit to work',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'A hot works permit: the work authorised, the hazards and controls, the atmospheric test, the isolation ' +
+      'record, a hand-ticked precautions checklist, and the three signature panels — issue, acceptance, and ' +
+      'cancellation — that make it valid. Printed and displayed at the work location, so nothing may reflow ' +
+      'unpredictably. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'permit-to-work.pdf',
+    generate: permitToWork,
+    dotnetClass: 'PermitToWorkExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Construction', 'Facilities', 'FieldService'],
+    documentType: 'permit',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'permit-to-work-classes',
+    name: 'Permit to work (Class API)',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same permit to work as Permit to work, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'permit-to-work-classes.pdf',
+    generate: permitToWorkClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'permit-to-work',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'inventory-schedule-of-condition',
+    name: 'Inventory and schedule of condition',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The tenancy check-in document a lettings or property-management platform issues: a room-by-room register ' +
+      'grading condition and cleanliness separately, meter readings, keys issued, and both parties\u2019 ' +
+      'declarations. At check-out it is the reference deposit deductions are argued against, so it is written to ' +
+      'be unambiguous. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'inventory-schedule-of-condition.pdf',
+    generate: inventoryScheduleOfCondition,
+    dotnetClass: 'InventoryScheduleOfConditionExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Property', 'Facilities'],
+    documentType: 'schedule',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'high',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'inventory-schedule-of-condition-classes',
+    name: 'Inventory and schedule of condition (Class API)',
+    category: 'Field',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same inventory and schedule of condition as Inventory and schedule of condition, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'inventory-schedule-of-condition-classes.pdf',
+    generate: inventoryScheduleOfConditionClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'inventory-schedule-of-condition',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'customer-account-statement',
+    name: 'Customer account statement',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The second-most-generated document in business software after the invoice: opening balance, every invoice, ' +
+      'payment and credit that moved it, a running balance that reconciles to the closing figure, an ageing ' +
+      'analysis, and a detachable remittance advice. The running balance is computed from the rows, never ' +
+      'transcribed. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'customer-account-statement.pdf',
+    generate: customerAccountStatement,
+    dotnetClass: 'CustomerAccountStatementExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Finance', 'General'],
+    documentType: 'statement',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'high',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'customer-account-statement-classes',
+    name: 'Customer account statement (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same customer account statement as Customer account statement, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'customer-account-statement-classes.pdf',
+    generate: customerAccountStatementClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'customer-account-statement',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'purchase-order',
+    name: 'Purchase order',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The other half of the invoice, and the half almost no example catalogue shows: the document a buyer issues ' +
+      'to commit to a purchase. Line schedule with per-line required dates, separate order/invoice/delivery ' +
+      'addresses, conditions of purchase, and an authorisation block rather than a payment block. ' +
+      'Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'purchase-order.pdf',
+    generate: purchaseOrder,
+    dotnetClass: 'PurchaseOrderExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['General', 'Manufacturing', 'Retail'],
+    documentType: 'quote',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'purchase-order-classes',
+    name: 'Purchase order (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same purchase order as Purchase order, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'purchase-order-classes.pdf',
+    generate: purchaseOrderClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'purchase-order',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'credit-note',
+    name: 'Credit note',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The correcting document: which lines of an earlier invoice were wrong, why, how the VAT is reversed, and ' +
+      'whether the money is refunded or offset. It borrows the invoice grammar on purpose, because a credit note ' +
+      'that does not look like the invoice it corrects is harder to reconcile \u2014 the reversal is signalled by ' +
+      'colour and sign. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'credit-note.pdf',
+    generate: creditNote,
+    dotnetClass: 'CreditNoteExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Finance', 'General'],
+    documentType: 'invoice',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'low',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'credit-note-classes',
+    name: 'Credit note (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same credit note as Credit note, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'credit-note-classes.pdf',
+    generate: creditNoteClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'credit-note',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'delivery-note',
+    name: 'Delivery note',
+    category: 'Operations',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'What travels with the goods, completing the fulfilment story the shipping label starts. Ordered, despatched ' +
+      'and to-follow quantities as three separate columns, because a part-shipment is the normal case; package ' +
+      'breakdown, goods-received signature, and a discrepancy notice period. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'delivery-note.pdf',
+    generate: deliveryNote,
+    dotnetClass: 'DeliveryNoteExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Logistics', 'Retail', 'Manufacturing'],
+    documentType: 'schedule',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'delivery-note-classes',
+    name: 'Delivery note (Class API)',
+    category: 'Operations',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same delivery note as Delivery note, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'delivery-note-classes.pdf',
+    generate: deliveryNoteClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'delivery-note',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'discharge-summary',
+    name: 'Hospital discharge summary',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The handover healthcare software is built around: diagnoses, the admission narrative, key investigations ' +
+      'with reference ranges, a full medication reconciliation marking every change from the pre-admission list, ' +
+      'and numbered actions for the GP. A medication table read out of order by a screen reader is a clinical ' +
+      'risk, which is what the tagged structure is for. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'discharge-summary.pdf',
+    generate: dischargeSummary,
+    dotnetClass: 'DischargeSummaryExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Healthcare'],
+    documentType: 'report',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'discharge-summary-classes',
+    name: 'Discharge summary (Class API)',
+    category: 'Healthcare',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same discharge summary as Discharge summary, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'discharge-summary-classes.pdf',
+    generate: dischargeSummaryClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'discharge-summary',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'exhibit-bundle-index',
+    name: 'Exhibit bundle index',
+    category: 'Legal',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The generated apparatus of a court bundle: cover sheet, hyperlinked index whose page references resolve ' +
+      'after layout, and a separator sheet per section \u2014 all under continuous pagination. BonniePDF generates ' +
+      'documents and is not a PDF merger, so this produces the apparatus, not the assembled bundle; combining it ' +
+      'with the exhibits is a separate merge step. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'exhibit-bundle-index.pdf',
+    generate: exhibitBundleIndex,
+    dotnetClass: 'ExhibitBundleIndexExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Legal'],
+    documentType: 'report',
+    capabilities: ['crossReferences', 'numbering', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'exhibit-bundle-index-classes',
+    name: 'Exhibit bundle index (Class API)',
+    category: 'Legal',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same exhibit bundle index as Exhibit bundle index, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'exhibit-bundle-index-classes.pdf',
+    generate: exhibitBundleIndexClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'exhibit-bundle-index',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'property-particulars',
+    name: 'Property particulars',
+    category: 'Property',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The sales document behind every estate-agency instruction: headline and guide price, key features, an ' +
+      'accommodation schedule in metric and imperial, tenure and council tax, and the misrepresentation notice. ' +
+      'The energy-rating graphic is drawn from layout primitives rather than dropped in as an image, so changing ' +
+      'the rating moves the markers. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'property-particulars.pdf',
+    generate: propertyParticulars,
+    dotnetClass: 'PropertyParticularsExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Property'],
+    documentType: 'catalog',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'property-particulars-classes',
+    name: 'Property particulars (Class API)',
+    category: 'Property',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same property particulars as Property particulars, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'property-particulars-classes.pdf',
+    generate: propertyParticularsClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'property-particulars',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'server-endpoint',
+    name: 'Server endpoint',
+    category: 'Integration',
+    tier: 'recipe',
+    description:
+      'What generation looks like inside an API: a receipt built as a pure function of the request body, with the ' +
+      'handler that produced it reproduced in the document. Covers the four things a server has to get right \u2014 ' +
+      'process-wide setup, the async path, disposal in a finally block, and content length.',
+    filename: 'server-endpoint.pdf',
+    generate: serverEndpoint,
+    dotnetClass: 'WebApiExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Technology'],
+    documentType: 'receipt',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node'],
+    dataDensity: 'low',
+  },
+  {
+    id: 'batch-generation',
+    name: 'Batch generation',
+    category: 'Integration',
+    tier: 'recipe',
+    description:
+      'What happens at volume. Generates a run of 250 documents in one process, measures it, and reports the run ' +
+      'in the document it produces \u2014 so the figures on the page come from the run that made it. Covers ' +
+      'per-document lifecycle, disposal inside the loop, and why process-wide setup is not repaid per document.',
+    filename: 'batch-generation.pdf',
+    generate: batchGeneration,
+    dotnetClass: 'AsyncGenerationExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Technology'],
+    documentType: 'report',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node'],
+    dataDensity: 'scale',
+  },
+  {
+    id: 'bill-of-costs',
+    name: 'Bill of costs',
+    category: 'Legal',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The long-table document of the legal sector: every unit of chargeable time by phase and fee-earner grade, ' +
+      'disbursements with their VAT treatment, and a summary that reconciles to the phase subtotals. Everything is ' +
+      'computed from the entries \u2014 a bill whose phase subtotals do not add to its total is not one anybody ' +
+      'will pay. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'bill-of-costs.pdf',
+    generate: billOfCosts,
+    dotnetClass: 'BillOfCostsExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Legal', 'Finance'],
+    documentType: 'statement',
+    capabilities: ['longTables', 'numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'high',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'bill-of-costs-classes',
+    name: 'Bill of costs (Class API)',
+    category: 'Legal',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same bill of costs as Bill of costs, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'bill-of-costs-classes.pdf',
+    generate: billOfCostsClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'bill-of-costs',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'remittance-advice',
+    name: 'Remittance advice',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'What a payer sends when they pay: which invoices the transfer settles, which credits were applied, and the ' +
+      'reconciliation to the amount that actually left the bank. An unallocated payment is a debt that stays open ' +
+      'until a human works out what it was for, so the document asserts on its face whether it reconciles. ' +
+      'Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'remittance-advice.pdf',
+    generate: remittanceAdvice,
+    dotnetClass: 'RemittanceAdviceExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Finance', 'General'],
+    documentType: 'statement',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'low',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'remittance-advice-classes',
+    name: 'Remittance advice (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same remittance advice as Remittance advice, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'remittance-advice-classes.pdf',
+    generate: remittanceAdviceClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'remittance-advice',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'dunning-letter',
+    name: 'Dunning letter',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'Where the invoice cluster meets correspondence: a collections letter carrying a schedule of overdue items. ' +
+      'Days overdue derive from the due dates against the letter date, so the same letter sent a week later says ' +
+      'something different without anyone editing it, and one escalation-stage value drives the tone, the ' +
+      'deadline, and the consequences. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'dunning-letter.pdf',
+    generate: dunningLetter,
+    dotnetClass: 'DunningLetterExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Finance', 'General'],
+    documentType: 'letter',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser', 'edge'],
+    dataDensity: 'low',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'dunning-letter-classes',
+    name: 'Dunning letter (Class API)',
+    category: 'Invoices',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same dunning letter as Dunning letter, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'dunning-letter-classes.pdf',
+    generate: dunningLetterClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'dunning-letter',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'timesheet',
+    name: 'Timesheet',
+    category: 'HR',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The weekly document professional-services software produces: hours by project and day, billable value, ' +
+      'utilisation against target, expenses, and the approval that releases it for invoicing. Landscape, and it ' +
+      'cross-foots \u2014 row totals and daily totals both add to the same figure, which is the thing an approver ' +
+      'actually checks. Tagged PDF/UA-1 and archival PDF/A-2a.',
+    filename: 'timesheet.pdf',
+    generate: timesheet,
+    dotnetClass: 'TimesheetExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['HR', 'Technology', 'General'],
+    documentType: 'worksheet',
+    capabilities: ['longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['node', 'browser'],
+    dataDensity: 'medium',
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'timesheet-classes',
+    name: 'Timesheet (Class API)',
+    category: 'HR',
+    tier: 'showcase',
+    region: 'UK',
+    description:
+      'The same timesheet as Timesheet, authored the long way: construct each element and assign its properties. This is the class API the options form is built on, and it produces an identical file.',
+    filename: 'timesheet-classes.pdf',
+    generate: timesheetClasses,
+    dotnetClass: null,
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'timesheet',
+    variantLabel: 'Class API',
   },
 ];
 

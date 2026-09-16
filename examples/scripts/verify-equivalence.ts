@@ -388,6 +388,81 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     variant: 'course-certificate-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
+  {
+    canonical: 'remittance-advice',
+    variant: 'remittance-advice-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'job-sheet',
+    variant: 'job-sheet-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'site-inspection-report',
+    variant: 'site-inspection-report-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'permit-to-work',
+    variant: 'permit-to-work-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'inventory-schedule-of-condition',
+    variant: 'inventory-schedule-of-condition-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'discharge-summary',
+    variant: 'discharge-summary-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'timesheet',
+    variant: 'timesheet-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'credit-note',
+    variant: 'credit-note-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'purchase-order',
+    variant: 'purchase-order-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'delivery-note',
+    variant: 'delivery-note-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'dunning-letter',
+    variant: 'dunning-letter-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'exhibit-bundle-index',
+    variant: 'exhibit-bundle-index-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'property-particulars',
+    variant: 'property-particulars-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'bill-of-costs',
+    variant: 'bill-of-costs-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'customer-account-statement',
+    variant: 'customer-account-statement-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
 ];
 registerBundledFonts();
 

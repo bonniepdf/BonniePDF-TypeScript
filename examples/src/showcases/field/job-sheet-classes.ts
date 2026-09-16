@@ -1,0 +1,476 @@
+// ── Field service job sheet / work order (class API) ─────────────────────────
+//
+// The document a field-service, facilities-management, or maintenance platform
+// produces at the end of every visit: what was wrong, what the engineer did,
+// how long it took, what parts went in, what is still outstanding, and the
+// customer's signature accepting the work.
+//
+// The **class / construct-then-mutate** companion to `job-sheet.ts`. Same job
+// sheet, authored the long way: `new` each element and assign its properties one
+// at a time, with the enum members rather than their string literals. It renders
+// **byte-for-byte identically** to the options-object form (an equivalence test
+// binds the two). Reach for the options form first; this variant exists to show
+// what it desugars to.
+
+import {
+  Document,
+  DocumentSettings,
+  DocumentMetadata,
+  AccessibilityMode,
+  PdfSize,
+  PdfAConformance,
+  TextAlignment,
+  TextBlock,
+  TextStyle,
+  TextElementBase,
+  Container,
+  VerticalStack,
+  HorizontalStack,
+  WidthDistribution,
+  Table,
+  StandardFonts,
+  Color,
+  ColorPalette,
+  Thickness,
+  Border,
+  BorderColors,
+} from '@bonniepdf/core';
+import type { IElement } from '@bonniepdf/core';
+
+import {
+  INK,
+  MUTED,
+  ACCENT,
+  RULE,
+  STATUS,
+  accentBar,
+  body,
+  eyebrow,
+  field,
+  fieldRow,
+  gbp,
+  h1,
+  h2,
+  hours,
+  panel,
+  shortDate,
+  signatureRow,
+  signatureSlot,
+  statusCell,
+  td,
+  th,
+} from './_kit-classes';
+
+// ── The visit ────────────────────────────────────────────────────────────────
+
+const VISIT = {
+  jobNumber: 'JOB-2026-04817',
+  orderReference: 'PO 55-2026-0912',
+  priority: 'P2 — Same working day',
+  raised: new Date(Date.UTC(2026, 8, 9, 7, 42)),
+  attended: new Date(Date.UTC(2026, 8, 9, 11, 5)),
+  completed: new Date(Date.UTC(2026, 8, 9, 14, 20)),
+  engineer: 'A. Okafor (Eng. 4471)',
+  client: 'Sample Client Ltd',
+  site: 'Sample Site B — Building 4, Level 2',
+  asset: 'AHU-04 — Air handling unit, plant room 2',
+  assetTag: 'SC-B4-AHU-04',
+  contract: 'Planned maintenance — schedule 3',
+};
+
+interface LabourLine {
+  description: string;
+  operative: string;
+  hours: number;
+  rate: number;
+}
+
+const LABOUR: LabourLine[] = [
+  { description: 'Attendance and fault diagnosis', operative: 'A. Okafor', hours: 1.5, rate: 68 },
+  { description: 'Bearing replacement — supply fan', operative: 'A. Okafor', hours: 2.25, rate: 68 },
+  { description: 'Belt tension and alignment check', operative: 'A. Okafor', hours: 0.5, rate: 68 },
+  { description: 'Run-up test and handover', operative: 'A. Okafor', hours: 0.75, rate: 68 },
+];
+
+interface PartLine {
+  code: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  fitted: boolean;
+}
+
+const PARTS: PartLine[] = [
+  {
+    code: 'BRG-6204-2RS',
+    description: 'Sealed deep-groove bearing, 20mm bore',
+    quantity: 2,
+    unitPrice: 18.4,
+    fitted: true,
+  },
+  { code: 'BLT-SPZ-1287', description: 'Drive belt, SPZ section, 1287mm', quantity: 1, unitPrice: 22.9, fitted: true },
+  { code: 'FLT-G4-592', description: 'Panel filter G4, 592 × 592 × 48', quantity: 4, unitPrice: 11.25, fitted: true },
+  {
+    code: 'SEAL-AHU-12',
+    description: 'Access door seal, 12mm closed cell',
+    quantity: 1,
+    unitPrice: 9.6,
+    fitted: false,
+  },
+];
+
+interface Outstanding {
+  reference: string;
+  description: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  action: string;
+}
+
+const OUTSTANDING: Outstanding[] = [
+  {
+    reference: 'D-01',
+    description: 'Corrosion to condensate tray, approx. 15% of surface',
+    severity: 'Medium',
+    action: 'Quote raised for tray replacement — see QT-2026-1180',
+  },
+  {
+    reference: 'D-02',
+    description: 'Access door seal perished; part carried but door frame out of true',
+    severity: 'Low',
+    action: 'Return visit required with fabrication support',
+  },
+  {
+    reference: 'D-03',
+    description: 'No isolator label at local switch',
+    severity: 'High',
+    action: 'Labelling to be completed before next statutory inspection',
+  },
+];
+
+const SEVERITY_COLOUR = {
+  Critical: STATUS.critical,
+  High: STATUS.high,
+  Medium: STATUS.medium,
+  Low: STATUS.low,
+} as const;
+
+// ── Document ─────────────────────────────────────────────────────────────────
+
+export function generate(): Document {
+  const labourTotal = LABOUR.reduce((sum, l) => sum + l.hours * l.rate, 0);
+  const partsTotal = PARTS.filter(p => p.fitted).reduce((sum, p) => sum + p.quantity * p.unitPrice, 0);
+  const onSite = (VISIT.completed.getTime() - VISIT.attended.getTime()) / 3_600_000;
+
+  const settings = new DocumentSettings(PdfSize.a4, 46);
+  settings.conformance = PdfAConformance.PdfA2a;
+  settings.accessibility = AccessibilityMode.PdfUa1;
+  settings.language = 'en-GB';
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
+  // The running header repeats the job number, because these get printed,
+  // separated, and filed a page at a time. Page one carries the full title
+  // block instead, so it is suppressed there.
+  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
+    pageNumber === 1 ? undefined : runningBand(`Job sheet ${VISIT.jobNumber}`, `${VISIT.client} — ${VISIT.site}`);
+  settings.footerTemplate = (pageNumber: number): IElement =>
+    runningBand('Customer copy — retain for your records', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+
+  const metadata = new DocumentMetadata();
+  metadata.title = `Job sheet ${VISIT.jobNumber} — ${VISIT.asset}`;
+  metadata.author = 'Sample Contractor Ltd';
+  metadata.subject =
+    'Field service job sheet with labour, parts, outstanding defects, and customer sign-off (sample data).';
+  metadata.keywords = 'job sheet, work order, field service, facilities management, maintenance, pdf/ua, pdf/a';
+
+  const doc = new Document(settings, metadata);
+
+  // ── Title block ────────────────────────────────────────────────────────────
+
+  doc.add(accentBar());
+  doc.add(eyebrow('JOB SHEET · COMPLETED VISIT'));
+  doc.add(h1('Reactive maintenance — air handling unit'));
+  doc.add(body(`${VISIT.client} · ${VISIT.site}`, { color: MUTED, mb: 2 }));
+  doc.add(body('Issued by Sample Contractor Ltd', { color: MUTED, mb: 14 }));
+
+  doc.add(
+    fieldRow(
+      [
+        field('Job number', VISIT.jobNumber),
+        field('Order reference', VISIT.orderReference),
+        field('Priority', VISIT.priority),
+        field('Contract', VISIT.contract),
+      ],
+      { mb: 6 }
+    )
+  );
+
+  doc.add(
+    fieldRow([
+      field('Asset', VISIT.assetTag),
+      field('Raised', `${shortDate(VISIT.raised)} ${clock(VISIT.raised)}`),
+      field('Attended', `${shortDate(VISIT.attended)} ${clock(VISIT.attended)}`),
+      field('Completed', `${shortDate(VISIT.completed)} ${clock(VISIT.completed)}`),
+    ])
+  );
+
+  // ── Summary tiles ──────────────────────────────────────────────────────────
+
+  const tiles = new HorizontalStack();
+  tiles.widthDistribution = WidthDistribution.Weighted;
+  tiles.spacing = 10;
+  tiles.margin = new Thickness(0, 0, 0, 4);
+  tiles.add(tile(hours(onSite), 'Time on site', ACCENT), 1);
+  tiles.add(tile(hours(LABOUR.reduce((s, l) => s + l.hours, 0)), 'Labour booked', ACCENT), 1);
+  tiles.add(tile(String(PARTS.filter(p => p.fitted).length), 'Parts fitted', ACCENT), 1);
+  tiles.add(tile(String(OUTSTANDING.length), 'Outstanding items', STATUS.high), 1);
+  doc.add(tiles);
+
+  // ── Reported fault and work done ───────────────────────────────────────────
+
+  doc.add(h2('Fault reported'));
+  doc.add(
+    body(
+      'Occupier reported intermittent noise and reduced airflow from the level 2 supply grilles. ' +
+        'Building management system showed the unit running but with supply air temperature drifting ' +
+        'above setpoint during the morning occupancy period.'
+    )
+  );
+
+  doc.add(h2('Work carried out'));
+  doc.add(
+    body(
+      'Unit isolated and locked off. Supply fan assembly stripped and inspected: drive-end bearing found ' +
+        'dry and scored, with corresponding wear to the drive belt. Both bearings replaced as a pair and the ' +
+        'belt renewed. Filters replaced at the same visit as they were within one month of their scheduled ' +
+        'change. Alignment and tension checked against manufacturer figures, unit run up for thirty minutes ' +
+        'and supply air temperature confirmed stable at setpoint. Controls returned to automatic.'
+    )
+  );
+
+  doc.add(
+    panel('Safety and isolation', [
+      body('Permit to work PTW-2026-0442 raised and closed on completion.', { mb: 3, size: 9 }),
+      body('Lock-off applied at local isolator; keys retained by attending engineer throughout.', { mb: 3, size: 9 }),
+      body('Work area left clean, guarding refitted, and access doors secured.', { mb: 0, size: 9 }),
+    ])
+  );
+
+  // ── Labour ─────────────────────────────────────────────────────────────────
+
+  doc.add(h2('Labour'));
+
+  const labour = new Table(3.4, 1.4, 0.8, 0.9, 1);
+  labour.cellPadding = 6;
+  labour.border = new Border(0.5);
+  labour.borderColors = new BorderColors(RULE);
+  labour.headerBackgroundColor = ACCENT;
+  labour.headerTextColor = Color.white;
+  labour.addHeader(th('Description'), th('Operative'), th('Hours'), th('Rate'), th('Amount'));
+  for (const line of LABOUR) {
+    labour.addRow(
+      td(line.description),
+      td(line.operative, { color: MUTED }),
+      td(hours(line.hours)),
+      td(gbp(line.rate)),
+      td(gbp(line.hours * line.rate), { bold: true })
+    );
+  }
+  doc.add(labour);
+
+  // ── Parts ──────────────────────────────────────────────────────────────────
+
+  doc.add(h2('Parts and materials'));
+
+  const parts = new Table(1.3, 3.1, 0.7, 1, 1, 0.9);
+  parts.cellPadding = 6;
+  parts.border = new Border(0.5);
+  parts.borderColors = new BorderColors(RULE);
+  parts.headerBackgroundColor = ACCENT;
+  parts.headerTextColor = Color.white;
+  parts.addHeader(th('Code'), th('Description'), th('Qty'), th('Unit'), th('Amount'), th('Status'));
+  for (const part of PARTS) {
+    parts.addRow(
+      td(part.code),
+      td(part.description),
+      td(String(part.quantity)),
+      td(gbp(part.unitPrice)),
+      td(part.fitted ? gbp(part.quantity * part.unitPrice) : '—'),
+      statusCell(part.fitted ? 'Fitted' : 'Carried, not fitted', part.fitted ? STATUS.done : STATUS.low)
+    );
+  }
+  doc.add(parts);
+
+  doc.add(
+    body(
+      'Parts carried but not fitted are returned to stock and are not charged. ' +
+        'Totals below exclude VAT and are provisional until invoiced.',
+      { color: MUTED, size: 8.5, mb: 6 }
+    )
+  );
+
+  // ── Totals ─────────────────────────────────────────────────────────────────
+
+  const totals = new HorizontalStack();
+  totals.widthDistribution = WidthDistribution.Weighted;
+  totals.margin = new Thickness(0, 2, 0, 4);
+  totals.add(new Container(), 2);
+
+  const totalsBody = new VerticalStack();
+  totalsBody.spacing = 5;
+  totalsBody.add(totalLine('Labour', gbp(labourTotal)));
+  totalsBody.add(totalLine('Parts fitted', gbp(partsTotal)));
+  totalsBody.add(totalLine('Total excluding VAT', gbp(labourTotal + partsTotal), true));
+
+  const totalsBox = new Container();
+  totalsBox.backgroundColor = ColorPalette.indigo[50];
+  totalsBox.cornerRadius = 6;
+  totalsBox.padding = new Thickness(12);
+  totalsBox.child = totalsBody;
+  totals.add(totalsBox, 1.4);
+  doc.add(totals);
+
+  // ── Outstanding work ───────────────────────────────────────────────────────
+
+  doc.add(h2('Outstanding items and recommendations'));
+  doc.add(
+    body(
+      'The following were identified during the visit but fall outside the scope of this job. ' +
+        'Each carries a reference so it can be quoted, scheduled, or accepted as a risk.',
+      { color: MUTED }
+    )
+  );
+
+  const defects = new Table(0.7, 3.4, 1, 3);
+  defects.cellPadding = 6;
+  defects.border = new Border(0.5);
+  defects.borderColors = new BorderColors(RULE);
+  defects.headerBackgroundColor = ACCENT;
+  defects.headerTextColor = Color.white;
+  defects.addHeader(th('Ref'), th('Observation'), th('Severity'), th('Recommended action'));
+  for (const item of OUTSTANDING) {
+    defects.addRow(
+      td(item.reference, { bold: true }),
+      td(item.description),
+      statusCell(item.severity, SEVERITY_COLOUR[item.severity]),
+      td(item.action, { color: MUTED })
+    );
+  }
+  doc.add(defects);
+
+  doc.add(
+    panel(
+      'Next planned visit',
+      [
+        body('Scheduled quarterly service — due 09 Dec 2026, schedule 3.', { mb: 3, size: 9 }),
+        body('Item D-03 to be closed before the next statutory inspection.', { mb: 0, size: 9 }),
+      ],
+      { accent: STATUS.high }
+    )
+  );
+
+  // ── Sign-off ───────────────────────────────────────────────────────────────
+
+  doc.add(h2('Acceptance and sign-off'));
+  doc.add(
+    body(
+      'By signing, the customer representative confirms that the work described above was carried out, ' +
+        'that the work area was left in a safe condition, and that the outstanding items were explained. ' +
+        'Signing does not constitute acceptance of charges, which are confirmed on invoice.',
+      { color: MUTED, size: 9 }
+    )
+  );
+
+  doc.add(
+    signatureRow([
+      signatureSlot('Attending engineer', VISIT.engineer, { dated: shortDate(VISIT.completed) }),
+      signatureSlot('Customer representative', 'R. Whitfield — Facilities Manager'),
+    ])
+  );
+
+  doc.add(
+    body(`Job ${VISIT.jobNumber} · ${VISIT.assetTag} · Retain this sheet with the asset history file.`, {
+      color: MUTED,
+      size: 8,
+      mt: 10,
+      mb: 0,
+    })
+  );
+
+  return doc;
+}
+
+// ── Local helpers ────────────────────────────────────────────────────────────
+
+function clock(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(d);
+}
+
+function runningBand(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+
+  const l = new TextBlock(left);
+  l.fontName = StandardFonts.Helvetica;
+  l.fontSize = 7.5;
+  l.textColor = MUTED;
+  row.add(l, 2);
+
+  const r = new TextBlock(right);
+  r.fontName = StandardFonts.Helvetica;
+  r.fontSize = 7.5;
+  r.textColor = MUTED;
+  r.alignment = TextAlignment.Right;
+  row.add(r, 2);
+
+  return row;
+}
+
+function tile(value: string, label: string, accent: Color): Container {
+  const stack = new VerticalStack();
+
+  const headline = new TextBlock(value);
+  headline.fontName = StandardFonts.HelveticaBold;
+  headline.fontSize = 16;
+  headline.textColor = accent;
+  headline.margin = new Thickness(0, 0, 0, 2);
+  stack.add(headline);
+
+  const caption = new TextBlock(label);
+  caption.fontName = StandardFonts.Helvetica;
+  caption.fontSize = 8;
+  caption.textColor = MUTED;
+  stack.add(caption);
+
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(11, 10);
+  box.child = stack;
+  return box;
+}
+
+function totalLine(label: string, value: string, strong = false): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+
+  const key = new TextBlock(label);
+  key.fontName = strong ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  key.fontSize = strong ? 10 : 9;
+  key.textColor = strong ? INK : MUTED;
+  row.add(key, 2);
+
+  const val = new TextBlock(value);
+  val.fontName = StandardFonts.HelveticaBold;
+  val.fontSize = strong ? 11 : 9;
+  val.textColor = strong ? ACCENT : INK;
+  val.alignment = TextAlignment.Right;
+  row.add(val, 1.2);
+
+  return row;
+}

@@ -15,6 +15,7 @@ import { TextElementBase } from './Elements/Text/TextElementBase';
 import type { TextStyle } from './Elements/Text/TextStyle';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
+import { ensureLicenseDeclared } from './Licensing/LicenseChecker';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 import { FileAttachment } from './Attachments/FileAttachment';
 import { AttachmentRelationship } from './Attachments/AttachmentRelationship';
@@ -283,6 +284,7 @@ export class Document {
    * (AES-256 encryption requires saveAsync).
    */
   public generateBytes(): Uint8Array {
+    ensureLicenseDeclared();
     this._diagnostics.clear();
     this.applyDefaultStyleToTree();
     this.validateSettings();
@@ -307,6 +309,7 @@ export class Document {
    * browser context.
    */
   public async generateBytesAsync(): Promise<Uint8Array> {
+    ensureLicenseDeclared();
     this._diagnostics.clear();
     this.applyDefaultStyleToTree();
     this.validateSettings();
@@ -328,6 +331,7 @@ export class Document {
    * point in both Node and the browser.
    */
   public async generateSvgPagesAsync(options?: SvgPageExportOptions): Promise<string[]> {
+    ensureLicenseDeclared();
     this.applyDefaultStyleToTree();
     return exportSvgPagesAsync(this, options);
   }
@@ -339,6 +343,7 @@ export class Document {
    * independent of what the viewer has installed. See {@link SvgDocumentExport}.
    */
   public async generateSvgDocumentAsync(options?: SvgPageExportOptions): Promise<SvgDocumentExport> {
+    ensureLicenseDeclared();
     this.applyDefaultStyleToTree();
     return exportSvgDocumentAsync(this, options);
   }

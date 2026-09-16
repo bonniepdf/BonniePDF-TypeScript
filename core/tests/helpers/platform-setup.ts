@@ -8,3 +8,13 @@ import { configurePlatform } from '../../src/Platform/PlatformIO';
 import { NodePlatformIO } from '../../src/Platform/NodePlatformIO';
 
 configurePlatform(new NodePlatformIO());
+
+// Declare a licence tier for the suite.
+//
+// The library requires the consuming application to declare which licence
+// applies to it, and treats a test runner as a development environment - so
+// without this line every test that generates a document would throw. The test
+// suite is not production use, so `evaluation` is the honest declaration.
+import { settings } from '../../src/Licensing/Settings';
+
+settings.license = 'evaluation';

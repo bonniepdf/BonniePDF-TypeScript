@@ -8,8 +8,16 @@
 // starts emitting .notdef glyphs.
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { configurePlatform, NodePlatformIO, FontManager } from '@bonniepdf/core';
+import { configurePlatform, NodePlatformIO, FontManager, settings } from '@bonniepdf/core';
 import type { ExampleDef } from '../examples/src/index.ts';
+
+// Declare a licence tier for these tooling scripts.
+//
+// The library asks the consuming application to state which licence applies to
+// it, and treats a CI or development environment as a place to say so loudly.
+// Rendering the example catalogue to build docs assets is not production use,
+// so `evaluation` is the honest declaration here.
+settings.license = 'evaluation';
 
 // Map the browser-style asset URLs the examples use to on-disk font files:
 //   /fonts/liberation/<f>  -> core/assets/fonts/<f>   (the bundled Liberation set)

@@ -17,8 +17,13 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { settings } from '@bonniepdf/core';
 import { examples, type ExampleDef } from '../src/index.ts';
 import { registerBundledFonts } from './register-bundled-fonts.ts';
+
+// Declare a licence tier for this script. Verifying the example catalogue is
+// not production use, so `evaluation` is the honest declaration.
+settings.license = 'evaluation';
 
 /** Example-id pairs that must render to identical SVG. */
 const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string }> = [

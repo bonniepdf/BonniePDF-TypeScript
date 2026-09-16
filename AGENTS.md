@@ -71,6 +71,14 @@ These are not TS quirks; they are correctness requirements of the format and the
 - **Resources live on the page, not the `/Pages` parent** (PDF/A-2b 6.2.2.2). Don't "fix" this to inheritance.
 - **The `.notdef` guard.** The encoder must never emit GID 0 for a real code point (PDF/A-2 6.2.11.8, PDF/UA-1 7.21.8). `resolveTextRuns` splits text into per-font runs, routes uncovered code points to registered fallback fonts in registration order, drops control/default-ignorable code points before shaping, and drops truly uncovered code points with a `font` diagnostic rather than emitting `.notdef`. Plain Latin in a covering primary font stays a single run, byte-identical to the non-fallback path.
 
+### Licence declaration
+
+- **`settings.license` is a declaration, never an enforcement mechanism.** No key, no activation, no network call, no telemetry, no tier-dependent feature gating. `Licensing/` contains the whole of it; nothing else in the engine may read the declared tier.
+- **It must never change output.** `licence-declaration.test.ts` generates the same document under every tier and compares bytes (masking only the trailer's random `/ID`). A watermark, a metadata field, or any free-tier degradation is a spec violation, not a product decision to be made here.
+- **It never throws without positive evidence** of a development, test, or CI environment — `classifySignals` decides, as a pure function. `unknown` warns. Do not "improve" this by treating an unset `NODE_ENV` as development: that would make a production deployment fail on upgrade, which is the failure mode the design exists to avoid.
+- **The notice writes to `console.warn`**, which is a deliberate, documented exception to the rule that the library never writes to a global sink the caller did not opt into (see `Core/Diagnostics.ts`). It fires at most once per process. Don't widen the exception; don't route ordinary diagnostics through it.
+- Every first-party surface that generates documents declares its own tier — the test setup, the tooling scripts, the website. Adding a new generating script means adding a declaration to it.
+
 ### Writers
 
 - **`Rendering/Writers/` is one type per file**, mirroring the shared spec's writer decomposition: `IPdfWriter`, `IAsyncPdfWriter`, `CatalogOptions`, `PdfWriter`, `AsyncPdfWriter`, `FontWriter`, `MetadataWriter`, `NavigationWriter`, `ComplianceWriter`, `StructureTreeWriter`. Import each from its own module (no barrel). Metadata/Navigation writers reuse `PdfSyntax.escape`/`encodeMetadataString`/`formatDate` — keep it that way.

@@ -12,6 +12,7 @@ import type { TaggingContext } from './Tagging/TaggingContext';
 import type { LayoutRecorder } from './LayoutRecorder';
 import type { RegisteredLink } from './RegisteredLink';
 import type { RenderContext as RenderContextContract } from '../Elements/IElement';
+import { NO_CHROME, type ChromeReservation } from './ChromeReservation';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
 const CONTAINER_ROLE_TAGS = new Set([
@@ -81,6 +82,26 @@ export class RenderContext implements RenderContextContract {
   public onPageCreated?: (pageNumber: number) => void;
 
   /**
+   * Per-page header/footer measurement, installed by the render pipeline via
+   * {@link setChromeReservation}. Undefined for a document with no page chrome,
+   * in which case the reservation is a constant zero and the content band is
+   * the margin box.
+   */
+  private chromeProvider?: (pageNumber: number) => ChromeReservation;
+
+  /** Memoised per page index, so a template function is measured once per page. */
+  private readonly chromeCache = new Map<number, ChromeReservation>();
+
+  private chrome: ChromeReservation = NO_CHROME;
+
+  /**
+   * While true, {@link contentTop} and {@link maxY} ignore the chrome
+   * reservation. Set only while the engine paints the chrome itself: a header
+   * is not laid out inside the band it reserves for the body.
+   */
+  public chromeReservationSuspended: boolean = false;
+
+  /**
    * PDF/UA tagging context. Non-undefined when the document opted into
    * AccessibilityMode.PdfUa1; undefined otherwise. Held on the context
    * so each per-page PdfCanvas gets it via updateCanvas.
@@ -114,7 +135,7 @@ export class RenderContext implements RenderContextContract {
     this.margin = margin;
     this.pages.push('');
     this.currentX = margin;
-    this.currentY = margin;
+    this.currentY = this.contentTop;
     this.resources = existingResources ?? new PdfResourceRegistry();
     if (svgOptions) this.svgOptions = svgOptions;
 
@@ -166,8 +187,104 @@ export class RenderContext implements RenderContextContract {
     return this.pages[this.currentPageIndex];
   }
 
+  /**
+   * Installs (or clears) the per-page header/footer measurement. Clearing the
+   * memo on every call keeps a context that is re-driven for a second pass -
+   * the streaming pipeline's compositing loop, a TOC dry run - from reusing
+   * heights measured against a different page size or margin.
+   *
+   * See the shared specification, "Layout & Pagination" §5.1.
+   */
+  public setChromeReservation(provider: ((pageNumber: number) => ChromeReservation) | undefined): void {
+    this.chromeProvider = provider;
+    this.chromeCache.clear();
+    // Deliberately not measured here: the pipeline assigns this run's page size
+    // and margin per page and then switches to the page, which is what triggers
+    // the first measurement against the right content width.
+    this.chrome = NO_CHROME;
+  }
+
+  /**
+   * Re-measures the current page's chrome. Called on every page switch and on
+   * every page break; the pipelines also call it directly after assigning a
+   * new page size or margin, because those change the width the chrome is
+   * measured against.
+   */
+  public refreshChromeReservation(): void {
+    if (!this.chromeProvider) {
+      this.chrome = NO_CHROME;
+      return;
+    }
+    let reservation = this.chromeCache.get(this.currentPageIndex);
+    if (!reservation) {
+      reservation = this.chromeProvider(this.currentPageIndex + 1);
+      this.chromeCache.set(this.currentPageIndex, reservation);
+    }
+    this.chrome = reservation;
+    this.assertUsableContentBand();
+  }
+
+  /** Measured header height for the current page, in points (0 when there is none). */
+  public get reservedHeaderHeight(): number {
+    return this.chrome.header;
+  }
+
+  /** Measured footer height for the current page, in points (0 when there is none). */
+  public get reservedFooterHeight(): number {
+    return this.chrome.footer;
+  }
+
+  /**
+   * Top of the body content band: `max(margin, headerHeight)`. Chrome that fits
+   * inside the top margin reserves nothing beyond the margin the page already
+   * had, so this reduces to `margin` for the overwhelming majority of
+   * documents.
+   */
+  public get contentTop(): number {
+    if (this.chromeReservationSuspended) return this.margin;
+    return Math.max(this.margin, this.chrome.header);
+  }
+
+  /** Bottom of the body content band: `pageHeight - max(margin, footerHeight)`. */
+  public get contentBottom(): number {
+    if (this.chromeReservationSuspended) return this.pageSize.height - this.margin;
+    return this.pageSize.height - Math.max(this.margin, this.chrome.footer);
+  }
+
   public get maxY(): number {
-    return this.pageSize.height - this.margin;
+    return this.contentBottom;
+  }
+
+  /**
+   * Usable body height on the current page: the full content band, not just
+   * what is left below the cursor. Elements use it to ask "would this fit on a
+   * fresh page at all?" before deciding to break rather than split.
+   */
+  public get contentHeight(): number {
+    return this.contentBottom - this.contentTop;
+  }
+
+  /** Moves the cursor to the top-left of the current page's body content band. */
+  public resetCursorToContentTop(): void {
+    this.currentX = this.margin;
+    this.currentY = this.contentTop;
+  }
+
+  /**
+   * Honest failure rather than silent clipping: a header and footer that
+   * between them consume the whole page leave nowhere for body content, and
+   * every subsequent break decision would be made against a negative band.
+   */
+  private assertUsableContentBand(): void {
+    const top = Math.max(this.margin, this.chrome.header);
+    const bottom = this.pageSize.height - Math.max(this.margin, this.chrome.footer);
+    if (bottom > top) return;
+    throw new Error(
+      `Page ${this.currentPageIndex + 1}: the header (${round(this.chrome.header)}pt) and footer ` +
+        `(${round(this.chrome.footer)}pt) leave no room for content on a ${round(this.pageSize.height)}pt-tall ` +
+        `page with a ${round(this.margin)}pt margin. Reduce the header/footer height, reduce the margin, ` +
+        `or use a larger page.`
+    );
   }
 
   /**
@@ -325,8 +442,11 @@ export class RenderContext implements RenderContextContract {
     this.flushCanvasToPage(); // save current page before moving on
     this.pages.push('');
     this.currentPageIndex++;
-    this.currentX = this.margin;
-    this.currentY = this.margin;
+    // The new page measures its own chrome: header/footer templates are
+    // functions of the page number, so a taller header on page 2 moves page 2's
+    // content band down. Must precede the cursor reset, which reads contentTop.
+    this.refreshChromeReservation();
+    this.resetCursorToContentTop();
     // MCIDs restart at 0 per PDF page (ISO 32000-1 §14.7.4). Pass the
     // new page index so any subsequent MCID can be paired with its
     // page for /Pg + /ParentTree emission later.
@@ -429,6 +549,7 @@ export class RenderContext implements RenderContextContract {
     // content as untagged real content (PDF/UA 7.1). MCIDs restart at 0
     // per page (ISO 32000-1 §14.7.4).
     this.tagging?.resetPage(index);
+    this.refreshChromeReservation();
     this.updateCanvas();
   }
 
@@ -462,4 +583,9 @@ export class RenderContext implements RenderContextContract {
   public async preloadAllFontsAsync(): Promise<void> {
     await this.resources.preloadAllFontsAsync();
   }
+}
+
+/** Formats a point measurement for a diagnostic message (2 dp, no trailing zeros). */
+function round(value: number): number {
+  return Number(value.toFixed(2));
 }

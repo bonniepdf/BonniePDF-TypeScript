@@ -179,7 +179,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       return this.renderLines(ctx, lines, startLine, lines.length, contentWidth, startY);
     }
 
-    const notAtTop = ctx.currentY > ctx.margin;
+    const notAtTop = ctx.currentY > ctx.contentTop;
 
     // Orphan control
     if (startLine === 0 && linesThatFit < this.minLinesBeforeBreak && notAtTop) {

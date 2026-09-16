@@ -176,7 +176,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       return this.renderLines(ctx, lines, startLine, lines.length, contentWidth, startY);
     }
 
-    const notAtTop = ctx.currentY > ctx.margin;
+    const notAtTop = ctx.currentY > ctx.contentTop;
 
     // Orphan control: if this is the first chunk of this block on the current page
     // and too few lines would appear before the break, move the whole block

@@ -25,7 +25,7 @@ export class PageBreak extends ElementBase {
   public renderStateful(ctx: RenderContext, _width: number): RenderStatus {
     if (!this.triggered) {
       this.triggered = true;
-      if (ctx.currentY > ctx.margin) {
+      if (ctx.currentY > ctx.contentTop) {
         return RenderStatus.WrapRequired;
       }
     }

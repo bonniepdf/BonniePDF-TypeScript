@@ -140,7 +140,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     const totalHeight = contentHeight + this.margin.top + this.margin.bottom;
 
     const wouldOverflow = ctx.currentY + totalHeight > ctx.maxY;
-    const notAtTop = ctx.currentY > ctx.margin;
+    const notAtTop = ctx.currentY > ctx.contentTop;
 
     if (wouldOverflow && notAtTop) {
       // Doesn't fit but would fit on a fresh page - request new page

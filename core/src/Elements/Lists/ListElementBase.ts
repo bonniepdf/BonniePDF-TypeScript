@@ -108,7 +108,7 @@ export abstract class ListElementBase extends TextElementBase {
    * Checks if a new page is needed before rendering content.
    */
   protected static checkPageBreak(ctx: RenderContext, lineHeight: number): boolean {
-    if (ctx.currentY + lineHeight > ctx.maxY && ctx.currentY > ctx.margin) {
+    if (ctx.currentY + lineHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
       ctx.newPage();
       return true;
     }

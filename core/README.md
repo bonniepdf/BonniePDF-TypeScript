@@ -240,19 +240,22 @@ source. Each version remains governed by the licence supplied with it.
 | Use case                                                                                                                         | Licence                                                                   |
 | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | Non-production evaluation, independent non-commercial projects, and qualifying charity, education, research, and open-source use | [Community License](./LICENSE) - free                                     |
-| Commercial production by one named developer for one business                                                                    | [Solo commercial licence](./COMMERCIAL-LICENSE.txt)                       |
-| Commercial production by a team or company group                                                                                 | [Professional or Enterprise commercial licence](./COMMERCIAL-LICENSE.txt) |
+| Commercial production, where the organisation the documents are for has annual gross revenue below US $1,000,000                 | [Community License](./LICENSE) - free                                     |
+| Commercial production at or above US $1,000,000 annual gross revenue                                                             | [Professional or Enterprise commercial licence](./COMMERCIAL-LICENSE.txt) |
 
 Evaluation excludes live use, live customer data, and external distribution.
-Commercial production requires a paid licence before it begins.
+The revenue test applies to the organisation receiving the primary business
+benefit of the documents, aggregated with its affiliates - for client work that
+is the client, not the contractor. Crossing the threshold allows ninety days to
+obtain a paid licence.
 The competing-product restriction prevents redistributing BonniePDF as a
 general-purpose PDF library, SDK, or hosted PDF generation service; ordinary
 applications and domain-specific SaaS products may generate their own PDFs
 under a paid licence.
 
-One commercial core licence covers both TypeScript/JavaScript and .NET. Solo is
-limited to one named developer; broader tiers have no developer-seat, document,
-server, deployment, or end-user fees. The core has no activation or telemetry.
+One commercial core licence covers both TypeScript/JavaScript and .NET. Paid
+tiers have no developer-seat, document, server, deployment, or end-user fees.
+The core has no activation or telemetry.
 Digital signing is included with every paid core licence at no extra charge and
 is governed by its own agreement.
 

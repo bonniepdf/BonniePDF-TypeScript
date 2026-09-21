@@ -415,33 +415,45 @@ export function generate(): Document {
 
   // ── Room-by-room register ──────────────────────────────────────────────────
 
-  doc.add(h2('Room-by-room schedule'));
+  if (ROOMS.length === 0) {
+    doc.add(h2('Room-by-room schedule'));
+  } else {
+    let firstRoom = true;
+    for (const room of ROOMS) {
+      const roomStack = new VerticalStack();
+      roomStack.breakAllowed = false;
+      if (firstRoom) {
+        roomStack.add(h2('Room-by-room schedule'));
+        firstRoom = false;
+      }
+      roomStack.add(h3(room.name));
 
-  for (const room of ROOMS) {
-    doc.add(h3(room.name));
-
-    const table = new Table(3.1, 1.1, 1.3, 4.2, 0.95);
-    table.cellPadding = 5;
-    table.border = new Border(0.5);
-    table.borderColors = new BorderColors(RULE);
-    table.headerBackgroundColor = ACCENT;
-    table.headerTextColor = Color.white;
-    table.addHeader(th('Item'), th('Condition'), th('Cleanliness'), th('Notes as found'), th('Plate'));
-    for (const item of room.items) {
-      table.addRow(
-        td(item.item),
-        statusCell(item.condition, CONDITION_COLOUR[item.condition]),
-        td(item.cleanliness, { color: MUTED }),
-        td(item.notes),
-        td(item.evidence, { color: MUTED })
-      );
+      const table = new Table(3.1, 1.1, 1.3, 4.2, 0.95);
+      table.cellPadding = 5;
+      table.border = new Border(0.5);
+      table.borderColors = new BorderColors(RULE);
+      table.headerBackgroundColor = ACCENT;
+      table.headerTextColor = Color.white;
+      table.addHeader(th('Item'), th('Condition'), th('Cleanliness'), th('Notes as found'), th('Plate'));
+      for (const item of room.items) {
+        table.addRow(
+          td(item.item),
+          statusCell(item.condition, CONDITION_COLOUR[item.condition]),
+          td(item.cleanliness, { color: MUTED }),
+          td(item.notes),
+          td(item.evidence, { color: MUTED })
+        );
+      }
+      roomStack.add(table);
+      doc.add(roomStack);
     }
-    doc.add(table);
   }
 
   // ── Meters and keys ────────────────────────────────────────────────────────
 
-  doc.add(h2('Meter readings'));
+  const metersStack = new VerticalStack();
+  metersStack.breakAllowed = false;
+  metersStack.add(h2('Meter readings'));
 
   const meters = new Table(1.4, 1.6, 1.6, 2.4);
   meters.cellPadding = 6;
@@ -458,9 +470,12 @@ export function generate(): Document {
       td(meter.located, { color: MUTED })
     );
   }
-  doc.add(meters);
+  metersStack.add(meters);
+  doc.add(metersStack);
 
-  doc.add(h2('Keys issued'));
+  const keysStack = new VerticalStack();
+  keysStack.breakAllowed = false;
+  keysStack.add(h2('Keys issued'));
 
   const keys = new Table(3, 1, 1.6);
   keys.cellPadding = 6;
@@ -472,7 +487,8 @@ export function generate(): Document {
   for (const key of KEYS) {
     keys.addRow(td(key.set), td(String(key.quantity)), td(key.issuedTo, { color: MUTED }));
   }
-  doc.add(keys);
+  keysStack.add(keys);
+  doc.add(keysStack);
 
   // ── Declarations ───────────────────────────────────────────────────────────
 

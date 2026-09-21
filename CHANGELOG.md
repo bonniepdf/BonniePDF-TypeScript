@@ -11,6 +11,13 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Changed
 
+- **`VerticalStack` honours `breakAllowed` on stateful children.** The keep-together
+  check ran for every stateful child regardless of the flag, so
+  setting `breakAllowed` had no effect and content the specification says may
+  split always moved to the next page whole. .NET has always gated on the flag;
+  the check is now gated here too. Documents that relied on the old behaviour
+  repaginate.
+
 - **SVG export now agrees with the .NET implementation, element for element.**
   The shared specification names SVG as the artefact the conformance tooling
   compares, so four differences between the two exporters were defects in that
@@ -30,6 +37,12 @@ change to `core/`; on release, rename it to the version being tagged.
   .NET side.
 
 ### Added
+
+- **Pagination control primitives.** `EnsureSpace`, `PreventPageBreak`,
+  `ShowEntire`, `StopPaging`, `ShowIf` (with `ShowOnce` and `SkipOnce`) and
+  `Unconstrained` are single-child wrappers that decide whether and where their
+  child renders, and draw nothing themselves, so they compose with any element
+  and with each other. .NET has the same set.
 
 - **Any measurement can now be written in a unit.** Every public authoring
   position that takes a length — widths, heights, padding and margin sides,

@@ -99,11 +99,11 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "26.5.1",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@types/node": "26.6.1",
+    "@vitest/coverage-v8": "^5.0.1",
     "tsup": "^8.5.1",
     "typescript": "7.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": ">=18.0.0"

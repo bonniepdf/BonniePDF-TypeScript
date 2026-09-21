@@ -178,8 +178,7 @@ export function generate(): Document {
   callout.child = cstack;
   doc.add(callout);
 
-  doc.add(h2('What you can borrow'));
-  const table = new Table(3, 1, 2.2);
+  const table = new Table(2.5, 1, 2.7);
   table.cellPadding = 9;
   table.border = new Border(0.75);
   table.borderColors = new BorderColors(LIBRARY_MIDGREY);
@@ -194,9 +193,12 @@ export function generate(): Document {
       td(item.note, TextAlignment.Left, LIBRARY_SECONDARY)
     );
   }
-  doc.add(table);
+  const borrowStack = new VerticalStack();
+  borrowStack.breakAllowed = false;
+  borrowStack.add(h2('What you can borrow'));
+  borrowStack.add(table);
+  doc.add(borrowStack);
 
-  doc.add(h2('Branch opening hours'));
   const hours = new Table(1.3, 1, 2.2);
   hours.cellPadding = 8;
   hours.border = new Border(0.75);
@@ -216,7 +218,11 @@ export function generate(): Document {
       td(row.note, TextAlignment.Left, LIBRARY_SECONDARY)
     );
   }
-  doc.add(hours);
+  const hoursStack = new VerticalStack();
+  hoursStack.breakAllowed = false;
+  hoursStack.add(h2('Branch opening hours'));
+  hoursStack.add(hours);
+  doc.add(hoursStack);
 
   doc.add(h2('Using your membership'));
   doc.add(

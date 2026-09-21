@@ -113,14 +113,17 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
         if ('renderStateful' in child) {
           const statefulChild = child as IStatefulElement;
 
-          const childHeight = child.measureHeight(contentWidth);
-          const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
-          const notAtTop = ctx.currentY > ctx.contentTop;
-          const wouldFitOnFreshPage = childHeight <= ctx.contentHeight;
+          // Check if this child disallows breaking across pages
+          if ((child as any).breakAllowed === false) {
+            const childHeight = child.measureHeight(contentWidth);
+            const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
+            const notAtTop = ctx.currentY > ctx.contentTop;
+            const wouldFitOnFreshPage = childHeight <= ctx.contentHeight;
 
-          if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
-            ctx.currentX = originalX;
-            return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+            if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
+              ctx.currentX = originalX;
+              return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+            }
           }
 
           // Layout capture: open the child node before rendering its segment.

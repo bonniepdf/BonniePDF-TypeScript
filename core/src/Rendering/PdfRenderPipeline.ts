@@ -124,6 +124,19 @@ export class PdfRenderPipeline {
     // and track their own continuation state so they can resume across page breaks.
     if (isStatefulElement(element)) {
       const stateful = element;
+
+      // Check if this element disallows breaking across pages
+      if ((element as any).breakAllowed === false) {
+        const elementHeight = element.measureHeight(contentWidth);
+        const wouldOverflow = ctx.currentY + elementHeight > ctx.maxY;
+        const notAtTop = ctx.currentY > ctx.contentTop;
+        const wouldFitOnFreshPage = elementHeight <= ctx.contentHeight;
+
+        if (wouldOverflow && notAtTop && wouldFitOnFreshPage) {
+          ctx.newPage();
+        }
+      }
+
       // Layout capture: open one node around the whole element; the overflow
       // loop drives it to completion and ctx.newPage() splits its rect per page.
       ctx.layoutRecorder?.openNode(

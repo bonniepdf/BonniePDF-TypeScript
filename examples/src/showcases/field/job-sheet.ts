@@ -272,8 +272,6 @@ export function generate(): Document {
 
   // ── Parts ──────────────────────────────────────────────────────────────────
 
-  doc.add(h2('Parts and materials'));
-
   const parts = new Table({
     columns: [1.3, 3.1, 0.7, 1, 1, 0.9],
     cellPadding: 6,
@@ -292,14 +290,18 @@ export function generate(): Document {
       statusCell(part.fitted ? 'Fitted' : 'Carried, not fitted', part.fitted ? STATUS.done : STATUS.low)
     );
   }
-  doc.add(parts);
+
+  const partsNote = body(
+    'Parts carried but not fitted are returned to stock and are not charged. ' +
+      'Totals below exclude VAT and are provisional until invoiced.',
+    { color: MUTED, size: 8.5, mb: 6 }
+  );
 
   doc.add(
-    body(
-      'Parts carried but not fitted are returned to stock and are not charged. ' +
-        'Totals below exclude VAT and are provisional until invoiced.',
-      { color: MUTED, size: 8.5, mb: 6 }
-    )
+    new VerticalStack({
+      breakAllowed: false,
+      children: [h2('Parts and materials'), parts, partsNote],
+    })
   );
 
   // ── Totals ─────────────────────────────────────────────────────────────────
@@ -326,13 +328,10 @@ export function generate(): Document {
 
   // ── Outstanding work ───────────────────────────────────────────────────────
 
-  doc.add(h2('Outstanding items and recommendations'));
-  doc.add(
-    body(
-      'The following were identified during the visit but fall outside the scope of this job. ' +
-        'Each carries a reference so it can be quoted, scheduled, or accepted as a risk.',
-      { color: MUTED }
-    )
+  const defectsIntro = body(
+    'The following were identified during the visit but fall outside the scope of this job. ' +
+      'Each carries a reference so it can be quoted, scheduled, or accepted as a risk.',
+    { color: MUTED }
   );
 
   const defects = new Table({
@@ -351,7 +350,13 @@ export function generate(): Document {
       td(item.action, { color: MUTED })
     );
   }
-  doc.add(defects);
+
+  doc.add(
+    new VerticalStack({
+      breakAllowed: false,
+      children: [h2('Outstanding items and recommendations'), defectsIntro, defects],
+    })
+  );
 
   doc.add(
     panel(

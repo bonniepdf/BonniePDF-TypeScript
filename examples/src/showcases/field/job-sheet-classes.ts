@@ -278,8 +278,6 @@ export function generate(): Document {
 
   // ── Parts ──────────────────────────────────────────────────────────────────
 
-  doc.add(h2('Parts and materials'));
-
   const parts = new Table(1.3, 3.1, 0.7, 1, 1, 0.9);
   parts.cellPadding = 6;
   parts.border = new Border(0.5);
@@ -297,15 +295,19 @@ export function generate(): Document {
       statusCell(part.fitted ? 'Fitted' : 'Carried, not fitted', part.fitted ? STATUS.done : STATUS.low)
     );
   }
-  doc.add(parts);
 
-  doc.add(
-    body(
-      'Parts carried but not fitted are returned to stock and are not charged. ' +
-        'Totals below exclude VAT and are provisional until invoiced.',
-      { color: MUTED, size: 8.5, mb: 6 }
-    )
+  const partsNote = body(
+    'Parts carried but not fitted are returned to stock and are not charged. ' +
+      'Totals below exclude VAT and are provisional until invoiced.',
+    { color: MUTED, size: 8.5, mb: 6 }
   );
+
+  const partsStack = new VerticalStack();
+  partsStack.breakAllowed = false;
+  partsStack.add(h2('Parts and materials'));
+  partsStack.add(parts);
+  partsStack.add(partsNote);
+  doc.add(partsStack);
 
   // ── Totals ─────────────────────────────────────────────────────────────────
 
@@ -330,13 +332,10 @@ export function generate(): Document {
 
   // ── Outstanding work ───────────────────────────────────────────────────────
 
-  doc.add(h2('Outstanding items and recommendations'));
-  doc.add(
-    body(
-      'The following were identified during the visit but fall outside the scope of this job. ' +
-        'Each carries a reference so it can be quoted, scheduled, or accepted as a risk.',
-      { color: MUTED }
-    )
+  const defectsIntro = body(
+    'The following were identified during the visit but fall outside the scope of this job. ' +
+      'Each carries a reference so it can be quoted, scheduled, or accepted as a risk.',
+    { color: MUTED }
   );
 
   const defects = new Table(0.7, 3.4, 1, 3);
@@ -354,7 +353,13 @@ export function generate(): Document {
       td(item.action, { color: MUTED })
     );
   }
-  doc.add(defects);
+
+  const defectsStack = new VerticalStack();
+  defectsStack.breakAllowed = false;
+  defectsStack.add(h2('Outstanding items and recommendations'));
+  defectsStack.add(defectsIntro);
+  defectsStack.add(defects);
+  doc.add(defectsStack);
 
   doc.add(
     panel(

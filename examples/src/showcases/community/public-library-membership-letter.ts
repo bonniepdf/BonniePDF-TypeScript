@@ -153,9 +153,8 @@ export function generate(): Document {
     })
   );
 
-  doc.add(h2('What you can borrow'));
   const table = new Table({
-    columns: [3, 1, 2.2],
+    columns: [2.5, 1, 2.7],
     cellPadding: 9,
     border: { width: 0.75, color: LIBRARY_MIDGREY },
     headerBackgroundColor: LIBRARY_INK,
@@ -166,9 +165,13 @@ export function generate(): Document {
   for (const item of MEMBERSHIP) {
     table.addRow(td(item.label), td(item.value), td(item.note, LIBRARY_SECONDARY));
   }
-  doc.add(table);
+  doc.add(
+    new VerticalStack({
+      breakAllowed: false,
+      children: [h2('What you can borrow'), table],
+    })
+  );
 
-  doc.add(h2('Branch opening hours'));
   const hours = new Table({
     columns: [1.3, 1, 2.2],
     cellPadding: 8,
@@ -181,7 +184,12 @@ export function generate(): Document {
   for (const row of OPENING_HOURS) {
     hours.addRow(td(row.label), td(row.value, LIBRARY_INK, true), td(row.note, LIBRARY_SECONDARY));
   }
-  doc.add(hours);
+  doc.add(
+    new VerticalStack({
+      breakAllowed: false,
+      children: [h2('Branch opening hours'), hours],
+    })
+  );
 
   doc.add(h2('Using your membership'));
   doc.add(

@@ -93,6 +93,18 @@ export * from './Elements/Layout/LayersDescriptor';
 export * from './Elements/Layout/SemanticGroup';
 export * from './Elements/Layout/VerticalStack';
 
+// Pagination control primitives (spec "Layout & Pagination" §7). Single-child
+// wrappers that decide whether and where their child renders; one type per
+// file, mirroring the .NET Elements/Layout/Pagination namespace.
+export * from './Elements/Layout/Pagination/PageContext';
+export * from './Elements/Layout/Pagination/PaginationWrapperBase';
+export * from './Elements/Layout/Pagination/EnsureSpace';
+export * from './Elements/Layout/Pagination/PreventPageBreak';
+export * from './Elements/Layout/Pagination/ShowEntire';
+export * from './Elements/Layout/Pagination/StopPaging';
+export * from './Elements/Layout/Pagination/ShowIf';
+export * from './Elements/Layout/Pagination/Unconstrained';
+
 export * from './Elements/Media/Image';
 export * from './Elements/Media/ImageFitMode';
 

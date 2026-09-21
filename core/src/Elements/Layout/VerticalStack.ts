@@ -113,8 +113,12 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
         if ('renderStateful' in child) {
           const statefulChild = child as IStatefulElement;
 
-          // Check if this child disallows breaking across pages
-          if ((child as any).breakAllowed === false) {
+          // Keep-together only when the child asks for it. A stateful child
+          // that allows breaking splits across the boundary instead (spec
+          // "Layout & Pagination" §6.3); applying this to every child
+          // unconditionally made `breakAllowed` a no-op here and diverged from
+          // the .NET pipeline, which has always gated on it.
+          if (child instanceof ElementBase && !child.breakAllowed) {
             const childHeight = child.measureHeight(contentWidth);
             const wouldOverflow = ctx.currentY + childHeight > ctx.maxY;
             const notAtTop = ctx.currentY > ctx.contentTop;
@@ -124,6 +128,8 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
               ctx.currentX = originalX;
               return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
             }
+            // At the top of a page, or too large for any page: fall through and
+            // render anyway.
           }
 
           // Layout capture: open the child node before rendering its segment.

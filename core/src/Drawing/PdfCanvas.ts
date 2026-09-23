@@ -887,7 +887,7 @@ export class PdfCanvas implements ICanvas {
       ];
 
       PdfOperators.saveState(this.stream);
-      if (color.scA < 1) this.applyColorAlpha(color);
+      this.applyColorAlpha(color);
       PdfOperators.setFillColor(this.stream, color);
       PdfOperators.moveTo(this.stream, corners[0].x, corners[0].y);
       PdfOperators.lineTo(this.stream, corners[1].x, corners[1].y);
@@ -1189,7 +1189,7 @@ export class PdfCanvas implements ICanvas {
     if (rim.scA > 0) {
       const [x0, y0, x1, y1] = bbox;
       PdfOperators.saveState(this.stream);
-      if (rim.scA < 1) this.applyColorAlpha(rim);
+      this.applyColorAlpha(rim);
       PdfOperators.setFillColor(this.stream, rim);
       const corners = [
         this.toPaintedPdfPoint(paint.transform, x0, y0),
@@ -1219,7 +1219,7 @@ export class PdfCanvas implements ICanvas {
 
       const r = paint.radius * ((i + 1) / bands);
       PdfOperators.saveState(this.stream);
-      if (disc.scA < 1) this.applyColorAlpha(disc);
+      this.applyColorAlpha(disc);
       PdfOperators.setFillColor(this.stream, disc);
       this.emitCirclePath(cx, cy, r, paint.transform);
       PdfOperators.fill(this.stream);

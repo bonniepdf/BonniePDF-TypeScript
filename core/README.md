@@ -287,4 +287,4 @@ the notice fatal or non-fatal everywhere.
 Visit **[bonniepdf.dev/license](https://bonniepdf.dev/license)** for current
 evaluation rights, commercial editions, and pricing.
 
-© 2026-present BonniePDF Contributors
+© 2026 CodeFocus Limited

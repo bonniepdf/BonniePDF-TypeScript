@@ -228,4 +228,4 @@ The check runs at most once per process, and **never changes a byte of output** 
 
 Issues and pull requests are welcome in the [BonniePDF-TypeScript repository](https://github.com/bonniepdf/BonniePDF-TypeScript). For substantial changes, please open an issue first so the behaviour can be coordinated with the shared specification and .NET implementation.
 
-© 2026 BonniePDF
+© 2026 CodeFocus Limited

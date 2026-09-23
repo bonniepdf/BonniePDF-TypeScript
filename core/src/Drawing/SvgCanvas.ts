@@ -1,4 +1,5 @@
 import { ICanvas } from './ICanvas';
+import { isIdentityPaintTransform, type PaintTransform } from './PaintTransform';
 import { ellipseToBeziers } from './EllipseGeometry';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { Color } from '../Core/Color';
@@ -897,6 +898,22 @@ export class SvgCanvas implements ICanvas {
     return Number(opacity.toFixed(4));
   }
 
+  /**
+   * A paint transform as SVG's `gradientTransform`, or nothing when absent.
+   *
+   * SVG expresses this natively, so the export is exact rather than
+   * approximated - unlike the PDF strip/disc fallbacks, which have to generate
+   * transformed geometry. An absent transform emits no attribute at all, so
+   * existing output stays byte-identical.
+   */
+  private gradientTransformAttr(transform: PaintTransform | undefined): string {
+    if (isIdentityPaintTransform(transform)) return '';
+    const t = transform as PaintTransform;
+    return ` gradientTransform="matrix(${this.n(t.a)} ${this.n(t.b)} ${this.n(t.c)} ${this.n(t.d)} ${this.n(
+      t.e
+    )} ${this.n(t.f)})"`;
+  }
+
   private n(value: number): string {
     if (this.options.precision === undefined) return `${value}`;
     if (!Number.isFinite(value)) return '0';
@@ -937,7 +954,7 @@ export class SvgCanvas implements ICanvas {
           paint.start.y
         )}" x2="${this.n(paint.end.x)}" y2="${this.n(
           paint.end.y
-        )}" gradientUnits="userSpaceOnUse">${stops}</linearGradient></defs>`
+        )}" gradientUnits="userSpaceOnUse"${this.gradientTransformAttr(paint.transform)}>${stops}</linearGradient></defs>`
       );
     } else {
       const stops = paint.stops
@@ -952,7 +969,9 @@ export class SvgCanvas implements ICanvas {
       this.svgElements.push(
         `<defs><radialGradient id="${id}" cx="${this.n(paint.center.x)}" cy="${this.n(
           paint.center.y
-        )}" r="${this.n(paint.radius)}"${focalAttrs} gradientUnits="userSpaceOnUse">${stops}</radialGradient></defs>`
+        )}" r="${this.n(paint.radius)}"${focalAttrs} gradientUnits="userSpaceOnUse"${this.gradientTransformAttr(
+          paint.transform
+        )}>${stops}</radialGradient></defs>`
       );
     }
     return id;

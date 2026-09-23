@@ -480,7 +480,7 @@ export class PdfCanvas implements ICanvas {
         PdfOperators.stroke(this.stream);
       } else {
         // Gradient stroke: linearize path, draw coloured segments
-        this.emitGradientStroke(p as LinearGradientPaint | RadialGradientPaint, style);
+        this.emitGradientStroke(p as LinearGradientPaint | RadialGradientPaint);
       }
       PdfOperators.restoreState(this.stream);
     });
@@ -795,29 +795,6 @@ export class PdfCanvas implements ICanvas {
   }
 
   // -- Private: gradient helpers ------------------------------------------
-
-  private interpolateGradient(stops: readonly GradientStop[], t: number): Color {
-    if (stops.length === 0) return Color.black;
-    if (stops.length === 1) return stops[0].color;
-    const tc = Math.max(0, Math.min(1, t));
-    if (tc <= stops[0].offset) return stops[0].color;
-    if (tc >= stops[stops.length - 1].offset) return stops[stops.length - 1].color;
-    for (let i = 0; i < stops.length - 1; i++) {
-      if (tc >= stops[i].offset && tc <= stops[i + 1].offset) {
-        const range = stops[i + 1].offset - stops[i].offset;
-        const f = range === 0 ? 0 : (tc - stops[i].offset) / range;
-        const c0 = stops[i].color;
-        const c1 = stops[i + 1].color;
-        return Color.fromScRgb(
-          c0.scR + (c1.scR - c0.scR) * f,
-          c0.scG + (c1.scG - c0.scG) * f,
-          c0.scB + (c1.scB - c0.scB) * f,
-          c0.scA + (c1.scA - c0.scA) * f
-        );
-      }
-    }
-    return stops[stops.length - 1].color;
-  }
 
   private emitGradientFill(paint: LinearGradientPaint | RadialGradientPaint): void {
     if (paint instanceof LinearGradientPaint) {
@@ -1281,83 +1258,122 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.closePath(this.stream);
   }
 
-  private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint, _style: StrokeStyle): void {
-    // Linearize path into points and draw individually-colored segments
-    const points = this.linearizeCurrentPath(200);
-    if (points.length < 2) return;
-
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      const mid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
-      const t = this.projectOntoGradient(mid, paint);
-      const color = this.interpolateGradient(paint.stops, t);
-      if (color.scA < 1) this.applyColorAlpha(color);
-      PdfOperators.setStrokeColor(this.stream, color);
-      const s = this.toPdfPoint(p0.x, p0.y);
-      const e = this.toPdfPoint(p1.x, p1.y);
-      PdfOperators.strokeLine(this.stream, s.x, s.y, e.x, e.y);
+  /**
+   * Strokes the current path with a gradient, one straight segment at a time.
+   *
+   * Each subpath is flattened on its own - curves into short chords, a closed
+   * subpath including its closing segment - and each segment is stroked in the
+   * colour sampled at its midpoint. The midpoint is taken in the same space the
+   * gradient's geometry is in, so a transformed canvas moves the ramp with the
+   * path rather than distorting it, and the colour comes from the normalized
+   * stops the fill paths sample.
+   *
+   * A translucent segment is wrapped in its own `q`/`Q`, so its alpha cannot
+   * leak into the opaque segments after it; an opaque segment needs neither.
+   */
+  private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint): void {
+    const stops = this.normalizeShadingStops(paint.stops);
+    for (const polyline of this.linearizeCurrentPath(200)) {
+      for (let i = 0; i < polyline.length - 1; i++) {
+        const p0 = polyline[i];
+        const p1 = polyline[i + 1];
+        const t = this.projectOntoGradient((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, paint);
+        const color = sampleNormalizedStops(stops, t);
+        const s = this.toPdfPoint(p0.x, p0.y);
+        const e = this.toPdfPoint(p1.x, p1.y);
+        const translucent = color.scA < 1;
+        if (translucent) {
+          PdfOperators.saveState(this.stream);
+          this.applyColorAlpha(color);
+        }
+        PdfOperators.setStrokeColor(this.stream, color);
+        PdfOperators.strokeLine(this.stream, s.x, s.y, e.x, e.y);
+        if (translucent) PdfOperators.restoreState(this.stream);
+      }
     }
   }
 
-  private projectOntoGradient(pt: { x: number; y: number }, paint: LinearGradientPaint | RadialGradientPaint): number {
+  /**
+   * The gradient parameter at a point: its projection onto a linear axis, or its
+   * distance from a radial centre as a fraction of the radius. A degenerate axis
+   * reads as the first stop, a zero radius as the last.
+   */
+  private projectOntoGradient(x: number, y: number, paint: LinearGradientPaint | RadialGradientPaint): number {
     if (paint instanceof LinearGradientPaint) {
       const dx = paint.end.x - paint.start.x;
       const dy = paint.end.y - paint.start.y;
       const lenSq = dx * dx + dy * dy;
       if (lenSq === 0) return 0;
-      return ((pt.x - paint.start.x) * dx + (pt.y - paint.start.y) * dy) / lenSq;
+      return ((x - paint.start.x) * dx + (y - paint.start.y) * dy) / lenSq;
     }
-    // Radial: distance from center / radius
-    const dx = pt.x - paint.center.x;
-    const dy = pt.y - paint.center.y;
+    if (paint.radius <= 0) return 1;
+    const dx = x - paint.center.x;
+    const dy = y - paint.center.y;
     return Math.sqrt(dx * dx + dy * dy) / paint.radius;
   }
 
-  private linearizeCurrentPath(totalSegments: number): { x: number; y: number }[] {
-    // Collect line endpoints; subdivide curves
-    const result: { x: number; y: number }[] = [];
-    let cx = 0,
-      cy = 0;
-    let subpathStart = { x: 0, y: 0 };
+  /**
+   * The current path as one polyline per subpath, in canvas space.
+   *
+   * A moveTo starts a new polyline rather than joining the previous one, and a
+   * closePath adds the segment back to the subpath's start. Each curve becomes
+   * `max(4, ceil(totalSegments / pathLength))` chords, where `pathLength` counts
+   * path commands.
+   */
+  private linearizeCurrentPath(totalSegments: number): { x: number; y: number }[][] {
+    const polylines: { x: number; y: number }[][] = [];
+    const chords = Math.max(4, Math.ceil(totalSegments / Math.max(1, this.currentPath.length)));
+    let current: { x: number; y: number }[] | null = null;
+    let cx = 0;
+    let cy = 0;
+    let startX = 0;
+    let startY = 0;
+
+    const continueFromCurrentPoint = (): { x: number; y: number }[] => {
+      if (current === null) {
+        current = [{ x: cx, y: cy }];
+        polylines.push(current);
+      }
+      return current;
+    };
 
     for (const cmd of this.currentPath) {
       switch (cmd.type) {
         case 'm':
-          cx = cmd.args[0];
-          cy = cmd.args[1];
-          subpathStart = { x: cx, y: cy };
-          result.push({ x: cx, y: cy });
+          cx = startX = cmd.args[0];
+          cy = startY = cmd.args[1];
+          current = [{ x: cx, y: cy }];
+          polylines.push(current);
           break;
         case 'l':
           cx = cmd.args[0];
           cy = cmd.args[1];
-          result.push({ x: cx, y: cy });
+          continueFromCurrentPoint().push({ x: cx, y: cy });
           break;
         case 'c': {
+          const polyline = continueFromCurrentPoint();
           const [c1x, c1y, c2x, c2y, ex, ey] = cmd.args;
-          const segs = Math.max(4, Math.ceil(totalSegments / Math.max(1, this.currentPath.length)));
-          for (let i = 1; i <= segs; i++) {
-            const t = i / segs;
+          for (let i = 1; i <= chords; i++) {
+            const t = i / chords;
             const u = 1 - t;
-            const x = u * u * u * cx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex;
-            const y = u * u * u * cy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey;
-            result.push({ x, y });
+            polyline.push({
+              x: u * u * u * cx + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex,
+              y: u * u * u * cy + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey,
+            });
           }
           cx = ex;
           cy = ey;
           break;
         }
         case 'h':
-          if (result.length > 0) {
-            result.push({ x: subpathStart.x, y: subpathStart.y });
-          }
-          cx = subpathStart.x;
-          cy = subpathStart.y;
+          if (current !== null) current.push({ x: startX, y: startY });
+          current = null;
+          cx = startX;
+          cy = startY;
           break;
       }
     }
-    return result;
+    return polylines;
   }
 }
 

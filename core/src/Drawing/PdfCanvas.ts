@@ -838,7 +838,8 @@ export class PdfCanvas implements ICanvas {
   }
 
   /**
-   * Approximates a linear gradient with abutting quads perpendicular to its axis.
+   * Approximates a linear gradient with a stack of overlapping quads
+   * perpendicular to its axis, each reaching back to the near end.
    *
    * `stops` are the same normalized stops the native shading path builds, and
    * `bbox` is the current path's bounding box in paint space — the region the

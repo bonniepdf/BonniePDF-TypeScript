@@ -241,6 +241,19 @@ describe('gradient shading fallback', () => {
     expect(reds.every(r => r === 1)).toBe(true);
   });
 
+  it('never writes a colour outside the unit range', () => {
+    // The backdrop correction solves for a colour, and the solution can fall
+    // outside [0, 1] when a translucent band sits over a differently coloured
+    // one. It is clamped back rather than written as a negative operand.
+    const mixed = [
+      { offset: 0, color: Color.fromScRgb(1, 0, 0, 0.5) },
+      { offset: 0.5, color: Color.fromScRgb(0, 0, 1, 1) },
+      { offset: 1, color: Color.fromScRgb(0, 1, 0, 0.25) },
+    ];
+    const content = fillWith(new RadialGradientPaint(new Point(50, 25), 40, mixed));
+    expect(content).not.toMatch(/^.*-[\d.]+.* rg$/m);
+  });
+
   it('paints nothing for a degenerate axis', () => {
     const content = fillWith(new LinearGradientPaint(new Point(10, 10), new Point(10, 10), stops));
     expect(count(content, 'f\n')).toBe(0);

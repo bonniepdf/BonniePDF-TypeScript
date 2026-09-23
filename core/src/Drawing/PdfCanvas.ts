@@ -60,6 +60,27 @@ export class PdfCanvas implements ICanvas {
   /** Fully transparent black; the implicit backdrop beyond a radial gradient's rim. */
   private static readonly TRANSPARENT = Color.fromScRgb(0, 0, 0, 0);
 
+  /**
+   * Bands in the strip/disc approximation of a gradient that cannot be painted
+   * as a native shading.
+   *
+   * Deliberately fixed rather than derived from the painted area: deriving it
+   * would make the byte output depend on layout arithmetic, and this path must
+   * stay comparable across implementations. 100 bands is a 1% colour step, at or
+   * below the visible banding threshold in 8-bit sRGB.
+   */
+  private static readonly GRADIENT_FALLBACK_BANDS = 100;
+
+  /**
+   * Control-point distance for approximating a quarter circle with one cubic
+   * Bézier: 4/3 · (√2 − 1).
+   *
+   * Written to full double precision on purpose. A truncated literal diverges in
+   * the last bits between implementations, and that shows up as different
+   * operands for the same input.
+   */
+  private static readonly QUARTER_ARC = 0.5522847498307933;
+
   // -- Path + transform state ----------------------------------------
   private currentPath: PathCmd[] = [];
   private ctm: number[] = [1, 0, 0, 1, 0, 0];
@@ -819,10 +840,11 @@ export class PdfCanvas implements ICanvas {
     // shading's coordinates in, so the paint draws nothing at all.
     if (bbox === null) return;
 
+    const stops = this.normalizeShadingStops(paint.stops);
     const request: ShadingRequest = {
       shadingType: 2,
       coords: [paint.start.x, paint.start.y, paint.end.x, paint.end.y],
-      stops: this.normalizeShadingStops(paint.stops),
+      stops,
       extend: [true, true],
       bbox,
       hasAlpha: paint.stops.some(s => s.color.scA < 1),
@@ -832,11 +854,25 @@ export class PdfCanvas implements ICanvas {
       this.emitShading(resolved, paint.transform);
       return;
     }
-    this.emitLinearGradientStrips(paint);
+    // The approximation samples the same normalized stops the shading would
+    // have, so switching between the two paths changes smoothness and nothing
+    // else, and unsorted input cannot make the two implementations disagree.
+    this.emitLinearGradientStrips(paint, stops, bbox);
   }
 
-  private emitLinearGradientStrips(paint: LinearGradientPaint): void {
-    const steps = 100;
+  /**
+   * Approximates a linear gradient with abutting quads perpendicular to its axis.
+   *
+   * `stops` are the same normalized stops the native shading path builds, and
+   * `bbox` is the current path's bounding box in paint space — the region the
+   * quads have to cover.
+   */
+  private emitLinearGradientStrips(
+    paint: LinearGradientPaint,
+    stops: readonly ShadingStop[],
+    bbox: [number, number, number, number]
+  ): void {
+    const bands = PdfCanvas.GRADIENT_FALLBACK_BANDS;
     const dx = paint.end.x - paint.start.x;
     const dy = paint.end.y - paint.start.y;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -844,13 +880,21 @@ export class PdfCanvas implements ICanvas {
 
     const perpX = -dy / len;
     const perpY = dx / len;
-    // Generous span to cover the clipped region
-    const halfSpan = len * 2;
 
-    for (let i = 0; i < steps; i++) {
-      const t0 = i / steps;
-      const t1 = (i + 1) / steps;
-      const color = this.interpolateGradient(paint.stops, (t0 + t1) / 2);
+    // Reach far enough either side of the axis to cover the clipped region,
+    // which is exactly the current path. Taking the greatest perpendicular
+    // distance to the path's corners is provably sufficient and needs nothing
+    // tuned — a constant multiple of the axis length is too short whenever the
+    // path is long across the axis, and an absolute constant is meaningless
+    // under a paint transform that scales.
+    const halfSpan = this.maxPerpendicularReach(paint, perpX, perpY, bbox);
+
+    for (let i = 0; i < bands; i++) {
+      const t0 = i / bands;
+      const t1 = (i + 1) / bands;
+      // The band's centre is its mean position, so a linear ramp reproduces
+      // exactly. Sampling an edge biases the whole ramp half a band.
+      const color = sampleNormalizedStops(stops, (i + 0.5) / bands);
 
       const x0 = paint.start.x + dx * t0;
       const y0 = paint.start.y + dy * t0;
@@ -867,6 +911,8 @@ export class PdfCanvas implements ICanvas {
         this.toPaintedPdfPoint(paint.transform, x1 + perpX * halfSpan, y1 + perpY * halfSpan),
       ];
 
+      // Strips abut, so nothing composites over anything and the sampled alpha
+      // is the alpha to paint. Unlike the disc case, no correction is needed.
       if (color.scA < 1) this.applyColorAlpha(color);
       PdfOperators.setFillColor(this.stream, color);
       PdfOperators.moveTo(this.stream, corners[0].x, corners[0].y);
@@ -878,6 +924,30 @@ export class PdfCanvas implements ICanvas {
     }
   }
 
+  /**
+   * The greatest perpendicular distance from the gradient axis to a corner of
+   * `bbox`, all in paint space.
+   */
+  private maxPerpendicularReach(
+    paint: LinearGradientPaint,
+    perpX: number,
+    perpY: number,
+    bbox: [number, number, number, number]
+  ): number {
+    const [x0, y0, x1, y1] = bbox;
+    let reach = 0;
+    for (const [cx, cy] of [
+      [x0, y0],
+      [x1, y0],
+      [x1, y1],
+      [x0, y1],
+    ] as const) {
+      const d = Math.abs((cx - paint.start.x) * perpX + (cy - paint.start.y) * perpY);
+      if (d > reach) reach = d;
+    }
+    return reach;
+  }
+
   private emitRadialGradientFill(paint: RadialGradientPaint): void {
     // Prefer a native PDF Type-3 radial shading (see emitShading). Falls back to
     // the disc approximation when shadings can't be used (translucent gradient
@@ -886,17 +956,18 @@ export class PdfCanvas implements ICanvas {
     const bbox = this.paintSpaceBBox(paint.transform);
     if (bbox === null) return;
 
+    const stops = this.normalizeShadingStops(paint.stops);
     const request: ShadingRequest = {
       shadingType: 3,
       coords: [inner.x, inner.y, 0, paint.center.x, paint.center.y, paint.radius],
-      stops: this.normalizeShadingStops(paint.stops),
+      stops,
       extend: [true, true],
       bbox,
       hasAlpha: paint.stops.some(s => s.color.scA < 1),
     };
     const resolved = this._shadingResolver?.(request);
     if (resolved) this.emitShading(resolved, paint.transform);
-    else this.emitRadialGradientDiscs(paint);
+    else this.emitRadialGradientDiscs(paint, stops);
   }
 
   /**
@@ -1021,7 +1092,7 @@ export class PdfCanvas implements ICanvas {
     return [minX, minY, maxX, maxY];
   }
 
-  private emitRadialGradientDiscs(paint: RadialGradientPaint): void {
+  private emitRadialGradientDiscs(paint: RadialGradientPaint, stops: readonly ShadingStop[]): void {
     // Approximate the radial gradient as a stack of overlapping filled discs,
     // largest first. Overlapping (rather than abutting annuli) is what keeps the
     // result smooth: each disc paints over the previous disc's antialiased edge,
@@ -1036,20 +1107,20 @@ export class PdfCanvas implements ICanvas {
     // For an opaque gradient this collapses to "paint the target colour"; for a
     // constant-colour fade (the common glow) it reproduces the alpha ramp
     // precisely. The net effect matches SVG's native <radialGradient>.
-    const steps = 100;
+    const bands = PdfCanvas.GRADIENT_FALLBACK_BANDS;
     const cx = paint.center.x;
     const cy = paint.center.y;
 
-    for (let i = steps - 1; i >= 0; i--) {
-      const target = this.interpolateGradient(paint.stops, (i + 0.5) / steps);
+    for (let i = bands - 1; i >= 0; i--) {
+      const target = sampleNormalizedStops(stops, (i + 0.5) / bands);
       // Whatever the larger discs already painted at this radius equals the
       // gradient sample one band further out (fully transparent past the rim).
-      const below = i + 1 < steps ? this.interpolateGradient(paint.stops, (i + 1.5) / steps) : PdfCanvas.TRANSPARENT;
+      const below = i + 1 < bands ? sampleNormalizedStops(stops, (i + 1.5) / bands) : PdfCanvas.TRANSPARENT;
 
       const disc = correctOverDisc(target, below);
       if (disc === null) continue; // nothing visible to add at this band
 
-      const r = paint.radius * ((i + 1) / steps);
+      const r = paint.radius * ((i + 1) / bands);
       PdfOperators.saveState(this.stream);
       if (disc.scA < 1) this.applyColorAlpha(disc);
       PdfOperators.setFillColor(this.stream, disc);
@@ -1069,7 +1140,7 @@ export class PdfCanvas implements ICanvas {
    * the same degree.
    */
   private emitCirclePath(cx: number, cy: number, r: number, paintTransform?: PaintTransform): void {
-    const kr = r * 0.5522847498;
+    const kr = r * PdfCanvas.QUARTER_ARC;
     const at = (x: number, y: number): { x: number; y: number } => this.toPaintedPdfPoint(paintTransform, x, y);
     const p0 = at(cx + r, cy);
     const c1a = at(cx + r, cy + kr);
@@ -1169,6 +1240,34 @@ export class PdfCanvas implements ICanvas {
     }
     return result;
   }
+}
+
+/**
+ * Samples a colour from stops that are already normalized — sorted, clamped to
+ * [0, 1] and padded so one sits at each end of the domain.
+ *
+ * Both approximations sample through here, so they agree with the native shading
+ * they stand in for and neither has to decide what lies outside the ramp: the
+ * padding guarantees the whole domain is covered.
+ */
+function sampleNormalizedStops(stops: readonly ShadingStop[], t: number): Color {
+  if (stops.length === 0) return Color.black;
+  const tc = t < 0 ? 0 : t > 1 ? 1 : t;
+  for (let i = 0; i < stops.length - 1; i++) {
+    const lo = stops[i];
+    const hi = stops[i + 1];
+    if (tc > hi.offset) continue;
+    const range = hi.offset - lo.offset;
+    const f = range === 0 ? 0 : (tc - lo.offset) / range;
+    return Color.fromScRgb(
+      lo.r + (hi.r - lo.r) * f,
+      lo.g + (hi.g - lo.g) * f,
+      lo.b + (hi.b - lo.b) * f,
+      lo.a + (hi.a - lo.a) * f
+    );
+  }
+  const last = stops[stops.length - 1];
+  return Color.fromScRgb(last.r, last.g, last.b, last.a);
 }
 
 /**

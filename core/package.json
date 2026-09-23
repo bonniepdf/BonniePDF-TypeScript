@@ -85,7 +85,7 @@
     "nodejs"
   ],
   "license": "SEE LICENSE IN LICENSE",
-  "author": "BonniePDF",
+  "author": "CodeFocus Limited",
   "repository": {
     "type": "git",
     "url": "https://github.com/bonniepdf/bonniepdf-typescript",

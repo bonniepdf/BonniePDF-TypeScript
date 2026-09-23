@@ -22,8 +22,15 @@ describe('gradient shading fallback', () => {
     { offset: 1, color: new Color(255, 255, 255) },
   ];
 
-  /** A canvas with no shading resolver at all, which forces the approximation. */
-  function fallbackCanvas(): { canvas: PdfCanvas; stream: string[] } {
+  /**
+   * A canvas that falls back, in one of the two ways that happens.
+   *
+   * `declines` models PDF/A-1: a resolver exists and refuses this gradient
+   * because it is translucent, which is also the case where the alpha ExtGState
+   * is forced to 1. With no resolver at all the alpha is honoured. The two differ
+   * in whether the bands are corrected for the backdrop beneath them.
+   */
+  function fallbackCanvas(declines = false): { canvas: PdfCanvas; stream: string[] } {
     const canvas = new PdfCanvas(
       1000,
       0,
@@ -32,16 +39,20 @@ describe('gradient shading fallback', () => {
       () => '/Im0',
       undefined,
       undefined,
-      () => '/GS0'
+      () => '/GS0',
+      undefined,
+      undefined,
+      declines ? () => null : undefined
     );
     return { canvas, stream: (canvas as unknown as { stream: string[] }).stream };
   }
 
   function fillWith(
     paint: LinearGradientPaint | RadialGradientPaint,
-    rect: [number, number, number, number] = [0, 0, 100, 50]
+    rect: [number, number, number, number] = [0, 0, 100, 50],
+    declines = false
   ): string {
-    const { canvas, stream } = fallbackCanvas();
+    const { canvas, stream } = fallbackCanvas(declines);
     canvas.beginPath();
     canvas.addRect(rect[0], rect[1], rect[2], rect[3]);
     canvas.fillCurrentPath(paint);
@@ -75,7 +86,30 @@ describe('gradient shading fallback', () => {
     const content = fillWith(new RadialGradientPaint(new Point(50, 25), 50, stops));
     // Four curveTo per disc, one closed circle each.
     expect(count(content, ' c\n')).toBe(400);
-    expect(count(content, 'f\n')).toBe(100);
+    // 100 discs plus the /Extend flood behind them, which is a quad, not a disc.
+    expect(count(content, 'f\n')).toBe(101);
+  });
+
+  it('floods past the rim, as the shading it stands in for does', () => {
+    // A native radial shading carries /Extend [true true] and fills the whole
+    // clipped region; the stack of discs stops at the rim. Without the flood the
+    // fallback drew a bare circle where the shading fills the path.
+    const content = fillWith(new RadialGradientPaint(new Point(50, 25), 20, stops));
+    // The flood is painted first, in the last stop's colour, and is the only
+    // quad in an otherwise all-Bézier fill.
+    const firstFill = content.slice(0, content.indexOf('f\n'));
+    expect(firstFill).toContain('1 1 1 rg');
+    expect(firstFill).not.toContain(' c\n');
+  });
+
+  it('does not flood when the ramp fades to nothing, which is also what the shading shows', () => {
+    const fade = [
+      { offset: 0, color: new Color(255, 0, 0, 255) },
+      { offset: 1, color: new Color(255, 0, 0, 0) },
+    ];
+    const content = fillWith(new RadialGradientPaint(new Point(50, 25), 20, fade));
+    // Discs only: a transparent flood would paint nothing, so it is not emitted.
+    expect(count(content, ' c\n') / 4).toBe(count(content, 'f\n'));
   });
 
   it('samples each band at its centre, so a ramp reproduces exactly', () => {
@@ -84,8 +118,58 @@ describe('gradient shading fallback', () => {
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));
     const greys = greyLevels(content);
     expect(greys).toHaveLength(100);
-    expect(greys[0]).toBeCloseTo(0.005, 4);
-    expect(greys[99]).toBeCloseTo(0.995, 4);
+    // Painted from the far end back, so the first fill is the last band.
+    expect(greys[0]).toBeCloseTo(0.995, 4);
+    expect(greys[99]).toBeCloseTo(0.005, 4);
+  });
+
+  it('stacks the bands so each is fully covered by a single path', () => {
+    // A hairline overlap is not enough, and measuring is what showed it: a
+    // renderer antialiases each quad's edges and composites, so two paths each
+    // covering a boundary pixel ~60% leave it ~16% uncovered. Coverage
+    // multiplies, it does not add, and the gaps read as a moiré lattice on any
+    // ramp that is not axis-aligned. Every band therefore reaches the near end.
+    const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));
+    // One moveTo for the clip path, then one per band, all at the same near end.
+    const starts = [...content.matchAll(/^(-?[\d.]+) -?[\d.]+ m$/gm)].map(m => Number(m[1])).slice(1);
+    expect(starts).toHaveLength(100);
+    expect(new Set(starts).size).toBe(1);
+  });
+
+  it('skips the backdrop correction when the alpha will not survive', () => {
+    // The correction solves for a (colour, alpha) pair, so it is right only where
+    // the alpha is honoured. A resolver that declined did so because this is
+    // PDF/A-1, where the alpha ExtGState is forced to 1 - and a corrected colour
+    // with its alpha discarded is simply the wrong colour, which shows up as a
+    // visibly distorted ramp. There the bands carry the sample itself.
+    const translucent = [
+      { offset: 0, color: new Color(255, 0, 0, 255) },
+      { offset: 1, color: new Color(0, 0, 255, 60) },
+    ];
+    const paint = new LinearGradientPaint(new Point(0, 0), new Point(100, 0), translucent);
+    const firstOf = (c: string): number[] =>
+      c
+        .match(/^([\d.]+) ([\d.]+) ([\d.]+) rg$/m)!
+        .slice(1)
+        .map(Number);
+
+    // Band 99 is painted first and sampled at t=0.995: essentially the last stop.
+    const declined = firstOf(fillWith(paint, [0, 0, 100, 50], true));
+    expect(declined[0]).toBeCloseTo(0.005, 2);
+    expect(declined[2]).toBeCloseTo(0.995, 2);
+    // With the alpha honoured the same band is corrected for what lies beneath.
+    expect(firstOf(fillWith(paint))).not.toEqual(declined);
+  });
+
+  it('covers the path where it runs past the end of the axis', () => {
+    // /Extend [true true] on the shading floods beyond both ends. Without it the
+    // bands cover only t=0..1, and everything past the axis is left unpainted -
+    // which is what turned a rotated swatch into an octagon.
+    const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(10, 0), stops), [0, 0, 100, 50]);
+    const xs = [...content.matchAll(/^(-?[\d.]+) -?[\d.]+ [lm]$/gm)].map(m => Number(m[1]));
+    expect(Math.max(...xs)).toBeGreaterThanOrEqual(100);
+    // The far flood is painted first and carries the last stop's colour.
+    expect(content.slice(0, content.indexOf('f\n'))).toContain('1 1 1 rg');
   });
 
   it('spans far enough to cover a path that is long across the axis', () => {
@@ -137,8 +221,8 @@ describe('gradient shading fallback', () => {
     ];
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), inset));
     const greys = greyLevels(content);
-    expect(greys[0]).toBe(0); // flat black below 0.25
-    expect(greys[99]).toBe(1); // flat white above 0.75
-    expect(greys[49]).toBeCloseTo(0.49, 2); // mid-ramp
+    expect(greys[0]).toBe(1); // flat white above 0.75 (far band, painted first)
+    expect(greys[99]).toBe(0); // flat black below 0.25
+    expect(greys[50]).toBeCloseTo(0.49, 2); // mid-ramp
   });
 });

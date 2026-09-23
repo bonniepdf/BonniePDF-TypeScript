@@ -888,21 +888,18 @@ export class PdfCanvas implements ICanvas {
     // path is long across the axis, and an absolute constant is meaningless
     // under a paint transform that scales.
     const halfSpan = this.maxPerpendicularReach(paint, perpX, perpY, bbox);
+    // How far the path runs along the axis, which is what the shading's
+    // /Extend [true true] would flood. Beyond it there is nothing to paint.
+    const [tMin, tMax] = this.axisProjection(paint, dx, dy, bbox);
 
-    for (let i = 0; i < bands; i++) {
-      const t0 = i / bands;
-      const t1 = (i + 1) / bands;
-      // The band's centre is its mean position, so a linear ramp reproduces
-      // exactly. Sampling an edge biases the whole ramp half a band.
-      const color = sampleNormalizedStops(stops, (i + 0.5) / bands);
-
+    /** One quad spanning `t0..t1` along the axis and the full span across it. */
+    const quad = (t0: number, t1: number, color: Color): void => {
       const x0 = paint.start.x + dx * t0;
       const y0 = paint.start.y + dy * t0;
       const x1 = paint.start.x + dx * t1;
       const y1 = paint.start.y + dy * t1;
 
-      // Quad corners perpendicular to the gradient axis, in paint space, then
-      // mapped into canvas space. Generating them in paint space is what makes a
+      // Corners are generated in paint space and mapped, which is what makes a
       // sheared ramp come out sheared rather than merely rotated.
       const corners = [
         this.toPaintedPdfPoint(paint.transform, x0 + perpX * halfSpan, y0 + perpY * halfSpan),
@@ -911,8 +908,7 @@ export class PdfCanvas implements ICanvas {
         this.toPaintedPdfPoint(paint.transform, x1 + perpX * halfSpan, y1 + perpY * halfSpan),
       ];
 
-      // Strips abut, so nothing composites over anything and the sampled alpha
-      // is the alpha to paint. Unlike the disc case, no correction is needed.
+      PdfOperators.saveState(this.stream);
       if (color.scA < 1) this.applyColorAlpha(color);
       PdfOperators.setFillColor(this.stream, color);
       PdfOperators.moveTo(this.stream, corners[0].x, corners[0].y);
@@ -921,7 +917,59 @@ export class PdfCanvas implements ICanvas {
       PdfOperators.lineTo(this.stream, corners[3].x, corners[3].y);
       PdfOperators.closePath(this.stream);
       PdfOperators.fill(this.stream);
+      PdfOperators.restoreState(this.stream);
+    };
+
+    // The bands are a stack painted from the far end back: each one reaches all
+    // the way to the near end, so every band completely covers the one before it.
+    //
+    // A hairline overlap is not enough, and measuring is what showed it. A
+    // renderer antialiases each quad's edges and composites the results, so two
+    // paths that each cover a boundary pixel ~60% leave it ~16% uncovered rather
+    // than filling it: coverage multiplies, it does not add. Abutting quads and
+    // narrowly overlapping ones both leave the page showing through along every
+    // boundary, which on any ramp that is not axis-aligned reads as a moiré
+    // lattice. Only full coverage by a single path removes it, which is what the
+    // stack gives - and it is why the disc approximation never had the problem.
+    //
+    // Past the far end, /Extend floods with the last stop's colour. Painted
+    // first, beneath the stack.
+    const far = this.bandColor(stops, bands, bands);
+    if (tMax > 1 && far !== null) quad(1 - 0.5 / bands, tMax, far);
+
+    for (let i = bands - 1; i >= 0; i--) {
+      const band = this.bandColor(stops, i, bands);
+      if (band === null) continue; // nothing visible to add at this band
+      quad(tMin, (i + 1) / bands, band);
     }
+
+    // Before the near end, /Extend floods with the first stop's colour, over the
+    // innermost band.
+    if (tMin < 0) {
+      const flood = this.bandColor(stops, -1, bands);
+      if (flood !== null) quad(tMin, 0.5 / bands, flood);
+    }
+  }
+
+  /**
+   * The colour band `i` is painted with, given that the band beyond it is
+   * already down.
+   *
+   * Whether the backdrop is corrected for depends on something the canvas can
+   * actually tell: a shading resolver that *declined* this gradient did so
+   * because it is translucent under PDF/A-1, where the alpha ExtGState is forced
+   * to `/ca 1`. The correction solves for a (colour, *alpha*) pair, so with the
+   * alpha discarded the corrected colour is simply the wrong colour and the ramp
+   * comes out visibly distorted. With no resolver at all the alpha is honoured
+   * and the correction is what keeps the overlapping stack from compounding it.
+   *
+   * `i` of `bands` or `-1` asks for the /Extend flood past either end.
+   */
+  private bandColor(stops: readonly ShadingStop[], i: number, bands: number): Color | null {
+    const at = (n: number): number => (n < 0 ? 0 : n >= bands ? 1 : (n + 0.5) / bands);
+    const target = sampleNormalizedStops(stops, at(i));
+    if (this._shadingResolver !== undefined) return target;
+    return correctOverDisc(target, sampleNormalizedStops(stops, at(i + 1)));
   }
 
   /**
@@ -948,6 +996,38 @@ export class PdfCanvas implements ICanvas {
     return reach;
   }
 
+  /**
+   * How far the path's bounding box runs along the gradient axis, as a `t`
+   * range, widened to at least the ramp's own `0..1`.
+   *
+   * This is what a native shading's `/Extend [true true]` covers. Without it the
+   * approximation paints only `0..1` and leaves everything beyond the axis
+   * unpainted, which shows up as bare wedges on any rotated or off-centre
+   * gradient — the native path fills them.
+   */
+  private axisProjection(
+    paint: LinearGradientPaint,
+    dx: number,
+    dy: number,
+    bbox: [number, number, number, number]
+  ): [number, number] {
+    const lenSq = dx * dx + dy * dy;
+    const [x0, y0, x1, y1] = bbox;
+    let tMin = 0;
+    let tMax = 1;
+    for (const [cx, cy] of [
+      [x0, y0],
+      [x1, y0],
+      [x1, y1],
+      [x0, y1],
+    ] as const) {
+      const t = ((cx - paint.start.x) * dx + (cy - paint.start.y) * dy) / lenSq;
+      if (t < tMin) tMin = t;
+      if (t > tMax) tMax = t;
+    }
+    return [tMin, tMax];
+  }
+
   private emitRadialGradientFill(paint: RadialGradientPaint): void {
     // Prefer a native PDF Type-3 radial shading (see emitShading). Falls back to
     // the disc approximation when shadings can't be used (translucent gradient
@@ -967,7 +1047,7 @@ export class PdfCanvas implements ICanvas {
     };
     const resolved = this._shadingResolver?.(request);
     if (resolved) this.emitShading(resolved, paint.transform);
-    else this.emitRadialGradientDiscs(paint, stops);
+    else this.emitRadialGradientDiscs(paint, stops, bbox);
   }
 
   /**
@@ -1092,7 +1172,11 @@ export class PdfCanvas implements ICanvas {
     return [minX, minY, maxX, maxY];
   }
 
-  private emitRadialGradientDiscs(paint: RadialGradientPaint, stops: readonly ShadingStop[]): void {
+  private emitRadialGradientDiscs(
+    paint: RadialGradientPaint,
+    stops: readonly ShadingStop[],
+    bbox: [number, number, number, number]
+  ): void {
     // Approximate the radial gradient as a stack of overlapping filled discs,
     // largest first. Overlapping (rather than abutting annuli) is what keeps the
     // result smooth: each disc paints over the previous disc's antialiased edge,
@@ -1111,13 +1195,42 @@ export class PdfCanvas implements ICanvas {
     const cx = paint.center.x;
     const cy = paint.center.y;
 
-    for (let i = bands - 1; i >= 0; i--) {
-      const target = sampleNormalizedStops(stops, (i + 0.5) / bands);
-      // Whatever the larger discs already painted at this radius equals the
-      // gradient sample one band further out (fully transparent past the rim).
-      const below = i + 1 < bands ? sampleNormalizedStops(stops, (i + 1.5) / bands) : PdfCanvas.TRANSPARENT;
+    // Past the rim, /Extend floods the rest of the path with the last stop's
+    // colour — which the native shading does and this approximation used not to,
+    // leaving a bare disc where the shading fills the whole clipped region.
+    // Painted first, with nothing beneath it, and overlapped by the stack.
+    // For a ramp that fades to nothing the flood is transparent and drops out,
+    // which is also what the native shading shows.
+    const rim = sampleNormalizedStops(stops, 1);
+    if (rim.scA > 0) {
+      const [x0, y0, x1, y1] = bbox;
+      PdfOperators.saveState(this.stream);
+      if (rim.scA < 1) this.applyColorAlpha(rim);
+      PdfOperators.setFillColor(this.stream, rim);
+      const corners = [
+        this.toPaintedPdfPoint(paint.transform, x0, y0),
+        this.toPaintedPdfPoint(paint.transform, x1, y0),
+        this.toPaintedPdfPoint(paint.transform, x1, y1),
+        this.toPaintedPdfPoint(paint.transform, x0, y1),
+      ];
+      PdfOperators.moveTo(this.stream, corners[0].x, corners[0].y);
+      PdfOperators.lineTo(this.stream, corners[1].x, corners[1].y);
+      PdfOperators.lineTo(this.stream, corners[2].x, corners[2].y);
+      PdfOperators.lineTo(this.stream, corners[3].x, corners[3].y);
+      PdfOperators.closePath(this.stream);
+      PdfOperators.fill(this.stream);
+      PdfOperators.restoreState(this.stream);
+    }
 
-      const disc = correctOverDisc(target, below);
+    for (let i = bands - 1; i >= 0; i--) {
+      // Beneath this disc is the band one step further out, or - at the
+      // outermost band - the /Extend flood, whose colour bandColor also gives.
+      // Past the rim with no flood (a ramp that fades to nothing) there is
+      // nothing beneath at all.
+      const disc =
+        i + 1 < bands || rim.scA > 0
+          ? this.bandColor(stops, i, bands)
+          : correctOverDisc(sampleNormalizedStops(stops, (i + 0.5) / bands), PdfCanvas.TRANSPARENT);
       if (disc === null) continue; // nothing visible to add at this band
 
       const r = paint.radius * ((i + 1) / bands);

@@ -72,8 +72,9 @@ describe('gradient shading fallback', () => {
     // Fixed at 100 rather than derived from the painted area: deriving it would
     // make the bytes depend on layout arithmetic, which this path cannot afford.
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));
-    expect(count(content, 'f\n')).toBe(100);
-    expect(greyLevels(content)).toHaveLength(100);
+    // 100 bands plus the far /Extend flood beneath them.
+    expect(count(content, 'f\n')).toBe(101);
+    expect(greyLevels(content)).toHaveLength(101);
     expect(content).not.toContain('/Sh');
 
     // Note: how the *clip* path spells a rectangle is deliberately not asserted
@@ -117,10 +118,11 @@ describe('gradient shading fallback', () => {
     // t=0.01. Sampling an edge would bias the whole ramp half a band.
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));
     const greys = greyLevels(content);
-    expect(greys).toHaveLength(100);
-    // Painted from the far end back, so the first fill is the last band.
-    expect(greys[0]).toBeCloseTo(0.995, 4);
-    expect(greys[99]).toBeCloseTo(0.005, 4);
+    expect(greys).toHaveLength(101);
+    // The far flood comes first, then the bands from the far end back.
+    expect(greys[0]).toBe(1);
+    expect(greys[1]).toBeCloseTo(0.995, 4);
+    expect(greys[100]).toBeCloseTo(0.005, 4);
   });
 
   it('stacks the bands so each is fully covered by a single path', () => {
@@ -130,9 +132,10 @@ describe('gradient shading fallback', () => {
     // multiplies, it does not add, and the gaps read as a moiré lattice on any
     // ramp that is not axis-aligned. Every band therefore reaches the near end.
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));
-    // One moveTo for the clip path, then one per band, all at the same near end.
+    // One moveTo for the clip path, then one for the far flood and one per band,
+    // all at the same near end.
     const starts = [...content.matchAll(/^(-?[\d.]+) -?[\d.]+ m$/gm)].map(m => Number(m[1])).slice(1);
-    expect(starts).toHaveLength(100);
+    expect(starts).toHaveLength(101);
     expect(new Set(starts).size).toBe(1);
   });
 
@@ -147,18 +150,16 @@ describe('gradient shading fallback', () => {
       { offset: 1, color: new Color(0, 0, 255, 60) },
     ];
     const paint = new LinearGradientPaint(new Point(0, 0), new Point(100, 0), translucent);
-    const firstOf = (c: string): number[] =>
-      c
-        .match(/^([\d.]+) ([\d.]+) ([\d.]+) rg$/m)!
-        .slice(1)
-        .map(Number);
+    const outermostBand = (c: string): number[] =>
+      [...c.matchAll(/^([\d.]+) ([\d.]+) ([\d.]+) rg$/gm)][1].slice(1).map(Number);
 
-    // Band 99 is painted first and sampled at t=0.995: essentially the last stop.
-    const declined = firstOf(fillWith(paint, [0, 0, 100, 50], true));
+    // Band 99 is painted next after the far flood and sampled at t=0.995:
+    // essentially the last stop.
+    const declined = outermostBand(fillWith(paint, [0, 0, 100, 50], true));
     expect(declined[0]).toBeCloseTo(0.005, 2);
     expect(declined[2]).toBeCloseTo(0.995, 2);
     // With the alpha honoured the same band is corrected for what lies beneath.
-    expect(firstOf(fillWith(paint))).not.toEqual(declined);
+    expect(outermostBand(fillWith(paint))).not.toEqual(declined);
   });
 
   it('covers the path where it runs past the end of the axis', () => {
@@ -170,6 +171,45 @@ describe('gradient shading fallback', () => {
     expect(Math.max(...xs)).toBeGreaterThanOrEqual(100);
     // The far flood is painted first and carries the last stop's colour.
     expect(content.slice(0, content.indexOf('f\n'))).toContain('1 1 1 rg');
+  });
+
+  it('reproduces a ramp that ends translucent rather than transparent', () => {
+    // Every band is corrected for the band beyond it, and the band beyond the
+    // outermost one is the far flood. The flood therefore has to lie beneath the
+    // whole stack: when it covered only t >= 1, a ramp ending at alpha 0.5
+    // composited to the same result as one ending at 0 - near-transparent at the
+    // far end, and nothing at all past it.
+    const ramp = [
+      { offset: 0, color: Color.fromScRgb(1, 0, 0, 1) },
+      { offset: 1, color: Color.fromScRgb(1, 0, 0, 0.5) },
+    ];
+    const { canvas, stream } = fallbackCanvas();
+    (canvas as unknown as { _alphaGraphicsStateResolver: (a: number) => string })._alphaGraphicsStateResolver = a =>
+      `/GS_${a}`;
+    canvas.beginPath();
+    canvas.addRect(0, 0, 150, 50);
+    canvas.fillCurrentPath(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), ramp));
+
+    // Composite the emitted quads source-over along the axis.
+    const fills: { alpha: number; lo: number; hi: number }[] = [];
+    let alpha = 1;
+    let xs: number[] = [];
+    for (const line of stream.join('').split('\n')) {
+      const tok = line.trim().split(/\s+/);
+      const op = tok[tok.length - 1];
+      if (op === 'Q') alpha = 1;
+      else if (op === 'gs' && tok[0].startsWith('/GS_')) alpha = Number(tok[0].slice(4));
+      else if (op === 'm' || op === 'l') xs.push(Number(tok[0]));
+      else if (op === 'f') {
+        fills.push({ alpha, lo: Math.min(...xs), hi: Math.max(...xs) });
+        xs = [];
+      } else if (op === 'n' || op === 'W' || op === 're') xs = [];
+    }
+    const composite = (x: number): number =>
+      fills.filter(f => x >= f.lo && x <= f.hi).reduce((a, f) => f.alpha + a * (1 - f.alpha), 0);
+
+    for (const x of [5, 25, 50, 75, 95, 99.5]) expect(composite(x)).toBeCloseTo(1 - 0.5 * (x / 100), 2);
+    expect(composite(125)).toBeCloseTo(0.5, 4);
   });
 
   it('spans far enough to cover a path that is long across the axis', () => {
@@ -221,8 +261,9 @@ describe('gradient shading fallback', () => {
     ];
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), inset));
     const greys = greyLevels(content);
-    expect(greys[0]).toBe(1); // flat white above 0.75 (far band, painted first)
-    expect(greys[99]).toBe(0); // flat black below 0.25
-    expect(greys[50]).toBeCloseTo(0.49, 2); // mid-ramp
+    expect(greys[0]).toBe(1); // the far flood, painted first
+    expect(greys[1]).toBe(1); // flat white above 0.75 (far band)
+    expect(greys[100]).toBe(0); // flat black below 0.25
+    expect(greys[51]).toBeCloseTo(0.49, 2); // mid-ramp
   });
 });

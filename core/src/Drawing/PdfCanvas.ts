@@ -932,10 +932,15 @@ export class PdfCanvas implements ICanvas {
     // lattice. Only full coverage by a single path removes it, which is what the
     // stack gives - and it is why the disc approximation never had the problem.
     //
-    // Past the far end, /Extend floods with the last stop's colour. Painted
-    // first, beneath the stack.
-    const far = this.bandColor(stops, bands, bands);
-    if (tMax > 1 && far !== null) quad(1 - 0.5 / bands, tMax, far);
+    // Past the far end, /Extend floods with the last stop's colour. It is painted
+    // first, beneath the whole stack and across the whole range, at its sampled
+    // colour: nothing lies beneath it to correct for. Every band's correction
+    // assumes the band beyond it is already down, and for the outermost band
+    // that is this flood - so it has to be there wherever that band shows, not
+    // only past t=1. A ramp that fades to nothing floods with nothing and drops
+    // out, exactly as the radial rim flood does.
+    const far = sampleNormalizedStops(stops, 1);
+    if (far.scA > 0) quad(tMin, tMax, far);
 
     for (let i = bands - 1; i >= 0; i--) {
       const band = this.bandColor(stops, i, bands);
@@ -963,7 +968,8 @@ export class PdfCanvas implements ICanvas {
    * comes out visibly distorted. With no resolver at all the alpha is honoured
    * and the correction is what keeps the overlapping stack from compounding it.
    *
-   * `i` of `bands` or `-1` asks for the /Extend flood past either end.
+   * `i` of `-1` asks for the /Extend flood before the near end. (The far-end
+   * flood is painted uncorrected, beneath everything, so it never comes here.)
    */
   private bandColor(stops: readonly ShadingStop[], i: number, bands: number): Color | null {
     const at = (n: number): number => (n < 0 ? 0 : n >= bands ? 1 : (n + 0.5) / bands);

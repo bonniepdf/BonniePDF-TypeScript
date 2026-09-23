@@ -11,6 +11,13 @@ import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
 import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint/Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 import type { ShadingRequest, ShadingStop } from '../Rendering/Pdf/GradientShading';
+import {
+  applyPaintTransform,
+  invertPaintTransform,
+  isIdentityPaintTransform,
+  mapBox,
+  type PaintTransform,
+} from './PaintTransform';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 import type { TtfFont } from '../Typography/TrueType/TtfFont';
 
@@ -807,17 +814,22 @@ export class PdfCanvas implements ICanvas {
     const dy0 = paint.end.y - paint.start.y;
     if (dx0 === 0 && dy0 === 0) return; // degenerate axis — nothing to paint
 
+    const bbox = this.paintSpaceBBox(paint.transform);
+    // A transform that collapses paint space leaves no space to interpret the
+    // shading's coordinates in, so the paint draws nothing at all.
+    if (bbox === null) return;
+
     const request: ShadingRequest = {
       shadingType: 2,
       coords: [paint.start.x, paint.start.y, paint.end.x, paint.end.y],
       stops: this.normalizeShadingStops(paint.stops),
       extend: [true, true],
-      bbox: this.currentPathBBoxCanvas(),
+      bbox,
       hasAlpha: paint.stops.some(s => s.color.scA < 1),
     };
     const resolved = this._shadingResolver?.(request);
     if (resolved) {
-      this.emitShading(resolved);
+      this.emitShading(resolved, paint.transform);
       return;
     }
     this.emitLinearGradientStrips(paint);
@@ -845,12 +857,14 @@ export class PdfCanvas implements ICanvas {
       const x1 = paint.start.x + dx * t1;
       const y1 = paint.start.y + dy * t1;
 
-      // Quad corners perpendicular to gradient axis
+      // Quad corners perpendicular to the gradient axis, in paint space, then
+      // mapped into canvas space. Generating them in paint space is what makes a
+      // sheared ramp come out sheared rather than merely rotated.
       const corners = [
-        this.toPdfPoint(x0 + perpX * halfSpan, y0 + perpY * halfSpan),
-        this.toPdfPoint(x0 - perpX * halfSpan, y0 - perpY * halfSpan),
-        this.toPdfPoint(x1 - perpX * halfSpan, y1 - perpY * halfSpan),
-        this.toPdfPoint(x1 + perpX * halfSpan, y1 + perpY * halfSpan),
+        this.toPaintedPdfPoint(paint.transform, x0 + perpX * halfSpan, y0 + perpY * halfSpan),
+        this.toPaintedPdfPoint(paint.transform, x0 - perpX * halfSpan, y0 - perpY * halfSpan),
+        this.toPaintedPdfPoint(paint.transform, x1 - perpX * halfSpan, y1 - perpY * halfSpan),
+        this.toPaintedPdfPoint(paint.transform, x1 + perpX * halfSpan, y1 + perpY * halfSpan),
       ];
 
       if (color.scA < 1) this.applyColorAlpha(color);
@@ -869,16 +883,19 @@ export class PdfCanvas implements ICanvas {
     // the disc approximation when shadings can't be used (translucent gradient
     // under PDF/A-1, which forbids transparency).
     const inner = paint.focal ?? paint.center;
+    const bbox = this.paintSpaceBBox(paint.transform);
+    if (bbox === null) return;
+
     const request: ShadingRequest = {
       shadingType: 3,
       coords: [inner.x, inner.y, 0, paint.center.x, paint.center.y, paint.radius],
       stops: this.normalizeShadingStops(paint.stops),
       extend: [true, true],
-      bbox: this.currentPathBBoxCanvas(),
+      bbox,
       hasAlpha: paint.stops.some(s => s.color.scA < 1),
     };
     const resolved = this._shadingResolver?.(request);
-    if (resolved) this.emitShading(resolved);
+    if (resolved) this.emitShading(resolved, paint.transform);
     else this.emitRadialGradientDiscs(paint);
   }
 
@@ -890,13 +907,53 @@ export class PdfCanvas implements ICanvas {
    * gradient the soft-mask ExtGState is set first (under the same CTM, so the
    * mask's group aligns with the colour shading).
    */
-  private emitShading(resolved: { shadingName: string; softMaskGs: string | null }): void {
+  private emitShading(
+    resolved: { shadingName: string; softMaskGs: string | null },
+    paintTransform?: PaintTransform
+  ): void {
     PdfOperators.saveState(this.stream);
     const [a, b, c, d, e, f] = this.ctm;
     PdfOperators.concatMatrix(this.stream, a, -b, c, -d, e + this.xOffset, this.height - this.yOffset - f);
+    // The paint transform is concatenated after the canvas matrix, so the
+    // shading's /Coords are read in the paint's own space. A second `cm` rather
+    // than a pre-multiplied one keeps the canvas mapping byte-identical for the
+    // overwhelmingly common paint with no transform.
+    if (paintTransform && !isIdentityPaintTransform(paintTransform)) {
+      PdfOperators.concatMatrix(
+        this.stream,
+        paintTransform.a,
+        paintTransform.b,
+        paintTransform.c,
+        paintTransform.d,
+        paintTransform.e,
+        paintTransform.f
+      );
+    }
+    // The soft mask is set under the same CTM as the colour shading, so the
+    // mask's group aligns with it.
     if (resolved.softMaskGs) PdfOperators.setGraphicsState(this.stream, resolved.softMaskGs);
     this.stream.push(`${resolved.shadingName} sh\n`);
     PdfOperators.restoreState(this.stream);
+  }
+
+  /**
+   * The painted region's bounding box, in the paint's own space.
+   *
+   * A translucent gradient's soft mask is a form XObject whose `/BBox` is in the
+   * form's space - which is paint space once a transform exists - so the canvas
+   * box has to be mapped back through the inverse. Leaving it in canvas space
+   * clips the mask wherever the transform moves content outside it, which reads
+   * as a gradient fading to nothing at one edge.
+   *
+   * Returns `null` for a transform that cannot be inverted: it has collapsed
+   * paint space, so there is nothing to paint.
+   */
+  private paintSpaceBBox(paintTransform: PaintTransform | undefined): [number, number, number, number] | null {
+    const canvasBox = this.currentPathBBoxCanvas();
+    if (!paintTransform || isIdentityPaintTransform(paintTransform)) return canvasBox;
+    const inverse = invertPaintTransform(paintTransform);
+    if (!inverse) return null;
+    return mapBox(inverse, canvasBox);
   }
 
   /** Sorts/clamps stops and pads them so the run spans the full [0, 1] domain. */
@@ -926,6 +983,23 @@ export class PdfCanvas implements ICanvas {
     if (mapped[0].offset > 0) mapped.unshift({ ...mapped[0], offset: 0 });
     if (mapped[mapped.length - 1].offset < 1) mapped.push({ ...mapped[mapped.length - 1], offset: 1 });
     return mapped;
+  }
+
+  /**
+   * A point in a paint's own space, mapped to PDF page space.
+   *
+   * Used by the strip and disc fallbacks, which generate their geometry in paint
+   * space so that a transform shears or scales the generated shapes rather than
+   * only moving them.
+   */
+  private toPaintedPdfPoint(
+    paintTransform: PaintTransform | undefined,
+    x: number,
+    y: number
+  ): { x: number; y: number } {
+    if (!paintTransform || isIdentityPaintTransform(paintTransform)) return this.toPdfPoint(x, y);
+    const mapped = applyPaintTransform(paintTransform, x, y);
+    return this.toPdfPoint(mapped.x, mapped.y);
   }
 
   /** Bounding box of the current path in canvas space (control points included). */
@@ -979,27 +1053,36 @@ export class PdfCanvas implements ICanvas {
       PdfOperators.saveState(this.stream);
       if (disc.scA < 1) this.applyColorAlpha(disc);
       PdfOperators.setFillColor(this.stream, disc);
-      this.emitCirclePath(cx, cy, r);
+      this.emitCirclePath(cx, cy, r, paint.transform);
       PdfOperators.fill(this.stream);
       PdfOperators.restoreState(this.stream);
     }
   }
 
-  /** Emits a closed circle path (4 cubic-bezier quadrants) in PDF user space. */
-  private emitCirclePath(cx: number, cy: number, r: number): void {
+  /**
+   * Emits a closed circle path (4 cubic-bezier quadrants) in PDF user space.
+   *
+   * With a paint transform the control points are generated in paint space and
+   * mapped, which yields a true ellipse rather than an approximation of one: an
+   * affine image of a circle-approximating Bézier *is* the corresponding
+   * ellipse-approximating Bézier, because affine maps take Béziers to Béziers of
+   * the same degree.
+   */
+  private emitCirclePath(cx: number, cy: number, r: number, paintTransform?: PaintTransform): void {
     const kr = r * 0.5522847498;
-    const p0 = this.toPdfPoint(cx + r, cy);
-    const c1a = this.toPdfPoint(cx + r, cy + kr);
-    const c1b = this.toPdfPoint(cx + kr, cy + r);
-    const p1 = this.toPdfPoint(cx, cy + r);
-    const c2a = this.toPdfPoint(cx - kr, cy + r);
-    const c2b = this.toPdfPoint(cx - r, cy + kr);
-    const p2 = this.toPdfPoint(cx - r, cy);
-    const c3a = this.toPdfPoint(cx - r, cy - kr);
-    const c3b = this.toPdfPoint(cx - kr, cy - r);
-    const p3 = this.toPdfPoint(cx, cy - r);
-    const c4a = this.toPdfPoint(cx + kr, cy - r);
-    const c4b = this.toPdfPoint(cx + r, cy - kr);
+    const at = (x: number, y: number): { x: number; y: number } => this.toPaintedPdfPoint(paintTransform, x, y);
+    const p0 = at(cx + r, cy);
+    const c1a = at(cx + r, cy + kr);
+    const c1b = at(cx + kr, cy + r);
+    const p1 = at(cx, cy + r);
+    const c2a = at(cx - kr, cy + r);
+    const c2b = at(cx - r, cy + kr);
+    const p2 = at(cx - r, cy);
+    const c3a = at(cx - r, cy - kr);
+    const c3b = at(cx - kr, cy - r);
+    const p3 = at(cx, cy - r);
+    const c4a = at(cx + kr, cy - r);
+    const c4b = at(cx + r, cy - kr);
     PdfOperators.moveTo(this.stream, p0.x, p0.y);
     PdfOperators.curveTo(this.stream, c1a.x, c1a.y, c1b.x, c1b.y, p1.x, p1.y);
     PdfOperators.curveTo(this.stream, c2a.x, c2a.y, c2b.x, c2b.y, p2.x, p2.y);

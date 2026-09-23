@@ -6,7 +6,7 @@ import { Point } from '../../src/Core/Point';
 
 /**
  * When a gradient cannot be painted as a native PDF shading, PdfCanvas
- * approximates it: a linear ramp becomes abutting quads perpendicular to its
+ * approximates it: a linear ramp becomes a stack of overlapping quads across its
  * axis, a radial one a stack of overlapping discs.
  *
  * This is reached in real output - a translucent gradient under PDF/A-1, whose
@@ -68,7 +68,7 @@ describe('gradient shading fallback', () => {
     return [...content.matchAll(/^([\d.]+) \1 \1 rg$/gm)].map(m => Number(m[1]));
   }
 
-  it('approximates a linear gradient with 100 abutting quads', () => {
+  it('approximates a linear gradient with a stack of 100 bands', () => {
     // Fixed at 100 rather than derived from the painted area: deriving it would
     // make the bytes depend on layout arithmetic, which this path cannot afford.
     const content = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops));

@@ -96,4 +96,38 @@ describe('gradient stroke', () => {
     }
     expect(segments(content)).toBe(10);
   });
+
+  it('reads the gradient through its paint transform', () => {
+    // The paint's own space is scaled 2x onto the canvas, so the canvas midpoint
+    // x=50 is x=25 in paint space: t=0.25, as a filled shape shows it.
+    const paint = new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops, {
+      a: 2,
+      b: 0,
+      c: 0,
+      d: 1,
+      e: 0,
+      f: 0,
+    });
+    const content = stroke(paint, c => {
+      c.moveTo(0, 0);
+      c.lineTo(100, 0);
+    });
+    expect(greys(content)).toEqual([0.25]);
+  });
+
+  it('strokes nothing through a transform that collapses paint space', () => {
+    const paint = new RadialGradientPaint(new Point(0, 0), 10, stops, undefined, {
+      a: 1,
+      b: 0,
+      c: 0,
+      d: 0,
+      e: 0,
+      f: 0,
+    });
+    const content = stroke(paint, c => {
+      c.moveTo(0, 0);
+      c.lineTo(100, 0);
+    });
+    expect(segments(content)).toBe(0);
+  });
 });

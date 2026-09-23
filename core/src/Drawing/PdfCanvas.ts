@@ -1266,18 +1266,28 @@ export class PdfCanvas implements ICanvas {
    * colour sampled at its midpoint. The midpoint is taken in the same space the
    * gradient's geometry is in, so a transformed canvas moves the ramp with the
    * path rather than distorting it, and the colour comes from the normalized
-   * stops the fill paths sample.
+   * stops the fill paths sample. With a paint transform the midpoint is mapped
+   * back into the paint's own space first, exactly as the fills read their
+   * geometry there; a transform that cannot be inverted paints nothing.
    *
    * A translucent segment is wrapped in its own `q`/`Q`, so its alpha cannot
    * leak into the opaque segments after it; an opaque segment needs neither.
    */
   private emitGradientStroke(paint: LinearGradientPaint | RadialGradientPaint): void {
+    let toPaintSpace: PaintTransform | null = null;
+    if (!isIdentityPaintTransform(paint.transform)) {
+      toPaintSpace = invertPaintTransform(paint.transform!);
+      if (toPaintSpace === null) return;
+    }
     const stops = this.normalizeShadingStops(paint.stops);
     for (const polyline of this.linearizeCurrentPath(200)) {
       for (let i = 0; i < polyline.length - 1; i++) {
         const p0 = polyline[i];
         const p1 = polyline[i + 1];
-        const t = this.projectOntoGradient((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, paint);
+        const mx = (p0.x + p1.x) / 2;
+        const my = (p0.y + p1.y) / 2;
+        const mid = toPaintSpace === null ? { x: mx, y: my } : applyPaintTransform(toPaintSpace, mx, my);
+        const t = this.projectOntoGradient(mid.x, mid.y, paint);
         const color = sampleNormalizedStops(stops, t);
         const s = this.toPdfPoint(p0.x, p0.y);
         const e = this.toPdfPoint(p1.x, p1.y);

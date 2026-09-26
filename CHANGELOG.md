@@ -11,6 +11,14 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Added
 
+- **`RichText` substitutes `{{CurrentPage}}` and `{{TotalPages}}`.** A span whose text
+  holds a page token now behaves as it does in a `TextBlock`: the current page number
+  is filled in as each page is drawn, the total is a deferred object that resolves
+  once the whole document is laid out, and layout reserves the width of two digits
+  for each. Alignment corrects for the page number's real width. Rich text with no
+  tokens is unchanged. (The .NET implementation gained the same behaviour, which its
+  fluent `CurrentPageNumber()` and `TotalPages()` depend on.)
+
 - **Images are reduced to the resolution their printed size can use.** An image
   used to be embedded at its source resolution however small it was drawn: a
   2658 x 512 logo placed 175 pt wide was stored at about 1,090 pixels per inch,
@@ -224,6 +232,18 @@ x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
   are exported for callers that want the maths directly.
 
 ### Fixed
+
+- **Header and footer content in a container was pushed onto the wrong page.** A
+  `Container` checks that it fits above the bottom margin, and the footer is painted
+  inside the bottom margin, so it broke the page in the middle of painting the
+  footer: the footer text landed at the top of a new page. Header and footer chrome
+  no longer paginates.
+- **Rich text sized by its container no longer wraps.** A container that gives a text
+  its own preferred width as the maximum (a centred footer, an auto-width column)
+  could wrap the last word onto a second line: preferred width summed whole span
+  widths, while line breaking measures word by word, and the two disagree by
+  float rounding and by trailing spaces. Preferred width now comes from the same
+  word flow that breaks lines. A centred "Page 1 of 2" footer stays on one line.
 
 - **Regression coverage for RGBA PNG defiltering.** `ImageLoader.loadPngAsync`
   is now tested against PNGs using each of the five row filters (None, Sub, Up,

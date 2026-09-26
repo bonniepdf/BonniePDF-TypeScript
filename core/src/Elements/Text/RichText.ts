@@ -6,6 +6,7 @@ import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { TextAlignment } from './TextAlignment';
+import { TextElementBase } from './TextElementBase';
 import { TextStyle } from './TextStyle';
 import { TextSpan } from './TextSpan';
 import { TextDecoration } from './TextDecoration';
@@ -16,6 +17,7 @@ import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { getTextSpacingWidth } from '../../Typography/TextSpacing';
+import type { SvgCanvas } from '../../Drawing/SvgCanvas';
 
 /**
  * A rich text element that supports mixed styling within a single flowing paragraph.
@@ -236,17 +238,19 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     this.invalidateCache();
   }
 
+  /**
+   * The width the text takes on one line, with no wrapping. Measured by the same word flow that
+   * breaks lines, so a container that hands this width back as the maximum can never wrap the text
+   * (summing whole span widths instead disagrees by float rounding, and by trailing spaces, and
+   * wrapped a centred "Page 1 of 2" footer onto two lines).
+   */
   protected override getPreferredContentWidth(): number {
-    // Measure the total width of all spans without wrapping
-    let totalWidth = 0;
-    for (const span of this.spans) {
-      const resolved = this.resolveStyle(span.style);
-      totalWidth +=
-        FontMetrics.getStringWidth(span.text ?? '', resolved.effectiveFontName, resolved.effectiveFontSize) +
-        RichText.styleSpacing(span.text ?? '', resolved);
+    let widest = 0;
+    for (const line of this.computeLines(Number.POSITIVE_INFINITY)) {
+      widest = Math.max(widest, line.totalWidth);
     }
 
-    return totalWidth;
+    return widest;
   }
 
   protected override measureContentHeight(contentWidth: number): number {
@@ -416,9 +420,10 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
           const isInterSpanSpace = hasLeadingSpace && i === 0 && prevSpanEndedWithSpace && !text.startsWith(' ');
           const spaceStyle = isInterSpanSpace && prevResolvedStyle ? prevResolvedStyle : resolved;
 
+          const measuredPart = RichText.measured(part);
           const partWidth =
-            FontMetrics.getStringWidth(part, resolved.effectiveFontName, resolved.effectiveFontSize) +
-            RichText.styleSpacing(part, resolved);
+            FontMetrics.getStringWidth(measuredPart, resolved.effectiveFontName, resolved.effectiveFontSize) +
+            RichText.styleSpacing(measuredPart, resolved);
           const spaceWidth = hasLeadingSpace
             ? FontMetrics.getStringWidth(' ', spaceStyle.effectiveFontName, spaceStyle.effectiveFontSize) +
               RichText.styleSpacing(' ', spaceStyle)
@@ -478,12 +483,17 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   ): void {
     if (line.runs.length === 0) return;
 
+    // Layout reserved two digits for each page token; alignment uses the width the line really has
+    // on this page (the current page number may be one digit or three). Equal to line.totalWidth
+    // for a line with no tokens.
+    const lineWidth = this.actualLineWidth(ctx, line);
+
     // Calculate starting X based on alignment
     let startX = baseX;
     if (this.alignment === TextAlignment.Center) {
-      startX += (contentWidth - line.totalWidth) / 2;
+      startX += (contentWidth - lineWidth) / 2;
     } else if (this.alignment === TextAlignment.Right) {
-      startX += contentWidth - line.totalWidth;
+      startX += contentWidth - lineWidth;
     }
 
     // For justify, calculate extra space per space character
@@ -498,7 +508,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       }
 
       if (spaceCount > 0) {
-        extraWordSpacing = (contentWidth - line.totalWidth) / spaceCount;
+        extraWordSpacing = (contentWidth - lineWidth) / spaceCount;
       }
     }
 
@@ -514,7 +524,9 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
       // Draw background highlight if specified
       if (style.backgroundColor) {
-        const runWidth = this.measureRunWidth(run, extraWordSpacing);
+        const runWidth = RichText.hasPageToken(run.text)
+          ? this.actualRunWidth(ctx, run)
+          : this.measureRunWidth(run, extraWordSpacing);
         ctx.canvas.fillRect(currentX, y, runWidth, line.height, style.backgroundColor);
       }
 
@@ -533,6 +545,14 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       // Draw each word segment separately when justified (to apply extra spacing)
       if (useJustify && extraWordSpacing > 0 && run.text.includes(' ')) {
         currentX = this.drawJustifiedRun(ctx, run, currentX, runY, extraWordSpacing);
+      } else if (RichText.hasPageToken(run.text)) {
+        const runWidth = this.drawTokenText(ctx, run.text, currentX, runY, style);
+
+        if (style.decoration !== TextDecoration.None) {
+          this.drawRunDecorations(ctx, style, currentX, runY, runWidth, fontSize);
+        }
+
+        currentX += runWidth;
       } else {
         // Draw the run as a single text call
         ctx.canvas.drawText(currentX, runY, run.text, color, fontSize, fontName, TextAlignment.Left);
@@ -581,8 +601,13 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       }
 
       if (word !== '') {
-        ctx.canvas.drawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
-        const wordWidth = FontMetrics.getStringWidth(word, fontName, fontSize) + RichText.styleSpacing(word, style);
+        let wordWidth: number;
+        if (RichText.hasPageToken(word)) {
+          wordWidth = this.drawTokenText(ctx, word, currentX, y, style);
+        } else {
+          ctx.canvas.drawText(currentX, y, word, color, fontSize, fontName, TextAlignment.Left);
+          wordWidth = FontMetrics.getStringWidth(word, fontName, fontSize) + RichText.styleSpacing(word, style);
+        }
 
         if (style.decoration !== TextDecoration.None) {
           this.drawRunDecorations(ctx, style, currentX, y, wordWidth, fontSize);
@@ -632,10 +657,98 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     return spanStyle.mergeWith(this.defaultStyle);
   }
 
+  // --- Page tokens ---
+  //
+  // {{CurrentPage}} and {{TotalPages}} in a span's text behave as they do in a TextBlock: the current
+  // page number is substituted when the line is drawn, the total page count is drawn as a deferred
+  // object that resolves once the whole document has been laid out, and layout reserves the width of
+  // two digits for each. Text with no token takes the original code path untouched.
+
+  private static hasPageToken(text: string): boolean {
+    return (
+      text.includes('{{') &&
+      (text.includes(TextElementBase.CurrentPageToken) || text.includes(TextElementBase.TotalPagesToken))
+    );
+  }
+
+  /** The text as layout measures it: each page token counts as two digits. */
+  private static measured(text: string): string {
+    return RichText.hasPageToken(text)
+      ? text.split(TextElementBase.TotalPagesToken).join('00').split(TextElementBase.CurrentPageToken).join('00')
+      : text;
+  }
+
+  private static withCurrentPage(ctx: RenderContext, text: string): string {
+    return text.split(TextElementBase.CurrentPageToken).join(String(ctx.currentPageIndex + 1));
+  }
+
+  /** A run's advance on this page: the real current page number, two digits for the total. */
+  private actualRunWidth(ctx: RenderContext, run: StyledRun): number {
+    const actual = RichText.withCurrentPage(ctx, run.text).split(TextElementBase.TotalPagesToken).join('00');
+    return (
+      FontMetrics.getStringWidth(actual, run.style.effectiveFontName, run.style.effectiveFontSize) +
+      RichText.styleSpacing(actual, run.style)
+    );
+  }
+
+  /**
+   * The line's width on this page. Layout measured each page token as two digits; the current page
+   * number may be shorter or longer, so alignment corrects by the difference. Exactly
+   * `line.totalWidth` when no run holds a token.
+   */
+  private actualLineWidth(ctx: RenderContext, line: RichTextLine): number {
+    let width = line.totalWidth;
+    for (const run of line.runs) {
+      if (!run.text || !RichText.hasPageToken(run.text)) continue;
+      width += this.actualRunWidth(ctx, run) - this.measureRunWidth(run, 0);
+    }
+
+    return width;
+  }
+
+  /**
+   * Draws text that holds page tokens at (x, y) and returns its advance. The total page count is a
+   * deferred object, exactly as in a TextBlock.
+   */
+  private drawTokenText(ctx: RenderContext, text: string, x: number, y: number, style: TextStyle): number {
+    const fontName = style.effectiveFontName;
+    const fontSize = style.effectiveFontSize;
+    const color = style.effectiveColor;
+
+    const parts = RichText.withCurrentPage(ctx, text).split(TextElementBase.TotalPagesToken);
+    let currentX = x;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (part.length > 0) {
+        ctx.canvas.drawText(currentX, y, part, color, fontSize, fontName, TextAlignment.Left);
+        currentX += FontMetrics.getStringWidth(part, fontName, fontSize) + RichText.styleSpacing(part, style);
+      }
+
+      if (i === parts.length - 1) continue;
+
+      if (ctx.isSvgMode) {
+        const svgCanvas = ctx.canvas as SvgCanvas;
+        if (typeof svgCanvas.drawDeferredTotalPages === 'function') {
+          svgCanvas.drawDeferredTotalPages(currentX, y, color, fontSize, fontName);
+        } else {
+          ctx.canvas.drawText(currentX, y, '00', color, fontSize, fontName, TextAlignment.Left);
+        }
+      } else {
+        ctx.canvas.drawFormXObject(ctx.registerDeferredXObject(fontName, fontSize, color), currentX, y);
+      }
+
+      currentX += FontMetrics.getStringWidth('00', fontName, fontSize) + RichText.styleSpacing('00', style);
+    }
+
+    return currentX - x;
+  }
+
   private measureRunWidth(run: StyledRun, extraWordSpacing: number): number {
+    const measured = RichText.measured(run.text);
     let baseWidth =
-      FontMetrics.getStringWidth(run.text, run.style.effectiveFontName, run.style.effectiveFontSize) +
-      RichText.styleSpacing(run.text, run.style);
+      FontMetrics.getStringWidth(measured, run.style.effectiveFontName, run.style.effectiveFontSize) +
+      RichText.styleSpacing(measured, run.style);
 
     if (extraWordSpacing > 0) {
       let spaceCount = 0;

@@ -208,6 +208,13 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Fixed
 
+- **Regression coverage for RGBA PNG defiltering.** `ImageLoader.loadPngAsync`
+  is now tested against PNGs using each of the five row filters (None, Sub, Up,
+  Average, Paeth) and a mix of them, checking that colour and alpha match the
+  original pixels. The behaviour was already correct; the .NET implementation
+  had a defect on the Up, Average and Paeth filters for alpha PNGs, now fixed,
+  and both suites now check the same pattern.
+
 - **A page header or footer now reserves body content space.** Previously the
   header and footer were painted into the margin band while body layout still
   ran from the top margin to the bottom margin, so page chrome taller than the

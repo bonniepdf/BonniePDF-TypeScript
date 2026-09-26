@@ -22,6 +22,15 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Changed
 
+- **The PDF canvas writes the same bytes as the .NET implementation for fills
+  and strokes.** The two had drifted apart. A solid `fillCurrentPath` now sits
+  in its own `q`/`Q`, so its colour no longer leaks into what is drawn next; a
+  translucent stroke sets its transparency outside the stroke's `q`, as fills
+  already did; a gradient fill is one `q`/`Q` rather than two; an empty path, or
+  a gradient stroke whose transform cannot be inverted, writes nothing; and a
+  miter limit of 10, PDF's default, is no longer written. Pages look the same;
+  their content streams change wherever the canvas fills or strokes a path.
+
 - **`VerticalStack` honours `breakAllowed` on stateful children.** The keep-together
   check ran for every stateful child regardless of the flag, so
   setting `breakAllowed` had no effect and content the specification says may

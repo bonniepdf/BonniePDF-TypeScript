@@ -25,6 +25,7 @@ export const IMAGE_OWN_OPTION_KEYS = [
   'height',
   'fitMode',
   'maintainAspectRatio',
+  'keepResolution',
 ] as const;
 
 /** The full settable surface, base included. */
@@ -132,6 +133,13 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
    */
   maintainAspectRatio: boolean = true;
 
+  /**
+   * When `true`, the image is embedded at its source resolution regardless of the document's
+   * `maxImageDpi`. If the same image is placed more than once, one placement with this set keeps
+   * the whole embedded copy at full resolution.
+   */
+  keepResolution: boolean = false;
+
   protected override getPreferredContentWidth(): number {
     const info = this.getImageInfo();
     const nativeWidth = info.displayWidth;
@@ -158,6 +166,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
 
     // Calculate display dimensions
     this.calculateDimensions(contentWidth, this.displayWidth, this.displayHeight);
+    info.keepResolution = this.keepResolution;
 
     // Calculate position (Screen coordinates)
     const x = ctx.currentX;

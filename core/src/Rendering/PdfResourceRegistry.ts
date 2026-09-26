@@ -6,6 +6,7 @@ import { StandardFonts } from '../Typography/StandardFonts';
 import { IPdfWriter } from './Writers/IPdfWriter';
 import { FontWriter } from './Writers/FontWriter';
 import { ImageWriter } from './Images/ImageWriter';
+import { ImageResampler } from './Images/ImageResampler';
 import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
@@ -486,8 +487,7 @@ export class PdfResourceRegistry {
   }
 
   public registerImage(info: ImageInfo): number {
-    const dataToHash = info.originalData && info.originalData.length > 0 ? info.originalData : info.data;
-    const key = 'img_' + this.computeHash(dataToHash);
+    const key = this.imageKey(info);
 
     if (!this.imageIdMap.has(key)) {
       const imageId = this.getNewImageId();
@@ -497,6 +497,106 @@ export class PdfResourceRegistry {
     }
 
     return this.imageIdMap.get(key)!;
+  }
+
+  /**
+   * The resolution cap for embedded images, in pixels per inch; `null` embeds every image at
+   * its source resolution. Wired from the document's settings.
+   */
+  public maxImageDpi: number | null = null;
+
+  /** The largest size each image is painted at, per axis of the stored pixels. */
+  private readonly imagePlacements = new Map<
+    string,
+    { maxWidthMilliPoints: number; maxHeightMilliPoints: number; keepResolution: boolean }
+  >();
+
+  /**
+   * Records that `image` is painted `widthPoints` x `heightPoints` on the page (its display size,
+   * already scaled by any transform). One embedded copy serves every placement, so it keeps the
+   * largest size asked of it, and one placement that keeps full resolution keeps it for all of them.
+   */
+  public noteImagePlacement(image: ImageInfo, widthPoints: number, heightPoints: number): void {
+    // Lengths are along the stored pixel axes: EXIF orientations 5-8 swap them for display.
+    const swapped = image.orientation >= 5 && image.orientation <= 8;
+    const storedWidth = swapped ? heightPoints : widthPoints;
+    const storedHeight = swapped ? widthPoints : heightPoints;
+
+    // Round half away from zero to whole milli-points, exactly as the other implementation does.
+    const toMilli = (points: number): number => Math.sign(points) * Math.round(Math.abs(points) * 1000);
+    const widthMilli = toMilli(storedWidth);
+    const heightMilli = toMilli(storedHeight);
+
+    const key = this.imageKey(image);
+    const placed = this.imagePlacements.get(key);
+    if (placed === undefined) {
+      this.imagePlacements.set(key, {
+        maxWidthMilliPoints: widthMilli,
+        maxHeightMilliPoints: heightMilli,
+        keepResolution: image.keepResolution,
+      });
+    } else {
+      placed.maxWidthMilliPoints = Math.max(placed.maxWidthMilliPoints, widthMilli);
+      placed.maxHeightMilliPoints = Math.max(placed.maxHeightMilliPoints, heightMilli);
+      placed.keepResolution ||= image.keepResolution;
+    }
+  }
+
+  /**
+   * Returns the image to embed for `key`: the source itself, or a reduced copy when the resolution
+   * cap applies. Decided from pixel counts and placement sizes alone, so every generate path, and
+   * the other language implementation, agree.
+   */
+  private prepareImageForWrite(key: string, info: ImageInfo): ImageInfo {
+    const dpi = this.maxImageDpi;
+    const placed = this.imagePlacements.get(key);
+    if (dpi === null || placed === undefined) return info;
+    if (placed.keepResolution || placed.maxWidthMilliPoints <= 0 || placed.maxHeightMilliPoints <= 0) return info;
+
+    const targetWidth = ImageResampler.targetLength(placed.maxWidthMilliPoints, dpi, info.width);
+    const targetHeight = ImageResampler.targetLength(placed.maxHeightMilliPoints, dpi, info.height);
+    if (!ImageResampler.shouldResample(info.width, info.height, targetWidth, targetHeight)) return info;
+
+    const ppi = (pixels: number, milliPoints: number): number => Math.floor((pixels * 72000) / milliPoints);
+    const points = (milli: number): string => String(Number((milli / 1000).toFixed(2)));
+    const drawn = `${points(placed.maxWidthMilliPoints)} x ${points(placed.maxHeightMilliPoints)} pt`;
+
+    const eligibility = ImageResampler.eligibility(info);
+    if (!eligibility.eligible) {
+      this.diagnostics.addInfo(
+        'image',
+        `image.passed-through: ${info.width}x${info.height} px drawn ${drawn} ` +
+          `(about ${ppi(info.width, placed.maxWidthMilliPoints)} ppi, cap ${dpi}); ` +
+          `embedded as it is: ${eligibility.reason}.`,
+        key
+      );
+      return info;
+    }
+
+    const reduced = ImageResampler.resampleImage(info, targetWidth, targetHeight);
+    const samplesPerPixel = info.components + (info.hasAlpha ? 1 : 0);
+    const saved = (info.width * info.height - targetWidth * targetHeight) * samplesPerPixel;
+    this.diagnostics.addInfo(
+      'image',
+      `image.resampled: ${info.width}x${info.height} -> ${targetWidth}x${targetHeight} px, drawn ${drawn} ` +
+        `(about ${ppi(info.width, placed.maxWidthMilliPoints)} -> ${ppi(targetWidth, placed.maxWidthMilliPoints)} ppi), ` +
+        `${saved} fewer raw bytes.`,
+      key
+    );
+    return reduced;
+  }
+
+  private readonly imageKeys = new WeakMap<ImageInfo, string>();
+
+  /** The content-hash key for an image, computed once per decoded image. */
+  private imageKey(info: ImageInfo): string {
+    let key = this.imageKeys.get(info);
+    if (key === undefined) {
+      const dataToHash = info.originalData && info.originalData.length > 0 ? info.originalData : info.data;
+      key = 'img_' + this.computeHash(dataToHash);
+      this.imageKeys.set(info, key);
+    }
+    return key;
   }
 
   private computeHash(data: Uint8Array): string {
@@ -651,7 +751,7 @@ export class PdfResourceRegistry {
       this.imagePdfObjectIds.set(key, pdfObjectId);
       const internalId = this.imageIdMap.get(key)!;
       const resourceName = this.getImageResourceName(internalId);
-      imageWriter.writeImage(pdfObjectId, info, resourceName);
+      imageWriter.writeImage(pdfObjectId, this.prepareImageForWrite(key, info), resourceName);
     }
 
     // 3. Write deferred XObjects (total-page-count placeholders etc.)

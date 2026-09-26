@@ -33,6 +33,12 @@ export class ImageInfo {
   public orientation: number = 1;
 
   /**
+   * Set by the placing element: embed this image at its source resolution, whatever the
+   * document's resolution cap. Not part of the decoded image.
+   */
+  public keepResolution: boolean = false;
+
+  /**
    * True for Photoshop-exported CMYK JPEGs (Adobe APP14 marker with
    * transform=0), where ink values are stored inverted.  The writer maps
    * this to PDF `/Decode [1 0 1 0 1 0 1 0]` so the colours render correctly.

@@ -158,6 +158,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
+    canonical: 'flags-of-the-world',
+    variant: 'flags-of-the-world-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
     canonical: 'bar-chart',
     variant: 'bar-chart-classes',
     why: 'class/mutation companion must desugar to the options-object form',

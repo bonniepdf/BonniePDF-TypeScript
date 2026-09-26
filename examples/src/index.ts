@@ -51,6 +51,8 @@ import { generate as barcodes } from './recipes/elements/barcodes';
 import { generate as barcodesClasses } from './recipes/elements/barcodes-classes';
 import { generate as dataMatrix } from './recipes/elements/data-matrix';
 import { generate as dataMatrixClasses } from './recipes/elements/data-matrix-classes';
+import { generate as flagsOfTheWorld } from './recipes/elements/flags-of-the-world';
+import { generate as flagsOfTheWorldClasses } from './recipes/elements/flags-of-the-world-classes';
 import { generate as images } from './recipes/elements/images';
 import { generate as imagesClasses } from './recipes/elements/images-classes';
 import { generate as chartShowcase } from './recipes/charting/chart-showcase';
@@ -342,6 +344,11 @@ export interface ExampleDef {
    */
   series?: string;
 }
+
+/** The SVG flags the Flags of the World examples draw, as asset paths (relative to examples/assets/). */
+const FLAG_ASSETS = ['mx', 'gs', 'es', 'pt', 'gr', 'nl', 'hk', 'kz', 'co', 'is', 'lb', 'my'].map(
+  code => `flags/4x3/${code}.svg`
+);
 
 /**
  * Every example, in the order consumers list them: recipes, then showcases,
@@ -904,6 +911,34 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'data-matrix',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'flags-of-the-world',
+    name: 'Flags of the World',
+    category: 'Elements',
+    description:
+      'SVG import: twelve national flags drawn as vector content, from a few shapes to a coat of arms with eight gradients, and one flag at full page width that stays sharp at any zoom. Every flag carries alt text.',
+    filename: 'flags-of-the-world.pdf',
+    generate: flagsOfTheWorld,
+    requiredAssets: FLAG_ASSETS,
+    dotnetClass: 'FlagsOfTheWorldExample',
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'flags-of-the-world-classes',
+    name: 'Flags of the World (Class API)',
+    category: 'Elements',
+    description:
+      'The same SVG flag tour as Flags of the World, built with the class API: construct each element and assign properties. The output is identical.',
+    filename: 'flags-of-the-world-classes.pdf',
+    generate: flagsOfTheWorldClasses,
+    requiredAssets: FLAG_ASSETS,
+    dotnetClass: 'FlagsOfTheWorldExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'flags-of-the-world',
     variantLabel: 'Class API',
   },
   {

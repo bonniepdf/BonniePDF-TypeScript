@@ -584,3 +584,96 @@ describe('ImageLoader', () => {
     });
   });
 });
+
+// A deterministic RGBA pattern with variation in both axes, so the Up, Average
+// and Paeth filters (which read the row above) cannot decode correctly by accident.
+const rgbaSample = (x: number, y: number, c: number): number => (x * 37 + y * 91 + c * 53 + ((x * y) % 29)) & 0xff;
+
+function paeth(a: number, b: number, c: number): number {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+}
+
+// Encodes an RGBA PNG, forward-filtering row y with filterOf(y), independently of the loader.
+async function createFilteredRgbaPng(
+  width: number,
+  height: number,
+  filterOf: (y: number) => number
+): Promise<Uint8Array> {
+  const bpp = 4;
+  const rowBytes = width * bpp;
+  const raw = new Uint8Array((1 + rowBytes) * height);
+  let prev = new Uint8Array(rowBytes);
+  for (let y = 0; y < height; y++) {
+    const cur = new Uint8Array(rowBytes);
+    for (let x = 0; x < width; x++) for (let c = 0; c < bpp; c++) cur[x * bpp + c] = rgbaSample(x, y, c);
+    const filter = filterOf(y);
+    raw[y * (1 + rowBytes)] = filter;
+    for (let i = 0; i < rowBytes; i++) {
+      const a = i >= bpp ? cur[i - bpp] : 0;
+      const b = prev[i];
+      const cc = i >= bpp ? prev[i - bpp] : 0;
+      const predictor = [0, a, b, (a + b) >> 1, paeth(a, b, cc)][filter];
+      raw[y * (1 + rowBytes) + 1 + i] = (cur[i] - predictor) & 0xff;
+    }
+    prev = cur;
+  }
+
+  const cs = new CompressionStream('deflate');
+  const writer = cs.writable.getWriter();
+  const reader = cs.readable.getReader();
+  writer.write(raw).then(() => writer.close());
+  const parts: Uint8Array[] = [];
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    parts.push(value);
+  }
+  const idat = parts.flatMap(p => Array.from(p));
+
+  return new Uint8Array([
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a,
+    ...pngChunk('IHDR', [...u32be(width), ...u32be(height), 8, 6, 0, 0, 0]),
+    ...pngChunk('IDAT', idat),
+    ...pngChunk('IEND', []),
+  ]);
+}
+
+describe('ImageLoader.loadPngAsync - RGBA defiltering', () => {
+  const cases: [string, (y: number) => number][] = [
+    ['None', () => 0],
+    ['Sub', () => 1],
+    ['Up', () => 2],
+    ['Average', () => 3],
+    ['Paeth', () => 4],
+    ['rows cycling through every filter', y => y % 5],
+  ];
+
+  for (const [name, filterOf] of cases) {
+    it(`decodes ${name} rows to the original pixels`, async () => {
+      const width = 23;
+      const height = 17;
+      const image = await ImageLoader.loadPngAsync(await createFilteredRgbaPng(width, height, filterOf));
+
+      expect(image.hasAlpha).toBe(true);
+      expect(image.components).toBe(3);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const pixel = y * width + x;
+          for (let c = 0; c < 3; c++) expect(image.data[pixel * 3 + c]).toBe(rgbaSample(x, y, c));
+          expect(image.alphaData[pixel]).toBe(rgbaSample(x, y, 3));
+        }
+      }
+    });
+  }
+});

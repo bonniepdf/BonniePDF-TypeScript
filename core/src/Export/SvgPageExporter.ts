@@ -65,7 +65,7 @@ export async function exportSvgDocumentAsync(
   }
 
   // ── Phase 1: discover embedded fonts (pages + header/footer templates) ──────
-  const { embeddedPaths, imagesToDecode } = collectDocumentPreloadResources(document);
+  const { embeddedPaths, imagesToDecode, svgs } = collectDocumentPreloadResources(document);
 
   // ── Phase 2: preload font bytes ─────────────────────────────────────────────
   const registry = new PdfResourceRegistry();
@@ -80,6 +80,9 @@ export async function exportSvgDocumentAsync(
   if (imagesToDecode.length > 0) {
     await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
   }
+
+  // ── Phase 2c: parse SVG elements, rasterizing in document order ─────────────
+  for (const svg of svgs) await svg.prepareAsync(document.svgRasterizer);
 
   // ── Phase 3: render through the SVG pipeline ────────────────────────────────
   const canvasOptions: SvgCanvasOptions = {

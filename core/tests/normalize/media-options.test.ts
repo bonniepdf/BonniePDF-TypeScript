@@ -6,6 +6,7 @@ import { Barcode, BARCODE_OPTION_KEYS } from '../../src/Elements/Shapes/Barcode'
 import { QRCode, QR_CODE_OPTION_KEYS } from '../../src/Elements/Shapes/QRCode';
 import { DataMatrix, DATA_MATRIX_OPTION_KEYS } from '../../src/Elements/Shapes/DataMatrix';
 import { Image, IMAGE_OPTION_KEYS } from '../../src/Elements/Media/Image';
+import { Svg, SVG_OPTION_KEYS } from '../../src/Elements/Media/Svg';
 import { CanvasElement, CANVAS_ELEMENT_OPTION_KEYS } from '../../src/Elements/Drawing/CanvasElement';
 import { ColorPalette } from '../../src/Core/ColorPalette';
 import { Thickness } from '../../src/Core/Thickness';
@@ -17,7 +18,8 @@ import { Color } from '../../src/Core/Color';
 
 const INTERNAL = {
   elementBase: ['startingY'],
-  image: ['cachedInfo', 'displayWidth', 'displayHeight'],
+  image: ['cachedInfo', 'displayWidth', 'displayHeight', 'box'],
+  svg: ['parsed', 'file', 'generated'], // private parse, file and generator caches
   dataMatrix: ['memo'], // private encode cache; no runtime marker for `private`
   canvas: ['drawHandler'], // private readonly; constructor-only, not an option
 } as const;
@@ -134,6 +136,21 @@ describe('Image options', () => {
 
   it('covers its surface (cachedInfo/display* are internal)', () => {
     expect(settableSurface(new Image(), INTERNAL.image)).toEqual([...IMAGE_OPTION_KEYS].sort());
+  });
+});
+
+describe('Svg options', () => {
+  it('accepts lengths and fit-mode tokens, and defaults to strict', () => {
+    const s = new Svg({ svgData: '<svg/>', width: '1in', fitMode: 'cover', altText: 'Logo' });
+    expect(s.width).toBe(72);
+    expect(s.fitMode).toBe(ImageFitMode.Cover);
+    expect(s.altText).toBe('Logo');
+    expect(new Svg().strictUnsupportedFeatures).toBe(true);
+    expect(new Svg().fitMode).toBe(ImageFitMode.Contain);
+  });
+
+  it('covers its surface', () => {
+    expect(settableSurface(new Svg(), INTERNAL.svg)).toEqual([...SVG_OPTION_KEYS].sort());
   });
 });
 

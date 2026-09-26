@@ -15,6 +15,7 @@ import { TextElementBase } from './Elements/Text/TextElementBase';
 import type { TextStyle } from './Elements/Text/TextStyle';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
+import type { SvgRasterizer } from './Rendering/Svg/ImportSvg';
 import { ensureLicenseDeclared } from './Licensing/LicenseChecker';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 import { FileAttachment } from './Attachments/FileAttachment';
@@ -64,6 +65,28 @@ export class Document {
 
   public settings: DocumentSettings;
   public metadata: DocumentMetadata;
+  private _svgRasterizer: SvgRasterizer | undefined;
+
+  /**
+   * Registers a function that renders SVG markup to PNG bytes, or removes it
+   * with `undefined`.
+   *
+   * With one registered, an {@link Svg} element whose `strictUnsupportedFeatures`
+   * is `false` draws what the SVG importer cannot draw as vector content -
+   * filters, masks, stylesheets, … - as images in their place, instead of
+   * skipping them. BonniePDF rasterizes nothing itself: any renderer will do.
+   * It is called on the async generate paths only; a synchronous generate
+   * whose document would need it fails rather than drawing something
+   * different.
+   */
+  public registerSvgRasterizer(rasterizer: SvgRasterizer | undefined): void {
+    this._svgRasterizer = rasterizer;
+  }
+
+  /** The registered SVG rasterizer, if any; see {@link registerSvgRasterizer}. */
+  public get svgRasterizer(): SvgRasterizer | undefined {
+    return this._svgRasterizer;
+  }
 
   /**
    * Recoverable issues collected during the most recent `generateBytes` /

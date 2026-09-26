@@ -11,16 +11,51 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Added
 
-- **Groundwork for SVG import: the import engine and its canvas adapter.**
+- **The `Svg` element draws an SVG document as vector content.** Paths,
+  fills, strokes, gradients, clips and text drawn as glyph outlines go through
+  the page's canvas like any other drawing, so the result stays sharp at any
+  zoom. Pass markup as `svgData`, a file as `filePath` (Node only), or an
+  `svgGenerator` given the box to fill. It sizes itself exactly as `Image`
+  does, with the same `width`, `height` and `fitMode`, and the document's own
+  `viewBox` and `preserveAspectRatio` place its content in that box.
+  Text uses the fonts registered with the document, resolved as for a
+  paragraph (`Arial` and `sans-serif` are Helvetica, drawn from Liberation
+  Sans), and is never drawn in a font nobody chose. Features outside the
+  supported profile - filters, masks, stylesheets and so on - fail generation
+  by default with `SvgUnsupportedFeatureError`, naming each one; with
+  `strictUnsupportedFeatures: false` the rest is drawn and each skipped feature
+  becomes a diagnostic. Under PDF/UA-1 the element is a figure whose alternate
+  text is `altText`, else the document's own `<title>`.
+- **`document.registerSvgRasterizer(fn)`** lets an `Svg` element with
+  `strictUnsupportedFeatures: false` draw what the importer cannot as images in
+  their place, using any renderer you supply (SVG markup in, PNG bytes out).
+  BonniePDF rasterizes nothing itself. It runs on the async generate paths; a
+  synchronous generate whose document would need it fails rather than drawing
+  something different.
+
+- **The SVG import engine and its canvas adapter.**
   The engine that parses SVG and draws it as vector content now lives under
   `core/src/Rendering/Svg/`. It is vendored - maintained upstream and copied
   here by tooling - so its files are never edited in this repository, and a
   test checks each against the hash recorded in `VENDORED.json`. An internal
   adapter draws what it emits onto any `ICanvas`, giving a stroke with no
-  miter limit SVG's default of 4 rather than PDF's 10. Nothing is exported yet
-  and no existing output changes; the `Svg` element that uses them follows.
+  miter limit SVG's default of 4 rather than PDF's 10. The `Svg` element above
+  is built on them.
 
 ### Changed
+
+- **The PDF canvas scales a stroke's width and dashes with the transform.**
+  Under a canvas transform, path points were transformed but line width and
+  dash lengths were not, so a scaled stroke came out too thick or too thin. They
+  now scale by the transform's scale factor (exact for uniform scaling and
+  rotation). Drawing without a transform is unchanged.
+- **The PDF canvas places images under its transform.** `drawImage` ignored any
+  canvas transform; it now draws in the transformed space. Drawing without a
+  transform is unchanged.
+- **Transformed drawing on the PDF canvas matches the .NET implementation byte
+  for byte.** Under a transform, the canvas now computes and prints in single
+  precision, as the .NET canvas does, so the same transformed drawing writes
+  the same operators in both. Untransformed drawing keeps full precision.
 
 - **The PDF canvas writes the same bytes as the .NET implementation for fills
   and strokes.** The two had drifted apart. A solid `fillCurrentPath` now sits

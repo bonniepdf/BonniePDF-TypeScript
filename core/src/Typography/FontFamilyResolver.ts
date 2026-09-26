@@ -139,6 +139,22 @@ export class FontFamilyResolver {
   }
 
   /**
+   * Resolves a family name as {@link resolve} does, but only when the name is
+   * known: a registered custom family, a standard family, or one of their
+   * aliases. Returns `undefined` rather than falling back to Helvetica, and
+   * never treats the name as a file path.
+   *
+   * For callers that must not substitute a font nobody chose, such as imported
+   * SVG, whose `font-family` lists fall through to the next name instead.
+   */
+  public static resolveKnown(family: string, weight: FontWeight, italic: boolean): string | undefined {
+    const isBold = weight >= FontWeight.SemiBold;
+    const customFamily = FontFamilyResolver.customFamilies.get(family);
+    if (customFamily) return customFamily.getVariant(isBold, italic);
+    return FontFamilyResolver.standardFonts.get(`${FontFamilyResolver.resolveAlias(family)},${isBold},${italic}`);
+  }
+
+  /**
    * Registers a custom font family with paths to its variant TTF files.
    * @param familyName - The family name
    * @param definition - The font family definition with variant paths

@@ -108,6 +108,17 @@ describe('PDF canvas fill and stroke bytes', () => {
     expect(stroke(4)).toBe('q\n1 w\n0 J\n0 j\n4 M\n0 0 0 RG\n0 1000 m\n10 990 l\nS\nQ\n');
   });
 
+  it("scales a stroke's width and dashes with the transform, like its points", () => {
+    const stroke = (transform: (c: PdfCanvas) => void) =>
+      draw(c => {
+        transform(c);
+        line(c);
+        c.strokeCurrentPath({ paint: new Color(0, 0, 0), width: 1.5, dashPattern: [2, 1], dashOffset: 0.5 });
+      });
+    expect(stroke(c => c.scale(2, 2))).toBe('q\n3 w\n0 J\n0 j\n[4 2] 1 d\n0 0 0 RG\n0 1000 m\n20 980 l\nS\nQ\n');
+    expect(stroke(c => c.translate(5, 5))).toBe('q\n1.5 w\n0 J\n0 j\n[2 1] 0.5 d\n0 0 0 RG\n5 995 m\n15 985 l\nS\nQ\n');
+  });
+
   it('writes nothing for an empty path', () => {
     expect(
       draw(c => {

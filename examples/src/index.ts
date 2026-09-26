@@ -385,7 +385,7 @@ export const examples: ExampleDef[] = [
     name: 'Margins and Padding',
     category: 'Basic',
     description:
-      'Margin is the space outside an element; padding is the space inside its border. Both are shown side by side on text, containers, tables, and stacks. PDF/A-2a + PDF/UA-1.',
+      'Margin is the space outside an element; padding is the space inside its border. Both are shown side by side on text, containers, tables, and stacks.',
     filename: 'margins.pdf',
     generate: margins,
     dotnetClass: 'MarginsAndPadding',
@@ -411,7 +411,7 @@ export const examples: ExampleDef[] = [
     name: 'Page Settings',
     category: 'Basic',
     description:
-      'A gallery of every standard page size in portrait and landscape, each page listing its dimensions in points, inches, and millimetres, with a running footer. PDF/A-2a + PDF/UA-1.',
+      'A gallery of every standard page size in portrait and landscape, each page listing its dimensions in points, inches, and millimetres, with a running footer.',
     filename: 'page-settings.pdf',
     generate: pageSettings,
     dotnetClass: 'PageSettingsExample',
@@ -437,7 +437,7 @@ export const examples: ExampleDef[] = [
     name: 'Simple Document',
     category: 'Basic',
     description:
-      'A three-page tour of the core Document API: semantic headings, body text, spacers, a custom square page, and a QR code with alt text. A good first example. PDF/A-2a + PDF/UA-1.',
+      'A three-page tour of the core Document API: semantic headings, body text, spacers, a custom square page, and a QR code with alt text. A good first example.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
     dotnetClass: 'SimpleDocumentExample',
@@ -467,7 +467,7 @@ export const examples: ExampleDef[] = [
     name: 'Area Chart',
     category: 'Charting',
     description:
-      'A filled area under the line with configurable opacity, showing monthly sales performance through the year, with a legend and alt text. PDF/A-2a + PDF/UA-1.',
+      'A filled area under the line with configurable opacity, showing monthly sales performance through the year, with a legend and alt text.',
     filename: 'area-chart.pdf',
     generate: areaChart,
     dotnetClass: 'AreaChartExample',
@@ -495,7 +495,7 @@ export const examples: ExampleDef[] = [
     name: 'Bar Chart',
     category: 'Charting',
     description:
-      'A vertical bar chart of monthly sales from January to December, with grid lines, value labels, a running page footer, and alt text describing the trend. PDF/A-2a + PDF/UA-1.',
+      'A vertical bar chart of monthly sales from January to December, with grid lines, value labels, a running page footer, and alt text describing the trend.',
     filename: 'bar-chart.pdf',
     generate: barChart,
     dotnetClass: 'BarChartExample',
@@ -523,7 +523,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase',
     category: 'Charting',
     description:
-      'Eight landscape pages covering every chart type, from bar and line to pie and lollipop charts, each chart carrying alt text for screen readers. PDF/A-2a + PDF/UA-1.',
+      'Eight landscape pages covering every chart type, from bar and line to pie and lollipop charts, each chart carrying alt text for screen readers.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
@@ -549,7 +549,7 @@ export const examples: ExampleDef[] = [
     name: 'Dot Plot Chart',
     category: 'Charting',
     description:
-      'Circular markers positioned along a value axis to compare the sales of eight products at a glance, with a legend and alt text for screen readers. PDF/A-2a + PDF/UA-1.',
+      'Circular markers positioned along a value axis to compare the sales of eight products at a glance, with a legend and alt text for screen readers.',
     filename: 'dot-plot-chart.pdf',
     generate: dotPlotChart,
     dotnetClass: 'DotPlotChartExample',
@@ -577,7 +577,7 @@ export const examples: ExampleDef[] = [
     name: 'Grouped Bar Chart',
     category: 'Charting',
     description:
-      'Side-by-side bars comparing Electronics, Clothing, and Home and Garden sales across twelve months, with a colour legend and alt text. PDF/A-2a + PDF/UA-1.',
+      'Side-by-side bars comparing Electronics, Clothing, and Home and Garden sales across twelve months, with a colour legend and alt text.',
     filename: 'grouped-bar-chart.pdf',
     generate: groupedBarChart,
     dotnetClass: 'GroupedBarChartExample',
@@ -605,7 +605,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Bar Chart',
     category: 'Charting',
     description:
-      'Horizontal bars ranking full-year sales across six UK regions, with value labels. The orientation reads better when category names are long. PDF/A-2a + PDF/UA-1.',
+      'Horizontal bars ranking full-year sales across six UK regions, with value labels. The orientation reads better when category names are long.',
     filename: 'horizontal-bar-chart.pdf',
     generate: horizontalBarChart,
     dotnetClass: 'HorizontalBarChartExample',
@@ -633,7 +633,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Grouped Bar Chart',
     category: 'Charting',
     description:
-      'Grouped horizontal bars comparing three product lines across four quarters of sales, with grid lines and a colour legend. PDF/A-2a + PDF/UA-1.',
+      'Grouped horizontal bars comparing three product lines across four quarters of sales, with grid lines and a colour legend.',
     filename: 'horizontal-grouped-bar-chart.pdf',
     generate: horizontalGroupedBarChart,
     dotnetClass: 'HorizontalGroupedBarChartExample',
@@ -661,7 +661,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Lollipop Chart',
     category: 'Charting',
     description:
-      'Horizontal stems with circular heads ranking year-to-date revenue for eight product lines: less ink than bars without losing clarity. PDF/A-2a + PDF/UA-1.',
+      'Horizontal stems with circular heads ranking year-to-date revenue for eight product lines: less ink than bars without losing clarity.',
     filename: 'horizontal-lollipop-chart.pdf',
     generate: horizontalLollipopChart,
     dotnetClass: 'HorizontalLollipopChartExample',
@@ -689,7 +689,7 @@ export const examples: ExampleDef[] = [
     name: 'Line Chart',
     category: 'Charting',
     description:
-      'A line chart of monthly revenue trends: connected data points with circular markers and value labels, a legend, and alt text describing the series. PDF/A-2a + PDF/UA-1.',
+      'A line chart of monthly revenue trends: connected data points with circular markers and value labels, a legend, and alt text describing the series.',
     filename: 'line-chart.pdf',
     generate: lineChart,
     dotnetClass: 'LineChartExample',
@@ -717,7 +717,7 @@ export const examples: ExampleDef[] = [
     name: 'Lollipop Chart',
     category: 'Charting',
     description:
-      'Stems with circular heads, a lighter alternative to bar charts, showing quarterly revenue rising from Q1 to Q4, with a legend and alt text. PDF/A-2a + PDF/UA-1.',
+      'Stems with circular heads, a lighter alternative to bar charts, showing quarterly revenue rising from Q1 to Q4, with a legend and alt text.',
     filename: 'lollipop-chart.pdf',
     generate: lollipopChart,
     dotnetClass: 'LollipopChartExample',
@@ -745,7 +745,7 @@ export const examples: ExampleDef[] = [
     name: 'Multi-Series Line Chart',
     category: 'Charting',
     description:
-      'Two overlapping line series comparing this year’s monthly revenue with last year’s on a shared axis, with a legend and alt text. PDF/A-2a + PDF/UA-1.',
+      'Two overlapping line series comparing this year’s monthly revenue with last year’s on a shared axis, with a legend and alt text.',
     filename: 'multi-series-line-chart.pdf',
     generate: multiSeriesLineChart,
     dotnetClass: 'MultiSeriesLineChartExample',
@@ -773,7 +773,7 @@ export const examples: ExampleDef[] = [
     name: 'Pie Chart',
     category: 'Charting',
     description:
-      'A donut chart of monthly sales share, with a colour legend and the total value in the centre, plus alt text describing the breakdown for screen readers. PDF/A-2a + PDF/UA-1.',
+      'A donut chart of monthly sales share, with a colour legend and the total value in the centre, plus alt text describing the breakdown for screen readers.',
     filename: 'pie-chart.pdf',
     generate: pieChart,
     dotnetClass: 'PieChartExample',
@@ -803,7 +803,7 @@ export const examples: ExampleDef[] = [
     name: 'Barcodes',
     category: 'Elements',
     description:
-      'Native vector 1D barcodes (Code 128, EAN-13, UPC-A, ITF-14) for UK, EU, and US retail and logistics, with automatic check digits and readable labels. PDF/A-2a + PDF/UA-1.',
+      'Native vector 1D barcodes (Code 128, EAN-13, UPC-A, ITF-14) for UK, EU, and US retail and logistics, with automatic check digits and readable labels.',
     filename: 'barcodes.pdf',
     generate: barcodes,
     dotnetClass: 'BarcodesExampleFluent',
@@ -857,7 +857,7 @@ export const examples: ExampleDef[] = [
     name: 'Cross-References',
     category: 'Elements',
     description:
-      'Section anchors, SectionLink internal jumps, and PageNumberOf “see page N” references, all resolved automatically by two-pass layout. PDF/A-2a + PDF/UA-1.',
+      'Section anchors, SectionLink internal jumps, and PageNumberOf “see page N” references, all resolved automatically by two-pass layout.',
     filename: 'cross-references.pdf',
     generate: crossReferences,
     thumbnails: false,
@@ -885,7 +885,7 @@ export const examples: ExampleDef[] = [
     name: 'Data Matrix',
     category: 'Elements',
     description:
-      'Native vector Data Matrix (ECC200) symbols with automatic encodation, Reed-Solomon error correction, square and rectangular sizes, and custom colours. PDF/A-2a + PDF/UA-1.',
+      'Native vector Data Matrix (ECC200) symbols with automatic encodation, Reed-Solomon error correction, square and rectangular sizes, and custom colours.',
     filename: 'data-matrix.pdf',
     generate: dataMatrix,
     dotnetClass: 'DataMatrixExampleFluent',
@@ -911,7 +911,7 @@ export const examples: ExampleDef[] = [
     name: 'Hyperlinks',
     category: 'Elements',
     description:
-      'External hyperlinks to real websites with custom font, size, and colour styling, plus links spaced with vertical margins. Every link is tagged for screen readers. PDF/A-2a + PDF/UA-1.',
+      'External hyperlinks to real websites with custom font, size, and colour styling, plus links spaced with vertical margins. Every link is tagged for screen readers.',
     filename: 'hyperlinks.pdf',
     generate: hyperlinks,
     thumbnails: false,
@@ -965,7 +965,7 @@ export const examples: ExampleDef[] = [
     name: 'Lists',
     category: 'Elements',
     description:
-      'Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, coloured) lists with nesting, each item structured for screen readers. PDF/A-2a + PDF/UA-1.',
+      'Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, coloured) lists with nesting, each item structured for screen readers.',
     filename: 'lists.pdf',
     generate: lists,
     dotnetClass: 'ListsExample',
@@ -991,7 +991,7 @@ export const examples: ExampleDef[] = [
     name: 'QR Codes',
     category: 'Elements',
     description:
-      'Native vector QR codes from a full ISO/IEC 18004 encoder: all four error correction levels, custom colours, and transparent backgrounds, sharp at any zoom. PDF/A-2a + PDF/UA-1.',
+      'Native vector QR codes from a full ISO/IEC 18004 encoder: all four error correction levels, custom colours, and transparent backgrounds, sharp at any zoom.',
     filename: 'qr-codes.pdf',
     generate: qrCodes,
     // .NET ships the Fluent variant as the canonical source
@@ -1018,7 +1018,7 @@ export const examples: ExampleDef[] = [
     name: 'Shapes & Borders',
     category: 'Elements',
     description:
-      'Rounded rectangles at several corner radii, bordered containers with and without fills, card layouts, and alert-style status banners. PDF/A-2a + PDF/UA-1.',
+      'Rounded rectangles at several corner radii, bordered containers with and without fills, card layouts, and alert-style status banners.',
     filename: 'shapes-and-borders.pdf',
     generate: shapesAndBorders,
     dotnetClass: 'ShapesAndBordersExample',
@@ -1044,7 +1044,7 @@ export const examples: ExampleDef[] = [
     name: 'Tables',
     category: 'Elements',
     description:
-      'A 45-row employee table whose column headers repeat on every page, with alternating row colours and a “Page N of M” footer, tagged for screen readers. PDF/A-2a + PDF/UA-1.',
+      'A 45-row employee table whose column headers repeat on every page, with alternating row colours and a “Page N of M” footer, tagged for screen readers.',
     filename: 'tables.pdf',
     generate: tables,
     dotnetClass: 'TablesExample',
@@ -1138,7 +1138,7 @@ export const examples: ExampleDef[] = [
     name: 'Horizontal Stacks',
     category: 'Layout',
     description:
-      'Horizontal layout with equal and weighted widths, vertical alignment, key-value pairs, and two-column text, all structured for screen readers. PDF/A-2a + PDF/UA-1.',
+      'Horizontal layout with equal and weighted widths, vertical alignment, key-value pairs, and two-column text, all structured for screen readers.',
     filename: 'horizontal-stacks.pdf',
     generate: horizontalStacks,
     thumbnails: false,
@@ -1208,7 +1208,7 @@ export const examples: ExampleDef[] = [
     name: 'Encryption',
     category: 'Security',
     description:
-      'Three AES-256 encryption scenarios: a simple password, user and owner passwords with printing and copying allowed, and an owner-only lock that blocks printing. PDF/UA-1.',
+      'Three AES-256 encryption scenarios: a simple password, user and owner passwords with printing and copying allowed, and an owner-only lock that blocks printing.',
     filename: 'encryption.pdf',
     generate: encryption,
     pdfUa1: true,
@@ -1263,7 +1263,7 @@ export const examples: ExampleDef[] = [
     name: 'Watermarking',
     category: 'Security',
     description:
-      'A semi-transparent diagonal DRAFT watermark behind the content of every page of a multi-section strategy proposal. The watermark is skipped by screen readers. PDF/A-2a + PDF/UA-1.',
+      'A semi-transparent diagonal DRAFT watermark behind the content of every page of a multi-section strategy proposal. The watermark is skipped by screen readers.',
     filename: 'watermarking.pdf',
     generate: watermarking,
     // .NET has three variants; Draft is canonical
@@ -1290,7 +1290,7 @@ export const examples: ExampleDef[] = [
     name: 'Watermarking: Confidential',
     category: 'Security',
     description:
-      'A CONFIDENTIAL variant of the diagonal watermark, tinted red and repeated behind every page of a multi-section quarterly financial report. PDF/A-2b + PDF/UA-1.',
+      'A CONFIDENTIAL variant of the diagonal watermark, tinted red and repeated behind every page of a multi-section quarterly financial report.',
     filename: 'watermarking-confidential.pdf',
     generate: watermarkingConfidential,
     dotnetClass: 'WatermarkConfidentialExample',
@@ -1318,7 +1318,7 @@ export const examples: ExampleDef[] = [
     name: 'Advanced Typography',
     category: 'Typography',
     description:
-      'Superscript and subscript with baseline shift (H₂O, E=mc²), plus decoration styling: overlines, and coloured or thick underlines and strikethroughs. PDF/A-2a + PDF/UA-1.',
+      'Superscript and subscript with baseline shift (H₂O, E=mc²), plus decoration styling: overlines, and coloured or thick underlines and strikethroughs.',
     filename: 'advanced-typography.pdf',
     generate: advancedTypography,
     thumbnails: false,
@@ -1346,7 +1346,7 @@ export const examples: ExampleDef[] = [
     name: 'Book Page Layout',
     category: 'Typography',
     description:
-      'A typeset monograph chapter page: Times fonts, justified body text, an inset bordered pull-quote, a bold/italic emphasis break, and a chapter footer with imprint. PDF/A-2a + PDF/UA-1.',
+      'A typeset monograph chapter page: Times fonts, justified body text, an inset bordered pull-quote, a bold/italic emphasis break, and a chapter footer with imprint.',
     filename: 'book-page-layout.pdf',
     generate: bookPageLayout,
     thumbnails: false,
@@ -1374,7 +1374,7 @@ export const examples: ExampleDef[] = [
     name: 'Custom Fonts',
     category: 'Typography',
     description:
-      'TrueType font embedding with Unicode coverage: symbols, currency, arrows, maths, dingbats, and Greek across NotoSans, NotoSansMath, and NotoSansSymbols2. PDF/A-2a + PDF/UA-1.',
+      'TrueType font embedding with Unicode coverage: symbols, currency, arrows, maths, dingbats, and Greek across NotoSans, NotoSansMath, and NotoSansSymbols2.',
     filename: 'custom-fonts.pdf',
     generate: customFonts,
     thumbnails: false,
@@ -1402,7 +1402,7 @@ export const examples: ExampleDef[] = [
     name: 'Dickens: A Tale of Two Cities',
     category: 'Typography',
     description:
-      'A tagged book layout with a visual table of contents, decorative running headers, footer page numbers, and justified text across three books and fourteen chapters. PDF/A-2a + PDF/UA-1.',
+      'A tagged book layout with a visual table of contents, decorative running headers, footer page numbers, and justified text across three books and fourteen chapters.',
     filename: 'dickens-novel.pdf',
     generate: dickensNovel,
     dotnetClass: 'DickensNovelExample',
@@ -1456,7 +1456,7 @@ export const examples: ExampleDef[] = [
     name: 'Emojis & Unicode',
     category: 'Typography',
     description:
-      'Full Unicode range: BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts, with a mixed text and emoji status line. PDF/UA-1.',
+      'Full Unicode range: BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts, with a mixed text and emoji status line.',
     filename: 'emojis-and-unicode.pdf',
     generate: emojisAndUnicode,
     thumbnails: false,
@@ -1484,7 +1484,7 @@ export const examples: ExampleDef[] = [
     name: 'Rich Text Styles',
     category: 'Typography',
     description:
-      'Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer. PDF/A-2a + PDF/UA-1.',
+      'Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer.',
     filename: 'rich-text-styles.pdf',
     generate: richTextStyles,
     dotnetClass: 'RichTextExample',
@@ -1510,7 +1510,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Alignment',
     category: 'Typography',
     description:
-      'Left, centre, right, and justified text, from short sentences to book-style paragraphs where word spacing stretches to both margins, readable by screen readers. PDF/A-2a + PDF/UA-1.',
+      'Left, centre, right, and justified text, from short sentences to book-style paragraphs where word spacing stretches to both margins, readable by screen readers.',
     filename: 'text-alignment.pdf',
     generate: textAlignment,
     thumbnails: false,
@@ -1538,7 +1538,7 @@ export const examples: ExampleDef[] = [
     name: 'Text Decorations',
     category: 'Typography',
     description:
-      'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes, with a practical price-list example. PDF/A-2a + PDF/UA-1.',
+      'Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes, with a practical price-list example.',
     filename: 'text-decorations.pdf',
     generate: textDecorations,
     thumbnails: false,
@@ -1570,7 +1570,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional grant funding decision: a headline “Awarded” block with key dates, an award-breakdown table, next steps, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.',
+      'A fictional grant funding decision: a headline “Awarded” block with key dates, an award-breakdown table, next steps, and an alternative-formats notice.',
     filename: 'grant-award-letter.pdf',
     generate: grantAwardLetter,
     dotnetClass: 'GrantAwardLetterExample',
@@ -1608,7 +1608,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice. PDF/A-2a + PDF/UA-1.',
+      'A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice.',
     filename: 'public-library-membership-letter.pdf',
     generate: publicLibraryMembershipLetter,
     dotnetClass: 'PublicLibraryMembershipLetterExample',
@@ -1648,7 +1648,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'A GDPR and ISO/IEC 27001 audit: a CONFIDENTIAL running header, KPI tiles, a control-status donut, a severity chart, and a findings register across pages. PDF/A-2a + PDF/UA-1.',
+      'A GDPR and ISO/IEC 27001 audit: a CONFIDENTIAL running header, KPI tiles, a control-status donut, a severity chart, and a findings register across pages.',
     filename: 'audit-report.pdf',
     generate: auditReport,
     dotnetClass: 'AuditReportExample',
@@ -1669,7 +1669,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'An enterprise data-protection and security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header. PDF/A-2a + PDF/UA-1.',
+      'An enterprise data-protection and security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header.',
     filename: 'audit-report-classes.pdf',
     generate: auditReportClasses,
     dotnetClass: 'AuditReportExample',
@@ -1724,7 +1724,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level that flows across pages, and a QR verification link. PDF/A-2a + PDF/UA-1.',
+      'A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level that flows across pages, and a QR verification link.',
     filename: 'uk-degree-transcript.pdf',
     generate: ukDegreeTranscript,
     dotnetClass: 'UkDegreeTranscriptExample',
@@ -1745,7 +1745,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'An official UK university degree transcript: institution header, student details, a UK honours classification banner (2:1), a module register grouped by FHEQ level with credits and marks that flows across pages, and a QR verification link. PDF/A-2a + PDF/UA-1.',
+      'An official UK university degree transcript: institution header, student details, a UK honours classification banner (2:1), a module register grouped by FHEQ level with credits and marks that flows across pages, and a QR verification link.',
     filename: 'uk-degree-transcript-classes.pdf',
     generate: ukDegreeTranscriptClasses,
     dotnetClass: 'UkDegreeTranscriptExample',
@@ -1764,7 +1764,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A field-service job sheet: the reported fault, work carried out, labour and parts, defects left unfixed, and a customer signature block kept whole on one page. PDF/A-2a + PDF/UA-1.',
+      'A field-service job sheet: the reported fault, work carried out, labour and parts, defects left unfixed, and a customer signature block kept whole on one page.',
     filename: 'job-sheet.pdf',
     generate: jobSheet,
     dotnetClass: 'JobSheetExample',
@@ -1802,7 +1802,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A tenancy check-in inventory: a room-by-room register grading condition and cleanliness, meter readings, keys issued, and declarations from both parties. PDF/A-2a + PDF/UA-1.',
+      'A tenancy check-in inventory: a room-by-room register grading condition and cleanliness, meter readings, keys issued, and declarations from both parties.',
     filename: 'inventory-schedule-of-condition.pdf',
     generate: inventoryScheduleOfCondition,
     dotnetClass: 'InventoryScheduleOfConditionExample',
@@ -1840,7 +1840,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A hot works permit: the work authorised, hazards and controls, the atmospheric test, a precautions checklist, and signatures for issue, acceptance, and cancellation. PDF/A-2a + PDF/UA-1.',
+      'A hot works permit: the work authorised, hazards and controls, the atmospheric test, a precautions checklist, and signatures for issue, acceptance, and cancellation.',
     filename: 'permit-to-work.pdf',
     generate: permitToWork,
     dotnetClass: 'PermitToWorkExample',
@@ -1878,7 +1878,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A site inspection snagging register: each defect with location, trade, severity, owner, target date, and evidence, in a long table whose header repeats. PDF/A-2a + PDF/UA-1.',
+      'A site inspection snagging register: each defect with location, trade, severity, owner, target date, and evidence, in a long table whose header repeats.',
     filename: 'site-inspection-report.pdf',
     generate: siteInspectionReport,
     dotnetClass: 'SiteInspectionReportExample',
@@ -1918,7 +1918,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A hospital discharge summary: diagnoses, key investigations with reference ranges, a medication reconciliation flagging every change, and actions for the GP. PDF/A-2a + PDF/UA-1.',
+      'A hospital discharge summary: diagnoses, key investigations with reference ranges, a medication reconciliation flagging every change, and actions for the GP.',
     filename: 'discharge-summary.pdf',
     generate: dischargeSummary,
     dotnetClass: 'DischargeSummaryExample',
@@ -1956,7 +1956,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional outpatient appointment letter: clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data notices. PDF/A-2a + PDF/UA-1.',
+      'A fictional outpatient appointment letter: clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data notices.',
     filename: 'outpatient-appointment-letter.pdf',
     generate: outpatientAppointmentLetter,
     dotnetClass: 'OutpatientAppointmentLetterExample',
@@ -1976,7 +1976,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider’s branding. PDF/A-2a + PDF/UA-1.',
+      'An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider’s branding.',
     filename: 'outpatient-appointment-letter-classes.pdf',
     generate: outpatientAppointmentLetterClasses,
     dotnetClass: 'OutpatientAppointmentLetterExample',
@@ -2014,7 +2014,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser. PDF/A-2a + PDF/UA-1.',
+      'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser.',
     filename: 'lab-report-classes.pdf',
     generate: labReportClasses,
     dotnetClass: 'LabReportExample',
@@ -2068,7 +2068,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A written statement of employment particulars: numbered clauses, defined terms, a running header, a schedule page, and signature and witness fields. PDF/A-2a + PDF/UA-1.',
+      'A written statement of employment particulars: numbered clauses, defined terms, a running header, a schedule page, and signature and witness fields.',
     filename: 'employment-contract.pdf',
     generate: employmentContract,
     dotnetClass: 'EmploymentContractExample',
@@ -2105,7 +2105,7 @@ export const examples: ExampleDef[] = [
     category: 'HR',
     tier: 'showcase',
     description:
-      'A payslip run: earnings, deductions, taxes, employer contributions, and year-to-date totals, with masked identifiers and AES-256 encryption, generated in the browser. PDF/UA-1.',
+      'A payslip run: earnings, deductions, taxes, employer contributions, and year-to-date totals, with masked identifiers and AES-256 encryption, generated in the browser.',
     filename: 'payslip.pdf',
     generate: payslip,
     dotnetClass: 'PayslipExample',
@@ -2145,7 +2145,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A landscape weekly timesheet: hours by project and day, billable value, utilisation against target, expenses, and approval, with totals that reconcile. PDF/A-2a + PDF/UA-1.',
+      'A landscape weekly timesheet: hours by project and day, billable value, utilisation against target, expenses, and approval, with totals that reconcile.',
     filename: 'timesheet.pdf',
     generate: timesheet,
     dotnetClass: 'TimesheetExample',
@@ -2185,7 +2185,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal. PDF/A-2a + PDF/UA-1.',
+      'An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal.',
     filename: 'policy-schedule.pdf',
     generate: policySchedule,
     dotnetClass: null,
@@ -2206,7 +2206,7 @@ export const examples: ExampleDef[] = [
     category: 'Invoices',
     tier: 'showcase',
     description:
-      'A US business invoice with company branding, customer addresses, a line-items table, an early-payment discount, and bank and online payment details. PDF/A-2a + PDF/UA-1.',
+      'A US business invoice with company branding, customer addresses, a line-items table, an early-payment discount, and bank and online payment details.',
     filename: 'business-invoice.pdf',
     generate: businessInvoice,
     dotnetClass: 'BusinessInvoiceExample',
@@ -2243,7 +2243,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A credit note: which invoice lines were wrong and why, how the VAT is reversed, and whether money is refunded or offset, in the layout of the invoice it corrects. PDF/A-2a + PDF/UA-1.',
+      'A credit note: which invoice lines were wrong and why, how the VAT is reversed, and whether money is refunded or offset, in the layout of the invoice it corrects.',
     filename: 'credit-note.pdf',
     generate: creditNote,
     dotnetClass: 'CreditNoteExample',
@@ -2280,7 +2280,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A customer statement: opening balance, every invoice, payment, and credit, a running balance calculated from the rows, ageing, and a remittance slip. PDF/A-2a + PDF/UA-1.',
+      'A customer statement: opening balance, every invoice, payment, and credit, a running balance calculated from the rows, ageing, and a remittance slip.',
     filename: 'customer-account-statement.pdf',
     generate: customerAccountStatement,
     dotnetClass: 'CustomerAccountStatementExample',
@@ -2318,7 +2318,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A collections letter with a schedule of overdue items. Days overdue come from the due dates, and one escalation stage sets the tone and deadline. PDF/A-2a + PDF/UA-1.',
+      'A collections letter with a schedule of overdue items. Days overdue come from the due dates, and one escalation stage sets the tone and deadline.',
     filename: 'dunning-letter.pdf',
     generate: dunningLetter,
     dotnetClass: 'DunningLetterExample',
@@ -2395,7 +2395,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'India',
     description:
-      'An India GST e-invoice: GSTIN for both parties, HSN/SAC codes, a CGST + SGST split, IRN and acknowledgement details, and a signed QR in INR. PDF/A-2a + PDF/UA-1.',
+      'An India GST e-invoice: GSTIN for both parties, HSN/SAC codes, a CGST + SGST split, IRN and acknowledgement details, and a signed QR in INR.',
     filename: 'india-gst-invoice.pdf',
     generate: indiaGstInvoice,
     dotnetClass: 'IndiaGstInvoiceExample',
@@ -2433,7 +2433,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A purchase order: a line schedule with required dates, separate order, invoice, and delivery addresses, conditions of purchase, and an authorisation block. PDF/A-2a + PDF/UA-1.',
+      'A purchase order: a line schedule with required dates, separate order, invoice, and delivery addresses, conditions of purchase, and an authorisation block.',
     filename: 'purchase-order.pdf',
     generate: purchaseOrder,
     dotnetClass: 'PurchaseOrderExample',
@@ -2471,7 +2471,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A remittance advice: which invoices a payment settles, which credits were applied, and a reconciliation to the amount paid, stating whether it reconciles. PDF/A-2a + PDF/UA-1.',
+      'A remittance advice: which invoices a payment settles, which credits were applied, and a reconciliation to the amount paid, stating whether it reconciles.',
     filename: 'remittance-advice.pdf',
     generate: remittanceAdvice,
     dotnetClass: 'RemittanceAdviceExample',
@@ -2507,7 +2507,7 @@ export const examples: ExampleDef[] = [
     category: 'Invoices',
     tier: 'showcase',
     description:
-      'An accessible subscription invoice for a Pro plan: per-seat and storage line items, proration, a QR payment code, VAT, and totals, in a clean UK layout. PDF/A-2a + PDF/UA-1.',
+      'An accessible subscription invoice for a Pro plan: per-seat and storage line items, proration, a QR payment code, VAT, and totals, in a clean UK layout.',
     filename: 'saas-invoice.pdf',
     generate: saasInvoice,
     dotnetClass: 'SaasInvoiceExample',
@@ -2544,7 +2544,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'An HMRC-style VAT invoice: supplier VAT number, tax point, standard, reduced, and zero-rated lines, and a per-rate VAT summary (net, VAT, gross) in GBP. PDF/A-2a + PDF/UA-1.',
+      'An HMRC-style VAT invoice: supplier VAT number, tax point, standard, reduced, and zero-rated lines, and a per-rate VAT summary (net, VAT, gross) in GBP.',
     filename: 'uk-vat-invoice.pdf',
     generate: ukVatInvoice,
     dotnetClass: 'UkVatInvoiceExample',
@@ -2582,7 +2582,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'US',
     description:
-      'A US commercial invoice: a destination-based state and county sales-tax breakdown, a purchase-order reference, USD amounts, and ACH/check remittance. PDF/A-2a + PDF/UA-1.',
+      'A US commercial invoice: a destination-based state and county sales-tax breakdown, a purchase-order reference, USD amounts, and ACH/check remittance.',
     filename: 'us-sales-invoice.pdf',
     generate: usSalesInvoice,
     dotnetClass: 'UsSalesInvoiceExample',
@@ -2622,7 +2622,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A legal bill of costs: time by phase and fee-earner grade, disbursements with their VAT treatment, and a summary calculated from the time entries. PDF/A-2a + PDF/UA-1.',
+      'A legal bill of costs: time by phase and fee-earner grade, disbursements with their VAT treatment, and a summary calculated from the time entries.',
     filename: 'bill-of-costs.pdf',
     generate: billOfCosts,
     dotnetClass: 'BillOfCostsExample',
@@ -2700,7 +2700,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, a goods-received signature, and a discrepancy period. PDF/A-2a + PDF/UA-1.',
+      'A delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, a goods-received signature, and a discrepancy period.',
     filename: 'delivery-note.pdf',
     generate: deliveryNote,
     dotnetClass: 'DeliveryNoteExample',
@@ -2737,7 +2737,7 @@ export const examples: ExampleDef[] = [
     category: 'Operations',
     tier: 'showcase',
     description:
-      'A concert ticket in boarding-pass style: a background image, a QR entry pass, a Code 128 ticket-id barcode, and a tear-off stub on a custom page size. PDF/A-2a + PDF/UA-1.',
+      'A concert ticket in boarding-pass style: a background image, a QR entry pass, a Code 128 ticket-id barcode, and a tear-off stub on a custom page size.',
     filename: 'event-ticket.pdf',
     generate: eventTicket,
     requiredAssets: ['images/danny-howe-bn-D2bCvpik-unsplash.jpg'],
@@ -2758,7 +2758,7 @@ export const examples: ExampleDef[] = [
     category: 'Operations',
     tier: 'showcase',
     description:
-      'Event ticket / boarding-pass style card with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size. PDF/A-2a + PDF/UA-1.',
+      'Event ticket / boarding-pass style card with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
     filename: 'event-ticket-classes.pdf',
     generate: eventTicketClasses,
     requiredAssets: ['images/danny-howe-bn-D2bCvpik-unsplash.jpg'],
@@ -2775,7 +2775,7 @@ export const examples: ExampleDef[] = [
     category: 'Operations',
     tier: 'showcase',
     description:
-      'A 4 × 6 in carrier shipping label on a custom page size: a routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link. PDF/A-2a + PDF/UA-1.',
+      'A 4 × 6 in carrier shipping label on a custom page size: a routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.',
     filename: 'shipping-label.pdf',
     generate: shippingLabel,
     dotnetClass: 'ShippingLabelExample',
@@ -2795,7 +2795,7 @@ export const examples: ExampleDef[] = [
     category: 'Operations',
     tier: 'showcase',
     description:
-      'A 4 × 6 in carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link. PDF/A-2a + PDF/UA-1.',
+      'A 4 × 6 in carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.',
     filename: 'shipping-label-classes.pdf',
     generate: shippingLabelClasses,
     dotnetClass: 'ShippingLabelExample',
@@ -2814,7 +2814,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'Estate agency particulars: guide price, key features, a metric and imperial room schedule, tenure, and an energy-rating graphic drawn from layout primitives. PDF/A-2a + PDF/UA-1.',
+      'Estate agency particulars: guide price, key features, a metric and imperial room schedule, tenure, and an energy-rating graphic drawn from layout primitives.',
     filename: 'property-particulars.pdf',
     generate: propertyParticulars,
     dotnetClass: 'PropertyParticularsExample',
@@ -3007,7 +3007,7 @@ export const examples: ExampleDef[] = [
     category: 'Reports',
     tier: 'showcase',
     description:
-      'A GRC audit findings register: 18 severity-coloured finding cards, each with a badge, heading, and remediation steps, paginating cleanly across pages. PDF/A-2a + PDF/UA-1.',
+      'A GRC audit findings register: 18 severity-coloured finding cards, each with a badge, heading, and remediation steps, paginating cleanly across pages.',
     filename: 'compliance-findings-register.pdf',
     generate: complianceFindingsRegister,
     dotnetClass: 'ComplianceFindingsRegisterExample',
@@ -3027,7 +3027,7 @@ export const examples: ExampleDef[] = [
     category: 'Reports',
     tier: 'showcase',
     description:
-      'A GRC / audit findings register: 18 severity-coloured finding cards (badge + heading + remediation) paginating across pages. PDF/A-2a + PDF/UA-1.',
+      'A GRC / audit findings register: 18 severity-coloured finding cards (badge + heading + remediation) paginating across pages.',
     filename: 'compliance-findings-register-classes.pdf',
     generate: complianceFindingsRegisterClasses,
     dotnetClass: 'ComplianceFindingsRegisterExample',
@@ -3043,7 +3043,7 @@ export const examples: ExampleDef[] = [
     category: 'Reports',
     tier: 'showcase',
     description:
-      'A single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette. PDF/A-2a + PDF/UA-1.',
+      'A single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
     dotnetClass: 'FinancialDashboardExample',
@@ -3080,7 +3080,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK/EU',
     description:
-      'IFRS-style statutory accounts: income and financial-position statements with prior-year comparatives, note references, bracketed negatives, and total rules. PDF/A-2a + PDF/UA-1.',
+      'IFRS-style statutory accounts: income and financial-position statements with prior-year comparatives, note references, bracketed negatives, and total rules.',
     filename: 'financial-statement.pdf',
     generate: financialStatement,
     dotnetClass: 'FinancialStatementExample',
@@ -3101,7 +3101,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK/EU',
     description:
-      'A UK/EU statutory financial statement in the IFRS / Companies House style: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000. PDF/A-2a + PDF/UA-1.',
+      'A UK/EU statutory financial statement in the IFRS / Companies House style: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000.',
     filename: 'financial-statement-classes.pdf',
     generate: financialStatementClasses,
     dotnetClass: 'FinancialStatementExample',
@@ -3119,7 +3119,7 @@ export const examples: ExampleDef[] = [
     category: 'Retail',
     tier: 'showcase',
     description:
-      'A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. A few KB with no WASM, so it runs in a Cloudflare Worker. PDF/A-2a + PDF/UA-1.',
+      'A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. A few KB with no WASM, so it runs in a Cloudflare Worker.',
     filename: 'edge-receipt.pdf',
     generate: edgeReceipt,
     dotnetClass: 'EdgeReceiptExample',
@@ -3155,7 +3155,7 @@ export const examples: ExampleDef[] = [
     category: 'Retail',
     tier: 'showcase',
     description:
-      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically, each led by an engine-drawn colour tile. PDF/A-2a + PDF/UA-1.',
+      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically, each led by an engine-drawn colour tile.',
     filename: 'product-photo-gallery.pdf',
     generate: productPhotoGallery,
     dotnetClass: 'ProductPhotoGalleryExample',
@@ -3175,7 +3175,7 @@ export const examples: ExampleDef[] = [
     category: 'Retail',
     tier: 'showcase',
     description:
-      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically. Each card starts with a colour tile drawn by the engine, so no image files are needed. PDF/A-2a + PDF/UA-1.',
+      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically. Each card starts with a colour tile drawn by the engine, so no image files are needed.',
     filename: 'product-photo-gallery-classes.pdf',
     generate: productPhotoGalleryClasses,
     dotnetClass: 'ProductPhotoGalleryExample',
@@ -3192,7 +3192,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'EU/UK',
     description:
-      'An EU/UK shelf-edge label on a custom 110 × 75 mm card: product details, was/now promotional pricing, the mandatory unit price, and an EAN-13 barcode. PDF/A-2a + PDF/UA-1.',
+      'An EU/UK shelf-edge label on a custom 110 × 75 mm card: product details, was/now promotional pricing, the mandatory unit price, and an EAN-13 barcode.',
     filename: 'shelf-label.pdf',
     generate: shelfLabel,
     dotnetClass: 'ShelfLabelExample',
@@ -3231,7 +3231,7 @@ export const examples: ExampleDef[] = [
     category: 'Sales',
     tier: 'showcase',
     description:
-      'A B2B sales quotation: a three-tier pricing comparison with the recommended tier highlighted, a scope of work, optional add-ons, and an acceptance block. PDF/A-2a + PDF/UA-1.',
+      'A B2B sales quotation: a three-tier pricing comparison with the recommended tier highlighted, a scope of work, optional add-ons, and an acceptance block.',
     filename: 'quotation.pdf',
     generate: quotation,
     dotnetClass: 'QuotationExample',
@@ -3270,7 +3270,7 @@ export const examples: ExampleDef[] = [
     tier: 'showcase',
     region: 'UK',
     description:
-      'A domestic energy bill calculated from meter readings: the amount due, a tariff breakdown, a twelve-month usage chart, and a detachable payment slip. PDF/A-2a + PDF/UA-1.',
+      'A domestic energy bill calculated from meter readings: the amount due, a tariff breakdown, a twelve-month usage chart, and a detachable payment slip.',
     filename: 'utility-bill.pdf',
     generate: utilityBill,
     dotnetClass: 'UtilityBillExample',

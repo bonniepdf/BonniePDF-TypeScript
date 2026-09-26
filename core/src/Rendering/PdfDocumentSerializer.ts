@@ -23,6 +23,7 @@ import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
 import { ConformancePlan } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
+import { Svg } from '../Elements/Media/Svg';
 import { VisualToc } from '../Elements/Text/VisualToc';
 import { PageNumberOf } from '../Elements/Text/PageNumberOf';
 import { SectionLink } from '../Core/SectionLink';
@@ -59,6 +60,8 @@ export class PdfDocumentSerializer {
    */
   public serialize(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
     const settings = this.document.settings;
+    const rasterizerRegistered = this.document.svgRasterizer !== undefined;
+    for (const svg of collectDocumentPreloadResources(this.document).svgs) svg.prepare(rasterizerRegistered);
     const fontScope = beginDocumentFontMetricScope(
       settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
       getRegistryFontInstances(preloadedResources),
@@ -448,7 +451,7 @@ export class PdfDocumentSerializer {
     const settings = this.document.settings;
 
     // ── Phase 1: Scan element tree for embedded font paths ───────────────────
-    const { embeddedPaths, imagesToDecode } = collectDocumentPreloadResources(this.document);
+    const { embeddedPaths, imagesToDecode, svgs } = collectDocumentPreloadResources(this.document);
 
     // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
     const preRegistry = new PdfResourceRegistry();
@@ -468,6 +471,11 @@ export class PdfDocumentSerializer {
     if (imagesToDecode.length > 0) {
       await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
     }
+
+    // ── Phase 2b': Parse SVG elements, rasterizing what needs it ────────────
+    // Sequentially and in document order, so a rasterizer sees a deterministic
+    // sequence of calls.
+    for (const svg of svgs) await svg.prepareAsync(this.document.svgRasterizer);
 
     // ── Phase 2c: Async AES-256 encryptor init ──────────────────────────────
     // AES-256 key derivation requires SubtleCrypto (async). Initialise the
@@ -490,15 +498,19 @@ export class PdfDocumentSerializer {
 export interface DocumentPreloadResources {
   embeddedPaths: Set<string>;
   imagesToDecode: Image[];
+  /** Every SVG element, in document order, for parsing and rasterizing before layout. */
+  svgs: Svg[];
 }
 
 /** Collects fonts and images that must be prepared before a document render. */
 export function collectDocumentPreloadResources(document: Document): DocumentPreloadResources {
   const embeddedPaths = new Set<string>();
   const imagesToDecode: Image[] = [];
+  const svgs: Svg[] = [];
   const collect = (element: unknown): void => {
     collectEmbeddedFonts(element, embeddedPaths);
     collectImagesNeedingDecode(element, imagesToDecode);
+    collectSvgElements(element, svgs);
   };
 
   for (const page of document.pages) {
@@ -514,7 +526,7 @@ export function collectDocumentPreloadResources(document: Document): DocumentPre
   const watermarkFont = document.settings.watermark?.fontName;
   if (watermarkFont && PdfResourceRegistry.isEmbeddedFont(watermarkFont)) embeddedPaths.add(watermarkFont);
 
-  return { embeddedPaths, imagesToDecode };
+  return { embeddedPaths, imagesToDecode, svgs };
 }
 
 /**
@@ -565,6 +577,13 @@ export function collectImagesNeedingDecode(element: unknown, out: Image[]): void
   }
 
   forEachChild(element, child => collectImagesNeedingDecode(child, out));
+}
+
+/** Walk the element tree and collect every `Svg` element, once each, in document order. */
+export function collectSvgElements(element: unknown, out: Svg[]): void {
+  if (!element || typeof element !== 'object') return;
+  if (element instanceof Svg && !out.includes(element)) out.push(element);
+  forEachChild(element, child => collectSvgElements(child, out));
 }
 
 /**

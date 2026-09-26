@@ -362,13 +362,29 @@ export class PdfCanvas implements ICanvas {
 
     this.drawAsArtifactFallback(() => {
       PdfOperators.saveState(this.stream);
-      PdfOperators.translate(this.stream, pdfX, pdfY);
+      if (this.isIdentityCtm()) {
+        PdfOperators.translate(this.stream, pdfX, pdfY);
+      } else {
+        // Under a transform, the image is placed in the canvas's own space: the
+        // transform, then the box's bottom-left corner with y pointing up.
+        const [a, b, c, d, e, f] = this.ctm;
+        this.concatAsSingle(
+          a,
+          -b,
+          c,
+          -d,
+          f32(e + f32(this.xOffset)),
+          f32(f32(f32(this.height) - f32(this.yOffset)) - f)
+        );
+        this.concatAsSingle(1, 0, 0, -1, f32(x), f32(f32(y) + f32(height)));
+      }
       // Combine EXIF orientation with the display-size scale into a single
       // `cm` matrix.  For orientation=1 (the common case) this is identical
       // to the previous translate+scale sequence.
       const orientation = typeof image?.orientation === 'number' ? image.orientation : 1;
       const m = orientationMatrix(orientation, width, height);
-      PdfOperators.concatMatrix(this.stream, m[0], m[1], m[2], m[3], m[4], m[5]);
+      if (this.isIdentityCtm()) PdfOperators.concatMatrix(this.stream, m[0], m[1], m[2], m[3], m[4], m[5]);
+      else this.concatAsSingle(m[0], m[1], m[2], m[3], m[4], m[5]);
       PdfOperators.paintXObject(this.stream, imageName);
       PdfOperators.restoreState(this.stream);
     }, this._reportUntaggedImage);
@@ -468,6 +484,7 @@ export class PdfCanvas implements ICanvas {
 
   public strokeCurrentPath(style: StrokeStyle): void {
     if (this.currentPath.length === 0) return;
+    style = this.toDeviceStroke(style);
     const p = toPaint(style.paint);
     // A gradient whose transform cannot be inverted has no space to sample in,
     // so it strokes nothing - and writes nothing, not even the stroke settings.
@@ -505,9 +522,37 @@ export class PdfCanvas implements ICanvas {
     });
   }
 
+  /**
+   * A stroke's width and dash lengths are in user space, like its points; the
+   * points are transformed at emit time, so these are scaled here. The scale is
+   * the square root of the transform's absolute determinant: exact for uniform
+   * scaling and rotation, and the geometric mean of the axis scales for a
+   * non-uniform transform. Under a transform that does not scale, the style is
+   * returned untouched.
+   */
+  private toDeviceStroke(style: StrokeStyle): StrokeStyle {
+    const [a, b, c, d] = this.ctm;
+    if (this.isIdentityCtm()) return style;
+    const k = f32(Math.sqrt(f32(Math.abs(f32(f32(a * d) - f32(b * c))))));
+    const scaled = (v: number): number => single(k === 1 ? f32(v) : f32(f32(v) * k));
+    return {
+      ...style,
+      width: scaled(style.width),
+      ...(style.miterLimit !== undefined ? { miterLimit: single(f32(style.miterLimit)) } : {}),
+      ...(style.dashPattern !== undefined ? { dashPattern: style.dashPattern.map(scaled) } : {}),
+      ...(style.dashOffset !== undefined ? { dashOffset: scaled(style.dashOffset) } : {}),
+    };
+  }
+
   // -- Affine transforms --------------------------------------------
   // Transforms are tracked in a screen-space CTM and applied to path points
   // at emit time. This avoids complex PDF-space/screen-space conjugation.
+  //
+  // The CTM, and every point mapped through a CTM that is not the identity,
+  // is computed in single precision, operation by operation, as the .NET
+  // canvas computes it in `float`. Transformed drawing - an imported SVG above
+  // all - is then byte-identical across the implementations. Untransformed
+  // drawing keeps full precision, and its bytes are unchanged.
 
   public translate(tx: number, ty: number): void {
     this.multiplyCtm(1, 0, 0, 1, tx, ty);
@@ -518,9 +563,9 @@ export class PdfCanvas implements ICanvas {
   }
 
   public rotate(angleDegrees: number): void {
-    const rad = (angleDegrees * Math.PI) / 180;
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
+    const rad = f32(f32(angleDegrees) * f32(Math.PI / 180));
+    const cos = f32(Math.cos(rad));
+    const sin = f32(Math.sin(rad));
     // Clockwise rotation in screen space (Y-down)
     this.multiplyCtm(cos, sin, -sin, cos, 0, 0);
   }
@@ -766,7 +811,30 @@ export class PdfCanvas implements ICanvas {
     };
   }
 
+  /**
+   * A path point in PDF space. Under a transform, in single precision, as the
+   * .NET canvas computes it.
+   */
   private toPdfPoint(sx: number, sy: number): { x: number; y: number } {
+    if (!this.isIdentityCtm()) {
+      const [a, b, c, d, e, f] = this.ctm;
+      const x = f32(sx);
+      const y = f32(sy);
+      const tx = f32(f32(f32(a * x) + f32(c * y)) + e);
+      const ty = f32(f32(f32(b * x) + f32(d * y)) + f);
+      return {
+        x: single(f32(tx + f32(this.xOffset))),
+        y: single(f32(f32(this.height) - f32(ty + f32(this.yOffset)))),
+      };
+    }
+    return this.toPdfPointPrecise(sx, sy);
+  }
+
+  /**
+   * A point in PDF space at full precision, for geometry the canvas generates
+   * itself (the gradient approximations), as the .NET canvas does.
+   */
+  private toPdfPointPrecise(sx: number, sy: number): { x: number; y: number } {
     const t = this.transformPoint(sx, sy);
     return {
       x: t.x + this.xOffset,
@@ -803,14 +871,30 @@ export class PdfCanvas implements ICanvas {
 
   private multiplyCtm(a2: number, b2: number, c2: number, d2: number, e2: number, f2: number): void {
     const [a1, b1, c1, d1, e1, f1] = this.ctm;
+    [a2, b2, c2, d2, e2, f2] = [f32(a2), f32(b2), f32(c2), f32(d2), f32(e2), f32(f2)];
     this.ctm = [
-      a1 * a2 + c1 * b2,
-      b1 * a2 + d1 * b2,
-      a1 * c2 + c1 * d2,
-      b1 * c2 + d1 * d2,
-      a1 * e2 + c1 * f2 + e1,
-      b1 * e2 + d1 * f2 + f1,
+      f32(f32(a1 * a2) + f32(c1 * b2)),
+      f32(f32(b1 * a2) + f32(d1 * b2)),
+      f32(f32(a1 * c2) + f32(c1 * d2)),
+      f32(f32(b1 * c2) + f32(d1 * d2)),
+      f32(f32(f32(a1 * e2) + f32(c1 * f2)) + e1),
+      f32(f32(f32(b1 * e2) + f32(d1 * f2)) + f1),
     ];
+  }
+
+  /**
+   * A `cm` written as the .NET canvas writes one from `float` values, for
+   * drawing under a transform.
+   */
+  private concatAsSingle(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    const v = (x: number): number => single(f32(x));
+    PdfOperators.concatMatrix(this.stream, v(a), v(b), v(c), v(d), v(e), v(f));
+  }
+
+  /** True while no transform is in effect. */
+  private isIdentityCtm(): boolean {
+    const [a, b, c, d, e, f] = this.ctm;
+    return a === 1 && b === 0 && c === 0 && d === 1 && e === 0 && f === 0;
   }
 
   // -- Private: gradient helpers ------------------------------------------
@@ -1076,14 +1160,19 @@ export class PdfCanvas implements ICanvas {
   ): void {
     this.beginGradientClip(rule);
     const [a, b, c, d, e, f] = this.ctm;
-    PdfOperators.concatMatrix(this.stream, a, -b, c, -d, e + this.xOffset, this.height - this.yOffset - f);
+    if (this.isIdentityCtm()) {
+      PdfOperators.concatMatrix(this.stream, a, -b, c, -d, e + this.xOffset, this.height - this.yOffset - f);
+    } else {
+      this.concatAsSingle(a, -b, c, -d, f32(e + f32(this.xOffset)), f32(f32(f32(this.height) - f32(this.yOffset)) - f));
+    }
     // The paint transform is concatenated after the canvas matrix, so the
     // shading's /Coords are read in the paint's own space. A second `cm` rather
     // than a pre-multiplied one keeps the canvas mapping byte-identical for the
     // overwhelmingly common paint with no transform.
     if (paintTransform && !isIdentityPaintTransform(paintTransform)) {
-      PdfOperators.concatMatrix(
-        this.stream,
+      (this.isIdentityCtm()
+        ? PdfOperators.concatMatrix.bind(PdfOperators, this.stream)
+        : this.concatAsSingle.bind(this))(
         paintTransform.a,
         paintTransform.b,
         paintTransform.c,
@@ -1160,9 +1249,9 @@ export class PdfCanvas implements ICanvas {
     x: number,
     y: number
   ): { x: number; y: number } {
-    if (!paintTransform || isIdentityPaintTransform(paintTransform)) return this.toPdfPoint(x, y);
+    if (!paintTransform || isIdentityPaintTransform(paintTransform)) return this.toPdfPointPrecise(x, y);
     const mapped = applyPaintTransform(paintTransform, x, y);
-    return this.toPdfPoint(mapped.x, mapped.y);
+    return this.toPdfPointPrecise(mapped.x, mapped.y);
   }
 
   /** Bounding box of the current path in canvas space (control points included). */
@@ -1318,8 +1407,8 @@ export class PdfCanvas implements ICanvas {
         const mid = toPaintSpace === null ? { x: mx, y: my } : applyPaintTransform(toPaintSpace, mx, my);
         const t = this.projectOntoGradient(mid.x, mid.y, paint);
         const color = sampleNormalizedStops(stops, t);
-        const s = this.toPdfPoint(p0.x, p0.y);
-        const e = this.toPdfPoint(p1.x, p1.y);
+        const s = this.toPdfPointPrecise(p0.x, p0.y);
+        const e = this.toPdfPointPrecise(p1.x, p1.y);
         const translucent = color.scA < 1;
         if (translucent) {
           PdfOperators.saveState(this.stream);
@@ -1506,3 +1595,9 @@ function orientationMatrix(
       return [width, 0, 0, height, 0, 0];
   }
 }
+
+/** Rounds to single precision, as the .NET canvas's `float` arithmetic does. */
+const f32 = Math.fround;
+
+/** A single-precision value, rounded as the .NET canvas prints it. */
+const single = PdfSyntax.roundAsSingle.bind(PdfSyntax);

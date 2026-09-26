@@ -107,6 +107,7 @@ export * from './Elements/Layout/Pagination/Unconstrained';
 
 export * from './Elements/Media/Image';
 export * from './Elements/Media/ImageFitMode';
+export * from './Elements/Media/Svg';
 
 export * from './Elements/Text/TextDecoration';
 export * from './Elements/Text/BaselineAlignment';

@@ -84,6 +84,24 @@ export class PdfSyntax {
     return `D:${year}${month}${day}${hh}${mm}${ss}Z`;
   }
 
+  /**
+   * A single-precision value rounded to three decimals as the .NET
+   * implementation prints a `float` - to 7 significant digits, then to 3
+   * decimals, half away from zero - so that {@link formatDecimal} writes the
+   * same text for it. That differs from rounding the exact value once in about
+   * one value in twenty.
+   */
+  public static roundAsSingle(value: number): number {
+    if (!Number.isFinite(value) || value === 0) return value;
+    const digits = Math.abs(value).toPrecision(7);
+    // Exponent notation only below 1e-6, which rounds to zero, or at 1e21 and above.
+    if (digits.includes('e')) return Math.abs(value) < 1 ? 0 : value;
+    const [whole, fraction = ''] = digits.split('.');
+    const padded = fraction.padEnd(4, '0');
+    const thousandths = Number(whole + padded.slice(0, 3)) + (padded[3] >= '5' ? 1 : 0);
+    return (Math.sign(value) * thousandths) / 1000;
+  }
+
   public static formatDecimal(value: number): string {
     // Matches the .NET reference's "0.###" format: up to 3 fractional digits with
     // trailing zeros (and a bare trailing dot) trimmed. This keeps content streams

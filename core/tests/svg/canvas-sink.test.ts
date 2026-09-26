@@ -15,7 +15,7 @@ describe('imported SVG on the PDF canvas', () => {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">' +
       '<path d="M1 1 L9 9" stroke="#0000ff" stroke-width="2" fill="none"/></svg>';
-    expect(draw(svg, 20, 20)).toBe('q\nq\n2 w\n0 J\n0 j\n4 M\n0 0 1 RG\n2 998 m\n18 982 l\nS\nQ\nQ\n');
+    expect(draw(svg, 20, 20)).toBe('q\nq\n4 w\n0 J\n0 j\n4 M\n0 0 1 RG\n2 998 m\n18 982 l\nS\nQ\nQ\n');
   });
 
   it('keeps a miter limit the document sets', () => {

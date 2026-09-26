@@ -3,6 +3,7 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { ImageInfo } from '../../Rendering/Images/ImageInfo';
 import { ImageLoader } from '../../Rendering/Images/ImageLoader';
 import { ImageFitMode } from './ImageFitMode';
+import { resolveImageBox } from './ImageBox';
 import { applyOptions } from '../../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { toImageFitMode, type ImageFitModeInput } from '../../Normalize/toEnum';
@@ -234,69 +235,10 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
 
     // Use displayWidth/Height so EXIF-rotated JPEGs (orientation 5–8) lay
     // out in their visual orientation, not their stored sensor orientation.
-    const nativeWidth = info.displayWidth;
-    const nativeHeight = info.displayHeight;
-    const aspectRatio = nativeWidth / nativeHeight;
-
-    // Use specified width or available width
-    const targetWidth = this.width ?? availableWidth;
-    const targetHeight = this.height ?? (this.maintainAspectRatio ? targetWidth / aspectRatio : nativeHeight);
-
-    let displayWidth = targetWidth;
-    let displayHeight = targetHeight;
-
-    // Apply fit mode
-    switch (this.fitMode) {
-      case ImageFitMode.Contain:
-        // Scale to fit within bounds, maintain aspect ratio
-        if (this.width !== undefined && this.height !== undefined) {
-          const widthRatio = this.width / nativeWidth;
-          const heightRatio = this.height / nativeHeight;
-          const scale = Math.min(widthRatio, heightRatio);
-          displayWidth = nativeWidth * scale;
-          displayHeight = nativeHeight * scale;
-        } else if (this.width !== undefined) {
-          displayWidth = this.width;
-          displayHeight = displayWidth / aspectRatio;
-        } else if (this.height !== undefined) {
-          displayHeight = this.height;
-          displayWidth = displayHeight * aspectRatio;
-        }
-        break;
-
-      case ImageFitMode.Cover:
-        // Scale to fill bounds, maintain aspect ratio, crop if needed
-        if (this.width !== undefined && this.height !== undefined) {
-          const widthRatio = this.width / nativeWidth;
-          const heightRatio = this.height / nativeHeight;
-          const scale = Math.max(widthRatio, heightRatio);
-          displayWidth = nativeWidth * scale;
-          displayHeight = nativeHeight * scale;
-        }
-        break;
-
-      case ImageFitMode.Fill:
-        // Stretch to fill, ignore aspect ratio
-        displayWidth = this.width ?? availableWidth;
-        displayHeight = this.height ?? nativeHeight;
-        break;
-
-      case ImageFitMode.FitHeight:
-        // Scale to fit height, maintain aspect ratio
-        if (this.height !== undefined) {
-          displayHeight = this.height;
-          displayWidth = displayHeight * aspectRatio;
-        }
-        break;
-
-      case ImageFitMode.ActualSize:
-        // Use native dimensions (1 pixel = 1 point)
-        displayWidth = nativeWidth;
-        displayHeight = nativeHeight;
-        break;
-    }
-
-    outDisplayWidth.value = displayWidth;
-    outDisplayHeight.value = displayHeight;
+    resolveImageBox(this, info.displayWidth, info.displayHeight, availableWidth, this.box);
+    outDisplayWidth.value = this.box.width;
+    outDisplayHeight.value = this.box.height;
   }
+
+  private readonly box = { width: 0, height: 0 };
 }

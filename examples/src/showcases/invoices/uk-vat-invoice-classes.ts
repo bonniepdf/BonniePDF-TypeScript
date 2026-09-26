@@ -1,6 +1,6 @@
 // ── UK VAT invoice ───────────────────────────────────────────────────────────
 //
-// A HMRC-style VAT invoice. Post-Brexit the UK runs its own VAT regime, and a
+// An HMRC-style VAT invoice. Post-Brexit the UK runs its own VAT regime, and a
 // valid VAT invoice must show the supplier's VAT registration number, a tax
 // point (supply date), and - crucially - a VAT breakdown by rate. This showcase
 // mixes standard-rated (20%), reduced-rated (5%), and zero-rated (0%) lines and

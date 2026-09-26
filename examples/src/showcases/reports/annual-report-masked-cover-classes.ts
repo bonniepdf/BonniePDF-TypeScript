@@ -5,7 +5,7 @@
 // equivalence test binds the two). Reach for the options form first; this
 // variant exists to show what it desugars to.
 //
-// The this feature vector-drawing calls inside `drawCover` are the low-level drawing
+// The vector-drawing calls inside `drawCover` are the low-level drawing
 // surface itself - there is no "options vs class" distinction for canvas
 // primitives, so `drawCover` (and its helpers) are kept identical in both
 // variants; only the surrounding Document/settings/metadata construction

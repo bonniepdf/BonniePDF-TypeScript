@@ -100,7 +100,7 @@ export function generate(): Document {
 
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const f = new TextBlock(
-      `CONFIDENTIAL - Patient: WESTON, Harold (Patient ID CGH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -110,8 +110,8 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Laboratory Report - specimen L26-118842';
-  metadata.author = 'City General Hospital Pathology Services';
-  metadata.subject = 'Pathology laboratory report with reference ranges and flags (fictional).';
+  metadata.author = 'Sample Hospital Pathology Services';
+  metadata.subject = 'Pathology laboratory report with reference ranges and flags (sample).';
 
   const doc = new Document(settings, metadata);
 
@@ -120,7 +120,7 @@ export function generate(): Document {
   header.cellPadding = 0;
   header.border = Border.none;
   const org = new VerticalStack();
-  const trust = new TextBlock('City General Hospital Pathology Services');
+  const trust = new TextBlock('Sample Hospital Pathology Services');
   trust.fontName = StandardFonts.HelveticaBold;
   trust.fontSize = 14;
   trust.textColor = CLINICAL_BLUE;
@@ -158,18 +158,18 @@ export function generate(): Document {
   info.margin = new Thickness(0, 0, 0, 18);
   const patient = new VerticalStack();
   patient.add(sectionLabel('PATIENT'));
-  patient.add(kv('Name', 'WESTON, Harold'));
+  patient.add(kv('Name', 'SAMPLE, Harold'));
   patient.add(kv('Date of birth', '02 Nov 1951 (74y)'));
   patient.add(kv('Sex', 'Male'));
-  patient.add(kv('Patient ID', 'CGH-9434765919'));
-  patient.add(kv('Hospital no.', 'CGH-2208814'));
+  patient.add(kv('Patient ID', 'SH-9434765919'));
+  patient.add(kv('Hospital no.', 'SH-2208814'));
   const specimen = new VerticalStack();
   specimen.add(sectionLabel('SPECIMEN'));
   specimen.add(kv('Specimen ID', 'L26-118842'));
   specimen.add(kv('Collected', '06 Jul 2026 08:14'));
   specimen.add(kv('Received', '06 Jul 2026 09:02'));
   specimen.add(kv('Reported', '06 Jul 2026 11:37'));
-  specimen.add(kv('Requested by', 'Dr A. Kaur, Ward 12'));
+  specimen.add(kv('Requested by', 'Dr A. Sample, Ward 12'));
   info.addRow(patient, specimen);
   doc.add(info);
 

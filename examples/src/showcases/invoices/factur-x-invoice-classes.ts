@@ -182,7 +182,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   bottom.margin = new Thickness(0, 20, 0, 0);
   const pay = labelled(
     'PAYMENT',
-    lines(['IBAN: DE21 1001 0000 0012 3456 78', 'BIC: PBNKDEFFXXX', 'Deutsche Postbank, Berlin'], {
+    lines(['IBAN: DE21 1001 0000 0012 3456 78', 'BIC: SMPLDEFFXXX', 'Sample Bank, Berlin'], {
       size: 8,
       color: MUTED,
     }),

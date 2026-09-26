@@ -55,7 +55,7 @@ function tb(
 
 /**
  * A rounded "card": a clipped, rounded-corner container whose first child is a
- * full-bleed coloured header band. The clip (this feature `clipContent`) is what makes
+ * full-bleed coloured header band. The clip (`clipContent`) is what makes
  * the band follow the rounded top corners instead of poking square corners out
  * past the card edge — the same reason the white body is masked at the bottom.
  */
@@ -136,7 +136,7 @@ export function generate(): Document {
 
   // ── 1. Patient card (teal bleed band) ────────────────────────────────────
   const idLine = new VerticalStack();
-  idLine.add(tb('Eleanor M. Whitfield', 15, Color.white, { bold: true }));
+  idLine.add(tb('Sample Patient', 15, Color.white, { bold: true }));
   idLine.add(tb('MRN 00482931  ·  DOB 14 Mar 1979  ·  Female', 9, CREAM, { top: 5 }));
 
   const patientBand = new Container();
@@ -146,7 +146,7 @@ export function generate(): Document {
 
   const detailsLeft = new VerticalStack();
   detailsLeft.add(detailRow('Blood type', 'O positive'));
-  detailsLeft.add(detailRow('Primary GP', 'Dr. A. Okafor'));
+  detailsLeft.add(detailRow('Primary GP', 'Dr. A. Sample'));
   detailsLeft.add(detailRow('Phone', '+44 7700 900482'));
 
   const detailsRight = new VerticalStack();
@@ -171,7 +171,7 @@ export function generate(): Document {
   const patientCard = new Container();
   patientCard.backgroundColor = CARD;
   patientCard.cornerRadius = 14;
-  patientCard.clipContent = true; // ← this feature
+  patientCard.clipContent = true; // ← clip to the rounded outline
   patientCard.border = new Border(0.75);
   patientCard.borderColors = new BorderColors(HAIRLINE);
   patientCard.margin = new Thickness(0, 20, 0, 16);

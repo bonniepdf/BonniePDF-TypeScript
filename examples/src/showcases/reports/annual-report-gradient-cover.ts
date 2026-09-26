@@ -21,7 +21,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #1 - "Gradient field".
 //
-// A full-bleed annual-report cover painted entirely on the this feature vector drawing
+// A full-bleed annual-report cover painted entirely on the vector drawing
 // surface. The whole page is one CanvasElement: a vertical linear-gradient
 // backdrop, a soft radial "glow" that fades to transparent, a set of fine
 // diagonal accent rules, and the cover type drawn directly with canvas text.
@@ -31,7 +31,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // printed report cover is laid out.
 //
 // The Document/settings/metadata wrapper is authored through the
-// options-object front door; the this feature vector-drawing calls inside `drawCover`
+// options-object front door; the vector-drawing calls inside `drawCover`
 // are the low-level drawing surface itself, with no "options vs class"
 // distinction, so they are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────

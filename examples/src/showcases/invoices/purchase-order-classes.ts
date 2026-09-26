@@ -67,8 +67,8 @@ const ORDER = {
   incoterms: 'DAP — Sample Distribution Centre',
   requisition: 'REQ-2026-1188',
   costCentre: 'CC-4420 — Facilities',
-  raisedBy: 'L. Fontaine — Buyer',
-  approvedBy: 'H. Yusuf — Head of Procurement',
+  raisedBy: 'Sample Buyer — Buyer',
+  approvedBy: 'Sample Manager — Head of Procurement',
   vatRate: 0.2,
 };
 

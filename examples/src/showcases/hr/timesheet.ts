@@ -43,12 +43,12 @@ import {
 
 const SHEET = {
   reference: 'TS-2026-W37-0114',
-  consultant: 'N. Bartoli — Senior Consultant',
+  consultant: 'Sample Consultant — Senior Consultant',
   employeeId: 'EMP-0114',
   weekCommencing: new Date(Date.UTC(2026, 8, 7)),
   weekEnding: new Date(Date.UTC(2026, 8, 13)),
   submitted: new Date(Date.UTC(2026, 8, 14)),
-  approver: 'H. Yusuf — Engagement Manager',
+  approver: 'Sample Manager — Engagement Manager',
   contractedHours: 37.5,
   utilisationTarget: 0.8,
 };

@@ -83,9 +83,9 @@ export interface PolicyScheduleData {
 
 export const samplePolicySchedule: PolicyScheduleData = {
   insurer: {
-    name: 'Meridian Home Insurance Ltd',
-    address: '20 Fenchurch Street\nLondon EC3M 8AF\nAuthorised by the FCA (fictional)',
-    authCode: 'MHIL-FC-0099',
+    name: 'Sample Home Insurance Ltd',
+    address: '20 Sample Street\nLondon EC3M 8AF\nAuthorised by the FCA (sample)',
+    authCode: 'SHIL-FC-0099',
   },
   policy: {
     number: 'HOM-2026-8842139',
@@ -95,13 +95,13 @@ export const samplePolicySchedule: PolicyScheduleData = {
     status: 'Active',
   },
   policyholder: {
-    name: 'Daniel & Hana Osei',
-    address: '47 Lime Tree Walk\nLeeds LS6 1QR',
-    email: 'd.osei@example.co.uk',
+    name: 'Sample Policyholder',
+    address: '47 Sample Walk\nSample City SC6 1QR',
+    email: 'policyholder@sample.example',
   },
   insuredRisk: {
     type: 'Semi-detached house',
-    address: '47 Lime Tree Walk, Leeds LS6 1QR',
+    address: '47 Sample Walk, Sample City SC6 1QR',
     yearBuilt: 1936,
     rebuild: 412000,
   },
@@ -163,8 +163,8 @@ export const samplePolicySchedule: PolicyScheduleData = {
       type: 'endorsement',
     },
   ],
-  claims: { phone: '0800 555 0142', email: 'claims@meridian-home.example', hours: '24 hours / 7 days' },
-  portalUrl: 'https://portal.meridian-home.example/p/HOM-2026-8842139',
+  claims: { phone: '0800 555 0142', email: 'claims@sample-home-insurance.example', hours: '24 hours / 7 days' },
+  portalUrl: 'https://portal.sample-home-insurance.example/p/HOM-2026-8842139',
   locale: 'en-GB',
   currency: 'GBP',
 };

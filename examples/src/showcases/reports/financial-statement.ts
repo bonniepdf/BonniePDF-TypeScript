@@ -131,7 +131,7 @@ export function generate(): Document {
   doc.add(
     sub(
       'These financial statements were approved by the Board of Directors and authorised ' +
-        'for issue on 20 June 2026, and are signed on its behalf by A. Whitfield, Director.'
+        'for issue on 20 June 2026, and are signed on its behalf by Sample Director, Director.'
     )
   );
 

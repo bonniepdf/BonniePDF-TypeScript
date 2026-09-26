@@ -161,7 +161,7 @@ export function generate(): Document {
   // ── Bill To / Ship To / Details ───────────────────────────────────────────
   // Each address is one TextBlock with hard line breaks, so it tags as a single
   // paragraph under PDF/UA instead of one per line.
-  const address = 'Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701';
+  const address = 'Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack({
     children: [tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }), tb(address)],
@@ -263,7 +263,7 @@ export function generate(): Document {
   // ── Payment details ───────────────────────────────────────────────────────
   const paymentTable = new Grid({ columns: [1, 1, 1], cellPadding: 0, border: 0 });
   paymentTable.addRow(
-    paymentColumn('Bank Transfer', 'Chase Bank\nRouting: 021000021\nAccount: ****7842'),
+    paymentColumn('Bank Transfer', 'Sample Bank\nRouting: 021000021\nAccount: ****7842'),
     paymentColumn('Other Methods', 'PayPal: payments@example.com\nWise: @sample-company'),
     paymentColumn('Reference', 'Please include invoice\nnumber with payment')
   );

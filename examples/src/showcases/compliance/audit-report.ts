@@ -128,7 +128,7 @@ export function generate(): Document {
     },
     metadata: {
       title: 'Data Protection & Information Security Audit - AR-2026-014',
-      author: 'Aegis Assurance LLP',
+      author: 'Sample Assurance LLP',
       subject: 'GDPR (EU/UK) and ISO/IEC 27001:2022 audit report (fictional).',
     },
   });
@@ -158,7 +158,7 @@ export function generate(): Document {
   metaRow.add(metaItem('Report ref', 'AR-2026-014'), 1);
   metaRow.add(metaItem('Audit period', 'Apr–Jun 2026'), 1);
   metaRow.add(metaItem('Issued', longDate), 1);
-  metaRow.add(metaItem('Auditor', 'Aegis Assurance LLP'), 1);
+  metaRow.add(metaItem('Auditor', 'Sample Assurance LLP'), 1);
   doc.add(metaRow);
 
   // ── Executive summary ─────────────────────────────────────────────────────

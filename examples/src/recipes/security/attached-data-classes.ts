@@ -3,7 +3,7 @@
 // A PDF/A-3 report that carries its underlying data as an embedded associated
 // file. The rendered table is the human-readable view; the same numbers are
 // attached as `quarterly-revenue.csv` so downstream tools (or an auditor)
-// can consume the exact source data without re-keying it. Demonstrates the generic this feature attachment API.
+// can consume the exact source data without re-keying it. Demonstrates the generic attachment API.
 //
 // Validated in CI (.NET side) by veraPDF as PDF/A-3b. Parity peer of the .NET
 // AttachedDataExample.

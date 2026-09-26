@@ -5,7 +5,7 @@
 // equivalence test binds the two). Reach for the options form first; this
 // variant exists to show what it desugars to.
 //
-// The this feature vector-drawing calls inside `drawCover` are the low-level drawing
+// The vector-drawing calls inside `drawCover` are the low-level drawing
 // surface itself - there is no "options vs class" distinction for canvas
 // primitives, so `drawCover` (and its helpers) are kept identical in both
 // variants; only the surrounding Document/settings/metadata construction
@@ -39,7 +39,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #1 - "Gradient field".
 //
-// A full-bleed annual-report cover painted entirely on the this feature vector drawing
+// A full-bleed annual-report cover painted entirely on the vector drawing
 // surface. The whole page is one CanvasElement: a vertical linear-gradient
 // backdrop, a soft radial "glow" that fades to transparent, a set of fine
 // diagonal accent rules, and the cover type drawn directly with canvas text.

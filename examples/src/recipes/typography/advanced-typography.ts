@@ -1,7 +1,7 @@
 import { Document, Heading, TextBlock, RichText, TextStyle, StandardFonts } from '@bonniepdf/core';
 
 /**
- * this feature advanced typography (phase 1a): super/subscript baseline shift and
+ * Advanced typography: super/subscript baseline shift and
  * decoration styling (overline + underline/strikethrough colour & thickness),
  * plus letter/word spacing, line clamping, and paragraph indent/spacing.
  * Authored through the options-object front door.

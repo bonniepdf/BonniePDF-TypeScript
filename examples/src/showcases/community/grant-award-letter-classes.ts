@@ -146,7 +146,7 @@ export function generate(): Document {
 
   // One TextBlock with hard line breaks: the address tags as a single
   // paragraph under PDF/UA instead of five.
-  const addr = body('Ms R. Adeyemi\nRiverside Youth Music Project\n14 Canalside Walk\nWestford\nWF3 2LP', { mb: 0 });
+  const addr = body('Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP', { mb: 0 });
 
   const meta = new VerticalStack();
   meta.add(body('Issued 4 August 2026', { align: TextAlignment.Right, mb: 0 }));
@@ -156,7 +156,7 @@ export function generate(): Document {
   doc.add(top);
 
   doc.add(h1('Decision on your grant application'));
-  doc.add(body('Dear Ms Adeyemi,', { bold: true, mb: 8 }));
+  doc.add(body('Dear Sample Recipient,', { bold: true, mb: 8 }));
   doc.add(
     body(
       'We are pleased to tell you that your application to the Sample Community Fund has been ' +

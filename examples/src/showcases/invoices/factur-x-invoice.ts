@@ -177,7 +177,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const bottom = new Grid({ columns: [1.1, 1], cellPadding: 0, border: 0, margin: { top: 20 } });
   const pay = labelled(
     'PAYMENT',
-    lines(['IBAN: DE21 1001 0000 0012 3456 78', 'BIC: PBNKDEFFXXX', 'Deutsche Postbank, Berlin'], {
+    lines(['IBAN: DE21 1001 0000 0012 3456 78', 'BIC: SMPLDEFFXXX', 'Sample Bank, Berlin'], {
       size: 8,
       color: MUTED,
     }),

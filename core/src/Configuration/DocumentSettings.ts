@@ -39,6 +39,7 @@ export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'pageColor',
   'orientation',
   'margin',
+  'maxImageDpi',
   'defaultZoom',
   'customZoomLevel',
   'pageMode',
@@ -216,6 +217,26 @@ export class DocumentSettings {
   public set margin(value: LengthInput) {
     this._margin = toLength(value);
   }
+  private _maxImageDpi: number | null = 288;
+
+  /**
+   * The most pixels per inch an embedded PNG image is kept at (default: 288). An image that carries
+   * more pixels than its printed size can use is reduced to this resolution when the document is
+   * written, by an exact area average that never re-encodes the image lossily and never enlarges
+   * it. `null` embeds every image at its source resolution. JPEG, indexed and 16-bit images are
+   * always embedded as they are; `Document.diagnostics` reports what was reduced and what was
+   * passed through.
+   */
+  public get maxImageDpi(): number | null {
+    return this._maxImageDpi;
+  }
+  public set maxImageDpi(value: number | null) {
+    if (value !== null && !(Number.isInteger(value) && value >= 1)) {
+      throw new RangeError(`maxImageDpi must be a whole number of at least 1, or null for no cap; got ${value}.`);
+    }
+    this._maxImageDpi = value;
+  }
+
   /**
    * The default zoom level when the PDF is opened (default: FitPage)
    */

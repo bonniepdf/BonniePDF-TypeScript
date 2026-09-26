@@ -323,7 +323,8 @@ export class RenderContext implements RenderContextContract {
         this.registerAlphaGraphicsState.bind(this),
         this.resolveTextRuns.bind(this),
         this.reportUntaggedImage.bind(this),
-        this.registerShading.bind(this)
+        this.registerShading.bind(this),
+        this.resources.noteImagePlacement.bind(this.resources)
       );
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
@@ -351,7 +352,8 @@ export class RenderContext implements RenderContextContract {
       this.registerAlphaGraphicsState.bind(this),
       undefined,
       undefined,
-      this.registerShading.bind(this)
+      this.registerShading.bind(this),
+      this.resources.noteImagePlacement.bind(this.resources)
     );
     if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
     return pdfCanvas;

@@ -107,6 +107,7 @@ export class PdfDocumentSerializer {
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
     ctx.resources.diagnostics = this.diagnostics;
+    ctx.resources.maxImageDpi = settings.maxImageDpi;
     ctx.resources.conformance = settings.conformance;
     // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
     // independently of any PDF/A claim - substitute embedded Liberation for

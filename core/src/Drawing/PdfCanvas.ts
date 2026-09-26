@@ -94,6 +94,7 @@ export class PdfCanvas implements ICanvas {
   private readonly _textRunResolver?: (fontFamily: string, text: string) => TextRun[];
   private readonly _reportUntaggedImage?: () => void;
   private readonly _shadingResolver?: ShadingResolver;
+  private readonly _imagePlacementTracker?: (image: ImageInfo, widthPoints: number, heightPoints: number) => void;
 
   constructor(
     pageHeight: number,
@@ -106,7 +107,8 @@ export class PdfCanvas implements ICanvas {
     alphaGraphicsStateResolver?: (alpha: number) => string,
     textRunResolver?: (fontFamily: string, text: string) => TextRun[],
     reportUntaggedImage?: () => void,
-    shadingResolver?: ShadingResolver
+    shadingResolver?: ShadingResolver,
+    imagePlacementTracker?: (image: ImageInfo, widthPoints: number, heightPoints: number) => void
   ) {
     this.height = pageHeight;
     this.xOffset = xOffset;
@@ -123,6 +125,7 @@ export class PdfCanvas implements ICanvas {
       alphaGraphicsStateResolver ?? (alpha => `/GS_ALPHA_${Math.round(alpha * 10000)}`);
     this._textRunResolver = textRunResolver;
     this._reportUntaggedImage = reportUntaggedImage;
+    this._imagePlacementTracker = imagePlacementTracker;
     this._shadingResolver = shadingResolver;
   }
 
@@ -357,6 +360,14 @@ export class PdfCanvas implements ICanvas {
 
   public drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void {
     const imageName = this._imageResolver(image);
+
+    // Tell the resource registry how large the image is actually painted, on the page, so it
+    // can decide how many pixels the embedded copy needs.
+    this._imagePlacementTracker?.(
+      image,
+      width * Math.hypot(this.ctm[0], this.ctm[1]),
+      height * Math.hypot(this.ctm[2], this.ctm[3])
+    );
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
 

@@ -440,41 +440,59 @@ export class PdfCanvas implements ICanvas {
   // -- Painting the current path ------------------------------------
 
   public fillCurrentPath(paint: Paint | Color, rule: FillRule = 'nonzero'): void {
+    if (this.currentPath.length === 0) return;
     const p = toPaint(paint);
     this.drawAsArtifactFallback(() => {
       if (p instanceof SolidPaint) {
+        // The fill colour is set inside its own q/Q, so it never leaks into
+        // whatever is drawn next.
         this.beginColorAlpha(p.color);
+        PdfOperators.saveState(this.stream);
         PdfOperators.setFillColor(this.stream, p.color);
         this.emitCurrentPath();
         this.stream.push(rule === 'evenodd' ? 'f*\n' : 'f\n');
+        PdfOperators.restoreState(this.stream);
         this.endColorAlpha(p.color);
       } else {
-        // Gradient fill: clip to path, then render gradient strips
-        PdfOperators.saveState(this.stream);
-        this.emitCurrentPath();
-        this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
-        this.emitGradientFill(p as LinearGradientPaint | RadialGradientPaint);
-        PdfOperators.restoreState(this.stream);
+        this.emitGradientFill(p as LinearGradientPaint | RadialGradientPaint, rule);
       }
     });
   }
 
+  /** Clip to the current path inside a fresh q, for a gradient's shading or its fallback. */
+  private beginGradientClip(rule: FillRule): void {
+    PdfOperators.saveState(this.stream);
+    this.emitCurrentPath();
+    this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
+  }
+
   public strokeCurrentPath(style: StrokeStyle): void {
+    if (this.currentPath.length === 0) return;
     const p = toPaint(style.paint);
+    // A gradient whose transform cannot be inverted has no space to sample in,
+    // so it strokes nothing - and writes nothing, not even the stroke settings.
+    if (!(p instanceof SolidPaint)) {
+      const t = (p as LinearGradientPaint | RadialGradientPaint).transform;
+      if (!isIdentityPaintTransform(t) && invertPaintTransform(t!) === null) return;
+    }
     this.drawAsArtifactFallback(() => {
+      // Translucency is set outside the stroke's own q/Q, as for fills.
+      if (p instanceof SolidPaint) this.beginColorAlpha(p.color);
       PdfOperators.saveState(this.stream);
       PdfOperators.setLineWidth(this.stream, style.width);
       const cap = style.lineCap === 'round' ? 1 : style.lineCap === 'square' ? 2 : 0;
       this.stream.push(`${cap} J\n`);
       const join = style.lineJoin === 'round' ? 1 : style.lineJoin === 'bevel' ? 2 : 0;
       PdfOperators.setLineJoin(this.stream, join);
-      if (style.miterLimit !== undefined) PdfOperators.setMiterLimit(this.stream, style.miterLimit);
+      // 10 is PDF's default miter limit, so it is not written.
+      if (style.miterLimit !== undefined && style.miterLimit !== 10) {
+        PdfOperators.setMiterLimit(this.stream, style.miterLimit);
+      }
       if (style.dashPattern && style.dashPattern.length > 0) {
         const d = style.dashPattern.map(v => PdfSyntax.formatDecimal(v)).join(' ');
         this.stream.push(`[${d}] ${PdfSyntax.formatDecimal(style.dashOffset ?? 0)} d\n`);
       }
       if (p instanceof SolidPaint) {
-        this.applyColorAlpha(p.color);
         PdfOperators.setStrokeColor(this.stream, p.color);
         this.emitCurrentPath();
         PdfOperators.stroke(this.stream);
@@ -483,6 +501,7 @@ export class PdfCanvas implements ICanvas {
         this.emitGradientStroke(p as LinearGradientPaint | RadialGradientPaint);
       }
       PdfOperators.restoreState(this.stream);
+      if (p instanceof SolidPaint) this.endColorAlpha(p.color);
     });
   }
 
@@ -796,15 +815,15 @@ export class PdfCanvas implements ICanvas {
 
   // -- Private: gradient helpers ------------------------------------------
 
-  private emitGradientFill(paint: LinearGradientPaint | RadialGradientPaint): void {
+  private emitGradientFill(paint: LinearGradientPaint | RadialGradientPaint, rule: FillRule): void {
     if (paint instanceof LinearGradientPaint) {
-      this.emitLinearGradientFill(paint);
+      this.emitLinearGradientFill(paint, rule);
     } else {
-      this.emitRadialGradientFill(paint);
+      this.emitRadialGradientFill(paint, rule);
     }
   }
 
-  private emitLinearGradientFill(paint: LinearGradientPaint): void {
+  private emitLinearGradientFill(paint: LinearGradientPaint, rule: FillRule): void {
     // Prefer a native PDF Type-2 axial shading (see emitShading). Falls back to
     // the perpendicular-strip approximation when shadings can't be used
     // (translucent gradient under PDF/A-1, which forbids transparency).
@@ -828,13 +847,15 @@ export class PdfCanvas implements ICanvas {
     };
     const resolved = this._shadingResolver?.(request);
     if (resolved) {
-      this.emitShading(resolved, paint.transform);
+      this.emitShading(resolved, rule, paint.transform);
       return;
     }
     // The approximation samples the same normalized stops the shading would
     // have, so switching between the two paths changes smoothness and nothing
     // else, and unsorted input cannot make the two implementations disagree.
+    this.beginGradientClip(rule);
     this.emitLinearGradientStrips(paint, stops, bbox);
+    PdfOperators.restoreState(this.stream);
   }
 
   /**
@@ -1012,7 +1033,7 @@ export class PdfCanvas implements ICanvas {
     return [tMin, tMax];
   }
 
-  private emitRadialGradientFill(paint: RadialGradientPaint): void {
+  private emitRadialGradientFill(paint: RadialGradientPaint, rule: FillRule): void {
     // Prefer a native PDF Type-3 radial shading (see emitShading). Falls back to
     // the disc approximation when shadings can't be used (translucent gradient
     // under PDF/A-1, which forbids transparency).
@@ -1030,12 +1051,18 @@ export class PdfCanvas implements ICanvas {
       hasAlpha: paint.stops.some(s => s.color.scA < 1),
     };
     const resolved = this._shadingResolver?.(request);
-    if (resolved) this.emitShading(resolved, paint.transform);
-    else this.emitRadialGradientDiscs(paint, stops, bbox);
+    if (resolved) {
+      this.emitShading(resolved, rule, paint.transform);
+      return;
+    }
+    this.beginGradientClip(rule);
+    this.emitRadialGradientDiscs(paint, stops, bbox);
+    PdfOperators.restoreState(this.stream);
   }
 
   /**
-   * Paints a resolved shading across the (already-clipped) region. A `cm` maps
+   * Paints a resolved shading across the current path, clipped to it within one
+   * q/Q. A `cm` maps
    * the shading's canvas-space coordinates into PDF page space — PdfCanvas bakes
    * its own transform into each emitted point and runs with an identity stream
    * CTM, so the shading needs that matrix re-applied here. For a translucent
@@ -1044,9 +1071,10 @@ export class PdfCanvas implements ICanvas {
    */
   private emitShading(
     resolved: { shadingName: string; softMaskGs: string | null },
+    rule: FillRule,
     paintTransform?: PaintTransform
   ): void {
-    PdfOperators.saveState(this.stream);
+    this.beginGradientClip(rule);
     const [a, b, c, d, e, f] = this.ctm;
     PdfOperators.concatMatrix(this.stream, a, -b, c, -d, e + this.xOffset, this.height - this.yOffset - f);
     // The paint transform is concatenated after the canvas matrix, so the

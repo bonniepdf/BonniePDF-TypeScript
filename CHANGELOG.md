@@ -9,6 +9,17 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Added
+
+- **Groundwork for SVG import: the import engine and its canvas adapter.**
+  The engine that parses SVG and draws it as vector content now lives under
+  `core/src/Rendering/Svg/`. It is vendored - maintained upstream and copied
+  here by tooling - so its files are never edited in this repository, and a
+  test checks each against the hash recorded in `VENDORED.json`. An internal
+  adapter draws what it emits onto any `ICanvas`, giving a stroke with no
+  miter limit SVG's default of 4 rather than PDF's 10. Nothing is exported yet
+  and no existing output changes; the `Svg` element that uses them follows.
+
 ### Changed
 
 - **`VerticalStack` honours `breakAllowed` on stateful children.** The keep-together

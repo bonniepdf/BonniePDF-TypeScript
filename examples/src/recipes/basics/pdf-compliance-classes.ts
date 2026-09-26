@@ -76,7 +76,7 @@ export function generate(): Document {
   doc.add(engineHeading);
 
   const engineBody = new TextBlock(
-    'BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and honest-claim resource checks.'
+    'BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and resource checks that keep the conformance claim accurate.'
   );
   engineBody.fontSize = 10;
   engineBody.textColor = ColorPalette.slate[700];

@@ -18,7 +18,7 @@ import {
 } from '@bonniepdf/core';
 
 /**
- * this feature cross-references: `Section` (named anchors), `SectionLink` (clickable
+ * Cross-references: `Section` (named anchors), `SectionLink` (clickable
  * internal jumps), and `PageNumberOf` ("see page 42"). The contents block sits
  * on page 1, ahead of the chapters it points at, so every reference is resolved
  * by the two-pass layout before the page is drawn.

@@ -190,8 +190,8 @@ export function generate(): Document {
 
   // ── Key-value pairs ───────────────────────────────────────────────────────
 
-  // Keep the heading with its section: no keep-with-next primitive exists yet
-  //, so force the whole block onto the next page with an explicit break.
+  // Keep the heading with its section: no keep-with-next primitive exists,
+  // so force the whole block onto the next page with an explicit break.
   doc.add(new PageBreak());
 
   const h2Kv = new Heading('Key-Value Pairs');

@@ -90,14 +90,14 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
-          `CONFIDENTIAL - Patient: WESTON, Harold (Patient ID CGH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
         ),
     },
     metadata: {
       title: 'Laboratory Report - specimen L26-118842',
-      author: 'City General Hospital Pathology Services',
-      subject: 'Pathology laboratory report with reference ranges and flags (fictional).',
+      author: 'Sample Hospital Pathology Services',
+      subject: 'Pathology laboratory report with reference ranges and flags (sample).',
     },
   });
 
@@ -106,7 +106,7 @@ export function generate(): Document {
   header.addRow(
     new VerticalStack({
       children: [
-        new TextBlock('City General Hospital Pathology Services', {
+        new TextBlock('Sample Hospital Pathology Services', {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 14,
           textColor: CLINICAL_BLUE,
@@ -152,11 +152,11 @@ export function generate(): Document {
     new VerticalStack({
       children: [
         sectionLabel('PATIENT'),
-        kv('Name', 'WESTON, Harold'),
+        kv('Name', 'SAMPLE, Harold'),
         kv('Date of birth', '02 Nov 1951 (74y)'),
         kv('Sex', 'Male'),
-        kv('Patient ID', 'CGH-9434765919'),
-        kv('Hospital no.', 'CGH-2208814'),
+        kv('Patient ID', 'SH-9434765919'),
+        kv('Hospital no.', 'SH-2208814'),
       ],
     }),
     new VerticalStack({
@@ -166,7 +166,7 @@ export function generate(): Document {
         kv('Collected', '06 Jul 2026 08:14'),
         kv('Received', '06 Jul 2026 09:02'),
         kv('Reported', '06 Jul 2026 11:37'),
-        kv('Requested by', 'Dr A. Kaur, Ward 12'),
+        kv('Requested by', 'Dr A. Sample, Ward 12'),
       ],
     })
   );

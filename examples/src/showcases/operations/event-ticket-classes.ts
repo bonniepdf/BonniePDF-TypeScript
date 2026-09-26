@@ -114,7 +114,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   eventName.margin = new Thickness(0, 0, 0, 3);
   info.add(eventName);
 
-  info.add(tb('Main Stage, Victoria Park, London', 10, BODY, { mb: 12 }));
+  info.add(tb('Main Stage, Sample Park, Sample City', 10, BODY, { mb: 12 }));
 
   const facts = new Grid(1, 1, 1);
   facts.border = Border.none;
@@ -155,7 +155,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   stub.add(tb('ADMIT ONE', 8, ACCENT, { bold: true, mb: 8, align: TextAlignment.Center }));
 
   const qr = new QRCode();
-  qr.data = 'https://tix.aurora.example/t/ASF26-4471-XK';
+  qr.data = 'https://tix.sample.example/t/ASF26-4471-XK';
   qr.size = 96;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Quartile;

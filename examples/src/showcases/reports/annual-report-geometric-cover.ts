@@ -21,7 +21,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // ─────────────────────────────────────────────────────────────────────────────
 // Annual-report front cover #3 - "Geometric badge".
 //
-// A light, modern cover built from this feature primitives: a radial "sun" bleeding off
+// A light, modern cover built from vector-drawing primitives: a radial "sun" bleeding off
 // the top-left corner, an abstract cluster of translucent rotated polygons and a
 // star placed with affine transforms, and a circular masked image badge (a photo
 // cropped to a circle - the most common "team / hero" cover crop) ringed in gold.
@@ -30,7 +30,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 // image drawn over its bounding square, so the circle does the cropping.
 //
 // The Document/settings/metadata wrapper is authored through the
-// options-object front door; the this feature vector-drawing calls inside `drawCover`
+// options-object front door; the vector-drawing calls inside `drawCover`
 // are the low-level drawing surface itself, with no "options vs class"
 // distinction, so they are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────

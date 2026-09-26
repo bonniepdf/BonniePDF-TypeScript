@@ -113,7 +113,7 @@ export function generate(): Document {
   // paragraph under PDF/UA instead of four.
   const top = new Grid({ columns: [1, 1], cellPadding: 0, border: 0, margin: { bottom: 24 } });
   top.addRow(
-    body('Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT', { mb: 0 }),
+    body('Sample Member\n14 Sample Court\nSample Town\nST1 6QT', { mb: 0 }),
     new VerticalStack({
       children: [
         body(longDate, { align: 'right', mb: 0 }),

@@ -61,8 +61,8 @@ const PERMIT = {
   site: 'Sample Site B — Building 4, Plant room 2',
   project: 'Sample Project — Phase 2 fit-out',
   contractor: 'Sample Contractor Ltd',
-  issuedBy: 'M. Delgado — Authorised Person (AP-118)',
-  acceptedBy: 'A. Okafor — Supervising Engineer (Eng. 4471)',
+  issuedBy: 'Sample Issuer — Authorised Person (AP-118)',
+  acceptedBy: 'Sample Engineer — Supervising Engineer (Eng. 4471)',
   validFrom: new Date(Date.UTC(2026, 8, 10, 8, 0)),
   validTo: new Date(Date.UTC(2026, 8, 10, 16, 0)),
   riskAssessment: 'RA-2026-0117 rev. C',
@@ -146,21 +146,21 @@ const ISOLATIONS: Isolation[] = [
     system: 'Electrical — lighting and power, plant room 2',
     point: 'DB-2B ways 4, 6, 8',
     method: 'Locked off, personal padlock, caution notice applied',
-    by: 'A. Okafor',
+    by: 'Sample Engineer',
   },
   {
     reference: 'I-2',
     system: 'Fire detection — zone 14',
     point: 'Panel FP-1, zone isolate',
     method: 'Zone isolated at panel, building manager informed',
-    by: 'M. Delgado',
+    by: 'Sample Issuer',
   },
   {
     reference: 'I-3',
     system: 'Heating — LTHW flow and return to AHU-04',
     point: 'Valves V-204 / V-205',
     method: 'Valves closed, chained, and tagged',
-    by: 'A. Okafor',
+    by: 'Sample Engineer',
   },
 ];
 
@@ -294,9 +294,9 @@ export function generate(): Document {
     headerTextColor: '#ffffff',
   });
   gas.addHeader(th('Measurement'), th('Reading'), th('Acceptable range'), th('Result'), th('Tested by'));
-  gas.addRow(td('Oxygen'), td('20.9 %'), td('19.5 – 23.5 %', { color: MUTED }), pass(), td('M. Delgado'));
-  gas.addRow(td('Flammable gas (LEL)'), td('0 %'), td('< 10 %', { color: MUTED }), pass(), td('M. Delgado'));
-  gas.addRow(td('Carbon monoxide'), td('0 ppm'), td('< 30 ppm', { color: MUTED }), pass(), td('M. Delgado'));
+  gas.addRow(td('Oxygen'), td('20.9 %'), td('19.5 – 23.5 %', { color: MUTED }), pass(), td('Sample Issuer'));
+  gas.addRow(td('Flammable gas (LEL)'), td('0 %'), td('< 10 %', { color: MUTED }), pass(), td('Sample Issuer'));
+  gas.addRow(td('Carbon monoxide'), td('0 ppm'), td('< 30 ppm', { color: MUTED }), pass(), td('Sample Issuer'));
   doc.add(gas);
 
   doc.add(

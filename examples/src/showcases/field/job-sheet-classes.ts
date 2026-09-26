@@ -70,7 +70,7 @@ const VISIT = {
   raised: new Date(Date.UTC(2026, 8, 9, 7, 42)),
   attended: new Date(Date.UTC(2026, 8, 9, 11, 5)),
   completed: new Date(Date.UTC(2026, 8, 9, 14, 20)),
-  engineer: 'A. Okafor (Eng. 4471)',
+  engineer: 'Sample Engineer (Eng. 4471)',
   client: 'Sample Client Ltd',
   site: 'Sample Site B — Building 4, Level 2',
   asset: 'AHU-04 — Air handling unit, plant room 2',
@@ -86,10 +86,10 @@ interface LabourLine {
 }
 
 const LABOUR: LabourLine[] = [
-  { description: 'Attendance and fault diagnosis', operative: 'A. Okafor', hours: 1.5, rate: 68 },
-  { description: 'Bearing replacement — supply fan', operative: 'A. Okafor', hours: 2.25, rate: 68 },
-  { description: 'Belt tension and alignment check', operative: 'A. Okafor', hours: 0.5, rate: 68 },
-  { description: 'Run-up test and handover', operative: 'A. Okafor', hours: 0.75, rate: 68 },
+  { description: 'Attendance and fault diagnosis', operative: 'Sample Engineer', hours: 1.5, rate: 68 },
+  { description: 'Bearing replacement — supply fan', operative: 'Sample Engineer', hours: 2.25, rate: 68 },
+  { description: 'Belt tension and alignment check', operative: 'Sample Engineer', hours: 0.5, rate: 68 },
+  { description: 'Run-up test and handover', operative: 'Sample Engineer', hours: 0.75, rate: 68 },
 ];
 
 interface PartLine {
@@ -387,7 +387,7 @@ export function generate(): Document {
   doc.add(
     signatureRow([
       signatureSlot('Attending engineer', VISIT.engineer, { dated: shortDate(VISIT.completed) }),
-      signatureSlot('Customer representative', 'R. Whitfield — Facilities Manager'),
+      signatureSlot('Customer representative', 'Sample Manager — Facilities Manager'),
     ])
   );
 

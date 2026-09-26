@@ -34,7 +34,7 @@ import { addCapabilitiesPage } from './_capabilities-page';
 //   └───────────────────────┘  ← page bottom
 //
 // The Document/settings/metadata wrapper is authored through the
-// options-object front door; the this feature vector-drawing calls inside `drawCover`
+// options-object front door; the vector-drawing calls inside `drawCover`
 // are the low-level drawing surface itself, with no "options vs class"
 // distinction, so they are unchanged.
 // ─────────────────────────────────────────────────────────────────────────────

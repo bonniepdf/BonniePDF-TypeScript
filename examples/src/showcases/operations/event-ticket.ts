@@ -112,7 +112,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         textColor: CREAM,
         margin: { bottom: 3 },
       }),
-      tb('Main Stage, Victoria Park, London', 10, BODY, { mb: 12 }),
+      tb('Main Stage, Sample Park, Sample City', 10, BODY, { mb: 12 }),
       facts,
       // Ticket-id barcode runs along the full width of the body.
       new Container({
@@ -149,7 +149,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     padding: 6,
     horizontalAlignment: 'center',
     child: new QRCode({
-      data: 'https://tix.aurora.example/t/ASF26-4471-XK',
+      data: 'https://tix.sample.example/t/ASF26-4471-XK',
       size: 96,
       quietZone: 1,
       errorCorrection: 'quartile',

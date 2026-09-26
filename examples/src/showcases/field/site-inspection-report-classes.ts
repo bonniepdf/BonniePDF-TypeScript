@@ -71,7 +71,7 @@ const INSPECTION = {
   site: 'Sample Site B — Building 4',
   client: 'Sample Client Ltd',
   contractor: 'Sample Contractor Ltd',
-  inspector: 'J. Mensah — Site Manager',
+  inspector: 'Sample Inspector — Site Manager',
   inspected: new Date(Date.UTC(2026, 8, 8)),
   issued: new Date(Date.UTC(2026, 8, 9)),
   reinspection: new Date(Date.UTC(2026, 8, 22)),
@@ -405,8 +405,8 @@ export function generate(): Document {
   doc.add(
     signatureRow([
       signatureSlot('Inspected by', INSPECTION.inspector, { dated: shortDate(INSPECTION.inspected) }),
-      signatureSlot('Received — principal contractor', 'T. Bergström — Project Manager'),
-      signatureSlot('Client representative', 'R. Whitfield — Facilities Manager'),
+      signatureSlot('Received — principal contractor', 'Sample Manager — Project Manager'),
+      signatureSlot('Client representative', 'Sample Manager — Facilities Manager'),
     ])
   );
 

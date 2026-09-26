@@ -74,14 +74,14 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
-          `University of Wessexbridge  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          `Sample University  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
         ),
     },
     metadata: {
-      title: 'Academic Transcript - Alexandra R. Bennett',
-      author: 'University of Wessexbridge',
-      subject: 'Official degree transcript with UK honours classification (fictional).',
+      title: 'Academic Transcript - Sample Student',
+      author: 'Sample University',
+      subject: 'Official degree transcript with UK honours classification (sample).',
     },
   });
 
@@ -90,7 +90,7 @@ export function generate(): Document {
   header.addRow(
     new VerticalStack({
       children: [
-        new TextBlock('UNIVERSITY OF WESSEXBRIDGE', {
+        new TextBlock('SAMPLE UNIVERSITY', {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 16,
           textColor: NAVY,
@@ -119,16 +119,12 @@ export function generate(): Document {
   const details = new Grid({ columns: [1, 1], cellPadding: 0, border: 0, margin: { bottom: 18 } });
   details.addRow(
     new VerticalStack({
-      children: [
-        kv('Student', 'Alexandra R. Bennett'),
-        kv('Student ID', '20458812'),
-        kv('Date of birth', '14 March 2003'),
-      ],
+      children: [kv('Student', 'Sample Student'), kv('Student ID', '20458812'), kv('Date of birth', '14 March 2003')],
     }),
     new VerticalStack({
       children: [
         kv('Programme', 'BSc (Hons) Computer Science'),
-        kv('Awarding body', 'University of Wessexbridge'),
+        kv('Awarding body', 'Sample University'),
         kv('Date conferred', '15 July 2026'),
       ],
     })
@@ -200,8 +196,8 @@ export function generate(): Document {
       children: [
         h2('Verification'),
         body(
-          'This is an official record issued by the University of Wessexbridge. Scan ' +
-            'the code or visit verify.wessexbridge.ac.uk and enter transcript reference ' +
+          'This is an official record issued by Sample University. Scan ' +
+            'the code or visit verify.sample-university.example and enter transcript reference ' +
             '20458812 to confirm authenticity. The grading scheme is defined in the ' +
             'University Academic Regulations.'
         ),
@@ -213,7 +209,7 @@ export function generate(): Document {
     new Container({
       horizontalAlignment: 'end',
       child: new QRCode({
-        data: 'https://verify.wessexbridge.ac.uk/t/20458812',
+        data: 'https://verify.sample-university.example/t/20458812',
         size: 92,
         quietZone: 1,
         errorCorrection: 'quartile',

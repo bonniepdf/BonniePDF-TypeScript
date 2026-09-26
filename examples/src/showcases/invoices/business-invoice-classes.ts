@@ -184,7 +184,7 @@ export function generate(): Document {
 
   // Each address is one TextBlock with hard line breaks, so it tags as a single
   // paragraph under PDF/UA instead of one per line.
-  const address = 'Sample Customer Inc.\nSarah Chen\n88 Innovation Way\nAustin, TX 78701';
+  const address = 'Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack();
   billToStack.add(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }));
@@ -285,7 +285,7 @@ export function generate(): Document {
   paymentTable.cellPadding = 0;
   paymentTable.border = Border.none;
   paymentTable.addRow(
-    paymentColumn('Bank Transfer', 'Chase Bank\nRouting: 021000021\nAccount: ****7842'),
+    paymentColumn('Bank Transfer', 'Sample Bank\nRouting: 021000021\nAccount: ****7842'),
     paymentColumn('Other Methods', 'PayPal: payments@example.com\nWise: @sample-company'),
     paymentColumn('Reference', 'Please include invoice\nnumber with payment')
   );

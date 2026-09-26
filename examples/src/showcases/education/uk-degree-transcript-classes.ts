@@ -87,7 +87,7 @@ export function generate(): Document {
 
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const f = new TextBlock(
-      `University of Wessexbridge  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `Sample University  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -96,9 +96,9 @@ export function generate(): Document {
   };
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Academic Transcript - Alexandra R. Bennett';
-  metadata.author = 'University of Wessexbridge';
-  metadata.subject = 'Official degree transcript with UK honours classification (fictional).';
+  metadata.title = 'Academic Transcript - Sample Student';
+  metadata.author = 'Sample University';
+  metadata.subject = 'Official degree transcript with UK honours classification (sample).';
 
   const doc = new Document(settings, metadata);
 
@@ -108,7 +108,7 @@ export function generate(): Document {
   header.border = Border.none;
   header.margin = new Thickness(0, 0, 0, 6);
   const uni = new VerticalStack();
-  const crest = new TextBlock('UNIVERSITY OF WESSEXBRIDGE');
+  const crest = new TextBlock('SAMPLE UNIVERSITY');
   crest.fontName = StandardFonts.HelveticaBold;
   crest.fontSize = 16;
   crest.textColor = NAVY;
@@ -138,12 +138,12 @@ export function generate(): Document {
   details.border = Border.none;
   details.margin = new Thickness(0, 0, 0, 18);
   const left = new VerticalStack();
-  left.add(kv('Student', 'Alexandra R. Bennett'));
+  left.add(kv('Student', 'Sample Student'));
   left.add(kv('Student ID', '20458812'));
   left.add(kv('Date of birth', '14 March 2003'));
   const right = new VerticalStack();
   right.add(kv('Programme', 'BSc (Hons) Computer Science'));
-  right.add(kv('Awarding body', 'University of Wessexbridge'));
+  right.add(kv('Awarding body', 'Sample University'));
   right.add(kv('Date conferred', '15 July 2026'));
   details.addRow(left, right);
   doc.add(details);
@@ -211,14 +211,14 @@ export function generate(): Document {
   vtext.add(h2('Verification'));
   vtext.add(
     body(
-      'This is an official record issued by the University of Wessexbridge. Scan ' +
-        'the code or visit verify.wessexbridge.ac.uk and enter transcript reference ' +
+      'This is an official record issued by Sample University. Scan ' +
+        'the code or visit verify.sample-university.example and enter transcript reference ' +
         '20458812 to confirm authenticity. The grading scheme is defined in the ' +
         'University Academic Regulations.'
     )
   );
   const qr = new QRCode();
-  qr.data = 'https://verify.wessexbridge.ac.uk/t/20458812';
+  qr.data = 'https://verify.sample-university.example/t/20458812';
   qr.size = 92;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Quartile;

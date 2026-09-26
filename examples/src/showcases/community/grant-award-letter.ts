@@ -133,7 +133,7 @@ export function generate(): Document {
   // paragraph under PDF/UA instead of five.
   const top = new Grid({ columns: [1, 1], cellPadding: 0, border: 0, margin: { bottom: 24 } });
   top.addRow(
-    body('Ms R. Adeyemi\nRiverside Youth Music Project\n14 Canalside Walk\nWestford\nWF3 2LP', { mb: 0 }),
+    body('Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP', { mb: 0 }),
     new VerticalStack({
       children: [
         body('Issued 4 August 2026', { align: 'right', mb: 0 }),
@@ -144,7 +144,7 @@ export function generate(): Document {
   doc.add(top);
 
   doc.add(h1('Decision on your grant application'));
-  doc.add(body('Dear Ms Adeyemi,', { bold: true, mb: 8 }));
+  doc.add(body('Dear Sample Recipient,', { bold: true, mb: 8 }));
   doc.add(
     body(
       'We are pleased to tell you that your application to the Sample Community Fund has been ' +

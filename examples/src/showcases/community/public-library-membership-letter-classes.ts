@@ -129,7 +129,7 @@ export function generate(): Document {
 
   // One TextBlock with hard line breaks: the address tags as a single
   // paragraph under PDF/UA instead of four.
-  const addr = body('Ms J. Okoro\n14 Elmfield Court\nNorthbridge\nNB1 6QT', { mb: 0 });
+  const addr = body('Sample Member\n14 Sample Court\nSample Town\nST1 6QT', { mb: 0 });
 
   const meta = new VerticalStack();
   meta.add(body(longDate, { align: TextAlignment.Right, mb: 0 }));

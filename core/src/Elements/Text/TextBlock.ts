@@ -63,13 +63,26 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     return SemanticRole.P;
   }
   private _alignment: TextAlignment = TextAlignment.Left;
+  private _alignmentExplicit = false;
 
-  /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+  /**
+   * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. When not set
+   * explicitly, an enclosing Container whose horizontalAlignment is Start/Center/End supplies an ambient
+   * default instead of the plain Left below (spec 01 "Document Model" §3.2); see `effectiveAlignment`.
+   */
   public get alignment(): TextAlignment {
     return this._alignment;
   }
   public set alignment(value: TextAlignmentInput) {
     this._alignment = toTextAlignment(value);
+    this._alignmentExplicit = true;
+  }
+
+  /** The alignment this render actually uses: the explicit value, or the render context's ambient. */
+  private effectiveAlignment(ctx: RenderContext): TextAlignment {
+    return this._alignmentExplicit
+      ? this._alignment
+      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Left);
   }
 
   /**
@@ -348,10 +361,11 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       // Decorations for token lines use the measured width
       if (this.textDecoration !== TextDecoration.None) {
         const lineWidth = this.measureTextWidth(processedLine);
+        const alignment = this.effectiveAlignment(ctx);
         let decoX = baseX;
-        if (this.alignment === TextAlignment.Center) {
+        if (alignment === TextAlignment.Center) {
           decoX += (contentWidth - lineWidth) / 2;
-        } else if (this.alignment === TextAlignment.Right) {
+        } else if (alignment === TextAlignment.Right) {
           decoX += contentWidth - lineWidth;
         }
         this.drawDecorations(ctx, decoX, y, lineWidth);
@@ -361,7 +375,8 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     }
 
     // Determine effective alignment: justified text uses left for the last line
-    const useJustify = this.alignment === TextAlignment.Justify && !isLastLine && line.includes(' ');
+    const alignment = this.effectiveAlignment(ctx);
+    const useJustify = alignment === TextAlignment.Justify && !isLastLine && line.includes(' ');
 
     if (useJustify) {
       ctx.canvas.drawTextJustified(baseX, y, processedLine, this.textColor, this.fontSize, this.fontName, contentWidth);
@@ -371,7 +386,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       }
     } else {
       // For justified last lines, fall back to left alignment
-      const effectiveAlign = this.alignment === TextAlignment.Justify ? TextAlignment.Left : this.alignment;
+      const effectiveAlign = alignment === TextAlignment.Justify ? TextAlignment.Left : alignment;
 
       let x = baseX;
       if (effectiveAlign === TextAlignment.Center) {
@@ -434,10 +449,11 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     const totalLineWidth = this.measureTextWidth(line);
 
     // 2. Determine Start X
+    const alignment = this.effectiveAlignment(ctx);
     let startX = baseX;
-    if (this.alignment === TextAlignment.Center) {
+    if (alignment === TextAlignment.Center) {
       startX += (contentWidth - totalLineWidth) / 2;
-    } else if (this.alignment === TextAlignment.Right) {
+    } else if (alignment === TextAlignment.Right) {
       startX += contentWidth - totalLineWidth;
     }
 

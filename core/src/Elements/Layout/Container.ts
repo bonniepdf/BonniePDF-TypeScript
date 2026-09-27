@@ -8,6 +8,7 @@ import { PaginationWrapperBase } from './Pagination/PaginationWrapperBase';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
+import { TextAlignment } from '../Text/TextAlignment';
 import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
 import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';
 import { toHorizontalAlignment, type HorizontalAlignmentInput } from '../../Normalize/toEnum';
@@ -367,9 +368,13 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
     let status: RenderStatus;
     const token = beginChildTag(ctx, child);
+    const savedAmbient = ctx.ambientHorizontalTextAlignment;
+    const newAmbient = Container.ambientTextAlignmentFor(this.horizontalAlignment);
+    if (newAmbient !== undefined) ctx.ambientHorizontalTextAlignment = newAmbient;
     try {
       status = child.renderStateful(ctx, childWidth);
     } finally {
+      ctx.ambientHorizontalTextAlignment = savedAmbient;
       endChildTag(ctx, token);
       ctx.currentX = entryX;
     }
@@ -561,6 +566,9 @@ export class Container extends BorderedElementBase implements IContentContainer,
     if (!this.child) return;
 
     const token = beginChildTag(ctx, this.child);
+    const savedAmbient = ctx.ambientHorizontalTextAlignment;
+    const newAmbient = Container.ambientTextAlignmentFor(this.horizontalAlignment);
+    if (newAmbient !== undefined) ctx.ambientHorizontalTextAlignment = newAmbient;
     try {
       // Render the child statelessly (atomic), matching the .NET reference
       // (Container.cs Child.Render). The stateful continuation path is reserved
@@ -569,7 +577,26 @@ export class Container extends BorderedElementBase implements IContentContainer,
       // that nothing resets, so a second export pass would skip them.
       this.child.render(ctx, innerWidth);
     } finally {
+      ctx.ambientHorizontalTextAlignment = savedAmbient;
       endChildTag(ctx, token);
+    }
+  }
+
+  /**
+   * The ambient horizontal text alignment a given HorizontalAlignment establishes for descendant text
+   * (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch and unset
+   * (undefined) return undefined, leaving whatever ambient an enclosing container established untouched.
+   */
+  private static ambientTextAlignmentFor(alignment: HorizontalAlignment | undefined): TextAlignment | undefined {
+    switch (alignment) {
+      case HorizontalAlignment.Start:
+        return TextAlignment.Left;
+      case HorizontalAlignment.Center:
+        return TextAlignment.Center;
+      case HorizontalAlignment.End:
+        return TextAlignment.Right;
+      default:
+        return undefined;
     }
   }
 }

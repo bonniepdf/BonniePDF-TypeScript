@@ -13,6 +13,7 @@ import type { LayoutRecorder } from './LayoutRecorder';
 import type { RegisteredLink } from './RegisteredLink';
 import type { RenderContext as RenderContextContract } from '../Elements/IElement';
 import { NO_CHROME, type ChromeReservation } from './ChromeReservation';
+import { TextAlignment } from '../Elements/Text/TextAlignment';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
 const CONTAINER_ROLE_TAGS = new Set([
@@ -111,6 +112,15 @@ export class RenderContext implements RenderContextContract {
 
   /** The height {@link cellStretchTarget} fills: the row height less the cell's padding. */
   public cellStretchHeight: number = 0;
+
+  /**
+   * The horizontal text alignment a Container establishes for descendant text (TextBlock/Heading/RichText)
+   * that sets none of its own, cascading through nesting the way CSS text-align is inherited (spec 01
+   * "Document Model" §3.2). `undefined` means no ambient is in effect: unset text stays at its own default
+   * (Left). Scoped to the container's subtree by the container itself, which restores the value it found
+   * on the way in.
+   */
+  public ambientHorizontalTextAlignment: TextAlignment | undefined = undefined;
 
   /**
    * PDF/UA tagging context. Non-undefined when the document opted into

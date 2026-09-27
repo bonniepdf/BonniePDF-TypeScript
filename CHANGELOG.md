@@ -233,6 +233,16 @@ x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
 
 ### Fixed
 
+- **A `Container`'s horizontal alignment now reaches wrapped text.** A centred `Container` wrapping a
+  `Text` centred a one-line title (block positioning of a child narrower than the container) but silently
+  left a paragraph long enough to wrap flush left, because there was no narrower child box left to
+  position once the text filled the container. A `Container` whose `horizontalAlignment` is
+  `start`/`center`/`end` now also establishes that as the **ambient horizontal text alignment** for
+  descendant `TextBlock`/`Heading`/`RichText` that set no `alignment` of their own, through any nesting
+  depth, the way CSS `text-align` cascades — an explicit `alignment` on the text element still always
+  wins, and a nested `Container` can set its own ambient for its own subtree. `HorizontalStack.alignment`
+  is a different, cross-axis concept (vertical positioning of row children) and does not feed this.
+
 - **A table's own border was never drawn.** `table.Border(...)` (`table.border`) applies a border to
   every cell, but a cell's own border is never null, so it always shadowed the table's and the setting did
   nothing. A cell that sets a border uses it; every other cell now takes the table's.

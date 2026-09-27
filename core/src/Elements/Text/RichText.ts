@@ -63,13 +63,26 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
   /** Text alignment for the paragraph. */
   private _alignment: TextAlignment = TextAlignment.Left;
+  private _alignmentExplicit = false;
 
-  /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+  /**
+   * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. When not set
+   * explicitly, an enclosing Container whose horizontalAlignment is Start/Center/End supplies an ambient
+   * default instead of the plain Left below (spec 01 "Document Model" §3.2); see `effectiveAlignment`.
+   */
   public get alignment(): TextAlignment {
     return this._alignment;
   }
   public set alignment(value: TextAlignmentInput) {
     this._alignment = toTextAlignment(value);
+    this._alignmentExplicit = true;
+  }
+
+  /** The alignment this render actually uses: the explicit value, or the render context's ambient. */
+  private effectiveAlignment(ctx: RenderContext): TextAlignment {
+    return this._alignmentExplicit
+      ? this._alignment
+      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Left);
   }
 
   /**
@@ -489,16 +502,17 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     const lineWidth = this.actualLineWidth(ctx, line);
 
     // Calculate starting X based on alignment
+    const alignment = this.effectiveAlignment(ctx);
     let startX = baseX;
-    if (this.alignment === TextAlignment.Center) {
+    if (alignment === TextAlignment.Center) {
       startX += (contentWidth - lineWidth) / 2;
-    } else if (this.alignment === TextAlignment.Right) {
+    } else if (alignment === TextAlignment.Right) {
       startX += contentWidth - lineWidth;
     }
 
     // For justify, calculate extra space per space character
     let extraWordSpacing = 0;
-    const useJustify = this.alignment === TextAlignment.Justify && !isLastLine;
+    const useJustify = alignment === TextAlignment.Justify && !isLastLine;
     if (useJustify) {
       let spaceCount = 0;
       for (const run of line.runs) {

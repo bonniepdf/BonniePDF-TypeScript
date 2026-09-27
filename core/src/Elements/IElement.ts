@@ -18,6 +18,12 @@ export interface RenderContext {
   /** The height {@link cellStretchTarget} fills: the row height less the cell's padding. */
   cellStretchHeight: number;
   /**
+   * The horizontal text alignment a Container establishes for descendant text (TextBlock/Heading/RichText)
+   * that sets none of its own, cascading through nesting the way CSS text-align is inherited (spec 01
+   * "Document Model" §3.2). `undefined` means no ambient is in effect: unset text stays at its own default.
+   */
+  ambientHorizontalTextAlignment: unknown;
+  /**
    * Top of the body content band on the current page: the margin, or the
    * header's height where the header is taller than the margin. Elements test
    * "am I at the top of the page?" against this rather than against `margin`,

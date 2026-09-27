@@ -1,7 +1,10 @@
 import { BorderedElementBase } from './BorderedElementBase';
 import { IContentContainer } from '../IContentContainer';
 import { LayersDescriptor } from './LayersDescriptor';
-import { IElement } from '../IElement';
+import { IElement, IStatefulElement, RenderStatus } from '../IElement';
+import { Border } from '../../Core/Border';
+import { isBorderFrameHost } from '../Tables/IBorderFrameHost';
+import { PaginationWrapperBase } from './Pagination/PaginationWrapperBase';
 import { RenderContext } from '../IElement';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
@@ -60,7 +63,7 @@ export type ContainerOptions = BorderedElementOptions &
   };
 
 /** Wraps one child with optional sizing, alignment, padding, borders, background, and layers. */
-export class Container extends BorderedElementBase implements IContentContainer {
+export class Container extends BorderedElementBase implements IContentContainer, IStatefulElement {
   public child?: IElement;
 
   /** Creates an empty container. */
@@ -221,12 +224,38 @@ export class Container extends BorderedElementBase implements IContentContainer 
     return this;
   }
 
+  // --- Frame absorption ---
+  //
+  // A bordered container whose child is a table (seen through wrappers that only pass a child along) is the
+  // table's frame: its border is centred on the table's outer edge, the table is not inset by it, and the
+  // border is painted over the table. The frame and the outermost cell edges then coincide, so the frame
+  // wins them, instead of the two sitting side by side as a double line.
+
+  private get absorbsTable(): boolean {
+    if (!this.border.hasAnyBorder || this.cornerRadius > 0) return false;
+    let current: IElement | undefined = this.child;
+    while (current) {
+      if (isBorderFrameHost(current)) return true;
+      if (current instanceof PaginationWrapperBase) {
+        current = current.child;
+        continue;
+      }
+      return false;
+    }
+    return false;
+  }
+
+  /** The border width the child is inset by: none when the border is a table's frame. */
+  private get childInset(): Border {
+    return this.absorbsTable ? new Border(0) : this.border;
+  }
+
   protected getPreferredContentWidth(): number {
     if (this.width !== undefined) {
       return this.width;
     }
     const childWidth = this.child?.getPreferredWidth() ?? 0;
-    return childWidth + this.padding.left + this.padding.right + this.border.horizontalWidth;
+    return childWidth + this.padding.left + this.padding.right + this.childInset.horizontalWidth;
   }
 
   protected measureContentHeight(contentWidth: number): number {
@@ -235,10 +264,10 @@ export class Container extends BorderedElementBase implements IContentContainer 
 
     // Use the fixed width if specified, otherwise the available width.
     const effectiveWidth = this.width ?? contentWidth;
-    const childContentWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
+    const childContentWidth = effectiveWidth - this.padding.left - this.padding.right - this.childInset.horizontalWidth;
 
     const childHeight = this.child ? this.child.measureHeight(childContentWidth) : 0;
-    return childHeight + this.padding.top + this.padding.bottom + this.border.verticalWidth;
+    return childHeight + this.padding.top + this.padding.bottom + this.childInset.verticalWidth;
   }
 
   /**
@@ -252,10 +281,145 @@ export class Container extends BorderedElementBase implements IContentContainer 
   private resolveHeight(ctx: RenderContext, effectiveWidth: number): number {
     if (this.height !== undefined) return this.height;
 
-    const natural = this.measureContentHeight(effectiveWidth);
+    let natural = this.measureContentHeight(effectiveWidth);
+
+    // Inside a table cell the cell's own container fills the row, so its border and background span the
+    // row, however tall the neighbouring cells are.
+    if (ctx.cellStretchTarget === this) natural = Math.max(natural, ctx.cellStretchHeight);
+
     if (!this.fillHeight) return natural;
 
     return Math.max(natural, ctx.maxY - ctx.currentY);
+  }
+
+  // --- Splitting across pages ---
+  //
+  // A container is a box drawn around its child. When the child can split across pages (a table, a
+  // column, a paragraph) and the whole box does not fit, the box splits with it: each page carries a
+  // fragment, with the top border and padding on the first fragment only and the bottom padding and
+  // border on the last, so padding, borders and backgrounds are transparent to the child's own
+  // pagination. A container that fits, or whose child cannot split, is drawn whole exactly as before.
+
+  /** Number of fragments already drawn; greater than zero while a split render is in progress. */
+  private _fragments = 0;
+
+  private get canSplit(): boolean {
+    return (
+      this.child !== undefined &&
+      'renderStateful' in this.child &&
+      this.height === undefined &&
+      !this.fillHeight &&
+      this.cornerRadius <= 0
+    );
+  }
+
+  public renderStateful(ctx: RenderContext, width: number): RenderStatus {
+    if (this._fragments === 0) {
+      const overflows = ctx.currentY + this.measureHeight(width) > ctx.maxY;
+      if (!overflows || !this.canSplit) {
+        // Whole, on this page, or on a fresh one: what an atomic box has always done.
+        if (overflows && ctx.currentY > ctx.contentTop) return RenderStatus.WrapRequired;
+        this.render(ctx, width);
+        return RenderStatus.Complete;
+      }
+    }
+
+    return this.renderFragment(ctx, width);
+  }
+
+  public resetState(): void {
+    this._fragments = 0;
+    if (this.child && 'resetState' in this.child) (this.child as IStatefulElement).resetState();
+  }
+
+  private renderFragment(ctx: RenderContext, width: number): RenderStatus {
+    const first = this._fragments === 0;
+    const child = this.child as IElement & IStatefulElement;
+    const entryX = ctx.currentX;
+    const entryY = ctx.currentY;
+
+    const effectiveWidth = this.width ?? this.getContentWidth(width);
+    if (first) ctx.currentY += this.margin.top;
+    const boxX = ctx.currentX + this.margin.left;
+    const boxTop = ctx.currentY;
+
+    const inset = this.childInset;
+    const frame = this.absorbsTable;
+    let childWidth = effectiveWidth - this.padding.left - this.padding.right - inset.horizontalWidth;
+    let childX = boxX + inset.left + this.padding.left;
+    const align = this.horizontalAlignment;
+    if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
+      const preferred = child.getPreferredWidth();
+      if (preferred > 0 && preferred < childWidth) {
+        const slack = childWidth - preferred;
+        childX += align === HorizontalAlignment.Center ? slack / 2 : slack;
+        childWidth = preferred;
+      }
+    }
+
+    ctx.currentX = childX;
+    ctx.currentY = boxTop + (first ? inset.top + this.padding.top : 0);
+
+    // The box is drawn after the child, once its height is known, and moved behind it.
+    const canvas = ctx.canvas;
+    const pageIndex = ctx.currentPageIndex;
+    const mark = canvas.streamLength?.();
+
+    let status: RenderStatus;
+    const token = beginChildTag(ctx, child);
+    try {
+      status = child.renderStateful(ctx, childWidth);
+    } finally {
+      endChildTag(ctx, token);
+      ctx.currentX = entryX;
+    }
+
+    if (status === RenderStatus.WrapRequired) {
+      // Nothing fitted on this page, so nothing was drawn: the caller starts a fresh page and asks again.
+      ctx.currentY = entryY;
+      return RenderStatus.WrapRequired;
+    }
+
+    const last = status === RenderStatus.Complete;
+    const bottom = ctx.currentY + (last ? this.padding.bottom + inset.bottom : 0);
+    const height = bottom - boxTop;
+
+    if (ctx.canvas === canvas && ctx.currentPageIndex === pageIndex) {
+      const decorationStart = canvas.streamLength?.();
+      if (this.backgroundColor) this.drawBackground(ctx, boxX, boxTop, effectiveWidth, height, this.backgroundColor);
+      const drawFragmentBorder = (complete: boolean): void => {
+        const full = this.border;
+        this.border = complete ? full : new Border(full.left, first ? full.top : 0, full.right, last ? full.bottom : 0);
+        try {
+          this.drawBorder(ctx, boxX, boxTop, effectiveWidth, height);
+        } finally {
+          this.border = full;
+        }
+      };
+
+      // The background goes behind the content; a table's frame stays on top of it.
+      if (!frame && this.border.hasAnyBorder) drawFragmentBorder(false);
+
+      if (mark !== undefined && decorationStart !== undefined && canvas.streamLength!() > decorationStart) {
+        canvas.moveTail?.(decorationStart, mark);
+      }
+
+      // A table's frame is its outer edge, so every page's fragment of it is a complete rectangle: the
+      // bottom edge under the last row on this page, and the top edge over the first (or repeated header)
+      // row on the next.
+      if (frame && this.border.hasAnyBorder) drawFragmentBorder(true);
+    }
+
+    ctx.currentY = bottom;
+    if (last) {
+      ctx.currentY += this.margin.bottom;
+      this._fragments = 0;
+      child.resetState();
+    } else {
+      this._fragments++;
+    }
+
+    return status;
   }
 
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
@@ -316,11 +480,17 @@ export class Container extends BorderedElementBase implements IContentContainer 
     containerHeight: number,
     drawBorderInline: boolean
   ): void {
+    const inset = this.childInset;
+    const frame = this.absorbsTable;
+    const boxX = ctx.currentX;
+    const boxY = ctx.currentY;
+
     if (this.backgroundColor) {
       this.drawBackground(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight, this.backgroundColor);
     }
 
-    if (drawBorderInline && this.border.hasAnyBorder) {
+    // A table's frame is painted after the table, over its outer edge.
+    if (drawBorderInline && this.border.hasAnyBorder && !frame) {
       this.drawBorder(ctx, ctx.currentX, ctx.currentY, effectiveWidth, containerHeight);
     }
 
@@ -337,9 +507,9 @@ export class Container extends BorderedElementBase implements IContentContainer 
     // by border.left/top as well - otherwise the child hugs the outer top-left
     // edge and the reserved space piles up as a visible gap at the right and
     // bottom edges (the border no longer "lines up" with the content).
-    ctx.currentX += this.border.left + this.padding.left;
-    ctx.currentY += this.border.top + this.padding.top;
-    let childWidth = effectiveWidth - this.padding.left - this.padding.right - this.border.horizontalWidth;
+    ctx.currentX += inset.left + this.padding.left;
+    ctx.currentY += inset.top + this.padding.top;
+    let childWidth = effectiveWidth - this.padding.left - this.padding.right - inset.horizontalWidth;
 
     const align = this.horizontalAlignment;
     if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
@@ -356,7 +526,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
     // the bottom instead of being positioned by a hand-tuned top padding.
     const vAlign = this.verticalAlignment;
     if (vAlign === VerticalAlignment.Center || vAlign === VerticalAlignment.End) {
-      const innerHeight = containerHeight - this.padding.top - this.padding.bottom - this.border.verticalWidth;
+      const innerHeight = containerHeight - this.padding.top - this.padding.bottom - inset.verticalWidth;
       const childHeight = this.child.measureHeight(childWidth);
       const slack = innerHeight - childHeight;
       if (slack > 0) ctx.currentY += vAlign === VerticalAlignment.Center ? slack / 2 : slack;
@@ -372,7 +542,7 @@ export class Container extends BorderedElementBase implements IContentContainer 
     // by its measured height instead.
     if (yAfterChildRender === yBeforeChildRender) {
       const childHeight = this.child.measureHeight(childWidth);
-      ctx.currentY = yBeforePadding + this.border.top + this.padding.top + childHeight;
+      ctx.currentY = yBeforePadding + inset.top + this.padding.top + childHeight;
     }
 
     ctx.currentY += this.padding.bottom;
@@ -383,6 +553,8 @@ export class Container extends BorderedElementBase implements IContentContainer 
     if (ctx.currentY < expectedBottom) {
       ctx.currentY = expectedBottom;
     }
+
+    if (frame && drawBorderInline) this.drawBorder(ctx, boxX, boxY, effectiveWidth, containerHeight);
   }
 
   private renderChild(ctx: RenderContext, innerWidth: number): void {

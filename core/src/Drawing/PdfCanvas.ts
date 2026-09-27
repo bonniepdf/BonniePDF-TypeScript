@@ -134,6 +134,17 @@ export class PdfCanvas implements ICanvas {
   }
 
   /** @inheritdoc */
+  public streamLength(): number {
+    return this.stream.length;
+  }
+
+  /** @inheritdoc */
+  public moveTail(from: number, to: number): void {
+    const tail = this.stream.splice(from);
+    this.stream.splice(to, 0, ...tail);
+  }
+
+  /** @inheritdoc */
   public get graphicsStateDepth(): number {
     return this.stateDepth;
   }

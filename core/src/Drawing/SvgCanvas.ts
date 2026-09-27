@@ -163,6 +163,17 @@ export class SvgCanvas implements ICanvas {
   public offsetY = 0;
 
   private readonly svgElements: string[] = [];
+
+  /** @inheritdoc */
+  public streamLength(): number {
+    return this.svgElements.length;
+  }
+
+  /** @inheritdoc */
+  public moveTail(from: number, to: number): void {
+    const tail = this.svgElements.splice(from);
+    this.svgElements.splice(to, 0, ...tail);
+  }
   private readonly fontResolver: SvgFontResolver | undefined;
   private readonly options: SvgCanvasOptions;
   private groupDepth = 0;

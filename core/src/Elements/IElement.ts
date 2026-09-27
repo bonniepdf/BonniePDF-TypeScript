@@ -10,6 +10,14 @@ export interface RenderContext {
   maxY: number;
   margin: number;
   /**
+   * While a table draws a cell whose content is a Container, that container. It fills
+   * {@link cellStretchHeight}, so a border or background on a cell's content spans the whole row.
+   * `undefined` everywhere else.
+   */
+  cellStretchTarget: object | undefined;
+  /** The height {@link cellStretchTarget} fills: the row height less the cell's padding. */
+  cellStretchHeight: number;
+  /**
    * Top of the body content band on the current page: the margin, or the
    * header's height where the header is taller than the margin. Elements test
    * "am I at the top of the page?" against this rather than against `margin`,

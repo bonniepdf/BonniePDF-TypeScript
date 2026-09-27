@@ -57,6 +57,10 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   private readonly widths: (number | null)[] = [];
   private rendered: boolean = false;
 
+  // While a row is split across pages: how many fragments are drawn, and which items have finished.
+  private _fragments = 0;
+  private _done: boolean[] | undefined = undefined;
+
   /**
    * Spacing between children (in points)
    */
@@ -155,30 +159,108 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
 
   /**
    * Renders this horizontal stack with state tracking for pagination.
-   * HorizontalStack is treated as atomic - all children render together on one page.
-   * If the stack doesn't fit, it requests a new page rather than splitting.
+   * A row that fits is drawn whole. A row that does not fit, and has an item that can split across pages
+   * (a table, a column, a paragraph), splits: each page carries the next piece of every unfinished item,
+   * side by side from the same top, until all are done. A row of items that cannot split moves to a
+   * fresh page as a whole.
    */
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
-    if (this.rendered) {
-      return RenderStatus.Complete;
+    if (this._fragments === 0) {
+      if (this.rendered) {
+        return RenderStatus.Complete;
+      }
+
+      const contentWidth = this.getContentWidth(width);
+      const contentHeight = this.measureContentHeight(contentWidth);
+      const totalHeight = contentHeight + this.margin.top + this.margin.bottom;
+
+      const wouldOverflow = ctx.currentY + totalHeight > ctx.maxY;
+      const notAtTop = ctx.currentY > ctx.contentTop;
+
+      if (!wouldOverflow || !this.canSplit) {
+        if (wouldOverflow && notAtTop) {
+          // Doesn't fit but would fit on a fresh page - request new page
+          return RenderStatus.WrapRequired;
+        }
+
+        // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
+        this.render(ctx, width);
+        this.rendered = true;
+        return RenderStatus.Complete;
+      }
     }
 
-    const contentWidth = this.getContentWidth(width);
-    const contentHeight = this.measureContentHeight(contentWidth);
-    const totalHeight = contentHeight + this.margin.top + this.margin.bottom;
+    return this.renderFragment(ctx, width);
+  }
 
-    const wouldOverflow = ctx.currentY + totalHeight > ctx.maxY;
-    const notAtTop = ctx.currentY > ctx.contentTop;
+  private get canSplit(): boolean {
+    return this.height === undefined && this._children.some(c => 'renderStateful' in c);
+  }
 
-    if (wouldOverflow && notAtTop) {
-      // Doesn't fit but would fit on a fresh page - request new page
+  private renderFragment(ctx: RenderContext, width: number): RenderStatus {
+    const first = this._fragments === 0;
+    const done = (this._done ??= new Array<boolean>(this._children.length).fill(false));
+    const entryX = ctx.currentX;
+    const entryY = ctx.currentY;
+
+    const [childWidths] = this.calculateChildWidths(this.getContentWidth(width));
+    if (first) ctx.currentY += this.margin.top;
+    const startY = ctx.currentY;
+    let x = ctx.currentX + this.margin.left;
+    let endY = startY;
+    let progress = false;
+    let allDone = true;
+
+    for (let i = 0; i < this._children.length; i++) {
+      const child = this._children[i];
+      if (!done[i]) {
+        ctx.currentX = x;
+        ctx.currentY = startY;
+        const token = beginChildTag(ctx, child);
+        try {
+          if ('renderStateful' in child) {
+            const status = (child as IStatefulElement).renderStateful(ctx, childWidths[i]);
+            if (status !== RenderStatus.WrapRequired) {
+              progress ||= status === RenderStatus.Complete || ctx.currentY > startY;
+              endY = Math.max(endY, ctx.currentY);
+            }
+
+            if (status === RenderStatus.Complete) done[i] = true;
+          } else {
+            // An item that cannot split is drawn once, with the first piece.
+            child.render(ctx, childWidths[i]);
+            endY = Math.max(endY, startY + child.measureHeight(childWidths[i]));
+            progress = true;
+            done[i] = true;
+          }
+        } finally {
+          endChildTag(ctx, token);
+        }
+      }
+
+      if (!done[i]) allDone = false;
+      x += childWidths[i] + this.spacing;
+    }
+
+    ctx.currentX = entryX;
+
+    if (!progress) {
+      // Nothing fitted on this page: the caller starts a fresh page and asks again.
+      ctx.currentY = entryY;
       return RenderStatus.WrapRequired;
     }
 
-    // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
-    this.render(ctx, width);
-    this.rendered = true;
-    return RenderStatus.Complete;
+    ctx.currentY = endY;
+    if (allDone) {
+      ctx.currentY += this.margin.bottom;
+      this.rendered = true;
+      this._fragments = 0;
+      this._done = undefined;
+      return RenderStatus.Complete;
+    }
+
+    this._fragments++;
+    return RenderStatus.Overflow;
   }
 
   /**
@@ -186,6 +268,8 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
    */
   public resetState(): void {
     this.rendered = false;
+    this._fragments = 0;
+    this._done = undefined;
     for (const child of this._children) {
       if ('resetState' in child) {
         (child as IStatefulElement).resetState();

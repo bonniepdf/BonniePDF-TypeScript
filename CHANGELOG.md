@@ -233,6 +233,36 @@ x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
 
 ### Fixed
 
+- **A table's own border was never drawn.** `table.Border(...)` (`table.border`) applies a border to
+  every cell, but a cell's own border is never null, so it always shadowed the table's and the setting did
+  nothing. A cell that sets a border uses it; every other cell now takes the table's.
+- **A table's cell borders are drawn once per shared edge.** Adjacent cells each drew the edge they share, so
+  every internal edge was stroked twice. The earlier cell (left, upper) now draws it, and the later cell draws it
+  only when its own border is more prominent (wider, then darker) and so paints over it. A 2 x 2 grid is 12
+  strokes rather than 16, and cells with different borders show the more prominent line where they meet.
+- **A bordered container around a table is now the table's frame.** The container's border used to be drawn
+  before the table and the table inset inside it, so the frame and the outermost cell edges sat side by side as
+  a double line. The border is now centred on the table's outer edge, the table is not inset, and the border is
+  painted over it, so the frame wins the outer edges. Every other bordered container is unchanged.
+
+- **A table inside padding, a border, a background or a row now splits across pages.**
+  Wrapping a tall table, column or paragraph in a `Container` (padding, border, background) used to turn it into an
+  unsplittable box: the whole thing jumped to a fresh page, leaving the page it
+  should have started on empty, and a `HorizontalStack` did the same. A box whose child can split
+  now splits with it. Each page carries a fragment of the box, with the top border and
+  padding on the first fragment and the bottom border and padding on the last, and its
+  background drawn behind that page's content. A `HorizontalStack` whose items can split lets each
+  paginate independently, side by side, until all are done. A box or row that fits, or
+  whose items cannot split, is drawn whole exactly as before, and a box with a fixed or
+  filling height, or rounded corners, is still unsplittable.
+
+- **A border or background on a table cell's content now spans the whole row.** The
+  container a cell's content is wrapped in was drawn at the height of its own text, so
+  a short cell beside a tall one, or an empty one, was drawn as a short box and the grid
+  came out ragged: the borders and shading of one row had three different heights. The
+  container that is the cell's own content now fills the row. Containers nested deeper in
+  the cell, and cells styled through the table's own cell properties, are unchanged.
+
 - **Header and footer content in a container was pushed onto the wrong page.** A
   `Container` checks that it fits above the bottom margin, and the footer is painted
   inside the bottom margin, so it broke the page in the middle of painting the

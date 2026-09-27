@@ -7,6 +7,11 @@ import {
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { IElement, RenderStatus, RenderContext } from '../IElement';
 import { TableRow } from './TableRow';
+import { Container } from '../Layout/Container';
+import { PaginationWrapperBase } from '../Layout/Pagination/PaginationWrapperBase';
+import type { IBorderFrameHost } from './IBorderFrameHost';
+import { Border } from '../../Core/Border';
+import type { BorderColors } from '../../Core/BorderColors';
 import { TableCell } from './TableCell';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
@@ -82,7 +87,12 @@ export type TableOptions = BorderedElementOptions &
   };
 
 /** Lays out rows and cells with column sizing, headers, footers, borders, and pagination. */
-export class Table extends BorderedElementBase implements IRoleProvider {
+export class Table extends BorderedElementBase implements IRoleProvider, IBorderFrameHost {
+  /** A container wrapped directly around a table becomes its frame (see {@link IBorderFrameHost}). */
+  public get acceptsBorderFrame(): true {
+    return true;
+  }
+
   /**
    * When `true`, the table is a **layout (presentation) table**: it arranges
    * content in a grid with no tabular data relationships. Per ISO 14289-1 §7.5 /
@@ -426,6 +436,105 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     this.lastRowRendered = -1;
     this.headersPending = true;
     this.taggedHeaderEmitted = false;
+    this._bottomsAbove = undefined;
+    this._edgePlan.clear();
+  }
+
+  // --- Border collapse ---
+  //
+  // Two adjacent cells share an edge: the right edge of the left cell is the left edge of the right cell, and
+  // the bottom edge of a cell is the top edge of the cell below it. Each shared edge is drawn once. The cell
+  // earlier in reading order (the left one, the upper one) always draws it; the later cell draws it only when
+  // its own border is more prominent, and so paints over the earlier one: the wider line wins, then the
+  // darker, and a tie goes to the earlier cell.
+
+  private readonly _edgePlan = new Map<TableCell, { drawLeft: boolean; drawTop: boolean }>();
+
+  // The bottom edge of each column in the row above, on the page being drawn; undefined when there is none.
+  private _bottomsAbove: { width: number; color: Color | undefined }[] | undefined = undefined;
+  private _bottomsAbovePage = -1;
+
+  // A cell that sets any border of its own uses it; every other cell takes the table's. (A cell's border is
+  // never undefined, so falling back only when it is unset would never use the table's at all.)
+  private edgesOf(cell: TableCell): { border: Border; colors: BorderColors } {
+    return cell.border.hasAnyBorder
+      ? { border: cell.border, colors: cell.borderColors }
+      : { border: this.border, colors: this.borderColors };
+  }
+
+  /** The width a side actually draws at: nothing when it has no colour. */
+  private static drawn(width: number, color: Color | undefined): number {
+    return color ? width : 0;
+  }
+
+  private static luminance(c: Color): number {
+    return 0.2126 * c.R + 0.7152 * c.G + 0.0722 * c.B;
+  }
+
+  /** True when the first edge is strictly more prominent than the second. */
+  private static outranks(
+    widthA: number,
+    colorA: Color | undefined,
+    widthB: number,
+    colorB: Color | undefined
+  ): boolean {
+    const a = Table.drawn(widthA, colorA);
+    const b = Table.drawn(widthB, colorB);
+    if (a !== b) return a > b;
+    if (a === 0 || !colorA || !colorB) return false;
+    return Table.luminance(colorA) < Table.luminance(colorB);
+  }
+
+  private planRowEdges(ctx: RenderContext, row: TableRow): void {
+    this._edgePlan.clear();
+    const aboveKnown = this._bottomsAbove !== undefined && this._bottomsAbovePage === ctx.currentPageIndex;
+
+    let previous: { border: Border; colors: BorderColors } | undefined;
+    let col = 0;
+    for (const cell of row.cells) {
+      const { border, colors } = this.edgesOf(cell);
+      const span = Math.max(1, cell.columnSpan);
+
+      const drawLeft =
+        previous === undefined ||
+        Table.outranks(border.left, colors.left, previous.border.right, previous.colors.right);
+
+      let drawTop = true;
+      if (aboveKnown) {
+        // Against the most prominent bottom edge among the columns this cell covers.
+        let strongest: { width: number; color: Color | undefined } = { width: 0, color: undefined };
+        for (let j = 0; j < span && col + j < this._bottomsAbove!.length; j++) {
+          const above = this._bottomsAbove![col + j];
+          if (Table.outranks(above.width, above.color, strongest.width, strongest.color)) strongest = above;
+        }
+
+        drawTop = Table.outranks(border.top, colors.top, strongest.width, strongest.color);
+      }
+
+      this._edgePlan.set(cell, { drawLeft, drawTop });
+      previous = { border, colors };
+      col += span;
+    }
+  }
+
+  private recordRowBottoms(ctx: RenderContext, row: TableRow, widths: number[]): void {
+    const bottoms: { width: number; color: Color | undefined }[] = widths.map(() => ({
+      width: 0,
+      color: undefined,
+    }));
+    let col = 0;
+    for (const cell of row.cells) {
+      const { border, colors } = this.edgesOf(cell);
+      const span = Math.max(1, cell.columnSpan);
+      for (let j = 0; j < span && col + j < bottoms.length; j++) {
+        bottoms[col + j] = { width: Table.drawn(border.bottom, colors.bottom), color: colors.bottom };
+      }
+
+      col += span;
+    }
+
+    this._bottomsAbove = bottoms;
+    this._bottomsAbovePage = ctx.currentPageIndex;
   }
 
   protected override measureContentHeight(contentWidth: number): number {
@@ -575,6 +684,22 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     this.renderRowDirect(ctx, row, widths);
   }
 
+  /**
+   * The container that is the cell's own content, looking through the wrappers that only pass a child
+   * along (the pagination primitives), or `undefined` when the content is anything else.
+   */
+  private static stretchableContainer(content: IElement): Container | undefined {
+    let current: IElement = content;
+    for (;;) {
+      if (current instanceof Container) return current;
+      if (current instanceof PaginationWrapperBase && current.child) {
+        current = current.child;
+        continue;
+      }
+      return undefined;
+    }
+  }
+
   private renderCell(
     ctx: RenderContext,
     cell: TableCell,
@@ -606,9 +731,6 @@ export class Table extends BorderedElementBase implements IRoleProvider {
 
     const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
 
-    const cellBorder = cell.border;
-    const cellBorderColors = cell.borderColors;
-
     // Apply text color to TextBlock content if specified
     let content = cell.content;
     if (textColor && content instanceof TextBlock) {
@@ -634,16 +756,32 @@ export class Table extends BorderedElementBase implements IRoleProvider {
     ctx.currentY += padding.top;
 
     const contentWidth = width - padding.left - padding.right;
-    content.render(ctx, contentWidth);
+    ctx.cellStretchTarget = Table.stretchableContainer(content);
+    ctx.cellStretchHeight = rowHeight - padding.top - padding.bottom;
+    try {
+      content.render(ctx, contentWidth);
+    } finally {
+      ctx.cellStretchTarget = undefined;
+    }
 
     // Restore X and Y positions
     ctx.currentX = originalX;
     ctx.currentY = yBeforeCell;
 
     // Draw border
-    if (cellBorder || this.border) {
-      const effectiveBorder = cellBorder ?? this.border!;
-      const effectiveBorderColors = cellBorderColors ?? this.borderColors!;
+    const edges = this.edgesOf(cell);
+    if (edges.border.hasAnyBorder) {
+      // A shared edge is drawn once, by the cell that wins it (planRowEdges).
+      const plan = this._edgePlan.get(cell);
+      const effectiveBorder = plan
+        ? new Border(
+            plan.drawLeft ? edges.border.left : 0,
+            plan.drawTop ? edges.border.top : 0,
+            edges.border.right,
+            edges.border.bottom
+          )
+        : edges.border;
+      const effectiveBorderColors = edges.colors;
       // Save and restore border settings for per-cell borders
       const savedBorder = this.border;
       const savedBorderColors = this.borderColors;
@@ -662,6 +800,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
    */
   private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[]): void {
     const rowHeight = this.measureRowHeight(row, widths);
+    this.planRowEdges(ctx, row);
 
     // Tagging: pushes /TR around the row and /TH or /TD around each
     // cell when the document opts into PDF/UA. ColumnSpan surfaces as
@@ -736,6 +875,7 @@ export class Table extends BorderedElementBase implements IRoleProvider {
       }
 
       ctx.currentX = startX;
+      this.recordRowBottoms(ctx, row, widths);
       ctx.currentY += rowHeight;
     } finally {
       if (dataTagging) {

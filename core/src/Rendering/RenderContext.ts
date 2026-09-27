@@ -102,6 +102,17 @@ export class RenderContext implements RenderContextContract {
   public chromeReservationSuspended: boolean = false;
 
   /**
+   * While a table draws a cell whose content is a `Container` (seen through pass-through wrappers),
+   * that container. It fills {@link cellStretchHeight}, so a border or background applied to a cell's
+   * content spans the whole row rather than only the cell's own text. `undefined` everywhere else;
+   * no other container is affected.
+   */
+  public cellStretchTarget: import('../Elements/Layout/Container').Container | undefined = undefined;
+
+  /** The height {@link cellStretchTarget} fills: the row height less the cell's padding. */
+  public cellStretchHeight: number = 0;
+
+  /**
    * PDF/UA tagging context. Non-undefined when the document opted into
    * AccessibilityMode.PdfUa1; undefined otherwise. Held on the context
    * so each per-page PdfCanvas gets it via updateCanvas.

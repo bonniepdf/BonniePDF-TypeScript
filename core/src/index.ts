@@ -194,7 +194,7 @@ export * from './Elements/Drawing/CanvasElement';
 // SVG page export
 export * from './Export/SvgPageExportOptions';
 export * from './Rendering/SvgRenderPipeline';
-export { exportSvgPagesAsync, exportSvgDocumentAsync } from './Export/SvgPageExporter';
+export { exportSvgPagesAsync, exportSvgDocumentAsync, SVG_DOCUMENT_EXPORT_VERSION } from './Export/SvgPageExporter';
 export type { SvgDocumentExport } from './Export/SvgPageExporter';
 export type {
   LayoutSnapshot,

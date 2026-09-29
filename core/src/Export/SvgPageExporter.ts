@@ -10,18 +10,35 @@ import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportO
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
-import { LayoutRecorder, LayoutSnapshot, SnapshotPage, colorToHex } from '../Rendering/LayoutRecorder';
+import { LayoutRecorder, LayoutSnapshot, SnapshotMeta, SnapshotPage, colorToHex } from '../Rendering/LayoutRecorder';
 import { debugSourceOf } from '../Rendering/DebugSource';
+import { evaluateCompliance, type ComplianceReport } from '../Compliance/ComplianceEvaluator';
 import {
   beginDocumentFontMetricScope,
   getRegistryFontInstances,
   getRegistryFontPaths,
 } from '../Typography/DocumentFontMetricScope';
 
-/** A rendered SVG document: one standalone SVG string per page, plus `@font-face`
+/** The version of the {@link SvgDocumentExport} envelope, written as its
+ * `version`. It changes only for a breaking change to the export's shape;
+ * the embedded snapshot carries its own version. */
+export const SVG_DOCUMENT_EXPORT_VERSION = 1;
+
+/**
+ * A rendered SVG document: one standalone SVG string per page, plus `@font-face`
  * CSS that embeds (as subsetted data URIs) the fonts the document used, so a host
- * can render the pages with the exact fonts BonniePDF laid them out with. */
+ * can render the pages with the exact fonts BonniePDF laid them out with.
+ *
+ * The export is plain data, so `JSON.stringify(result)` is its JSON form: the
+ * value a host sends to a previewer in another process, or that a .NET server
+ * produces for the same document. Keep every part of it free of class
+ * instances and methods.
+ */
 export interface SvgDocumentExport {
+  /** Export format version; see {@link SVG_DOCUMENT_EXPORT_VERSION}. */
+  version: number;
+  /** One standalone `<svg>` document per page, in page order. Each root carries
+   * `width`, `height` and `viewBox` in PDF points. */
   pages: string[];
   /** `<style>`-ready `@font-face` rules, or `''` when the document uses no
    * embeddable fonts (e.g. only the viewer-supplied standard-14). */
@@ -32,6 +49,14 @@ export interface SvgDocumentExport {
    * the same top-left, points coordinate space as the SVG.
    */
   snapshot?: LayoutSnapshot;
+  /**
+   * The compliance report for {@link snapshot}, present exactly when the snapshot
+   * is. Equal to `evaluateCompliance(snapshot)` with default options, so every
+   * rule family runs, WCAG included; filter by `standard` to hide one. Attached
+   * here so the report always comes from the same engine as the snapshot it
+   * describes, even when it is read in another process.
+   */
+  report?: ComplianceReport;
 }
 
 /**
@@ -168,12 +193,15 @@ export async function exportSvgDocumentAsync(
     );
     // Document-level accessibility/compliance context for the evaluator.
     const metaTitle = document.metadata?.title;
-    recorder.setMeta({
+    // Unset fields are left out rather than set to undefined, so the snapshot
+    // stays plain data whose JSON form carries no absent keys.
+    const meta: SnapshotMeta = {
       accessibilityMode: settings.accessibility,
       conformance: settings.conformance,
-      language: settings.language,
-      title: typeof metaTitle === 'string' && metaTitle.length > 0 ? metaTitle : undefined,
-    });
+    };
+    if (settings.language) meta.language = settings.language;
+    if (typeof metaTitle === 'string' && metaTitle.length > 0) meta.title = metaTitle;
+    recorder.setMeta(meta);
     snapshot = recorder.snapshot();
 
     // Document is represented by a synthetic root, and its constructor-created
@@ -188,7 +216,18 @@ export async function exportSvgDocumentAsync(
     }
   }
 
-  return { pages: pageSvgs, fontFaceCss: buildFontFaceCss(usage), snapshot };
+  const result: SvgDocumentExport = {
+    version: SVG_DOCUMENT_EXPORT_VERSION,
+    pages: pageSvgs,
+    fontFaceCss: buildFontFaceCss(usage),
+  };
+  if (snapshot) {
+    result.snapshot = snapshot;
+    // Evaluated over the finished snapshot. The evaluator is pure, and neither
+    // the snapshot nor any page changes.
+    result.report = evaluateCompliance(snapshot);
+  }
+  return result;
 }
 
 /** Builds `@font-face` rules that embed a minimal subset (only the used glyphs)

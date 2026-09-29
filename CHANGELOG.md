@@ -11,6 +11,19 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ### Added
 
+- **The SVG document export carries a version and its compliance report.**
+  `generateSvgDocumentAsync()` now returns `version` (currently `1`, exported as
+  `SVG_DOCUMENT_EXPORT_VERSION`), and with `captureLayout: true` it also returns
+  `report`: the result of `evaluateCompliance(snapshot)` with default options, so a
+  host no longer runs the check itself, and the report always comes from the same
+  engine as the snapshot. The export is plain data, and `JSON.stringify(result)` is
+  its JSON form, so it can be generated in one process (a worker, a server, an
+  editor extension) and shown in another: camelCase keys, no `null` values,
+  severities as `"error"` / `"warning"` / `"info"`. Without `captureLayout` neither
+  `snapshot` nor `report` is present. The snapshot's `meta` no longer carries
+  `language` or `title` keys set to `undefined` when those are unset. The .NET
+  implementation gains the same fields and a `ToJson()` method in step with this.
+
 - **`RichText` substitutes `{{CurrentPage}}` and `{{TotalPages}}`.** A span whose text
   holds a page token now behaves as it does in a `TextBlock`: the current page number
   is filled in as each page is drawn, the total is a deferred object that resolves

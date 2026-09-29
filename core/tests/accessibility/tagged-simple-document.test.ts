@@ -1,4 +1,6 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { fileURLToPath } from 'node:url';
+import { FontManager } from '../../src/Typography/FontManager';
 import { Document } from '../../src/Document';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { DocumentMetadata } from '../../src/Configuration/DocumentMetadata';
@@ -25,8 +27,13 @@ import { pdfToText } from '../helpers/test-base';
 describe('Tagged simple-document (stage-0 closeout)', () => {
   let doc: Document;
 
+  // PDF/UA-1 requires embedded fonts, so the claim is only made when the
+  // Liberation substitutes are available, as the Node entry point registers them.
+  beforeEach(() => FontManager.autoRegisterBundledFonts(fileURLToPath(new URL('../../assets/fonts', import.meta.url))));
+
   afterEach(() => {
     doc?.dispose();
+    FontManager.clear();
   });
 
   function buildTaggedDocument(): Document {

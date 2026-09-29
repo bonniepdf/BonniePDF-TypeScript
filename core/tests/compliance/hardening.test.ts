@@ -77,12 +77,12 @@ describe('Hardening fixtures', () => {
 
   // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
-  it('fixture 02 - PDF/A claim is suppressed when standard fonts are used (this feature contract)', () => {
-    // PDF/A-1b §6.3.4 forbids non-embedded fonts. When the caller
-    // asks for PDF/A but uses any of the standard 14 (Helvetica
-    // here), the serializer drops the PDF/A claim rather than
-    // emitting an invalid one. PDF/UA-1 still ships because it has
-    // no font-embedding requirement.
+  it('fixture 02 - PDF/A and PDF/UA-1 claims are suppressed when standard fonts are not embedded (this feature contract)', () => {
+    // PDF/A-1b §6.3.4 and PDF/UA-1 §7.21.4.1 both forbid non-embedded
+    // fonts. With no Liberation faces registered (tests import from src/,
+    // skipping the Node entry point's registration), Helvetica cannot be
+    // embedded, so the serializer withholds both claims rather than
+    // emitting invalid ones. The tagging itself is kept (spec 04 §8.2).
     const pdf = generate(d => {
       d.settings.version = PdfVersion.Pdf17;
       d.settings.pdfAEnabled = true;
@@ -98,8 +98,8 @@ describe('Hardening fixtures', () => {
     // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
     expect(pdf).not.toContain('pdfaid:part');
     expect(pdf).not.toContain('/OutputIntents');
-    // PDF/UA-1 plumbing is unaffected.
-    expect(pdf).toContain('pdfuaid:part');
+    // So is the PDF/UA-1 claim; the tagging is unaffected.
+    expect(pdf).not.toContain('pdfuaid:part');
     expect(pdf).toContain('/StructTreeRoot');
     expect(pdf).toContain('/MarkInfo << /Marked true >>');
   });

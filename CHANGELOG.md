@@ -9,6 +9,21 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Fixed
+
+- **A PDF/UA-1 claim is no longer made over fonts that were not embedded.**
+  PDF/UA-1 requires every font to be embedded, as PDF/A does. When the
+  standard-14 fonts cannot be embedded (in the browser, the Liberation fonts were
+  not registered), the PDF/A claim was already withheld, but the `pdfuaid` claim
+  was still written. It is now withheld too. The document is still tagged: the
+  structure tree, `/Lang`, `/MarkInfo` and a PDF/UA-only document's OutputIntent
+  are unchanged; only the claim goes.
+- **A withheld conformance claim is now reported.** Each withheld claim adds one
+  `warning` to `Document.diagnostics`, in the new `compliance` category, with
+  `source` set to the claim (`'pdf/a-2a'`, `'pdf/ua-1'`, …) and a message naming
+  the fonts that could not be embedded. Previously the PDF/A claim disappeared
+  without a trace.
+
 ### Added
 
 - **The SVG document export carries a version and its compliance report.**

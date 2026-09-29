@@ -1,4 +1,5 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { fileURLToPath } from 'node:url';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Container } from '../../src/Elements/Layout/Container';
@@ -8,10 +9,19 @@ import { Color } from '../../src/Core/Color';
 import { LAYOUT_SNAPSHOT_VERSION } from '../../src/Rendering/LayoutRecorder';
 import { evaluateCompliance } from '../../src/Compliance/ComplianceEvaluator';
 import { SVG_DOCUMENT_EXPORT_VERSION, type SvgDocumentExport } from '../../src/Export/SvgPageExporter';
+import { FontManager } from '../../src/Typography/FontManager';
 
 // Mirrors the shared conformance fixtures svg-document-export/with-layout and
 // svg-document-export/without-layout, and the shared JSON conventions the
 // export is serialized under. The .NET suite asserts the same facts.
+//
+// The fixture document is tagged, and PDF/UA-1 forces the standard-14 faces to
+// be embedded, so its Helvetica is drawn in the bundled Liberation Sans and the
+// export carries that subset as font CSS. The Node entry point registers the
+// bundled fonts on import; tests import from src/, so they register them here.
+const BUNDLED_FONTS = fileURLToPath(new URL('../../assets/fonts', import.meta.url));
+beforeEach(() => FontManager.autoRegisterBundledFonts(BUNDLED_FONTS));
+afterEach(() => FontManager.clear());
 
 /** The fixture document: tagged, titled, one light card holding mid-grey text.
  * It is the compliance-preflight/contrast-insufficient document, so its report
@@ -51,7 +61,7 @@ describe('SVG document export envelope (with layout)', () => {
   let doc: Document;
   afterEach(() => doc?.dispose());
 
-  it('carries version 1, one page with its size in the root element, and empty font CSS', async () => {
+  it('carries version 1, one page with its size in the root element, and the embedded font CSS', async () => {
     doc = fixtureDocument();
     const result = await doc.generateSvgDocumentAsync({ captureLayout: true });
 
@@ -59,8 +69,10 @@ describe('SVG document export envelope (with layout)', () => {
     expect(result.version).toBe(1);
     expect(result.pages).toHaveLength(1);
     expect(rootAttributes(result.pages[0])).toEqual({ width: 595.276, height: 841.89, viewBox: '0 0 595.276 841.89' });
-    // Helvetica only, and standard-14 faces are viewer-supplied in SVG output.
-    expect(result.fontFaceCss).toBe('');
+    // PDF/UA-1 embeds the Helvetica substitute, so its subset travels with the pages.
+    expect(result.fontFaceCss).toContain('@font-face');
+    expect(result.fontFaceCss).toContain("font-family:'bpf-helvetica'");
+    expect(result.pages[0]).toContain("font-family:'bpf-helvetica'");
   });
 
   it('carries the snapshot with its own version and document meta', async () => {
@@ -123,7 +135,7 @@ describe('SVG document export envelope (without layout)', () => {
 
     expect(result.version).toBe(1);
     expect(result.pages).toHaveLength(1);
-    expect(result.fontFaceCss).toBe('');
+    expect(result.fontFaceCss).toContain("font-family:'bpf-helvetica'");
     expect('snapshot' in result).toBe(false);
     expect('report' in result).toBe(false);
 

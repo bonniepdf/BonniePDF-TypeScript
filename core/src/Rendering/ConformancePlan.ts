@@ -8,7 +8,14 @@ export type PdfAClaimSuppressedReason = 'non-embedded-standard-fonts' | 'blockin
 
 interface PdfAResourceAudit {
   hasNonEmbeddedStandardFont(): boolean;
+  getNonEmbeddedStandardFonts?(): string[];
   getPdfAResourceIssues?(): PdfAResourceIssue[];
+}
+
+/** `PdfA2a` → `pdf/a-2a`, `PdfA4` → `pdf/a-4`: the claim's spec token. */
+export function pdfAConformanceToken(conformance: PdfAConformance): string {
+  const match = /^PdfA(\d)([a-z]?)$/i.exec(conformance);
+  return match ? `pdf/a-${match[1]}${match[2].toLowerCase()}` : 'none';
 }
 
 /**
@@ -16,8 +23,9 @@ interface PdfAResourceAudit {
  * so {@link PdfDocumentSerializer} can grow PDF 2.0 / PDF/A-4 / PDF/UA-2
  * support without scattering conformance branching through the writer.
  *
- * PDF/A claims are requests that the unembedded-standard-font guard may
- * suppress, and PDF/UA tagging is emitted only for PDF/UA-1 on PDF 1.7.
+ * PDF/A and PDF/UA-1 claims are requests that the honest-claim guard may
+ * withhold when standard-14 fonts cannot be embedded; PDF/UA tagging is emitted
+ * only for PDF/UA-1 on PDF 1.7, and is kept even when its claim is withheld.
  */
 export class ConformancePlan {
   public readonly requestedPdfA: PdfAConformance;
@@ -27,6 +35,13 @@ export class ConformancePlan {
   public readonly pdfVersion: (typeof PdfVersion)[keyof typeof PdfVersion];
   public readonly pdfAClaimSuppressedReason?: PdfAClaimSuppressedReason;
   public readonly pdfAResourceIssues: ReadonlyArray<PdfAResourceIssue>;
+  /**
+   * True when PDF/UA-1 tagging is written but its `pdfuaid` claim is withheld,
+   * because standard-14 fonts cannot be embedded (ISO 14289-1 §7.21.4.1).
+   */
+  public readonly pdfUaClaimSuppressed: boolean;
+  /** Standard-14 font references written without embedding, for diagnostics. */
+  public readonly nonEmbeddedStandardFonts: ReadonlyArray<string>;
   public readonly needsXmpMetadata: boolean;
   public readonly needsOutputIntent: boolean;
   public readonly needsStructureTree: boolean;
@@ -66,6 +81,11 @@ export class ConformancePlan {
     this.needsStructureTree =
       settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17;
     this.effectiveAccessibility = this.needsStructureTree ? settings.accessibility : AccessibilityMode.None;
+    const fontsUnembedded = registry?.hasNonEmbeddedStandardFont() === true;
+    this.nonEmbeddedStandardFonts = fontsUnembedded ? (registry?.getNonEmbeddedStandardFonts?.() ?? []) : [];
+    // The claim is withheld; the tagging (and the PDF/UA-only OutputIntent,
+    // which is colour management rather than a claim) is not.
+    this.pdfUaClaimSuppressed = this.effectiveAccessibility === AccessibilityMode.PdfUa1 && fontsUnembedded;
     this.needsViewerPreferencesDisplayDocTitle = this.needsStructureTree;
     this.needsXmpMetadata = settings.version === PdfVersion.Pdf17 || settings.version === PdfVersion.Pdf20;
 
@@ -95,18 +115,20 @@ export class ConformancePlan {
   }
 
   /**
-   * Returns settings for XMP emission. When the honest-claim guard suppresses
-   * PDF/A, clone the settings with `conformance = None` while preserving the
-   * DocumentSettings prototype (getters, methods, and compatibility shims).
+   * Returns settings for XMP emission. When the honest-claim guard withholds a
+   * claim, clone the settings with `conformance = None` and/or `accessibility =
+   * None` while preserving the DocumentSettings prototype (getters, methods, and
+   * compatibility shims). The caller's settings are never modified.
    */
   public createXmpSettings(): DocumentSettings {
-    if (this.effectivePdfA === this.requestedPdfA && this.effectiveAccessibility === this.requestedAccessibility) {
+    const xmpAccessibility = this.pdfUaClaimSuppressed ? AccessibilityMode.None : this.effectiveAccessibility;
+    if (this.effectivePdfA === this.requestedPdfA && xmpAccessibility === this.requestedAccessibility) {
       return this.settings;
     }
 
     return Object.assign(Object.create(Object.getPrototypeOf(this.settings)), this.settings, {
       conformance: this.effectivePdfA,
-      accessibility: this.effectiveAccessibility,
+      accessibility: xmpAccessibility,
     });
   }
 }

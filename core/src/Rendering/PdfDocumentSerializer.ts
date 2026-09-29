@@ -20,7 +20,7 @@ import { PdfVersion } from '../Configuration/PdfVersion';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { PdfEncryptor } from '../Security/Encryption/pdfEncryptor';
-import { ConformancePlan } from './ConformancePlan';
+import { ConformancePlan, pdfAConformanceToken } from './ConformancePlan';
 import { EncryptionAlgorithm } from '../Security/Models/EncryptionAlgorithm';
 import { Image } from '../Elements/Media/Image';
 import { Svg } from '../Elements/Media/Svg';
@@ -254,6 +254,7 @@ export class PdfDocumentSerializer {
     // conformance plan whether that claim can still be emitted honestly
     // (currently: no non-embedded standard-14 font references).
     conformancePlan = conformancePlan.withResourceRegistry(ctx.resources);
+    this.reportWithheldClaims(conformancePlan);
 
     // 6a. Write the global Resources object every page references.
     // PDF/A-2b clause 6.2.2.2 - see page-dict comment above.
@@ -394,6 +395,30 @@ export class PdfDocumentSerializer {
    * attachments are dropped and a warning diagnostic recorded, keeping the
    * emitted PDF's conformance claim honest.
    */
+  private reportWithheldClaims(plan: ConformancePlan): void {
+    const fonts =
+      plan.nonEmbeddedStandardFonts.length > 0 ? plan.nonEmbeddedStandardFonts.join(', ') : 'standard-14 fonts';
+    const remedy =
+      'Register the Liberation fonts (or use embeddable fonts) and generate again to keep the claim. ' +
+      'The rest of the document is unchanged.';
+    if (plan.pdfAClaimSuppressedReason) {
+      const token = pdfAConformanceToken(plan.requestedPdfA);
+      const reason =
+        plan.pdfAClaimSuppressedReason === 'non-embedded-standard-fonts'
+          ? `these fonts could not be embedded: ${fonts}`
+          : 'a resource the requested PDF/A level forbids could not be made conformant';
+      this.diagnostics.addWarning('compliance', `The ${token} claim was withheld: ${reason}. ${remedy}`, token);
+    }
+    if (plan.pdfUaClaimSuppressed) {
+      this.diagnostics.addWarning(
+        'compliance',
+        `The pdf/ua-1 claim was withheld: these fonts could not be embedded: ${fonts}. ` +
+          `The document is still tagged. ${remedy}`,
+        'pdf/ua-1'
+      );
+    }
+  }
+
   private resolveAttachments(): readonly FileAttachment[] | undefined {
     const attachments = this.document.attachments;
     if (!attachments || attachments.length === 0) return undefined;

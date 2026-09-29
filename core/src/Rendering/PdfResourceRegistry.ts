@@ -288,7 +288,8 @@ export class PdfResourceRegistry {
     return issues;
   }
 
-  private getNonEmbeddedStandardFonts(): string[] {
+  /** The standard-14 font references that will be written without embedding. */
+  public getNonEmbeddedStandardFonts(): string[] {
     const result: string[] = [];
     for (const fontIdentifier of this.fontNameMap.keys()) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;

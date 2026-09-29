@@ -9,7 +9,17 @@
 export type DiagnosticSeverity = 'error' | 'warning' | 'info';
 
 export type DiagnosticCategory =
-  'font' | 'font-subset' | 'image' | 'encryption' | 'compression' | 'tagging' | 'platform' | 'render' | 'attachment';
+  | 'font'
+  | 'font-subset'
+  | 'image'
+  | 'encryption'
+  | 'compression'
+  | 'tagging'
+  | 'platform'
+  | 'render'
+  | 'attachment'
+  /** A conformance claim the honest-claim guard withheld; `source` is the claim's token. */
+  | 'compliance';
 
 export interface IDiagnostic {
   severity: DiagnosticSeverity;

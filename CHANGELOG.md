@@ -9,7 +9,84 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+### Changed
+
+- **`loadFontFromUrl` resolves to nothing.** It returned the parsed font, a type that is not part of the public API. It still fetches, parses and registers the font, including its width metrics.
+
+- **One spelling for a text colour and decoration: `color` and `decoration`.**
+  `TextBlock`, `Heading`, `RichText` (through `TextElementBase`), `PageNumberOf`,
+  `VisualToc`, lists, `Hyperlink`, `TableCell`, `TableRow` and `Watermark` said
+  `textColor`; text elements said `textDecoration`. `TextStyle` already said
+  `color` and `decoration`, so the two now agree, in code, in options objects and in
+  a Document Definition. `TableCell.withTextColor` and `TableRow.withTextColor` are
+  `withColor`. Compound names that say which part they colour (`headerTextColor`,
+  `rowTextColor`) are unchanged. There are no aliases for the old names.
+- **Encryption permissions are granted, never toggled.** `EncryptionOptions`
+  matches .NET: `allowPrinting(highQuality = true)` (it had `allowPrinting(allow,
+highQuality)`, so `allowPrinting(false)` denied printing where .NET reads it as
+  "low quality"), `allowCopying()`, `allowModification()`, `allowAnnotations()`,
+  `allowFormFilling()`, the new `allowAssembly()` and `allowAccessibility()`, and
+  `denyAll()` in place of `allowNone()`. `withPassword(password)` sets both passwords.
+  Start from `denyAll()` and grant back what is needed.
+- **Overload workarounds folded into single methods.** `TableCell.withPadding4` and
+  `TableRow.withPadding4` are `withPadding(padding)`, which accepts a number, a
+  `[horizontal, vertical]` pair or a per-side object. `withBorderFull` and
+  `withBorderAndColor` are `withBorder(border, colors)`. `RichText.spanWithConfigure`
+  is `span(text, callback)`. `Document.toByteArray()` and `toByteArrayAsync()`, kept
+  only to mirror a C# name, are removed; use `generateBytes()` and
+  `generateBytesAsync()`.
+- **`Table.rows`, `OrderedList.items` and `UnorderedList.items`** are readable, as
+  `Table.Rows` and `Items` are in .NET.
+- **Async generation and saving can be cancelled.** `generateBytesAsync`,
+  `saveAsync`, and the SVG exports accept `{ signal }`; the promise rejects with the
+  signal's reason. It is checked before generation starts and between its stages.
+  .NET takes a `CancellationToken`.
+- **`BonniePdfError`** is the base class of the errors BonniePDF raises for input it
+  rejects (`BarcodeContentException`, `DataMatrixContentException`,
+  `DefinitionError`), as `BonniePdfException` is in .NET.
+- **`PaintTransform`** and its helper functions are exported, so the `transform` of a
+  gradient paint can be built and inspected. `mapBox` is `mapPaintBox`.
+- Engine-only members that were still public (`ICanvas.streamLength` and `moveTail`,
+  `Hyperlink.setRenderBounds`, `RenderContext.registerShading`, and similar) are
+  marked `@internal`.
+
+- **The package exports its API and not its plumbing.** About 210 names that were
+  exported by accident are no longer exported from any entry point: the PDF writers
+  (`PdfWriter`, `AsyncPdfWriter`, `FontWriter`, ...), `PdfDocumentSerializer`,
+  `PdfResourceRegistry`, `PdfSyntax`, `PdfOperators`, the ciphers and key types
+  (`AesCipher`, `RC4Cipher`, `Md5Hash`, ...), the barcode and QR encoders, the
+  TrueType parser and subsetter, the XMP writer, the `*_OPTION_KEYS` constants,
+  and a number of layout and rendering helpers. Members of public types that only
+  the engine used (`RenderContext.resources`, `EmbeddedFontInfo`, the parsed font on
+  `DocumentFontFace` and `FallbackFont`, ...) are marked `@internal` and no longer
+  appear in the declarations. Code that imported one of these will stop compiling;
+  everything the documentation and examples use is unchanged. A test now fails if
+  an internal name is exported again.
+
+- **`validateDefinition` refuses `settings` combinations that generation refuses.**
+  A definition that asks for PDF/A with encryption, AES-256 on PDF 1.4, an "a" level
+  without `accessibility: "pdf/ua-1"`, PDF/UA-1 on PDF 2.0 (which includes PDF/A-4),
+  or bookmarks on PDF 1.4 is now reported as `incompatible-settings` when it is read,
+  instead of throwing later when the document is generated. The rules are data in the
+  format description and both implementations evaluate the same list.
+
+- **Chart text is formatted by one culture-invariant grammar, and now matches
+  .NET.** A data point's `labelFormat` and a pie's `totalValueFormat` were ignored
+  (every value printed as `value.toString()`); they are now honoured. The formats
+  are `G` (the default: the shortest exact decimal, no grouping), `F<n>` (fixed
+  decimals), `N<n>` (fixed decimals, grouped in thousands) and `P<n>` (times 100,
+  then `%`), with `n` from 0 to 15, `.` for decimals and `,` for thousands always.
+  Rounding is half away from zero on the value's decimal digits, so `1.005` at `F2`
+  is `1.01`. Any other format, such as `C0` or `E2`, now throws when the chart is
+  drawn, naming the grammar; currency belongs in the axis `prefix` and `suffix`.
+  **Axis labels are grouped**: `4,000` where they were `4000`. The pie total is the
+  exact sum of the values as written, so `0.1 + 0.2` shows `0.3`. `formatChartNumber`
+  and `isChartNumberFormat` are exported. The .NET implementation makes the same
+  change, and its chart text no longer depends on the machine's regional settings.
+
 ### Fixed
+
+- **The horizontal bar and lollipop chart examples no longer use a label format outside the number grammar.** They passed `'£'#,##0`, which the grammar rejects; they use `N0`. `pnpm verify-examples` now builds every example so a regression like this fails in CI.
 
 - **A PDF/UA-1 claim is no longer made over fonts that were not embedded.**
   PDF/UA-1 requires every font to be embedded, as PDF/A does. When the
@@ -25,6 +102,70 @@ change to `core/`; on release, rename it to the version being tagged.
   without a trace.
 
 ### Added
+
+- **Documents can be built from JSON.** `fromDefinition(json, options)`, from the new
+  `@bonniepdf/core/definition` entry, reads a
+  Document Definition, a versioned, language-neutral JSON description of a whole document
+  (settings, metadata, pages, every element including charts, fonts and other resources), and
+  returns a `Document`. `validateDefinition(json)` checks it first and returns every problem at
+  once, each with a JSON Pointer path and a stable code (`unknown-type`, `invalid-value`,
+  `dangling-reference`, …), without constructing anything; `fromDefinition` rejects with a
+  `DefinitionError` carrying the same list. Nothing in a definition can run code, open a file or
+  fetch a URL: an image or font is embedded as base64 or named by a `ref` that the host resolves
+  through `options.resources`, and encryption passwords are supplied through `options.passwords`,
+  never stored. Input size, nesting depth and element count are limited, and a document written for
+  a newer minor version than this release reads is refused with each unrecognised item listed,
+  unless `bestEffort` is set. `DEFINITION_VERSIONS` states the range this release reads (1.0).
+  The definition code is a separate entry, not methods on `Document`, because reading and writing
+  touch every element type and would otherwise keep charts, QR codes and barcodes in the bundle of
+  anyone who builds documents in code. The .NET implementation gains `Document.FromDefinition` in step with this.
+
+- **Documents can be written as JSON.** `await toDefinition(doc)` (same entry) returns the definition and a
+  list of notes: the same Document Definition `fromDefinition` reads, so the document you read
+  back renders identically. Values equal to their defaults are left out, lengths are points, colours
+  are hex (or palette tokens with `writePaletteTokens`) and every enumeration is its token, so
+  writing what was written changes nothing. Images, fonts and attachments become entries of
+  `resources`, named `image-1`, `font-1`, … and shared when the bytes are identical; pass
+  `resourceRef` to name a resource your code can supply again and the definition carries that
+  `ref` and a `sha256` instead of the bytes. A construct a definition cannot express (a
+  function-valued page template, a `ShowIf` predicate, an `Svg` generator, a custom element) makes
+  `toDefinition` reject with a `DefinitionError` that lists every one; `onUnrepresentable: 'drop'`
+  leaves them out and returns a `dropped` note for each. Encryption is written without its
+  passwords, with a `secret-omitted` note. A text property the author never set (font, size,
+  colour, line height, alignment, a list's bullet colour) is not written, so the document's default
+  text style and an enclosing container's alignment still apply after the round trip.
+  `maxImageDpi: null` (no cap) is written as `"unlimited"`, which is also what a definition says to
+  read it back. `Attachments` in a definition may now carry `creationDate` and `modificationDate`. The .NET
+  implementation gains `Document.ToDefinition` in step with this.
+
+- **A document can carry its own fonts.** `doc.fonts.add(bytes, { family, weight,
+italic })` adds a face to that document, and a document holds any number of
+  families with any number of weights and styles each. Family, weight and italic
+  are read from the font unless you give them. An element's `fontFamily`,
+  `fontWeight` and `italic` (and a `TextStyle`, the document's `defaultTextStyle`
+  and the family names in an imported SVG) resolve against the document's faces
+  first, then the global registrations, then the standard fonts. Style is matched
+  first, then weight in the CSS font-matching order, so a family with only regular
+  and bold still answers semi-bold and medium. Nothing added to one document is
+  visible to another, including one generated at the same time, and the global
+  registries are not touched, so two documents can use different files under the
+  same family name. A face is embedded and subset as any other TrueType font. When
+  a face lacks a glyph, the document's other faces are tried before the global
+  fallback fonts. `face.fontName` selects a face anywhere an element takes a font
+  name. The .NET implementation gains `Document.Fonts` in step with this.
+
+- **Page templates can be built from elements.** `pageTemplate({ default, firstPage,
+odd, even })` returns a template for `headerTemplate`, `footerTemplate`,
+  `pageBackground` or `pageForeground` without writing a function. For page _n_ it
+  returns the first present of `firstPage` (page 1 only), then `odd` or `even` by
+  parity, then `default`, and nothing when none applies. At least one member is
+  required. The same element is used on every page it covers, so
+  `{{CurrentPage}}` and `{{TotalPages}}` are how one footer shows a different
+  number on each. The result is an ordinary function, and output is byte-identical
+  to the equivalent hand-written one. `getPageTemplateElements(template)` reads the
+  members back, and returns `undefined` for a function you wrote yourself. The
+  `PageTemplate` type is now exported. The .NET implementation gains
+  `PageTemplate.FromElements` in step with this.
 
 - **The SVG document export carries a version and its compliance report.**
   `generateSvgDocumentAsync()` now returns `version` (currently `1`, exported as

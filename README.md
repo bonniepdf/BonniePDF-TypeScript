@@ -118,7 +118,7 @@ const title = new Heading('Quarterly report');
 title.level = 1;
 title.fontName = StandardFonts.HelveticaBold;
 title.fontSize = 24;
-title.textColor = ColorPalette.slate[800];
+title.color = ColorPalette.slate[800];
 document.add(title);
 
 document.add(new TextBlock('Generated as a tagged, PDF/A document with no server required.'));

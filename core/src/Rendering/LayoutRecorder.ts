@@ -194,7 +194,7 @@ function fontNameLooksBold(fontName: string | undefined): boolean {
 
 /**
  * Derives {@link NodePaint} from an element instance by reading its already
- * resolved `textColor` / `fontSize` / `fontWeight` / `backgroundColor` — the same
+ * resolved `color` / `fontSize` / `fontWeight` / `backgroundColor` — the same
  * values the canvas is about to draw with. Returns `undefined` when the element
  * paints nothing the contrast rules care about, so most nodes stay unannotated.
  *
@@ -202,7 +202,7 @@ function fontNameLooksBold(fontName: string | undefined): boolean {
  */
 export function paintOf(element: object, type: string): NodePaint | undefined {
   const el = element as {
-    textColor?: Color;
+    color?: Color;
     fontSize?: number;
     fontWeight?: number;
     fontName?: string;
@@ -210,11 +210,11 @@ export function paintOf(element: object, type: string): NodePaint | undefined {
   };
   const paint: NodePaint = {};
 
-  // Text side. `textColor` has a black default on text elements, so gate on the
+  // Text side. `color` has a black default on text elements, so gate on the
   // element actually being text-bearing (it exposes a numeric fontSize).
-  if (el.textColor && typeof el.fontSize === 'number') {
-    paint.text = colorToHex(el.textColor);
-    const alpha = alphaOf(el.textColor);
+  if (el.color && typeof el.fontSize === 'number') {
+    paint.text = colorToHex(el.color);
+    const alpha = alphaOf(el.color);
     if (alpha < 1) paint.textAlpha = alpha;
     paint.fontSize = el.fontSize;
     if ((typeof el.fontWeight === 'number' && el.fontWeight >= 700) || fontNameLooksBold(el.fontName)) {

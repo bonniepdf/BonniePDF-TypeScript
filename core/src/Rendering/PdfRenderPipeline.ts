@@ -334,7 +334,7 @@ export class PdfRenderPipeline {
     PdfOperators.beginText(wmOps);
     PdfOperators.setFont(wmOps, fontResourceName, wm.fontSize);
 
-    let fillColor = wm.textColor;
+    let fillColor = wm.color;
     const isPdfA1 = settings.conformance === PdfAConformance.PdfA1b || settings.conformance === PdfAConformance.PdfA1a;
     if (isPdfA1 && wm.opacity < 1.0) {
       // PDF/A-1 forbids transparency (ISO 19005-1 §6.4), so its /ca alpha is forced

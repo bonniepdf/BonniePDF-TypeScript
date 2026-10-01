@@ -111,27 +111,35 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   // --- Builder API ---
 
   /**
-   * Adds a text span with an explicit style.
+   * Adds a text span.
+   * @param text - The span's text
+   * @param style - A style, or a callback that configures a fresh one
+   *
+   * @example
+   * ```ts
+   * const rich = new RichText();
+   * rich.span('Payment due within ');
+   * rich.span('30 days', new TextStyle().bold());
+   * rich.span(' of the invoice date, or ', s => s.underline());
+   * ```
    */
-  public span(text: string, style?: TextStyle): RichText {
+  public span(text: string, style?: TextStyle | ((style: TextStyle) => void)): RichText {
+    let spanStyle: TextStyle | undefined;
+    if (typeof style === 'function') {
+      spanStyle = new TextStyle();
+      style(spanStyle);
+    } else {
+      // Snapshot the style: the fluent builders mutate and return `this`, so a
+      // style shared across spans and mutated between them would otherwise leak
+      // its final state onto every span that references it.
+      spanStyle = style?.clone();
+    }
     const textSpan = new TextSpan();
     textSpan.text = text;
-    // Snapshot the style: the fluent builders mutate and return `this`, so a
-    // style shared across spans and mutated between them would otherwise leak
-    // its final state onto every span that references it.
-    textSpan.style = style?.clone();
+    textSpan.style = spanStyle;
     this.spans.push(textSpan);
     this.invalidateCache();
     return this;
-  }
-
-  /**
-   * Adds a text span with a style configured via callback.
-   */
-  public spanWithConfigure(text: string, configure: (style: TextStyle) => void): RichText {
-    const style = new TextStyle();
-    configure(style);
-    return this.span(text, style);
   }
 
   /**

@@ -234,14 +234,14 @@ describe('Hardening fixtures', () => {
         const tb = new TextBlock();
         tb.text = `Header - page ${pageNum}`;
         tb.fontSize = 9;
-        tb.textColor = ColorPalette.slate[500];
+        tb.color = ColorPalette.slate[500];
         return tb;
       };
       d.settings.footerTemplate = pageNum => {
         const tb = new TextBlock();
         tb.text = `- ${pageNum} -`;
         tb.fontSize = 9;
-        tb.textColor = ColorPalette.slate[500];
+        tb.color = ColorPalette.slate[500];
         return tb;
       };
       const h = new Heading('Body');

@@ -97,7 +97,7 @@ No native addons. No WASM. No server.
 ```typescript
 import { Document, DocumentSettings, DocumentMetadata, PdfSize } from '@bonniepdf/core';
 
-const settings = new DocumentSettings(PdfSize.a4);
+const settings = new DocumentSettings({ pageSize: PdfSize.a4 });
 
 const metadata = new DocumentMetadata();
 metadata.title = 'My Report';
@@ -119,16 +119,16 @@ import { TextBlock, RichText, StandardFonts, Color, ColorPalette } from '@bonnie
 const heading = new TextBlock('Hello world');
 heading.fontName = StandardFonts.HelveticaBold;
 heading.fontSize = 14;
-heading.textColor = Color.fromHex('#1a1a1a');
+heading.color = Color.fromHex('#1a1a1a');
 
 // Rich text with mixed styles - one span per run
 const rich = new RichText();
 rich.span('Normal ');
-rich.spanWithConfigure('bold', s => {
-  s.bold = true;
+rich.span('bold', s => {
+  s.bold();
 });
 rich.span(' and ');
-rich.spanWithConfigure('coloured', s => {
+rich.span('coloured', s => {
   s.color = ColorPalette.blue[500];
 });
 ```
@@ -204,7 +204,7 @@ doc.add(text);
 ```typescript
 import { Document, DocumentSettings, PdfSize, PdfVersion, withEncryptionAes256 } from '@bonniepdf/core';
 
-const settings = new DocumentSettings(PdfSize.a4);
+const settings = new DocumentSettings({ pageSize: PdfSize.a4 });
 settings.version = PdfVersion.Pdf17; // AES-256 requires PDF 1.7
 
 withEncryptionAes256(settings, opts =>

@@ -29,6 +29,7 @@ import { PageLabel, type PageLabelOptions } from './PageLabel';
 import { FacturXMetadata } from '../EInvoice/FacturXMetadata';
 import type { IElement } from '../Elements/IElement';
 import { toLength, type LengthInput } from '../Normalize/toLength';
+import type { PageTemplate } from './PageTemplate';
 
 /**
  * Configuration settings for PDF document creation and display
@@ -134,13 +135,13 @@ export class DocumentSettings {
    * Called with the page number (1-based) and should return an IElement to render at the top of each page.
    * The returned element is rendered at the top margin position.
    */
-  public headerTemplate?: (pageNumber: number) => IElement | undefined;
+  public headerTemplate?: PageTemplate;
   /**
    * Template function for generating page footers.
    * Called with the page number (1-based) and should return an IElement to render at the bottom of each page.
    * The returned element is rendered at the bottom margin position.
    */
-  public footerTemplate?: (pageNumber: number) => IElement | undefined;
+  public footerTemplate?: PageTemplate;
   /**
    * Template function for the full-page **background** slot.
    * Called with the page number (1-based); the returned element is painted
@@ -150,7 +151,7 @@ export class DocumentSettings {
    * certificate backgrounds reach the page edge. Rendered at the page origin
    * (0, 0) with the full page width available.
    */
-  public pageBackground?: (pageNumber: number) => IElement | undefined;
+  public pageBackground?: PageTemplate;
   /**
    * Template function for the full-page **foreground** slot.
    * Called with the page number (1-based); the returned element is painted
@@ -159,7 +160,7 @@ export class DocumentSettings {
    * {@link pageBackground} it spans the entire page and ignores the margins,
    * rendered at the page origin (0, 0) with the full page width available.
    */
-  public pageForeground?: (pageNumber: number) => IElement | undefined;
+  public pageForeground?: PageTemplate;
   /**
    * The page size for the document (default: A4)
    */

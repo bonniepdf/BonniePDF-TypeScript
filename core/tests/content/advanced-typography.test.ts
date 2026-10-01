@@ -74,7 +74,7 @@ describe('this feature advanced typography', () => {
   it('overline decoration emits a stroked line in the content stream', () => {
     const d = new Document();
     const overlined = new TextBlock('Overlined heading');
-    overlined.textDecoration = TextDecoration.Overline;
+    overlined.decoration = TextDecoration.Overline;
     d.add(overlined);
     doc = d;
 
@@ -216,14 +216,14 @@ describe('this feature advanced typography', () => {
     it('a wavy underline emits many short segments (vs one for solid)', () => {
       const solidDoc = new Document();
       const s = new TextBlock('Underlined');
-      s.textDecoration = TextDecoration.Underline;
+      s.decoration = TextDecoration.Underline;
       solidDoc.add(s);
       const solidStrokes = (pdfToText(solidDoc.generateBytes()).match(/\bl\s+S\b/g) ?? []).length;
       solidDoc.dispose();
 
       const wavyDoc = new Document();
       const w = new TextBlock('Underlined');
-      w.textDecoration = TextDecoration.Underline;
+      w.decoration = TextDecoration.Underline;
       w.decorationStyle = DecorationStyle.Wavy;
       wavyDoc.add(w);
       doc = wavyDoc;

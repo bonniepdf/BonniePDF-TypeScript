@@ -1,3 +1,4 @@
+import { throwIfAborted } from './Core/throwIfAborted';
 import { DocumentSettings, type DocumentSettingsOptions } from './Configuration/DocumentSettings';
 import { DocumentMetadata, type DocumentMetadataOptions } from './Configuration/DocumentMetadata';
 import { IElement } from './Elements/IElement';
@@ -20,6 +21,7 @@ import { ensureLicenseDeclared } from './Licensing/LicenseChecker';
 import { SvgPageExportOptions } from './Export/SvgPageExportOptions';
 import { FileAttachment } from './Attachments/FileAttachment';
 import { AttachmentRelationship } from './Attachments/AttachmentRelationship';
+import { DocumentFonts } from './Typography/DocumentFonts';
 
 /**
  * Options for creating a {@link Document}.
@@ -53,6 +55,15 @@ export interface AddPageOptions {
   margin?: number;
 }
 
+/** Options for the asynchronous generate and save methods. */
+export interface GenerateOptions {
+  /**
+   * Cancels the operation. Checked before generation starts and between its stages (font loading, image and SVG
+   * preparation, serialization); when aborted, the promise rejects with the signal's reason.
+   */
+  signal?: AbortSignal;
+}
+
 /**
  * High-level entry point for creating PDF documents.
  * Provides a simplified API for adding elements, setting metadata, and saving PDFs.
@@ -65,6 +76,21 @@ export class Document {
 
   public settings: DocumentSettings;
   public metadata: DocumentMetadata;
+
+  /**
+   * The fonts that belong to this document: any number of families and faces. Nothing
+   * added here is visible to another document, and the global font registries are
+   * unchanged. A family named here is resolved before the global and standard ones.
+   *
+   * @example
+   * ```ts
+   * doc.fonts.add(regularBytes, { family: 'Inter' });
+   * doc.fonts.add(boldBytes, { family: 'Inter', weight: 'bold' });
+   * doc.add(new TextBlock({ text: 'Hello', fontFamily: 'Inter', fontWeight: 'bold' }));
+   * ```
+   */
+  public readonly fonts: DocumentFonts = new DocumentFonts();
+
   private _svgRasterizer: SvgRasterizer | undefined;
 
   /**
@@ -154,16 +180,37 @@ export class Document {
    * PDF/A-4; under levels that forbid them (PDF/A-1, PDF/A-2) they are
    * dropped at generation time with a diagnostic, keeping the conformance
    * claim honest.
+   *
+   * @remarks
+   * A read-only array: read it or loop over it. It has no `add` or `push`; add a file with {@link Document.attach}.
+   *
+   * @example
+   * ```ts
+   * doc.attach({ fileName: 'data.csv', content: bytes, relationship: AttachmentRelationship.Data, mediaType: 'text/csv' });
+   * console.log(doc.attachments.length); // 1
+   * ```
    */
   public get attachments(): ReadonlyArray<FileAttachment> {
     return this._attachments;
   }
 
-  /** Embeds a file into the document. Returns this document for chaining. */
+  /**
+   * Embeds a file into the document. Returns this document for chaining.
+   *
+   * @example
+   * ```ts
+   * doc.attach({ fileName: 'invoice.xml', content: xmlBytes, relationship: AttachmentRelationship.Alternative, mediaType: 'text/xml' });
+   * ```
+   */
   public attach(attachment: FileAttachment): this;
   /**
    * Embeds a file into the document from a name and bytes. Returns this
    * document for chaining.
+   *
+   * @example
+   * ```ts
+   * doc.attach('data.csv', bytes, { relationship: AttachmentRelationship.Data, mediaType: 'text/csv' });
+   * ```
    */
   public attach(
     fileName: string,
@@ -191,7 +238,16 @@ export class Document {
 
   // ─── Element helpers ─────────────────────────────────────────────────────────
 
-  /** Adds an element to the current (last) page. */
+  /**
+   * Adds an element to the current (last) page.
+   *
+   * @example
+   * ```ts
+   * const doc = new Document();
+   * doc.add(new TextBlock('Quarterly report', { fontSize: 20 }));
+   * doc.add(new TextBlock('Prepared by Operations'));
+   * ```
+   */
   public add(element: IElement): void {
     if (this._disposed) throw new Error('Document has been disposed.');
     if (!element) throw new Error('element cannot be null.');
@@ -199,14 +255,31 @@ export class Document {
     this._pages[this._pages.length - 1].add(element);
   }
 
-  /** Adds multiple elements to the current page. */
+  /**
+   * Adds multiple elements to the current page.
+   *
+   * @example
+   * ```ts
+   * doc.addRange([new TextBlock('One'), new TextBlock('Two'), new TextBlock('Three')]);
+   * ```
+   */
   public addRange(elements: Iterable<IElement>): void {
     for (const el of elements) this.add(el);
   }
 
   // ─── Page management ─────────────────────────────────────────────────────────
 
-  /** Adds a new page using the document's default size and margin. */
+  /**
+   * Adds a new page using the document's default size and margin.
+   *
+   * @example
+   * ```ts
+   * const doc = new Document();
+   * doc.add(new TextBlock('First page'));
+   * doc.addPage(); // start a new page
+   * doc.add(new TextBlock('Second page'));
+   * ```
+   */
   public addPage(): Page;
   /**
    * Adds a new page configured by an options object (the primary form).
@@ -305,6 +378,11 @@ export class Document {
    *
    * Fully synchronous - uses the RC4 encryption path if encryption is set
    * (AES-256 encryption requires saveAsync).
+   *
+   * @example
+   * ```ts
+   * const bytes = doc.generateBytes(); // Node only
+   * ```
    */
   public generateBytes(): Uint8Array {
     ensureLicenseDeclared();
@@ -330,15 +408,26 @@ export class Document {
    *
    * Prefer this over `generateBytes()` whenever TTF font embedding is used in a
    * browser context.
+   *
+   * @example
+   * ```ts
+   * const bytes = await doc.generateBytesAsync();
+   *
+   * // Cancel with an AbortSignal:
+   * const controller = new AbortController();
+   * const pending = doc.generateBytesAsync({ signal: controller.signal });
+   * controller.abort();
+   * ```
    */
-  public async generateBytesAsync(): Promise<Uint8Array> {
+  public async generateBytesAsync(options?: GenerateOptions): Promise<Uint8Array> {
+    throwIfAborted(options?.signal);
     ensureLicenseDeclared();
     this._diagnostics.clear();
     this.applyDefaultStyleToTree();
     this.validateSettings();
     const writer = new PdfWriter(this.settings.version);
     const serializer = new PdfDocumentSerializer(this, this._diagnostics);
-    await serializer.serializeAsync(writer);
+    await serializer.serializeAsync(writer, options?.signal);
     return writer.toUint8Array();
   }
 
@@ -352,6 +441,12 @@ export class Document {
    * the visual layout matches. Embedded fonts and PNG images are preloaded
    * exactly as the async PDF path does, so this is the recommended export entry
    * point in both Node and the browser.
+   *
+   * @example
+   * ```ts
+   * const pages = await doc.generateSvgPagesAsync({ maxPages: 1 });
+   * document.body.innerHTML = pages[0];
+   * ```
    */
   public async generateSvgPagesAsync(options?: SvgPageExportOptions): Promise<string[]> {
     ensureLicenseDeclared();
@@ -391,23 +486,6 @@ export class Document {
   }
 
   /**
-   * @deprecated Use {@link generateBytes} instead. This alias exists only to
-   * mirror the C# `ToByteArray()` name and will be removed in a future major.
-   */
-  public toByteArray(): Uint8Array {
-    return this.generateBytes();
-  }
-
-  /**
-   * @deprecated Use {@link generateBytesAsync} instead. This alias exists only
-   * to mirror the C# `ToByteArrayAsync()` name and will be removed in a future
-   * major.
-   */
-  public async toByteArrayAsync(): Promise<Uint8Array> {
-    return this.generateBytesAsync();
-  }
-
-  /**
    * Saves the document to the given file path synchronously.
    * Requires a platform with synchronous file IO (Node.js via the node entry
    * point); throws in browser contexts - use saveAsync instead.
@@ -429,10 +507,16 @@ export class Document {
    * Saves the document to the given file path asynchronously via the configured
    * platform I/O. Uses the async generation path, so embedded fonts are
    * preloaded (browser-safe) and AES-256 encryption is supported.
+   *
+   * @example
+   * ```ts
+   * await doc.saveAsync('./report.pdf'); // Node; in a browser use generateBytesAsync()
+   * ```
    */
-  public async saveAsync(path: string): Promise<void> {
+  public async saveAsync(path: string, options?: GenerateOptions): Promise<void> {
     if (!path) throw new Error('path cannot be null or empty.');
-    const bytes = await this.generateBytesAsync();
+    const bytes = await this.generateBytesAsync(options);
+    throwIfAborted(options?.signal);
     await getPlatformIO().writeFile(path, bytes);
   }
 

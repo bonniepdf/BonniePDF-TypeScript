@@ -2,6 +2,7 @@ import { getPlatformIO } from '../Platform/PlatformIO';
 import type { FontFace, FontProvider } from '../Rendering/Svg/Fonts/FontFace';
 import { TrueTypeFace } from '../Rendering/Svg/Fonts/TrueTypeFace';
 import { FontFamilyResolver } from '../Typography/FontFamilyResolver';
+import { getDocumentFontBytes } from '../Typography/DocumentFontMetricScope';
 import { FontManager } from '../Typography/FontManager';
 import type { FontWeight } from '../Typography/FontWeight';
 
@@ -38,6 +39,7 @@ export class BonniePdfFontProvider implements FontProvider {
     const resolved = FontFamilyResolver.resolveKnown(family, weight as FontWeight, italic);
     if (resolved !== undefined) {
       return (
+        getDocumentFontBytes(resolved) ??
         FontManager.getBytesForStandardFont(resolved) ??
         FontManager.getBytesForIdentifier(resolved) ??
         readFile(resolved)

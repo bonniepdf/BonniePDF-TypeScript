@@ -10,23 +10,16 @@ import { toLength, type LengthInput } from '../Normalize/toLength';
  * PDF ExtGState for transparency and the cm operator for rotation.
  */
 /** Settable properties of {@link Watermark}. */
-export const WATERMARK_OPTION_KEYS = [
-  'text',
-  'fontName',
-  'fontSize',
-  'textColor',
-  'opacity',
-  'rotationDegrees',
-] as const;
+export const WATERMARK_OPTION_KEYS = ['text', 'fontName', 'fontSize', 'color', 'opacity', 'rotationDegrees'] as const;
 
 /** Options for {@link Watermark}. */
 export type WatermarkOptions = Partial<
-  Omit<Pick<Watermark, (typeof WATERMARK_OPTION_KEYS)[number]>, 'textColor' | 'fontSize'>
+  Omit<Pick<Watermark, (typeof WATERMARK_OPTION_KEYS)[number]>, 'color' | 'fontSize'>
 > & {
   /** Font size. Accepts a length: `72`, `'1cm'`, or `{ value, unit }`. */
   fontSize?: LengthInput;
   /** Text colour. Accepts a palette token (`'slate-400'`) or hex. */
-  textColor?: ColorInput;
+  color?: ColorInput;
 };
 
 /** Configures text drawn over or behind every page of a document. */
@@ -58,10 +51,10 @@ export class Watermark {
    * Color of the watermark text (default: gray-500).
    * Accepts a palette token (`'slate-400'`) or hex (`'#ff00aa'`).
    */
-  public get textColor(): Color {
+  public get color(): Color {
     return this._textColor;
   }
-  public set textColor(value: ColorInput) {
+  public set color(value: ColorInput) {
     this._textColor = toColor(value);
   }
   /**
@@ -83,7 +76,7 @@ export class Watermark {
     this.text = text;
     this.fontName = 'Helvetica';
     this.fontSize = 72;
-    this.textColor = ColorPalette.gray[500];
+    this.color = ColorPalette.gray[500];
     this.opacity = 0.15;
     this.rotationDegrees = -45;
     if (typeof textOrOptions !== 'string') {

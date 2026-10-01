@@ -15,7 +15,7 @@ import {
   applyPaintTransform,
   invertPaintTransform,
   isIdentityPaintTransform,
-  mapBox,
+  mapPaintBox,
   type PaintTransform,
 } from './PaintTransform';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
@@ -1227,7 +1227,7 @@ export class PdfCanvas implements ICanvas {
     if (!paintTransform || isIdentityPaintTransform(paintTransform)) return canvasBox;
     const inverse = invertPaintTransform(paintTransform);
     if (!inverse) return null;
-    return mapBox(inverse, canvasBox);
+    return mapPaintBox(inverse, canvasBox);
   }
 
   /** Sorts/clamps stops and pads them so the run spans the full [0, 1] domain. */

@@ -11,7 +11,12 @@ import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { FontManager, FallbackFont } from '../Typography/FontManager';
-import { recordRegistryFontInstance, recordRegistryFontPath } from '../Typography/DocumentFontMetricScope';
+import {
+  getActiveDocumentFonts,
+  getDocumentFontBytes,
+  recordRegistryFontInstance,
+  recordRegistryFontPath,
+} from '../Typography/DocumentFontMetricScope';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
@@ -121,7 +126,7 @@ export class PdfResourceRegistry {
       // Browser callers frequently preload URL fonts through FontManager. Reuse
       // those exact bytes instead of fetching the same URL again; this also lets
       // Node build-time preview generation resolve browser-rooted font URLs.
-      const registeredBytes = FontManager.getBytesForIdentifier(fontIdentifier);
+      const registeredBytes = getDocumentFontBytes(fontIdentifier) ?? FontManager.getBytesForIdentifier(fontIdentifier);
       if (registeredBytes) return this.registerEmbeddedFontFromBytes(registeredBytes, fontIdentifier);
       return this.registerEmbeddedFont(fontIdentifier);
     }
@@ -446,7 +451,9 @@ export class PdfResourceRegistry {
     // candidates (index 0 is the primary and has no FallbackFont entry).
     const candidates: ShaperFont[] = [{ fontIdentifier: primaryFontIdentifier, font: primaryFont }];
     const fallbackByIndex: (FallbackFont | undefined)[] = [undefined];
-    for (const fb of FontManager.getFallbackFonts()) {
+    // The document's own faces come first, then the global registrations (spec 16 §4).
+    const documentFallbacks = getActiveDocumentFonts()?.fallbackFonts() ?? [];
+    for (const fb of [...documentFallbacks, ...FontManager.getFallbackFonts()]) {
       if (fb.font === primaryFont) continue;
       candidates.push({ fontIdentifier: `${FALLBACK_PREFIX}${fb.key}`, font: fb.font });
       fallbackByIndex.push(fb);

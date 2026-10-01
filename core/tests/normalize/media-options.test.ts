@@ -160,7 +160,7 @@ describe('CanvasElement options (required handler)', () => {
   it('accepts the handler positionally or in the bag', () => {
     const a = new CanvasElement(handler);
     // 0 means "fill the available content width" - the shared default, matching
-    // the .NET CanvasWidth. See the element catalogue's canvas sizing rules.
+    // the .NET DrawWidth. See the element catalogue's canvas sizing rules.
     expect(a.drawWidth).toBe(0);
     expect(a.drawHeight).toBe(100);
 

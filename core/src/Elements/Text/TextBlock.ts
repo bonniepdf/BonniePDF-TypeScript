@@ -153,7 +153,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * Creates a text block configured in one expression.
    *
    * ```typescript
-   * new TextBlock({ text: 'Hello', fontSize: 11, textColor: 'slate-600' });
+   * new TextBlock({ text: 'Hello', fontSize: 11, color: 'slate-600' });
    * ```
    */
   constructor(options: TextBlockOptions);
@@ -359,7 +359,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     if (line.includes(TextElementBase.TotalPagesToken)) {
       this.drawLineWithTokens(ctx, processedLine, contentWidth, y, baseX);
       // Decorations for token lines use the measured width
-      if (this.textDecoration !== TextDecoration.None) {
+      if (this.decoration !== TextDecoration.None) {
         const lineWidth = this.measureTextWidth(processedLine);
         const alignment = this.effectiveAlignment(ctx);
         let decoX = baseX;
@@ -379,9 +379,9 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     const useJustify = alignment === TextAlignment.Justify && !isLastLine && line.includes(' ');
 
     if (useJustify) {
-      ctx.canvas.drawTextJustified(baseX, y, processedLine, this.textColor, this.fontSize, this.fontName, contentWidth);
+      ctx.canvas.drawTextJustified(baseX, y, processedLine, this.color, this.fontSize, this.fontName, contentWidth);
 
-      if (this.textDecoration !== TextDecoration.None) {
+      if (this.decoration !== TextDecoration.None) {
         this.drawDecorations(ctx, baseX, y, contentWidth);
       }
     } else {
@@ -395,9 +395,9 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
         x += contentWidth;
       }
 
-      ctx.canvas.drawText(x, y, processedLine, this.textColor, this.fontSize, this.fontName, effectiveAlign);
+      ctx.canvas.drawText(x, y, processedLine, this.color, this.fontSize, this.fontName, effectiveAlign);
 
-      if (this.textDecoration !== TextDecoration.None) {
+      if (this.decoration !== TextDecoration.None) {
         const lineWidth = this.measureTextWidth(processedLine);
         let decoX = baseX;
         if (effectiveAlign === TextAlignment.Center) {
@@ -417,14 +417,14 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     // Line thickness scales with font size (typical: 1/18th of font size, min 0.5pt)
     // unless an explicit decorationThickness is set.
     const thickness = this.decorationThickness ?? Math.max(0.5, this.fontSize / 18);
-    const color = this.decorationColor ?? this.textColor;
+    const color = this.decorationColor ?? this.color;
 
-    if ((this.textDecoration & TextDecoration.Overline) !== 0) {
+    if ((this.decoration & TextDecoration.Overline) !== 0) {
       // Overline: drawn above the text, just over the cap height.
       paintDecorationLine(ctx.canvas, x, y + this.fontSize * 0.15, width, color, thickness, this.decorationStyle);
     }
 
-    if ((this.textDecoration & TextDecoration.Underline) !== 0) {
+    if ((this.decoration & TextDecoration.Underline) !== 0) {
       // Underline: drawn below the baseline.
       // Baseline is approximately at y + fontSize. Underline offset below baseline ~fontSize/7.
       paintDecorationLine(
@@ -438,7 +438,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       );
     }
 
-    if ((this.textDecoration & TextDecoration.Strikethrough) !== 0) {
+    if ((this.decoration & TextDecoration.Strikethrough) !== 0) {
       // Strikethrough: drawn at approximately half the cap height.
       paintDecorationLine(ctx.canvas, x, y + this.fontSize * 0.55, width, color, thickness, this.decorationStyle);
     }
@@ -466,7 +466,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       const part = parts[i];
       if (part !== '') {
         // Draw normal text
-        ctx.canvas.drawText(currentX, y, part, this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+        ctx.canvas.drawText(currentX, y, part, this.color, this.fontSize, this.fontName, TextAlignment.Left);
         currentX += this.measureTextWidth(part);
       }
 
@@ -478,12 +478,12 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
         if (ctx.isSvgMode) {
           const svgCanvas = ctx.canvas as SvgCanvas;
           if (typeof svgCanvas.drawDeferredTotalPages === 'function') {
-            svgCanvas.drawDeferredTotalPages(currentX, y, this.textColor, this.fontSize, this.fontName);
+            svgCanvas.drawDeferredTotalPages(currentX, y, this.color, this.fontSize, this.fontName);
           } else {
-            ctx.canvas.drawText(currentX, y, '00', this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+            ctx.canvas.drawText(currentX, y, '00', this.color, this.fontSize, this.fontName, TextAlignment.Left);
           }
         } else {
-          const resourceName = ctx.registerDeferredXObject(this.fontName, this.fontSize, this.textColor);
+          const resourceName = ctx.registerDeferredXObject(this.fontName, this.fontSize, this.color);
           // DrawFormXObject draws at x, y (top-left of form)
           ctx.canvas.drawFormXObject(resourceName, currentX, y);
         }

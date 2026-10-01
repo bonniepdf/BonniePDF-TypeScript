@@ -130,6 +130,7 @@ export interface ICanvas {
   /**
    * The number of drawing operations recorded so far: a position in the page's content. Optional; a
    * canvas that does not keep an ordered operation list omits it.
+   * @internal
    */
   streamLength?(): number;
 
@@ -137,6 +138,7 @@ export interface ICanvas {
    * Moves the operations recorded since `from` to position `to` (earlier in the content), so something
    * drawn after other content, such as a box whose height was only known once its child rendered, sits
    * behind it. Optional, with `streamLength`.
+   * @internal
    */
   moveTail?(from: number, to: number): void;
 

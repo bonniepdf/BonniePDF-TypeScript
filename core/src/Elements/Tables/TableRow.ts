@@ -14,7 +14,7 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 /** Settable properties declared by {@link TableRow} itself. */
 export const TABLE_ROW_OPTION_KEYS = [
   'cells',
-  'textColor',
+  'color',
   'padding',
   'isHeader',
   'isFooter',
@@ -26,12 +26,12 @@ type TableRowKey = (typeof TABLE_ROW_OPTION_KEYS)[number];
 
 /** Options for {@link TableRow}. */
 export type TableRowOptions = Partial<
-  Omit<Pick<TableRow, TableRowKey>, 'textColor' | 'padding' | 'backgroundColor' | 'minHeight'>
+  Omit<Pick<TableRow, TableRowKey>, 'color' | 'padding' | 'backgroundColor' | 'minHeight'>
 > & {
   /** Minimum row height. Accepts a length: `24`, `'1cm'`, or `{ value, unit }`. */
   minHeight?: LengthInput;
   /** Row text colour. Accepts a palette token or hex. */
-  textColor?: ColorInput;
+  color?: ColorInput;
   /** Row padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
   padding?: ThicknessInput;
   /** Row fill. Accepts a palette token or hex. */
@@ -52,10 +52,10 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   private _textColor?: Color;
 
   /** Row text colour. Accepts a palette token or hex. */
-  public get textColor(): Color | undefined {
+  public get color(): Color | undefined {
     return this._textColor;
   }
-  public set textColor(value: ColorInput | undefined) {
+  public set color(value: ColorInput | undefined) {
     this._textColor = value === undefined ? undefined : toColor(value);
   }
 
@@ -166,24 +166,16 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /**
    * Sets the text color for this row
    */
-  public withTextColor(color: Color): TableRow {
-    this.textColor = color;
+  public withColor(color: Color): TableRow {
+    this.color = color;
     return this;
   }
 
   /**
-   * Sets the padding for this row
+   * Sets the padding for this row: a number (all sides), a `[horizontal, vertical]` pair, or a per-side object.
    */
-  public withPadding(padding: number): TableRow {
-    this.padding = new Thickness(padding);
-    return this;
-  }
-
-  /**
-   * Sets the padding for this row with individual values
-   */
-  public withPadding4(left: number, top: number, right: number, bottom: number): TableRow {
-    this.padding = new Thickness(left, top, right, bottom);
+  public withPadding(padding: ThicknessInput): TableRow {
+    this.padding = toThickness(padding);
     return this;
   }
 

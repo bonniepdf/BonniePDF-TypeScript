@@ -54,7 +54,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     h1.level = 1;
     h1.fontName = StandardFonts.HelveticaBold;
     h1.fontSize = 24;
-    h1.textColor = ColorPalette.slate[800];
+    h1.color = ColorPalette.slate[800];
     h1.margin = new Thickness(0, 0, 0, 12);
     d.add(h1);
 
@@ -62,7 +62,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     p1.text = 'This document opts into PDF/UA-1 tagging by setting Settings.Accessibility = AccessibilityMode.PdfUa1.';
     p1.fontName = StandardFonts.Helvetica;
     p1.fontSize = 12;
-    p1.textColor = ColorPalette.slate[700];
+    p1.color = ColorPalette.slate[700];
     p1.margin = new Thickness(0, 0, 0, 8);
     d.add(p1);
 
@@ -70,7 +70,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     p2.text = 'Existing elements tag themselves automatically - no semantic verbs required.';
     p2.fontName = StandardFonts.Helvetica;
     p2.fontSize = 12;
-    p2.textColor = ColorPalette.slate[700];
+    p2.color = ColorPalette.slate[700];
     p2.margin = new Thickness(0, 0, 0, 12);
     d.add(p2);
 
@@ -79,7 +79,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     h2.level = 2;
     h2.fontName = StandardFonts.HelveticaBold;
     h2.fontSize = 16;
-    h2.textColor = ColorPalette.slate[800];
+    h2.color = ColorPalette.slate[800];
     h2.margin = new Thickness(0, 0, 0, 8);
     d.add(h2);
 

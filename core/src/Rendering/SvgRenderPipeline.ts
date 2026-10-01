@@ -256,7 +256,7 @@ export class SvgRenderPipeline {
 
     const cx = pageWidth / 2;
     const cy = pageHeight / 2;
-    const hex = wm.textColor.toHexString();
+    const hex = wm.color.toHexString();
     const text = escapeXml(wm.text);
 
     // rotate() in SVG is clockwise-positive; the layout model treats positive as

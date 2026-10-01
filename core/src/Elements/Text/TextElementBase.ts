@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
+import { getActiveDocumentFonts } from '../../Typography/DocumentFontMetricScope';
 import { FontWeight } from '../../Typography/FontWeight';
 import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
@@ -49,6 +50,11 @@ export abstract class TextElementBase extends ElementBase {
    * defaultTextStyle cascade will not override it.
    */
   public get fontName(): string {
+    // While a document with its own fonts is being generated, a family is resolved
+    // against them (spec 16 §4). Otherwise the name resolved when the family was set stands.
+    if (this._fontFamily !== undefined && getActiveDocumentFonts()) {
+      return FontFamilyResolver.resolve(this._fontFamily, this._fontWeight, this._italic);
+    }
     return this._fontName;
   }
   public set fontName(value: string) {
@@ -86,10 +92,10 @@ export abstract class TextElementBase extends ElementBase {
    * Text color for rendering. Defaults to black if not set.
    * Setting this marks the property as explicitly set, preventing cascade override.
    */
-  public get textColor(): Color {
+  public get color(): Color {
     return this._textColor ?? Color.black;
   }
-  public set textColor(value: ColorInput) {
+  public set color(value: ColorInput) {
     this._textColor = toColor(value);
   }
 
@@ -97,17 +103,17 @@ export abstract class TextElementBase extends ElementBase {
    * Text decoration (underline, strikethrough, overline, or a combination).
    * Defaults to None if not set.
    */
-  public get textDecoration(): TextDecoration {
+  public get decoration(): TextDecoration {
     return this._textDecoration ?? TextDecoration.None;
   }
-  public set textDecoration(value: TextDecorationInput) {
+  public set decoration(value: TextDecorationInput) {
     this._textDecoration = toTextDecoration(value);
   }
 
   private _decorationColor?: Color;
 
   /**
-   * Colour of the decoration lines. Undefined = use {@link textColor}, the default.
+   * Colour of the decoration lines. Undefined = use {@link color}, the default.
    */
   public get decorationColor(): Color | undefined {
     return this._decorationColor;
@@ -275,10 +281,10 @@ export abstract class TextElementBase extends ElementBase {
       this.fontSize = style.fontSize;
     }
     if (style.color !== undefined) {
-      this.textColor = style.color;
+      this.color = style.color;
     }
     if (style.decoration !== TextDecoration.None) {
-      this.textDecoration = style.decoration;
+      this.decoration = style.decoration;
     }
   }
 

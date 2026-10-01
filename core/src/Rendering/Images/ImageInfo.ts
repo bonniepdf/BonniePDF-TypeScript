@@ -61,10 +61,14 @@ export class ImageInfo {
    * JFIF APP0 (when units = 1 or 2) and from PNG `pHYs` chunks.  Zero when
    * the source carries no density information; the layout engine then
    * treats one source pixel as one PDF point (the historical default).
+   * @internal
    */
   public dpiX: number = 0;
 
-  /** Vertical pixel density, in pixels per inch.  See {@link dpiX}. */
+  /**
+   * Vertical pixel density, in pixels per inch.  See {@link dpiX}.
+   * @internal
+   */
   public dpiY: number = 0;
 
   /**

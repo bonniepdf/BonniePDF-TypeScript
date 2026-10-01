@@ -1,3 +1,5 @@
+import { BonniePdfError } from '../../Core/BonniePdfError';
+
 /**
  * The 1D barcode symbologies supported natively by BonniePDF. These four
  * cover retail (EAN-13, UPC-A) and logistics (Code 128, ITF-14) across the
@@ -19,7 +21,7 @@ export enum BarcodeSymbology {
  * Raised when a value cannot be encoded in the requested {@link BarcodeSymbology}
  * (wrong length, invalid characters, etc.).
  */
-export class BarcodeContentException extends Error {
+export class BarcodeContentException extends BonniePdfError {
   /** The symbology that rejected the value. */
   public readonly symbology: BarcodeSymbology;
 

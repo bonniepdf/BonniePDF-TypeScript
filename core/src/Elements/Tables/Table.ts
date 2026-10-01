@@ -129,7 +129,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private readonly columnWeights: number[];
   private readonly footers: TableRow[] = [];
   private readonly headers: TableRow[] = [];
-  private readonly rows: TableRow[] = [];
+  private readonly _rows: TableRow[] = [];
 
   // State tracking for multipage rendering
   private lastRowRendered = -1;
@@ -255,7 +255,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this._rowTextColor = value === undefined ? undefined : toColor(value);
   }
 
-  /** Adds a header row to the table. */
+  /**
+   * Adds a header row to the table.
+   *
+   * @example
+   * ```ts
+   * table.addHeader(new TextBlock('Item'), new TextBlock('Qty'), new TextBlock('Price'));
+   * ```
+   */
   public addHeader(...elements: IElement[]): void;
   public addHeader(cells: TableCell[]): void;
   public addHeader(row: TableRow): void;
@@ -267,7 +274,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this.headers.push(row);
   }
 
-  /** Adds a footer row to the table. */
+  /**
+   * Adds a footer row to the table.
+   *
+   * @example
+   * ```ts
+   * table.addFooter(new TextBlock('Total'), new TextBlock('4'), new TextBlock('£48.00'));
+   * ```
+   */
   public addFooter(...elements: IElement[]): void;
   public addFooter(cells: TableCell[]): void;
   public addFooter(row: TableRow): void;
@@ -277,13 +291,20 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this.footers.push(row);
   }
 
-  /** Adds a data row to the table. */
+  /**
+   * Adds a data row to the table.
+   *
+   * @example
+   * ```ts
+   * table.addRow(new TextBlock('Widget'), new TextBlock('4'), new TextBlock('£12.00'));
+   * ```
+   */
   public addRow(...elements: IElement[]): void;
   public addRow(cells: TableCell[]): void;
   public addRow(row: TableRow): void;
   public addRow(...args: Array<IElement | TableCell[] | TableRow>): void {
     const row = this.createRowFromArgs(args);
-    this.rows.push(row);
+    this._rows.push(row);
   }
 
   private createRowFromArgs(args: Array<IElement | TableCell[] | TableRow>): TableRow {
@@ -300,9 +321,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     return TableRow.fromElements(...(args as IElement[]));
   }
 
+  /** The body rows, in order: not the header or footer rows (see {@link getAllRows}). Add rows with {@link addRow}. */
+  public get rows(): ReadonlyArray<TableRow> {
+    return this._rows;
+  }
+
   /** Returns all rows (headers + data rows + footers) for tree-walking. */
   public getAllRows(): ReadonlyArray<TableRow> {
-    return [...this.headers, ...this.rows, ...this.footers];
+    return [...this.headers, ...this._rows, ...this.footers];
   }
 
   /** @inheritdoc - every cell's content across headers, body rows, and footers. */
@@ -383,7 +409,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Start from the next unrendered row
     const startRow = this.lastRowRendered + 1;
 
-    if (startRow >= this.rows.length) {
+    if (startRow >= this._rows.length) {
       this.renderFootersGrouped(ctx, widths, tagging);
       ctx.currentY += this.margin.bottom;
       return RenderStatus.Complete;
@@ -391,8 +417,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     // Render data rows
     let tbodyOpen = false;
-    for (let i = startRow; i < this.rows.length; i++) {
-      const row = this.rows[i];
+    for (let i = startRow; i < this._rows.length; i++) {
+      const row = this._rows[i];
       const rowHeight = this.measureRowHeight(row, widths);
 
       // Pagination check
@@ -414,7 +440,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     this.renderFootersGrouped(ctx, widths, tagging);
     ctx.currentY += this.margin.bottom;
-    this.lastRowRendered = this.rows.length - 1;
+    this.lastRowRendered = this._rows.length - 1;
     return RenderStatus.Complete;
   }
 
@@ -547,7 +573,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     }
 
     // Data rows
-    for (const row of this.rows) {
+    for (const row of this._rows) {
       totalHeight += this.measureRowHeight(row, widths);
     }
 
@@ -597,10 +623,10 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     }
 
     // Render data rows - grouped under TBody.
-    if (this.rows.length > 0) {
+    if (this._rows.length > 0) {
       if (groupTagging) tagging!.tree.begin(SemanticRole.TBody);
       try {
-        for (const row of this.rows) {
+        for (const row of this._rows) {
           const rowHeight = this.measureRowHeight(row, widths);
 
           // Pagination check
@@ -723,8 +749,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     if (bgColor) ctx.layoutRecorder?.annotatePaint(cell, paintForBackground(bgColor));
 
     const textColor =
-      cell.textColor ??
-      row.textColor ??
+      cell.color ??
+      row.color ??
       (row.isHeader ? this.headerTextColor : undefined) ??
       (row.isFooter ? this.footerTextColor : undefined) ??
       this.rowTextColor;
@@ -739,7 +765,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       tb.text = content.text;
       tb.fontName = content.fontName;
       tb.fontSize = content.fontSize;
-      tb.textColor = textColor;
+      tb.color = textColor;
       tb.alignment = content.alignment;
       content = tb;
     }
@@ -914,7 +940,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private columnCount(): number {
     let columns = this.columnWeights.length;
 
-    for (const row of [...this.headers, ...this.rows, ...this.footers]) {
+    for (const row of [...this.headers, ...this._rows, ...this.footers]) {
       let spanned = 0;
       for (const cell of row.cells) spanned += Math.max(1, cell.columnSpan);
       if (spanned > columns) columns = spanned;

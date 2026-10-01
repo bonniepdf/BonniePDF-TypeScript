@@ -14,8 +14,8 @@ export const TEXT_ELEMENT_OWN_OPTION_KEYS = [
   'fontWeight',
   'italic',
   'fontSize',
-  'textColor',
-  'textDecoration',
+  'color',
+  'decoration',
   'decorationColor',
   'decorationThickness',
   'decorationStyle',
@@ -32,8 +32,8 @@ type TextElementOwnKey = (typeof TEXT_ELEMENT_OWN_OPTION_KEYS)[number];
 /** Keys whose accepted input is wider than the stored type (asymmetric accessor). */
 type TextElementWidenedKey =
   | 'fontWeight'
-  | 'textColor'
-  | 'textDecoration'
+  | 'color'
+  | 'decoration'
   | 'decorationColor'
   | 'decorationStyle'
   | 'fontSize'
@@ -66,9 +66,9 @@ export type TextElementOptions = ElementOptions &
     /** Font weight. Accepts `'bold'`, `'semi-bold'`, … or the numeric value. */
     fontWeight?: FontWeightInput;
     /** Text colour. Accepts a palette token (`'slate-800'`) or hex (`'#ff00aa'`). */
-    textColor?: ColorInput;
+    color?: ColorInput;
     /** Decoration. Accepts one token or a list: `['underline', 'overline']`. */
-    textDecoration?: TextDecorationInput;
+    decoration?: TextDecorationInput;
     /** Decoration line colour. Accepts a palette token or hex. */
     decorationColor?: ColorInput;
     /** Decoration line style. Accepts `'solid' | 'wavy' | 'dashed' | 'dotted'`. */

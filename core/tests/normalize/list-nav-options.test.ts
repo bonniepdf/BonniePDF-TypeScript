@@ -40,14 +40,14 @@ describe('List options (09a Phase 2.H)', () => {
       numberFormat: 'upper-roman',
       startNumber: 5,
       fontSize: 11,
-      textColor: 'slate-700',
+      color: 'slate-700',
       indent: 24,
       items: ['a', 'b', 'c'],
     });
     expect(l.numberFormat).toBe(NumberFormat.UpperRoman);
     expect(l.startNumber).toBe(5);
     expect(l.fontSize).toBe(11);
-    expect(l.textColor).toBe(ColorPalette.slate[700]);
+    expect(l.color).toBe(ColorPalette.slate[700]);
     expect(l.indent).toBe(24);
     // items added through addItem — assert via getChildren-independent height > 0
     expect(l.measureHeight(400)).toBeGreaterThan(0);
@@ -67,9 +67,9 @@ describe('List options (09a Phase 2.H)', () => {
     expect(l.itemSpacing).toBe(8);
   });
 
-  it('bulletColor now accepts tokens (Phase 2.H widening) and defaults to textColor', () => {
-    const l = new UnorderedList({ textColor: 'indigo-700' });
-    expect(l.bulletColor).toBe(ColorPalette.indigo[700]); // falls back to textColor
+  it('bulletColor now accepts tokens (Phase 2.H widening) and defaults to color', () => {
+    const l = new UnorderedList({ color: 'indigo-700' });
+    expect(l.bulletColor).toBe(ColorPalette.indigo[700]); // falls back to color
     l.bulletColor = '#123456';
     expect(l.bulletColor).not.toBe(ColorPalette.indigo[700]);
   });
@@ -90,9 +90,9 @@ describe('Hyperlink / SectionLink options (required text)', () => {
     expect(new Hyperlink('click').text).toBe('click');
     expect(new Hyperlink('click', 'https://x.dev').uri).toBe('https://x.dev');
 
-    const h = new Hyperlink('click', 'https://x.dev', { textColor: 'blue-600', fontSize: 10, margin: { bottom: 2 } });
+    const h = new Hyperlink('click', 'https://x.dev', { color: 'blue-600', fontSize: 10, margin: { bottom: 2 } });
     expect(h.uri).toBe('https://x.dev');
-    expect(h.textColor).toBe(ColorPalette.blue[600]);
+    expect(h.color).toBe(ColorPalette.blue[600]);
     expect(h.fontSize).toBe(10);
     expect(h.margin).toEqual(new Thickness(0, 0, 0, 2));
 
@@ -108,10 +108,10 @@ describe('Hyperlink / SectionLink options (required text)', () => {
   });
 
   it('SectionLink keeps positional and validates anchorTarget', () => {
-    const s = new SectionLink('See ch.1', 'ch1', { textColor: 'blue-700' });
+    const s = new SectionLink('See ch.1', 'ch1', { color: 'blue-700' });
     expect(s.text).toBe('See ch.1');
     expect(s.anchorTarget).toBe('ch1');
-    expect(s.textColor).toBe(ColorPalette.blue[700]);
+    expect(s.color).toBe(ColorPalette.blue[700]);
 
     const o = new SectionLink({ text: 'See ch.1', anchorTarget: 'ch1' });
     expect(o.anchorTarget).toBe('ch1');
@@ -133,12 +133,12 @@ describe('VisualToc options', () => {
     const toc = new VisualToc({
       headingIdentifiers: ['intro', 'methods'],
       fontSize: 13,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { top: 4 },
     });
     expect(toc.headingIdentifiers).toEqual(['intro', 'methods']);
     expect(toc.fontSize).toBe(13);
-    expect(toc.textColor).toBe(ColorPalette.slate[800]);
+    expect(toc.color).toBe(ColorPalette.slate[800]);
     expect(toc.margin).toEqual(new Thickness(0, 4, 0, 0));
   });
 

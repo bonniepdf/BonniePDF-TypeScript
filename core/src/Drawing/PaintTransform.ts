@@ -77,7 +77,7 @@ export function applyPaintTransform(
  * A rotated or sheared transform turns a rectangle into a parallelogram, so the
  * containing box is what a `/BBox` needs.
  */
-export function mapBox(
+export function mapPaintBox(
   transform: PaintTransform,
   box: readonly [number, number, number, number]
 ): [number, number, number, number] {

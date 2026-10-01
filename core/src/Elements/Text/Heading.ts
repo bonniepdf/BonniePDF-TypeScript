@@ -75,7 +75,7 @@ export class Heading extends TextBlock implements IStatefulElement {
    * Creates a heading configured in one expression.
    *
    * ```typescript
-   * new Heading({ text: 'Hello', level: 1, fontSize: 24, textColor: 'slate-800' });
+   * new Heading({ text: 'Hello', level: 1, fontSize: 24, color: 'slate-800' });
    * ```
    */
   constructor(options: HeadingOptions);

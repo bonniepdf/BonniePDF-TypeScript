@@ -23,18 +23,18 @@ import { toLength, type LengthInput } from '../../Normalize/toLength';
  * tables of contents flow naturally across page boundaries.
  */
 /** Settable properties declared by {@link VisualToc} itself. */
-export const VISUAL_TOC_OWN_OPTION_KEYS = ['headingIdentifiers', 'fontName', 'fontSize', 'textColor'] as const;
+export const VISUAL_TOC_OWN_OPTION_KEYS = ['headingIdentifiers', 'fontName', 'fontSize', 'color'] as const;
 
 /** The full settable surface, base included. */
 export const VISUAL_TOC_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...VISUAL_TOC_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link VisualToc}. */
 export type VisualTocOptions = ElementOptions &
-  Partial<Omit<Pick<VisualToc, (typeof VISUAL_TOC_OWN_OPTION_KEYS)[number]>, 'textColor' | 'fontSize'>> & {
+  Partial<Omit<Pick<VisualToc, (typeof VISUAL_TOC_OWN_OPTION_KEYS)[number]>, 'color' | 'fontSize'>> & {
     /** Entry font size. Accepts a length: `12`, `'12pt'`, or `{ value, unit }`. */
     fontSize?: LengthInput;
     /** Entry text colour. Accepts a palette token or hex. */
-    textColor?: ColorInput;
+    color?: ColorInput;
   };
 
 /** Renders a table of contents from headings collected during document layout. */
@@ -81,10 +81,10 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
   private _textColor: Color = Color.black;
 
   /** Entry text colour. Accepts a palette token or hex. */
-  public get textColor(): Color {
+  public get color(): Color {
     return this._textColor;
   }
-  public set textColor(value: ColorInput) {
+  public set color(value: ColorInput) {
     this._textColor = toColor(value);
   }
 
@@ -213,12 +213,12 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     }
 
     // Draw heading text
-    ctx.canvas.drawText(ctx.currentX, y, identifier, this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+    ctx.canvas.drawText(ctx.currentX, y, identifier, this.color, this.fontSize, this.fontName, TextAlignment.Left);
 
     // Draw page number
     const pageNumWidth = FontMetrics.getStringWidth(pageNumStr, this.fontName, this.fontSize);
     const pageNumX = ctx.currentX + contentWidth - pageNumWidth;
-    ctx.canvas.drawText(pageNumX, y, pageNumStr, this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+    ctx.canvas.drawText(pageNumX, y, pageNumStr, this.color, this.fontSize, this.fontName, TextAlignment.Left);
 
     // Draw dotted leader
     const textWidth = FontMetrics.getStringWidth(identifier, this.fontName, this.fontSize);
@@ -230,7 +230,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
       const dotWidth = FontMetrics.getStringWidth(dot, this.fontName, this.fontSize);
       let currentDotX = startDotX;
       while (currentDotX + dotWidth <= endDotX) {
-        ctx.canvas.drawText(currentDotX, y, dot, this.textColor, this.fontSize, this.fontName, TextAlignment.Left);
+        ctx.canvas.drawText(currentDotX, y, dot, this.color, this.fontSize, this.fontName, TextAlignment.Left);
         currentDotX += dotWidth * 2; // Spacing between dots
       }
     }

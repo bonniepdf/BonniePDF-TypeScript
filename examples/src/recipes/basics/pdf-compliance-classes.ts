@@ -30,7 +30,7 @@ export function generate(): Document {
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[900];
+  title.color = ColorPalette.slate[900];
   title.margin = new Thickness(0, 0, 0, 8);
   doc.add(title);
 
@@ -38,7 +38,7 @@ export function generate(): Document {
     'BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.'
   );
   intro.fontSize = 11;
-  intro.textColor = ColorPalette.slate[600];
+  intro.color = ColorPalette.slate[600];
   intro.margin = new Thickness(0, 0, 0, 12);
   doc.add(intro);
 
@@ -52,7 +52,7 @@ export function generate(): Document {
   settingsHeading.level = 2;
   settingsHeading.fontName = StandardFonts.HelveticaBold;
   settingsHeading.fontSize = 15;
-  settingsHeading.textColor = ColorPalette.slate[800];
+  settingsHeading.color = ColorPalette.slate[800];
   settingsHeading.margin = new Thickness(0, 0, 0, 5);
   doc.add(settingsHeading);
 
@@ -61,7 +61,7 @@ export function generate(): Document {
   settingsList.addItem('accessibility: pdf/ua-1 - emits tagged structure for assistive technology.');
   settingsList.addItem('language: en-GB - declares the document language for screen readers.');
   settingsList.fontSize = 10;
-  settingsList.textColor = ColorPalette.slate[700];
+  settingsList.color = ColorPalette.slate[700];
   settingsList.bulletColor = ColorPalette.blue[600];
   settingsList.itemSpacing = 5;
   settingsList.margin = new Thickness(0, 0, 0, 14);
@@ -71,7 +71,7 @@ export function generate(): Document {
   engineHeading.level = 2;
   engineHeading.fontName = StandardFonts.HelveticaBold;
   engineHeading.fontSize = 15;
-  engineHeading.textColor = ColorPalette.slate[800];
+  engineHeading.color = ColorPalette.slate[800];
   engineHeading.margin = new Thickness(0, 0, 0, 5);
   doc.add(engineHeading);
 
@@ -79,7 +79,7 @@ export function generate(): Document {
     'BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and resource checks that keep the conformance claim accurate.'
   );
   engineBody.fontSize = 10;
-  engineBody.textColor = ColorPalette.slate[700];
+  engineBody.color = ColorPalette.slate[700];
   engineBody.margin = new Thickness(0, 0, 0, 8);
   doc.add(engineBody);
 
@@ -87,7 +87,7 @@ export function generate(): Document {
     'The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.'
   );
   authorBody.fontSize = 10;
-  authorBody.textColor = ColorPalette.slate[700];
+  authorBody.color = ColorPalette.slate[700];
   authorBody.margin = new Thickness(0, 0, 0, 16);
   doc.add(authorBody);
 
@@ -101,7 +101,7 @@ export function generate(): Document {
   );
   legacy.fontName = StandardFonts.HelveticaOblique;
   legacy.fontSize = 9;
-  legacy.textColor = ColorPalette.slate[500];
+  legacy.color = ColorPalette.slate[500];
   doc.add(legacy);
 
   return doc;

@@ -42,7 +42,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 6 },
     })
   );
@@ -111,7 +111,7 @@ export function generate(): Document {
       height: 60,
       backgroundColor: 'amber-400',
       padding: 6,
-      child: new TextBlock('Image 100x60', { fontSize: 10, textColor: 'amber-900', alignment: 'center' }),
+      child: new TextBlock('Image 100x60', { fontSize: 10, color: 'amber-900', alignment: 'center' }),
     })
   );
 
@@ -160,7 +160,7 @@ export function generate(): Document {
             backgroundColor: bg,
             padding: 8,
             margin: topMargin ? { top: 5 } : undefined,
-            child: new TextBlock(text, { fontSize: 10, textColor: fg }),
+            child: new TextBlock(text, { fontSize: 10, color: fg }),
           })
       ),
     })
@@ -171,7 +171,7 @@ export function generate(): Document {
     new TextBlock(
       'Note: adjacent margins stack additively - this engine does not collapse them the way CSS does, ' +
         'so a 12pt bottom margin above an 8pt top margin leaves a 20pt gap.',
-      { fontName: StandardFonts.HelveticaOblique, fontSize: 10, textColor: 'slate-500' }
+      { fontName: StandardFonts.HelveticaOblique, fontSize: 10, color: 'slate-500' }
     )
   );
 
@@ -185,7 +185,7 @@ function sectionHeading(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: 'slate-700',
+    color: 'slate-700',
     margin: { top: 8, bottom: 4 },
   });
 }
@@ -195,9 +195,9 @@ function comparisonColumn(heading: string, caption: string, demo: Container): Ve
   return new VerticalStack({
     spacing: 4,
     children: [
-      new TextBlock(heading, { fontName: StandardFonts.HelveticaBold, fontSize: 10, textColor: 'slate-700' }),
+      new TextBlock(heading, { fontName: StandardFonts.HelveticaBold, fontSize: 10, color: 'slate-700' }),
       demo,
-      new TextBlock(caption, { fontSize: 9, textColor: 'slate-500' }),
+      new TextBlock(caption, { fontSize: 9, color: 'slate-500' }),
     ],
   });
 }
@@ -208,7 +208,7 @@ function contentChip(margin?: number): Container {
     backgroundColor: 'slate-700',
     padding: 6,
     margin,
-    child: new TextBlock('content', { fontSize: 10, textColor: 'slate-50', alignment: 'center' }),
+    child: new TextBlock('content', { fontSize: 10, color: 'slate-50', alignment: 'center' }),
   });
 }
 

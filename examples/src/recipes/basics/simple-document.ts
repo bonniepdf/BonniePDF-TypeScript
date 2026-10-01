@@ -38,7 +38,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 12 },
     })
   );
@@ -55,7 +55,7 @@ export function generate(): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'slate-700',
+      color: 'slate-700',
       margin: { bottom: 6 },
     })
   );
@@ -90,7 +90,7 @@ export function generate(): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'slate-700',
+      color: 'slate-700',
       margin: { bottom: 6 },
     })
   );
@@ -107,7 +107,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 12 },
     })
   );
@@ -123,7 +123,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 16,
-      textColor: 'slate-800',
+      color: 'slate-800',
       alignment: 'center',
       margin: { top: 50 },
     })

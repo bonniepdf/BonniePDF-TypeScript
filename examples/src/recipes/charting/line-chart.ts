@@ -31,14 +31,14 @@ export function generate(): Document {
           new TextBlock('BonniePDF - Line Chart', {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
           })
         );
         stack.add(
           new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
             alignment: 'right',
           }),
           1
@@ -56,7 +56,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Line Chart: Monthly Revenue Trends', {
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       alignment: 'center',
       margin: { bottom: 8 },
     })
@@ -65,7 +65,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Connected data points with markers and value labels', {
       fontSize: 14,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
       margin: { bottom: 20 },
     })

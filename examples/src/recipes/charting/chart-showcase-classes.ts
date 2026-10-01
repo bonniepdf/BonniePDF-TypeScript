@@ -84,13 +84,13 @@ export function generate(): Document {
     const left = new TextBlock('BonniePDF Charting Examples');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
+    left.color = ColorPalette.slate[500];
     stack.add(left);
 
     const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
+    right.color = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
     stack.add(right, 1);
 
@@ -107,14 +107,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Bar Chart: Monthly Sales Report');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Vertical bars with grid lines and value labels');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -153,14 +153,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Grouped Bar Chart: Quarterly Revenue');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Comparison of three product lines across all months');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -219,14 +219,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Line Chart: Monthly Revenue Trends');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Connected data points with markers and value labels');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -270,14 +270,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Area Chart: Monthly Sales Performance');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Filled area under the line with configurable opacity');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -321,14 +321,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Stems with circular heads - clear and minimal bar alternative');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -372,14 +372,14 @@ export function generate(): Document {
   {
     const title = new TextBlock('Dot Plot Chart: Product Performance');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Circular markers positioned along a value axis');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -426,14 +426,14 @@ export function generate(): Document {
 
     const title = new TextBlock(`Pie Chart: Monthly Sales ${year}`);
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock('Donut chart with legend and total value in the centre');
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);
@@ -472,14 +472,14 @@ export function generate(): Document {
 
     const title = new TextBlock('Multi-Series Line Chart: Year-over-Year Comparison');
     title.fontSize = 24;
-    title.textColor = ColorPalette.slate[800];
+    title.color = ColorPalette.slate[800];
     title.alignment = TextAlignment.Center;
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
     const subtitle = new TextBlock(`Comparing ${year - 1} and ${year} revenue with a shared axis`);
     subtitle.fontSize = 14;
-    subtitle.textColor = ColorPalette.slate[600];
+    subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
     subtitle.margin = new Thickness(0, 0, 0, 20);
     doc.add(subtitle);

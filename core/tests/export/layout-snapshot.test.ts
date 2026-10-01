@@ -6,6 +6,7 @@ import { Hyperlink } from '../../src/Core/Hyperlink';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { LAYOUT_SNAPSHOT_VERSION, LayoutNode } from '../../src/Rendering/LayoutRecorder';
 import { markDebugSource } from '../../src/Rendering/DebugSource';
+import { pdfToText } from '../helpers/test-base';
 
 /** Depth-first walk of the snapshot tree. */
 function walk(node: LayoutNode, visit: (n: LayoutNode) => void): void {
@@ -43,6 +44,37 @@ describe('Layout snapshot capture (this feature / structure view)', () => {
     const nodes = collect(snapshot!.root).filter(n => n.type === 'TextBlock');
     expect(nodes[0].sourceId).toBe('src:test-title');
     expect(nodes[1].sourceId).toBeUndefined();
+  });
+
+  it('ignores an empty source id', async () => {
+    doc = new Document();
+    doc.add(markDebugSource(new TextBlock('Empty', { fontSize: 14, fontName: StandardFonts.Helvetica }), ''));
+
+    const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+    expect(collect(snapshot!.root).find(n => n.type === 'TextBlock')!.sourceId).toBeUndefined();
+  });
+
+  it('never lets a source id reach the PDF or the SVG', async () => {
+    const render = async (marked: boolean) => {
+      const d = new Document();
+      const text = new TextBlock('Same either way', { fontSize: 14, fontName: StandardFonts.Helvetica });
+      d.add(marked ? markDebugSource(text, 'src:only-in-the-snapshot') : text);
+      if (marked) markDebugSource(d, 'src:document');
+      const svg = (await d.generateSvgDocumentAsync({ captureLayout: true })).pages[0];
+      // The trailer's /ID is random per generation; nothing else may differ.
+      const pdf = pdfToText(await d.generateBytesAsync())
+        .replace(/\/ID \[[^\]]*\]/, '/ID []')
+        .replace(/\/(CreationDate|ModDate) \([^)]*\)/g, '');
+      d.dispose();
+      return { svg, pdf };
+    };
+
+    const plain = await render(false);
+    const marked = await render(true);
+
+    expect(marked.pdf).toBe(plain.pdf);
+    expect(marked.svg).toBe(plain.svg);
+    expect(marked.svg).not.toContain('src:');
   });
 
   it('maps the Document root and its auto-created Page to the document declaration', async () => {

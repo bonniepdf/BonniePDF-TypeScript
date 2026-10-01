@@ -25,7 +25,12 @@ export type OrderedListOptions = ListElementOptions &
 
 /** Renders a sequence of items with generated numeric or alphabetic markers. */
 export class OrderedList extends ListElementBase {
-  private readonly items: string[] = [];
+  private readonly _items: string[] = [];
+
+  /** The text items, in order, not counting nested lists. Add items with {@link addItem}. */
+  public get items(): ReadonlyArray<string> {
+    return this._items;
+  }
 
   /** Creates an ordered list, optionally configured in one expression. */
   constructor(options?: OrderedListOptions) {
@@ -52,9 +57,16 @@ export class OrderedList extends ListElementBase {
 
   /**
    * Adds a text item to this list
+   *
+   * @example
+   * ```ts
+   * const list = new OrderedList({ numberFormat: NumberFormat.LowerRoman });
+   * list.addItem('Preliminaries');
+   * list.addItem('Main text');
+   * ```
    */
   public addItem(item: string): void {
-    this.items.push(item ?? '');
+    this._items.push(item ?? '');
   }
 
   /**
@@ -70,7 +82,7 @@ export class OrderedList extends ListElementBase {
   }
 
   protected override measureContentHeight(contentWidth: number): number {
-    return this.measureListHeight(this.items, this.nestedLists, contentWidth);
+    return this.measureListHeight(this._items, this.nestedLists, contentWidth);
   }
 
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
@@ -79,7 +91,7 @@ export class OrderedList extends ListElementBase {
     let currentItemNumber = this.startNumber;
 
     // Render regular items
-    for (const item of this.items) {
+    for (const item of this._items) {
       const lines = this.computeLines(item, itemWidth);
       const numberText = this.formatNumber(currentItemNumber);
       const numberWidth = this.measureTextWidth(numberText + '.');
@@ -90,7 +102,7 @@ export class OrderedList extends ListElementBase {
         lines,
         (x, y) => {
           // Draw number
-          ctx.canvas.drawText(x, y, numberText + '.', this.textColor, this.fontSize, this.fontName, 0); // TextAlignment.Left
+          ctx.canvas.drawText(x, y, numberText + '.', this.color, this.fontSize, this.fontName, 0); // TextAlignment.Left
         },
         numberWidth
       );

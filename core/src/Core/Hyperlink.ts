@@ -31,18 +31,18 @@ export const HYPERLINK_OPTION_KEYS = [
   'targetPageIndex',
   'fontName',
   'fontSize',
-  'textColor',
+  'color',
   'margin',
 ] as const;
 
 type HyperlinkKey = (typeof HYPERLINK_OPTION_KEYS)[number];
 
 /** Options for {@link Hyperlink}. */
-export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'textColor' | 'margin' | 'fontSize'>> & {
+export type HyperlinkOptions = Partial<Omit<Pick<Hyperlink, HyperlinkKey>, 'color' | 'margin' | 'fontSize'>> & {
   /** Font size. Accepts a length: `12`, `'12pt'`, `'4mm'`, or `{ value, unit }`. */
   fontSize?: LengthInput;
   /** Link text colour. Accepts a palette token or hex. */
-  textColor?: ColorInput;
+  color?: ColorInput;
   /** Margin around the link. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
   margin?: ThicknessInput;
 };
@@ -89,10 +89,10 @@ export class Hyperlink implements IElement, IRoleProvider {
   private _textColor: Color = Color.blue;
 
   /** Link text colour. Accepts a palette token or hex on write. */
-  public get textColor(): Color {
+  public get color(): Color {
     return this._textColor;
   }
-  public set textColor(value: ColorInput) {
+  public set color(value: ColorInput) {
     this._textColor = toColor(value);
   }
   /**
@@ -173,6 +173,7 @@ export class Hyperlink implements IElement, IRoleProvider {
   /**
    * Sets the rendered bounding rectangle in PDF coordinates (bottom-left origin).
    * Called during rendering so that the annotation can be written after layout is complete.
+   * @internal
    */
   setRenderBounds(x: number, y: number, width: number, height: number): void {
     this.renderX = x;
@@ -238,7 +239,7 @@ export class Hyperlink implements IElement, IRoleProvider {
         ctx.currentX + this.margin.left,
         localY,
         line,
-        this.textColor,
+        this.color,
         this.fontSize,
         this.fontName,
         TextAlignment.Left
@@ -270,6 +271,7 @@ export class Hyperlink implements IElement, IRoleProvider {
   /**
    * Gets the PDF rectangle string for this hyperlink in the format [x1 y1 x2 y2]
    * where (x1, y1) is the bottom-left corner and (x2, y2) is the top-right corner
+   * @internal
    */
   getRectangleString(): string {
     // PDF coordinates: (0,0) is bottom-left

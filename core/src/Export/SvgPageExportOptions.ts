@@ -71,10 +71,18 @@ export interface SvgPageExportOptions {
    * view to highlight where each element landed.
    */
   captureLayout?: boolean;
+
+  /**
+   * Cancels the export. Checked before it starts and between its stages; when aborted, the promise rejects with
+   * the signal's reason.
+   */
+  signal?: AbortSignal;
 }
 
 /** Default values applied when an option is omitted. */
-export const SVG_PAGE_EXPORT_DEFAULTS: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout'>> = {
+export const SVG_PAGE_EXPORT_DEFAULTS: Required<
+  Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout' | 'signal'>
+> = {
   precision: 3,
   embedImages: 'data-uri',
   textMode: 'text',

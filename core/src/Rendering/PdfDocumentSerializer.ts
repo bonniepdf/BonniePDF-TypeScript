@@ -1,3 +1,4 @@
+import { throwIfAborted } from '../Core/throwIfAborted';
 import { Document } from '../Document';
 import { RenderContext } from './RenderContext';
 import { PdfRenderPipeline } from './PdfRenderPipeline';
@@ -65,7 +66,8 @@ export class PdfDocumentSerializer {
     const fontScope = beginDocumentFontMetricScope(
       settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
       getRegistryFontInstances(preloadedResources),
-      getRegistryFontPaths(preloadedResources)
+      getRegistryFontPaths(preloadedResources),
+      this.document.fonts
     );
     try {
       this.serializeWithinFontScope(writer, preloadedResources);
@@ -470,7 +472,8 @@ export class PdfDocumentSerializer {
    *
    * @param writer  A synchronous `IPdfWriter` or an `AsyncPdfWriter` wrapper.
    */
-  public async serializeAsync(writer: IPdfWriter | IAsyncPdfWriter): Promise<void> {
+  public async serializeAsync(writer: IPdfWriter | IAsyncPdfWriter, signal?: AbortSignal): Promise<void> {
+    throwIfAborted(signal);
     // Resolve to a synchronous IPdfWriter regardless of which variant was passed.
     const syncWriter: IPdfWriter = writer instanceof AsyncPdfWriter ? writer.syncWriter : (writer as IPdfWriter);
 
@@ -487,6 +490,7 @@ export class PdfDocumentSerializer {
       preRegistry.registerFont(path); // registers with font=null initially
     }
     await preRegistry.preloadAllFontsAsync();
+    throwIfAborted(signal);
 
     // ── Phase 2b: Async-decode any PNG images that need it ──────────────────
     // Real-world PNGs use Huffman-compressed deflate, which the sync inflater
@@ -497,11 +501,15 @@ export class PdfDocumentSerializer {
     if (imagesToDecode.length > 0) {
       await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
     }
+    throwIfAborted(signal);
 
     // ── Phase 2b': Parse SVG elements, rasterizing what needs it ────────────
     // Sequentially and in document order, so a rasterizer sees a deterministic
     // sequence of calls.
-    for (const svg of svgs) await svg.prepareAsync(this.document.svgRasterizer);
+    for (const svg of svgs) {
+      throwIfAborted(signal);
+      await svg.prepareAsync(this.document.svgRasterizer);
+    }
 
     // ── Phase 2c: Async AES-256 encryptor init ──────────────────────────────
     // AES-256 key derivation requires SubtleCrypto (async). Initialise the
@@ -511,6 +519,7 @@ export class PdfDocumentSerializer {
     if (settings2.isEncrypted && settings2.encryption!.algorithm === EncryptionAlgorithm.AES_256) {
       syncWriter.encryptor = await PdfEncryptor.create(settings2.encryption!);
     }
+    throwIfAborted(signal);
 
     // ── Phase 3: Real serialization with the pre-loaded registry ────────────
     // Only pass the registry when there are actually embedded fonts to inject -

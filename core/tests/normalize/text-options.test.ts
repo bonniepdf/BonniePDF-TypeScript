@@ -60,7 +60,7 @@ describe('TextBlock options (09a Phase 2.C)', () => {
       text: 'hello',
       alignment: 'center',
       fontSize: 11,
-      textColor: 'slate-600',
+      color: 'slate-600',
       margin: { bottom: 6 },
       maxLines: 3,
       ellipsis: '…more',
@@ -69,7 +69,7 @@ describe('TextBlock options (09a Phase 2.C)', () => {
     expect(b.text).toBe('hello');
     expect(b.alignment).toBe(TextAlignment.Center);
     expect(b.fontSize).toBe(11);
-    expect(b.textColor).toBe(ColorPalette.slate[600]);
+    expect(b.color).toBe(ColorPalette.slate[600]);
     expect(b.margin).toEqual(new Thickness(0, 0, 0, 6));
     expect(b.maxLines).toBe(3);
     expect(b.ellipsis).toBe('…more');
@@ -106,7 +106,7 @@ describe('Heading options — the deepest chain (27 properties)', () => {
       tocIdentifier: 'intro',
       anchorId: 'top',
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       fontWeight: 'bold',
       alignment: 'center',
       margin: { bottom: 12 },
@@ -116,7 +116,7 @@ describe('Heading options — the deepest chain (27 properties)', () => {
     expect(h.tocIdentifier).toBe('intro');
     expect(h.anchorId).toBe('top');
     expect(h.fontSize).toBe(24);
-    expect(h.textColor).toBe(ColorPalette.slate[800]);
+    expect(h.color).toBe(ColorPalette.slate[800]);
     expect(h.fontWeight).toBe(FontWeight.Bold);
     expect(h.alignment).toBe(TextAlignment.Center);
     expect(h.margin).toEqual(new Thickness(0, 0, 0, 12));
@@ -156,10 +156,10 @@ describe('PageNumberOf / Section — required payloads', () => {
   });
 
   it('applies inherited options alongside the payload', () => {
-    const p = new PageNumberOf('ch1', { placeholder: '--', fontSize: 8, textColor: 'gray-500' });
+    const p = new PageNumberOf('ch1', { placeholder: '--', fontSize: 8, color: 'gray-500' });
     expect(p.placeholder).toBe('--');
     expect(p.fontSize).toBe(8);
-    expect(p.textColor).toBe(ColorPalette.gray[500]);
+    expect(p.color).toBe(ColorPalette.gray[500]);
 
     const s = new Section('s1', { margin: 4 });
     expect(s.margin).toEqual(new Thickness(4));

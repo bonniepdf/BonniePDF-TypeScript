@@ -45,6 +45,17 @@ export class EncryptionOptions {
   }
 
   /**
+   * Sets both the user and the owner password to the same value.
+   * @param password - The password to use for both
+   * @returns This builder for method chaining
+   */
+  withPassword(password: string): EncryptionOptions {
+    this.settings.userPassword = password ?? '';
+    this.settings.ownerPassword = password ?? '';
+    return this;
+  }
+
+  /**
    * Sets the document permissions.
    * @param permissions - The permissions to set
    * @returns This builder for method chaining
@@ -55,109 +66,87 @@ export class EncryptionOptions {
   }
 
   /**
-   * Allows or disallows printing.
-   * @param allow - Whether to allow printing
-   * @param highQuality - Whether to allow high-quality printing
+   * Allows printing of the document.
+   * @param highQuality - Whether to also allow high-quality printing (default true)
    * @returns This builder for method chaining
    */
-  allowPrinting(allow: boolean = true, highQuality: boolean = false): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.Print;
-      if (highQuality) {
-        this.settings.permissions |= PdfPermissions.PrintHighQuality;
-      }
-    } else {
-      this.settings.permissions &= ~PdfPermissions.Print;
-      this.settings.permissions &= ~PdfPermissions.PrintHighQuality;
+  allowPrinting(highQuality: boolean = true): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.Print;
+    if (highQuality) {
+      this.settings.permissions |= PdfPermissions.PrintHighQuality;
     }
     return this;
   }
 
   /**
-   * Allows or disallows document modification.
-   * @param allow - Whether to allow modification
+   * Allows copying of text and graphics from the document.
    * @returns This builder for method chaining
    */
-  allowModification(allow: boolean = true): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.Modify;
-    } else {
-      this.settings.permissions &= ~PdfPermissions.Modify;
-    }
+  allowCopying(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.Copy;
     return this;
   }
 
   /**
-   * Allows or disallows copying text and graphics.
-   * @param allow - Whether to allow copying
+   * Allows modification of the document.
    * @returns This builder for method chaining
    */
-  allowCopying(allow: boolean = true): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.Copy;
-    } else {
-      this.settings.permissions &= ~PdfPermissions.Copy;
-    }
+  allowModification(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.Modify;
     return this;
   }
 
   /**
-   * Allows or disallows adding annotations and filling form fields.
-   * @param allow - Whether to allow annotations and form filling
+   * Allows adding and modifying annotations and filling forms.
    * @returns This builder for method chaining
    */
-  allowAnnotations(allow: boolean = true): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.AnnotateAndFillForms;
-    } else {
-      this.settings.permissions &= ~PdfPermissions.AnnotateAndFillForms;
-    }
+  allowAnnotations(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.AnnotateAndFillForms;
     return this;
   }
 
   /**
-   * Allows or disallows filling form fields.
-   * @param allow - Whether to allow form filling
+   * Allows filling of interactive form fields.
    * @returns This builder for method chaining
    */
-  allowFormFilling(allow: boolean = true): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.FillForms;
-    } else {
-      this.settings.permissions &= ~PdfPermissions.FillForms;
-    }
+  allowFormFilling(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.FillForms;
     return this;
   }
 
   /**
-   * Allows or disallows text extraction for accessibility.
-   * @param allow - Whether to allow accessibility extraction
+   * Allows document assembly (inserting, rotating and deleting pages).
    * @returns This builder for method chaining
    */
-  allowAccessibility(allow: boolean = true): EncryptionOptions {
-    if (allow) {
-      this.settings.permissions |= PdfPermissions.ExtractForAccessibility;
-    } else {
-      this.settings.permissions &= ~PdfPermissions.ExtractForAccessibility;
-    }
+  allowAssembly(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.Assemble;
     return this;
   }
 
   /**
-   * Allows all permissions.
+   * Allows text extraction for accessibility.
+   * @returns This builder for method chaining
+   */
+  allowAccessibility(): EncryptionOptions {
+    this.settings.permissions |= PdfPermissions.ExtractForAccessibility;
+    return this;
+  }
+
+  /**
+   * Denies all permissions (most restrictive). Grant back what is needed with the `allow*` methods.
+   * @returns This builder for method chaining
+   */
+  denyAll(): EncryptionOptions {
+    this.settings.permissions = PdfPermissions.None;
+    return this;
+  }
+
+  /**
+   * Grants all permissions (least restrictive, the default).
    * @returns This builder for method chaining
    */
   allowAll(): EncryptionOptions {
     this.settings.permissions = PdfPermissions.All;
-    return this;
-  }
-
-  /**
-   * Disallows all permissions.
-   * @returns This builder for method chaining
-   */
-  allowNone(): EncryptionOptions {
-    this.settings.permissions = PdfPermissions.None;
     return this;
   }
 

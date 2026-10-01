@@ -19,7 +19,7 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * A table cell with support for custom styling, background color, and padding overrides
  */
 /** Settable properties declared by {@link TableCell} itself. */
-export const TABLE_CELL_OWN_OPTION_KEYS = ['content', 'textColor', 'padding', 'columnSpan', 'isHeader'] as const;
+export const TABLE_CELL_OWN_OPTION_KEYS = ['content', 'color', 'padding', 'columnSpan', 'isHeader'] as const;
 
 /** The full settable surface of a cell, bases included. */
 export const TABLE_CELL_OPTION_KEYS = [...BORDERED_ELEMENT_OPTION_KEYS, ...TABLE_CELL_OWN_OPTION_KEYS] as const;
@@ -28,9 +28,9 @@ type TableCellOwnKey = (typeof TABLE_CELL_OWN_OPTION_KEYS)[number];
 
 /** Options for {@link TableCell}. Intersects {@link BorderedElementOptions}. */
 export type TableCellOptions = BorderedElementOptions &
-  Partial<Omit<Pick<TableCell, TableCellOwnKey>, 'textColor' | 'padding'>> & {
+  Partial<Omit<Pick<TableCell, TableCellOwnKey>, 'color' | 'padding'>> & {
     /** Cell text colour. Accepts a palette token or hex. */
-    textColor?: ColorInput;
+    color?: ColorInput;
     /** Cell padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
     padding?: ThicknessInput;
   };
@@ -50,10 +50,10 @@ export class TableCell extends BorderedElementBase implements IRoleProvider {
   private _textColor?: Color;
 
   /** Cell text colour. Accepts a palette token or hex. */
-  public get textColor(): Color | undefined {
+  public get color(): Color | undefined {
     return this._textColor;
   }
-  public set textColor(value: ColorInput | undefined) {
+  public set color(value: ColorInput | undefined) {
     this._textColor = value === undefined ? undefined : toColor(value);
   }
 
@@ -134,62 +134,36 @@ export class TableCell extends BorderedElementBase implements IRoleProvider {
    * Sets the text color for this cell
    * @param color - The text color
    */
-  public withTextColor(color: Color): TableCell {
-    this.textColor = color;
+  public withColor(color: Color): TableCell {
+    this.color = color;
     return this;
   }
 
   /**
-   * Sets the padding for this cell (uniform on all sides)
-   * @param padding - The padding value in points
+   * Sets the padding for this cell.
+   * @param padding - A number (all sides), a `[horizontal, vertical]` pair, or a per-side object
    */
-  public withPadding(padding: number): TableCell {
-    this.padding = new Thickness(padding);
+  public withPadding(padding: ThicknessInput): TableCell {
+    this.padding = toThickness(padding);
     return this;
   }
 
   /**
-   * Sets the padding for this cell with individual values
-   * @param left - Left padding
-   * @param top - Top padding
-   * @param right - Right padding
-   * @param bottom - Bottom padding
+   * Sets the border for this cell.
+   * - `withBorder(color, width = 1)`: one colour, the same width on every side
+   * - `withBorder(border, color)`: per-side widths, one colour
+   * - `withBorder(border, borderColors)`: per-side widths and colours
    */
-  public withPadding4(left: number, top: number, right: number, bottom: number): TableCell {
-    this.padding = new Thickness(left, top, right, bottom);
-    return this;
-  }
-
-  /**
-   * Sets the border for this cell (uniform color, same width on all sides)
-   * @param color - Border color
-   * @param width - Border width in points (default: 1)
-   */
-  public withBorder(color: Color, width = 1): TableCell {
-    this.border = new Border(width);
-    this.borderColors = new BorderColors(color);
-    return this;
-  }
-
-  /**
-   * Sets the border with per-side widths and colors
-   * @param border - Border widths
-   * @param borderColors - Border colors
-   */
-  public withBorderFull(border: Border, borderColors: BorderColors): TableCell {
-    this.border = border;
-    this.borderColors = borderColors;
-    return this;
-  }
-
-  /**
-   * Sets the border with per-side widths (single color)
-   * @param border - Border widths
-   * @param color - Border color (applied to all sides)
-   */
-  public withBorderAndColor(border: Border, color: Color): TableCell {
-    this.border = border;
-    this.borderColors = new BorderColors(color);
+  public withBorder(color: Color, width?: number): TableCell;
+  public withBorder(border: Border, colors: Color | BorderColors): TableCell;
+  public withBorder(first: Color | Border, second?: number | Color | BorderColors): TableCell {
+    if (first instanceof Border) {
+      this.border = first;
+      this.borderColors = second instanceof BorderColors ? second : new BorderColors(second as Color);
+    } else {
+      this.border = new Border(typeof second === 'number' ? second : 1);
+      this.borderColors = new BorderColors(first);
+    }
     return this;
   }
 

@@ -180,7 +180,7 @@ export abstract class ListElementBase extends TextElementBase {
         if (!tagging) {
           // Non-tagged: original behavior - marker drawn on every wrapped line
           renderMarker(markerX, y);
-          ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0);
+          ctx.canvas.drawText(textX, y, line, this.color, this.fontSize, this.fontName, 0);
         } else {
           if (i === 0) {
             // Lbl - list item label (drawn once, on the first line only)
@@ -196,7 +196,7 @@ export abstract class ListElementBase extends TextElementBase {
           }
           // Each wrapped line gets its own MCID, all recorded under LBody
           ctx.canvas.beginMarkedContent('LBody');
-          ctx.canvas.drawText(textX, y, line, this.textColor, this.fontSize, this.fontName, 0);
+          ctx.canvas.drawText(textX, y, line, this.color, this.fontSize, this.fontName, 0);
           ctx.canvas.endMarkedContent();
         }
 

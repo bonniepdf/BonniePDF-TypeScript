@@ -86,7 +86,7 @@ describe('TableCell / TableRow options', () => {
     const content = new TextBlock('x');
     const c = new TableCell({
       content,
-      textColor: 'slate-700',
+      color: 'slate-700',
       padding: 4,
       columnSpan: 2,
       isHeader: true,
@@ -94,7 +94,7 @@ describe('TableCell / TableRow options', () => {
       border: { width: 1, color: 'slate-300' },
     });
     expect(c.content).toBe(content);
-    expect(c.textColor).toBe(ColorPalette.slate[700]);
+    expect(c.color).toBe(ColorPalette.slate[700]);
     expect(c.padding).toEqual(new Thickness(4));
     expect(c.columnSpan).toBe(2);
     expect(c.isHeader).toBe(true);
@@ -113,14 +113,14 @@ describe('TableCell / TableRow options', () => {
 
     const r = new TableRow({
       cells,
-      textColor: 'gray-600',
+      color: 'gray-600',
       padding: { bottom: 3 },
       minHeight: 20,
       isFooter: true,
       backgroundColor: 'slate-100',
     });
     expect(r.cells).toBe(cells);
-    expect(r.textColor).toBe(ColorPalette.gray[600]);
+    expect(r.color).toBe(ColorPalette.gray[600]);
     expect(r.padding).toEqual(new Thickness(0, 0, 0, 3));
     expect(r.minHeight).toBe(20);
     expect(r.isFooter).toBe(true);

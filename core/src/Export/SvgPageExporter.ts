@@ -1,3 +1,4 @@
+import { throwIfAborted } from '../Core/throwIfAborted';
 import type { Document } from '../Document';
 import { RenderContext } from '../Rendering/RenderContext';
 import { SvgRenderPipeline, SvgPageRenderOutput } from '../Rendering/SvgRenderPipeline';
@@ -81,6 +82,7 @@ export async function exportSvgDocumentAsync(
   document: Document,
   options?: SvgPageExportOptions
 ): Promise<SvgDocumentExport> {
+  throwIfAborted(options?.signal);
   const opts = { ...SVG_PAGE_EXPORT_DEFAULTS, ...options };
 
   const settings = document.settings;
@@ -100,14 +102,19 @@ export async function exportSvgDocumentAsync(
   registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
   for (const path of embeddedPaths) registry.registerFont(path);
   await registry.preloadAllFontsAsync();
+  throwIfAborted(opts.signal);
 
   // ── Phase 2b: async-decode PNGs that need it ────────────────────────────────
   if (imagesToDecode.length > 0) {
     await Promise.all(imagesToDecode.map(img => img.prepareAsync()));
+    throwIfAborted(opts.signal);
   }
 
   // ── Phase 2c: parse SVG elements, rasterizing in document order ─────────────
-  for (const svg of svgs) await svg.prepareAsync(document.svgRasterizer);
+  for (const svg of svgs) {
+    throwIfAborted(opts.signal);
+    await svg.prepareAsync(document.svgRasterizer);
+  }
 
   // ── Phase 3: render through the SVG pipeline ────────────────────────────────
   const canvasOptions: SvgCanvasOptions = {
@@ -122,7 +129,8 @@ export async function exportSvgDocumentAsync(
   const fontScope = beginDocumentFontMetricScope(
     settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
     getRegistryFontInstances(registry),
-    getRegistryFontPaths(registry)
+    getRegistryFontPaths(registry),
+    document.fonts
   );
   try {
     // ── Two-pass TOC resolution ───────────────────────────────────────────────
@@ -277,7 +285,7 @@ function resolveTitle(document: Document, explicit?: string): string {
 /** Wraps a rendered page surface in a standalone, deterministic `<svg>` root. */
 function assemblePageSvg(
   output: SvgPageRenderOutput,
-  opts: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout'>>,
+  opts: Required<Omit<SvgPageExportOptions, 'title' | 'maxPages' | 'captureLayout' | 'signal'>>,
   title: string
 ): string {
   const w = round(output.width, opts.precision);

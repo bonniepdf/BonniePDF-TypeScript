@@ -99,6 +99,7 @@ export class EncryptionSettings {
 
   /**
    * Gets the encryption key length in bits based on the algorithm.
+   * @internal
    */
   public keyLengthValue(): number {
     switch (this.algorithm) {

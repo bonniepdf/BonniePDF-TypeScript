@@ -40,19 +40,24 @@ export interface RenderContext {
   /**
    * Optional layout-snapshot recorder; present only under opt-in `captureLayout`.
    * Typed via the concrete recorder; capture is a no-op when undefined.
+   * @internal
    */
   layoutRecorder?: LayoutRecorder;
   pageSize: { width: number; height: number };
   currentStream: string;
   registerFont(fontName: string): string;
+  /** @internal */
   resolveEmbeddedFont(fontName: string): TtfFont | null;
+  /** @internal */
   trackGlyphUsage(fontName: string, text: string): void;
+  /** @internal */
   registerHyperlink(hyperlink: RegisteredLink): void;
   newPage(): void;
   isLastPage: boolean;
   /**
    * PDF/UA tagging context, set by the concrete `Rendering/RenderContext`
    * when accessibility is on (type-only import, so no runtime cycle).
+   * @internal
    */
   tagging?: TaggingContext;
 }

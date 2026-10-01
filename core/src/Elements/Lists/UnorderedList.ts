@@ -29,7 +29,12 @@ export type UnorderedListOptions = ListElementOptions &
 
 /** Renders a sequence of items with bullet markers. */
 export class UnorderedList extends ListElementBase {
-  private readonly items: string[] = [];
+  private readonly _items: string[] = [];
+
+  /** The text items, in order, not counting nested lists. Add items with {@link addItem}. */
+  public get items(): ReadonlyArray<string> {
+    return this._items;
+  }
 
   /** Creates an unordered list, optionally configured in one expression. */
   constructor(options?: UnorderedListOptions) {
@@ -57,7 +62,7 @@ export class UnorderedList extends ListElementBase {
 
   /** Color for the bullet character */
   public get bulletColor(): Color {
-    return this._bulletColor ?? this.textColor;
+    return this._bulletColor ?? this.color;
   }
   public set bulletColor(value: ColorInput) {
     this._bulletColor = toColor(value);
@@ -69,9 +74,16 @@ export class UnorderedList extends ListElementBase {
 
   /**
    * Adds a text item to this list
+   *
+   * @example
+   * ```ts
+   * const list = new UnorderedList();
+   * list.addItem('First point');
+   * list.addItem('Second point');
+   * ```
    */
   public addItem(item: string): void {
-    this.items.push(item ?? '');
+    this._items.push(item ?? '');
   }
 
   /**
@@ -87,14 +99,14 @@ export class UnorderedList extends ListElementBase {
   }
 
   protected override measureContentHeight(contentWidth: number): number {
-    return this.measureListHeight(this.items, this.nestedLists, contentWidth);
+    return this.measureListHeight(this._items, this.nestedLists, contentWidth);
   }
 
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
     const itemWidth = contentWidth - this.indent;
 
     // Render regular items
-    for (const item of this.items) {
+    for (const item of this._items) {
       const lines = this.computeLines(item, itemWidth);
       const bulletWidth = this.measureTextWidth(this.bulletChar);
 

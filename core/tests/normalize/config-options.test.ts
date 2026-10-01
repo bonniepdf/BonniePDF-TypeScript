@@ -42,13 +42,13 @@ describe('simple config classes (09a Phase 2.D)', () => {
     expect(new Watermark('DRAFT').text).toBe('DRAFT');
     const w = new Watermark({
       text: 'CONFIDENTIAL',
-      textColor: 'rose-500',
+      color: 'rose-500',
       opacity: 0.3,
       rotationDegrees: -30,
       fontSize: 60,
     });
     expect(w.text).toBe('CONFIDENTIAL');
-    expect(w.textColor).toBe(ColorPalette.rose[500]);
+    expect(w.color).toBe(ColorPalette.rose[500]);
     expect(w.opacity).toBe(0.3);
     expect(w.rotationDegrees).toBe(-30);
     expect(w.fontSize).toBe(60);
@@ -169,7 +169,7 @@ describe('DocumentSettings options', () => {
 
   it('coerces nested settings from literals into canonical instances', () => {
     const s = new DocumentSettings({
-      watermark: { text: 'DRAFT', textColor: 'gray-400' },
+      watermark: { text: 'DRAFT', color: 'gray-400' },
       encryption: { userPassword: 'pw' },
       pageLabel: { style: 'uppercase-roman', startAt: 1 },
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },

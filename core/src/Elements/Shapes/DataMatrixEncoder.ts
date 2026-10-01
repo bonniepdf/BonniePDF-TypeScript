@@ -1,3 +1,5 @@
+import { BonniePdfError } from '../../Core/BonniePdfError';
+
 /**
  * Data Matrix (ECC200) encoder.
  *
@@ -14,7 +16,7 @@
  */
 
 /** Thrown when a message cannot fit in the largest Data Matrix symbol. */
-export class DataMatrixContentException extends Error {
+export class DataMatrixContentException extends BonniePdfError {
   constructor(message: string) {
     super(message);
     this.name = 'DataMatrixContentException';

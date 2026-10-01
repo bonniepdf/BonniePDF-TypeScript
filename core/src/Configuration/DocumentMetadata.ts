@@ -27,6 +27,20 @@ export type DocumentMetadataOptions = Partial<
   customProperties?: Map<string, string> | Record<string, string>;
 };
 
+/**
+ * The dates a metadata object gave itself when it was built. A date the author assigned is a different
+ * object, so this tells "the time it was built" from "a date somebody chose" without another property.
+ */
+const builtInDates = new WeakSet<Date>();
+
+/**
+ * True when `date` is one a {@link DocumentMetadata} gave itself on construction rather than one that was
+ * assigned. Used by tools that copy a document and must not turn "now" into a chosen date.
+ */
+export function isBuiltInMetadataDate(date: Date | undefined): boolean {
+  return date !== undefined && builtInDates.has(date);
+}
+
 /** Contains descriptive metadata written to the PDF information and XMP records. */
 export class DocumentMetadata {
   /**
@@ -53,6 +67,8 @@ export class DocumentMetadata {
     this.producer = 'BonniePDF';
     this.creationDate = new Date();
     this.modifiedDate = new Date();
+    builtInDates.add(this.creationDate);
+    builtInDates.add(this.modifiedDate);
     this.customProperties = new Map();
 
     if (!isPositional) {

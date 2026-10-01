@@ -44,8 +44,10 @@ export class DeferredXObjectInfo {
 // (Elements/IElement.ts) so any drift between the two is a compile error.
 /** Carries page, canvas, resource, navigation, tagging, and cursor state through layout. */
 export class RenderContext implements RenderContextContract {
+  /** @internal */
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];
+  /** @internal */
   public readonly pageHyperlinks: Map<number, RegisteredLink[]> = new Map();
   public readonly tocEntries: Map<string, number> = new Map();
 
@@ -56,6 +58,7 @@ export class RenderContext implements RenderContextContract {
    * Low-level SVG canvas options threaded into every {@link SvgCanvas} created
    * by this context (precision, image embedding, PDF baseline parity). Set by
    * the SVG render pipeline before rendering begins.
+   * @internal
    */
   public svgOptions: SvgCanvasOptions = {};
 
@@ -126,6 +129,7 @@ export class RenderContext implements RenderContextContract {
    * PDF/UA tagging context. Non-undefined when the document opted into
    * AccessibilityMode.PdfUa1; undefined otherwise. Held on the context
    * so each per-page PdfCanvas gets it via updateCanvas.
+   * @internal
    */
   public tagging?: TaggingContext;
 
@@ -133,6 +137,7 @@ export class RenderContext implements RenderContextContract {
    * Optional layout-snapshot recorder. Attached only when a caller opted into
    * `captureLayout` (currently the SVG exporter). When undefined, all capture is
    * a guarded no-op and output is byte-identical to the un-instrumented path.
+   * @internal
    */
   public layoutRecorder?: LayoutRecorder;
 
@@ -143,6 +148,7 @@ export class RenderContext implements RenderContextContract {
    * @param existingResources  Pass a pre-populated (and pre-loaded) registry to reuse font/image
    *                          registrations from a previous dry-run pass.  When omitted a fresh
    *                          registry is created automatically.
+   * @internal
    */
   constructor(
     size: PdfSize,
@@ -163,7 +169,10 @@ export class RenderContext implements RenderContextContract {
     this.updateCanvas();
   }
 
-  /** Returns the persisted SVG canvas for a page index, if one exists. */
+  /**
+   * Returns the persisted SVG canvas for a page index, if one exists.
+   * @internal
+   */
   public getSvgPage(index: number): SvgCanvas | undefined {
     return this.svgPages[index];
   }
@@ -215,6 +224,7 @@ export class RenderContext implements RenderContextContract {
    * heights measured against a different page size or margin.
    *
    * See the shared specification, "Layout & Pagination" §5.1.
+   * @internal
    */
   public setChromeReservation(provider: ((pageNumber: number) => ChromeReservation) | undefined): void {
     this.chromeProvider = provider;
@@ -385,14 +395,17 @@ export class RenderContext implements RenderContextContract {
     return this.resources.getImageResourceName(id);
   }
 
+  /** @internal */
   public resolveEmbeddedFont(fontIdentifier: string): TtfFont | null {
     return this.resources.resolveEmbeddedFont(fontIdentifier);
   }
 
+  /** @internal */
   public trackGlyphUsage(fontIdentifier: string, text: string): void {
     this.resources.trackGlyphUsage(fontIdentifier, text);
   }
 
+  /** @internal */
   public resolveTextRuns(fontIdentifier: string, text: string): ResolvedTextRun[] {
     return this.resources.resolveTextRuns(fontIdentifier, text);
   }
@@ -403,6 +416,7 @@ export class RenderContext implements RenderContextContract {
    * /Artifact to stay PDF/UA-valid. Surfacing this as a diagnostic keeps a
    * meaningful image from being demoted to an artifact *silently* — the author
    * should tag it (alt text -> Figure) or mark it decorative on purpose.
+   * @internal
    */
   public reportUntaggedImage(): void {
     this.resources.diagnostics.addWarning(
@@ -420,6 +434,7 @@ export class RenderContext implements RenderContextContract {
     return this.resources.registerAlphaGraphicsState(alpha);
   }
 
+  /** @internal */
   public registerShading(request: ShadingRequest): { shadingName: string; softMaskGs: string | null } | null {
     return this.resources.registerShading(request);
   }
@@ -428,6 +443,7 @@ export class RenderContext implements RenderContextContract {
     return PdfResourceRegistry.isEmbeddedFont(fontIdentifier);
   }
 
+  /** @internal */
   public getEmbeddedFont(filePath: string): EmbeddedFontInfo | null {
     return this.resources.getEmbeddedFont(filePath);
   }
@@ -597,6 +613,7 @@ export class RenderContext implements RenderContextContract {
     return this.resources.getImageResourceName(imageId);
   }
 
+  /** @internal */
   public registerHyperlink(hyperlink: RegisteredLink): void {
     if (!this.pageHyperlinks.has(this.currentPageIndex)) {
       this.pageHyperlinks.set(this.currentPageIndex, []);
@@ -611,6 +628,7 @@ export class RenderContext implements RenderContextContract {
   /**
    * Loads every embedded TTF font that has been registered.
    * Must be awaited before rendering begins.
+   * @internal
    */
   public async preloadAllFontsAsync(): Promise<void> {
     await this.resources.preloadAllFontsAsync();

@@ -5,7 +5,7 @@ import { LinearGradientPaint, RadialGradientPaint } from '../../src/Drawing/Pain
 import { Color } from '../../src/Core/Color';
 import { Point } from '../../src/Core/Point';
 import type { PaintTransform } from '../../src/Drawing/PaintTransform';
-import { invertPaintTransform, isIdentityPaintTransform, mapBox } from '../../src/Drawing/PaintTransform';
+import { invertPaintTransform, isIdentityPaintTransform, mapPaintBox } from '../../src/Drawing/PaintTransform';
 import type { ShadingRequest } from '../../src/Rendering/Pdf/GradientShading';
 
 /**
@@ -147,7 +147,7 @@ describe('PaintTransform helpers', () => {
   it('takes the containing box of a rotated box, not the mapped corners', () => {
     // A rotation turns a rectangle into a parallelogram, and a /BBox has to
     // contain it.
-    const rotated = mapBox({ a: 0, b: 1, c: -1, d: 0, e: 0, f: 0 }, [0, 0, 10, 20]);
+    const rotated = mapPaintBox({ a: 0, b: 1, c: -1, d: 0, e: 0, f: 0 }, [0, 0, 10, 20]);
     expect(rotated).toEqual([-20, 0, 0, 10]);
   });
 });

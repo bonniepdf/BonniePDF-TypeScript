@@ -152,8 +152,8 @@ describe('List tagging', () => {
 
     doc.generateBytes();
 
-    expect(orderedInner.textColor).toBe(ColorPalette.slate[700]);
-    expect(unorderedInner.textColor).toBe(ColorPalette.slate[700]);
+    expect(orderedInner.color).toBe(ColorPalette.slate[700]);
+    expect(unorderedInner.color).toBe(ColorPalette.slate[700]);
     expect(unorderedInner.bulletColor).toBe(ColorPalette.slate[700]);
   });
 
@@ -169,7 +169,7 @@ describe('List tagging', () => {
 
     doc.generateBytes();
 
-    expect(inner.textColor).toBe(ColorPalette.slate[700]);
+    expect(inner.color).toBe(ColorPalette.slate[700]);
     expect(inner.bulletColor).toBe(Color.red);
   });
 

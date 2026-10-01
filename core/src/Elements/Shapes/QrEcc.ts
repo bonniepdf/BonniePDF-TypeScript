@@ -19,10 +19,16 @@ export class QrEcc {
   /** High error correction: ~30% of codewords can be restored. */
   public static readonly High = new QrEcc(3, 2);
 
-  /** Ordinal index used for table lookups (0=Low, 1=Medium, 2=Quartile, 3=High). */
+  /**
+   * Ordinal index used for table lookups (0=Low, 1=Medium, 2=Quartile, 3=High).
+   * @internal
+   */
   public readonly ordinal: number;
 
-  /** The 2-bit format info value for this ECC level, used in the format information area. */
+  /**
+   * The 2-bit format info value for this ECC level, used in the format information area.
+   * @internal
+   */
   public readonly formatBits: number;
 
   private constructor(ordinal: number, formatBits: number) {

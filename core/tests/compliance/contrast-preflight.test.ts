@@ -72,7 +72,7 @@ describe('WCAG contrast maths', () => {
 describe('paintOf — intrinsic paint capture', () => {
   it('captures text colour, size and boldness from a text element', () => {
     const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    tb.textColor = new Color(0x33, 0x33, 0x33);
+    tb.color = new Color(0x33, 0x33, 0x33);
     expect(paintOf(tb, 'TextBlock')).toMatchObject({ text: '#333333', fontSize: 11 });
   });
 
@@ -105,7 +105,7 @@ describe('paintOf — intrinsic paint capture', () => {
 
   it('marks bold from fontWeight', () => {
     const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    tb.textColor = new Color(0x33, 0x33, 0x33);
+    tb.color = new Color(0x33, 0x33, 0x33);
     tb.fontWeight = 700;
     expect(paintOf(tb, 'TextBlock')).toMatchObject({ bold: true });
   });
@@ -117,14 +117,14 @@ describe('paintOf — intrinsic paint capture', () => {
   // threshold.
   it('marks bold from a bold PostScript font name, independent of fontWeight', () => {
     const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.HelveticaBold });
-    tb.textColor = new Color(0x33, 0x33, 0x33);
+    tb.color = new Color(0x33, 0x33, 0x33);
     expect(tb.fontWeight).toBeLessThan(700);
     expect(paintOf(tb, 'TextBlock')).toMatchObject({ bold: true });
   });
 
   it('does not mark bold for a regular-weight font name', () => {
     const tb = new TextBlock('Body', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    tb.textColor = new Color(0x33, 0x33, 0x33);
+    tb.color = new Color(0x33, 0x33, 0x33);
     expect(paintOf(tb, 'TextBlock')!.bold).toBeUndefined();
   });
 });
@@ -152,7 +152,7 @@ describe('contrast preflight — end to end', () => {
   it('flags pale grey text on the default white page', async () => {
     const doc = baselineDocument();
     const faint = new TextBlock('Barely visible', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    faint.textColor = new Color(0xcc, 0xcc, 0xcc);
+    faint.color = new Color(0xcc, 0xcc, 0xcc);
     doc.add(faint);
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -173,7 +173,7 @@ describe('contrast preflight — end to end', () => {
   it('does not fail the report — contrast is a warning, not an error', async () => {
     const doc = baselineDocument();
     const faint = new TextBlock('Barely visible', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    faint.textColor = new Color(0xcc, 0xcc, 0xcc);
+    faint.color = new Color(0xcc, 0xcc, 0xcc);
     doc.add(faint);
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -189,7 +189,7 @@ describe('contrast preflight — end to end', () => {
     // against the white page it would be measured against if the ancestor walk
     // did not work.
     const label = new TextBlock('On a dark card', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    label.textColor = new Color(255, 255, 255);
+    label.color = new Color(255, 255, 255);
     const card = new Container({ child: label });
     card.backgroundColor = new Color(0x11, 0x22, 0x33);
     doc.add(card);
@@ -212,7 +212,7 @@ describe('contrast preflight — end to end', () => {
     // A dark row fill set on the table, which the cell element itself never carries.
     table.rowBackgroundColor = new Color(0x1f, 0x2a, 0x37);
     const white = new TextBlock('Light on dark', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    white.textColor = new Color(255, 255, 255);
+    white.color = new Color(255, 255, 255);
     table.addRow(white, new TextBlock('Second', { fontSize: 11, fontName: StandardFonts.Helvetica }));
     doc.add(table);
 
@@ -236,7 +236,7 @@ describe('contrast preflight — end to end', () => {
     doc.add(
       new Hyperlink('Terms and conditions', 'https://example.com', {
         fontSize: 11,
-        textColor: new Color(0x99, 0x99, 0x99),
+        color: new Color(0x99, 0x99, 0x99),
       })
     );
 
@@ -255,7 +255,7 @@ describe('contrast preflight — end to end', () => {
     doc.add(
       new Hyperlink('Terms and conditions', 'https://example.com', {
         fontSize: 11,
-        textColor: new Color(0x99, 0x99, 0x99),
+        color: new Color(0x99, 0x99, 0x99),
       })
     );
 
@@ -279,7 +279,7 @@ describe('contrast preflight — end to end', () => {
       new Hyperlink('Terms and conditions', 'https://example.com', {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 14,
-        textColor: new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
+        color: new Color(0xe1, 0x71, 0x00), // 3.20:1 on white - passes 3:1, fails 4.5:1
       })
     );
 
@@ -310,7 +310,7 @@ describe('contrast preflight — end to end', () => {
   it('reports unknown for translucent text instead of compositing it', async () => {
     const doc = baselineDocument();
     const ghost = new TextBlock('Half there', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    ghost.textColor = new Color(0x33, 0x33, 0x33, 100);
+    ghost.color = new Color(0x33, 0x33, 0x33, 100);
     doc.add(ghost);
 
     const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
@@ -338,12 +338,12 @@ describe('contrast preflight — end to end', () => {
 
     const small = baselineDocument();
     const smallText = new TextBlock('Small grey', { fontSize: 11, fontName: StandardFonts.Helvetica });
-    smallText.textColor = grey;
+    smallText.color = grey;
     small.add(smallText);
 
     const large = baselineDocument();
     const largeText = new TextBlock('Large grey', { fontSize: 24, fontName: StandardFonts.Helvetica });
-    largeText.textColor = grey;
+    largeText.color = grey;
     large.add(largeText);
 
     const smallReport = evaluateCompliance((await small.generateSvgDocumentAsync({ captureLayout: true })).snapshot!);
@@ -383,7 +383,7 @@ describe('includeWcag option', () => {
     const build = (): Document => {
       const doc = baselineDocument();
       const caption = new TextBlock('Muted caption', { fontSize: 11, fontName: StandardFonts.Helvetica });
-      caption.textColor = new Color(0x99, 0x99, 0x99);
+      caption.color = new Color(0x99, 0x99, 0x99);
       const card = new Container({ child: caption });
       card.backgroundColor = new Color(0xf1, 0xf5, 0xf9);
       doc.add(card);
@@ -425,7 +425,7 @@ describe('capture stays observational', () => {
     const build = (): Document => {
       const doc = baselineDocument();
       const label = new TextBlock('On a card', { fontSize: 11, fontName: StandardFonts.Helvetica });
-      label.textColor = new Color(0x33, 0x33, 0x33);
+      label.color = new Color(0x33, 0x33, 0x33);
       const card = new Container({ child: label });
       card.backgroundColor = new Color(0xee, 0xee, 0xee);
       doc.add(card);

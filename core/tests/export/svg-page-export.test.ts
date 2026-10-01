@@ -198,14 +198,14 @@ describe('SVG page export', () => {
       const tb = new TextBlock();
       tb.text = `Header ${pageNum}`;
       tb.fontSize = 9;
-      tb.textColor = ColorPalette.slate[500];
+      tb.color = ColorPalette.slate[500];
       return tb;
     };
     doc.settings.footerTemplate = pageNum => {
       const tb = new TextBlock();
       tb.text = `Footer ${pageNum}`;
       tb.fontSize = 9;
-      tb.textColor = ColorPalette.slate[500];
+      tb.color = ColorPalette.slate[500];
       return tb;
     };
     const svg = await doc.generateFirstPageSvgAsync();

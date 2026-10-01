@@ -11,7 +11,7 @@ import { RenderContext } from '../../Rendering/RenderContext';
  * out twice; see `documentRequiresTwoPassLayout`).
  *
  * It is a {@link TextBlock} at heart, so it inherits all text styling
- * (`fontName`, `fontSize`, `textColor`, alignment, decorations). Until the
+ * (`fontName`, `fontSize`, `color`, alignment, decorations). Until the
  * anchor is resolved (the throw-away first pass, or an unknown id) it renders
  * the {@link placeholder}.
  *

@@ -32,7 +32,7 @@ function fixtureDocument(): Document {
   doc.settings.accessibility = AccessibilityMode.PdfUa1;
   doc.settings.language = 'en-GB';
   const caption = new TextBlock('Muted caption', { fontSize: 11, fontName: StandardFonts.Helvetica });
-  caption.textColor = new Color(0x99, 0x99, 0x99);
+  caption.color = new Color(0x99, 0x99, 0x99);
   const card = new Container({ child: caption });
   card.backgroundColor = new Color(0xf1, 0xf5, 0xf9);
   doc.add(card);

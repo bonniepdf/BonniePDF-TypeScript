@@ -1,4 +1,3 @@
 export * from './Elements/Shapes/QrEcc';
-export * from './Elements/Shapes/QrSegment';
-export * from './Elements/Shapes/QrCodeEncoder';
-export * from './Elements/Shapes/QRCode';
+
+export { type QRCodeOptions, QRCode } from './Elements/Shapes/QRCode';

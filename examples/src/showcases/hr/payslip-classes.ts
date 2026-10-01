@@ -123,7 +123,7 @@ function cell(text: string, style: CellStyle = {}): TextBlock {
   const block = new TextBlock(text);
   block.fontName = style.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = style.size ?? 8.5;
-  block.textColor = style.color ?? INK;
+  block.color = style.color ?? INK;
   if (style.align !== undefined) block.alignment = style.align;
   return block;
 }

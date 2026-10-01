@@ -94,7 +94,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.CourierBold,
       fontSize: 13,
-      textColor: INK,
+      color: INK,
       alignment: 'center',
       margin: { bottom: 3 },
     })
@@ -185,7 +185,7 @@ function center(text: string, size = 8, color: ColorInput = MUTE, marginTop = 0)
   return new TextBlock(text, {
     fontName: StandardFonts.Courier,
     fontSize: size,
-    textColor: color,
+    color: color,
     alignment: 'center',
     margin: marginTop ? { top: marginTop } : undefined,
   });
@@ -204,7 +204,7 @@ function cell(text: string, size: number, bold = false, align: TextAlignmentInpu
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.CourierBold : StandardFonts.Courier,
     fontSize: size,
-    textColor: INK,
+    color: INK,
     alignment: align,
   });
 }
@@ -214,7 +214,7 @@ function rule(): TextBlock {
   return new TextBlock('- - - - - - - - - - - - - - - -', {
     fontName: StandardFonts.Courier,
     fontSize: 9,
-    textColor: MUTE,
+    color: MUTE,
     alignment: 'center',
     margin: { top: 5, bottom: 5 },
   });

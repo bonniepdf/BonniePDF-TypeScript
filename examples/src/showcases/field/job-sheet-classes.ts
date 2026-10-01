@@ -421,13 +421,13 @@ function runningBand(left: string, right: string): HorizontalStack {
   const l = new TextBlock(left);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 7.5;
-  l.textColor = MUTED;
+  l.color = MUTED;
   row.add(l, 2);
 
   const r = new TextBlock(right);
   r.fontName = StandardFonts.Helvetica;
   r.fontSize = 7.5;
-  r.textColor = MUTED;
+  r.color = MUTED;
   r.alignment = TextAlignment.Right;
   row.add(r, 2);
 
@@ -440,14 +440,14 @@ function tile(value: string, label: string, accent: Color): Container {
   const headline = new TextBlock(value);
   headline.fontName = StandardFonts.HelveticaBold;
   headline.fontSize = 16;
-  headline.textColor = accent;
+  headline.color = accent;
   headline.margin = new Thickness(0, 0, 0, 2);
   stack.add(headline);
 
   const caption = new TextBlock(label);
   caption.fontName = StandardFonts.Helvetica;
   caption.fontSize = 8;
-  caption.textColor = MUTED;
+  caption.color = MUTED;
   stack.add(caption);
 
   const box = new Container();
@@ -467,13 +467,13 @@ function totalLine(label: string, value: string, strong = false): HorizontalStac
   const key = new TextBlock(label);
   key.fontName = strong ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   key.fontSize = strong ? 10 : 9;
-  key.textColor = strong ? INK : MUTED;
+  key.color = strong ? INK : MUTED;
   row.add(key, 2);
 
   const val = new TextBlock(value);
   val.fontName = StandardFonts.HelveticaBold;
   val.fontSize = strong ? 11 : 9;
-  val.textColor = strong ? ACCENT : INK;
+  val.color = strong ? ACCENT : INK;
   val.alignment = TextAlignment.Right;
   row.add(val, 1.2);
 

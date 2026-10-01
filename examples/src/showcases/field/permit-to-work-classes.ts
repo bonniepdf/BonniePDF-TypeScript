@@ -454,7 +454,7 @@ function checkItem(text: string): HorizontalStack {
   const label = new TextBlock(text);
   label.fontName = StandardFonts.Helvetica;
   label.fontSize = 9;
-  label.textColor = INK;
+  label.color = INK;
   row.add(label, 12);
 
   return row;
@@ -476,13 +476,13 @@ function runningBand(left: string, right: string, color: Color = MUTED): Horizon
   const l = new TextBlock(left);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 7.5;
-  l.textColor = color;
+  l.color = color;
   row.add(l, 3);
 
   const r = new TextBlock(right);
   r.fontName = StandardFonts.Helvetica;
   r.fontSize = 7.5;
-  r.textColor = MUTED;
+  r.color = MUTED;
   r.alignment = TextAlignment.Right;
   row.add(r, 1.5);
 

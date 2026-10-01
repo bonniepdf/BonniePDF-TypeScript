@@ -183,7 +183,7 @@ function cell(text: string, style: CellStyle = {}): TextBlock {
   const block = new TextBlock(text);
   block.fontName = style.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = style.size ?? 9;
-  block.textColor = style.color ?? INK;
+  block.color = style.color ?? INK;
   if (style.align !== undefined) block.alignment = style.align;
   return block;
 }
@@ -198,7 +198,7 @@ function sectionHeading(text: string, id: string): Heading {
   h.tocIdentifier = id;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 11;
-  h.textColor = INK;
+  h.color = INK;
   h.margin = new Thickness(0, 0, 0, 6);
   return h;
 }
@@ -220,7 +220,7 @@ function masthead(data: UtilityBillData): VerticalStack {
   title.tocIdentifier = 'bill';
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 16;
-  title.textColor = ACCENT_DEEP;
+  title.color = ACCENT_DEEP;
 
   const identity = new VerticalStack();
   identity.spacing = 2;

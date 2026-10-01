@@ -318,12 +318,12 @@ function bandRow(left: string, right: string, rightColor: Color): HorizontalStac
   const l = new TextBlock(left);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 8;
-  l.textColor = MUTED;
+  l.color = MUTED;
   row.add(l, 3);
   const r = new TextBlock(right);
   r.fontName = StandardFonts.HelveticaBold;
   r.fontSize = 8;
-  r.textColor = rightColor;
+  r.color = rightColor;
   r.alignment = TextAlignment.Right;
   row.add(r, 2);
   return row;
@@ -333,7 +333,7 @@ function eyebrow(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 9;
-  b.textColor = PRIMARY;
+  b.color = PRIMARY;
   b.margin = new Thickness(0, 0, 0, 4);
   return b;
 }
@@ -343,7 +343,7 @@ function h1(text: string): Heading {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 22;
-  h.textColor = ColorPalette.slate[800];
+  h.color = ColorPalette.slate[800];
   h.margin = new Thickness(0, 0, 0, 6);
   return h;
 }
@@ -353,7 +353,7 @@ function h2(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = PRIMARY;
+  h.color = PRIMARY;
   h.margin = new Thickness(0, 8, 0, 8);
   return h;
 }
@@ -362,7 +362,7 @@ function body(text: string, opts: { color?: Color; mb?: number } = {}): TextBloc
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 10;
-  b.textColor = opts.color ?? INK;
+  b.color = opts.color ?? INK;
   b.alignment = TextAlignment.Justify;
   b.margin = new Thickness(0, 0, 0, opts.mb ?? 10);
   return b;
@@ -373,13 +373,13 @@ function metaItem(label: string, value: string): VerticalStack {
   const l = new TextBlock(label.toUpperCase());
   l.fontName = StandardFonts.HelveticaBold;
   l.fontSize = 7;
-  l.textColor = MUTED;
+  l.color = MUTED;
   l.margin = new Thickness(0, 0, 0, 2);
   stack.add(l);
   const v = new TextBlock(value);
   v.fontName = StandardFonts.Helvetica;
   v.fontSize = 10;
-  v.textColor = INK;
+  v.color = INK;
   stack.add(v);
   return stack;
 }
@@ -389,13 +389,13 @@ function kpi(value: string, label: string, accent: Color): Container {
   const v = new TextBlock(value);
   v.fontName = StandardFonts.HelveticaBold;
   v.fontSize = 20;
-  v.textColor = accent;
+  v.color = accent;
   v.margin = new Thickness(0, 0, 0, 3);
   stack.add(v);
   const l = new TextBlock(label);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 8.5;
-  l.textColor = MUTED;
+  l.color = MUTED;
   stack.add(l);
   const c = new Container();
   c.backgroundColor = ColorPalette.indigo[50];
@@ -410,7 +410,7 @@ function card(title: string, chart: IElement): Container {
   const h = new TextBlock(title);
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 11;
-  h.textColor = PRIMARY;
+  h.color = PRIMARY;
   h.margin = new Thickness(0, 0, 0, 8);
   stack.add(h);
   stack.add(chart);
@@ -428,7 +428,7 @@ function th(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 9;
-  b.textColor = Color.white;
+  b.color = Color.white;
   return b;
 }
 
@@ -436,7 +436,7 @@ function td(text: string, color: Color): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 9;
-  b.textColor = color;
+  b.color = color;
   return b;
 }
 
@@ -445,6 +445,6 @@ function severityCell(sev: Severity): TextBlock {
   const b = new TextBlock(sev);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 9;
-  b.textColor = SEV[sev];
+  b.color = SEV[sev];
   return b;
 }

@@ -51,8 +51,8 @@ const ACCENT = ColorPalette.teal[700];
 const HELVETICA = StandardFonts.Helvetica;
 const HELVETICA_BOLD = StandardFonts.HelveticaBold;
 
-const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9.5, textColor: INK };
-const mutedText: TextBlockOptions = { ...bodyText, fontSize: 8.5, textColor: MUTED };
+const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9.5, color: INK };
+const mutedText: TextBlockOptions = { ...bodyText, fontSize: 8.5, color: MUTED };
 
 // ── Domain model ─────────────────────────────────────────────────────────────
 
@@ -189,7 +189,7 @@ function titleBlock(data: ContractData): VerticalStack {
         tocIdentifier: 'title',
         fontName: HELVETICA_BOLD,
         fontSize: 17,
-        textColor: ACCENT,
+        color: ACCENT,
       }),
       new TextBlock(`Agreement reference ${data.reference}`, { ...mutedText, margin: { top: 3 } }),
       new Container({ height: 2, backgroundColor: ACCENT, margin: { top: 10, bottom: 14 } }),
@@ -203,10 +203,10 @@ function parties(data: ContractData): Container {
     new VerticalStack({
       spacing: 2,
       children: [
-        new TextBlock(role.toUpperCase(), { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: FAINT }),
-        new TextBlock(name, { fontName: HELVETICA_BOLD, fontSize: 10, textColor: INK }),
+        new TextBlock(role.toUpperCase(), { fontName: HELVETICA_BOLD, fontSize: 6.5, color: FAINT }),
+        new TextBlock(name, { fontName: HELVETICA_BOLD, fontSize: 10, color: INK }),
         new TextBlock(address, mutedText),
-        ...(extra ? [new TextBlock(extra, { ...mutedText, textColor: FAINT })] : []),
+        ...(extra ? [new TextBlock(extra, { ...mutedText, color: FAINT })] : []),
       ],
     });
 
@@ -226,8 +226,8 @@ function particulars(data: ContractData): VerticalStack {
     headerBackgroundColor: PANEL,
   });
   table.addHeader(
-    new TextBlock('Particular', { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED }),
-    new TextBlock('Detail', { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED })
+    new TextBlock('Particular', { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED }),
+    new TextBlock('Detail', { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED })
   );
   const rows: [string, string][] = [
     ['Job title', data.role.title],
@@ -243,7 +243,7 @@ function particulars(data: ContractData): VerticalStack {
   ];
   for (const [label, value] of rows) {
     table.addRow(
-      new TextBlock(label, { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK }),
+      new TextBlock(label, { fontName: HELVETICA_BOLD, fontSize: 9, color: INK }),
       new TextBlock(value, bodyText)
     );
   }
@@ -258,7 +258,7 @@ function definitions(data: ContractData): VerticalStack {
         spacing: 1,
         margin: { bottom: 6 },
         children: [
-          new TextBlock(term, { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK }),
+          new TextBlock(term, { fontName: HELVETICA_BOLD, fontSize: 9, color: INK }),
           new TextBlock(meaning, mutedText),
         ],
       })
@@ -277,7 +277,7 @@ function heading(text: string, id: string): Heading {
     tocIdentifier: id,
     fontName: HELVETICA_BOLD,
     fontSize: 11.5,
-    textColor: ACCENT,
+    color: ACCENT,
     margin: { top: 4, bottom: 6 },
   });
 }
@@ -299,7 +299,7 @@ function clause(item: Clause, index: number): VerticalStack {
       numberFormat: 'decimal',
       fontName: HELVETICA,
       fontSize: 9.5,
-      textColor: INK,
+      color: INK,
       itemSpacing: 5,
       indent: 16,
     })
@@ -314,7 +314,7 @@ function signatureField(caption: string): VerticalStack {
     children: [
       new Spacer(24),
       new Line({ thickness: 0.75, color: FAINT }),
-      new TextBlock(caption, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+      new TextBlock(caption, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
     ],
   });
 }
@@ -335,12 +335,12 @@ function schedule(data: ContractData): VerticalStack {
     headerBackgroundColor: PANEL,
   });
   table.addHeader(
-    new TextBlock('Item', { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED }),
-    new TextBlock('Provision', { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED })
+    new TextBlock('Item', { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED }),
+    new TextBlock('Provision', { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED })
   );
   for (const [label, value] of rows) {
     table.addRow(
-      new TextBlock(label, { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK }),
+      new TextBlock(label, { fontName: HELVETICA_BOLD, fontSize: 9, color: INK }),
       new TextBlock(value, bodyText)
     );
   }
@@ -405,13 +405,13 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
     new TextBlock(`${data.reference} · ${data.employer.name} and ${data.employee.name}`, {
       fontName: HELVETICA,
       fontSize: 7,
-      textColor: FAINT,
+      color: FAINT,
     });
   settings.footerTemplate = (pageNumber: number) =>
     new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
       fontName: HELVETICA,
       fontSize: 7,
-      textColor: FAINT,
+      color: FAINT,
       alignment: 'center',
     });
 

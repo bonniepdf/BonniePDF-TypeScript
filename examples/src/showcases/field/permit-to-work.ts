@@ -446,7 +446,7 @@ function checkItem(text: string): HorizontalStack {
     }),
     0.35
   );
-  row.add(new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: INK }), 12);
+  row.add(new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9, color: INK }), 12);
   return row;
 }
 
@@ -461,12 +461,12 @@ function clock(d: Date): string {
 
 function runningBand(left: string, right: string, color: ColorInput = MUTED): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
-  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 7.5, textColor: color }), 3);
+  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: color }), 3);
   row.add(
     new TextBlock(right, {
       fontName: StandardFonts.Helvetica,
       fontSize: 7.5,
-      textColor: MUTED,
+      color: MUTED,
       alignment: 'right',
     }),
     1.5

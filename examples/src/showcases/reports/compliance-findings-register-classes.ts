@@ -245,7 +245,7 @@ function findingCard(finding: Finding): Container {
   const badgeText = new TextBlock(style.label);
   badgeText.fontName = StandardFonts.HelveticaBold;
   badgeText.fontSize = 9;
-  badgeText.textColor = Color.white;
+  badgeText.color = Color.white;
   badgeText.alignment = TextAlignment.Center;
   badge.child = badgeText;
 
@@ -261,18 +261,18 @@ function findingCard(finding: Finding): Container {
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 12;
-  heading.textColor = ColorPalette.slate[800];
+  heading.color = ColorPalette.slate[800];
   body.add(heading);
 
   const category = new TextBlock(finding.category);
   category.fontName = StandardFonts.HelveticaBold;
   category.fontSize = 9;
-  category.textColor = ColorPalette.slate[600];
+  category.color = ColorPalette.slate[600];
   body.add(category);
 
   const description = new TextBlock(finding.description);
   description.fontSize = 10.5;
-  description.textColor = ColorPalette.slate[700];
+  description.color = ColorPalette.slate[700];
   body.add(description);
 
   // Optional "Related: F-XXX (page N)" cross-reference - a clickable SectionLink
@@ -285,24 +285,24 @@ function findingCard(finding: Finding): Container {
     const relatedLabel = new TextBlock('Related:');
     relatedLabel.fontName = StandardFonts.HelveticaBold;
     relatedLabel.fontSize = 9;
-    relatedLabel.textColor = ColorPalette.slate[600];
+    relatedLabel.color = ColorPalette.slate[600];
     relatedRow.add(relatedLabel, relatedLabel.getPreferredWidth());
 
     const relatedLink = new SectionLink(finding.related, anchorFor(finding.related));
     relatedLink.fontName = StandardFonts.HelveticaBold;
     relatedLink.fontSize = 9;
-    relatedLink.textColor = ColorPalette.blue[700];
+    relatedLink.color = ColorPalette.blue[700];
     relatedRow.add(relatedLink, relatedLink.getPreferredWidth());
 
     const onPage = new TextBlock('on page');
     onPage.fontSize = 9;
-    onPage.textColor = ColorPalette.slate[600];
+    onPage.color = ColorPalette.slate[600];
     relatedRow.add(onPage, onPage.getPreferredWidth());
 
     const relatedPage = new PageNumberOf(anchorFor(finding.related));
     relatedPage.fontName = StandardFonts.HelveticaBold;
     relatedPage.fontSize = 9;
-    relatedPage.textColor = ColorPalette.slate[600];
+    relatedPage.color = ColorPalette.slate[600];
     relatedRow.add(relatedPage);
 
     body.add(relatedRow);
@@ -341,13 +341,13 @@ function priorityActions(critical: Finding[]): Container {
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 13;
-  heading.textColor = ColorPalette.red[800];
+  heading.color = ColorPalette.red[800];
   heading.margin = new Thickness(0, 0, 0, 2);
   inner.add(heading);
 
   const lead = new TextBlock(`${critical.length} critical findings require immediate remediation:`);
   lead.fontSize = 10;
-  lead.textColor = ColorPalette.slate[600];
+  lead.color = ColorPalette.slate[600];
   lead.margin = new Thickness(0, 0, 0, 4);
   inner.add(lead);
 
@@ -359,18 +359,18 @@ function priorityActions(critical: Finding[]): Container {
     const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id));
     link.fontName = StandardFonts.HelveticaBold;
     link.fontSize = 10.5;
-    link.textColor = ColorPalette.blue[700];
+    link.color = ColorPalette.blue[700];
     row.add(link, link.getPreferredWidth());
 
     const onPage = new TextBlock('page');
     onPage.fontSize = 10;
-    onPage.textColor = ColorPalette.slate[600];
+    onPage.color = ColorPalette.slate[600];
     row.add(onPage, onPage.getPreferredWidth());
 
     const page = new PageNumberOf(anchorFor(finding.id));
     page.fontName = StandardFonts.HelveticaBold;
     page.fontSize = 10;
-    page.textColor = ColorPalette.slate[700];
+    page.color = ColorPalette.slate[700];
     row.add(page);
 
     inner.add(row);
@@ -398,7 +398,7 @@ export function generate(): Document {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
+    b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Right;
     return b;
   };
@@ -416,7 +416,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1);
 

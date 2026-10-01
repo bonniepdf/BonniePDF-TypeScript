@@ -94,7 +94,7 @@ export function generate(): Document {
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
           `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+          { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
     },
     metadata: {
@@ -145,7 +145,7 @@ function renderLine(l: Line): IElement {
     return new TextBlock(l.label, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 10,
-      textColor: NAVY,
+      color: NAVY,
       margin: { top: 8, bottom: 4 },
     });
   }
@@ -156,7 +156,7 @@ function renderLine(l: Line): IElement {
     new TextBlock(l.label, {
       fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
       fontSize: 10,
-      textColor: bold ? NAVY : INK,
+      color: bold ? NAVY : INK,
       margin: l.indent ? { left: 14 } : undefined,
     }),
     6
@@ -180,7 +180,7 @@ function numCell(text: string, bold: boolean, color: ColorInput, align: TextAlig
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: 10,
-    textColor: color,
+    color: color,
     alignment: align,
   });
 }
@@ -206,7 +206,7 @@ function company(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 11,
-    textColor: MUTED,
+    color: MUTED,
     margin: { bottom: 4 },
   });
 }
@@ -216,7 +216,7 @@ function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 22,
-    textColor: NAVY,
+    color: NAVY,
     margin: { bottom: 4 },
   });
 }
@@ -226,7 +226,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: NAVY,
+    color: NAVY,
     margin: { top: 4, bottom: 8 },
   });
 }
@@ -235,7 +235,7 @@ function sub(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 9,
-    textColor: MUTED,
+    color: MUTED,
     margin: { bottom: 3 },
   });
 }

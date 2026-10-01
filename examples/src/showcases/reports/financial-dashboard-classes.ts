@@ -75,25 +75,25 @@ export function generate(): Document {
   const companyText = new TextBlock('Sample Company');
   companyText.fontName = StandardFonts.HelveticaBold;
   companyText.fontSize = 14;
-  companyText.textColor = CREAM;
+  companyText.color = CREAM;
   companyStack.add(companyText);
   const confidentialInternalUseOnlyText = new TextBlock('Confidential - Internal Use Only');
   confidentialInternalUseOnlyText.fontName = StandardFonts.Helvetica;
   confidentialInternalUseOnlyText.fontSize = 8;
-  confidentialInternalUseOnlyText.textColor = HEADER_MUTE;
+  confidentialInternalUseOnlyText.color = HEADER_MUTE;
   confidentialInternalUseOnlyText.margin = new Thickness(0, 5, 0, 0);
   companyStack.add(confidentialInternalUseOnlyText);
 
   const reportTitle = new TextBlock(title);
   reportTitle.fontName = StandardFonts.HelveticaBold;
   reportTitle.fontSize = 13;
-  reportTitle.textColor = CREAM;
+  reportTitle.color = CREAM;
   reportTitle.alignment = TextAlignment.Right;
 
   const reportDate = new TextBlock(generated);
   reportDate.fontName = StandardFonts.Helvetica;
   reportDate.fontSize = 8;
-  reportDate.textColor = HEADER_MUTE;
+  reportDate.color = HEADER_MUTE;
   reportDate.alignment = TextAlignment.Right;
   reportDate.margin = new Thickness(0, 5, 0, 0);
 
@@ -122,18 +122,18 @@ export function generate(): Document {
   const totalRevenueValueText = new TextBlock('£2.41M');
   totalRevenueValueText.fontName = StandardFonts.HelveticaBold;
   totalRevenueValueText.fontSize = 18;
-  totalRevenueValueText.textColor = ESPRESSO;
+  totalRevenueValueText.color = ESPRESSO;
   totalRevenueStack.add(totalRevenueValueText);
   const totalRevenueText = new TextBlock('TOTAL REVENUE');
   totalRevenueText.fontName = StandardFonts.Helvetica;
   totalRevenueText.fontSize = 7;
-  totalRevenueText.textColor = BROWN;
+  totalRevenueText.color = BROWN;
   totalRevenueText.margin = new Thickness(0, 4, 0, 0);
   totalRevenueStack.add(totalRevenueText);
   const totalRevenueDeltaText = new TextBlock('↑ 18.3% YoY');
   totalRevenueDeltaText.fontName = StandardFonts.HelveticaBold;
   totalRevenueDeltaText.fontSize = 7;
-  totalRevenueDeltaText.textColor = DELTA_POS;
+  totalRevenueDeltaText.color = DELTA_POS;
   totalRevenueDeltaText.margin = new Thickness(0, 4, 0, 0);
   totalRevenueStack.add(totalRevenueDeltaText);
   const totalRevenueCell = new Container();
@@ -144,18 +144,18 @@ export function generate(): Document {
   const grossProfitValueText = new TextBlock('£640K');
   grossProfitValueText.fontName = StandardFonts.HelveticaBold;
   grossProfitValueText.fontSize = 18;
-  grossProfitValueText.textColor = ESPRESSO;
+  grossProfitValueText.color = ESPRESSO;
   grossProfitStack.add(grossProfitValueText);
   const grossProfitText = new TextBlock('GROSS PROFIT');
   grossProfitText.fontName = StandardFonts.Helvetica;
   grossProfitText.fontSize = 7;
-  grossProfitText.textColor = BROWN;
+  grossProfitText.color = BROWN;
   grossProfitText.margin = new Thickness(0, 4, 0, 0);
   grossProfitStack.add(grossProfitText);
   const grossProfitDeltaText = new TextBlock('↑ 11.7% YoY');
   grossProfitDeltaText.fontName = StandardFonts.HelveticaBold;
   grossProfitDeltaText.fontSize = 7;
-  grossProfitDeltaText.textColor = DELTA_POS;
+  grossProfitDeltaText.color = DELTA_POS;
   grossProfitDeltaText.margin = new Thickness(0, 4, 0, 0);
   grossProfitStack.add(grossProfitDeltaText);
   const grossProfitCell = new Container();
@@ -168,18 +168,18 @@ export function generate(): Document {
   const newCustomersValueText = new TextBlock('3,814');
   newCustomersValueText.fontName = StandardFonts.HelveticaBold;
   newCustomersValueText.fontSize = 18;
-  newCustomersValueText.textColor = ESPRESSO;
+  newCustomersValueText.color = ESPRESSO;
   newCustomersStack.add(newCustomersValueText);
   const newCustomersText = new TextBlock('NEW CUSTOMERS');
   newCustomersText.fontName = StandardFonts.Helvetica;
   newCustomersText.fontSize = 7;
-  newCustomersText.textColor = BROWN;
+  newCustomersText.color = BROWN;
   newCustomersText.margin = new Thickness(0, 4, 0, 0);
   newCustomersStack.add(newCustomersText);
   const newCustomersDeltaText = new TextBlock('↑ 24.1% YoY');
   newCustomersDeltaText.fontName = StandardFonts.HelveticaBold;
   newCustomersDeltaText.fontSize = 7;
-  newCustomersDeltaText.textColor = DELTA_POS;
+  newCustomersDeltaText.color = DELTA_POS;
   newCustomersDeltaText.margin = new Thickness(0, 4, 0, 0);
   newCustomersStack.add(newCustomersDeltaText);
   const newCustomersCell = new Container();
@@ -192,18 +192,18 @@ export function generate(): Document {
   const satisfactionValueText = new TextBlock('94.2%');
   satisfactionValueText.fontName = StandardFonts.HelveticaBold;
   satisfactionValueText.fontSize = 18;
-  satisfactionValueText.textColor = ESPRESSO;
+  satisfactionValueText.color = ESPRESSO;
   satisfactionStack.add(satisfactionValueText);
   const satisfactionText = new TextBlock('SATISFACTION');
   satisfactionText.fontName = StandardFonts.Helvetica;
   satisfactionText.fontSize = 7;
-  satisfactionText.textColor = BROWN;
+  satisfactionText.color = BROWN;
   satisfactionText.margin = new Thickness(0, 4, 0, 0);
   satisfactionStack.add(satisfactionText);
   const satisfactionDeltaText = new TextBlock('↓ 0.8%');
   satisfactionDeltaText.fontName = StandardFonts.HelveticaBold;
   satisfactionDeltaText.fontSize = 7;
-  satisfactionDeltaText.textColor = DELTA_NEG;
+  satisfactionDeltaText.color = DELTA_NEG;
   satisfactionDeltaText.margin = new Thickness(0, 4, 0, 0);
   satisfactionStack.add(satisfactionDeltaText);
   const satisfactionCell = new Container();
@@ -233,7 +233,7 @@ export function generate(): Document {
   const monthlyRevenueTitleText = new TextBlock('MONTHLY REVENUE  (£000s)');
   monthlyRevenueTitleText.fontName = StandardFonts.HelveticaBold;
   monthlyRevenueTitleText.fontSize = 7;
-  monthlyRevenueTitleText.textColor = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
+  monthlyRevenueTitleText.color = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
   chartTitleCell.child = monthlyRevenueTitleText;
   doc.add(chartTitleCell);
 
@@ -280,7 +280,7 @@ export function generate(): Document {
   const topProductsText = new TextBlock('TOP PRODUCTS');
   topProductsText.fontName = StandardFonts.HelveticaBold;
   topProductsText.fontSize = 7;
-  topProductsText.textColor = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
+  topProductsText.color = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
   tableTitleCell.child = topProductsText;
   doc.add(tableTitleCell);
 
@@ -294,22 +294,22 @@ export function generate(): Document {
   const productText = new TextBlock('Product');
   productText.fontName = StandardFonts.HelveticaBold;
   productText.fontSize = 8;
-  productText.textColor = ESPRESSO;
+  productText.color = ESPRESSO;
   productText.alignment = TextAlignment.Left;
   const unitsText = new TextBlock('Units');
   unitsText.fontName = StandardFonts.HelveticaBold;
   unitsText.fontSize = 8;
-  unitsText.textColor = ESPRESSO;
+  unitsText.color = ESPRESSO;
   unitsText.alignment = TextAlignment.Right;
   const revenueText = new TextBlock('Revenue');
   revenueText.fontName = StandardFonts.HelveticaBold;
   revenueText.fontSize = 8;
-  revenueText.textColor = ESPRESSO;
+  revenueText.color = ESPRESSO;
   revenueText.alignment = TextAlignment.Right;
   const marginText = new TextBlock('Margin');
   marginText.fontName = StandardFonts.HelveticaBold;
   marginText.fontSize = 8;
-  marginText.textColor = ESPRESSO;
+  marginText.color = ESPRESSO;
   marginText.alignment = TextAlignment.Right;
   productTable.addHeader(productText, unitsText, revenueText, marginText);
 
@@ -324,22 +324,22 @@ export function generate(): Document {
     const pNameText = new TextBlock(p.name);
     pNameText.fontName = StandardFonts.Helvetica;
     pNameText.fontSize = 8;
-    pNameText.textColor = ESPRESSO;
+    pNameText.color = ESPRESSO;
     pNameText.alignment = TextAlignment.Left;
     const pUnitsText = new TextBlock(p.units);
     pUnitsText.fontName = StandardFonts.Helvetica;
     pUnitsText.fontSize = 8;
-    pUnitsText.textColor = BROWN;
+    pUnitsText.color = BROWN;
     pUnitsText.alignment = TextAlignment.Right;
     const pRevenueText = new TextBlock(p.revenue);
     pRevenueText.fontName = StandardFonts.HelveticaBold;
     pRevenueText.fontSize = 8;
-    pRevenueText.textColor = ESPRESSO;
+    pRevenueText.color = ESPRESSO;
     pRevenueText.alignment = TextAlignment.Right;
     const pMarginText = new TextBlock(p.margin);
     pMarginText.fontName = StandardFonts.Helvetica;
     pMarginText.fontSize = 8;
-    pMarginText.textColor = BROWN;
+    pMarginText.color = BROWN;
     pMarginText.alignment = TextAlignment.Right;
     productTable.addRow(pNameText, pUnitsText, pRevenueText, pMarginText);
   }

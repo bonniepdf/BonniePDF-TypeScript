@@ -109,7 +109,7 @@ export function generate(): Document {
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
-    f.textColor = MUTED;
+    f.color = MUTED;
     return f;
   };
 
@@ -161,7 +161,7 @@ function renderLine(l: Line): IElement {
     const t = new TextBlock(l.label);
     t.fontName = StandardFonts.HelveticaBold;
     t.fontSize = 10;
-    t.textColor = NAVY;
+    t.color = NAVY;
     t.margin = new Thickness(0, 8, 0, 4);
     return t;
   }
@@ -173,7 +173,7 @@ function renderLine(l: Line): IElement {
   const label = new TextBlock(l.label);
   label.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   label.fontSize = 10;
-  label.textColor = bold ? NAVY : INK;
+  label.color = bold ? NAVY : INK;
   if (l.indent) label.margin = new Thickness(14, 0, 0, 0);
   row.add(label, 6);
   row.add(numCell(l.note ?? '', false, MUTED, TextAlignment.Center), 1);
@@ -195,7 +195,7 @@ function numCell(text: string, bold: boolean, color: Color, align: TextAlignment
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = 10;
-  b.textColor = color;
+  b.color = color;
   b.alignment = align;
   return b;
 }
@@ -223,7 +223,7 @@ function company(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 11;
-  b.textColor = MUTED;
+  b.color = MUTED;
   b.margin = new Thickness(0, 0, 0, 4);
   return b;
 }
@@ -233,7 +233,7 @@ function h1(text: string): Heading {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 22;
-  h.textColor = NAVY;
+  h.color = NAVY;
   h.margin = new Thickness(0, 0, 0, 4);
   return h;
 }
@@ -243,7 +243,7 @@ function h2(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = NAVY;
+  h.color = NAVY;
   h.margin = new Thickness(0, 4, 0, 8);
   return h;
 }
@@ -252,7 +252,7 @@ function sub(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 9;
-  b.textColor = MUTED;
+  b.color = MUTED;
   b.margin = new Thickness(0, 0, 0, 3);
   return b;
 }

@@ -55,7 +55,7 @@ export function eyebrow(text: string, color: ColorInput = ACCENT): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 8.5,
-    textColor: color,
+    color: color,
     margin: { bottom: 4 },
   });
 }
@@ -65,7 +65,7 @@ export function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 21,
-    textColor: HEADING,
+    color: HEADING,
     margin: { bottom: 6 },
   });
 }
@@ -75,7 +75,7 @@ export function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: ACCENT,
+    color: ACCENT,
     margin: { top: 14, bottom: 8 },
   });
 }
@@ -85,7 +85,7 @@ export function h3(text: string): Heading {
     level: 3,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 10.5,
-    textColor: HEADING,
+    color: HEADING,
     margin: { top: 8, bottom: 5 },
   });
 }
@@ -97,7 +97,7 @@ export function body(
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: opts.size ?? 9.5,
-    textColor: opts.color ?? INK,
+    color: opts.color ?? INK,
     margin: { top: opts.mt ?? 0, bottom: opts.mb ?? 8 },
   });
 }
@@ -107,7 +107,7 @@ export function th(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 8.5,
-    textColor: '#ffffff',
+    color: '#ffffff',
   });
 }
 
@@ -116,7 +116,7 @@ export function td(text: string, opts: { color?: ColorInput; bold?: boolean; siz
   return new TextBlock(text, {
     fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: opts.size ?? 8.5,
-    textColor: opts.color ?? INK,
+    color: opts.color ?? INK,
   });
 }
 
@@ -134,10 +134,10 @@ export function field(label: string, value: string): VerticalStack {
       new TextBlock(label.toUpperCase(), {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 6.5,
-        textColor: MUTED,
+        color: MUTED,
         margin: { bottom: 2 },
       }),
-      new TextBlock(value, { fontName: StandardFonts.Helvetica, fontSize: 9.5, textColor: INK }),
+      new TextBlock(value, { fontName: StandardFonts.Helvetica, fontSize: 9.5, color: INK }),
     ],
   });
 }
@@ -173,7 +173,7 @@ export function panel(title: string, children: IElement[], opts: { accent?: Colo
         new TextBlock(title, {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 9.5,
-          textColor: opts.accent ?? ACCENT,
+          color: opts.accent ?? ACCENT,
           margin: { bottom: 4 },
         }),
         ...children,
@@ -188,7 +188,7 @@ export function statusCell(text: string, color: ColorInput): Container {
     child: new TextBlock(text, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 8,
-      textColor: color,
+      color: color,
     }),
   });
 }
@@ -210,16 +210,16 @@ export function signatureSlot(role: string, name: string, opts: { dated?: string
       new TextBlock(role.toUpperCase(), {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 6.5,
-        textColor: MUTED,
+        color: MUTED,
         margin: { bottom: 18 },
       }),
       // The rule people actually sign on.
       new Container({ backgroundColor: ColorPalette.slate[400], height: 0.75, margin: { bottom: 5 } }),
-      new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: INK }),
+      new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, color: INK }),
       new TextBlock(opts.dated ? `Date: ${opts.dated}` : 'Date:', {
         fontName: StandardFonts.Helvetica,
         fontSize: 8,
-        textColor: MUTED,
+        color: MUTED,
         margin: { top: 3 },
       }),
     ],

@@ -109,7 +109,7 @@ export function generate(): Document {
   name.level = 1;
   name.fontName = StandardFonts.CourierBold;
   name.fontSize = 13;
-  name.textColor = INK;
+  name.color = INK;
   name.alignment = TextAlignment.Center;
   name.margin = new Thickness(0, 0, 0, 3);
   doc.add(name);
@@ -195,7 +195,7 @@ function center(text: string, size = 8, color: Color = MUTE, marginTop = 0): Tex
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Courier;
   b.fontSize = size;
-  b.textColor = color;
+  b.color = color;
   b.alignment = TextAlignment.Center;
   if (marginTop) b.margin = new Thickness(0, marginTop, 0, 0);
   return b;
@@ -216,7 +216,7 @@ function cell(text: string, size: number, bold = false, align: TextAlignment = T
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.CourierBold : StandardFonts.Courier;
   b.fontSize = size;
-  b.textColor = INK;
+  b.color = INK;
   b.alignment = align;
   return b;
 }
@@ -226,7 +226,7 @@ function rule(): TextBlock {
   const b = new TextBlock('- - - - - - - - - - - - - - - -');
   b.fontName = StandardFonts.Courier;
   b.fontSize = 9;
-  b.textColor = MUTE;
+  b.color = MUTE;
   b.alignment = TextAlignment.Center;
   b.margin = new Thickness(0, 5, 0, 5);
   return b;

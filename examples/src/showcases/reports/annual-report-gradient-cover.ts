@@ -109,7 +109,7 @@ function coverType(): Container {
     new TextBlock('SAMPLE', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 15,
-      textColor: Color.white,
+      color: Color.white,
       margin: { left: 36, bottom: 108 },
     })
   );
@@ -118,7 +118,7 @@ function coverType(): Container {
     new TextBlock(`ANNUAL REPORT ${YEAR}`, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 16,
-      textColor: ColorPalette.fuchsia[200],
+      color: ColorPalette.fuchsia[200],
       margin: { bottom: 8 },
     })
   );
@@ -129,7 +129,7 @@ function coverType(): Container {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 52,
       lineHeight: 1,
-      textColor: Color.white,
+      color: Color.white,
       margin: { bottom: 70 },
     })
   );
@@ -137,7 +137,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock('Designing the systems that power tomorrow', {
       fontSize: 14,
-      textColor: ColorPalette.violet[100],
+      color: ColorPalette.violet[100],
       margin: { bottom: 324 },
     })
   );
@@ -150,7 +150,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock('Prepared with BonniePDF', {
       fontSize: 10,
-      textColor: ColorPalette.violet[100],
+      color: ColorPalette.violet[100],
       margin: { bottom: 7 },
     })
   );
@@ -158,7 +158,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock(`Fiscal Year ${YEAR} · Confidential`, {
       fontSize: 10,
-      textColor: ColorPalette.violet[100],
+      color: ColorPalette.violet[100],
     })
   );
 

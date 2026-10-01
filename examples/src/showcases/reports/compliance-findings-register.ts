@@ -237,16 +237,16 @@ function findingCard(finding: Finding): Container {
         level: 2,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 12,
-        textColor: ColorPalette.slate[800],
+        color: ColorPalette.slate[800],
       }),
       new TextBlock(finding.category, {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 9,
         // 600, not 500: this card always sits on a coloured tint (red/orange-50),
         // and 500 falls to 4.35-4.49:1 against the 4.5:1 WCAG AA threshold there.
-        textColor: ColorPalette.slate[600],
+        color: ColorPalette.slate[600],
       }),
-      new TextBlock(finding.description, { fontSize: 10.5, textColor: ColorPalette.slate[700] }),
+      new TextBlock(finding.description, { fontSize: 10.5, color: ColorPalette.slate[700] }),
     ],
   });
 
@@ -256,18 +256,18 @@ function findingCard(finding: Finding): Container {
     const relatedLabel = new TextBlock('Related:', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
-      textColor: ColorPalette.slate[600],
+      color: ColorPalette.slate[600],
     });
     const relatedLink = new SectionLink(finding.related, anchorFor(finding.related), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
-      textColor: ColorPalette.blue[700],
+      color: ColorPalette.blue[700],
     });
-    const onPage = new TextBlock('on page', { fontSize: 9, textColor: ColorPalette.slate[600] });
+    const onPage = new TextBlock('on page', { fontSize: 9, color: ColorPalette.slate[600] });
     const relatedPage = new PageNumberOf(anchorFor(finding.related), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
-      textColor: ColorPalette.slate[600],
+      color: ColorPalette.slate[600],
     });
 
     const relatedRow = new HorizontalStack({ spacing: 4, margin: { top: 4 } });
@@ -287,7 +287,7 @@ function findingCard(finding: Finding): Container {
     child: new TextBlock(style.label, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 9,
-      textColor: '#ffffff',
+      color: '#ffffff',
       alignment: 'center',
     }),
   });
@@ -322,7 +322,7 @@ function priorityActions(critical: Finding[]): Container {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 13,
-      textColor: ColorPalette.red[800],
+      color: ColorPalette.red[800],
       margin: { bottom: 2 },
     })
   );
@@ -330,7 +330,7 @@ function priorityActions(critical: Finding[]): Container {
   inner.add(
     new TextBlock(`${critical.length} critical findings require immediate remediation:`, {
       fontSize: 10,
-      textColor: ColorPalette.slate[600],
+      color: ColorPalette.slate[600],
       margin: { bottom: 4 },
     })
   );
@@ -339,13 +339,13 @@ function priorityActions(critical: Finding[]): Container {
     const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 10.5,
-      textColor: ColorPalette.blue[700],
+      color: ColorPalette.blue[700],
     });
-    const onPage = new TextBlock('page', { fontSize: 10, textColor: ColorPalette.slate[600] });
+    const onPage = new TextBlock('page', { fontSize: 10, color: ColorPalette.slate[600] });
     const page = new PageNumberOf(anchorFor(finding.id), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 10,
-      textColor: ColorPalette.slate[700],
+      color: ColorPalette.slate[700],
     });
 
     const row = new HorizontalStack({ spacing: 4, margin: { bottom: 2 } });
@@ -376,7 +376,7 @@ export function generate(): Document {
         new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: ColorPalette.slate[400],
+          color: ColorPalette.slate[400],
           alignment: 'right',
         }),
     },
@@ -394,7 +394,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: ColorPalette.slate[800],
+      color: ColorPalette.slate[800],
       margin: { bottom: 10 },
     })
   );

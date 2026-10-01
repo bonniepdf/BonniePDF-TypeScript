@@ -168,7 +168,7 @@ function cell(text: string, style: CellStyle = {}): TextBlock {
   const block = new TextBlock(text);
   block.fontName = style.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = style.size ?? 9.5;
-  block.textColor = style.color ?? INK;
+  block.color = style.color ?? INK;
   if (style.align !== undefined) block.alignment = style.align;
   return block;
 }
@@ -180,7 +180,7 @@ function heading(text: string, id: string): Heading {
   h.tocIdentifier = id;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 11.5;
-  h.textColor = ACCENT;
+  h.color = ACCENT;
   h.margin = new Thickness(0, 4, 0, 6);
   return h;
 }
@@ -212,7 +212,7 @@ function titleBlock(data: ContractData): VerticalStack {
   title.tocIdentifier = 'title';
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 17;
-  title.textColor = ACCENT;
+  title.color = ACCENT;
 
   const reference = cell(`Agreement reference ${data.reference}`, { size: 8.5, color: MUTED });
   reference.margin = new Thickness(0, 3, 0, 0);
@@ -303,7 +303,7 @@ function clause(item: Clause, index: number): VerticalStack {
   list.numberFormat = NumberFormat.Decimal;
   list.fontName = StandardFonts.Helvetica;
   list.fontSize = 9.5;
-  list.textColor = INK;
+  list.color = INK;
   list.itemSpacing = 5;
   list.indent = 16;
   for (const paragraph of item.paragraphs) list.addItem(paragraph);
@@ -390,14 +390,14 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
     const header = new TextBlock(`${data.reference} · ${data.employer.name} and ${data.employee.name}`);
     header.fontName = StandardFonts.Helvetica;
     header.fontSize = 7;
-    header.textColor = FAINT;
+    header.color = FAINT;
     return header;
   };
   settings.footerTemplate = (pageNumber: number) => {
     const footer = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     footer.fontName = StandardFonts.Helvetica;
     footer.fontSize = 7;
-    footer.textColor = FAINT;
+    footer.color = FAINT;
     footer.alignment = TextAlignment.Center;
     return footer;
   };

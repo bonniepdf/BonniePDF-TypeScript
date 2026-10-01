@@ -215,7 +215,7 @@ export function generate(): Document {
     const link = new SectionLink(`Tab ${section.tab} — ${section.title}`, section.id);
     link.fontName = StandardFonts.HelveticaBold;
     link.fontSize = 12;
-    link.textColor = ACCENT;
+    link.color = ACCENT;
     heading.add(link, 4);
 
     const pageRow = new HorizontalStack();
@@ -226,7 +226,7 @@ export function generate(): Document {
     const pageRef = new PageNumberOf(section.id);
     pageRef.fontName = StandardFonts.HelveticaBold;
     pageRef.fontSize = 9;
-    pageRef.textColor = INK;
+    pageRef.color = INK;
     pageRow.add(pageRef);
 
     heading.add(pageRow, 1.4);
@@ -284,7 +284,7 @@ export function generate(): Document {
     const back = new SectionLink('Return to the index', 'index');
     back.fontName = StandardFonts.Helvetica;
     back.fontSize = 9;
-    back.textColor = ACCENT;
+    back.color = ACCENT;
     back.margin = new Thickness(0, 18, 0, 0);
     doc.add(back);
   }

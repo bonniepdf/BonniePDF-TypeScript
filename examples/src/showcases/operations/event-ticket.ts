@@ -44,7 +44,7 @@ function tb(
   return new TextBlock(content, {
     fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: size,
-    textColor: color,
+    color: color,
     alignment: opts.align,
     margin: opts.mb ? { bottom: opts.mb } : undefined,
   });
@@ -109,7 +109,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       new Heading('Sample Sound Festival', {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 19,
-        textColor: CREAM,
+        color: CREAM,
         margin: { bottom: 3 },
       }),
       tb('Main Stage, Sample Park, Sample City', 10, BODY, { mb: 12 }),

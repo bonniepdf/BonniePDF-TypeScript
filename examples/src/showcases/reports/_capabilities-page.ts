@@ -61,7 +61,7 @@ function tb(text: string, size: number, color: Color, bold = false, align?: Text
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = size;
-  b.textColor = color;
+  b.color = color;
   if (align) b.alignment = align;
   return b;
 }
@@ -207,7 +207,7 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 22;
-  heading.textColor = brand.primary;
+  heading.color = brand.primary;
   heading.margin = new Thickness(0, 0, 0, 6);
   content.add(heading);
 
@@ -246,7 +246,7 @@ export function addCapabilitiesPage(doc: Document, brand: ReportBrand): void {
   tableHeading.level = 3;
   tableHeading.fontName = StandardFonts.HelveticaBold;
   tableHeading.fontSize = 11;
-  tableHeading.textColor = brand.accent;
+  tableHeading.color = brand.accent;
   tableHeading.margin = new Thickness(0, 0, 0, 8);
   content.add(tableHeading);
   content.add(financialTable(brand.primary));

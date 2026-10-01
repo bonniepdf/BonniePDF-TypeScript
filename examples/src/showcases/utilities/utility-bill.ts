@@ -55,11 +55,11 @@ const ACCENT_DEEP = ColorPalette.amber[700];
 const HELVETICA = StandardFonts.Helvetica;
 const HELVETICA_BOLD = StandardFonts.HelveticaBold;
 
-const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, textColor: INK };
+const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, color: INK };
 const boldText: TextBlockOptions = { ...bodyText, fontName: HELVETICA_BOLD };
-const mutedText: TextBlockOptions = { ...bodyText, fontSize: 8, textColor: MUTED };
-const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: FAINT };
-const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED };
+const mutedText: TextBlockOptions = { ...bodyText, fontSize: 8, color: MUTED };
+const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, color: FAINT };
+const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED };
 const rightBody: TextBlockOptions = { ...bodyText, alignment: 'right' };
 
 // ── Domain model ─────────────────────────────────────────────────────────────
@@ -203,10 +203,10 @@ function masthead(data: UtilityBillData): VerticalStack {
         tocIdentifier: 'bill',
         fontName: HELVETICA_BOLD,
         fontSize: 16,
-        textColor: ACCENT_DEEP,
+        color: ACCENT_DEEP,
       }),
       new TextBlock(data.supplier.address, { ...mutedText, fontSize: 7.5 }),
-      new TextBlock(`Enquiries ${data.supplier.phone}`, { ...mutedText, fontSize: 7.5, textColor: FAINT }),
+      new TextBlock(`Enquiries ${data.supplier.phone}`, { ...mutedText, fontSize: 7.5, color: FAINT }),
     ],
   });
 
@@ -216,7 +216,7 @@ function masthead(data: UtilityBillData): VerticalStack {
       new TextBlock('YOUR ENERGY BILL', {
         fontName: HELVETICA_BOLD,
         fontSize: 11,
-        textColor: INK,
+        color: INK,
         alignment: 'right',
       }),
       new TextBlock(`${data.period.from} to ${data.period.to}`, { ...mutedText, alignment: 'right' }),
@@ -258,7 +258,7 @@ function amountDueBand(data: UtilityBillData): Container {
   const label = new VerticalStack({
     spacing: 1,
     children: [
-      new TextBlock('TOTAL AMOUNT DUE', { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK }),
+      new TextBlock('TOTAL AMOUNT DUE', { fontName: HELVETICA_BOLD, fontSize: 9, color: INK }),
       new TextBlock(`Please pay by ${data.period.dueBy}`, { ...mutedText, fontSize: 8 }),
     ],
   });
@@ -269,7 +269,7 @@ function amountDueBand(data: UtilityBillData): Container {
     new TextBlock(money(amountDue(data), data), {
       fontName: HELVETICA_BOLD,
       fontSize: 20,
-      textColor: ACCENT_DEEP,
+      color: ACCENT_DEEP,
       alignment: 'right',
     }),
     1
@@ -346,7 +346,7 @@ function tariffTable(data: UtilityBillData): VerticalStack {
         tocIdentifier: 'calculation',
         fontName: HELVETICA_BOLD,
         fontSize: 11,
-        textColor: INK,
+        color: INK,
         margin: { bottom: 6 },
       }),
       table,
@@ -381,7 +381,7 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
         tocIdentifier: 'usage',
         fontName: HELVETICA_BOLD,
         fontSize: 11,
-        textColor: INK,
+        color: INK,
         margin: { bottom: 6 },
       }),
       chart,
@@ -437,7 +437,7 @@ function remittanceSlip(data: UtilityBillData): Container {
       new TextBlock(money(amountDue(data), data), {
         fontName: HELVETICA_BOLD,
         fontSize: 17,
-        textColor: ACCENT_DEEP,
+        color: ACCENT_DEEP,
       }),
       new TextBlock(`Due by ${data.period.dueBy}`, { ...mutedText, fontSize: 7.5 }),
       new Barcode({
@@ -461,7 +461,7 @@ function remittanceSlip(data: UtilityBillData): Container {
     new TextBlock('Payment slip — detach and return with your payment', {
       fontName: HELVETICA_BOLD,
       fontSize: 9,
-      textColor: INK,
+      color: INK,
       margin: { bottom: 8 },
     }),
     row,

@@ -228,7 +228,7 @@ function bandCell(text: string, align: TextAlignment, bold: boolean, color: Colo
   const cell = new TextBlock(text);
   cell.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   cell.fontSize = bold ? 12 : 10;
-  cell.textColor = color;
+  cell.color = color;
   cell.alignment = align;
   return cell;
 }
@@ -287,7 +287,7 @@ function coverLabel(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 13;
-  b.textColor = ColorPalette.teal[300];
+  b.color = ColorPalette.teal[300];
   b.margin = new Thickness(0, 0, 0, 12);
   return b;
 }
@@ -298,7 +298,7 @@ function coverTitle(text: string): Heading {
   b.level = 1;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 42;
-  b.textColor = Color.white;
+  b.color = Color.white;
   return b;
 }
 
@@ -321,7 +321,7 @@ function coverSubtitle(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 16;
-  b.textColor = ColorPalette.blue[200];
+  b.color = ColorPalette.blue[200];
   return b;
 }
 
@@ -329,7 +329,7 @@ function coverCredit(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 10;
-  b.textColor = ColorPalette.blue[300];
+  b.color = ColorPalette.blue[300];
   b.margin = new Thickness(0, 0, 0, 4);
   return b;
 }
@@ -341,7 +341,7 @@ function sectionHeading(text: string): Heading {
   b.level = 2;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 20;
-  b.textColor = HEADING;
+  b.color = HEADING;
   b.margin = new Thickness(0, 0, 0, 12);
   return b;
 }
@@ -351,7 +351,7 @@ function subHeading(text: string): Heading {
   b.level = 3;
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 14;
-  b.textColor = ColorPalette.blue[700];
+  b.color = ColorPalette.blue[700];
   b.margin = new Thickness(0, 18, 0, 8);
   return b;
 }
@@ -360,7 +360,7 @@ function body(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 11;
-  b.textColor = INK;
+  b.color = INK;
   b.alignment = TextAlignment.Justify;
   b.margin = new Thickness(0, 0, 0, 12);
   return b;
@@ -389,14 +389,14 @@ function kpiCard(value: string, label: string, accent: Color): Container {
   const v = new TextBlock(value);
   v.fontName = StandardFonts.HelveticaBold;
   v.fontSize = 24;
-  v.textColor = accent;
+  v.color = accent;
   v.margin = new Thickness(0, 0, 0, 4);
   stack.add(v);
 
   const l = new TextBlock(label);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 10;
-  l.textColor = ColorPalette.slate[600];
+  l.color = ColorPalette.slate[600];
   stack.add(l);
 
   const card = new Container();

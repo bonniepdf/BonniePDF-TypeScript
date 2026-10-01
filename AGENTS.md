@@ -109,7 +109,7 @@ pnpm test:coverage
 pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
 ```
 
-`pnpm --filter @bonniepdf/examples verify-equivalence` asserts each `*-classes.ts` companion renders byte-for-byte identically to its options-object sibling.
+`pnpm --filter @bonniepdf/examples verify-equivalence` asserts each `*-classes.ts` companion renders byte-for-byte identically to its options-object sibling. `pnpm --filter @bonniepdf/examples verify-examples` builds every example as PDF and SVG and fails if any throws, so an API change that breaks an example shows up before a reader finds it.
 
 **`pnpm lint` does not currently run.** typescript-eslint refuses to load against the TypeScript 7 native compiler this repo builds with, and throws before linting anything ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)). The `eslint --fix` step has been removed from the lint-staged pre-commit config for the same reason - it blocked every commit touching `core/src` instead of catching defects. Restore both once upstream supports the TypeScript version pinned in `core/package.json`; the reasoning is repeated in `.husky/pre-commit`.
 
@@ -124,3 +124,7 @@ pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
 
 - The **spec** is the authority, not the other language's source. If a change here would force a behavioural divergence from the spec (and therefore from .NET), surface it — it likely needs a spec change applied to both implementations.
 - `README.md` is the authoritative user-facing description. Keep it in sync with public-API changes.
+
+## The public surface is curated
+
+The package exports its API, not its plumbing. Where a module mixes public and internal names, the barrels (`src/index.ts`, `charts.ts`, `security.ts`, `qr.ts`, `datamatrix.ts`) list the public names explicitly instead of `export *`. A new export needs a line in the barrel and a documented purpose; the default for a new helper is not to export it. Members of public types that only the engine uses carry `/** @internal */`, and `stripInternal` removes them from the declarations. `core/tests/api/surface.test.ts` fails if a name the specification lists as internal is exported again.

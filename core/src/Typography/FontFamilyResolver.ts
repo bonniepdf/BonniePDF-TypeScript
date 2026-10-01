@@ -1,5 +1,7 @@
 import { StandardFonts } from './StandardFonts';
 import { FontWeight } from './FontWeight';
+import { getActiveDocumentFonts } from './DocumentFontMetricScope';
+import { isDocumentFontName } from './DocumentFontName';
 
 /**
  * Defines the TTF file paths for each variant of a custom font family.
@@ -107,6 +109,13 @@ export class FontFamilyResolver {
   public static resolve(family: string, weight: FontWeight, italic: boolean): string {
     if (!family) return StandardFonts.Helvetica;
 
+    // A font name a document made for one of its faces is already resolved.
+    if (isDocumentFontName(family)) return family;
+
+    // The document's own fonts come first (spec 16 §4).
+    const documentFace = getActiveDocumentFonts()?.resolve(family, weight, italic);
+    if (documentFace) return documentFace.fontName;
+
     // If the family is already a fully-qualified standard font name, return it directly
     if (FontFamilyResolver.isStandardFontName(family)) return family;
 
@@ -148,6 +157,8 @@ export class FontFamilyResolver {
    * SVG, whose `font-family` lists fall through to the next name instead.
    */
   public static resolveKnown(family: string, weight: FontWeight, italic: boolean): string | undefined {
+    const documentFace = getActiveDocumentFonts()?.resolve(family, weight, italic);
+    if (documentFace) return documentFace.fontName;
     const isBold = weight >= FontWeight.SemiBold;
     const customFamily = FontFamilyResolver.customFamilies.get(family);
     if (customFamily) return customFamily.getVariant(isBold, italic);

@@ -32,10 +32,8 @@ import { FontManager } from './FontManager';
  *                 `fontName` set on elements.
  * @param opts     Optional family / subfamily overrides for the FontManager
  *                 registration. Defaults are read from the font's name table.
- * @returns        The parsed `TtfFont` instance, for callers that want direct
- *                 access (e.g. to inspect metrics).
  */
-export async function loadFontFromUrl(url: string, opts?: { family?: string; subfamily?: string }): Promise<TtfFont> {
+export async function loadFontFromUrl(url: string, opts?: { family?: string; subfamily?: string }): Promise<void> {
   const font = await TtfFont.fromFile(url);
   FontMetrics.registerFontInstance(url, font);
 
@@ -51,6 +49,4 @@ export async function loadFontFromUrl(url: string, opts?: { family?: string; sub
   } catch {
     // ignore - path-style usage works regardless
   }
-
-  return font;
 }

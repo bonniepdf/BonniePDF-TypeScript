@@ -1,10 +1,12 @@
 import { TtfFont } from './TrueType/TtfFont';
 import { FontManager } from './FontManager';
+import type { DocumentFonts } from './DocumentFonts';
 
 interface DocumentFontMetricScope {
   embedStandardFonts: boolean;
   pathAliases: Map<string, string>;
   instanceAliases: Map<string, TtfFont>;
+  documentFonts?: DocumentFonts;
 }
 
 const globalPathAliases = new Map<string, string>();
@@ -18,7 +20,8 @@ const registryFontPaths = new WeakMap<object, Map<string, string>>();
 export function beginDocumentFontMetricScope(
   embedStandardFonts: boolean,
   instanceAliases?: ReadonlyMap<string, TtfFont>,
-  pathAliases?: ReadonlyMap<string, string>
+  pathAliases?: ReadonlyMap<string, string>,
+  documentFonts?: DocumentFonts
 ): { dispose(): void } {
   const previous = currentScope;
   const scope: DocumentFontMetricScope = {
@@ -28,6 +31,12 @@ export function beginDocumentFontMetricScope(
   };
   for (const [name, path] of pathAliases ?? []) scope.pathAliases.set(name, path);
   for (const [name, font] of instanceAliases ?? []) scope.instanceAliases.set(name, font);
+  if (documentFonts && !documentFonts.isEmpty) {
+    scope.documentFonts = documentFonts;
+    // Measurement runs before any resource is registered, so the faces' parsed fonts are
+    // known to it from the start, under the same names the elements carry.
+    for (const face of documentFonts.faces) scope.instanceAliases.set(face.fontName, face.font);
+  }
   currentScope = scope;
 
   let disposed = false;
@@ -92,6 +101,16 @@ export function getFontPathAlias(logicalName: string): string | undefined {
 
 export function getFontInstanceAlias(logicalName: string): TtfFont | undefined {
   return (currentScope?.instanceAliases ?? globalInstanceAliases).get(logicalName);
+}
+
+/** The document fonts of the render pass in progress, if that document has any. */
+export function getActiveDocumentFonts(): DocumentFonts | undefined {
+  return currentScope?.documentFonts;
+}
+
+/** Bytes of a document font by its font name, within the render pass in progress. */
+export function getDocumentFontBytes(fontName: string): Uint8Array | undefined {
+  return currentScope?.documentFonts?.faceForFontName(fontName)?.bytes;
 }
 
 export function shouldUseEmbeddedStandardMetrics(): boolean {

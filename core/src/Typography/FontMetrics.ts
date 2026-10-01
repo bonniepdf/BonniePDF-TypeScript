@@ -36,6 +36,7 @@ export class FontMetrics {
    * Registers a logical font name alias pointing to an already-parsed TtfFont.
    * Used when the font was loaded from bytes (e.g., bundled Liberation Sans) rather
    * than a file path, so file-based caching is bypassed entirely.
+   * @internal
    */
   public static registerFontInstance(logicalName: string, font: TtfFont): void {
     registerFontInstanceAlias(logicalName, font);
@@ -194,6 +195,7 @@ export class FontMetrics {
    * @param text - The text to measure
    * @param font - The embedded TTF font
    * @param fontSize - The font size in points
+   * @internal
    */
   public static getKernedStringWidth(text: string, font: TtfFont, fontSize: number): number {
     if (!text || !font) return 0;

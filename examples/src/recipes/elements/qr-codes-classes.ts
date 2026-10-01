@@ -53,7 +53,7 @@ export function generate(): Document {
   const title = new TextBlock('QR Code Generator');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -69,7 +69,7 @@ export function generate(): Document {
   const basicHeader = new TextBlock('Basic QR Code');
   basicHeader.fontName = StandardFonts.HelveticaBold;
   basicHeader.fontSize = 16;
-  basicHeader.textColor = ColorPalette.indigo[600];
+  basicHeader.color = ColorPalette.indigo[600];
   basicHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(basicHeader);
 
@@ -114,7 +114,7 @@ export function generate(): Document {
   const eccHeader = new TextBlock('Error Correction Levels');
   eccHeader.fontName = StandardFonts.HelveticaBold;
   eccHeader.fontSize = 16;
-  eccHeader.textColor = ColorPalette.indigo[600];
+  eccHeader.color = ColorPalette.indigo[600];
   eccHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(eccHeader);
 
@@ -157,12 +157,12 @@ export function generate(): Document {
 
     const detail = new TextBlock(eccDetail);
     detail.fontSize = 9;
-    detail.textColor = ColorPalette.slate[500];
+    detail.color = ColorPalette.slate[500];
     detail.alignment = TextAlignment.Center;
 
     const url = new TextBlock(urlData);
     url.fontSize = 8;
-    url.textColor = ColorPalette.slate[600];
+    url.color = ColorPalette.slate[600];
     url.alignment = TextAlignment.Center;
     url.margin = new Thickness(0, 4, 0, 0);
 
@@ -185,7 +185,7 @@ export function generate(): Document {
   const colorsHeader = new TextBlock('Colors & Backgrounds');
   colorsHeader.fontName = StandardFonts.HelveticaBold;
   colorsHeader.fontSize = 16;
-  colorsHeader.textColor = ColorPalette.indigo[600];
+  colorsHeader.color = ColorPalette.indigo[600];
   colorsHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(colorsHeader);
 
@@ -213,7 +213,7 @@ export function generate(): Document {
   fgCol.add(fgWrap);
   const fgLabel = new TextBlock('tel:+1234567890');
   fgLabel.fontSize = 9;
-  fgLabel.textColor = ColorPalette.slate[500];
+  fgLabel.color = ColorPalette.slate[500];
   fgLabel.alignment = TextAlignment.Center;
   fgLabel.margin = new Thickness(0, 8, 0, 0);
   fgCol.add(fgLabel);
@@ -240,7 +240,7 @@ export function generate(): Document {
   bgCol.add(bgWrap);
   const bgLabel = new TextBlock('mailto:hello@example.com');
   bgLabel.fontSize = 9;
-  bgLabel.textColor = ColorPalette.slate[500];
+  bgLabel.color = ColorPalette.slate[500];
   bgLabel.alignment = TextAlignment.Center;
   bgLabel.margin = new Thickness(0, 8, 0, 0);
   bgCol.add(bgLabel);
@@ -268,7 +268,7 @@ export function generate(): Document {
   transCol.add(transWrap);
   const transLabel = new TextBlock('WIFI:S:MyNetwork;...');
   transLabel.fontSize = 9;
-  transLabel.textColor = ColorPalette.slate[500];
+  transLabel.color = ColorPalette.slate[500];
   transLabel.alignment = TextAlignment.Center;
   transLabel.margin = new Thickness(0, 8, 0, 0);
   transCol.add(transLabel);

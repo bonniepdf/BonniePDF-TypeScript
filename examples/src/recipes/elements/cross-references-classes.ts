@@ -74,7 +74,7 @@ export function generate(): Document {
   const title = new Heading('Cross-Reference Field Guide');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
@@ -90,7 +90,7 @@ export function generate(): Document {
   contentsLabel.level = 2;
   contentsLabel.fontName = StandardFonts.HelveticaBold;
   contentsLabel.fontSize = 15;
-  contentsLabel.textColor = ColorPalette.slate[800];
+  contentsLabel.color = ColorPalette.slate[800];
   contentsLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(contentsLabel);
 
@@ -99,7 +99,7 @@ export function generate(): Document {
     const jump = new SectionLink(`> ${chapterTitle}`, id);
     jump.fontName = StandardFonts.HelveticaBold;
     jump.fontSize = 13;
-    jump.textColor = ColorPalette.blue[600];
+    jump.color = ColorPalette.blue[600];
     jump.margin = new Thickness(0, 0, 0, 2);
     doc.add(jump);
 
@@ -110,13 +110,13 @@ export function generate(): Document {
 
     const label = new TextBlock('begins on page');
     label.fontSize = 11;
-    label.textColor = ColorPalette.slate[500];
+    label.color = ColorPalette.slate[500];
     row.add(label, label.getPreferredWidth());
 
     const pageRef = new PageNumberOf(id);
     pageRef.fontName = StandardFonts.HelveticaBold;
     pageRef.fontSize = 11;
-    pageRef.textColor = ColorPalette.slate[700];
+    pageRef.color = ColorPalette.slate[700];
     row.add(pageRef);
 
     doc.add(row);
@@ -133,7 +133,7 @@ export function generate(): Document {
     heading.level = 2;
     heading.fontName = StandardFonts.HelveticaBold;
     heading.fontSize = 18;
-    heading.textColor = ColorPalette.slate[800];
+    heading.color = ColorPalette.slate[800];
     heading.margin = new Thickness(0, 0, 0, 8);
     doc.add(heading);
 
@@ -144,7 +144,7 @@ export function generate(): Document {
     // Back-reference to the contents page, resolved the same way.
     const back = new SectionLink('< Back to Contents', 'contents');
     back.fontSize = 12;
-    back.textColor = ColorPalette.blue[600];
+    back.color = ColorPalette.blue[600];
     doc.add(back);
   }
 

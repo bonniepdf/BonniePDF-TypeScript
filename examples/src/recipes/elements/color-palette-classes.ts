@@ -45,7 +45,7 @@ function rowLabel(name: PaletteName): Container {
   const text = new TextBlock(name);
   text.fontName = StandardFonts.Helvetica;
   text.fontSize = 9;
-  text.textColor = ColorPalette.slate[700];
+  text.color = ColorPalette.slate[700];
 
   const box = new Container();
   box.width = LABEL_WIDTH;
@@ -61,7 +61,7 @@ function headerCell(label: string): TextBlock {
   const text = new TextBlock(label);
   text.fontName = StandardFonts.Helvetica;
   text.fontSize = 7;
-  text.textColor = ColorPalette.slate[500];
+  text.color = ColorPalette.slate[500];
   // Centred via alignment; no wrapping Container needed — the cell it lands in
   // already stretches with its column so the number stays centred over the swatch.
   text.alignment = TextAlignment.Center;
@@ -95,7 +95,7 @@ export function generate(): Document {
   const title = new TextBlock('ColorPalette');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 18;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   doc.add(title);
 
   const subtitle = new TextBlock(
@@ -103,7 +103,7 @@ export function generate(): Document {
   );
   subtitle.fontName = StandardFonts.Helvetica;
   subtitle.fontSize = 9;
-  subtitle.textColor = ColorPalette.slate[500];
+  subtitle.color = ColorPalette.slate[500];
   subtitle.margin = new Thickness(0, 4, 0, 8);
   doc.add(subtitle);
 

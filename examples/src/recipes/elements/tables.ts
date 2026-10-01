@@ -90,7 +90,7 @@ export function generate(): Document {
       footerTemplate: (pageNumber: number) =>
         new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
           fontSize: 9,
-          textColor: 'slate-400',
+          color: 'slate-400',
           alignment: 'right',
         }),
     },
@@ -110,7 +110,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 10 },
     })
   );
@@ -137,9 +137,9 @@ export function generate(): Document {
   for (const [name, dept, role] of EMPLOYEES) {
     const bg = rowIndex++ % 2 === 0 ? '#ffffff' : 'slate-50';
     const row = TableRow.fromElements(
-      new TextBlock(dept, { fontSize: 10, textColor: 'slate-600' }),
-      new TextBlock(name, { fontSize: 10, textColor: 'slate-800' }),
-      new TextBlock(role, { fontSize: 10, textColor: 'slate-600' })
+      new TextBlock(dept, { fontSize: 10, color: 'slate-600' }),
+      new TextBlock(name, { fontSize: 10, color: 'slate-800' }),
+      new TextBlock(role, { fontSize: 10, color: 'slate-600' })
     );
     row.backgroundColor = bg;
     table.addRow(row);
@@ -155,7 +155,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { top: 20, bottom: 10 },
     })
   );
@@ -167,7 +167,7 @@ export function generate(): Document {
         level: 2,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 14,
-        textColor: 'slate-700',
+        color: 'slate-700',
         margin: { top: 14, bottom: 6 },
       })
     );

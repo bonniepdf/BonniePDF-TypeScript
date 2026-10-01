@@ -45,7 +45,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 8 },
     })
   );
@@ -75,7 +75,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 15,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { bottom: 6 },
     })
   );
@@ -84,7 +84,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     new TextBlock(
       'The flag of Mexico is 356 paths and four gradients. Zoom in: the eagle, the serpent and every feather stay ' +
         'crisp at any scale.',
-      { textColor: 'slate-500', margin: { bottom: 10 } }
+      { color: 'slate-500', margin: { bottom: 10 } }
     )
   );
 
@@ -98,7 +98,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 15,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: 16, bottom: 6 },
     })
   );
@@ -106,7 +106,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(
     new TextBlock('Flag artwork: flag-icons 7.2.3 (MIT licence), https://github.com/lipis/flag-icons.', {
       fontSize: 9,
-      textColor: 'slate-500',
+      color: 'slate-500',
     })
   );
 
@@ -163,7 +163,7 @@ function flagCard(flag: Flag, assets: ReadonlyMap<string, Uint8Array>): IElement
       spacing: 4,
       children: [
         new Svg({ svgData: flagMarkup(flag, assets), width: CARD_FLAG_WIDTH, altText: altText(flag) }),
-        new TextBlock(flag.name, { fontSize: 9, textColor: 'slate-600', alignment: 'center' }),
+        new TextBlock(flag.name, { fontSize: 9, color: 'slate-600', alignment: 'center' }),
       ],
     }),
   });

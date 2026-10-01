@@ -110,7 +110,7 @@ export function generate(): Document {
   settings.footerTemplate = (pageNumber: number): TextBlock => {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
+    b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Right;
     return b;
   };
@@ -130,7 +130,7 @@ export function generate(): Document {
   h1Dir.level = 1;
   h1Dir.fontName = StandardFonts.HelveticaBold;
   h1Dir.fontSize = 20;
-  h1Dir.textColor = ColorPalette.slate[800];
+  h1Dir.color = ColorPalette.slate[800];
   h1Dir.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1Dir);
 
@@ -161,13 +161,13 @@ export function generate(): Document {
     const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
     const deptCell = new TextBlock(dept);
     deptCell.fontSize = 10;
-    deptCell.textColor = ColorPalette.slate[600];
+    deptCell.color = ColorPalette.slate[600];
     const nameCell = new TextBlock(name);
     nameCell.fontSize = 10;
-    nameCell.textColor = ColorPalette.slate[800];
+    nameCell.color = ColorPalette.slate[800];
     const roleCell = new TextBlock(role);
     roleCell.fontSize = 10;
-    roleCell.textColor = ColorPalette.slate[600];
+    roleCell.color = ColorPalette.slate[600];
     table.addRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
   }
 
@@ -180,7 +180,7 @@ export function generate(): Document {
   h1Overview.level = 1;
   h1Overview.fontName = StandardFonts.HelveticaBold;
   h1Overview.fontSize = 20;
-  h1Overview.textColor = ColorPalette.slate[800];
+  h1Overview.color = ColorPalette.slate[800];
   h1Overview.margin = new Thickness(0, 20, 0, 10);
   doc.add(h1Overview);
 
@@ -190,7 +190,7 @@ export function generate(): Document {
     h2.level = 2;
     h2.fontName = StandardFonts.HelveticaBold;
     h2.fontSize = 14;
-    h2.textColor = ColorPalette.slate[700];
+    h2.color = ColorPalette.slate[700];
     h2.margin = new Thickness(0, 14, 0, 6);
     doc.add(h2);
 

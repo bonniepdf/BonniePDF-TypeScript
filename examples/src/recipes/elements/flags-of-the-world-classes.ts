@@ -55,7 +55,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 8);
   doc.add(h1);
 
@@ -84,7 +84,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   h2Full.level = 2;
   h2Full.fontName = StandardFonts.HelveticaBold;
   h2Full.fontSize = 15;
-  h2Full.textColor = ColorPalette.indigo[600];
+  h2Full.color = ColorPalette.indigo[600];
   h2Full.margin = new Thickness(0, 0, 0, 6);
   doc.add(h2Full);
 
@@ -92,7 +92,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     'The flag of Mexico is 356 paths and four gradients. Zoom in: the eagle, the serpent and every feather stay ' +
       'crisp at any scale.'
   );
-  fullIntro.textColor = ColorPalette.slate[500];
+  fullIntro.color = ColorPalette.slate[500];
   fullIntro.margin = new Thickness(0, 0, 0, 10);
   doc.add(fullIntro);
 
@@ -109,13 +109,13 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   h2Credits.level = 2;
   h2Credits.fontName = StandardFonts.HelveticaBold;
   h2Credits.fontSize = 15;
-  h2Credits.textColor = ColorPalette.indigo[600];
+  h2Credits.color = ColorPalette.indigo[600];
   h2Credits.margin = new Thickness(0, 16, 0, 6);
   doc.add(h2Credits);
 
   const credit = new TextBlock('Flag artwork: flag-icons 7.2.3 (MIT licence), https://github.com/lipis/flag-icons.');
   credit.fontSize = 9;
-  credit.textColor = ColorPalette.slate[500];
+  credit.color = ColorPalette.slate[500];
   doc.add(credit);
 
   return doc;
@@ -170,7 +170,7 @@ function flagCard(flag: Flag, assets: ReadonlyMap<string, Uint8Array>): IElement
 
   const name = new TextBlock(flag.name);
   name.fontSize = 9;
-  name.textColor = ColorPalette.slate[600];
+  name.color = ColorPalette.slate[600];
   name.alignment = TextAlignment.Center;
 
   const stack = new VerticalStack();

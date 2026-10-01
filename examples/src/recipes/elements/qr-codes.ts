@@ -39,7 +39,7 @@ export function generate(): Document {
     new TextBlock('QR Code Generator', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 20 },
     })
   );
@@ -137,8 +137,8 @@ export function generate(): Document {
                 alignment: 'center',
                 margin: { top: 8 },
               }),
-              new TextBlock(eccDetail, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
-              new TextBlock(urlData, { fontSize: 8, textColor: 'slate-600', alignment: 'center', margin: { top: 4 } }),
+              new TextBlock(eccDetail, { fontSize: 9, color: 'slate-500', alignment: 'center' }),
+              new TextBlock(urlData, { fontSize: 8, color: 'slate-600', alignment: 'center', margin: { top: 4 } }),
             ],
           })
       ),
@@ -215,7 +215,7 @@ function sectionHeader(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 16,
-    textColor: 'indigo-600',
+    color: 'indigo-600',
     margin: { bottom: 10 },
   });
 }
@@ -231,7 +231,7 @@ function colorColumn(title: string, wrap: Container, labelText: string): Vertica
     children: [
       new TextBlock(title, { fontName: StandardFonts.HelveticaBold, margin: { bottom: 8 } }),
       wrap,
-      new TextBlock(labelText, { fontSize: 9, textColor: 'slate-500', alignment: 'center', margin: { top: 8 } }),
+      new TextBlock(labelText, { fontSize: 9, color: 'slate-500', alignment: 'center', margin: { top: 8 } }),
     ],
   });
 }

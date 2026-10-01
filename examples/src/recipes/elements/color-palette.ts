@@ -37,7 +37,7 @@ function rowLabel(name: PaletteName): Container {
     height: BOX_HEIGHT,
     // Nudge the label down so it sits roughly centred against the box.
     padding: { top: 9, right: H_GAP },
-    child: new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: 'slate-700' }),
+    child: new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-700' }),
   });
 }
 
@@ -48,7 +48,7 @@ function headerCell(label: string): TextBlock {
   return new TextBlock(label, {
     fontName: StandardFonts.Helvetica,
     fontSize: 7,
-    textColor: 'slate-500',
+    color: 'slate-500',
     alignment: 'center',
   });
 }
@@ -86,14 +86,12 @@ export function generate(): Document {
   });
 
   // ── Title ──
-  doc.add(
-    new TextBlock('ColorPalette', { fontName: StandardFonts.HelveticaBold, fontSize: 18, textColor: 'slate-800' })
-  );
+  doc.add(new TextBlock('ColorPalette', { fontName: StandardFonts.HelveticaBold, fontSize: 18, color: 'slate-800' }));
 
   doc.add(
     new TextBlock(
       'Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].',
-      { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: 'slate-500', margin: { top: 4, bottom: 8 } }
+      { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-500', margin: { top: 4, bottom: 8 } }
     )
   );
 

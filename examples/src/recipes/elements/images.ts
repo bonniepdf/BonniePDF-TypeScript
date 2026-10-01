@@ -50,7 +50,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 8 },
     })
   );
@@ -160,13 +160,13 @@ function sectionHeading(title: string, tocId: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 15,
-    textColor: 'indigo-600',
+    color: 'indigo-600',
     margin: { top: 14, bottom: 6 },
   });
 }
 
 function caption(text: string): TextBlock {
-  return new TextBlock(text, { fontSize: 10, textColor: 'slate-500', margin: { bottom: 6 } });
+  return new TextBlock(text, { fontSize: 10, color: 'slate-500', margin: { bottom: 6 } });
 }
 
 function fitModeBlock(

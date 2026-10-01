@@ -41,7 +41,7 @@ export function generate(): Document {
     new TextBlock('1D Barcodes', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 16 },
     })
   );
@@ -121,11 +121,11 @@ export function generate(): Document {
           new TextBlock(cardTitle, {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 13,
-            textColor: 'slate-800',
+            color: 'slate-800',
             margin: { bottom: 6 },
           }),
-          new TextBlock(description, { fontSize: 10, textColor: 'slate-600', margin: { bottom: 6 } }),
-          ...specifics.map(line => new TextBlock(line, { fontSize: 9, textColor: 'slate-500', margin: { bottom: 2 } })),
+          new TextBlock(description, { fontSize: 10, color: 'slate-600', margin: { bottom: 6 } }),
+          ...specifics.map(line => new TextBlock(line, { fontSize: 9, color: 'slate-500', margin: { bottom: 2 } })),
         ],
       }),
       1
@@ -145,7 +145,7 @@ function sectionHeader(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 16,
-    textColor: 'indigo-600',
+    color: 'indigo-600',
     margin: { bottom: 10 },
   });
 }

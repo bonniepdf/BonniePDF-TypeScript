@@ -33,14 +33,14 @@ export function generate(): Document {
           new TextBlock('BonniePDF - Horizontal Grouped Bar Chart', {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
           })
         );
         stack.add(
           new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
             alignment: 'right',
           }),
           1
@@ -58,7 +58,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Horizontal Grouped Bar Chart: Quarterly Sales by Region', {
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       alignment: 'center',
       margin: { bottom: 8 },
     })
@@ -67,7 +67,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Three product lines compared across four quarters - horizontal grouped layout', {
       fontSize: 14,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
       margin: { bottom: 20 },
     })

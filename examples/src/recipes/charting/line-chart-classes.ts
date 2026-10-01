@@ -46,12 +46,12 @@ export function generate(): Document {
     const left = new TextBlock('BonniePDF - Line Chart');
     left.fontName = StandardFonts.Helvetica;
     left.fontSize = 10;
-    left.textColor = ColorPalette.slate[500];
+    left.color = ColorPalette.slate[500];
     stack.add(left);
     const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
-    right.textColor = ColorPalette.slate[500];
+    right.color = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
     stack.add(right, 1);
     return stack;
@@ -66,14 +66,14 @@ export function generate(): Document {
 
   const title = new TextBlock('Line Chart: Monthly Revenue Trends');
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.alignment = TextAlignment.Center;
   title.margin = new Thickness(0, 0, 0, 8);
   doc.add(title);
 
   const subtitle = new TextBlock('Connected data points with markers and value labels');
   subtitle.fontSize = 14;
-  subtitle.textColor = ColorPalette.slate[600];
+  subtitle.color = ColorPalette.slate[600];
   subtitle.alignment = TextAlignment.Center;
   subtitle.margin = new Thickness(0, 0, 0, 20);
   doc.add(subtitle);

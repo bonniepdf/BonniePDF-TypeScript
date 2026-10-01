@@ -51,10 +51,8 @@ const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, va
 
 /** Adds a centred title + subtitle above a chart page. */
 function pageHeader(doc: Document, title: string, subtitle: string): void {
-  doc.add(new TextBlock(title, { fontSize: 24, textColor: 'slate-800', alignment: 'center', margin: { bottom: 10 } }));
-  doc.add(
-    new TextBlock(subtitle, { fontSize: 14, textColor: 'slate-600', alignment: 'center', margin: { bottom: 20 } })
-  );
+  doc.add(new TextBlock(title, { fontSize: 24, color: 'slate-800', alignment: 'center', margin: { bottom: 10 } }));
+  doc.add(new TextBlock(subtitle, { fontSize: 14, color: 'slate-600', alignment: 'center', margin: { bottom: 20 } }));
 }
 
 // ── Entry point ──────────────────────────────────────────────────────────────
@@ -76,14 +74,14 @@ export function generate(): Document {
           new TextBlock('BonniePDF Charting Examples', {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
           })
         );
         stack.add(
           new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
             fontName: StandardFonts.Helvetica,
             fontSize: 10,
-            textColor: 'slate-500',
+            color: 'slate-500',
             alignment: 'right',
           }),
           1

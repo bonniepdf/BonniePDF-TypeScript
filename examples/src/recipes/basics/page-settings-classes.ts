@@ -60,7 +60,7 @@ export function generate(): Document {
     const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
+    b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Center;
     return b;
   };
@@ -90,12 +90,12 @@ export function generate(): Document {
       const heading = new TextBlock(`${formatName} (${orientation})`);
       heading.fontName = StandardFonts.HelveticaBold;
       heading.fontSize = 28;
-      heading.textColor = ColorPalette.slate[800];
+      heading.color = ColorPalette.slate[800];
       content.add(heading);
 
       const sub = new TextBlock('Technical Specifications');
       sub.fontSize = 14;
-      sub.textColor = ColorPalette.slate[500];
+      sub.color = ColorPalette.slate[500];
       content.add(sub);
 
       const divider = new Line();
@@ -109,7 +109,7 @@ export function generate(): Document {
       );
       points.fontName = StandardFonts.Courier;
       points.fontSize = 11;
-      points.textColor = ColorPalette.slate[600];
+      points.color = ColorPalette.slate[600];
       content.add(points);
 
       const inches = new TextBlock(
@@ -117,7 +117,7 @@ export function generate(): Document {
       );
       inches.fontName = StandardFonts.Courier;
       inches.fontSize = 11;
-      inches.textColor = ColorPalette.slate[600];
+      inches.color = ColorPalette.slate[600];
       content.add(inches);
 
       const millimeters = new TextBlock(
@@ -125,7 +125,7 @@ export function generate(): Document {
       );
       millimeters.fontName = StandardFonts.Courier;
       millimeters.fontSize = 11;
-      millimeters.textColor = ColorPalette.slate[600];
+      millimeters.color = ColorPalette.slate[600];
       content.add(millimeters);
 
       doc.add(content);

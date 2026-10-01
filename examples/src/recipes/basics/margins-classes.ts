@@ -54,7 +54,7 @@ export function generate(): Document {
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 20;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 6);
   doc.add(title);
 
@@ -117,7 +117,7 @@ export function generate(): Document {
 
   const placeholderLabel = new TextBlock('Image 100x60');
   placeholderLabel.fontSize = 10;
-  placeholderLabel.textColor = ColorPalette.amber[900];
+  placeholderLabel.color = ColorPalette.amber[900];
   placeholderLabel.alignment = TextAlignment.Center;
 
   const placeholder = new Container();
@@ -175,7 +175,7 @@ export function generate(): Document {
   ] as [Color, Color, string, boolean][]) {
     const t = new TextBlock(text);
     t.fontSize = 10;
-    t.textColor = fg;
+    t.color = fg;
 
     const c = new Container();
     c.backgroundColor = bg;
@@ -193,7 +193,7 @@ export function generate(): Document {
   );
   note.fontName = StandardFonts.HelveticaOblique;
   note.fontSize = 10;
-  note.textColor = ColorPalette.slate[500];
+  note.color = ColorPalette.slate[500];
   doc.add(note);
 
   return doc;
@@ -206,7 +206,7 @@ function sectionHeading(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = ColorPalette.slate[700];
+  h.color = ColorPalette.slate[700];
   h.margin = new Thickness(0, 8, 0, 4);
   return h;
 }
@@ -219,14 +219,14 @@ function comparisonColumn(heading: string, caption: string, demo: Container): Ve
   const label = new TextBlock(heading);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 10;
-  label.textColor = ColorPalette.slate[700];
+  label.color = ColorPalette.slate[700];
   column.add(label);
 
   column.add(demo);
 
   const desc = new TextBlock(caption);
   desc.fontSize = 9;
-  desc.textColor = ColorPalette.slate[500];
+  desc.color = ColorPalette.slate[500];
   column.add(desc);
 
   return column;
@@ -236,7 +236,7 @@ function comparisonColumn(heading: string, caption: string, demo: Container): Ve
 function contentChip(): Container {
   const chipLabel = new TextBlock('content');
   chipLabel.fontSize = 10;
-  chipLabel.textColor = ColorPalette.slate[50];
+  chipLabel.color = ColorPalette.slate[50];
   chipLabel.alignment = TextAlignment.Center;
 
   const chip = new Container();

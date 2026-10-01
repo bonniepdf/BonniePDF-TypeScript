@@ -43,7 +43,7 @@ export function generate(): Document {
         new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: 'slate-400',
+          color: 'slate-400',
           alignment: 'center',
         }),
     },
@@ -74,22 +74,22 @@ export function generate(): Document {
             new TextBlock(`${formatName} (${orientation})`, {
               fontName: StandardFonts.HelveticaBold,
               fontSize: 28,
-              textColor: 'slate-800',
+              color: 'slate-800',
             }),
-            new TextBlock('Technical Specifications', { fontSize: 14, textColor: 'slate-500' }),
+            new TextBlock('Technical Specifications', { fontSize: 14, color: 'slate-500' }),
             new Line({ color: 'slate-200', thickness: 1 }),
             new TextBlock(`${'Points:'.padEnd(15)} ${current.width.toFixed(2)}pt x ${current.height.toFixed(2)}pt`, {
               fontName: StandardFonts.Courier,
               fontSize: 11,
-              textColor: 'slate-600',
+              color: 'slate-600',
             }),
             new TextBlock(
               `${'Inches:'.padEnd(15)} ${(current.width / 72).toFixed(2)}" x ${(current.height / 72).toFixed(2)}"`,
-              { fontName: StandardFonts.Courier, fontSize: 11, textColor: 'slate-600' }
+              { fontName: StandardFonts.Courier, fontSize: 11, color: 'slate-600' }
             ),
             new TextBlock(
               `${'Millimeters:'.padEnd(15)} ${((current.width / 72) * mmPerInch).toFixed(1)}mm x ${((current.height / 72) * mmPerInch).toFixed(1)}mm`,
-              { fontName: StandardFonts.Courier, fontSize: 11, textColor: 'slate-600' }
+              { fontName: StandardFonts.Courier, fontSize: 11, color: 'slate-600' }
             ),
           ],
         })

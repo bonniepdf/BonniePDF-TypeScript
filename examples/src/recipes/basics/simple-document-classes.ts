@@ -58,7 +58,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = HEADING;
   h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -71,7 +71,7 @@ export function generate(): Document {
   keyFeatures.level = 2;
   keyFeatures.fontName = HEADING;
   keyFeatures.fontSize = 14;
-  keyFeatures.textColor = ColorPalette.slate[700];
+  keyFeatures.color = ColorPalette.slate[700];
   keyFeatures.margin = new Thickness(0, 0, 0, 6);
   doc.add(keyFeatures);
 
@@ -107,7 +107,7 @@ export function generate(): Document {
   scan.level = 2;
   scan.fontName = HEADING;
   scan.fontSize = 14;
-  scan.textColor = ColorPalette.slate[700];
+  scan.color = ColorPalette.slate[700];
   scan.margin = new Thickness(0, 0, 0, 6);
   doc.add(scan);
 
@@ -124,7 +124,7 @@ export function generate(): Document {
   page2.level = 1;
   page2.fontName = HEADING;
   page2.fontSize = 20;
-  page2.textColor = ColorPalette.slate[800];
+  page2.color = ColorPalette.slate[800];
   page2.margin = new Thickness(0, 0, 0, 12);
   doc.add(page2);
   doc.add(new TextBlock('This demonstrates multipage support with automatic page management.'));
@@ -138,7 +138,7 @@ export function generate(): Document {
   p3title.level = 1;
   p3title.fontName = HEADING;
   p3title.fontSize = 16;
-  p3title.textColor = ColorPalette.slate[800];
+  p3title.color = ColorPalette.slate[800];
   p3title.alignment = TextAlignment.Center;
   p3title.margin = new Thickness(0, 50, 0, 0);
   doc.add(p3title);

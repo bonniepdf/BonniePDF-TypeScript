@@ -1,3 +1,4 @@
+import { formatChartNumber } from './ChartNumberFormat';
 import { ICanvas } from '../Drawing/ICanvas';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartData } from './Models/ChartData';
@@ -421,7 +422,7 @@ export abstract class CartesianChartBase extends ChartBase {
       for (let i = 0; i <= stepCount; i++) {
         const x = CartesianChartBase.LEFT_PADDING + i * stepWidth;
         const value = minValue + i * stepValue;
-        const label = `${data.yAxis.prefix}${Math.round(value)}${data.yAxis.suffix}`;
+        const label = `${data.yAxis.prefix}${formatChartNumber(value, 'N0')}${data.yAxis.suffix}`;
         canvas.drawText(
           x,
           baselineY + 8,
@@ -438,7 +439,7 @@ export abstract class CartesianChartBase extends ChartBase {
       for (let i = 0; i <= stepCount; i++) {
         const y = baselineY - i * stepHeight;
         const value = minValue + i * stepValue;
-        const label = `${data.yAxis.prefix}${Math.round(value)}${data.yAxis.suffix}`;
+        const label = `${data.yAxis.prefix}${formatChartNumber(value, 'N0')}${data.yAxis.suffix}`;
         canvas.drawText(
           CartesianChartBase.LEFT_PADDING - 8,
           y - CartesianChartBase.AXIS_LABEL_FONT_SIZE / 2,

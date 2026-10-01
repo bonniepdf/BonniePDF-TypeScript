@@ -79,6 +79,12 @@ export class TtfFont {
   /** Font subfamily (e.g., "Regular", "Bold") */
   public fontSubfamily = 'Regular';
 
+  /** OS/2 `usWeightClass` (1-1000), or undefined when the font has no OS/2 table. */
+  public weightClass: number | undefined;
+
+  /** OS/2 `fsSelection` ITALIC (bit 0) or OBLIQUE (bit 9) flag; false without an OS/2 table. */
+  public selectionItalic = false;
+
   /** Units per em (typically 1000 or 2048) */
   public unitsPerEm = 1000;
 
@@ -559,6 +565,9 @@ export class TtfFont {
       this.capHeight = Math.floor(this.unitsPerEm * 0.7);
       this.xHeight = Math.floor(this.unitsPerEm * 0.5);
     }
+
+    this.weightClass = usWeightClass >= 1 && usWeightClass <= 1000 ? usWeightClass : undefined;
+    this.selectionItalic = (fsSelection & 1) !== 0 || (fsSelection & 0x200) !== 0;
 
     // Calculate StemV from weight class (rough estimate)
     this.stemV = 50 + Math.floor(usWeightClass / 10);

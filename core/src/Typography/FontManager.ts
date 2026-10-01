@@ -77,7 +77,10 @@ export interface FallbackFont {
   key: string;
   /** Raw TTF bytes, for embedding the fallback font on demand. */
   bytes: Uint8Array;
-  /** Parsed font, for glyph-coverage probing. */
+  /**
+   * Parsed font, for glyph-coverage probing.
+   * @internal
+   */
   font: TtfFont;
 }
 

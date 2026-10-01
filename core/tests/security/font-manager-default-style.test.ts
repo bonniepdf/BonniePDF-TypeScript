@@ -122,7 +122,7 @@ describe('DefaultTextStyle cascade', () => {
     // After generateBytes, the cascade should have applied
     doc.generateBytes();
     expect(tb.fontSize).toBe(11);
-    expect(tb.textColor).toEqual(ColorPalette.slate[600]);
+    expect(tb.color).toEqual(ColorPalette.slate[600]);
     doc.dispose();
   });
 
@@ -141,10 +141,10 @@ describe('DefaultTextStyle cascade', () => {
     const doc = new Document();
     doc.settings.defaultTextStyle = new TextStyle().withColor(ColorPalette.slate[600]);
     const tb = new TextBlock('Hello');
-    tb.textColor = Color.fromHex('#FF0000'); // explicitly set
+    tb.color = Color.fromHex('#FF0000'); // explicitly set
     doc.add(tb);
     doc.generateBytes();
-    expect(tb.textColor).toEqual(Color.fromHex('#FF0000'));
+    expect(tb.color).toEqual(Color.fromHex('#FF0000'));
     doc.dispose();
   });
 

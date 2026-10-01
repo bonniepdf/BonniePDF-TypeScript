@@ -6,11 +6,13 @@ export class EmbeddedFontInfo {
   /**
    * The parsed TrueType font. `null` until the font bytes have been loaded
    * (async registrations start unloaded and are populated by preload).
+   * @internal
    */
   public font: TtfFont | null = null;
   /**
    * Tracks which glyphs are used in the document. `null` until the font has
    * been loaded (the tracker needs the parsed font to resolve glyph IDs).
+   * @internal
    */
   public tracker: GlyphUsageTracker | null = null;
   /**

@@ -15,7 +15,7 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
-      watermark: { text: 'CONFIDENTIAL', fontSize: 60, textColor: '#ff0000', opacity: 0.08, rotationDegrees: -55 },
+      watermark: { text: 'CONFIDENTIAL', fontSize: 60, color: '#ff0000', opacity: 0.08, rotationDegrees: -55 },
     },
     metadata: {
       title: 'Confidential Report',
@@ -29,7 +29,7 @@ export function generate(): Document {
     new TextBlock(`Financial Performance Report Q4 ${year}`, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 20 },
     })
   );
@@ -65,7 +65,7 @@ export function generate(): Document {
     new TextBlock(
       'This report contains proprietary financial data and is intended solely for ' +
         'authorised recipients. Unauthorised disclosure or distribution is prohibited.',
-      { fontName: StandardFonts.TimesItalic, fontSize: 10, textColor: 'slate-500', margin: { top: 20 } }
+      { fontName: StandardFonts.TimesItalic, fontSize: 10, color: 'slate-500', margin: { top: 20 } }
     )
   );
 

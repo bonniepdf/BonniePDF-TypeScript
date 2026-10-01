@@ -223,7 +223,7 @@ function codeBlock(source: string): Container {
     child: new TextBlock(source, {
       fontName: StandardFonts.Courier,
       fontSize: 7.6,
-      textColor: INK,
+      color: INK,
     }),
   });
 }

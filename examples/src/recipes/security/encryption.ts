@@ -42,7 +42,7 @@ export function generate(): Document {
     new TextBlock('AES-256 Password Protection', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'blue-700',
+      color: 'blue-700',
     })
   );
   doc.add(
@@ -52,7 +52,7 @@ export function generate(): Document {
     )
   );
 
-  doc.add(new TextBlock('Password: demo123', { fontSize: 14, textColor: 'slate-700' }));
+  doc.add(new TextBlock('Password: demo123', { fontSize: 14, color: 'slate-700' }));
 
   doc.add(
     new TextBlock('Printing and copying are allowed, but modification and annotation are restricted.', {
@@ -75,7 +75,7 @@ export function generate(): Document {
         '  // withEncryption128(settings, opts => ...)\n\n' +
         '  // Or the simplest form:\n' +
         "  // withPassword(settings, 'demo123');",
-      { fontName: StandardFonts.Courier, fontSize: 10, textColor: 'slate-600', margin: { top: 20 } }
+      { fontName: StandardFonts.Courier, fontSize: 10, color: 'slate-600', margin: { top: 20 } }
     )
   );
 
@@ -86,7 +86,7 @@ export function generate(): Document {
     new TextBlock('Permission Restrictions', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'blue-700',
+      color: 'blue-700',
     })
   );
   doc.add(
@@ -96,10 +96,10 @@ export function generate(): Document {
     })
   );
 
-  doc.add(new TextBlock('  - Printing: Allowed', { textColor: 'green-700' }));
-  doc.add(new TextBlock('  - Copying: Allowed', { textColor: 'green-700' }));
-  doc.add(new TextBlock('  - Modifying: Denied', { textColor: 'red-600' }));
-  doc.add(new TextBlock('  - Annotations: Denied', { textColor: 'red-600' }));
+  doc.add(new TextBlock('  - Printing: Allowed', { color: 'green-700' }));
+  doc.add(new TextBlock('  - Copying: Allowed', { color: 'green-700' }));
+  doc.add(new TextBlock('  - Modifying: Denied', { color: 'red-600' }));
+  doc.add(new TextBlock('  - Annotations: Denied', { color: 'red-600' }));
 
   doc.add(new TextBlock('Passwords:', { fontSize: 14, margin: { top: 20, bottom: 5 } }));
   doc.add(new TextBlock('  User password: user'));
@@ -114,7 +114,7 @@ export function generate(): Document {
         '        .allowPrinting()\n' +
         '        .allowCopying()\n' +
         '  );',
-      { fontName: StandardFonts.Courier, fontSize: 10, textColor: 'slate-600', margin: { top: 20 } }
+      { fontName: StandardFonts.Courier, fontSize: 10, color: 'slate-600', margin: { top: 20 } }
     )
   );
 
@@ -125,7 +125,7 @@ export function generate(): Document {
     new TextBlock('Owner-Only Restrictions', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'blue-700',
+      color: 'blue-700',
     })
   );
   doc.add(
@@ -136,24 +136,24 @@ export function generate(): Document {
   );
   doc.add(new TextBlock('Restricted permissions in this scenario:', { fontSize: 12 }));
 
-  doc.add(new TextBlock('  - Low-quality printing: Allowed', { textColor: 'green-700' }));
-  doc.add(new TextBlock('  - Accessibility extraction: Allowed', { textColor: 'green-700' }));
-  doc.add(new TextBlock('  - Copying text: Denied', { textColor: 'red-600' }));
-  doc.add(new TextBlock('  - Modifying: Denied', { textColor: 'red-600' }));
-  doc.add(new TextBlock('  - High-quality printing: Denied', { textColor: 'red-600' }));
+  doc.add(new TextBlock('  - Low-quality printing: Allowed', { color: 'green-700' }));
+  doc.add(new TextBlock('  - Accessibility extraction: Allowed', { color: 'green-700' }));
+  doc.add(new TextBlock('  - Copying text: Denied', { color: 'red-600' }));
+  doc.add(new TextBlock('  - Modifying: Denied', { color: 'red-600' }));
+  doc.add(new TextBlock('  - High-quality printing: Denied', { color: 'red-600' }));
 
-  doc.add(new TextBlock('Owner password: secret', { fontSize: 14, textColor: 'red-600', margin: { top: 20 } }));
+  doc.add(new TextBlock('Owner password: secret', { fontSize: 14, color: 'red-600', margin: { top: 20 } }));
 
   doc.add(
     new TextBlock(
       'API usage:\n' +
         '  withEncryptionAes256(settings, opts =>\n' +
         "    opts.withOwnerPassword('secret')\n" +
-        '        .allowNone()\n' +
+        '        .denyAll()\n' +
         '        .allowPrinting(false)\n' +
         '        .allowAccessibility()\n' +
         '  );',
-      { fontName: StandardFonts.Courier, fontSize: 10, textColor: 'slate-600', margin: { top: 20 } }
+      { fontName: StandardFonts.Courier, fontSize: 10, color: 'slate-600', margin: { top: 20 } }
     )
   );
 

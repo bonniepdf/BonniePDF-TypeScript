@@ -44,7 +44,7 @@ export function generate(): Document {
   const watermark = new Watermark('DRAFT');
   watermark.fontName = StandardFonts.HelveticaBold;
   watermark.fontSize = 120;
-  watermark.textColor = ColorPalette.slate[400];
+  watermark.color = ColorPalette.slate[400];
   watermark.opacity = 0.12;
   watermark.rotationDegrees = -45;
   settings.watermark = watermark;
@@ -63,14 +63,14 @@ export function generate(): Document {
   const eyebrow = new TextBlock('SAMPLE COMPANY');
   eyebrow.fontName = StandardFonts.HelveticaBold;
   eyebrow.fontSize = 11;
-  eyebrow.textColor = ColorPalette.blue[200];
+  eyebrow.color = ColorPalette.blue[200];
   eyebrow.margin = new Thickness(0, 0, 0, 6);
   bannerStack.add(eyebrow);
 
   const bannerTitle = new TextBlock('Product Strategy Proposal');
   bannerTitle.fontName = StandardFonts.HelveticaBold;
   bannerTitle.fontSize = 26;
-  bannerTitle.textColor = ColorPalette.slate[50];
+  bannerTitle.color = ColorPalette.slate[50];
   bannerStack.add(bannerTitle);
 
   const banner = new Container();
@@ -89,7 +89,7 @@ export function generate(): Document {
   );
   calloutText.fontName = StandardFonts.Helvetica;
   calloutText.fontSize = 11;
-  calloutText.textColor = ColorPalette.amber[800];
+  calloutText.color = ColorPalette.amber[800];
   calloutText.alignment = TextAlignment.Justify;
 
   const callout = new Container();
@@ -107,7 +107,7 @@ export function generate(): Document {
   );
   intro.fontName = StandardFonts.Helvetica;
   intro.fontSize = 12;
-  intro.textColor = ColorPalette.slate[600];
+  intro.color = ColorPalette.slate[600];
   intro.alignment = TextAlignment.Justify;
   doc.add(intro);
 
@@ -117,7 +117,7 @@ export function generate(): Document {
   const s1 = new TextBlock('Section 1: Executive Summary');
   s1.fontName = StandardFonts.HelveticaBold;
   s1.fontSize = 18;
-  s1.textColor = ColorPalette.blue[800];
+  s1.color = ColorPalette.blue[800];
   s1.margin = new Thickness(0, 0, 0, 12);
   doc.add(s1);
 
@@ -130,7 +130,7 @@ export function generate(): Document {
   );
   para1.fontName = StandardFonts.Helvetica;
   para1.fontSize = 11;
-  para1.textColor = ColorPalette.slate[700];
+  para1.color = ColorPalette.slate[700];
   para1.alignment = TextAlignment.Justify;
   para1.margin = new Thickness(0, 0, 0, 12);
   doc.add(para1);
@@ -142,14 +142,14 @@ export function generate(): Document {
   );
   para2.fontName = StandardFonts.Helvetica;
   para2.fontSize = 11;
-  para2.textColor = ColorPalette.slate[700];
+  para2.color = ColorPalette.slate[700];
   para2.alignment = TextAlignment.Justify;
   doc.add(para2);
 
   const s2 = new TextBlock('Section 2: Expected Outcomes');
   s2.fontName = StandardFonts.HelveticaBold;
   s2.fontSize = 18;
-  s2.textColor = ColorPalette.blue[800];
+  s2.color = ColorPalette.blue[800];
   s2.margin = new Thickness(0, 18, 0, 12);
   doc.add(s2);
 
@@ -161,7 +161,7 @@ export function generate(): Document {
   );
   para3.fontName = StandardFonts.Helvetica;
   para3.fontSize = 11;
-  para3.textColor = ColorPalette.slate[700];
+  para3.color = ColorPalette.slate[700];
   para3.alignment = TextAlignment.Justify;
   doc.add(para3);
 

@@ -30,6 +30,7 @@ const ROWS: Array<[string, number, number]> = [
 ];
 
 export function generate(): Document {
+  // #region settings
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -44,10 +45,12 @@ export function generate(): Document {
       subject: 'PDF/A-3 Report with Embedded Data',
     },
   });
+  // #endregion settings
 
   doc.add(tb('Quarterly revenue - 2026', 18, INK, true, undefined, 4));
   doc.add(tb('The source data for this report is embedded as quarterly-revenue.csv.', 9, MUTE, false, undefined, 16));
 
+  // #region table
   const table = new Table({ columns: [2, 2, 2], border: 0, cellPadding: 6 });
   // Real tabular data → a proper header row (emits TH cells for assistive tech).
   table.addHeader(
@@ -63,8 +66,10 @@ export function generate(): Document {
     );
   }
   doc.add(table);
+  // #endregion table
 
   // ── Embed the source data as an attachment ──
+  // #region attach
   doc.attach({
     fileName: 'quarterly-revenue.csv',
     content: buildCsv(),
@@ -72,6 +77,7 @@ export function generate(): Document {
     mediaType: 'text/csv',
     description: 'Source data for the quarterly revenue report',
   });
+  // #endregion attach
 
   return doc;
 }
@@ -95,7 +101,7 @@ function tb(
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: size,
-    textColor: color,
+    color: color,
     alignment: align,
     margin: bottom > 0 ? { bottom } : undefined,
   });

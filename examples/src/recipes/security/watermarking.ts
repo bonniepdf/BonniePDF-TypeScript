@@ -24,7 +24,7 @@ export function generate(): Document {
         text: 'DRAFT',
         fontName: StandardFonts.HelveticaBold,
         fontSize: 120,
-        textColor: 'slate-400',
+        color: 'slate-400',
         opacity: 0.12,
         rotationDegrees: -45,
       },
@@ -49,13 +49,13 @@ export function generate(): Document {
           new TextBlock('SAMPLE COMPANY', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 11,
-            textColor: 'blue-200',
+            color: 'blue-200',
             margin: { bottom: 6 },
           }),
           new TextBlock('Product Strategy Proposal', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 26,
-            textColor: 'slate-50',
+            color: 'slate-50',
           }),
         ],
       }),
@@ -73,7 +73,7 @@ export function generate(): Document {
         'This document is a draft and has not been approved for distribution. All content ' +
           'is subject to change pending final review by the project committee. Please do not ' +
           'share this document outside the review team.',
-        { fontName: StandardFonts.Helvetica, fontSize: 11, textColor: 'amber-800', alignment: 'justify' }
+        { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'amber-800', alignment: 'justify' }
       ),
     })
   );
@@ -82,7 +82,7 @@ export function generate(): Document {
     new TextBlock(
       'Prepared for internal review by the strategy team. The sections that follow outline ' +
         'the proposed initiative, its objectives, and the resourcing required to deliver it.',
-      { fontName: StandardFonts.Helvetica, fontSize: 12, textColor: 'slate-600', alignment: 'justify' }
+      { fontName: StandardFonts.Helvetica, fontSize: 12, color: 'slate-600', alignment: 'justify' }
     )
   );
 
@@ -93,7 +93,7 @@ export function generate(): Document {
     new TextBlock('Section 1: Executive Summary', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 18,
-      textColor: 'blue-800',
+      color: 'blue-800',
       margin: { bottom: 12 },
     })
   );
@@ -108,7 +108,7 @@ export function generate(): Document {
       {
         fontName: StandardFonts.Helvetica,
         fontSize: 11,
-        textColor: 'slate-700',
+        color: 'slate-700',
         alignment: 'justify',
         margin: { bottom: 12 },
       }
@@ -120,7 +120,7 @@ export function generate(): Document {
       'Key stakeholders include the VP of Engineering, the CTO, and department leads ' +
         'from Product, Security, and Operations. A steering committee will convene monthly ' +
         'to review progress against milestones and address any blockers or scope changes.',
-      { fontName: StandardFonts.Helvetica, fontSize: 11, textColor: 'slate-700', alignment: 'justify' }
+      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700', alignment: 'justify' }
     )
   );
 
@@ -128,7 +128,7 @@ export function generate(): Document {
     new TextBlock('Section 2: Expected Outcomes', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 18,
-      textColor: 'blue-800',
+      color: 'blue-800',
       margin: { top: 18, bottom: 12 },
     })
   );
@@ -139,7 +139,7 @@ export function generate(): Document {
         'percent, cut average deployment time from hours to minutes, and improve service ' +
         'availability to four nines. These outcomes will be measured against a baseline ' +
         'captured during the discovery phase and reported to the steering committee.',
-      { fontName: StandardFonts.Helvetica, fontSize: 11, textColor: 'slate-700', alignment: 'justify' }
+      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700', alignment: 'justify' }
     )
   );
 

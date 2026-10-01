@@ -51,7 +51,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -68,7 +68,7 @@ export function generate(): Document {
   h2Equal.level = 2;
   h2Equal.fontName = StandardFonts.HelveticaBold;
   h2Equal.fontSize = 14;
-  h2Equal.textColor = ColorPalette.indigo[600];
+  h2Equal.color = ColorPalette.indigo[600];
   h2Equal.margin = new Thickness(0, 0, 0, 8);
   doc.add(h2Equal);
 
@@ -87,7 +87,7 @@ export function generate(): Document {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.HelveticaBold;
     t.fontSize = 11;
-    t.textColor = Color.white;
+    t.color = Color.white;
     const c = new Container();
     c.child = t;
     c.padding = new Thickness(12, 8, 12, 8);
@@ -103,7 +103,7 @@ export function generate(): Document {
   h2Weighted.level = 2;
   h2Weighted.fontName = StandardFonts.HelveticaBold;
   h2Weighted.fontSize = 14;
-  h2Weighted.textColor = ColorPalette.indigo[600];
+  h2Weighted.color = ColorPalette.indigo[600];
   h2Weighted.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2Weighted);
 
@@ -124,7 +124,7 @@ export function generate(): Document {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.HelveticaBold;
     t.fontSize = 11;
-    t.textColor = Color.white;
+    t.color = Color.white;
     const c = new Container();
     c.child = t;
     c.padding = new Thickness(12, 8, 12, 8);
@@ -140,7 +140,7 @@ export function generate(): Document {
   h2Align.level = 2;
   h2Align.fontName = StandardFonts.HelveticaBold;
   h2Align.fontSize = 14;
-  h2Align.textColor = ColorPalette.indigo[600];
+  h2Align.color = ColorPalette.indigo[600];
   h2Align.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2Align);
 
@@ -164,7 +164,7 @@ export function generate(): Document {
     const rowCaption = new TextBlock(caption);
     rowCaption.fontName = StandardFonts.HelveticaBold;
     rowCaption.fontSize = 11;
-    rowCaption.textColor = ColorPalette.slate[600];
+    rowCaption.color = ColorPalette.slate[600];
     rowCaption.margin = new Thickness(0, 8, 0, 4);
     doc.add(rowCaption);
 
@@ -177,7 +177,7 @@ export function generate(): Document {
       const t = new TextBlock(label);
       t.fontName = StandardFonts.HelveticaBold;
       t.fontSize = 11;
-      t.textColor = Color.white;
+      t.color = Color.white;
       const c = new Container();
       c.child = t;
       c.padding = new Thickness(12, 6, 12, 6);
@@ -199,7 +199,7 @@ export function generate(): Document {
   h2Kv.level = 2;
   h2Kv.fontName = StandardFonts.HelveticaBold;
   h2Kv.fontSize = 14;
-  h2Kv.textColor = ColorPalette.indigo[600];
+  h2Kv.color = ColorPalette.indigo[600];
   h2Kv.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2Kv);
 
@@ -221,9 +221,9 @@ export function generate(): Document {
     kv.margin = new Thickness(0, 0, 0, 6);
     const k = new TextBlock(key);
     k.fontName = StandardFonts.HelveticaBold;
-    k.textColor = ColorPalette.slate[700];
+    k.color = ColorPalette.slate[700];
     const v = new TextBlock(value);
-    v.textColor = ColorPalette.slate[800];
+    v.color = ColorPalette.slate[800];
     kv.add(k, 1);
     kv.add(v, 3);
     doc.add(kv);
@@ -236,7 +236,7 @@ export function generate(): Document {
   h2TwoCols.level = 2;
   h2TwoCols.fontName = StandardFonts.HelveticaBold;
   h2TwoCols.fontSize = 14;
-  h2TwoCols.textColor = ColorPalette.indigo[600];
+  h2TwoCols.color = ColorPalette.indigo[600];
   h2TwoCols.margin = new Thickness(0, 16, 0, 8);
   doc.add(h2TwoCols);
 

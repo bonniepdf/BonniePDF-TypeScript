@@ -48,7 +48,7 @@ export function generate(): Document {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
+    b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Right;
     return b;
   };
@@ -67,7 +67,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
@@ -85,7 +85,7 @@ export function generate(): Document {
     h2.level = 2;
     h2.fontName = StandardFonts.HelveticaBold;
     h2.fontSize = 14;
-    h2.textColor = ColorPalette.indigo[600];
+    h2.color = ColorPalette.indigo[600];
     h2.margin = new Thickness(0, 16, 0, 6);
     doc.add(h2);
 

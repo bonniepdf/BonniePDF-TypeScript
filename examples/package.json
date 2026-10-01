@@ -13,7 +13,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "generate-svgs": "tsx scripts/generate-svgs.ts",
-    "verify-equivalence": "tsx scripts/verify-equivalence.ts"
+    "verify-equivalence": "tsx scripts/verify-equivalence.ts",
+    "verify-examples": "tsx scripts/verify-examples.ts",
+    "export-example": "tsx scripts/export-example.ts"
   },
   "dependencies": {
     "@bonniepdf/core": "workspace:*"

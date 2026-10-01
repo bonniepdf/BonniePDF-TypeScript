@@ -64,7 +64,7 @@ export function generate(): Document {
       level: 1,
       fontName: SANS_BOLD,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 16 },
     })
   );
@@ -99,7 +99,7 @@ function section(doc: Document, title: string, tocId: string, alignment: TextAli
       level: 2,
       fontName: SANS_BOLD,
       fontSize: 13,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { bottom: 6 },
       alignment,
     })

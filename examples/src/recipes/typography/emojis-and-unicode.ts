@@ -49,7 +49,7 @@ export function generate(): Document {
       level: 1,
       fontName: TEXT_FONT,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 8 },
     })
   );
@@ -82,7 +82,7 @@ export function generate(): Document {
     new TextBlock('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω', {
       fontName: TEXT_FONT,
       fontSize: 12,
-      textColor: 'slate-600',
+      color: 'slate-600',
       margin: { bottom: 2 },
     })
   );
@@ -90,7 +90,7 @@ export function generate(): Document {
     new TextBlock('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω', {
       fontName: TEXT_FONT,
       fontSize: 12,
-      textColor: 'slate-600',
+      color: 'slate-600',
       margin: { bottom: 4 },
     })
   );
@@ -161,7 +161,7 @@ function section(doc: Document, title: string, tocId: string): void {
       level: 2,
       fontName: TEXT_FONT,
       fontSize: 13,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: 12, bottom: 4 },
     })
   );
@@ -169,12 +169,10 @@ function section(doc: Document, title: string, tocId: string): void {
 
 function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
   section(doc, title, tocId);
-  doc.add(new TextBlock(content, { fontName: font, fontSize: 12, textColor: 'slate-600', margin: { bottom: 4 } }));
+  doc.add(new TextBlock(content, { fontName: font, fontSize: 12, color: 'slate-600', margin: { bottom: 4 } }));
 }
 
 function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
   section(doc, title, tocId);
-  doc.add(
-    new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, textColor: 'slate-800', margin: { bottom: 4 } })
-  );
+  doc.add(new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, color: 'slate-800', margin: { bottom: 4 } }));
 }

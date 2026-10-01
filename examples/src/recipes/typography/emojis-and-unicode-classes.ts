@@ -71,7 +71,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = TEXT_FONT;
   h1.fontSize = 20;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 8);
   doc.add(h1);
 
@@ -102,13 +102,13 @@ export function generate(): Document {
   const greekLower = new TextBlock('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω');
   greekLower.fontName = TEXT_FONT;
   greekLower.fontSize = 12;
-  greekLower.textColor = ColorPalette.slate[600];
+  greekLower.color = ColorPalette.slate[600];
   greekLower.margin = new Thickness(0, 0, 0, 2);
   doc.add(greekLower);
   const greekUpper = new TextBlock('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω');
   greekUpper.fontName = TEXT_FONT;
   greekUpper.fontSize = 12;
-  greekUpper.textColor = ColorPalette.slate[600];
+  greekUpper.color = ColorPalette.slate[600];
   greekUpper.margin = new Thickness(0, 0, 0, 4);
   doc.add(greekUpper);
 
@@ -180,7 +180,7 @@ function section(doc: Document, title: string, tocId: string): void {
   h.level = 2;
   h.fontName = TEXT_FONT;
   h.fontSize = 13;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 12, 0, 4);
   doc.add(h);
 }
@@ -190,7 +190,7 @@ function bmpSection(doc: Document, title: string, tocId: string, content: string
   const b = new TextBlock(content);
   b.fontName = font;
   b.fontSize = 12;
-  b.textColor = ColorPalette.slate[600];
+  b.color = ColorPalette.slate[600];
   b.margin = new Thickness(0, 0, 0, 4);
   doc.add(b);
 }
@@ -200,7 +200,7 @@ function emojiSection(doc: Document, title: string, tocId: string, content: stri
   const b = new TextBlock(content);
   b.fontName = EMOJI_FONT;
   b.fontSize = 20;
-  b.textColor = ColorPalette.slate[800];
+  b.color = ColorPalette.slate[800];
   b.margin = new Thickness(0, 0, 0, 4);
   doc.add(b);
 }

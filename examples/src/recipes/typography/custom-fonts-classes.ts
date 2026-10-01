@@ -65,7 +65,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = FONT;
   h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1);
 
@@ -167,7 +167,7 @@ function section(doc: Document, title: string, tocId: string): void {
   h.level = 2;
   h.fontName = FONT;
   h.fontSize = 13;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 12, 0, 6);
   doc.add(h);
 }

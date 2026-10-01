@@ -76,7 +76,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 16);
   doc.add(h1);
 
@@ -111,7 +111,7 @@ function section(doc: Document, title: string, tocId: string, alignment: TextAli
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 13;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 0, 0, 6);
   h.alignment = alignment;
   doc.add(h);

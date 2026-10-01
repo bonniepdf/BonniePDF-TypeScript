@@ -44,7 +44,7 @@ export function generate(): Document {
       level: 1,
       fontName: FONT,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 10 },
     })
   );
@@ -137,7 +137,7 @@ function section(doc: Document, title: string, tocId: string): void {
       level: 2,
       fontName: FONT,
       fontSize: 13,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: 12, bottom: 6 },
     })
   );

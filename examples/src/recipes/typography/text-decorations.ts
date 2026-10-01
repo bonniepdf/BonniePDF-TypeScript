@@ -4,7 +4,7 @@ import { Document, Heading, TextBlock, Line, StandardFonts } from '@bonniepdf/co
  * Underline and strikethrough decorations across alignments and sizes, authored
  * through the options-object front door.
  *
- * `textDecoration` is a forgiving token or list: `'underline'`, `'strikethrough'`,
+ * `decoration` is a forgiving token or list: `'underline'`, `'strikethrough'`,
  * or `['underline', 'strikethrough']` for the combined form (no bitwise-OR of
  * flag enums needed). Decorations are presentational - every decorated paragraph
  * stays an ordinary paragraph. PDF/A-2a + PDF/UA-1.
@@ -34,7 +34,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 10 },
     })
   );
@@ -54,7 +54,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock(
       'This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.',
-      { textDecoration: 'underline', margin: { bottom: 10 } }
+      { decoration: 'underline', margin: { bottom: 10 } }
     )
   );
 
@@ -65,7 +65,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock(
       'This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.',
-      { textDecoration: 'strikethrough', margin: { bottom: 10 } }
+      { decoration: 'strikethrough', margin: { bottom: 10 } }
     )
   );
 
@@ -77,7 +77,7 @@ export function generate(): Document {
     new TextBlock(
       'Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: ' +
         'TextDecoration.Underline | TextDecoration.Strikethrough.',
-      { textDecoration: ['underline', 'strikethrough'], margin: { bottom: 10 } }
+      { decoration: ['underline', 'strikethrough'], margin: { bottom: 10 } }
     )
   );
 
@@ -90,7 +90,7 @@ export function generate(): Document {
     ['Centre-aligned underlined text.', 'center'],
     ['Right-aligned underlined text.', 'right'],
   ] as const) {
-    doc.add(new TextBlock(label, { textDecoration: 'underline', alignment: align, margin: { bottom: 8 } }));
+    doc.add(new TextBlock(label, { decoration: 'underline', alignment: align, margin: { bottom: 8 } }));
   }
 
   // ── 5. Scales with font size ──────────────────────────────────────────────────
@@ -99,7 +99,7 @@ export function generate(): Document {
 
   for (const size of [8, 12, 18, 24, 36]) {
     doc.add(
-      new TextBlock(`Underline at ${size}pt`, { fontSize: size, textDecoration: 'underline', margin: { bottom: 6 } })
+      new TextBlock(`Underline at ${size}pt`, { fontSize: size, decoration: 'underline', margin: { bottom: 6 } })
     );
   }
 
@@ -112,8 +112,8 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Original Price: £199.99', {
       fontSize: 14,
-      textColor: 'slate-600',
-      textDecoration: 'strikethrough',
+      color: 'slate-600',
+      decoration: 'strikethrough',
       margin: { bottom: 4 },
     })
   );
@@ -122,13 +122,13 @@ export function generate(): Document {
     new TextBlock('Sale Price: £149.99', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 18,
-      textColor: '#ff0000',
-      textDecoration: 'underline',
+      color: '#ff0000',
+      decoration: 'underline',
       margin: { bottom: 4 },
     })
   );
 
-  doc.add(new TextBlock('You save £50.00!', { fontSize: 11, textColor: 'green-700' }));
+  doc.add(new TextBlock('You save £50.00!', { fontSize: 11, color: 'green-700' }));
 
   return doc;
 }
@@ -140,7 +140,7 @@ function section(doc: Document, title: string, tocId: string): void {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: 12, bottom: 6 },
     })
   );

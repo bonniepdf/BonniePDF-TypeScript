@@ -30,7 +30,7 @@ function tb(
   return new TextBlock(content, {
     fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: size,
-    textColor: color,
+    color: color,
     alignment: opts.align,
     margin: opts.mb ? { bottom: opts.mb } : undefined,
   });

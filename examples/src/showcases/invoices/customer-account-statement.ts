@@ -290,7 +290,7 @@ export function generate(): Document {
           level: 1,
           fontName: StandardFonts.HelveticaBold,
           fontSize: 21,
-          textColor: ColorPalette.slate[800],
+          color: ColorPalette.slate[800],
           margin: { bottom: 4 },
         }),
         cell(`${gb(ACCOUNT.periodFrom)} to ${gb(ACCOUNT.periodTo)}`, { color: MUTED }),
@@ -502,7 +502,7 @@ function cell(text: string, o: TextOpts = {}): TextBlock {
   return new TextBlock(text, {
     fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: o.size ?? 9,
-    textColor: o.color ?? INK,
+    color: o.color ?? INK,
     alignment: o.align ?? 'left',
     margin: { top: o.mt ?? 0, bottom: o.mb ?? 0 },
   });
@@ -552,7 +552,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: ACCENT,
+    color: ACCENT,
     margin: { top: 16, bottom: 8 },
   });
 }

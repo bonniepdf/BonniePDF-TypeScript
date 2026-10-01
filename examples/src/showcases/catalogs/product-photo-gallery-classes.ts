@@ -120,7 +120,7 @@ function productMedia(product: Product, index: number): Container {
   monogram.fontSize = 40;
   // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
   // [100] tint (2.87:1); every other hue already clears it at [600].
-  monogram.textColor = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
+  monogram.color = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
   monogram.alignment = TextAlignment.Center;
   monogram.margin = new Thickness(0, 40, 0, 0);
 
@@ -143,7 +143,7 @@ function productCard(product: Product, index: number): Container {
   name.level = 2;
   name.fontName = StandardFonts.HelveticaBold;
   name.fontSize = 12;
-  name.textColor = ColorPalette.slate[800];
+  name.color = ColorPalette.slate[800];
   name.margin = new Thickness(0, 6, 0, 0);
   body.add(name);
 
@@ -151,12 +151,12 @@ function productCard(product: Product, index: number): Container {
   meta.widthDistribution = WidthDistribution.Weighted;
   const sku = new TextBlock(product.sku);
   sku.fontSize = 9;
-  sku.textColor = ColorPalette.slate[500];
+  sku.color = ColorPalette.slate[500];
 
   const price = new TextBlock(product.price);
   price.fontName = StandardFonts.HelveticaBold;
   price.fontSize = 12;
-  price.textColor = ACCENT;
+  price.color = ACCENT;
   price.alignment = TextAlignment.Right;
   meta.add(sku, 1);
   meta.add(price, 1);
@@ -164,7 +164,7 @@ function productCard(product: Product, index: number): Container {
 
   const blurb = new TextBlock(product.blurb);
   blurb.fontSize = 9.5;
-  blurb.textColor = ColorPalette.slate[600];
+  blurb.color = ColorPalette.slate[600];
   body.add(blurb);
 
   const card = new Container();
@@ -188,7 +188,7 @@ export function generate(): Document {
     const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
-    b.textColor = ColorPalette.slate[400];
+    b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Right;
     return b;
   };
@@ -206,13 +206,13 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 4);
   doc.add(h1);
 
   const intro = new TextBlock('Homeware & lighting - selected pieces from the new season.');
   intro.fontSize = 12;
-  intro.textColor = ColorPalette.slate[500];
+  intro.color = ColorPalette.slate[500];
   intro.margin = new Thickness(0, 0, 0, 18);
   doc.add(intro);
 

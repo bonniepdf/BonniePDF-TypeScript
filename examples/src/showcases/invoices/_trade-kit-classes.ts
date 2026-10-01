@@ -70,7 +70,7 @@ export function cell(text: string, o: CellOpts = {}): TextBlock {
   const block = new TextBlock(text);
   block.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = o.size ?? 9;
-  block.textColor = o.color ?? INK;
+  block.color = o.color ?? INK;
   block.alignment = o.align ?? TextAlignment.Left;
   block.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
   return block;
@@ -93,7 +93,7 @@ export function h1(text: string): Heading {
   heading.level = 1;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 21;
-  heading.textColor = HEADING;
+  heading.color = HEADING;
   heading.margin = new Thickness(0, 0, 0, 4);
   return heading;
 }
@@ -103,7 +103,7 @@ export function h2(text: string, color: Color = ACCENT): Heading {
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 13;
-  heading.textColor = color;
+  heading.color = color;
   heading.margin = new Thickness(0, 16, 0, 8);
   return heading;
 }
@@ -113,7 +113,7 @@ export function h3(text: string): Heading {
   heading.level = 3;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 10.5;
-  heading.textColor = HEADING;
+  heading.color = HEADING;
   heading.margin = new Thickness(0, 10, 0, 5);
   return heading;
 }

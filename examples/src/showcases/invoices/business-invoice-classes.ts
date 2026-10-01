@@ -52,7 +52,7 @@ function tb(content: string, o: TextOpts = {}): TextBlock {
   const t = new TextBlock(content);
   t.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   t.fontSize = o.size ?? 9;
-  t.textColor = o.color ?? TEXT_MEDIUM;
+  t.color = o.color ?? TEXT_MEDIUM;
   if (o.align !== undefined) t.alignment = o.align;
   if (o.mt !== undefined || o.mb !== undefined) t.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
   return t;
@@ -164,7 +164,7 @@ export function generate(): Document {
   invoiceTitle.level = 1;
   invoiceTitle.fontName = StandardFonts.HelveticaBold;
   invoiceTitle.fontSize = 28;
-  invoiceTitle.textColor = ACCENT_GREEN;
+  invoiceTitle.color = ACCENT_GREEN;
   invoiceTitle.alignment = TextAlignment.Right;
   const titleStack = new VerticalStack();
   titleStack.add(invoiceTitle);

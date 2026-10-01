@@ -53,10 +53,10 @@ const HELVETICA = StandardFonts.Helvetica;
 const HELVETICA_BOLD = StandardFonts.HelveticaBold;
 
 // ── Reusable option objects ──────────────────────────────────────────────────
-const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, textColor: INK };
-const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK };
-const mutedText: TextBlockOptions = { ...bodyText, textColor: MUTED };
-const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: FAINT };
+const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, color: INK };
+const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 9, color: INK };
+const mutedText: TextBlockOptions = { ...bodyText, color: MUTED };
+const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, color: FAINT };
 /**
  * Section titles are real level-2 headings rather than styled body text, so
  * assistive technology gets a navigable outline of the quotation instead of a
@@ -68,11 +68,11 @@ function sectionTitle(text: string, id: string): Heading {
     tocIdentifier: id,
     fontName: HELVETICA_BOLD,
     fontSize: 11,
-    textColor: INK,
+    color: INK,
     margin: { bottom: 6 },
   });
 }
-const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, textColor: MUTED };
+const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED };
 const moneyRight: TextBlockOptions = { ...bodyText, alignment: 'right' };
 
 const cardBase: ContainerOptions = { padding: [12, 12], border: { width: 0.75, color: LINE } };
@@ -218,20 +218,20 @@ function masthead(data: QuotationData): VerticalStack {
         tocIdentifier: 'quotation',
         fontName: HELVETICA_BOLD,
         fontSize: 15,
-        textColor: ACCENT,
+        color: ACCENT,
       }),
-      new TextBlock(data.supplier.address, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
-      new TextBlock(data.supplier.registration, { fontName: HELVETICA, fontSize: 7.5, textColor: FAINT }),
+      new TextBlock(data.supplier.address, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
+      new TextBlock(data.supplier.registration, { fontName: HELVETICA, fontSize: 7.5, color: FAINT }),
     ],
   });
   const marker = new VerticalStack({
     spacing: 2,
     children: [
-      new TextBlock('QUOTATION', { fontName: HELVETICA_BOLD, fontSize: 15, textColor: INK, alignment: 'right' }),
+      new TextBlock('QUOTATION', { fontName: HELVETICA_BOLD, fontSize: 15, color: INK, alignment: 'right' }),
       new TextBlock(data.reference.quoteNumber, {
         fontName: HELVETICA_BOLD,
         fontSize: 9,
-        textColor: MUTED,
+        color: MUTED,
         alignment: 'right',
       }),
     ],
@@ -279,7 +279,7 @@ function scopeSection(data: QuotationData): VerticalStack {
         numberFormat: 'decimal',
         fontName: HELVETICA,
         fontSize: 9,
-        textColor: INK,
+        color: INK,
         itemSpacing: 4,
       }),
     ],
@@ -303,7 +303,7 @@ function tierColumns(data: QuotationData): VerticalStack {
     const badge = new Container({
       height: 9,
       child: promoted
-        ? new TextBlock('RECOMMENDED', { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: ACCENT_DEEP })
+        ? new TextBlock('RECOMMENDED', { fontName: HELVETICA_BOLD, fontSize: 6.5, color: ACCENT_DEEP })
         : undefined,
     });
 
@@ -314,9 +314,9 @@ function tierColumns(data: QuotationData): VerticalStack {
         new TextBlock(tier.name, {
           fontName: HELVETICA_BOLD,
           fontSize: 13,
-          textColor: promoted ? ACCENT_DEEP : INK,
+          color: promoted ? ACCENT_DEEP : INK,
         }),
-        new TextBlock(tier.tagline, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+        new TextBlock(tier.tagline, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
       ],
     });
 
@@ -327,9 +327,9 @@ function tierColumns(data: QuotationData): VerticalStack {
         new TextBlock(money(tier.price, data), {
           fontName: HELVETICA_BOLD,
           fontSize: 20,
-          textColor: promoted ? ACCENT_DEEP : INK,
+          color: promoted ? ACCENT_DEEP : INK,
         }),
-        new TextBlock(tier.cadence, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+        new TextBlock(tier.cadence, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
       ],
     });
 
@@ -337,7 +337,7 @@ function tierColumns(data: QuotationData): VerticalStack {
       items: tier.includes,
       fontName: HELVETICA,
       fontSize: 8,
-      textColor: INK,
+      color: INK,
       bulletColor: promoted ? ACCENT : MUTED,
       itemSpacing: 3.5,
     });
@@ -400,11 +400,11 @@ function validityBand(data: QuotationData): Container {
       new TextBlock(`This quotation is valid until ${data.reference.validUntil}`, {
         fontName: HELVETICA_BOLD,
         fontSize: 10,
-        textColor: ACCENT_DEEP,
+        color: ACCENT_DEEP,
       }),
       new TextBlock(
         'Prices are held for the period shown. After that date we are happy to re-quote at prevailing rates.',
-        { fontName: HELVETICA, fontSize: 8, textColor: MUTED }
+        { fontName: HELVETICA, fontSize: 8, color: MUTED }
       ),
     ],
   });
@@ -426,7 +426,7 @@ function assumptionsSection(data: QuotationData): VerticalStack {
         items: data.assumptions,
         fontName: HELVETICA,
         fontSize: 8.5,
-        textColor: MUTED,
+        color: MUTED,
         bulletColor: FAINT,
         itemSpacing: 4,
       }),
@@ -441,7 +441,7 @@ function signatureField(caption: string): VerticalStack {
     children: [
       new Spacer(22),
       new Line({ thickness: 0.75, color: FAINT }),
-      new TextBlock(caption, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+      new TextBlock(caption, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
     ],
   });
 }
@@ -485,7 +485,7 @@ export function createQuotationSettings(): DocumentSettings {
   settings.footerTemplate = (pageNumber: number) =>
     new TextBlock(
       `${sampleQuotation.reference.quoteNumber} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-      { fontName: HELVETICA, fontSize: 7, textColor: FAINT, alignment: 'center' }
+      { fontName: HELVETICA, fontSize: 7, color: FAINT, alignment: 'center' }
     );
   return settings;
 }

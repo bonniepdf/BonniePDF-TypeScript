@@ -88,7 +88,7 @@ export function generate(): Document {
         level: 1,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 26,
-        textColor: ACCENT,
+        color: ACCENT,
         alignment: 'right',
       }),
       cell(`INV-US-${year}-0148`, { color: MUTED, align: 'right', margin: new Thickness(0, 2, 0, 0) }),

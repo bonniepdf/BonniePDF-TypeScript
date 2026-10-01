@@ -45,7 +45,7 @@ export function cell(text: string, o: TextOpts = {}): TextBlock {
   return new TextBlock(text, {
     fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: o.size ?? 9,
-    textColor: o.color ?? INK,
+    color: o.color ?? INK,
     alignment: o.align ?? 'left',
     margin: { top: o.mt ?? 0, bottom: o.mb ?? 0 },
   });
@@ -71,7 +71,7 @@ export function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 21,
-    textColor: HEADING,
+    color: HEADING,
     margin: { bottom: 4 },
   });
 }
@@ -81,7 +81,7 @@ export function h2(text: string, color: ColorInput = ACCENT): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: color,
+    color: color,
     margin: { top: 16, bottom: 8 },
   });
 }
@@ -91,7 +91,7 @@ export function h3(text: string): Heading {
     level: 3,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 10.5,
-    textColor: HEADING,
+    color: HEADING,
     margin: { top: 10, bottom: 5 },
   });
 }

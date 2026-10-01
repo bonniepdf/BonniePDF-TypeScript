@@ -130,7 +130,7 @@ function mainOffer(): Table {
   name.level = 1;
   name.fontName = StandardFonts.HelveticaBold;
   name.fontSize = 16;
-  name.textColor = INK;
+  name.color = INK;
   name.margin = new Thickness(0, 0, 0, 1);
   left.add(name);
   left.add(text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY));
@@ -229,7 +229,7 @@ function text(
   const block = new TextBlock(value);
   block.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = size;
-  block.textColor = color;
+  block.color = color;
   block.alignment = align;
   if (top || bottom) block.margin = new Thickness(0, top, 0, bottom);
   return block;

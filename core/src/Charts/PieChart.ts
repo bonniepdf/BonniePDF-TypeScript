@@ -1,3 +1,4 @@
+import { formatChartNumber, sumChartNumbers } from './ChartNumberFormat';
 import { ChartData } from './Models/ChartData';
 import { applyOptions } from '../Core/applyOptions';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
@@ -141,8 +142,8 @@ export class PieChart extends ChartBase {
   }
 
   /**
-   * Format string for the total value.
-   * When null (default), the raw numeric total is displayed.
+   * Number format for the total: `G` (default), `F<n>`, `N<n>` or `P<n>`.
+   * Culture-invariant; see {@link formatChartNumber}. Anything else throws when the chart is drawn.
    */
   totalValueFormat: string | undefined;
 
@@ -393,7 +394,11 @@ export class PieChart extends ChartBase {
     }
 
     if (this.showTotal) {
-      const totalText = `${this.totalLabel}: ${total.toString()}`;
+      // The exact sum of the values as written, so 0.1 + 0.2 is 0.3 in every implementation.
+      const totalText = `${this.totalLabel}: ${formatChartNumber(
+        sumChartNumbers(dataPoints.map(dp => dp.value)),
+        this.totalValueFormat
+      )}`;
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
       const totalY = layout.legendStartY + dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT + PieChart.TOTAL_ROW_GAP;
       canvas.drawText(

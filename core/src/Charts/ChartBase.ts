@@ -82,7 +82,10 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   /** Marks the chart as decorative even when altText is set. */
   public isDecorative = false;
 
-  /** Charts self-tag because their positioned canvas is flushed separately. */
+  /**
+   * Charts self-tag because their positioned canvas is flushed separately.
+   * @internal
+   */
   public get handlesOwnTagging(): true {
     return true;
   }

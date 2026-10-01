@@ -1,3 +1,4 @@
+import { formatChartNumber } from '../ChartNumberFormat';
 import { applyOptions } from '../../Core/applyOptions';
 /**
  * Represents a single data point in a chart
@@ -19,8 +20,8 @@ export class ChartDataPoint {
   value: number = 0;
 
   /**
-   * Standard .NET format string to use for FormattedValue (e.g., "C0", "P1", "N2").
-   * Defaults to "G" (General).
+   * Number format for {@link formattedValue}: `G` (default), `F<n>`, `N<n>` or `P<n>`.
+   * Culture-invariant; see {@link formatChartNumber}. Anything else throws when the chart is drawn.
    */
   labelFormat: string = 'G';
 
@@ -28,6 +29,6 @@ export class ChartDataPoint {
    * Gets the formatted value string based on Value and LabelFormat.
    */
   get formattedValue(): string {
-    return this.value.toString();
+    return formatChartNumber(this.value, this.labelFormat);
   }
 }

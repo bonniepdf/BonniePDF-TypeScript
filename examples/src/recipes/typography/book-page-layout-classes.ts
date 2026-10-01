@@ -42,7 +42,7 @@ export function generate(): Document {
     const h = new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS');
     h.fontName = StandardFonts.TimesItalic;
     h.fontSize = 8;
-    h.textColor = ColorPalette.slate[400];
+    h.color = ColorPalette.slate[400];
     h.alignment = TextAlignment.Center;
     return h;
   };
@@ -55,7 +55,7 @@ export function generate(): Document {
     const f = new TextBlock(String(pageNumber + 41));
     f.fontName = StandardFonts.TimesBold;
     f.fontSize = 10;
-    f.textColor = ColorPalette.slate[500];
+    f.color = ColorPalette.slate[500];
     f.alignment = TextAlignment.Center;
     return f;
   };
@@ -73,7 +73,7 @@ export function generate(): Document {
   const chapterLabel = new TextBlock('CHAPTER III');
   chapterLabel.fontName = StandardFonts.TimesBold;
   chapterLabel.fontSize = 11;
-  chapterLabel.textColor = ColorPalette.slate[700];
+  chapterLabel.color = ColorPalette.slate[700];
   chapterLabel.alignment = TextAlignment.Center;
   chapterLabel.margin = new Thickness(0, 0, 0, 6);
   doc.add(chapterLabel);
@@ -83,7 +83,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.TimesBold;
   h1.fontSize = 18;
-  h1.textColor = ColorPalette.slate[900];
+  h1.color = ColorPalette.slate[900];
   h1.alignment = TextAlignment.Center;
   h1.margin = new Thickness(0, 0, 0, 20);
   doc.add(h1);
@@ -95,7 +95,7 @@ export function generate(): Document {
   );
   p1.fontName = StandardFonts.TimesRoman;
   p1.fontSize = 11;
-  p1.textColor = ColorPalette.slate[800];
+  p1.color = ColorPalette.slate[800];
   p1.alignment = TextAlignment.Justify;
   p1.margin = new Thickness(0, 0, 0, 10);
   doc.add(p1);
@@ -105,7 +105,7 @@ export function generate(): Document {
   );
   quote1.fontName = StandardFonts.TimesItalic;
   quote1.fontSize = 11;
-  quote1.textColor = ColorPalette.slate[700];
+  quote1.color = ColorPalette.slate[700];
   quote1.alignment = TextAlignment.Justify;
   quote1.margin = new Thickness(0, 0, 0, 10);
   doc.add(quote1);
@@ -115,7 +115,7 @@ export function generate(): Document {
   );
   p2.fontName = StandardFonts.TimesRoman;
   p2.fontSize = 11;
-  p2.textColor = ColorPalette.slate[800];
+  p2.color = ColorPalette.slate[800];
   p2.alignment = TextAlignment.Justify;
   p2.margin = new Thickness(0, 0, 0, 10);
   doc.add(p2);
@@ -125,7 +125,7 @@ export function generate(): Document {
   );
   p3.fontName = StandardFonts.TimesRoman;
   p3.fontSize = 11;
-  p3.textColor = ColorPalette.slate[800];
+  p3.color = ColorPalette.slate[800];
   p3.alignment = TextAlignment.Justify;
   p3.margin = new Thickness(0, 0, 0, 10);
   doc.add(p3);
@@ -135,7 +135,7 @@ export function generate(): Document {
   );
   p4.fontName = StandardFonts.TimesRoman;
   p4.fontSize = 11;
-  p4.textColor = ColorPalette.slate[800];
+  p4.color = ColorPalette.slate[800];
   p4.alignment = TextAlignment.Justify;
   p4.margin = new Thickness(0, 0, 0, 10);
   doc.add(p4);
@@ -146,12 +146,12 @@ export function generate(): Document {
   const butThen = new TextBlock('But then -');
   butThen.fontName = StandardFonts.TimesBold;
   butThen.fontSize = 11;
-  butThen.textColor = ColorPalette.slate[800];
+  butThen.color = ColorPalette.slate[800];
   emphStack.add(butThen);
   const whisper = new TextBlock('he continued, his voice dropping to a conspiratorial whisper -');
   whisper.fontName = StandardFonts.TimesItalic;
   whisper.fontSize = 11;
-  whisper.textColor = ColorPalette.slate[700];
+  whisper.color = ColorPalette.slate[700];
   emphStack.add(whisper);
   doc.add(emphStack);
 
@@ -160,7 +160,7 @@ export function generate(): Document {
   );
   p5.fontName = StandardFonts.TimesRoman;
   p5.fontSize = 11;
-  p5.textColor = ColorPalette.slate[800];
+  p5.color = ColorPalette.slate[800];
   p5.alignment = TextAlignment.Justify;
   p5.margin = new Thickness(0, 0, 0, 10);
   doc.add(p5);
@@ -170,7 +170,7 @@ export function generate(): Document {
   );
   p6.fontName = StandardFonts.TimesRoman;
   p6.fontSize = 11;
-  p6.textColor = ColorPalette.slate[800];
+  p6.color = ColorPalette.slate[800];
   p6.alignment = TextAlignment.Justify;
   p6.margin = new Thickness(0, 0, 0, 10);
   doc.add(p6);
@@ -182,7 +182,7 @@ export function generate(): Document {
   );
   quoteText.fontName = StandardFonts.TimesItalic;
   quoteText.fontSize = 10;
-  quoteText.textColor = ColorPalette.slate[600];
+  quoteText.color = ColorPalette.slate[600];
   quoteText.alignment = TextAlignment.Justify;
 
   const quoteInner = new VerticalStack();
@@ -202,7 +202,7 @@ export function generate(): Document {
   );
   p7.fontName = StandardFonts.TimesRoman;
   p7.fontSize = 11;
-  p7.textColor = ColorPalette.slate[800];
+  p7.color = ColorPalette.slate[800];
   p7.alignment = TextAlignment.Justify;
   p7.margin = new Thickness(0, 0, 0, 10);
   doc.add(p7);
@@ -212,7 +212,7 @@ export function generate(): Document {
   );
   p8.fontName = StandardFonts.TimesRoman;
   p8.fontSize = 11;
-  p8.textColor = ColorPalette.slate[800];
+  p8.color = ColorPalette.slate[800];
   p8.alignment = TextAlignment.Justify;
   p8.margin = new Thickness(0, 0, 0, 10);
   doc.add(p8);

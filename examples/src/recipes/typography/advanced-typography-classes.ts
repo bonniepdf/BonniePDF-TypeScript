@@ -47,7 +47,7 @@ export function generate(): Document {
   const title = new Heading('Advanced Typography');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 14);
   doc.add(title);
 
@@ -98,8 +98,8 @@ export function generate(): Document {
   const overlined = new TextBlock('Overlined section marker');
   overlined.fontName = StandardFonts.HelveticaBold;
   overlined.fontSize = 13;
-  overlined.textColor = ColorPalette.slate[800];
-  overlined.textDecoration = TextDecoration.Overline;
+  overlined.color = ColorPalette.slate[800];
+  overlined.decoration = TextDecoration.Overline;
   overlined.decorationColor = ColorPalette.blue[500];
   overlined.decorationThickness = 1.5;
   overlined.margin = new Thickness(0, 0, 0, 8);
@@ -125,14 +125,14 @@ export function generate(): Document {
   const tracked = new TextBlock('WIDE TRACKING FOR EMPHASIS');
   tracked.fontName = StandardFonts.HelveticaBold;
   tracked.fontSize = 12;
-  tracked.textColor = ColorPalette.slate[800];
+  tracked.color = ColorPalette.slate[800];
   tracked.letterSpacing = 3;
   tracked.margin = new Thickness(0, 0, 0, 4);
   doc.add(tracked);
 
   const airy = new TextBlock('Airy   word   spacing   opens   the   line.');
   airy.fontSize = 12;
-  airy.textColor = ColorPalette.slate[700];
+  airy.color = ColorPalette.slate[700];
   airy.wordSpacing = 4;
   airy.margin = new Thickness(0, 0, 0, 16);
   doc.add(airy);
@@ -144,7 +144,7 @@ export function generate(): Document {
     'This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.'
   );
   clamped.fontSize = 12;
-  clamped.textColor = ColorPalette.slate[700];
+  clamped.color = ColorPalette.slate[700];
   clamped.maxLines = 2;
   clamped.margin = new Thickness(0, 0, 0, 16);
   doc.add(clamped);
@@ -157,7 +157,7 @@ export function generate(): Document {
       'This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.'
   );
   prose.fontSize = 12;
-  prose.textColor = ColorPalette.slate[700];
+  prose.color = ColorPalette.slate[700];
   prose.firstLineIndent = 24;
   prose.paragraphSpacing = 8;
   doc.add(prose);
@@ -171,7 +171,7 @@ function sectionLabel(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = ColorPalette.slate[700];
+  h.color = ColorPalette.slate[700];
   h.margin = new Thickness(0, 0, 0, 6);
   return h;
 }

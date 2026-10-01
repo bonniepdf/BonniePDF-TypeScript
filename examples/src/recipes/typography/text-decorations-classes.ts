@@ -52,7 +52,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 22;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 10);
   doc.add(h1);
 
@@ -70,7 +70,7 @@ export function generate(): Document {
   const u = new TextBlock(
     'This text has an underline applied. Underlines can mark emphasis, hyperlinks, or headings in informal documents.'
   );
-  u.textDecoration = TextDecoration.Underline;
+  u.decoration = TextDecoration.Underline;
   u.margin = new Thickness(0, 0, 0, 10);
   doc.add(u);
 
@@ -81,7 +81,7 @@ export function generate(): Document {
   const s = new TextBlock(
     'This text has a strikethrough applied. Strikethrough visually signals content that has been withdrawn, revised, or superseded.'
   );
-  s.textDecoration = TextDecoration.Strikethrough;
+  s.decoration = TextDecoration.Strikethrough;
   s.margin = new Thickness(0, 0, 0, 10);
   doc.add(s);
 
@@ -93,7 +93,7 @@ export function generate(): Document {
     'Both decorations can be applied simultaneously. TextDecoration is a set of flags — combine them with the | operator: ' +
       'TextDecoration.Underline | TextDecoration.Strikethrough.'
   );
-  c.textDecoration = TextDecoration.Underline | TextDecoration.Strikethrough;
+  c.decoration = TextDecoration.Underline | TextDecoration.Strikethrough;
   c.margin = new Thickness(0, 0, 0, 10);
   doc.add(c);
 
@@ -107,7 +107,7 @@ export function generate(): Document {
     ['Right-aligned underlined text.', TextAlignment.Right],
   ] as [string, TextAlignment][]) {
     const b = new TextBlock(label);
-    b.textDecoration = TextDecoration.Underline;
+    b.decoration = TextDecoration.Underline;
     b.alignment = align;
     b.margin = new Thickness(0, 0, 0, 8);
     doc.add(b);
@@ -120,7 +120,7 @@ export function generate(): Document {
   for (const size of [8, 12, 18, 24, 36]) {
     const b = new TextBlock(`Underline at ${size}pt`);
     b.fontSize = size;
-    b.textDecoration = TextDecoration.Underline;
+    b.decoration = TextDecoration.Underline;
     b.margin = new Thickness(0, 0, 0, 6);
     doc.add(b);
   }
@@ -137,22 +137,22 @@ export function generate(): Document {
 
   const original = new TextBlock('Original Price: £199.99');
   original.fontSize = 14;
-  original.textColor = ColorPalette.slate[600];
-  original.textDecoration = TextDecoration.Strikethrough;
+  original.color = ColorPalette.slate[600];
+  original.decoration = TextDecoration.Strikethrough;
   original.margin = new Thickness(0, 0, 0, 4);
   doc.add(original);
 
   const sale = new TextBlock('Sale Price: £149.99');
   sale.fontName = StandardFonts.HelveticaBold;
   sale.fontSize = 18;
-  sale.textColor = Color.red;
-  sale.textDecoration = TextDecoration.Underline;
+  sale.color = Color.red;
+  sale.decoration = TextDecoration.Underline;
   sale.margin = new Thickness(0, 0, 0, 4);
   doc.add(sale);
 
   const saving = new TextBlock('You save £50.00!');
   saving.fontSize = 11;
-  saving.textColor = ColorPalette.green[700];
+  saving.color = ColorPalette.green[700];
   doc.add(saving);
 
   return doc;
@@ -164,7 +164,7 @@ function section(doc: Document, title: string, tocId: string): void {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 12, 0, 6);
   doc.add(h);
 }

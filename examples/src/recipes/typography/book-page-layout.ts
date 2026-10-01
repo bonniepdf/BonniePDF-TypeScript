@@ -24,7 +24,7 @@ export function generate(): Document {
         new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS', {
           fontName: StandardFonts.TimesItalic,
           fontSize: 8,
-          textColor: 'slate-400',
+          color: 'slate-400',
           alignment: 'center',
         }),
       // Viewer page counter starts at 42; footer text matches.
@@ -33,7 +33,7 @@ export function generate(): Document {
         new TextBlock(String(pageNumber + 41), {
           fontName: StandardFonts.TimesBold,
           fontSize: 10,
-          textColor: 'slate-500',
+          color: 'slate-500',
           alignment: 'center',
         }),
     },
@@ -50,7 +50,7 @@ export function generate(): Document {
     new TextBlock(text, {
       fontName: StandardFonts.TimesRoman,
       fontSize: 11,
-      textColor: 'slate-800',
+      color: 'slate-800',
       alignment: 'justify',
       margin: { bottom: 10 },
     });
@@ -61,7 +61,7 @@ export function generate(): Document {
     new TextBlock('CHAPTER III', {
       fontName: StandardFonts.TimesBold,
       fontSize: 11,
-      textColor: 'slate-700',
+      color: 'slate-700',
       alignment: 'center',
       margin: { bottom: 6 },
     })
@@ -73,7 +73,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.TimesBold,
       fontSize: 18,
-      textColor: 'slate-900',
+      color: 'slate-900',
       alignment: 'center',
       margin: { bottom: 20 },
     })
@@ -93,7 +93,7 @@ export function generate(): Document {
       {
         fontName: StandardFonts.TimesItalic,
         fontSize: 11,
-        textColor: 'slate-700',
+        color: 'slate-700',
         alignment: 'justify',
         margin: { bottom: 10 },
       }
@@ -123,11 +123,11 @@ export function generate(): Document {
     new VerticalStack({
       margin: { bottom: 10 },
       children: [
-        new TextBlock('But then -', { fontName: StandardFonts.TimesBold, fontSize: 11, textColor: 'slate-800' }),
+        new TextBlock('But then -', { fontName: StandardFonts.TimesBold, fontSize: 11, color: 'slate-800' }),
         new TextBlock('he continued, his voice dropping to a conspiratorial whisper -', {
           fontName: StandardFonts.TimesItalic,
           fontSize: 11,
-          textColor: 'slate-700',
+          color: 'slate-700',
         }),
       ],
     })
@@ -157,7 +157,7 @@ export function generate(): Document {
         children: [
           new TextBlock(
             'We have discovered, through decades of research across multiple disciplines, that the architectural blueprint of memory is not unique to humans. It exists in varying forms across all mammalian species, suggesting an ancient origin predating consciousness itself. More remarkably - and this is where conventional science begins to grow uncomfortable - we have found evidence that this architecture can be influenced, modified, and in some cases, completely redesigned.',
-            { fontName: StandardFonts.TimesItalic, fontSize: 10, textColor: 'slate-600', alignment: 'justify' }
+            { fontName: StandardFonts.TimesItalic, fontSize: 10, color: 'slate-600', alignment: 'justify' }
           ),
         ],
       }),

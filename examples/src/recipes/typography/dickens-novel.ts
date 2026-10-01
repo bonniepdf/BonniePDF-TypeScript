@@ -87,7 +87,7 @@ export function generate(): Document {
           new TextBlock('A Tale of Two Cities', {
             fontName: StandardFonts.TimesItalic,
             fontSize: 9,
-            textColor: 'slate-500',
+            color: 'slate-500',
             alignment: 'left',
           }),
           1
@@ -96,7 +96,7 @@ export function generate(): Document {
           new TextBlock('Charles Dickens', {
             fontName: StandardFonts.TimesItalic,
             fontSize: 9,
-            textColor: 'slate-500',
+            color: 'slate-500',
             alignment: 'right',
           }),
           1
@@ -108,7 +108,7 @@ export function generate(): Document {
         return new TextBlock(String(pageNum), {
           fontName: StandardFonts.TimesRoman,
           fontSize: 9,
-          textColor: 'slate-500',
+          color: 'slate-500',
           alignment: 'center',
           margin: { top: 2 },
         });
@@ -126,7 +126,7 @@ export function generate(): Document {
     new TextBlock('A TALE OF TWO CITIES', {
       fontName: StandardFonts.TimesBold,
       fontSize: 28,
-      textColor: 'slate-900',
+      color: 'slate-900',
       alignment: 'center',
       margin: { top: 100, bottom: 12 },
     })
@@ -136,7 +136,7 @@ export function generate(): Document {
     new TextBlock('A Story of the French Revolution', {
       fontName: StandardFonts.TimesItalic,
       fontSize: 15,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
       margin: { bottom: 40 },
     })
@@ -150,7 +150,7 @@ export function generate(): Document {
     new TextBlock('---------------', {
       fontName: StandardFonts.TimesRoman,
       fontSize: 13,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
       margin: { bottom: 40 },
     })
@@ -160,7 +160,7 @@ export function generate(): Document {
     new TextBlock('Charles Dickens', {
       fontName: StandardFonts.TimesBold,
       fontSize: 20,
-      textColor: 'slate-800',
+      color: 'slate-800',
       alignment: 'center',
       margin: { bottom: 60 },
     })
@@ -170,7 +170,7 @@ export function generate(): Document {
     new TextBlock('Project Gutenberg Edition · eBook #98', {
       fontName: StandardFonts.TimesRoman,
       fontSize: 10,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
       margin: { bottom: 4 },
     })
@@ -180,7 +180,7 @@ export function generate(): Document {
     new TextBlock('Public domain - free to read, copy, and share.', {
       fontName: StandardFonts.TimesItalic,
       fontSize: 9,
-      textColor: 'slate-600',
+      color: 'slate-600',
       alignment: 'center',
     })
   );
@@ -191,7 +191,7 @@ export function generate(): Document {
     new TextBlock('Table of Contents', {
       fontName: StandardFonts.TimesBold,
       fontSize: 24,
-      textColor: 'slate-900',
+      color: 'slate-900',
       alignment: 'center',
       margin: { top: 40, bottom: 40 },
     })
@@ -208,7 +208,7 @@ export function generate(): Document {
       headingIdentifiers: tocIds,
       fontName: StandardFonts.TimesRoman,
       fontSize: 11,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 40 },
     })
   );
@@ -222,7 +222,7 @@ export function generate(): Document {
       new TextBlock('---------------', {
         fontName: StandardFonts.TimesRoman,
         fontSize: 11,
-        textColor: 'slate-600',
+        color: 'slate-600',
         alignment: 'center',
         margin: { top: 56, bottom: 14 },
       })
@@ -233,7 +233,7 @@ export function generate(): Document {
         tocIdentifier: book.tocId,
         fontName: StandardFonts.TimesBold,
         fontSize: 14,
-        textColor: 'slate-800',
+        color: 'slate-800',
         alignment: 'center',
         margin: { bottom: 14 },
       })
@@ -243,7 +243,7 @@ export function generate(): Document {
       new TextBlock('---------------', {
         fontName: StandardFonts.TimesRoman,
         fontSize: 11,
-        textColor: 'slate-600',
+        color: 'slate-600',
         alignment: 'center',
         margin: { bottom: 32 },
       })
@@ -254,7 +254,7 @@ export function generate(): Document {
         new TextBlock(ch.number, {
           fontName: StandardFonts.TimesBold,
           fontSize: 10,
-          textColor: 'slate-500',
+          color: 'slate-500',
           alignment: 'center',
           margin: { top: 32, bottom: 6 },
         })
@@ -265,7 +265,7 @@ export function generate(): Document {
           tocIdentifier: ch.tocId,
           fontName: StandardFonts.TimesBold,
           fontSize: 17,
-          textColor: 'slate-900',
+          color: 'slate-900',
           alignment: 'center',
           margin: { bottom: 18 },
         })
@@ -283,7 +283,7 @@ export function generate(): Document {
           new TextBlock(paragraphParts.join(' '), {
             fontName: StandardFonts.TimesRoman,
             fontSize: 11,
-            textColor: 'slate-900',
+            color: 'slate-900',
             alignment: 'justify',
             margin: { bottom: 7 },
           })

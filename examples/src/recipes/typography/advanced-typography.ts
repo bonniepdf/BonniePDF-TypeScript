@@ -33,7 +33,7 @@ export function generate(): Document {
     new Heading('Advanced Typography', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 14 },
     })
   );
@@ -84,8 +84,8 @@ export function generate(): Document {
     new TextBlock('Overlined section marker', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 13,
-      textColor: 'slate-800',
-      textDecoration: 'overline',
+      color: 'slate-800',
+      decoration: 'overline',
       decorationColor: 'blue-500',
       decorationThickness: 1.5,
       margin: { bottom: 8 },
@@ -119,7 +119,7 @@ export function generate(): Document {
     new TextBlock('WIDE TRACKING FOR EMPHASIS', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
-      textColor: 'slate-800',
+      color: 'slate-800',
       letterSpacing: 3,
       margin: { bottom: 4 },
     })
@@ -128,7 +128,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Airy   word   spacing   opens   the   line.', {
       fontSize: 12,
-      textColor: 'slate-700',
+      color: 'slate-700',
       wordSpacing: 4,
       margin: { bottom: 16 },
     })
@@ -140,7 +140,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock(
       'This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.',
-      { fontSize: 12, textColor: 'slate-700', maxLines: 2, margin: { bottom: 16 } }
+      { fontSize: 12, color: 'slate-700', maxLines: 2, margin: { bottom: 16 } }
     )
   );
 
@@ -151,7 +151,7 @@ export function generate(): Document {
     new TextBlock(
       'The first line of each paragraph is indented and a little air is inserted between paragraphs, the way a printed book sets body copy.\n' +
         'This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.',
-      { fontSize: 12, textColor: 'slate-700', firstLineIndent: 24, paragraphSpacing: 8 }
+      { fontSize: 12, color: 'slate-700', firstLineIndent: 24, paragraphSpacing: 8 }
     )
   );
 
@@ -164,7 +164,7 @@ function sectionLabel(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: 'slate-700',
+    color: 'slate-700',
     margin: { bottom: 6 },
   });
 }

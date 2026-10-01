@@ -554,13 +554,13 @@ function runningBand(left: string, right: string): HorizontalStack {
   const l = new TextBlock(left);
   l.fontName = StandardFonts.Helvetica;
   l.fontSize = 7.5;
-  l.textColor = MUTED;
+  l.color = MUTED;
   row.add(l, 2.5);
 
   const r = new TextBlock(right);
   r.fontName = StandardFonts.Helvetica;
   r.fontSize = 7.5;
-  r.textColor = MUTED;
+  r.color = MUTED;
   r.alignment = TextAlignment.Right;
   row.add(r, 2);
 
@@ -573,14 +573,14 @@ function tile(value: string, label: string, accent: Color): Container {
   const headline = new TextBlock(value);
   headline.fontName = StandardFonts.HelveticaBold;
   headline.fontSize = 16;
-  headline.textColor = accent;
+  headline.color = accent;
   headline.margin = new Thickness(0, 0, 0, 2);
   stack.add(headline);
 
   const caption = new TextBlock(label);
   caption.fontName = StandardFonts.Helvetica;
   caption.fontSize = 8;
-  caption.textColor = MUTED;
+  caption.color = MUTED;
   stack.add(caption);
 
   const box = new Container();

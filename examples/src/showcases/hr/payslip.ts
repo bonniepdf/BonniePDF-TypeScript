@@ -47,15 +47,15 @@ const HELVETICA_BOLD = StandardFonts.HelveticaBold;
 
 // ── Reusable option objects ────────────────────────────────────────────────────
 // Shared element configuration, composed with the spread operator for one-offs.
-const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 8.5, textColor: INK };
-const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 8.5, textColor: INK };
+const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 8.5, color: INK };
+const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 8.5, color: INK };
 const moneyText: TextBlockOptions = { ...bodyText, alignment: 'right' };
 const moneyTotal: TextBlockOptions = { ...boldText, alignment: 'right' };
-const mutedRight: TextBlockOptions = { ...moneyText, textColor: MUTED };
-const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, textColor: FAINT };
-const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7, textColor: MUTED };
-const periodText: TextBlockOptions = { fontName: HELVETICA, fontSize: 8, textColor: MUTED, alignment: 'right' };
-const footnote: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 10, textColor: INK };
+const mutedRight: TextBlockOptions = { ...moneyText, color: MUTED };
+const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, color: FAINT };
+const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7, color: MUTED };
+const periodText: TextBlockOptions = { fontName: HELVETICA, fontSize: 8, color: MUTED, alignment: 'right' };
+const footnote: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 10, color: INK };
 
 /** The light panel behind each metadata strip. */
 const panelOptions: ContainerOptions = { backgroundColor: PANEL, padding: [6, 4], margin: { bottom: 12 } };
@@ -163,14 +163,14 @@ function masthead(data: PayslipData): VerticalStack {
   const identity = new VerticalStack({
     spacing: 2,
     children: [
-      new TextBlock(data.employer.name, { fontName: HELVETICA_BOLD, fontSize: 15, textColor: ACCENT }),
-      new TextBlock(data.employer.address, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+      new TextBlock(data.employer.name, { fontName: HELVETICA_BOLD, fontSize: 15, color: ACCENT }),
+      new TextBlock(data.employer.address, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
     ],
   });
   const period = new VerticalStack({
     spacing: 2,
     children: [
-      new TextBlock('PAYSLIP', { fontName: HELVETICA_BOLD, fontSize: 11, textColor: INK, alignment: 'right' }),
+      new TextBlock('PAYSLIP', { fontName: HELVETICA_BOLD, fontSize: 11, color: INK, alignment: 'right' }),
       new TextBlock(`Pay date   ${data.payPeriod.payDate}`, periodText),
       new TextBlock(`Tax month ${data.payPeriod.taxMonth}  ·  ${data.payPeriod.taxYear}`, periodText),
     ],
@@ -246,8 +246,8 @@ function netPayBand(data: PayslipData): Container {
   const label = new VerticalStack({
     spacing: 1,
     children: [
-      new TextBlock('NET PAY', { fontName: HELVETICA_BOLD, fontSize: 9, textColor: INK }),
-      new TextBlock(`Paid by ${data.employee.paidTo}`, { fontName: HELVETICA, fontSize: 7.5, textColor: MUTED }),
+      new TextBlock('NET PAY', { fontName: HELVETICA_BOLD, fontSize: 9, color: INK }),
+      new TextBlock(`Paid by ${data.employee.paidTo}`, { fontName: HELVETICA, fontSize: 7.5, color: MUTED }),
     ],
   });
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
@@ -256,7 +256,7 @@ function netPayBand(data: PayslipData): Container {
     new TextBlock(money(net, data), {
       fontName: HELVETICA_BOLD,
       fontSize: 16,
-      textColor: NET_AMOUNT,
+      color: NET_AMOUNT,
       alignment: 'right',
     }),
     1
@@ -288,7 +288,7 @@ export function createPayslipSettings(): DocumentSettings {
     new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
       fontName: HELVETICA,
       fontSize: 6.5,
-      textColor: FAINT,
+      color: FAINT,
       alignment: 'center',
     });
   return settings;

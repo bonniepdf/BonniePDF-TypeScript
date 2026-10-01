@@ -166,7 +166,7 @@ function coverType(): Container {
   const label = new TextBlock(`ANNUAL REPORT ${YEAR}`);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 15;
-  label.textColor = ColorPalette.amber[600];
+  label.color = ColorPalette.amber[600];
   label.alignment = TextAlignment.Center;
   stack.add(label);
 
@@ -175,14 +175,14 @@ function coverType(): Container {
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 44;
   title.lineHeight = 1;
-  title.textColor = INK;
+  title.color = INK;
   title.alignment = TextAlignment.Center;
   title.margin = new Thickness(0, 0, 0, 48);
   stack.add(title);
 
   const tagline = new TextBlock('Stewardship, growth, and long-term value');
   tagline.fontSize = 13;
-  tagline.textColor = ColorPalette.slate[500];
+  tagline.color = ColorPalette.slate[500];
   tagline.alignment = TextAlignment.Center;
   // The block is anchored to the foot of the page, so this gap is what sets how
   // far the type sits below the badge: the eyebrow was clearing the gold ring by
@@ -192,7 +192,7 @@ function coverType(): Container {
 
   const credit = new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`);
   credit.fontSize = 10;
-  credit.textColor = ColorPalette.slate[600];
+  credit.color = ColorPalette.slate[600];
   credit.alignment = TextAlignment.Center;
   stack.add(credit);
 

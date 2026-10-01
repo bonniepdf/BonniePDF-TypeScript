@@ -48,7 +48,7 @@ export function eyebrow(text: string, color: Color = ACCENT): TextBlock {
   const block = new TextBlock(text);
   block.fontName = StandardFonts.HelveticaBold;
   block.fontSize = 8.5;
-  block.textColor = color;
+  block.color = color;
   block.margin = new Thickness(0, 0, 0, 4);
   return block;
 }
@@ -58,7 +58,7 @@ export function h1(text: string): Heading {
   heading.level = 1;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 21;
-  heading.textColor = HEADING;
+  heading.color = HEADING;
   heading.margin = new Thickness(0, 0, 0, 6);
   return heading;
 }
@@ -68,7 +68,7 @@ export function h2(text: string): Heading {
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 13;
-  heading.textColor = ACCENT;
+  heading.color = ACCENT;
   heading.margin = new Thickness(0, 14, 0, 8);
   return heading;
 }
@@ -78,7 +78,7 @@ export function h3(text: string): Heading {
   heading.level = 3;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 10.5;
-  heading.textColor = HEADING;
+  heading.color = HEADING;
   heading.margin = new Thickness(0, 8, 0, 5);
   return heading;
 }
@@ -87,7 +87,7 @@ export function body(text: string, opts: { color?: Color; mb?: number; mt?: numb
   const block = new TextBlock(text);
   block.fontName = StandardFonts.Helvetica;
   block.fontSize = opts.size ?? 9.5;
-  block.textColor = opts.color ?? INK;
+  block.color = opts.color ?? INK;
   block.margin = new Thickness(0, opts.mt ?? 0, 0, opts.mb ?? 8);
   return block;
 }
@@ -97,7 +97,7 @@ export function th(text: string): TextBlock {
   const block = new TextBlock(text);
   block.fontName = StandardFonts.HelveticaBold;
   block.fontSize = 8.5;
-  block.textColor = Color.white;
+  block.color = Color.white;
   return block;
 }
 
@@ -106,7 +106,7 @@ export function td(text: string, opts: { color?: Color; bold?: boolean; size?: n
   const block = new TextBlock(text);
   block.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = opts.size ?? 8.5;
-  block.textColor = opts.color ?? INK;
+  block.color = opts.color ?? INK;
   return block;
 }
 
@@ -127,14 +127,14 @@ export function field(label: string, value: string): VerticalStack {
   const key = new TextBlock(label.toUpperCase());
   key.fontName = StandardFonts.HelveticaBold;
   key.fontSize = 6.5;
-  key.textColor = MUTED;
+  key.color = MUTED;
   key.margin = new Thickness(0, 0, 0, 2);
   stack.add(key);
 
   const val = new TextBlock(value);
   val.fontName = StandardFonts.Helvetica;
   val.fontSize = 9.5;
-  val.textColor = INK;
+  val.color = INK;
   stack.add(val);
 
   return stack;
@@ -156,7 +156,7 @@ export function panel(title: string, children: IElement[], opts: { accent?: Colo
   const caption = new TextBlock(title);
   caption.fontName = StandardFonts.HelveticaBold;
   caption.fontSize = 9.5;
-  caption.textColor = opts.accent ?? ACCENT;
+  caption.color = opts.accent ?? ACCENT;
   caption.margin = new Thickness(0, 0, 0, 4);
   stack.add(caption);
   for (const child of children) stack.add(child);
@@ -177,7 +177,7 @@ export function statusCell(text: string, color: Color): Container {
   const label = new TextBlock(text);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 8;
-  label.textColor = color;
+  label.color = color;
 
   const box = new Container();
   box.child = label;
@@ -193,7 +193,7 @@ export function signatureSlot(role: string, name: string, opts: { dated?: string
   const caption = new TextBlock(role.toUpperCase());
   caption.fontName = StandardFonts.HelveticaBold;
   caption.fontSize = 6.5;
-  caption.textColor = MUTED;
+  caption.color = MUTED;
   caption.margin = new Thickness(0, 0, 0, 18);
   stack.add(caption);
 
@@ -207,13 +207,13 @@ export function signatureSlot(role: string, name: string, opts: { dated?: string
   const who = new TextBlock(name);
   who.fontName = StandardFonts.Helvetica;
   who.fontSize = 9;
-  who.textColor = INK;
+  who.color = INK;
   stack.add(who);
 
   const when = new TextBlock(opts.dated ? `Date: ${opts.dated}` : 'Date:');
   when.fontName = StandardFonts.Helvetica;
   when.fontSize = 8;
-  when.textColor = MUTED;
+  when.color = MUTED;
   when.margin = new Thickness(0, 3, 0, 0);
   stack.add(when);
 

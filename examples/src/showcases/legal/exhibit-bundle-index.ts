@@ -214,14 +214,14 @@ export function generate(): Document {
       new SectionLink(`Tab ${section.tab} — ${section.title}`, section.id, {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 12,
-        textColor: ACCENT,
+        color: ACCENT,
       }),
       4
     );
     const pageRow = new HorizontalStack({ spacing: 4 });
     const label = cell('separator at page', { size: 9, color: MUTED });
     pageRow.add(label, label.getPreferredWidth());
-    pageRow.add(new PageNumberOf(section.id, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: INK }));
+    pageRow.add(new PageNumberOf(section.id, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: INK }));
     heading.add(pageRow, 1.4);
     doc.add(heading);
 
@@ -276,7 +276,7 @@ export function generate(): Document {
       new SectionLink('Return to the index', 'index', {
         fontName: StandardFonts.Helvetica,
         fontSize: 9,
-        textColor: ACCENT,
+        color: ACCENT,
         margin: { top: 18 },
       })
     );

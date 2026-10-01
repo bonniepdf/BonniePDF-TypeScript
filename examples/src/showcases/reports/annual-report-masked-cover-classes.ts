@@ -109,7 +109,7 @@ function coverType(): Container {
   const label = new TextBlock(`ANNUAL REPORT ${YEAR}`);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 15;
-  label.textColor = ColorPalette.emerald[200];
+  label.color = ColorPalette.emerald[200];
   label.margin = new Thickness(0, 0, 0, 6);
   stack.add(label);
 
@@ -118,7 +118,7 @@ function coverType(): Container {
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 46;
   title.lineHeight = 1;
-  title.textColor = Color.white;
+  title.color = Color.white;
   title.margin = new Thickness(0, 0, 0, 18);
   stack.add(title);
 
@@ -132,13 +132,13 @@ function coverType(): Container {
 
   const tagline = new TextBlock('Building resilient infrastructure across three continents');
   tagline.fontSize = 13;
-  tagline.textColor = ColorPalette.emerald[100];
+  tagline.color = ColorPalette.emerald[100];
   tagline.margin = new Thickness(0, 0, 0, 106);
   stack.add(tagline);
 
   const credit = new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`);
   credit.fontSize = 10;
-  credit.textColor = ColorPalette.emerald[200];
+  credit.color = ColorPalette.emerald[200];
   stack.add(credit);
 
   const block = new Container();

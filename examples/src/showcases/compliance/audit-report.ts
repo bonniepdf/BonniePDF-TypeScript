@@ -289,12 +289,12 @@ function severityBars(): ChartBase {
 
 function bandRow(left: string, right: string, rightColor: ColorInput): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
-  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }), 3);
+  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }), 3);
   row.add(
     new TextBlock(right, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 8,
-      textColor: rightColor,
+      color: rightColor,
       alignment: 'right',
     }),
     2
@@ -306,7 +306,7 @@ function eyebrow(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 9,
-    textColor: PRIMARY,
+    color: PRIMARY,
     margin: { bottom: 4 },
   });
 }
@@ -316,7 +316,7 @@ function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 22,
-    textColor: ColorPalette.slate[800],
+    color: ColorPalette.slate[800],
     margin: { bottom: 6 },
   });
 }
@@ -326,7 +326,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: PRIMARY,
+    color: PRIMARY,
     margin: { top: 8, bottom: 8 },
   });
 }
@@ -335,7 +335,7 @@ function body(text: string, opts: { color?: ColorInput; mb?: number } = {}): Tex
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 10,
-    textColor: opts.color ?? INK,
+    color: opts.color ?? INK,
     alignment: 'justify',
     margin: { bottom: opts.mb ?? 10 },
   });
@@ -347,10 +347,10 @@ function metaItem(label: string, value: string): VerticalStack {
       new TextBlock(label.toUpperCase(), {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 7,
-        textColor: MUTED,
+        color: MUTED,
         margin: { bottom: 2 },
       }),
-      new TextBlock(value, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: INK }),
+      new TextBlock(value, { fontName: StandardFonts.Helvetica, fontSize: 10, color: INK }),
     ],
   });
 }
@@ -365,10 +365,10 @@ function kpi(value: string, label: string, accent: ColorInput): Container {
         new TextBlock(value, {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 20,
-          textColor: accent,
+          color: accent,
           margin: { bottom: 3 },
         }),
-        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 8.5, textColor: MUTED }),
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 8.5, color: MUTED }),
       ],
     }),
   });
@@ -385,7 +385,7 @@ function card(title: string, chart: IElement): Container {
         new TextBlock(title, {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 11,
-          textColor: PRIMARY,
+          color: PRIMARY,
           margin: { bottom: 8 },
         }),
         chart,
@@ -395,14 +395,14 @@ function card(title: string, chart: IElement): Container {
 }
 
 function th(text: string): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: '#ffffff' });
+  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: '#ffffff' });
 }
 
 function td(text: string, color: ColorInput): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9, textColor: color });
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9, color: color });
 }
 
 /** A severity cell: a coloured dot label pill effect via bold coloured text. */
 function severityCell(sev: Severity): TextBlock {
-  return new TextBlock(sev, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: SEV[sev] });
+  return new TextBlock(sev, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: SEV[sev] });
 }

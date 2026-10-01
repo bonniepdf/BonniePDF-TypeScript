@@ -121,14 +121,14 @@ function coverType(): Container {
   const wordmark = new TextBlock('SAMPLE');
   wordmark.fontName = StandardFonts.HelveticaBold;
   wordmark.fontSize = 15;
-  wordmark.textColor = Color.white;
+  wordmark.color = Color.white;
   wordmark.margin = new Thickness(36, 0, 0, 108);
   stack.add(wordmark);
 
   const label = new TextBlock(`ANNUAL REPORT ${YEAR}`);
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 16;
-  label.textColor = ColorPalette.fuchsia[200];
+  label.color = ColorPalette.fuchsia[200];
   label.margin = new Thickness(0, 0, 0, 8);
   stack.add(label);
 
@@ -137,25 +137,25 @@ function coverType(): Container {
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 52;
   title.lineHeight = 1;
-  title.textColor = Color.white;
+  title.color = Color.white;
   title.margin = new Thickness(0, 0, 0, 70);
   stack.add(title);
 
   const tagline = new TextBlock('Designing the systems that power tomorrow');
   tagline.fontSize = 14;
-  tagline.textColor = ColorPalette.violet[100];
+  tagline.color = ColorPalette.violet[100];
   tagline.margin = new Thickness(0, 0, 0, 324);
   stack.add(tagline);
 
   const credit = new TextBlock('Prepared with BonniePDF');
   credit.fontSize = 10;
-  credit.textColor = ColorPalette.violet[100];
+  credit.color = ColorPalette.violet[100];
   credit.margin = new Thickness(0, 0, 0, 7);
   stack.add(credit);
 
   const confidential = new TextBlock(`Fiscal Year ${YEAR} · Confidential`);
   confidential.fontSize = 10;
-  confidential.textColor = ColorPalette.violet[100];
+  confidential.color = ColorPalette.violet[100];
   stack.add(confidential);
 
   const block = new Container();

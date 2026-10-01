@@ -457,12 +457,12 @@ function countBy<T, K>(items: readonly T[], key: (item: T) => K): Map<K, number>
 
 function runningBand(left: string, right: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
-  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 7.5, textColor: MUTED }), 2);
+  row.add(new TextBlock(left, { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: MUTED }), 2);
   row.add(
     new TextBlock(right, {
       fontName: StandardFonts.Helvetica,
       fontSize: 7.5,
-      textColor: MUTED,
+      color: MUTED,
       alignment: 'right',
     }),
     2
@@ -481,10 +481,10 @@ function tile(value: string, label: string, accent: ColorInput): Container {
         new TextBlock(value, {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 16,
-          textColor: accent,
+          color: accent,
           margin: { bottom: 2 },
         }),
-        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }),
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }),
       ],
     }),
   });

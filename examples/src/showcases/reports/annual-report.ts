@@ -219,7 +219,7 @@ function bandCell(text: string, align: TextAlignmentInput, bold: boolean, color:
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: bold ? 12 : 10,
-    textColor: color,
+    color: color,
     alignment: align,
   });
 }
@@ -271,7 +271,7 @@ function coverLabel(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: ColorPalette.teal[300],
+    color: ColorPalette.teal[300],
     margin: { bottom: 12 },
   });
 }
@@ -282,7 +282,7 @@ function coverTitle(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 42,
-    textColor: '#ffffff',
+    color: '#ffffff',
   });
 }
 
@@ -296,14 +296,14 @@ function triColourRule(): HorizontalStack {
 }
 
 function coverSubtitle(text: string): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 16, textColor: ColorPalette.blue[200] });
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 16, color: ColorPalette.blue[200] });
 }
 
 function coverCredit(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 10,
-    textColor: ColorPalette.blue[300],
+    color: ColorPalette.blue[300],
     margin: { bottom: 4 },
   });
 }
@@ -315,7 +315,7 @@ function sectionHeading(text: string, opts: { top?: number } = {}): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 20,
-    textColor: HEADING,
+    color: HEADING,
     margin: { top: opts.top ?? 0, bottom: 12 },
   });
 }
@@ -325,7 +325,7 @@ function subHeading(text: string): Heading {
     level: 3,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: ColorPalette.blue[700],
+    color: ColorPalette.blue[700],
     margin: { top: 18, bottom: 8 },
   });
 }
@@ -334,7 +334,7 @@ function body(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 11,
-    textColor: INK,
+    color: INK,
     alignment: 'justify',
     margin: { bottom: 12 },
   });
@@ -365,12 +365,12 @@ function kpiCard(value: string, label: string, accent: ColorInput): Container {
         new TextBlock(value, {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 24,
-          textColor: accent,
+          color: accent,
           margin: { bottom: 4 },
         }),
         // 600, not 500: this card sits on the blue-50 panel, where 500 falls to
         // 4.38:1 against the 4.5:1 WCAG AA threshold.
-        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: ColorPalette.slate[600] }),
+        new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 10, color: ColorPalette.slate[600] }),
       ],
     }),
   });

@@ -97,7 +97,7 @@ function coverType(): Container {
     new TextBlock(`ANNUAL REPORT ${YEAR}`, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 15,
-      textColor: ColorPalette.emerald[200],
+      color: ColorPalette.emerald[200],
       margin: { bottom: 6 },
     })
   );
@@ -108,7 +108,7 @@ function coverType(): Container {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 46,
       lineHeight: 1,
-      textColor: Color.white,
+      color: Color.white,
       margin: { bottom: 18 },
     })
   );
@@ -126,7 +126,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock('Building resilient infrastructure across three continents', {
       fontSize: 13,
-      textColor: ColorPalette.emerald[100],
+      color: ColorPalette.emerald[100],
       margin: { bottom: 106 },
     })
   );
@@ -134,7 +134,7 @@ function coverType(): Container {
   stack.add(
     new TextBlock(`Prepared with BonniePDF · Fiscal Year ${YEAR}`, {
       fontSize: 10,
-      textColor: ColorPalette.emerald[200],
+      color: ColorPalette.emerald[200],
     })
   );
 

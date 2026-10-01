@@ -59,7 +59,7 @@ export function generate(): Document {
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 7.5;
-    f.textColor = MUTED;
+    f.color = MUTED;
     f.alignment = TextAlignment.Center;
     return f;
   };
@@ -78,10 +78,10 @@ export function generate(): Document {
   const brandName = new TextBlock('Sample Healthcare');
   brandName.fontName = StandardFonts.HelveticaBold;
   brandName.fontSize = 21;
-  brandName.textColor = BLUE_DARK;
+  brandName.color = BLUE_DARK;
   const brandSub = new TextBlock('Outpatient services');
   brandSub.fontSize = 10;
-  brandSub.textColor = MUTED;
+  brandSub.color = MUTED;
   const brand = new VerticalStack();
   brand.spacing = 3;
   brand.add(brandName);
@@ -89,11 +89,11 @@ export function generate(): Document {
 
   const issuedDate = new TextBlock('Issued 1 August 2026');
   issuedDate.fontSize = 9.5;
-  issuedDate.textColor = MUTED;
+  issuedDate.color = MUTED;
   issuedDate.alignment = TextAlignment.Right;
   const issuedRef = new TextBlock('Reference SAMPLE-OP-1042');
   issuedRef.fontSize = 9.5;
-  issuedRef.textColor = MUTED;
+  issuedRef.color = MUTED;
   issuedRef.alignment = TextAlignment.Right;
   const issued = new VerticalStack();
   issued.spacing = 3;
@@ -110,7 +110,7 @@ export function generate(): Document {
   const bannerText = new TextBlock('SAMPLE DOCUMENT - FICTIONAL DATA');
   bannerText.fontName = StandardFonts.HelveticaBold;
   bannerText.fontSize = 9;
-  bannerText.textColor = Color.white;
+  bannerText.color = Color.white;
   bannerText.alignment = TextAlignment.Center;
   banner.child = bannerText;
   doc.add(banner);
@@ -120,7 +120,7 @@ export function generate(): Document {
   heading.level = 1;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 25;
-  heading.textColor = INK;
+  heading.color = INK;
   heading.margin = new Thickness(0, 0, 0, 14);
   doc.add(heading);
 
@@ -149,7 +149,7 @@ export function generate(): Document {
   appointmentHeading.level = 2;
   appointmentHeading.fontName = StandardFonts.HelveticaBold;
   appointmentHeading.fontSize = 16;
-  appointmentHeading.textColor = BLUE_DARK;
+  appointmentHeading.color = BLUE_DARK;
 
   const appointmentStack = new VerticalStack();
   appointmentStack.spacing = 8;
@@ -169,7 +169,7 @@ export function generate(): Document {
   const list = new UnorderedList();
   list.fontName = StandardFonts.Helvetica;
   list.fontSize = 10.5;
-  list.textColor = BODY;
+  list.color = BODY;
   list.bulletColor = BLUE;
   list.itemSpacing = 4;
   list.margin = new Thickness(0, 0, 0, 18);
@@ -184,12 +184,12 @@ export function generate(): Document {
   const noticeHeading = new TextBlock('If you feel unwell before the appointment');
   noticeHeading.fontName = StandardFonts.HelveticaBold;
   noticeHeading.fontSize = 11;
-  noticeHeading.textColor = INK;
+  noticeHeading.color = INK;
   const noticeBody = new TextBlock(
     'Use the appropriate local healthcare service for advice. This sample letter does not provide medical or emergency guidance.'
   );
   noticeBody.fontSize = 10;
-  noticeBody.textColor = BODY;
+  noticeBody.color = BODY;
 
   const noticeStack = new VerticalStack();
   noticeStack.spacing = 5;
@@ -218,7 +218,7 @@ export function generate(): Document {
   );
   disclaimer.fontName = StandardFonts.HelveticaOblique;
   disclaimer.fontSize = 8.5;
-  disclaimer.textColor = MUTED;
+  disclaimer.color = MUTED;
   disclaimer.alignment = TextAlignment.Center;
 
   const disclaimerBox = new Container();
@@ -236,7 +236,7 @@ function sectionHeading(text: string, tocIdentifier: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 16;
-  h.textColor = INK;
+  h.color = INK;
   h.margin = new Thickness(0, 0, 0, 8);
   return h;
 }
@@ -245,7 +245,7 @@ function body(text: string, options: { bold?: boolean; bottom?: number } = {}): 
   const b = new TextBlock(text);
   b.fontName = options.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = 11;
-  b.textColor = BODY;
+  b.color = BODY;
   b.margin = new Thickness(0, 0, 0, options.bottom ?? 12);
   return b;
 }
@@ -254,12 +254,12 @@ function detail(label: string, value: string): VerticalStack {
   const labelBlock = new TextBlock(label.toUpperCase());
   labelBlock.fontName = StandardFonts.HelveticaBold;
   labelBlock.fontSize = 8;
-  labelBlock.textColor = BLUE_DARK;
+  labelBlock.color = BLUE_DARK;
 
   const valueBlock = new TextBlock(value);
   valueBlock.fontName = StandardFonts.Helvetica;
   valueBlock.fontSize = 10.5;
-  valueBlock.textColor = INK;
+  valueBlock.color = INK;
 
   const s = new VerticalStack();
   s.spacing = 3;

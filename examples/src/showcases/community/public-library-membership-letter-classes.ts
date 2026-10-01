@@ -87,7 +87,7 @@ export function generate(): Document {
     const f = new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`);
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
-    f.textColor = LIBRARY_SECONDARY;
+    f.color = LIBRARY_SECONDARY;
     return f;
   };
 
@@ -105,14 +105,14 @@ export function generate(): Document {
   const brand = new TextBlock('Sample Libraries');
   brand.fontName = StandardFonts.HelveticaBold;
   brand.fontSize = 18;
-  brand.textColor = Color.white;
+  brand.color = Color.white;
   mast.child = brand;
   doc.add(mast);
 
   const service = new TextBlock('Membership Services');
   service.fontName = StandardFonts.HelveticaBold;
   service.fontSize = 12;
-  service.textColor = LIBRARY_INK;
+  service.color = LIBRARY_INK;
   service.margin = new Thickness(0, 0, 0, 2);
   doc.add(service);
 
@@ -163,17 +163,17 @@ export function generate(): Document {
   const cstack = new VerticalStack();
   const clabel = new TextBlock('Membership status');
   clabel.fontSize = 11;
-  clabel.textColor = LIBRARY_SECONDARY;
+  clabel.color = LIBRARY_SECONDARY;
   cstack.add(clabel);
   const cval = new TextBlock('Active');
   cval.fontName = StandardFonts.HelveticaBold;
   cval.fontSize = 28;
-  cval.textColor = LIBRARY_INK;
+  cval.color = LIBRARY_INK;
   cval.margin = new Thickness(0, 2, 0, 2);
   cstack.add(cval);
   const cdate = new TextBlock('Borrow, renew, and reserve items from today');
   cdate.fontSize = 11;
-  cdate.textColor = LIBRARY_SECONDARY;
+  cdate.color = LIBRARY_SECONDARY;
   cstack.add(cdate);
   callout.child = cstack;
   doc.add(callout);
@@ -247,7 +247,7 @@ export function generate(): Document {
       'Contact Membership Services to request an alternative format.'
   );
   note.fontSize = 9.5;
-  note.textColor = LIBRARY_SECONDARY;
+  note.color = LIBRARY_SECONDARY;
   note.margin = new Thickness(0, 18, 0, 0);
   doc.add(note);
 
@@ -259,7 +259,7 @@ function h1(text: string): Heading {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 22;
-  h.textColor = LIBRARY_INK;
+  h.color = LIBRARY_INK;
   h.margin = new Thickness(0, 0, 0, 12);
   return h;
 }
@@ -269,7 +269,7 @@ function h2(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 15;
-  h.textColor = LIBRARY_INK;
+  h.color = LIBRARY_INK;
   h.margin = new Thickness(0, 6, 0, 8);
   return h;
 }
@@ -281,7 +281,7 @@ function body(
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = opts.size ?? 11;
-  b.textColor = opts.color ?? LIBRARY_INK;
+  b.color = opts.color ?? LIBRARY_INK;
   if (opts.align) b.alignment = opts.align;
   b.margin = new Thickness(0, 0, 0, opts.mb ?? 12);
   return b;
@@ -291,7 +291,7 @@ function th(text: string, align: TextAlignment): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 11;
-  b.textColor = Color.white;
+  b.color = Color.white;
   b.alignment = align;
   return b;
 }
@@ -300,7 +300,7 @@ function td(text: string, align: TextAlignment, color: Color = LIBRARY_INK, bold
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = 11;
-  b.textColor = color;
+  b.color = color;
   b.alignment = align;
   return b;
 }

@@ -58,8 +58,8 @@ const SANS = StandardFonts.Helvetica;
 const PAGE_MARGIN = 34;
 const FRAME_HEIGHT = 595.276 - PAGE_MARGIN * 2;
 
-const centred: TextBlockOptions = { alignment: 'center', textColor: INK };
-const caption: TextBlockOptions = { fontName: SANS, fontSize: 7.5, textColor: MUTED, alignment: 'center' };
+const centred: TextBlockOptions = { alignment: 'center', color: INK };
+const caption: TextBlockOptions = { fontName: SANS, fontSize: 7.5, color: MUTED, alignment: 'center' };
 
 // ── Domain model ─────────────────────────────────────────────────────────────
 
@@ -206,7 +206,7 @@ function signatureColumn(name: string, role: string): VerticalStack {
     children: [
       new Spacer(16),
       new Line({ thickness: 0.6, color: FAINT }),
-      new TextBlock(name, { fontName: SERIF_BOLD, fontSize: 9.5, textColor: INK, alignment: 'center' }),
+      new TextBlock(name, { fontName: SERIF_BOLD, fontSize: 9.5, color: INK, alignment: 'center' }),
       new TextBlock(role, caption),
     ],
   });
@@ -220,7 +220,7 @@ function citation(data: CertificateData): VerticalStack {
       new TextBlock(data.institution.name.toUpperCase(), {
         fontName: SANS,
         fontSize: 9,
-        textColor: ACCENT,
+        color: ACCENT,
         alignment: 'center',
       }),
       new TextBlock(data.institution.department, { ...caption, margin: { top: 2, bottom: 14 } }),
@@ -230,7 +230,7 @@ function citation(data: CertificateData): VerticalStack {
         tocIdentifier: 'certificate',
         fontName: SERIF_BOLD,
         fontSize: 26,
-        textColor: INK,
+        color: INK,
         alignment: 'center',
         margin: { bottom: 4 },
       }),
@@ -244,31 +244,31 @@ function citation(data: CertificateData): VerticalStack {
         ...centred,
         fontName: SERIF_ITALIC,
         fontSize: 11,
-        textColor: MUTED,
+        color: MUTED,
       }),
       new TextBlock(data.recipient, {
         ...centred,
         fontName: SERIF_BOLD,
         fontSize: 24,
-        textColor: ACCENT,
+        color: ACCENT,
         margin: { top: 6, bottom: 6 },
       }),
       new TextBlock(data.award.statement, {
         ...centred,
         fontName: SERIF_ITALIC,
         fontSize: 11,
-        textColor: MUTED,
+        color: MUTED,
       }),
       new TextBlock(data.course.title, {
         ...centred,
         fontName: SERIF_BOLD,
         fontSize: 16,
-        textColor: INK,
+        color: INK,
         margin: { top: 6, bottom: 6 },
       }),
       new TextBlock(
         `${data.course.creditHours} credit hours · Awarded with ${data.course.grade} · ${data.award.awarded}`,
-        { ...centred, fontName: SANS, fontSize: 9, textColor: MUTED }
+        { ...centred, fontName: SANS, fontSize: 9, color: MUTED }
       ),
     ],
   });
@@ -314,7 +314,7 @@ function attestation(data: CertificateData): VerticalStack {
       // MUTED, not FAINT: this sits inside a Layers composition, so the preflight
       // can't verify it - but FAINT (slate-400) is 2.63:1 against the white it
       // actually renders on, well under 4.5:1 at this tiny 6.5pt size.
-      new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, textColor: MUTED }),
+      new TextBlock(data.award.certificateId, { ...caption, fontSize: 6.5, color: MUTED }),
     ],
   });
   // The trailing spacer is deliberate, not decorative: the certificate ID

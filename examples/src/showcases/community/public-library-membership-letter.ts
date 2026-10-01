@@ -69,7 +69,7 @@ export function generate(): Document {
         new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 8,
-          textColor: LIBRARY_SECONDARY,
+          color: LIBRARY_SECONDARY,
         }),
     },
     metadata: {
@@ -87,7 +87,7 @@ export function generate(): Document {
       child: new TextBlock('Sample Libraries', {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 18,
-        textColor: '#ffffff',
+        color: '#ffffff',
       }),
     })
   );
@@ -96,7 +96,7 @@ export function generate(): Document {
     new TextBlock('Membership Services', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
-      textColor: LIBRARY_INK,
+      color: LIBRARY_INK,
       margin: { bottom: 2 },
     })
   );
@@ -140,14 +140,14 @@ export function generate(): Document {
       margin: { top: 8, bottom: 22 },
       child: new VerticalStack({
         children: [
-          new TextBlock('Membership status', { fontSize: 11, textColor: LIBRARY_SECONDARY }),
+          new TextBlock('Membership status', { fontSize: 11, color: LIBRARY_SECONDARY }),
           new TextBlock('Active', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 28,
-            textColor: LIBRARY_INK,
+            color: LIBRARY_INK,
             margin: { top: 2, bottom: 2 },
           }),
-          new TextBlock('Borrow, renew, and reserve items from today', { fontSize: 11, textColor: LIBRARY_SECONDARY }),
+          new TextBlock('Borrow, renew, and reserve items from today', { fontSize: 11, color: LIBRARY_SECONDARY }),
         ],
       }),
     })
@@ -213,7 +213,7 @@ export function generate(): Document {
     new TextBlock(
       'This document is available in Braille, large print, audio and other formats. ' +
         'Contact Membership Services to request an alternative format.',
-      { fontSize: 9.5, textColor: LIBRARY_SECONDARY, margin: { top: 18 } }
+      { fontSize: 9.5, color: LIBRARY_SECONDARY, margin: { top: 18 } }
     )
   );
 
@@ -225,7 +225,7 @@ function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 22,
-    textColor: LIBRARY_INK,
+    color: LIBRARY_INK,
     margin: { bottom: 12 },
   });
 }
@@ -235,7 +235,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 15,
-    textColor: LIBRARY_INK,
+    color: LIBRARY_INK,
     margin: { top: 6, bottom: 8 },
   });
 }
@@ -247,7 +247,7 @@ function body(
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: opts.size ?? 11,
-    textColor: opts.color ?? LIBRARY_INK,
+    color: opts.color ?? LIBRARY_INK,
     alignment: opts.align,
     margin: { bottom: opts.mb ?? 12 },
   });
@@ -257,7 +257,7 @@ function th(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 11,
-    textColor: '#ffffff',
+    color: '#ffffff',
     alignment: 'left',
   });
 }
@@ -266,7 +266,7 @@ function td(text: string, color: ColorInput = LIBRARY_INK, bold = false): TextBl
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: 11,
-    textColor: color,
+    color: color,
     alignment: 'left',
   });
 }

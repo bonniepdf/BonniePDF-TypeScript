@@ -104,7 +104,7 @@ export function generate(): Document {
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
-    f.textColor = MUTED;
+    f.color = MUTED;
     return f;
   };
 
@@ -123,23 +123,23 @@ export function generate(): Document {
   const trust = new TextBlock('Sample Hospital Pathology Services');
   trust.fontName = StandardFonts.HelveticaBold;
   trust.fontSize = 14;
-  trust.textColor = CLINICAL_BLUE;
+  trust.color = CLINICAL_BLUE;
   org.add(trust);
   const dept = new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry');
   dept.fontSize = 9;
-  dept.textColor = MUTED;
+  dept.color = MUTED;
   dept.margin = new Thickness(0, 2, 0, 0);
   org.add(dept);
   const accred = new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189');
   accred.fontSize = 8;
-  accred.textColor = MUTED;
+  accred.color = MUTED;
   accred.margin = new Thickness(0, 1, 0, 0);
   org.add(accred);
   const title = new Heading('LABORATORY REPORT');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 13;
-  title.textColor = INK;
+  title.color = INK;
   title.alignment = TextAlignment.Right;
   header.addRow(org, title);
   doc.add(header);
@@ -228,12 +228,12 @@ export function generate(): Document {
   const authName = new TextBlock('Dr S. Patel, Consultant Haematologist (electronically authorised)');
   authName.fontName = StandardFonts.HelveticaBold;
   authName.fontSize = 10;
-  authName.textColor = INK;
+  authName.color = INK;
   authName.margin = new Thickness(0, 2, 0, 2);
   astack.add(authName);
   const authMeta = new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503');
   authMeta.fontSize = 8.5;
-  authMeta.textColor = MUTED;
+  authMeta.color = MUTED;
   astack.add(authMeta);
   auth.child = astack;
   doc.add(auth);
@@ -248,7 +248,7 @@ function h2(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 13;
-  h.textColor = CLINICAL_BLUE;
+  h.color = CLINICAL_BLUE;
   h.margin = new Thickness(0, 4, 0, 6);
   return h;
 }
@@ -257,7 +257,7 @@ function body(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 9.5;
-  b.textColor = INK;
+  b.color = INK;
   b.alignment = TextAlignment.Justify;
   b.margin = new Thickness(0, 0, 0, 10);
   return b;
@@ -267,7 +267,7 @@ function sectionLabel(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 8;
-  b.textColor = CLINICAL_BLUE;
+  b.color = CLINICAL_BLUE;
   b.margin = new Thickness(0, 0, 0, 6);
   return b;
 }
@@ -279,11 +279,11 @@ function kv(label: string, value: string): HorizontalStack {
   const l = new TextBlock(label);
   l.fontName = StandardFonts.HelveticaBold;
   l.fontSize = 9;
-  l.textColor = MUTED;
+  l.color = MUTED;
   row.add(l, 2);
   const v = new TextBlock(value);
   v.fontSize = 9.5;
-  v.textColor = INK;
+  v.color = INK;
   row.add(v, 3);
   return row;
 }
@@ -292,7 +292,7 @@ function th(text: string, align: TextAlignment): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 9;
-  b.textColor = INK;
+  b.color = INK;
   b.alignment = align;
   return b;
 }
@@ -301,7 +301,7 @@ function td(text: string, align: TextAlignment, color: Color, bold: boolean): Te
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = 9.5;
-  b.textColor = color;
+  b.color = color;
   b.alignment = align;
   return b;
 }

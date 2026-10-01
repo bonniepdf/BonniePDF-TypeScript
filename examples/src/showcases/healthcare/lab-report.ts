@@ -91,7 +91,7 @@ export function generate(): Document {
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
           `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+          { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
     },
     metadata: {
@@ -109,16 +109,16 @@ export function generate(): Document {
         new TextBlock('Sample Hospital Pathology Services', {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 14,
-          textColor: CLINICAL_BLUE,
+          color: CLINICAL_BLUE,
         }),
         new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry', {
           fontSize: 9,
-          textColor: MUTED,
+          color: MUTED,
           margin: { top: 2 },
         }),
         new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189', {
           fontSize: 8,
-          textColor: MUTED,
+          color: MUTED,
           margin: { top: 1 },
         }),
       ],
@@ -127,7 +127,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 13,
-      textColor: INK,
+      color: INK,
       alignment: 'right',
     })
   );
@@ -229,12 +229,12 @@ export function generate(): Document {
           new TextBlock('Dr S. Patel, Consultant Haematologist (electronically authorised)', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 10,
-            textColor: INK,
+            color: INK,
             margin: { top: 2, bottom: 2 },
           }),
           new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503', {
             fontSize: 8.5,
-            textColor: MUTED,
+            color: MUTED,
           }),
         ],
       }),
@@ -251,7 +251,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: CLINICAL_BLUE,
+    color: CLINICAL_BLUE,
     margin: { top: 4, bottom: 6 },
   });
 }
@@ -260,7 +260,7 @@ function body(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 9.5,
-    textColor: INK,
+    color: INK,
     alignment: 'justify',
     margin: { bottom: 10 },
   });
@@ -270,27 +270,27 @@ function sectionLabel(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 8,
-    textColor: CLINICAL_BLUE,
+    color: CLINICAL_BLUE,
     margin: { bottom: 6 },
   });
 }
 
 function kv(label: string, value: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 4 } });
-  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
-  row.add(new TextBlock(value, { fontSize: 9.5, textColor: INK }), 3);
+  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: MUTED }), 2);
+  row.add(new TextBlock(value, { fontSize: 9.5, color: INK }), 3);
   return row;
 }
 
 function th(text: string, align: TextAlignmentInput): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: INK, alignment: align });
+  return new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: INK, alignment: align });
 }
 
 function td(text: string, align: TextAlignmentInput, color: ColorInput, bold: boolean): TextBlock {
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: 9.5,
-    textColor: color,
+    color: color,
     alignment: align,
   });
 }

@@ -86,7 +86,7 @@ export function generate(): Document {
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
-            textColor: MUTED,
+            color: MUTED,
             alignment: 'center',
           }
         ),
@@ -107,7 +107,7 @@ export function generate(): Document {
       child: new TextBlock('Sample Community Fund', {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 18,
-        textColor: '#ffffff',
+        color: '#ffffff',
       }),
     })
   );
@@ -116,7 +116,7 @@ export function generate(): Document {
     new TextBlock('Grants & Awards Service', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
-      textColor: INK,
+      color: INK,
       margin: { bottom: 2 },
     })
   );
@@ -166,11 +166,11 @@ export function generate(): Document {
       margin: { top: 8, bottom: 22 },
       child: new VerticalStack({
         children: [
-          new TextBlock('Our decision', { fontSize: 11, textColor: MUTED }),
+          new TextBlock('Our decision', { fontSize: 11, color: MUTED }),
           new TextBlock('Awarded', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 28,
-            textColor: AWARD,
+            color: AWARD,
             margin: { top: 2, bottom: 10 },
           }),
           details,
@@ -211,7 +211,7 @@ export function generate(): Document {
     new UnorderedList({
       fontName: StandardFonts.Helvetica,
       fontSize: 10.5,
-      textColor: BODY,
+      color: BODY,
       bulletColor: BRAND,
       itemSpacing: 4,
       margin: { bottom: 22 },
@@ -246,13 +246,13 @@ export function generate(): Document {
           new TextBlock('Time limit', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 11,
-            textColor: INK,
+            color: INK,
           }),
           new TextBlock(
             'Return your signed grant agreement within one month of the date of this letter to ' +
               'release your first instalment. This is a fictional sample and does not provide legal ' +
               'or financial advice.',
-            { fontSize: 10, textColor: BODY }
+            { fontSize: 10, color: BODY }
           ),
         ],
       }),
@@ -279,7 +279,7 @@ export function generate(): Document {
         {
           fontName: StandardFonts.HelveticaOblique,
           fontSize: 8.5,
-          textColor: MUTED,
+          color: MUTED,
           alignment: 'center',
         }
       ),
@@ -295,7 +295,7 @@ function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 22,
-    textColor: INK,
+    color: INK,
     margin: { bottom: 12 },
   });
 }
@@ -306,7 +306,7 @@ function h2(text: string, tocIdentifier: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 15,
-    textColor: INK,
+    color: INK,
     margin: { top: 6, bottom: 8 },
   });
 }
@@ -318,7 +318,7 @@ function body(
   return new TextBlock(text, {
     fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: opts.size ?? 11,
-    textColor: opts.color ?? BODY,
+    color: opts.color ?? BODY,
     alignment: opts.align,
     margin: { bottom: opts.mb ?? 12 },
   });
@@ -331,12 +331,12 @@ function detail(item: Detail): VerticalStack {
       new TextBlock(item.label.toUpperCase(), {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 8,
-        textColor: BRAND_DARK,
+        color: BRAND_DARK,
       }),
       new TextBlock(item.value, {
         fontName: StandardFonts.Helvetica,
         fontSize: 10.5,
-        textColor: INK,
+        color: INK,
       }),
     ],
   });
@@ -346,7 +346,7 @@ function th(text: string, align: TextAlignmentInput = 'left'): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 11,
-    textColor: '#ffffff',
+    color: '#ffffff',
     alignment: align,
   });
 }
@@ -355,7 +355,7 @@ function td(text: string, color: ColorInput = INK, align: TextAlignmentInput = '
   return new TextBlock(text, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: 11,
-    textColor: color,
+    color: color,
     alignment: align,
   });
 }

@@ -47,7 +47,7 @@ export function generate(): Document {
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
-            textColor: MUTED,
+            color: MUTED,
             alignment: 'center',
           }
         ),
@@ -68,9 +68,9 @@ export function generate(): Document {
         new TextBlock('Sample Healthcare', {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 21,
-          textColor: BLUE_DARK,
+          color: BLUE_DARK,
         }),
-        new TextBlock('Outpatient services', { fontSize: 10, textColor: MUTED }),
+        new TextBlock('Outpatient services', { fontSize: 10, color: MUTED }),
       ],
     }),
     new VerticalStack({
@@ -78,12 +78,12 @@ export function generate(): Document {
       children: [
         new TextBlock('Issued 1 August 2026', {
           fontSize: 9.5,
-          textColor: MUTED,
+          color: MUTED,
           alignment: 'right',
         }),
         new TextBlock('Reference SAMPLE-OP-1042', {
           fontSize: 9.5,
-          textColor: MUTED,
+          color: MUTED,
           alignment: 'right',
         }),
       ],
@@ -99,7 +99,7 @@ export function generate(): Document {
       child: new TextBlock('SAMPLE DOCUMENT - FICTIONAL DATA', {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 9,
-        textColor: '#ffffff',
+        color: '#ffffff',
         alignment: 'center',
       }),
     })
@@ -111,7 +111,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 25,
-      textColor: INK,
+      color: INK,
       margin: { bottom: 14 },
     })
   );
@@ -149,7 +149,7 @@ export function generate(): Document {
             level: 2,
             fontName: StandardFonts.HelveticaBold,
             fontSize: 16,
-            textColor: BLUE_DARK,
+            color: BLUE_DARK,
           }),
           appointmentDetails,
         ],
@@ -162,7 +162,7 @@ export function generate(): Document {
     new UnorderedList({
       fontName: StandardFonts.Helvetica,
       fontSize: 10.5,
-      textColor: BODY,
+      color: BODY,
       bulletColor: BLUE,
       itemSpacing: 4,
       margin: { bottom: 18 },
@@ -187,11 +187,11 @@ export function generate(): Document {
           new TextBlock('If you feel unwell before the appointment', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 11,
-            textColor: INK,
+            color: INK,
           }),
           new TextBlock(
             'Use the appropriate local healthcare service for advice. This sample letter does not provide medical or emergency guidance.',
-            { fontSize: 10, textColor: BODY }
+            { fontSize: 10, color: BODY }
           ),
         ],
       }),
@@ -215,7 +215,7 @@ export function generate(): Document {
         {
           fontName: StandardFonts.HelveticaOblique,
           fontSize: 8.5,
-          textColor: MUTED,
+          color: MUTED,
           alignment: 'center',
         }
       ),
@@ -231,7 +231,7 @@ function sectionHeading(text: string, tocIdentifier: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 16,
-    textColor: INK,
+    color: INK,
     margin: { bottom: 8 },
   });
 }
@@ -240,7 +240,7 @@ function body(text: string, options: { bold?: boolean; bottom?: number } = {}): 
   return new TextBlock(text, {
     fontName: options.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: 11,
-    textColor: BODY,
+    color: BODY,
     margin: { bottom: options.bottom ?? 12 },
   });
 }
@@ -252,12 +252,12 @@ function detail(label: string, value: string): VerticalStack {
       new TextBlock(label.toUpperCase(), {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 8,
-        textColor: BLUE_DARK,
+        color: BLUE_DARK,
       }),
       new TextBlock(value, {
         fontName: StandardFonts.Helvetica,
         fontSize: 10.5,
-        textColor: INK,
+        color: INK,
       }),
     ],
   });

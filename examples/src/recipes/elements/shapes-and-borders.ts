@@ -30,7 +30,7 @@ export function generate(): Document {
     new TextBlock('Rounded Rectangles', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 20 },
     })
   );
@@ -47,7 +47,7 @@ export function generate(): Document {
       child: new TextBlock('A container with 8pt corner radius and a light blue background.', {
         fontName: StandardFonts.Helvetica,
         fontSize: 12,
-        textColor: 'blue-800',
+        color: 'blue-800',
       }),
     })
   );
@@ -60,7 +60,7 @@ export function generate(): Document {
       margin: { bottom: 12 },
       child: new TextBlock(
         'A container with a larger 16pt corner radius. The arcs become more pronounced as the radius increases.',
-        { fontName: StandardFonts.Helvetica, fontSize: 12, textColor: 'green-800' }
+        { fontName: StandardFonts.Helvetica, fontSize: 12, color: 'green-800' }
       ),
     })
   );
@@ -77,7 +77,7 @@ export function generate(): Document {
       child: new TextBlock('A rounded border with no background fill. The stroke follows the curved path.', {
         fontName: StandardFonts.Helvetica,
         fontSize: 12,
-        textColor: 'slate-700',
+        color: 'slate-700',
       }),
     })
   );
@@ -92,7 +92,7 @@ export function generate(): Document {
       child: new TextBlock('Rounded border combined with a background fill - great for alert boxes and callouts.', {
         fontName: StandardFonts.Helvetica,
         fontSize: 12,
-        textColor: '#92400e',
+        color: '#92400e',
       }),
     })
   );
@@ -120,10 +120,10 @@ export function generate(): Document {
             new TextBlock(cardTitle, {
               fontName: StandardFonts.HelveticaBold,
               fontSize: 14,
-              textColor: accent,
+              color: accent,
               margin: { bottom: 6 },
             }),
-            new TextBlock(description, { fontName: StandardFonts.Helvetica, fontSize: 10, textColor: 'slate-600' }),
+            new TextBlock(description, { fontName: StandardFonts.Helvetica, fontSize: 10, color: 'slate-600' }),
           ],
         }),
       }),
@@ -144,7 +144,7 @@ export function generate(): Document {
         cornerRadius: r,
         padding: [12, 8],
         margin: { bottom: 6 },
-        child: new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 11, textColor: 'slate-700' }),
+        child: new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700' }),
       })
     );
   }
@@ -195,7 +195,7 @@ export function generate(): Document {
         child: new TextBlock(banner.message, {
           fontName: banner.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
           fontSize: 12,
-          textColor: banner.text,
+          color: banner.text,
         }),
       })
     );
@@ -209,7 +209,7 @@ function sectionHeader(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: 'indigo-600',
+    color: 'indigo-600',
     margin: { top: 12, bottom: 6 },
   });
 }

@@ -61,7 +61,7 @@ export function generate(): Document {
     new Heading('Cross-Reference Field Guide', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 12 },
     })
   );
@@ -80,7 +80,7 @@ export function generate(): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 15,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 8 },
     })
   );
@@ -91,7 +91,7 @@ export function generate(): Document {
       new SectionLink(`> ${chapterTitle}`, id, {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 13,
-        textColor: 'blue-600',
+        color: 'blue-600',
         margin: { bottom: 2 },
       })
     );
@@ -99,10 +99,10 @@ export function generate(): Document {
     // "begins on page N" - a label + a live PageNumberOf on one row.
     const row = new HorizontalStack({ spacing: 4, margin: { left: 16, bottom: 10 } });
 
-    const label = new TextBlock('begins on page', { fontSize: 11, textColor: 'slate-500' });
+    const label = new TextBlock('begins on page', { fontSize: 11, color: 'slate-500' });
     row.add(label, label.getPreferredWidth());
 
-    row.add(new PageNumberOf(id, { fontName: StandardFonts.HelveticaBold, fontSize: 11, textColor: 'slate-700' }));
+    row.add(new PageNumberOf(id, { fontName: StandardFonts.HelveticaBold, fontSize: 11, color: 'slate-700' }));
 
     doc.add(row);
   }
@@ -119,7 +119,7 @@ export function generate(): Document {
         level: 2,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 18,
-        textColor: 'slate-800',
+        color: 'slate-800',
         margin: { bottom: 8 },
       })
     );
@@ -127,7 +127,7 @@ export function generate(): Document {
     doc.add(new TextBlock(body, { margin: { bottom: 16 } }));
 
     // Back-reference to the contents page, resolved the same way.
-    doc.add(new SectionLink('< Back to Contents', 'contents', { fontSize: 12, textColor: 'blue-600' }));
+    doc.add(new SectionLink('< Back to Contents', 'contents', { fontSize: 12, color: 'blue-600' }));
   }
 
   return doc;

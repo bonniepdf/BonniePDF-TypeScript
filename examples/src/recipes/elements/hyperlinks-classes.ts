@@ -48,7 +48,7 @@ export function generate(): Document {
   const title = new Heading('Hyperlink Support Demo');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 12);
   doc.add(title);
 
@@ -57,7 +57,7 @@ export function generate(): Document {
   basicLabel.level = 2;
   basicLabel.fontName = StandardFonts.HelveticaBold;
   basicLabel.fontSize = 14;
-  basicLabel.textColor = ColorPalette.slate[700];
+  basicLabel.color = ColorPalette.slate[700];
   basicLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(basicLabel);
 
@@ -77,7 +77,7 @@ export function generate(): Document {
   styledLabel.level = 2;
   styledLabel.fontName = StandardFonts.HelveticaBold;
   styledLabel.fontSize = 14;
-  styledLabel.textColor = ColorPalette.slate[700];
+  styledLabel.color = ColorPalette.slate[700];
   styledLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(styledLabel);
 
@@ -88,14 +88,14 @@ export function generate(): Document {
 
   // Green
   const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
-  greenLink.textColor = ColorPalette.green[700];
+  greenLink.color = ColorPalette.green[700];
   greenLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(greenLink);
 
   // Large purple
   const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
   purpleLink.fontSize = 16;
-  purpleLink.textColor = ColorPalette.purple[600];
+  purpleLink.color = ColorPalette.purple[600];
   purpleLink.margin = new Thickness(0, 0, 0, 8);
   doc.add(purpleLink);
 
@@ -103,7 +103,7 @@ export function generate(): Document {
   const redLink = new Hyperlink('Bold Red Link', 'https://stackoverflow.com');
   redLink.fontName = StandardFonts.HelveticaBold;
   redLink.fontSize = 14;
-  redLink.textColor = ColorPalette.red[700];
+  redLink.color = ColorPalette.red[700];
   redLink.margin = new Thickness(0, 0, 0, 16);
   doc.add(redLink);
 
@@ -112,7 +112,7 @@ export function generate(): Document {
   marginLabel.level = 2;
   marginLabel.fontName = StandardFonts.HelveticaBold;
   marginLabel.fontSize = 14;
-  marginLabel.textColor = ColorPalette.slate[700];
+  marginLabel.color = ColorPalette.slate[700];
   doc.add(marginLabel);
 
   const before = new TextBlock('Text before link.');

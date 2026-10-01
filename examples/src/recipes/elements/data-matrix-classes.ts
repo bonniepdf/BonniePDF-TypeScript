@@ -52,7 +52,7 @@ export function generate(): Document {
   const title = new TextBlock('Data Matrix Generator');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -69,7 +69,7 @@ export function generate(): Document {
   const basicHeader = new TextBlock('Basic Data Matrix');
   basicHeader.fontName = StandardFonts.HelveticaBold;
   basicHeader.fontSize = 16;
-  basicHeader.textColor = ColorPalette.indigo[600];
+  basicHeader.color = ColorPalette.indigo[600];
   basicHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(basicHeader);
 
@@ -114,7 +114,7 @@ export function generate(): Document {
   const encHeader = new TextBlock('Automatic Encodation');
   encHeader.fontName = StandardFonts.HelveticaBold;
   encHeader.fontSize = 16;
-  encHeader.textColor = ColorPalette.indigo[600];
+  encHeader.color = ColorPalette.indigo[600];
   encHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(encHeader);
 
@@ -155,12 +155,12 @@ export function generate(): Document {
 
     const detailBlock = new TextBlock(detail);
     detailBlock.fontSize = 9;
-    detailBlock.textColor = ColorPalette.slate[500];
+    detailBlock.color = ColorPalette.slate[500];
     detailBlock.alignment = TextAlignment.Center;
 
     const dataBlock = new TextBlock(data);
     dataBlock.fontSize = 8;
-    dataBlock.textColor = ColorPalette.slate[600];
+    dataBlock.color = ColorPalette.slate[600];
     dataBlock.alignment = TextAlignment.Center;
     dataBlock.margin = new Thickness(0, 4, 0, 0);
 
@@ -183,7 +183,7 @@ export function generate(): Document {
   const rectHeader = new TextBlock('Rectangular Symbols');
   rectHeader.fontName = StandardFonts.HelveticaBold;
   rectHeader.fontSize = 16;
-  rectHeader.textColor = ColorPalette.indigo[600];
+  rectHeader.color = ColorPalette.indigo[600];
   rectHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(rectHeader);
 
@@ -223,7 +223,7 @@ export function generate(): Document {
 
     const dataBlock = new TextBlock(data);
     dataBlock.fontSize = 9;
-    dataBlock.textColor = ColorPalette.slate[500];
+    dataBlock.color = ColorPalette.slate[500];
     dataBlock.alignment = TextAlignment.Center;
 
     const col = new VerticalStack();
@@ -244,7 +244,7 @@ export function generate(): Document {
   const colorsHeader = new TextBlock('Colours & Backgrounds');
   colorsHeader.fontName = StandardFonts.HelveticaBold;
   colorsHeader.fontSize = 16;
-  colorsHeader.textColor = ColorPalette.indigo[600];
+  colorsHeader.color = ColorPalette.indigo[600];
   colorsHeader.margin = new Thickness(0, 0, 0, 10);
   doc.add(colorsHeader);
 
@@ -281,7 +281,7 @@ export function generate(): Document {
 
     const dataBlock = new TextBlock(data);
     dataBlock.fontSize = 9;
-    dataBlock.textColor = ColorPalette.slate[500];
+    dataBlock.color = ColorPalette.slate[500];
     dataBlock.alignment = TextAlignment.Center;
 
     const col = new VerticalStack();

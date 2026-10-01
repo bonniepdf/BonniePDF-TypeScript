@@ -52,7 +52,7 @@ export function generate(): Document {
   const title = new TextBlock('1D Barcodes');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 16);
   doc.add(title);
 
@@ -115,7 +115,7 @@ export function generate(): Document {
     const header = new TextBlock(sectionTitle);
     header.fontName = StandardFonts.HelveticaBold;
     header.fontSize = 16;
-    header.textColor = ColorPalette.indigo[600];
+    header.color = ColorPalette.indigo[600];
     header.margin = new Thickness(0, 0, 0, 10);
     doc.add(header);
 
@@ -142,20 +142,20 @@ export function generate(): Document {
     const heading = new TextBlock(cardTitle);
     heading.fontName = StandardFonts.HelveticaBold;
     heading.fontSize = 13;
-    heading.textColor = ColorPalette.slate[800];
+    heading.color = ColorPalette.slate[800];
     heading.margin = new Thickness(0, 0, 0, 6);
     details.add(heading);
 
     const desc = new TextBlock(description);
     desc.fontSize = 10;
-    desc.textColor = ColorPalette.slate[600];
+    desc.color = ColorPalette.slate[600];
     desc.margin = new Thickness(0, 0, 0, 6);
     details.add(desc);
 
     for (const line of specifics) {
       const s = new TextBlock(line);
       s.fontSize = 9;
-      s.textColor = ColorPalette.slate[500];
+      s.color = ColorPalette.slate[500];
       s.margin = new Thickness(0, 0, 0, 2);
       details.add(s);
     }

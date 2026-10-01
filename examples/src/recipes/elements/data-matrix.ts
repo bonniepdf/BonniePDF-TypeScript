@@ -39,7 +39,7 @@ export function generate(): Document {
     new TextBlock('Data Matrix Generator', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 20 },
     })
   );
@@ -126,8 +126,8 @@ export function generate(): Document {
                 child: new DataMatrix({ data, size: 95, quietZone: 2, altText: `Data Matrix encoding ${data}` }),
               }),
               new TextBlock(label, { fontName: StandardFonts.HelveticaBold, alignment: 'center', margin: { top: 8 } }),
-              new TextBlock(detail, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
-              new TextBlock(data, { fontSize: 8, textColor: 'slate-600', alignment: 'center', margin: { top: 4 } }),
+              new TextBlock(detail, { fontSize: 9, color: 'slate-500', alignment: 'center' }),
+              new TextBlock(data, { fontSize: 8, color: 'slate-600', alignment: 'center', margin: { top: 4 } }),
             ],
           })
       ),
@@ -172,7 +172,7 @@ export function generate(): Document {
                 }),
               }),
               new TextBlock(label, { fontName: StandardFonts.HelveticaBold, alignment: 'center', margin: { top: 8 } }),
-              new TextBlock(data, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
+              new TextBlock(data, { fontSize: 9, color: 'slate-500', alignment: 'center' }),
             ],
           })
       ),
@@ -216,7 +216,7 @@ export function generate(): Document {
                 alignment: 'center',
                 margin: { top: 8 },
               }),
-              new TextBlock(data, { fontSize: 9, textColor: 'slate-500', alignment: 'center' }),
+              new TextBlock(data, { fontSize: 9, color: 'slate-500', alignment: 'center' }),
             ],
           })
       ),
@@ -231,7 +231,7 @@ function sectionHeader(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 16,
-    textColor: 'indigo-600',
+    color: 'indigo-600',
     margin: { bottom: 10 },
   });
 }

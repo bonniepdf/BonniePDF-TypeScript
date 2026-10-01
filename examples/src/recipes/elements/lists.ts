@@ -146,7 +146,7 @@ export function generate(): Document {
   const colouredList = new UnorderedList({
     bulletStyle: 'square',
     bulletColor: '#ff0000',
-    textColor: 'slate-700',
+    color: 'slate-700',
     fontSize: 12,
     itemSpacing: 6,
   });
@@ -179,7 +179,7 @@ function category(doc: Document, title: string, tocId: string): void {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 10 },
     })
   );
@@ -192,7 +192,7 @@ function section(doc: Document, title: string, tocId: string): void {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: 14, bottom: 6 },
     })
   );

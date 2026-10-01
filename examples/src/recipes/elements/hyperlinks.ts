@@ -32,7 +32,7 @@ export function generate(): Document {
     new Heading('Hyperlink Support Demo', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 12 },
     })
   );
@@ -59,7 +59,7 @@ export function generate(): Document {
   // for the compliance preflight to detect, so this always needs the
   // regular-text 4.5:1 threshold regardless of fontName; green-500 only reaches
   // 2.22:1.
-  doc.add(new Hyperlink('Green Link', 'https://microsoft.com', { textColor: 'green-700', margin: { bottom: 8 } }));
+  doc.add(new Hyperlink('Green Link', 'https://microsoft.com', { color: 'green-700', margin: { bottom: 8 } }));
 
   // Large purple. purple-600, not purple-500: 16pt isn't large enough to relax
   // the threshold (needs 18pt regular or 14pt bold), and purple-500 only
@@ -67,7 +67,7 @@ export function generate(): Document {
   doc.add(
     new Hyperlink('Large Purple Link', 'https://google.com', {
       fontSize: 16,
-      textColor: 'purple-600',
+      color: 'purple-600',
       margin: { bottom: 8 },
     })
   );
@@ -79,7 +79,7 @@ export function generate(): Document {
     new Hyperlink('Bold Red Link', 'https://stackoverflow.com', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'red-700',
+      color: 'red-700',
       margin: { bottom: 16 },
     })
   );
@@ -102,7 +102,7 @@ function sectionLabel(text: string, marginBottom?: number): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    textColor: 'slate-700',
+    color: 'slate-700',
     margin: marginBottom === undefined ? undefined : { bottom: marginBottom },
   });
 }

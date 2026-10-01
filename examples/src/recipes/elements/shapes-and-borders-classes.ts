@@ -50,7 +50,7 @@ export function generate(): Document {
   const title = new TextBlock('Rounded Rectangles');
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 24;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -58,14 +58,14 @@ export function generate(): Document {
   const basicHeader = new TextBlock('Basic Rounded Containers');
   basicHeader.fontName = StandardFonts.HelveticaBold;
   basicHeader.fontSize = 14;
-  basicHeader.textColor = ColorPalette.indigo[600];
+  basicHeader.color = ColorPalette.indigo[600];
   basicHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(basicHeader);
 
   const box1Text = new TextBlock('A container with 8pt corner radius and a light blue background.');
   box1Text.fontName = StandardFonts.Helvetica;
   box1Text.fontSize = 12;
-  box1Text.textColor = ColorPalette.blue[800];
+  box1Text.color = ColorPalette.blue[800];
   const box1 = new Container();
   box1.backgroundColor = ColorPalette.blue[50];
   box1.cornerRadius = 8;
@@ -79,7 +79,7 @@ export function generate(): Document {
   );
   box2Text.fontName = StandardFonts.Helvetica;
   box2Text.fontSize = 12;
-  box2Text.textColor = ColorPalette.green[800];
+  box2Text.color = ColorPalette.green[800];
   const box2 = new Container();
   box2.backgroundColor = ColorPalette.green[50];
   box2.cornerRadius = 16;
@@ -92,14 +92,14 @@ export function generate(): Document {
   const bordersHeader = new TextBlock('Rounded Borders');
   bordersHeader.fontName = StandardFonts.HelveticaBold;
   bordersHeader.fontSize = 14;
-  bordersHeader.textColor = ColorPalette.indigo[600];
+  bordersHeader.color = ColorPalette.indigo[600];
   bordersHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(bordersHeader);
 
   const strokeText = new TextBlock('A rounded border with no background fill. The stroke follows the curved path.');
   strokeText.fontName = StandardFonts.Helvetica;
   strokeText.fontSize = 12;
-  strokeText.textColor = ColorPalette.slate[700];
+  strokeText.color = ColorPalette.slate[700];
   const strokeBox = new Container();
   strokeBox.border = new Border(2);
   strokeBox.borderColors = new BorderColors(ColorPalette.indigo[500]);
@@ -114,7 +114,7 @@ export function generate(): Document {
   );
   alertText.fontName = StandardFonts.Helvetica;
   alertText.fontSize = 12;
-  alertText.textColor = Color.fromHex('#92400e');
+  alertText.color = Color.fromHex('#92400e');
   const alertBox = new Container();
   alertBox.backgroundColor = Color.fromHex('#fef3c7');
   alertBox.border = new Border(2);
@@ -129,7 +129,7 @@ export function generate(): Document {
   const cardHeader = new TextBlock('Card Layout');
   cardHeader.fontName = StandardFonts.HelveticaBold;
   cardHeader.fontSize = 14;
-  cardHeader.textColor = ColorPalette.indigo[600];
+  cardHeader.color = ColorPalette.indigo[600];
   cardHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(cardHeader);
 
@@ -162,14 +162,14 @@ export function generate(): Document {
     const t = new TextBlock(cardTitle);
     t.fontName = StandardFonts.HelveticaBold;
     t.fontSize = 14;
-    t.textColor = accent;
+    t.color = accent;
     t.margin = new Thickness(0, 0, 0, 6);
     stack.add(t);
 
     const d = new TextBlock(description);
     d.fontName = StandardFonts.Helvetica;
     d.fontSize = 10;
-    d.textColor = ColorPalette.slate[600];
+    d.color = ColorPalette.slate[600];
     stack.add(d);
 
     const c = new Container();
@@ -187,7 +187,7 @@ export function generate(): Document {
   const radiusHeader = new TextBlock('Radius Comparison');
   radiusHeader.fontName = StandardFonts.HelveticaBold;
   radiusHeader.fontSize = 14;
-  radiusHeader.textColor = ColorPalette.indigo[600];
+  radiusHeader.color = ColorPalette.indigo[600];
   radiusHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(radiusHeader);
 
@@ -196,7 +196,7 @@ export function generate(): Document {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.Helvetica;
     t.fontSize = 11;
-    t.textColor = ColorPalette.slate[700];
+    t.color = ColorPalette.slate[700];
     const c = new Container();
     c.backgroundColor = ColorPalette.slate[100];
     c.border = new Border(1);
@@ -217,7 +217,7 @@ export function generate(): Document {
   const practicalHeader = new TextBlock('Practical Examples');
   practicalHeader.fontName = StandardFonts.HelveticaBold;
   practicalHeader.fontSize = 14;
-  practicalHeader.textColor = ColorPalette.indigo[600];
+  practicalHeader.color = ColorPalette.indigo[600];
   practicalHeader.margin = new Thickness(0, 12, 0, 6);
   doc.add(practicalHeader);
 
@@ -246,7 +246,7 @@ export function generate(): Document {
     const t = new TextBlock(bannerMessages[i]);
     t.fontName = bannerBold[i] ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
     t.fontSize = 12;
-    t.textColor = bannerTexts[i];
+    t.color = bannerTexts[i];
     const c = new Container();
     c.backgroundColor = Color.fromHex(bannerBgs[i]);
     c.border = new Border(1);

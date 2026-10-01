@@ -200,7 +200,7 @@ export function generate(): Document {
   const colouredList = new UnorderedList();
   colouredList.bulletStyle = BulletStyle.Square;
   colouredList.bulletColor = Color.red;
-  colouredList.textColor = ColorPalette.slate[700];
+  colouredList.color = ColorPalette.slate[700];
   colouredList.fontSize = 12;
   colouredList.itemSpacing = 6;
   colouredList.addItem('The bullet colour is independent of the text colour.');
@@ -238,7 +238,7 @@ function category(doc: Document, title: string, tocId: string): void {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 22;
-  h.textColor = ColorPalette.slate[800];
+  h.color = ColorPalette.slate[800];
   h.margin = new Thickness(0, 0, 0, 10);
   doc.add(h);
 }
@@ -249,7 +249,7 @@ function section(doc: Document, title: string, tocId: string): void {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 14;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 14, 0, 6);
   doc.add(h);
 }

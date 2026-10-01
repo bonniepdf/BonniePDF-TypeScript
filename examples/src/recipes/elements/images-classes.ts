@@ -77,7 +77,7 @@ export function generate(): Document {
   h1.level = 1;
   h1.fontName = StandardFonts.HelveticaBold;
   h1.fontSize = 24;
-  h1.textColor = ColorPalette.slate[800];
+  h1.color = ColorPalette.slate[800];
   h1.margin = new Thickness(0, 0, 0, 8);
   doc.add(h1);
 
@@ -198,7 +198,7 @@ function sectionHeading(title: string, tocId: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 15;
-  h.textColor = ColorPalette.indigo[600];
+  h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 14, 0, 6);
   return h;
 }
@@ -206,7 +206,7 @@ function sectionHeading(title: string, tocId: string): Heading {
 function caption(text: string): TextBlock {
   const c = new TextBlock(text);
   c.fontSize = 10;
-  c.textColor = ColorPalette.slate[500];
+  c.color = ColorPalette.slate[500];
   c.margin = new Thickness(0, 0, 0, 6);
   return c;
 }

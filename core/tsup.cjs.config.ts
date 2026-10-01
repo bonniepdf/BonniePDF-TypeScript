@@ -11,6 +11,7 @@ export default defineConfig({
     security: 'src/security.ts',
     qr: 'src/qr.ts',
     datamatrix: 'src/datamatrix.ts',
+    definition: 'src/definition.ts',
   },
   format: ['cjs'],
   platform: 'neutral',

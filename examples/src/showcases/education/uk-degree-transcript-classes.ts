@@ -91,7 +91,7 @@ export function generate(): Document {
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
-    f.textColor = MUTED;
+    f.color = MUTED;
     return f;
   };
 
@@ -111,17 +111,17 @@ export function generate(): Document {
   const crest = new TextBlock('SAMPLE UNIVERSITY');
   crest.fontName = StandardFonts.HelveticaBold;
   crest.fontSize = 16;
-  crest.textColor = NAVY;
+  crest.color = NAVY;
   uni.add(crest);
   const estd = new TextBlock('Founded 1887  ·  Registrar’s Office');
   estd.fontSize = 9;
-  estd.textColor = MUTED;
+  estd.color = MUTED;
   estd.margin = new Thickness(0, 2, 0, 0);
   uni.add(estd);
   const doctype = new TextBlock('ACADEMIC TRANSCRIPT');
   doctype.fontName = StandardFonts.HelveticaBold;
   doctype.fontSize = 12;
-  doctype.textColor = GOLD;
+  doctype.color = GOLD;
   doctype.alignment = TextAlignment.Right;
   header.addRow(uni, doctype);
   doc.add(header);
@@ -163,7 +163,7 @@ export function generate(): Document {
   const blabel = new TextBlock('AWARD');
   blabel.fontName = StandardFonts.HelveticaBold;
   blabel.fontSize = 8;
-  blabel.textColor = MUTED;
+  blabel.color = MUTED;
   bstack.add(blabel);
   // The award is the transcript's primary heading (H1). Tagging it as the
   // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2); the
@@ -172,7 +172,7 @@ export function generate(): Document {
   bstack.add(bval);
   const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`);
   bmeta.fontSize = 9;
-  bmeta.textColor = INK;
+  bmeta.color = INK;
   bstack.add(bmeta);
   banner.child = bstack;
   doc.add(banner);
@@ -241,7 +241,7 @@ function h1(text: string): Heading {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 16;
-  h.textColor = NAVY;
+  h.color = NAVY;
   h.margin = new Thickness(0, 2, 0, 2);
   return h;
 }
@@ -251,7 +251,7 @@ function h2(text: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 13;
-  h.textColor = NAVY;
+  h.color = NAVY;
   h.margin = new Thickness(0, 4, 0, 8);
   return h;
 }
@@ -260,7 +260,7 @@ function body(text: string): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 9.5;
-  b.textColor = INK;
+  b.color = INK;
   b.alignment = TextAlignment.Justify;
   b.margin = new Thickness(0, 0, 12, 0);
   return b;
@@ -273,11 +273,11 @@ function kv(label: string, value: string): HorizontalStack {
   const l = new TextBlock(label);
   l.fontName = StandardFonts.HelveticaBold;
   l.fontSize = 9;
-  l.textColor = MUTED;
+  l.color = MUTED;
   row.add(l, 2);
   const v = new TextBlock(value);
   v.fontSize = 10;
-  v.textColor = INK;
+  v.color = INK;
   row.add(v, 3);
   return row;
 }
@@ -286,7 +286,7 @@ function th(text: string, align: TextAlignment): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 9;
-  b.textColor = Color.white;
+  b.color = Color.white;
   b.alignment = align;
   return b;
 }
@@ -295,7 +295,7 @@ function td(text: string, align: TextAlignment, color: Color): TextBlock {
   const b = new TextBlock(text);
   b.fontName = StandardFonts.Helvetica;
   b.fontSize = 9.5;
-  b.textColor = color;
+  b.color = color;
   b.alignment = align;
   return b;
 }

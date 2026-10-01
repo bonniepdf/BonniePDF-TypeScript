@@ -94,7 +94,7 @@ function text(content: string, style: CellStyle = {}): TextBlock {
   const block = new TextBlock(content);
   block.fontName = style.font ?? StandardFonts.TimesRoman;
   block.fontSize = style.size ?? 11;
-  block.textColor = style.color ?? INK;
+  block.color = style.color ?? INK;
   if (style.align !== undefined) block.alignment = style.align;
   return block;
 }
@@ -233,7 +233,7 @@ function citation(data: CertificateData): VerticalStack {
   title.tocIdentifier = 'certificate';
   title.fontName = SERIF_BOLD;
   title.fontSize = 26;
-  title.textColor = INK;
+  title.color = INK;
   title.alignment = TextAlignment.Center;
   title.margin = new Thickness(0, 0, 0, 4);
   stack.add(title);

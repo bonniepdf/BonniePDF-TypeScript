@@ -75,7 +75,7 @@ export function generate(): Document {
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
           `Sample University  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 8, textColor: MUTED }
+          { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
     },
     metadata: {
@@ -93,15 +93,15 @@ export function generate(): Document {
         new TextBlock('SAMPLE UNIVERSITY', {
           fontName: StandardFonts.HelveticaBold,
           fontSize: 16,
-          textColor: NAVY,
+          color: NAVY,
         }),
-        new TextBlock('Founded 1887  ·  Registrar’s Office', { fontSize: 9, textColor: MUTED, margin: { top: 2 } }),
+        new TextBlock('Founded 1887  ·  Registrar’s Office', { fontSize: 9, color: MUTED, margin: { top: 2 } }),
       ],
     }),
     new TextBlock('ACADEMIC TRANSCRIPT', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
-      textColor: GOLD,
+      color: GOLD,
       alignment: 'right',
     })
   );
@@ -145,14 +145,14 @@ export function generate(): Document {
       margin: { bottom: 20 },
       child: new VerticalStack({
         children: [
-          new TextBlock('AWARD', { fontName: StandardFonts.HelveticaBold, fontSize: 8, textColor: MUTED }),
+          new TextBlock('AWARD', { fontName: StandardFonts.HelveticaBold, fontSize: 8, color: MUTED }),
           // The award is the transcript's primary heading (H1). Tagging it as
           // the first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede
           // any H2); the section headings below are H2. Styling is unchanged.
           h1('Upper Second-Class Honours (2:1)'),
           new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`, {
             fontSize: 9,
-            textColor: INK,
+            color: INK,
           }),
         ],
       }),
@@ -230,7 +230,7 @@ function h1(text: string): Heading {
     level: 1,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 16,
-    textColor: NAVY,
+    color: NAVY,
     margin: { top: 2, bottom: 2 },
   });
 }
@@ -240,7 +240,7 @@ function h2(text: string): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
-    textColor: NAVY,
+    color: NAVY,
     margin: { top: 4, bottom: 8 },
   });
 }
@@ -249,7 +249,7 @@ function body(text: string): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.Helvetica,
     fontSize: 9.5,
-    textColor: INK,
+    color: INK,
     alignment: 'justify',
     margin: { right: 12 },
   });
@@ -257,8 +257,8 @@ function body(text: string): TextBlock {
 
 function kv(label: string, value: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 5 } });
-  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, textColor: MUTED }), 2);
-  row.add(new TextBlock(value, { fontSize: 10, textColor: INK }), 3);
+  row.add(new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 9, color: MUTED }), 2);
+  row.add(new TextBlock(value, { fontSize: 10, color: INK }), 3);
   return row;
 }
 
@@ -266,11 +266,11 @@ function th(text: string, align: TextAlignmentInput): TextBlock {
   return new TextBlock(text, {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 9,
-    textColor: '#ffffff',
+    color: '#ffffff',
     alignment: align,
   });
 }
 
 function td(text: string, align: TextAlignmentInput, color: ColorInput): TextBlock {
-  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9.5, textColor: color, alignment: align });
+  return new TextBlock(text, { fontName: StandardFonts.Helvetica, fontSize: 9.5, color: color, alignment: align });
 }

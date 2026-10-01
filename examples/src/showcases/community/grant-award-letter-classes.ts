@@ -101,7 +101,7 @@ export function generate(): Document {
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 7.5;
-    f.textColor = MUTED;
+    f.color = MUTED;
     f.alignment = TextAlignment.Center;
     return f;
   };
@@ -122,14 +122,14 @@ export function generate(): Document {
   const brand = new TextBlock('Sample Community Fund');
   brand.fontName = StandardFonts.HelveticaBold;
   brand.fontSize = 18;
-  brand.textColor = Color.white;
+  brand.color = Color.white;
   mast.child = brand;
   doc.add(mast);
 
   const service = new TextBlock('Grants & Awards Service');
   service.fontName = StandardFonts.HelveticaBold;
   service.fontSize = 12;
-  service.textColor = INK;
+  service.color = INK;
   service.margin = new Thickness(0, 0, 0, 2);
   doc.add(service);
 
@@ -174,12 +174,12 @@ export function generate(): Document {
   const calloutStack = new VerticalStack();
   const calloutLabel = new TextBlock('Our decision');
   calloutLabel.fontSize = 11;
-  calloutLabel.textColor = MUTED;
+  calloutLabel.color = MUTED;
   calloutStack.add(calloutLabel);
   const calloutValue = new TextBlock('Awarded');
   calloutValue.fontName = StandardFonts.HelveticaBold;
   calloutValue.fontSize = 28;
-  calloutValue.textColor = AWARD;
+  calloutValue.color = AWARD;
   calloutValue.margin = new Thickness(0, 2, 0, 10);
   calloutStack.add(calloutValue);
   calloutStack.add(details);
@@ -223,7 +223,7 @@ export function generate(): Document {
   const nextSteps = new UnorderedList();
   nextSteps.fontName = StandardFonts.Helvetica;
   nextSteps.fontSize = 10.5;
-  nextSteps.textColor = BODY;
+  nextSteps.color = BODY;
   nextSteps.bulletColor = BRAND;
   nextSteps.itemSpacing = 4;
   nextSteps.margin = new Thickness(0, 0, 0, 22);
@@ -248,7 +248,7 @@ export function generate(): Document {
   const noticeTitle = new TextBlock('Time limit');
   noticeTitle.fontName = StandardFonts.HelveticaBold;
   noticeTitle.fontSize = 11;
-  noticeTitle.textColor = INK;
+  noticeTitle.color = INK;
   noticeStack.add(noticeTitle);
   const noticeBody = new TextBlock(
     'Return your signed grant agreement within one month of the date of this letter to ' +
@@ -256,7 +256,7 @@ export function generate(): Document {
       'or financial advice.'
   );
   noticeBody.fontSize = 10;
-  noticeBody.textColor = BODY;
+  noticeBody.color = BODY;
   noticeStack.add(noticeBody);
 
   const notice = new Container();
@@ -287,7 +287,7 @@ export function generate(): Document {
   );
   disclaimerText.fontName = StandardFonts.HelveticaOblique;
   disclaimerText.fontSize = 8.5;
-  disclaimerText.textColor = MUTED;
+  disclaimerText.color = MUTED;
   disclaimerText.alignment = TextAlignment.Center;
   disclaimer.child = disclaimerText;
   doc.add(disclaimer);
@@ -301,7 +301,7 @@ function h1(text: string): Heading {
   h.level = 1;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 22;
-  h.textColor = INK;
+  h.color = INK;
   h.margin = new Thickness(0, 0, 0, 12);
   return h;
 }
@@ -312,7 +312,7 @@ function h2(text: string, tocIdentifier: string): Heading {
   h.level = 2;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 15;
-  h.textColor = INK;
+  h.color = INK;
   h.margin = new Thickness(0, 6, 0, 8);
   return h;
 }
@@ -324,7 +324,7 @@ function body(
   const b = new TextBlock(text);
   b.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = opts.size ?? 11;
-  b.textColor = opts.color ?? BODY;
+  b.color = opts.color ?? BODY;
   if (opts.align) b.alignment = opts.align;
   b.margin = new Thickness(0, 0, 0, opts.mb ?? 12);
   return b;
@@ -336,12 +336,12 @@ function detail(item: Detail): VerticalStack {
   const label = new TextBlock(item.label.toUpperCase());
   label.fontName = StandardFonts.HelveticaBold;
   label.fontSize = 8;
-  label.textColor = BRAND_DARK;
+  label.color = BRAND_DARK;
   stack.add(label);
   const value = new TextBlock(item.value);
   value.fontName = StandardFonts.Helvetica;
   value.fontSize = 10.5;
-  value.textColor = INK;
+  value.color = INK;
   stack.add(value);
   return stack;
 }
@@ -350,7 +350,7 @@ function th(text: string, align: TextAlignment = TextAlignment.Left): TextBlock 
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 11;
-  b.textColor = Color.white;
+  b.color = Color.white;
   b.alignment = align;
   return b;
 }
@@ -359,7 +359,7 @@ function td(text: string, color: Color = INK, align: TextAlignment = TextAlignme
   const b = new TextBlock(text);
   b.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = 11;
-  b.textColor = color;
+  b.color = color;
   b.alignment = align;
   return b;
 }

@@ -182,7 +182,7 @@ function cell(text: string, o: CellOpts = {}): TextBlock {
   return new TextBlock(text, {
     fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: o.size ?? 9,
-    textColor: o.color ?? INK,
+    color: o.color ?? INK,
     alignment: o.align,
   });
 }
@@ -227,12 +227,12 @@ export function buildDocument(data: PolicyScheduleData): Document {
       headerTemplate: (pageNumber: number) =>
         new TextBlock(
           `${data.insurer.name} · Policy ${data.policy.number} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 7.5, textColor: FAINT, alignment: TextAlignment.Left }
+          { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Left }
         ),
       footerTemplate: (pageNumber: number) =>
         new TextBlock(
           `${data.policy.product} · Renewal ${data.policy.renewal} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 7.5, textColor: FAINT, alignment: TextAlignment.Center }
+          { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Center }
         ),
     },
     metadata: {
@@ -262,7 +262,7 @@ export function buildDocument(data: PolicyScheduleData): Document {
           level: 1,
           fontName: StandardFonts.HelveticaBold,
           fontSize: 18,
-          textColor: BRAND,
+          color: BRAND,
         }),
         cell(data.insurer.address, { size: 8, color: MUTED }),
       ],

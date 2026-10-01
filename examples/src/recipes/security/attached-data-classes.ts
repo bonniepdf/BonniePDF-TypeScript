@@ -107,7 +107,7 @@ function tb(text: string, size: number, color: Color, bold = false, align?: Text
   const t = new TextBlock(text);
   t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   t.fontSize = size;
-  t.textColor = color;
+  t.color = color;
   if (align !== undefined) t.alignment = align;
   if (bottom > 0) t.margin = new Thickness(0, 0, 0, bottom);
   return t;

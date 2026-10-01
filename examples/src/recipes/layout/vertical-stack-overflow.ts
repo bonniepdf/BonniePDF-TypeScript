@@ -57,7 +57,7 @@ export function generate(): Document {
         new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: 'slate-400',
+          color: 'slate-400',
           alignment: 'right',
         }),
     },
@@ -76,7 +76,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 10 },
     })
   );

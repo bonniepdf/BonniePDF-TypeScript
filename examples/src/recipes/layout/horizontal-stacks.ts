@@ -43,7 +43,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 12 },
     })
   );
@@ -61,7 +61,7 @@ export function generate(): Document {
       padding: [12, 8],
       backgroundColor: background,
       height,
-      child: new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 11, textColor: '#ffffff' }),
+      child: new TextBlock(label, { fontName: StandardFonts.HelveticaBold, fontSize: 11, color: '#ffffff' }),
     });
 
   const sectionHeading = (text: string, tocIdentifier: string, topMargin: number): Heading =>
@@ -70,7 +70,7 @@ export function generate(): Document {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 14,
-      textColor: 'indigo-600',
+      color: 'indigo-600',
       margin: { top: topMargin, bottom: 8 },
     });
 
@@ -138,7 +138,7 @@ export function generate(): Document {
       new TextBlock(caption, {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 11,
-        textColor: 'slate-600',
+        color: 'slate-600',
         margin: { top: 8, bottom: 4 },
       })
     );
@@ -158,7 +158,7 @@ export function generate(): Document {
               child: new TextBlock(label, {
                 fontName: StandardFonts.HelveticaBold,
                 fontSize: 11,
-                textColor: '#ffffff',
+                color: '#ffffff',
               }),
             })
         ),
@@ -187,8 +187,8 @@ export function generate(): Document {
     ['Layout Engine:', 'BonniePDF Flow Layout'],
   ]) {
     const kv = new HorizontalStack({ spacing: 10, widthDistribution: 'weighted', margin: { bottom: 6 } });
-    kv.add(new TextBlock(key, { fontName: StandardFonts.HelveticaBold, textColor: 'slate-700' }), 1);
-    kv.add(new TextBlock(value, { textColor: 'slate-800' }), 3);
+    kv.add(new TextBlock(key, { fontName: StandardFonts.HelveticaBold, color: 'slate-700' }), 1);
+    kv.add(new TextBlock(value, { color: 'slate-800' }), 3);
     doc.add(kv);
   }
 

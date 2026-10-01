@@ -57,14 +57,14 @@ export function generate(): Document {
         new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: 'slate-500',
+          color: 'slate-500',
           alignment: 'center',
         }),
       footerTemplate: (pageNumber: number) =>
         new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: 'slate-400',
+          color: 'slate-400',
           alignment: 'center',
         }),
     },
@@ -82,7 +82,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 22,
-      textColor: 'slate-800',
+      color: 'slate-800',
       margin: { bottom: 14 },
     })
   );
@@ -102,7 +102,7 @@ export function generate(): Document {
         level: 2,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 14,
-        textColor: 'indigo-600',
+        color: 'indigo-600',
         margin: { top: 14, bottom: 6 },
       })
     );

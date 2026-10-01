@@ -40,7 +40,7 @@ export function generate(): Document {
 
   const watermark = new Watermark('CONFIDENTIAL');
   watermark.fontSize = 60;
-  watermark.textColor = Color.red;
+  watermark.color = Color.red;
   watermark.opacity = 0.08;
   watermark.rotationDegrees = -55;
   settings.watermark = watermark;
@@ -57,7 +57,7 @@ export function generate(): Document {
   const title = new TextBlock(`Financial Performance Report Q4 ${year}`);
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 22;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 20);
   doc.add(title);
 
@@ -108,7 +108,7 @@ export function generate(): Document {
   );
   disclaimer.fontName = StandardFonts.TimesItalic;
   disclaimer.fontSize = 10;
-  disclaimer.textColor = ColorPalette.slate[500];
+  disclaimer.color = ColorPalette.slate[500];
   disclaimer.margin = new Thickness(0, 20, 0, 0);
   doc.add(disclaimer);
 

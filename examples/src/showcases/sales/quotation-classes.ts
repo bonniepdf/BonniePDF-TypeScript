@@ -173,7 +173,7 @@ function cell(text: string, style: CellStyle = {}): TextBlock {
   const block = new TextBlock(text);
   block.fontName = style.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   block.fontSize = style.size ?? 9;
-  block.textColor = style.color ?? INK;
+  block.color = style.color ?? INK;
   if (style.align !== undefined) block.alignment = style.align;
   return block;
 }
@@ -197,7 +197,7 @@ function sectionTitle(text: string, id: string): Heading {
   h.tocIdentifier = id;
   h.fontName = StandardFonts.HelveticaBold;
   h.fontSize = 11;
-  h.textColor = INK;
+  h.color = INK;
   h.margin = new Thickness(0, 0, 0, 6);
   return h;
 }
@@ -225,7 +225,7 @@ function masthead(data: QuotationData): VerticalStack {
   title.tocIdentifier = 'quotation';
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 15;
-  title.textColor = ACCENT;
+  title.color = ACCENT;
   identity.add(title);
   identity.add(cell(data.supplier.address, { size: 7.5, color: MUTED }));
   identity.add(cell(data.supplier.registration, { size: 7.5, color: FAINT }));
@@ -278,7 +278,7 @@ function scopeSection(data: QuotationData): VerticalStack {
   list.numberFormat = NumberFormat.Decimal;
   list.fontName = StandardFonts.Helvetica;
   list.fontSize = 9;
-  list.textColor = INK;
+  list.color = INK;
   list.itemSpacing = 4;
   for (const item of data.scope) list.addItem(item);
 
@@ -316,7 +316,7 @@ function tierColumns(data: QuotationData): VerticalStack {
     const features = new UnorderedList();
     features.fontName = StandardFonts.Helvetica;
     features.fontSize = 8;
-    features.textColor = INK;
+    features.color = INK;
     features.bulletColor = promoted ? ACCENT : MUTED;
     features.itemSpacing = 3.5;
     for (const item of tier.includes) features.addItem(item);
@@ -394,7 +394,7 @@ function assumptionsSection(data: QuotationData): VerticalStack {
   const list = new UnorderedList();
   list.fontName = StandardFonts.Helvetica;
   list.fontSize = 8.5;
-  list.textColor = MUTED;
+  list.color = MUTED;
   list.bulletColor = FAINT;
   list.itemSpacing = 4;
   for (const item of data.assumptions) list.addItem(item);
@@ -466,7 +466,7 @@ export function createQuotationSettings(): DocumentSettings {
     );
     footer.fontName = StandardFonts.Helvetica;
     footer.fontSize = 7;
-    footer.textColor = FAINT;
+    footer.color = FAINT;
     footer.alignment = TextAlignment.Center;
     return footer;
   };

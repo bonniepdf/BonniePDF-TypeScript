@@ -43,7 +43,7 @@ export function cell(text: string, o: CellOpts = {}): TextBlock {
   const b = new TextBlock(text);
   b.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   b.fontSize = o.size ?? 9;
-  b.textColor = o.color ?? INK;
+  b.color = o.color ?? INK;
   if (o.align) b.alignment = o.align;
   if (o.margin) b.margin = o.margin;
   return b;

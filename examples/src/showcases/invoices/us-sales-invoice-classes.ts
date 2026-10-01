@@ -102,7 +102,7 @@ export function generate(): Document {
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 26;
-  title.textColor = ACCENT;
+  title.color = ACCENT;
   title.alignment = TextAlignment.Right;
   const titleStack = new VerticalStack();
   titleStack.add(title);

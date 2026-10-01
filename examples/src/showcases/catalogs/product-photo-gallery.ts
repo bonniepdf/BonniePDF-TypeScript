@@ -110,7 +110,7 @@ function productMedia(product: Product, index: number): Container {
     child: new TextBlock(product.name.charAt(0).toUpperCase(), {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 40,
-      textColor: monogramColor,
+      color: monogramColor,
       alignment: 'center',
       margin: { top: 40 },
     }),
@@ -119,12 +119,12 @@ function productMedia(product: Product, index: number): Container {
 
 function productCard(product: Product, index: number): Container {
   const meta = new HorizontalStack({ widthDistribution: 'weighted' });
-  meta.add(new TextBlock(product.sku, { fontSize: 9, textColor: ColorPalette.slate[500] }), 1);
+  meta.add(new TextBlock(product.sku, { fontSize: 9, color: ColorPalette.slate[500] }), 1);
   meta.add(
     new TextBlock(product.price, {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 12,
-      textColor: ACCENT,
+      color: ACCENT,
       alignment: 'right',
     }),
     1
@@ -139,11 +139,11 @@ function productCard(product: Product, index: number): Container {
         level: 2,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 12,
-        textColor: ColorPalette.slate[800],
+        color: ColorPalette.slate[800],
         margin: { top: 6 },
       }),
       meta,
-      new TextBlock(product.blurb, { fontSize: 9.5, textColor: ColorPalette.slate[600] }),
+      new TextBlock(product.blurb, { fontSize: 9.5, color: ColorPalette.slate[600] }),
     ],
   });
 
@@ -167,7 +167,7 @@ export function generate(): Document {
         new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
-          textColor: ColorPalette.slate[400],
+          color: ColorPalette.slate[400],
           alignment: 'right',
         }),
     },
@@ -185,7 +185,7 @@ export function generate(): Document {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 24,
-      textColor: ColorPalette.slate[800],
+      color: ColorPalette.slate[800],
       margin: { bottom: 4 },
     })
   );
@@ -193,7 +193,7 @@ export function generate(): Document {
   doc.add(
     new TextBlock('Homeware & lighting - selected pieces from the new season.', {
       fontSize: 12,
-      textColor: ColorPalette.slate[500],
+      color: ColorPalette.slate[500],
       margin: { bottom: 18 },
     })
   );

@@ -315,7 +315,7 @@ export function generate(): Document {
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 21;
-  title.textColor = ColorPalette.slate[800];
+  title.color = ColorPalette.slate[800];
   title.margin = new Thickness(0, 0, 0, 4);
   titleStack.add(title);
   titleStack.add(cell(`${gb(ACCOUNT.periodFrom)} to ${gb(ACCOUNT.periodTo)}`, { color: MUTED }));

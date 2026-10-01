@@ -40,7 +40,7 @@ function tb(
   const t = new TextBlock(content);
   t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   t.fontSize = size;
-  t.textColor = color;
+  t.color = color;
   if (opts.align !== undefined) t.alignment = opts.align;
   if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
   return t;

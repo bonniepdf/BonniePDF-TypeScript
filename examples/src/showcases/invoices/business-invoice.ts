@@ -48,7 +48,7 @@ function tb(content: string, o: TextOpts = {}): TextBlock {
   return new TextBlock(content, {
     fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: o.size ?? 9,
-    textColor: o.color ?? TEXT_MEDIUM,
+    color: o.color ?? TEXT_MEDIUM,
     alignment: o.align,
     margin: o.mt !== undefined || o.mb !== undefined ? { top: o.mt ?? 0, bottom: o.mb ?? 0 } : undefined,
   });
@@ -148,7 +148,7 @@ export function generate(): Document {
         level: 1,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 28,
-        textColor: ACCENT_GREEN,
+        color: ACCENT_GREEN,
         alignment: 'right',
       }),
     ],

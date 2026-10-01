@@ -103,7 +103,7 @@ function mainOffer(): Grid {
         level: 1,
         fontName: StandardFonts.HelveticaBold,
         fontSize: 16,
-        textColor: INK,
+        color: INK,
         margin: { bottom: 1 },
       }),
       text(`${PRODUCT.pack}  -  ${PRODUCT.origin}`, 9, BODY),
@@ -194,7 +194,7 @@ function text(
   return new TextBlock(value, {
     fontName: bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: size,
-    textColor: color,
+    color: color,
     alignment: align,
     margin: top || bottom ? { top, bottom } : undefined,
   });

@@ -151,7 +151,7 @@ export const sampleContract: ContractData = {
       ],
     },
   ],
-  outlinePages: { particulars: 0, definitions: 0, clauses: [0, 0, 1, 1, 1], schedule: 2, execution: 2 },
+  outlinePages: { particulars: 0, definitions: 0, clauses: [0, 1, 1, 1, 1], schedule: 2, execution: 2 },
   locale: 'en-GB',
 };
 
@@ -291,6 +291,7 @@ function definitions(data: ContractData): VerticalStack {
 function clause(item: Clause, index: number): VerticalStack {
   const stack = new VerticalStack();
   stack.margin = new Thickness(0, 0, 0, 14);
+  stack.breakAllowed = false;
   stack.add(heading(`${index + 1}.  ${item.heading}`, `clause-${index + 1}`));
 
   if (item.intro !== undefined) {

@@ -21,7 +21,16 @@
 //
 // Tagged PDF/UA-1 and archival PDF/A-2a.
 
-import { Document, TextBlock, TextElementBase, Container, Table, StandardFonts, ColorPalette } from '@bonniepdf/core';
+import {
+  Document,
+  TextBlock,
+  TextElementBase,
+  Container,
+  Table,
+  StandardFonts,
+  ColorPalette,
+  VerticalStack,
+} from '@bonniepdf/core';
 
 import {
   INK,
@@ -171,8 +180,10 @@ export function generate(): Document {
   );
   doc.add(codeBlock(HANDLER_SOURCE));
 
-  doc.add(h2('What to get right'));
-  doc.add(
+  // The heading travels with the first point it introduces.
+  const firstPoint = new VerticalStack({ breakAllowed: false });
+  firstPoint.add(h2('What to get right'));
+  firstPoint.add(
     panel('Once per process, not per request', [
       cell(
         'Platform configuration, font registration, and the licence declaration are process-wide. Doing any of ' +
@@ -181,6 +192,7 @@ export function generate(): Document {
       ),
     ])
   );
+  doc.add(firstPoint);
   doc.add(
     panel('Await the async path', [
       cell(
@@ -212,7 +224,7 @@ export function generate(): Document {
   return doc;
 }
 
-/** Monospaced source on a tinted panel. */
+/** Monospaced source on a tinted panel. `preserveWhitespace` keeps the listing's indentation. */
 function codeBlock(source: string): Container {
   return new Container({
     backgroundColor: ColorPalette.slate[50],
@@ -224,6 +236,7 @@ function codeBlock(source: string): Container {
       fontName: StandardFonts.Courier,
       fontSize: 7.6,
       color: INK,
+      preserveWhitespace: true,
     }),
   });
 }

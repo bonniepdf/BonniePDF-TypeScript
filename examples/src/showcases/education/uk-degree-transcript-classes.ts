@@ -205,8 +205,10 @@ export function generate(): Document {
   doc.add(table);
 
   // ── Verification ──────────────────────────────────────────────────────────
+  // The heading, wording and QR code stay on one page.
   const verify = new HorizontalStack();
   verify.widthDistribution = WidthDistribution.Weighted;
+  verify.breakAllowed = false;
   const vtext = new VerticalStack();
   vtext.add(h2('Verification'));
   vtext.add(

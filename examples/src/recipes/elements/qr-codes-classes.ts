@@ -187,7 +187,12 @@ export function generate(): Document {
   colorsHeader.fontSize = 16;
   colorsHeader.color = ColorPalette.indigo[600];
   colorsHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(colorsHeader);
+
+  // Heading and codes share a page: `breakAllowed = false` moves the whole section on rather than
+  // leaving the heading stranded at the foot of the previous page.
+  const colorsSection = new VerticalStack();
+  colorsSection.breakAllowed = false;
+  colorsSection.add(colorsHeader);
 
   const colorRow = new HorizontalStack();
   colorRow.spacing = 20;
@@ -274,7 +279,8 @@ export function generate(): Document {
   transCol.add(transLabel);
   colorRow.add(transCol);
 
-  doc.add(colorRow);
+  colorsSection.add(colorRow);
+  doc.add(colorsSection);
 
   return doc;
 }

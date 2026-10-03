@@ -23,6 +23,7 @@ export const TEXT_BLOCK_OWN_OPTION_KEYS = [
   'ellipsis',
   'firstLineIndent',
   'paragraphSpacing',
+  'preserveWhitespace',
 ] as const;
 
 /** The full settable surface of a text block, bases included. */
@@ -126,6 +127,16 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public set firstLineIndent(value: LengthInput) {
     this._firstLineIndent = toLength(value);
   }
+
+  /**
+   * Keep every space, including leading and repeated ones, for text whose indentation carries meaning
+   * (source code, a fixed-width listing). Default `false`, which drops a segment's leading spaces.
+   *
+   * Lines wrap by code point at the last space that fits, or mid-token when there is none, so a long
+   * line never overflows. Tabs are not expanded. Inherited by {@link Heading}; list items and
+   * {@link RichText} do not take it. Spec 03 "Preserved whitespace".
+   */
+  public preserveWhitespace = false;
 
   private _paragraphSpacing: number = 0;
 
@@ -571,8 +582,18 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * Greedy word-wrap where the first line fits `contentWidth - firstLineIndent`
    * and the remainder fits the full `contentWidth`.
    */
+  /** Ordinary word wrapping, or the whitespace-preserving form when {@link preserveWhitespace} is set. */
+  protected override wrapSegment(text: string, maxWidth: number): string[] {
+    return this.preserveWhitespace
+      ? this.wrapPreservingWhitespace(text, maxWidth, maxWidth)
+      : super.wrapSegment(text, maxWidth);
+  }
+
   private wrapWithFirstIndent(segment: string, contentWidth: number): string[] {
     if (segment === '') return [];
+    if (this.preserveWhitespace) {
+      return this.wrapPreservingWhitespace(segment, contentWidth - this.firstLineIndent, contentWidth);
+    }
     const words = segment.split(' ');
     const lines: string[] = [];
     let current = '';

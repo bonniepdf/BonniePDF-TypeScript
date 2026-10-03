@@ -355,9 +355,74 @@ export abstract class TextElementBase extends ElementBase {
   }
 
   /**
+   * Wraps a single break-free segment, keeping every space (spec 03 "Preserved whitespace").
+   *
+   * Works by Unicode code point and never splits a surrogate pair. A line is the longest prefix that
+   * fits: `firstWidth` for a segment's first line, `width` for the rest. It breaks at the last space
+   * that has a non-space before it, trimming the line's trailing spaces and dropping the spaces at the
+   * break; failing that, it breaks at the last code point that fits. At least one code point is placed
+   * on every line, so it always terminates.
+   */
+  protected wrapPreservingWhitespace(text: string, firstWidth: number, width: number): string[] {
+    const lines: string[] = [];
+    if (text === '') return lines;
+
+    let rest = Array.from(text);
+    let limit = firstWidth;
+    const fits = (count: number): boolean => this.measureTextWidth(rest.slice(0, count).join('')) <= limit;
+
+    while (rest.length > 0) {
+      if (fits(rest.length)) {
+        lines.push(rest.join(''));
+        break;
+      }
+
+      // One code point is always placed, even when it alone is wider than the line.
+      if (rest.length === 1) {
+        lines.push(rest[0]);
+        break;
+      }
+
+      // The longest prefix that fits, never fewer than one code point.
+      let lo = 1;
+      let hi = rest.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (fits(mid)) lo = mid;
+        else hi = mid - 1;
+      }
+      const count = lo;
+
+      let cut = -1;
+      if (rest[count] === ' ' && rest.slice(0, count).some(c => c !== ' ')) {
+        cut = count;
+      } else {
+        for (let i = count - 1; i > 0; i--) {
+          if (rest[i] === ' ' && rest.slice(0, i).some(c => c !== ' ')) {
+            cut = i;
+            break;
+          }
+        }
+      }
+
+      if (cut >= 0) {
+        lines.push(rest.slice(0, cut).join('').replace(/ +$/, ''));
+        rest = rest.slice(cut);
+        while (rest[0] === ' ') rest.shift();
+      } else {
+        lines.push(rest.slice(0, count).join(''));
+        rest = rest.slice(count);
+      }
+      limit = width;
+    }
+
+    return lines;
+  }
+
+  /**
    * Word-wraps a single break-free segment to maxWidth.
    */
-  private wrapSegment(text: string, maxWidth: number): string[] {
+  protected wrapSegment(text: string, maxWidth: number): string[] {
     const lines: string[] = [];
     if (text === '') return lines;
 

@@ -189,7 +189,11 @@ export function generate(): Document {
   radiusHeader.fontSize = 14;
   radiusHeader.color = ColorPalette.indigo[600];
   radiusHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(radiusHeader);
+
+  // The heading and all six samples stay together: a comparison split across pages defeats its purpose.
+  const radiusSection = new VerticalStack();
+  radiusSection.breakAllowed = false;
+  radiusSection.add(radiusHeader);
 
   for (const r of [0, 4, 8, 12, 20, 30]) {
     const label = r === 0 ? 'CornerRadius = 0 (sharp corners, default)' : `CornerRadius = ${r}`;
@@ -205,8 +209,9 @@ export function generate(): Document {
     c.padding = new Thickness(12, 8, 12, 8);
     c.margin = new Thickness(0, 0, 0, 6);
     c.child = t;
-    doc.add(c);
+    radiusSection.add(c);
   }
+  doc.add(radiusSection);
 
   // ── Section 5: Practical banners ──
   const divider = new Line();
@@ -219,7 +224,9 @@ export function generate(): Document {
   practicalHeader.fontSize = 14;
   practicalHeader.color = ColorPalette.indigo[600];
   practicalHeader.margin = new Thickness(0, 12, 0, 6);
-  doc.add(practicalHeader);
+  const bannerSection = new VerticalStack();
+  bannerSection.breakAllowed = false;
+  bannerSection.add(practicalHeader);
 
   const bannerBorders = [
     ColorPalette.green[600],
@@ -255,8 +262,9 @@ export function generate(): Document {
     c.padding = new Thickness(16, 12, 16, 12);
     c.margin = new Thickness(0, 0, 0, 8);
     c.child = t;
-    doc.add(c);
+    bannerSection.add(c);
   }
+  doc.add(bannerSection);
 
   return doc;
 }

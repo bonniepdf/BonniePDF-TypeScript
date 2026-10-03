@@ -54,6 +54,7 @@ import {
   fieldRow,
   h1,
   h2,
+  keepWithNext,
   panel,
   shortDate,
   signatureRow,
@@ -351,7 +352,7 @@ export function generate(): Document {
 
   // ── The register ───────────────────────────────────────────────────────────
 
-  doc.add(h2('Defect register'));
+  doc.add(keepWithNext(h2('Defect register'), 150));
   doc.add(
     body(
       'Every item carries a reference, an owner, a target date, and an evidence plate number. ' +
@@ -392,8 +393,11 @@ export function generate(): Document {
 
   // ── Close-out and distribution ─────────────────────────────────────────────
 
-  doc.add(h2('Close-out'));
-  doc.add(
+  // The close-out wording stays on the same page as the sign-off it leads to.
+  const closeOut = new VerticalStack();
+  closeOut.breakAllowed = false;
+  closeOut.add(h2('Close-out'));
+  closeOut.add(
     body(
       'Each owner is to close their items by the target date and submit evidence against the item reference. ' +
         'Items not closed by the re-inspection date are escalated to the weekly progress meeting and remain open ' +
@@ -402,7 +406,7 @@ export function generate(): Document {
     )
   );
 
-  doc.add(
+  closeOut.add(
     signatureRow([
       signatureSlot('Inspected by', INSPECTION.inspector, { dated: shortDate(INSPECTION.inspected) }),
       signatureSlot('Received — principal contractor', 'Sample Manager — Project Manager'),
@@ -410,7 +414,7 @@ export function generate(): Document {
     ])
   );
 
-  doc.add(
+  closeOut.add(
     body(`${INSPECTION.reference} · issued to the client, the principal contractor, and each named subcontractor.`, {
       color: MUTED,
       size: 8,
@@ -418,6 +422,7 @@ export function generate(): Document {
       mb: 0,
     })
   );
+  doc.add(closeOut);
 
   return doc;
 }

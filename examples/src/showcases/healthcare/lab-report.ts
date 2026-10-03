@@ -205,8 +205,10 @@ export function generate(): Document {
   }
 
   // ── Interpretation ────────────────────────────────────────────────────────
-  doc.add(h2('Clinical interpretation'));
-  doc.add(
+  // The interpretation and the sign-off that authorises it stay on one page.
+  const sign = new VerticalStack({ breakAllowed: false });
+  sign.add(h2('Clinical interpretation'));
+  sign.add(
     body(
       'Mild normocytic anaemia with a neutrophil leucocytosis, consistent with an ' +
         'acute inflammatory or infective process. Renal function shows a mildly raised ' +
@@ -217,7 +219,7 @@ export function generate(): Document {
   );
 
   // ── Authorisation ─────────────────────────────────────────────────────────
-  doc.add(
+  sign.add(
     new Container({
       backgroundColor: ColorPalette.blue[50],
       border: { left: 3, color: CLINICAL_BLUE },
@@ -240,6 +242,7 @@ export function generate(): Document {
       }),
     })
   );
+  doc.add(sign);
 
   return doc;
 }

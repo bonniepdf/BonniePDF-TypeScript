@@ -15,7 +15,7 @@
 // and figures throughout. Nothing here is legal advice, a costs template, or a
 // statement of any court's requirements.
 
-import { Document, TextElementBase, Table } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, VerticalStack } from '@bonniepdf/core';
 
 import {
   INK,
@@ -32,6 +32,7 @@ import {
   h1,
   h2,
   h3,
+  keepWithNext,
   money,
   panel,
   td,
@@ -385,7 +386,8 @@ export function generate(): Document {
 
   // ── Rates ──────────────────────────────────────────────────────────────────
 
-  doc.add(h2('Hourly rates claimed'));
+  // Each heading asks for room for the start of what it introduces, so it is never left alone at the foot of a page.
+  doc.add(keepWithNext(h2('Hourly rates claimed')));
   const rates = new Table({
     columns: [1, 4.6, 1.4, 1.4],
     cellPadding: 6,
@@ -415,7 +417,7 @@ export function generate(): Document {
 
   // ── Schedule of work, by phase ─────────────────────────────────────────────
 
-  doc.add(h2('Schedule of work'));
+  doc.add(keepWithNext(h2('Schedule of work'), 170));
   doc.add(
     cell('Each phase carries its own subtotal. The phase subtotals are what the summary adds up.', {
       size: 9,
@@ -429,7 +431,7 @@ export function generate(): Document {
   // narrowest column, where it wraps to four lines - and a phase that starts
   // mid-page then loses its label entirely when the table carries over.
   for (const phase of phaseTotals) {
-    doc.add(h3(`${phase.phase} — ${phase.hours.toFixed(1)} hours, ${money(phase.value)}`));
+    const heading = h3(`${phase.phase} — ${phase.hours.toFixed(1)} hours, ${money(phase.value)}`);
 
     const schedule = new Table({
       columns: [1.1, 1.5, 0.6, 5, 0.85, 1.15, 1.25],
@@ -470,12 +472,13 @@ export function generate(): Document {
       td(money(phase.value), { align: 'right', bold: true, color: ACCENT })
     );
 
-    doc.add(schedule);
+    // A phase is short enough to keep whole: heading, rows and subtotal share a page.
+    doc.add(new VerticalStack({ breakAllowed: false, children: [heading, schedule] }));
   }
 
   // ── Disbursements ──────────────────────────────────────────────────────────
 
-  doc.add(h2('Disbursements'));
+  doc.add(keepWithNext(h2('Disbursements')));
 
   const disbursements = new Table({
     columns: [1.2, 5.4, 1.2, 1.3],
@@ -505,7 +508,7 @@ export function generate(): Document {
 
   // ── Summary ────────────────────────────────────────────────────────────────
 
-  doc.add(h2('Summary of costs claimed'));
+  doc.add(keepWithNext(h2('Summary of costs claimed'), 150));
 
   doc.add(
     totalsPanel(

@@ -14,6 +14,7 @@ import {
   TextBlock,
   Heading,
   Container,
+  EnsureSpace,
   VerticalStack,
   HorizontalStack,
   StandardFonts,
@@ -94,6 +95,14 @@ export function h3(text: string): Heading {
     color: HEADING,
     margin: { top: 10, bottom: 5 },
   });
+}
+
+/**
+ * Keeps a heading with the start of whatever it introduces: the heading moves to the next page
+ * unless `minHeight` points of room remain below it.
+ */
+export function keepWithNext(heading: Heading, minHeight = 120): EnsureSpace {
+  return new EnsureSpace({ minHeight, child: heading });
 }
 
 /** The full-width accent rule at the top of each document. */

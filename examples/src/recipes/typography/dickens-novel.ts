@@ -10,7 +10,16 @@
  * To render from the real Project Gutenberg source, replace the body loop
  * with a parser that reads pg98.txt (A Tale of Two Cities, eBook #98).
  */
-import { Document, Heading, TextBlock, VisualToc, HorizontalStack, StandardFonts } from '@bonniepdf/core';
+import {
+  Document,
+  Heading,
+  TextBlock,
+  VisualToc,
+  HorizontalStack,
+  VerticalStack,
+  PageBreak,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
 
@@ -217,7 +226,10 @@ export function generate(): Document {
 
   // ── Body ──────────────────────────────────────────────────────────────
   let paraIndex = 0;
-  for (const book of BOOKS) {
+  for (const [bookIndex, book] of BOOKS.entries()) {
+    // Each book opens a fresh page (the first already follows the contents page).
+    if (bookIndex > 0) doc.add(new PageBreak());
+
     doc.add(
       new TextBlock('---------------', {
         fontName: StandardFonts.TimesRoman,
@@ -250,7 +262,10 @@ export function generate(): Document {
     );
 
     for (const ch of book.chapters) {
-      doc.add(
+      // The chapter number, title and first paragraph are one block, so a chapter never
+      // opens at the foot of a page with its text on the next.
+      const opener = new VerticalStack({ breakAllowed: false });
+      opener.add(
         new TextBlock(ch.number, {
           fontName: StandardFonts.TimesBold,
           fontSize: 10,
@@ -260,7 +275,7 @@ export function generate(): Document {
         })
       );
 
-      doc.add(
+      opener.add(
         new Heading(ch.title, {
           tocIdentifier: ch.tocId,
           fontName: StandardFonts.TimesBold,
@@ -279,15 +294,19 @@ export function generate(): Document {
         }
         paraIndex++;
 
-        doc.add(
-          new TextBlock(paragraphParts.join(' '), {
-            fontName: StandardFonts.TimesRoman,
-            fontSize: 11,
-            color: 'slate-900',
-            alignment: 'justify',
-            margin: { bottom: 7 },
-          })
-        );
+        const paragraph = new TextBlock(paragraphParts.join(' '), {
+          fontName: StandardFonts.TimesRoman,
+          fontSize: 11,
+          color: 'slate-900',
+          alignment: 'justify',
+          margin: { bottom: 7 },
+        });
+        if (i === 0) {
+          opener.add(paragraph);
+          doc.add(opener);
+        } else {
+          doc.add(paragraph);
+        }
       }
     }
   }

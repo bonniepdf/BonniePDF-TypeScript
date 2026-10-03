@@ -230,6 +230,55 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "preserve-whitespace": {
+      "_fixture": {
+        "id": "document-definition/valid/preserve-whitespace",
+        "description": "A TextBlock with preserveWhitespace true, and one stating the default false. Both cores read both; the canonical write keeps the key only where it differs from its spec default (15 §3.3).",
+        "spec": "15 §3.3, §7; 03 TextBlock 'Preserved whitespace'"
+      },
+      "_expect": {
+        "pages": 1,
+        "roundTrip": true,
+        "canonical": {
+          "version": 1,
+          "minorVersion": 0,
+          "pages": [
+            {
+              "content": [
+                {
+                  "type": "TextBlock",
+                  "text": "    indented",
+                  "preserveWhitespace": true
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "plain"
+                }
+              ]
+            }
+          ]
+        },
+        "pdfSha256": null
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "    indented",
+              "preserveWhitespace": true
+            },
+            {
+              "type": "TextBlock",
+              "text": "plain",
+              "preserveWhitespace": false
+            }
+          ]
+        }
+      ]
+    },
     "report-table-chart": {
       "_fixture": {
         "id": "document-definition/valid/report-table-chart",

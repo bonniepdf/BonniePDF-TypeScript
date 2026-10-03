@@ -442,6 +442,8 @@ function acceptanceBlock(data: QuotationData): Container {
   card.padding = new Thickness(12, 12, 12, 12);
   card.border = new Border(0.75);
   card.borderColors = new BorderColors(LINE);
+  // The signature fields stay with the wording that asks for them.
+  card.breakAllowed = false;
   card.child = body;
   return card;
 }

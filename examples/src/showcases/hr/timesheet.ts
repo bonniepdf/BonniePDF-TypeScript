@@ -14,7 +14,7 @@
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample people, projects, clients, and
 // rates throughout.
 
-import { Document, TextElementBase, Table } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, VerticalStack } from '@bonniepdf/core';
 
 import {
   INK,
@@ -303,7 +303,9 @@ export function generate(): Document {
 
   // ── Expenses ───────────────────────────────────────────────────────────────
 
-  doc.add(h2('Expenses'));
+  // Each section is kept whole, so a heading never sits apart from its table and a table is never left with its totals on another page.
+  const expensesSection = new VerticalStack({ breakAllowed: false });
+  expensesSection.add(h2('Expenses'));
 
   const expenses = new Table({
     columns: [1.2, 1.2, 5.4, 1.6, 1.2],
@@ -324,9 +326,9 @@ export function generate(): Document {
       td(money(expense.amount), { align: 'right', bold: true })
     );
   }
-  doc.add(expenses);
+  expensesSection.add(expenses);
 
-  doc.add(
+  expensesSection.add(
     totalsPanel([
       totalLine('Billable time', money(billableValue)),
       totalLine('Rechargeable expenses', money(rechargeable)),
@@ -339,11 +341,13 @@ export function generate(): Document {
       }),
     ])
   );
+  doc.add(expensesSection);
 
   // ── Approval ───────────────────────────────────────────────────────────────
 
-  doc.add(h2('Declaration and approval'));
-  doc.add(
+  const approval = new VerticalStack({ breakAllowed: false });
+  approval.add(h2('Declaration and approval'));
+  approval.add(
     panel('Consultant declaration', [
       cell(
         'I confirm that the hours recorded above were worked on the projects shown, that the expenses claimed were ' +
@@ -352,7 +356,7 @@ export function generate(): Document {
       ),
     ])
   );
-  doc.add(
+  approval.add(
     panel(
       'Approval releases this for invoicing',
       [
@@ -366,7 +370,7 @@ export function generate(): Document {
     )
   );
 
-  doc.add(
+  approval.add(
     weightedRow(
       [
         field('Submitted by', `${SHEET.consultant} — ${gbDate(SHEET.submitted)}`),
@@ -376,6 +380,7 @@ export function generate(): Document {
       { spacing: 22, mb: 0 }
     )
   );
+  doc.add(approval);
 
   return doc;
 }

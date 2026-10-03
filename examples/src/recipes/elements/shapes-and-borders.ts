@@ -133,11 +133,13 @@ export function generate(): Document {
   doc.add(cardRow);
 
   // ── Section 4: Radius comparison ──
-  doc.add(sectionHeader('Radius Comparison'));
+  // The heading and all six samples stay together: a comparison split across pages defeats its purpose.
+  const radiusSection = new VerticalStack({ breakAllowed: false });
+  radiusSection.add(sectionHeader('Radius Comparison'));
 
   for (const r of [0, 4, 8, 12, 20, 30]) {
     const label = r === 0 ? 'CornerRadius = 0 (sharp corners, default)' : `CornerRadius = ${r}`;
-    doc.add(
+    radiusSection.add(
       new Container({
         backgroundColor: 'slate-100',
         border: { width: 1, color: 'slate-400' },
@@ -148,10 +150,12 @@ export function generate(): Document {
       })
     );
   }
+  doc.add(radiusSection);
 
   // ── Section 5: Practical banners ──
   doc.add(new Line({ color: 'slate-300', thickness: 1, margin: { top: 16 } }));
-  doc.add(sectionHeader('Practical Examples'));
+  const bannerSection = new VerticalStack({ breakAllowed: false });
+  bannerSection.add(sectionHeader('Practical Examples'));
 
   const banners = [
     {
@@ -185,7 +189,7 @@ export function generate(): Document {
   ] as const;
 
   for (const banner of banners) {
-    doc.add(
+    bannerSection.add(
       new Container({
         backgroundColor: banner.bg,
         border: { width: 1, color: banner.border },
@@ -200,6 +204,7 @@ export function generate(): Document {
       })
     );
   }
+  doc.add(bannerSection);
 
   return doc;
 }

@@ -170,9 +170,10 @@ export const sampleContract: ContractData = {
       ],
     },
   ],
-  // Verified against the rendered sample: clauses 1-2 sit on page 1, clauses
-  // 3-5 on page 2, and the page break puts the schedule and execution on page 3.
-  outlinePages: { particulars: 0, definitions: 0, clauses: [0, 0, 1, 1, 1], schedule: 2, execution: 2 },
+  // Verified against the rendered sample: clause 1 sits on page 1 and clauses 2-5 on
+  // page 2 (each clause is kept whole, so clause 2 moves over rather than leaving its
+  // heading behind), and the page break puts the schedule and execution on page 3.
+  outlinePages: { particulars: 0, definitions: 0, clauses: [0, 1, 1, 1, 1], schedule: 2, execution: 2 },
   locale: 'en-GB',
 };
 
@@ -304,7 +305,7 @@ function clause(item: Clause, index: number): VerticalStack {
       indent: 16,
     })
   );
-  return new VerticalStack({ margin: { bottom: 14 }, children });
+  return new VerticalStack({ margin: { bottom: 14 }, breakAllowed: false, children });
 }
 
 /** A ruled line with its caption underneath — one execution field. */

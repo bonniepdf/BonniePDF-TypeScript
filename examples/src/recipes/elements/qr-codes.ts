@@ -148,9 +148,11 @@ export function generate(): Document {
   doc.add(divider());
 
   // ── Section 3: Colors & backgrounds ──
-  doc.add(sectionHeader('Colors & Backgrounds'));
-
-  doc.add(
+  // Heading and codes share a page: `breakAllowed: false` moves the whole section on rather than
+  // leaving the heading stranded at the foot of the previous page.
+  const colorsSection = new VerticalStack({ breakAllowed: false });
+  colorsSection.add(sectionHeader('Colors & Backgrounds'));
+  colorsSection.add(
     new HorizontalStack({
       spacing: 20,
       widthDistribution: 'equal',
@@ -206,6 +208,7 @@ export function generate(): Document {
       ],
     })
   );
+  doc.add(colorsSection);
 
   return doc;
 }

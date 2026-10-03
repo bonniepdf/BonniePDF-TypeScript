@@ -86,6 +86,8 @@ highQuality)`, so `allowPrinting(false)` denied printing where .NET reads it as
 
 ### Fixed
 
+- **A heading, figure or table inside a pagination wrapper keeps its structure tag.** `EnsureSpace`, `PreventPageBreak`, `ShowEntire`, `ShowIf`, `ShowOnce`, `SkipOnce`, `StopPaging` and `Unconstrained` rendered their child without opening its semantic role, so a `Heading` wrapped in one dropped out of the structure tree (and out of the bookmarks and contents that read it) in a PDF/UA-1 document. The wrapper now opens the child's role as a stack or `Container` does.
+
 - **The horizontal bar and lollipop chart examples no longer use a label format outside the number grammar.** They passed `'£'#,##0`, which the grammar rejects; they use `N0`. `pnpm verify-examples` now builds every example so a regression like this fails in CI.
 
 - **A PDF/UA-1 claim is no longer made over fonts that were not embedded.**
@@ -102,6 +104,8 @@ highQuality)`, so `allowPrinting(false)` denied printing where .NET reads it as
   without a trace.
 
 ### Added
+
+- **A text block can keep its indentation.** By default a `TextBlock` drops the leading spaces of each line, which flattens source code and any other text whose indentation means something. `preserveWhitespace: true` keeps every space, including leading and repeated ones, and wraps by code point at the last space that fits (or mid-token when there is none), so a long line never overflows. Tabs are not expanded. `Heading` and `PageNumberOf` inherit it; list items and `RichText` do not take it. It is also a Document Definition key. Example: `new TextBlock(source, { fontName: StandardFonts.Courier, preserveWhitespace: true })`.
 
 - **Documents can be built from JSON.** `fromDefinition(json, options)`, from the new
   `@bonniepdf/core/definition` entry, reads a

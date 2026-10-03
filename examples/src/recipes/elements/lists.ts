@@ -1,4 +1,12 @@
-import { Document, Heading, TextBlock, OrderedList, UnorderedList, StandardFonts } from '@bonniepdf/core';
+import {
+  Document,
+  Heading,
+  TextBlock,
+  OrderedList,
+  UnorderedList,
+  VerticalStack,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 /**
  * Ordered and unordered lists — numbering formats, bullet styles, custom start
@@ -39,31 +47,34 @@ export function generate(): Document {
     )
   );
 
-  section(doc, 'Decimal (1, 2, 3…)', 's-decimal');
+  const s1 = section('Decimal (1, 2, 3…)', 's-decimal');
   const decimalList = new OrderedList({ numberFormat: 'decimal', fontSize: 12, itemSpacing: 6 });
   decimalList.addItem('Plan the document structure before writing.');
   decimalList.addItem('Apply semantic headings so assistive technology can navigate by section.');
   decimalList.addItem('Tag every image with alternative text or mark it as decorative.');
   decimalList.addItem('Validate the output with veraPDF before publishing.');
-  doc.add(decimalList);
+  s1.add(decimalList);
+  doc.add(s1);
 
-  section(doc, 'Upper Roman (I, II, III…)', 's-roman');
+  const s2 = section('Upper Roman (I, II, III…)', 's-roman');
   const romanList = new OrderedList({ numberFormat: 'upper-roman', fontSize: 12, itemSpacing: 6 });
   romanList.addItem('Accessibility requirements');
   romanList.addItem('Design guidelines');
   romanList.addItem('Testing and validation');
   romanList.addItem('Release checklist');
-  doc.add(romanList);
+  s2.add(romanList);
+  doc.add(s2);
 
-  section(doc, 'Lowercase letters (a, b, c…)', 's-alpha');
+  const s3 = section('Lowercase letters (a, b, c…)', 's-alpha');
   const alphaList = new OrderedList({ numberFormat: 'lower-alpha', fontSize: 12, itemSpacing: 6 });
   alphaList.addItem('Provide document language metadata.');
   alphaList.addItem('Embed all fonts used in the file.');
   alphaList.addItem('Include a colour profile so colours reproduce reliably.');
-  doc.add(alphaList);
+  s3.add(alphaList);
+  doc.add(s3);
 
-  section(doc, 'Custom start number', 's-start');
-  doc.add(
+  const s4 = section('Custom start number', 's-start');
+  s4.add(
     new TextBlock('Numbering can begin at any value — useful when a list continues across sections.', {
       margin: { bottom: 6 },
     })
@@ -72,10 +83,11 @@ export function generate(): Document {
   customStartList.addItem('Review colour contrast ratios.');
   customStartList.addItem('Confirm the reading order is logical.');
   customStartList.addItem('Export and archive the final file.');
-  doc.add(customStartList);
+  s4.add(customStartList);
+  doc.add(s4);
 
-  section(doc, 'Nested ordered lists', 's-nested-ordered');
-  doc.add(
+  const s5 = section('Nested ordered lists', 's-nested-ordered');
+  s5.add(
     new TextBlock('A sub-list nests under its parent item and can use a different numbering format.', {
       margin: { bottom: 6 },
     })
@@ -92,9 +104,10 @@ export function generate(): Document {
 
   mainOrdered.addItem('Review and validate.');
   mainOrdered.addItem('Publish the accessible PDF.');
-  doc.add(mainOrdered);
+  s5.add(mainOrdered);
 
   // ── Unordered lists ─────────────────────────────────────────────────────────
+  doc.add(s5);
 
   category(doc, 'Unordered Lists', 'unordered');
 
@@ -107,42 +120,47 @@ export function generate(): Document {
     )
   );
 
-  section(doc, 'Disc (•)', 's-disc');
+  const s6 = section('Disc (•)', 's-disc');
   const discList = new UnorderedList({ bulletStyle: 'disc', fontSize: 12, itemSpacing: 6 });
   discList.addItem('Screen readers announce list items and their position within the list.');
   discList.addItem('Users can jump between lists using standard navigation shortcuts.');
   discList.addItem('Disc is the default first-level bullet.');
-  doc.add(discList);
+  s6.add(discList);
+  doc.add(s6);
 
-  section(doc, 'Circle (◦)', 's-circle');
+  const s7 = section('Circle (◦)', 's-circle');
   const circleList = new UnorderedList({ bulletStyle: 'circle', fontSize: 12, itemSpacing: 6 });
   circleList.addItem('Circle bullets suit second-level points.');
   circleList.addItem('They read as hollow discs.');
   circleList.addItem('Pair them with disc bullets to signal hierarchy.');
-  doc.add(circleList);
+  s7.add(circleList);
+  doc.add(s7);
 
-  section(doc, 'Square (■)', 's-square');
+  const s8 = section('Square (■)', 's-square');
   const squareList = new UnorderedList({ bulletStyle: 'square', fontSize: 12, itemSpacing: 6 });
   squareList.addItem('Square bullets draw attention to key notes.');
   squareList.addItem('Useful for warnings or highlights.');
   squareList.addItem('The marker takes any palette colour.');
-  doc.add(squareList);
+  s8.add(squareList);
+  doc.add(s8);
 
-  section(doc, 'Dash (-)', 's-dash');
+  const s9 = section('Dash (-)', 's-dash');
   const dashList = new UnorderedList({ bulletStyle: 'dash', fontSize: 12, itemSpacing: 6 });
   dashList.addItem('Dash bullets give a plain, minimal look.');
   dashList.addItem('Common in technical and code documentation.');
   dashList.addItem('No special glyph is required.');
-  doc.add(dashList);
+  s9.add(dashList);
+  doc.add(s9);
 
-  section(doc, 'Custom (★)', 's-custom');
+  const s10 = section('Custom (★)', 's-custom');
   const customList = new UnorderedList({ bulletStyle: 'custom', customBullet: '★', fontSize: 12, itemSpacing: 6 });
   customList.addItem('Any character can serve as a bullet.');
   customList.addItem('Stars, arrows, or checkmarks all work.');
   customList.addItem('Choose one that suits the document tone.');
-  doc.add(customList);
+  s10.add(customList);
+  doc.add(s10);
 
-  section(doc, 'Coloured bullets', 's-coloured');
+  const s11 = section('Coloured bullets', 's-coloured');
   const colouredList = new UnorderedList({
     bulletStyle: 'square',
     bulletColor: '#ff0000',
@@ -153,9 +171,10 @@ export function generate(): Document {
   colouredList.addItem('The bullet colour is independent of the text colour.');
   colouredList.addItem('Handy for status markers or categorisation.');
   colouredList.addItem('Any palette token or Color works.');
-  doc.add(colouredList);
+  s11.add(colouredList);
+  doc.add(s11);
 
-  section(doc, 'Nested unordered lists', 's-nested-unordered');
+  const s12 = section('Nested unordered lists', 's-nested-unordered');
   const mainUnordered = new UnorderedList({ bulletStyle: 'disc', fontSize: 12, itemSpacing: 6 });
   mainUnordered.addItem('Compliance standards we target:');
 
@@ -167,7 +186,8 @@ export function generate(): Document {
 
   mainUnordered.addItem('Each is validated in CI.');
   mainUnordered.addItem('A failure blocks the release.');
-  doc.add(mainUnordered);
+  s12.add(mainUnordered);
+  doc.add(s12);
 
   return doc;
 }
@@ -185,15 +205,23 @@ function category(doc: Document, title: string, tocId: string): void {
   );
 }
 
-function section(doc: Document, title: string, tocId: string): void {
-  doc.add(
-    new Heading(title, {
-      tocIdentifier: tocId,
-      level: 2,
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 14,
-      color: 'indigo-600',
-      margin: { top: 14, bottom: 6 },
-    })
-  );
+/**
+ * A keep-together block that opens with a section heading. Everything added to it moves to the next
+ * page as one piece, so a heading never sits at the foot of a page apart from its list, and a nested
+ * list is never parted from the item it belongs to.
+ */
+function section(title: string, tocId: string): VerticalStack {
+  return new VerticalStack({
+    breakAllowed: false,
+    children: [
+      new Heading(title, {
+        tocIdentifier: tocId,
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 14,
+        color: 'indigo-600',
+        margin: { top: 14, bottom: 6 },
+      }),
+    ],
+  });
 }

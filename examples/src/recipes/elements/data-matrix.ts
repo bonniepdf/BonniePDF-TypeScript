@@ -137,8 +137,10 @@ export function generate(): Document {
   doc.add(divider());
 
   // ── Section 3: Rectangular symbols ──
-  doc.add(sectionHeader('Rectangular Symbols'));
-  doc.add(
+  // Each section is one keep-together block, so a heading never sits on a page apart from its symbols.
+  const rectSection = new VerticalStack({ breakAllowed: false });
+  rectSection.add(sectionHeader('Rectangular Symbols'));
+  rectSection.add(
     new TextBlock(
       'Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking long, narrow parts ' +
         'and labels. Set `rectangular = true` and a short message will use the most compact rectangular size.',
@@ -146,7 +148,7 @@ export function generate(): Document {
     )
   );
 
-  doc.add(
+  rectSection.add(
     new HorizontalStack({
       spacing: 20,
       widthDistribution: 'equal',
@@ -178,13 +180,15 @@ export function generate(): Document {
       ),
     })
   );
+  doc.add(rectSection);
 
   doc.add(divider());
 
   // ── Section 4: Colours ──
-  doc.add(sectionHeader('Colours & Backgrounds'));
+  const colourSection = new VerticalStack({ breakAllowed: false });
+  colourSection.add(sectionHeader('Colours & Backgrounds'));
 
-  doc.add(
+  colourSection.add(
     new HorizontalStack({
       spacing: 20,
       widthDistribution: 'equal',
@@ -222,6 +226,8 @@ export function generate(): Document {
       ),
     })
   );
+
+  doc.add(colourSection);
 
   return doc;
 }

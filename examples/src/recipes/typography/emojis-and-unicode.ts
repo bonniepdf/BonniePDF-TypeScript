@@ -14,7 +14,7 @@
  * Font downloads (free / open-source):
  *   https://fonts.google.com/noto
  */
-import { Document, Heading, TextBlock, RichText, TextStyle, PdfVersion } from '@bonniepdf/core';
+import { Document, Heading, TextBlock, RichText, TextStyle, VerticalStack, PdfVersion } from '@bonniepdf/core';
 
 const TEXT_FONT = '/fonts/NotoSans-Regular.ttf';
 const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
@@ -77,8 +77,9 @@ export function generate(): Document {
 
   bmpSection(doc, 'Currency Symbols', 's-currency', '€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽', TEXT_FONT);
 
-  section(doc, 'Greek Alphabet', 's-greek');
-  doc.add(
+  const greek = new VerticalStack({ breakAllowed: false });
+  greek.add(sectionHeading('Greek Alphabet', 's-greek'));
+  greek.add(
     new TextBlock('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω', {
       fontName: TEXT_FONT,
       fontSize: 12,
@@ -86,7 +87,7 @@ export function generate(): Document {
       margin: { bottom: 2 },
     })
   );
-  doc.add(
+  greek.add(
     new TextBlock('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω', {
       fontName: TEXT_FONT,
       fontSize: 12,
@@ -94,6 +95,7 @@ export function generate(): Document {
       margin: { bottom: 4 },
     })
   );
+  doc.add(greek);
 
   bmpSection(doc, 'Cyrillic', 's-cyrillic', 'А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я', TEXT_FONT);
 
@@ -127,9 +129,10 @@ export function generate(): Document {
 
   // ── Mixed content ─────────────────────────────────────────────────────────────
 
-  section(doc, 'Mixed Content', 's-mixed');
+  const mixed = new VerticalStack({ breakAllowed: false });
+  mixed.add(sectionHeading('Mixed Content', 's-mixed'));
 
-  doc.add(
+  mixed.add(
     new TextBlock(
       'Emoji appear inline with regular text using RichText spans — Latin text keeps its ' +
         'text-font metrics while each emoji span switches to the emoji font:',
@@ -148,31 +151,45 @@ export function generate(): Document {
     ['Coverage: ', '📊', ' 94.2%'],
     ['Performance: ', '⚡', ' Response time < 100 ms'],
   ]) {
-    doc.add(new RichText({ margin: { left: 12, bottom: 4 } }).span(label).span(emoji, emojiStyle).span(rest));
+    mixed.add(new RichText({ margin: { left: 12, bottom: 4 } }).span(label).span(emoji, emojiStyle).span(rest));
   }
+  doc.add(mixed);
 
   return doc;
 }
 
-function section(doc: Document, title: string, tocId: string): void {
+/** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
+function sectionHeading(title: string, tocId: string): Heading {
+  return new Heading(title, {
+    tocIdentifier: tocId,
+    level: 2,
+    fontName: TEXT_FONT,
+    fontSize: 13,
+    color: 'indigo-600',
+    margin: { top: 12, bottom: 4 },
+  });
+}
+
+function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
   doc.add(
-    new Heading(title, {
-      tocIdentifier: tocId,
-      level: 2,
-      fontName: TEXT_FONT,
-      fontSize: 13,
-      color: 'indigo-600',
-      margin: { top: 12, bottom: 4 },
+    new VerticalStack({
+      breakAllowed: false,
+      children: [
+        sectionHeading(title, tocId),
+        new TextBlock(content, { fontName: font, fontSize: 12, color: 'slate-600', margin: { bottom: 4 } }),
+      ],
     })
   );
 }
 
-function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
-  section(doc, title, tocId);
-  doc.add(new TextBlock(content, { fontName: font, fontSize: 12, color: 'slate-600', margin: { bottom: 4 } }));
-}
-
 function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
-  section(doc, title, tocId);
-  doc.add(new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, color: 'slate-800', margin: { bottom: 4 } }));
+  doc.add(
+    new VerticalStack({
+      breakAllowed: false,
+      children: [
+        sectionHeading(title, tocId),
+        new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, color: 'slate-800', margin: { bottom: 4 } }),
+      ],
+    })
+  );
 }

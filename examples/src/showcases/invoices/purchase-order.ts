@@ -226,8 +226,10 @@ export function generate(): Document {
     ])
   );
 
-  doc.add(h2('Order terms'));
-  doc.add(
+  // The heading stays with the terms panel it introduces.
+  const terms = new VerticalStack({ breakAllowed: false });
+  terms.add(h2('Order terms'));
+  terms.add(
     panel('Conditions of purchase', [
       cell(
         'This order is placed on the buyer’s standard conditions of purchase, which prevail over any terms the ' +
@@ -246,16 +248,18 @@ export function generate(): Document {
       ),
     ])
   );
+  doc.add(terms);
 
-  doc.add(h2('Authorisation'));
-  doc.add(
+  const authorisation = new VerticalStack({ breakAllowed: false });
+  authorisation.add(h2('Authorisation'));
+  authorisation.add(
     cell('Raised and approved within the delegated authority for this cost centre.', {
       size: 9,
       color: MUTED,
       mb: 8,
     })
   );
-  doc.add(
+  authorisation.add(
     weightedRow(
       [
         authSlot('Raised by', ORDER.raisedBy, gbDate(ORDER.raised)),
@@ -265,6 +269,7 @@ export function generate(): Document {
       { spacing: 22, mb: 0 }
     )
   );
+  doc.add(authorisation);
 
   return doc;
 }

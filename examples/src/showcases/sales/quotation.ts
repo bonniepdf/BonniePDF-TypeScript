@@ -458,6 +458,8 @@ function acceptanceBlock(data: QuotationData): Container {
 
   return new Container({
     ...cardBase,
+    // The signature fields stay with the wording that asks for them.
+    breakAllowed: false,
     child: new VerticalStack({
       children: [
         sectionTitle('Acceptance', 'acceptance'),

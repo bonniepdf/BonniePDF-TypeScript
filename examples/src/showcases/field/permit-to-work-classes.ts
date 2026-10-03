@@ -287,7 +287,10 @@ export function generate(): Document {
 
   // ── Atmospheric test ───────────────────────────────────────────────────────
 
-  doc.add(h2('Atmospheric test record'));
+  // The test record stays whole: a gas reading split from its heading or its note cannot be trusted at a glance.
+  const atmosphere = new VerticalStack();
+  atmosphere.breakAllowed = false;
+  atmosphere.add(h2('Atmospheric test record'));
 
   const gas = new Table(2.2, 1.2, 1.4, 1.2, 1.6);
   gas.cellPadding = 6;
@@ -299,15 +302,16 @@ export function generate(): Document {
   gas.addRow(td('Oxygen'), td('20.9 %'), td('19.5 – 23.5 %', { color: MUTED }), pass(), td('Sample Issuer'));
   gas.addRow(td('Flammable gas (LEL)'), td('0 %'), td('< 10 %', { color: MUTED }), pass(), td('Sample Issuer'));
   gas.addRow(td('Carbon monoxide'), td('0 ppm'), td('< 30 ppm', { color: MUTED }), pass(), td('Sample Issuer'));
-  doc.add(gas);
+  atmosphere.add(gas);
 
-  doc.add(
+  atmosphere.add(
     body(
       `Instrument SN-4471-B, calibration due 14 Nov 2026. Tested at ${clock(PERMIT.validFrom)} on ` +
         `${shortDate(PERMIT.validFrom)}. Re-test required after any break in work longer than 30 minutes.`,
       { color: MUTED, size: 8.5 }
     )
   );
+  doc.add(atmosphere);
 
   // ── Isolations ─────────────────────────────────────────────────────────────
 

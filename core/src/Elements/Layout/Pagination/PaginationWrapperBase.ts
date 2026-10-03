@@ -2,6 +2,7 @@ import { ElementBase } from '../../ElementBase';
 import { IContentContainer } from '../../IContentContainer';
 import { IElement, IStatefulElement, RenderContext, RenderStatus } from '../../IElement';
 import { captureTypeOf, captureNameOf } from '../../../Rendering/LayoutRecorder';
+import { beginChildTag, endChildTag } from '../../../Rendering/Tagging/ChildTagging';
 
 /**
  * What a pagination primitive decides to do with its child before rendering it
@@ -116,12 +117,20 @@ export abstract class PaginationWrapperBase extends ElementBase implements ICont
     const child = this.child;
     if (!child) return RenderStatus.Complete;
 
-    if (isStateful(child)) return child.renderStateful(ctx, contentWidth);
+    // The wrapper declares no role of its own, so the child's semantics (a heading, a
+    // figure, a table) must be opened here, as every other layout container does for
+    // its children. Without it a wrapped heading drops out of the structure tree.
+    const token = beginChildTag(ctx, child);
+    try {
+      if (isStateful(child)) return child.renderStateful(ctx, contentWidth);
 
-    const before = ctx.currentY;
-    child.render(ctx, contentWidth);
-    if (ctx.currentY === before) ctx.currentY += child.measureHeight(contentWidth);
-    return RenderStatus.Complete;
+      const before = ctx.currentY;
+      child.render(ctx, contentWidth);
+      if (ctx.currentY === before) ctx.currentY += child.measureHeight(contentWidth);
+      return RenderStatus.Complete;
+    } finally {
+      endChildTag(ctx, token);
+    }
   }
 
   /**

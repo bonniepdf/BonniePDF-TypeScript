@@ -12,6 +12,7 @@ import {
   TextBlock,
   Heading,
   Container,
+  EnsureSpace,
   VerticalStack,
   HorizontalStack,
   WidthDistribution,
@@ -111,6 +112,17 @@ export function td(text: string, opts: { color?: Color; bold?: boolean; size?: n
 }
 
 // ── Structure ────────────────────────────────────────────────────────────────
+
+/**
+ * Keeps a heading with the start of whatever it introduces: the heading moves to the next page
+ * unless `minHeight` points of room remain below it.
+ */
+export function keepWithNext(heading: Heading, minHeight = 120): EnsureSpace {
+  const guard = new EnsureSpace();
+  guard.minHeight = minHeight;
+  guard.child = heading;
+  return guard;
+}
 
 export function accentBar(color: Color = ACCENT, height = 3): Container {
   const bar = new Container();
@@ -225,6 +237,8 @@ export function signatureRow(slots: IElement[]): HorizontalStack {
   row.widthDistribution = WidthDistribution.Weighted;
   row.spacing = 22;
   row.margin = new Thickness(0, 10, 0, 4);
+  // A signature row is never split between pages.
+  row.breakAllowed = false;
   for (const s of slots) row.add(s, 1);
   return row;
 }

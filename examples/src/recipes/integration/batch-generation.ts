@@ -195,6 +195,16 @@ export function generate(): Document {
   );
   doc.add(table);
 
+  // The caveat sits with the figures it qualifies, not alone at the end of the document.
+  doc.add(
+    cell(
+      `Run completed ${gbDate(new Date())} on the machine that generated this document. ` +
+        'Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine ' +
+        'was doing.',
+      { size: 8.5, color: MUTED, mt: 8, mb: 0 }
+    )
+  );
+
   doc.add(h2('The lifecycle'));
   doc.add(
     panel('A document is not reusable after generation', [
@@ -232,15 +242,6 @@ export function generate(): Document {
         { size: 9, mb: 0 }
       ),
     ])
-  );
-
-  doc.add(
-    cell(
-      `Run completed ${gbDate(new Date())} on the machine that generated this document. ` +
-        'Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine ' +
-        'was doing.',
-      { size: 8.5, color: MUTED, mt: 8, mb: 0 }
-    )
   );
 
   return doc;

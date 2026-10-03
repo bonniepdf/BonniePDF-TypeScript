@@ -15,6 +15,7 @@
  */
 import {
   Document,
+  VerticalStack,
   DocumentSettings,
   DocumentMetadata,
   AccessibilityMode,
@@ -98,19 +99,22 @@ export function generate(): Document {
 
   bmpSection(doc, 'Currency Symbols', 's-currency', '€  £  ¥  ¢  ₹  ₩  ₿  ₪  ₫  ₽', TEXT_FONT);
 
-  section(doc, 'Greek Alphabet', 's-greek');
+  const greek = new VerticalStack();
+  greek.breakAllowed = false;
+  greek.add(sectionHeading('Greek Alphabet', 's-greek'));
   const greekLower = new TextBlock('α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω');
   greekLower.fontName = TEXT_FONT;
   greekLower.fontSize = 12;
   greekLower.color = ColorPalette.slate[600];
   greekLower.margin = new Thickness(0, 0, 0, 2);
-  doc.add(greekLower);
+  greek.add(greekLower);
   const greekUpper = new TextBlock('Α Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω');
   greekUpper.fontName = TEXT_FONT;
   greekUpper.fontSize = 12;
   greekUpper.color = ColorPalette.slate[600];
   greekUpper.margin = new Thickness(0, 0, 0, 4);
-  doc.add(greekUpper);
+  greek.add(greekUpper);
+  doc.add(greek);
 
   bmpSection(doc, 'Cyrillic', 's-cyrillic', 'А Б В Г Д Е Ж З И К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я', TEXT_FONT);
 
@@ -144,7 +148,9 @@ export function generate(): Document {
 
   // ── Mixed content ─────────────────────────────────────────────────────────────
 
-  section(doc, 'Mixed Content', 's-mixed');
+  const mixed = new VerticalStack();
+  mixed.breakAllowed = false;
+  mixed.add(sectionHeading('Mixed Content', 's-mixed'));
 
   const mixedIntro = new TextBlock(
     'Emoji appear inline with regular text using RichText spans — Latin text keeps its ' +
@@ -152,7 +158,7 @@ export function generate(): Document {
   );
   mixedIntro.fontName = TEXT_FONT;
   mixedIntro.margin = new Thickness(0, 0, 0, 6);
-  doc.add(mixedIntro);
+  mixed.add(mixedIntro);
 
   // NotoEmoji contains basic Latin glyphs on wide emoji advances, so setting it
   // as the whole line's font stretches the text — spans keep each script in the
@@ -168,13 +174,15 @@ export function generate(): Document {
     const line = new RichText();
     line.margin = new Thickness(12, 0, 0, 4);
     line.span(label).span(emoji, emojiStyle).span(rest);
-    doc.add(line);
+    mixed.add(line);
   }
+  doc.add(mixed);
 
   return doc;
 }
 
-function section(doc: Document, title: string, tocId: string): void {
+/** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
+function sectionHeading(title: string, tocId: string): Heading {
   const h = new Heading(title);
   h.tocIdentifier = tocId;
   h.level = 2;
@@ -182,25 +190,31 @@ function section(doc: Document, title: string, tocId: string): void {
   h.fontSize = 13;
   h.color = ColorPalette.indigo[600];
   h.margin = new Thickness(0, 12, 0, 4);
-  doc.add(h);
+  return h;
 }
 
 function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
-  section(doc, title, tocId);
+  const section = new VerticalStack();
+  section.breakAllowed = false;
+  section.add(sectionHeading(title, tocId));
   const b = new TextBlock(content);
   b.fontName = font;
   b.fontSize = 12;
   b.color = ColorPalette.slate[600];
   b.margin = new Thickness(0, 0, 0, 4);
-  doc.add(b);
+  section.add(b);
+  doc.add(section);
 }
 
 function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
-  section(doc, title, tocId);
+  const section = new VerticalStack();
+  section.breakAllowed = false;
+  section.add(sectionHeading(title, tocId));
   const b = new TextBlock(content);
   b.fontName = EMOJI_FONT;
   b.fontSize = 20;
   b.color = ColorPalette.slate[800];
   b.margin = new Thickness(0, 0, 0, 4);
-  doc.add(b);
+  section.add(b);
+  doc.add(section);
 }

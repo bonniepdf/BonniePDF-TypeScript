@@ -563,6 +563,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       },
       "paragraphSpacing": {
         "kind": "length"
+      },
+      "preserveWhitespace": {
+        "kind": "boolean"
       }
     },
     "List": {

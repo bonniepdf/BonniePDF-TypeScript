@@ -27,6 +27,8 @@ import {
   HorizontalStack,
   WidthDistribution,
   PdfAConformance,
+  VerticalStack,
+  PageBreak,
 } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
@@ -228,7 +230,10 @@ export function generate(): Document {
 
   // ── Body ──────────────────────────────────────────────────────────────
   let paraIndex = 0;
-  for (const book of BOOKS) {
+  for (const [bookIndex, book] of BOOKS.entries()) {
+    // Each book opens a fresh page (the first already follows the contents page).
+    if (bookIndex > 0) doc.add(new PageBreak());
+
     const bookTopRule = new TextBlock('---------------');
     bookTopRule.fontName = StandardFonts.TimesRoman;
     bookTopRule.fontSize = 11;
@@ -255,13 +260,17 @@ export function generate(): Document {
     doc.add(bookBottomRule);
 
     for (const ch of book.chapters) {
+      // The chapter number, title and first paragraph are one block, so a chapter never
+      // opens at the foot of a page with its text on the next.
+      const opener = new VerticalStack();
+      opener.breakAllowed = false;
       const chapterNumber = new TextBlock(ch.number);
       chapterNumber.fontName = StandardFonts.TimesBold;
       chapterNumber.fontSize = 10;
       chapterNumber.color = ColorPalette.slate[500];
       chapterNumber.alignment = TextAlignment.Center;
       chapterNumber.margin = new Thickness(0, 32, 0, 6);
-      doc.add(chapterNumber);
+      opener.add(chapterNumber);
 
       const chapterHeading = new Heading(ch.title);
       chapterHeading.tocIdentifier = ch.tocId;
@@ -270,7 +279,7 @@ export function generate(): Document {
       chapterHeading.color = ColorPalette.slate[900];
       chapterHeading.alignment = TextAlignment.Center;
       chapterHeading.margin = new Thickness(0, 0, 0, 18);
-      doc.add(chapterHeading);
+      opener.add(chapterHeading);
 
       for (let i = 0; i < ch.paragraphCount; i++) {
         const sentenceCount = 4 + (paraIndex % 4);
@@ -286,7 +295,12 @@ export function generate(): Document {
         paragraph.color = ColorPalette.slate[900];
         paragraph.alignment = TextAlignment.Justify;
         paragraph.margin = new Thickness(0, 0, 0, 7);
-        doc.add(paragraph);
+        if (i === 0) {
+          opener.add(paragraph);
+          doc.add(opener);
+        } else {
+          doc.add(paragraph);
+        }
       }
     }
   }

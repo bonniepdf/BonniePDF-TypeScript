@@ -190,7 +190,8 @@ export function generate(): Document {
   doc.add(table);
 
   // ── Verification ──────────────────────────────────────────────────────────
-  const verify = new HorizontalStack({ widthDistribution: 'weighted' });
+  // The heading, wording and QR code stay on one page.
+  const verify = new HorizontalStack({ widthDistribution: 'weighted', breakAllowed: false });
   verify.add(
     new VerticalStack({
       children: [

@@ -15,6 +15,7 @@ import {
   Thickness,
   StandardFonts,
   PdfAConformance,
+  VerticalStack,
 } from '@bonniepdf/core';
 
 const EMPLOYEES: [string, string, string][] = [
@@ -185,6 +186,9 @@ export function generate(): Document {
   doc.add(h1Overview);
 
   for (const [title, body] of OVERVIEW_SECTIONS) {
+    // Each heading is kept with its paragraph, so a heading never ends a page on its own.
+    const section = new VerticalStack();
+    section.breakAllowed = false;
     const h2 = new Heading(title);
     h2.tocIdentifier = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     h2.level = 2;
@@ -192,11 +196,12 @@ export function generate(): Document {
     h2.fontSize = 14;
     h2.color = ColorPalette.slate[700];
     h2.margin = new Thickness(0, 14, 0, 6);
-    doc.add(h2);
+    section.add(h2);
 
     const p = new TextBlock(body);
     p.margin = new Thickness(0, 0, 0, 6);
-    doc.add(p);
+    section.add(p);
+    doc.add(section);
   }
 
   return doc;

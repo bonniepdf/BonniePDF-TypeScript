@@ -1,4 +1,13 @@
-import { Document, Heading, TextBlock, TextElementBase, Table, TableRow, StandardFonts } from '@bonniepdf/core';
+import {
+  Document,
+  Heading,
+  TextBlock,
+  TextElementBase,
+  Table,
+  TableRow,
+  StandardFonts,
+  VerticalStack,
+} from '@bonniepdf/core';
 
 const EMPLOYEES: [string, string, string][] = [
   ['Alice Chen', 'Engineering', 'Senior Developer'],
@@ -161,7 +170,9 @@ export function generate(): Document {
   );
 
   for (const [title, body] of OVERVIEW_SECTIONS) {
-    doc.add(
+    // Each heading is kept with its paragraph, so a heading never ends a page on its own.
+    const section = new VerticalStack({ breakAllowed: false });
+    section.add(
       new Heading(title, {
         tocIdentifier: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         level: 2,
@@ -172,7 +183,8 @@ export function generate(): Document {
       })
     );
 
-    doc.add(new TextBlock(body, { margin: { bottom: 6 } }));
+    section.add(new TextBlock(body, { margin: { bottom: 6 } }));
+    doc.add(section);
   }
 
   return doc;

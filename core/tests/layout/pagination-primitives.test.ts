@@ -4,6 +4,10 @@ import { PdfSize } from '../../src/Configuration/PdfSize';
 import { Container } from '../../src/Elements/Layout/Container';
 import { VerticalStack } from '../../src/Elements/Layout/VerticalStack';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
+import { Heading } from '../../src/Elements/Text/Heading';
+import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
+import { PdfVersion } from '../../src/Configuration/PdfVersion';
+import { pdfToText } from '../helpers/test-base';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { EnsureSpace, ENSURE_SPACE_OPTION_KEYS } from '../../src/Elements/Layout/Pagination/EnsureSpace';
 import {
@@ -381,6 +385,39 @@ describe('pagination primitive option bags', () => {
   for (const [name, instance, keys] of cases) {
     it(`${name}'s option keys cover its settable surface exactly`, () => {
       expect(settableSurface(instance)).toEqual([...keys].sort());
+    });
+  }
+});
+
+describe('pagination wrappers keep their child tagged', () => {
+  function headingCount(wrap: boolean, wrapper: (child: Heading) => IElement): number {
+    const doc = new Document();
+    doc.settings.version = PdfVersion.Pdf17;
+    doc.settings.accessibility = AccessibilityMode.PdfUa1;
+    doc.settings.language = 'en-GB';
+    const heading = new Heading('Section');
+    heading.level = 2;
+    doc.add(wrap ? wrapper(heading) : heading);
+    doc.add(new TextBlock('Body text.'));
+    const text = pdfToText(doc.generateBytes());
+    doc.dispose();
+    return (text.match(/\/S\s*\/H2\b/g) ?? []).length;
+  }
+
+  // SkipOnce is absent on purpose: it renders nothing on the first page, where this document puts the heading.
+  const wrappers: Array<[string, (child: Heading) => IElement]> = [
+    ['EnsureSpace', c => new EnsureSpace({ minHeight: 50, child: c })],
+    ['PreventPageBreak', c => new PreventPageBreak({ child: c })],
+    ['ShowEntire', c => new ShowEntire({ child: c })],
+    ['ShowIf', c => new ShowIf({ predicate: () => true, child: c })],
+    ['ShowOnce', c => new ShowOnce({ child: c })],
+    ['StopPaging', c => new StopPaging({ child: c })],
+  ];
+
+  for (const [name, wrapper] of wrappers) {
+    it(`${name} leaves a heading in the structure tree`, () => {
+      expect(headingCount(false, wrapper)).toBe(1);
+      expect(headingCount(true, wrapper)).toBe(1);
     });
   }
 });

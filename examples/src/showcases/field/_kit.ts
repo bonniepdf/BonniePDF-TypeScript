@@ -14,6 +14,7 @@ import {
   TextBlock,
   Heading,
   Container,
+  EnsureSpace,
   VerticalStack,
   HorizontalStack,
   StandardFonts,
@@ -121,6 +122,14 @@ export function td(text: string, opts: { color?: ColorInput; bold?: boolean; siz
 }
 
 // ── Structure ────────────────────────────────────────────────────────────────
+
+/**
+ * Keeps a heading with the start of whatever it introduces: the heading moves to the next page
+ * unless `minHeight` points of room remain below it.
+ */
+export function keepWithNext(heading: Heading, minHeight = 120): EnsureSpace {
+  return new EnsureSpace({ minHeight, child: heading });
+}
 
 /** A full-width accent rule; the visual top of every one of these documents. */
 export function accentBar(color: ColorInput = ACCENT, height = 3): Container {
@@ -232,6 +241,8 @@ export function signatureRow(slots: IElement[]): HorizontalStack {
     widthDistribution: 'weighted',
     spacing: 22,
     margin: { top: 10, bottom: 4 },
+    // A signature row is never split between pages.
+    breakAllowed: false,
   });
   for (const s of slots) row.add(s, 1);
   return row;

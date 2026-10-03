@@ -200,13 +200,20 @@ function eyebrow(text: string, color: ColorInput = BRAND): TextBlock {
   return cell(text.toUpperCase(), { bold: true, size: 8, color });
 }
 
+/**
+ * A labelled group of facts. Each key sits above its value rather than beside it, so a long value
+ * (an email address does not wrap) gets the whole column instead of a fraction of it.
+ */
 function kvBlock(label: string, rows: [string, string][]): VerticalStack {
   const stack = new VerticalStack({ children: [cell(label, { bold: true, size: 8, color: BRAND })] });
-  const grid = new Grid({ columns: [1.1, 1.4], cellPadding: 0, border: 0 });
   for (const [k, v] of rows) {
-    grid.addRow(cell(k, { size: 8, color: FAINT }), cell(v, { size: 9 }));
+    stack.add(
+      new VerticalStack({
+        margin: { top: 6 },
+        children: [cell(k, { size: 7.5, color: FAINT }), cell(v, { size: 9 })],
+      })
+    );
   }
-  stack.add(grid);
   return stack;
 }
 
@@ -380,7 +387,9 @@ export function buildDocument(data: PolicyScheduleData): Document {
   doc.add(premQrGrid);
 
   // ── Endorsements & exclusions ─────────────────────────────────────────────
-  doc.add(eyebrow('Endorsements & exclusions'));
+  // Heading and table stay together: a short register is never split across pages.
+  const endorsements = new VerticalStack({ breakAllowed: false });
+  endorsements.add(eyebrow('Endorsements & exclusions'));
   const endTable = new Table({
     columns: [0.8, 2, 4],
     cellPadding: 6,
@@ -402,10 +411,12 @@ export function buildDocument(data: PolicyScheduleData): Document {
       cell(e.detail, { align: 'left', color: MUTED })
     );
   }
-  doc.add(endTable);
+  endorsements.add(endTable);
+  doc.add(endorsements);
 
   // ── Claims & contacts ─────────────────────────────────────────────────────
-  const claimsGrid = new Grid({ columns: [1, 1, 1], cellPadding: 0, border: 0 });
+  // The middle column is wider: an email address cannot wrap, so it needs room.
+  const claimsGrid = new Grid({ columns: [1, 1.7, 1], cellPadding: 0, border: 0 });
   claimsGrid.addRow(
     new VerticalStack({
       children: [

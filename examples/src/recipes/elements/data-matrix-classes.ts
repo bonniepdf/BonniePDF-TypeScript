@@ -185,14 +185,17 @@ export function generate(): Document {
   rectHeader.fontSize = 16;
   rectHeader.color = ColorPalette.indigo[600];
   rectHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(rectHeader);
+  // Each section is one keep-together block, so a heading never sits on a page apart from its symbols.
+  const rectSection = new VerticalStack();
+  rectSection.breakAllowed = false;
+  rectSection.add(rectHeader);
 
   const rectIntro = new TextBlock(
     'Unlike QR codes, Data Matrix supports rectangular symbols - handy for marking long, narrow parts ' +
       'and labels. Set `rectangular = true` and a short message will use the most compact rectangular size.'
   );
   rectIntro.margin = new Thickness(0, 0, 0, 15);
-  doc.add(rectIntro);
+  rectSection.add(rectIntro);
 
   const rectRow = new HorizontalStack();
   rectRow.spacing = 20;
@@ -232,7 +235,8 @@ export function generate(): Document {
     col.add(dataBlock);
     rectRow.add(col);
   }
-  doc.add(rectRow);
+  rectSection.add(rectRow);
+  doc.add(rectSection);
 
   const rectDivider = new Line();
   rectDivider.color = ColorPalette.slate[200];
@@ -246,7 +250,9 @@ export function generate(): Document {
   colorsHeader.fontSize = 16;
   colorsHeader.color = ColorPalette.indigo[600];
   colorsHeader.margin = new Thickness(0, 0, 0, 10);
-  doc.add(colorsHeader);
+  const colourSection = new VerticalStack();
+  colourSection.breakAllowed = false;
+  colourSection.add(colorsHeader);
 
   const colorRow = new HorizontalStack();
   colorRow.spacing = 20;
@@ -290,7 +296,8 @@ export function generate(): Document {
     col.add(dataBlock);
     colorRow.add(col);
   }
-  doc.add(colorRow);
+  colourSection.add(colorRow);
+  doc.add(colourSection);
 
   return doc;
 }

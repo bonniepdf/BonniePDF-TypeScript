@@ -1,5 +1,6 @@
 import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
+import { generate as firstPdf } from './recipes/basics/first-pdf';
 import { generate as simpleDocument } from './recipes/basics/simple-document';
 import { generate as simpleDocumentClasses } from './recipes/basics/simple-document-classes';
 import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
@@ -438,6 +439,16 @@ export const examples: ExampleDef[] = [
     gallery: false,
     variantOf: 'page-settings',
     variantLabel: 'Class API',
+  },
+  {
+    id: 'first-pdf',
+    name: 'Your First PDF',
+    category: 'Basic',
+    description:
+      'The four-line minimum from the getting-started page: one Document, one TextBlock, one PDF. The output of exactly the snippet the docs show.',
+    filename: 'first-pdf.pdf',
+    generate: firstPdf,
+    dotnetClass: null,
   },
   {
     id: 'simple-document',

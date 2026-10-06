@@ -12,6 +12,7 @@ import {
   Thickness,
   StandardFonts,
   PdfAConformance,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 /**
@@ -74,23 +75,27 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
 
-  settings.headerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`);
+  function pageHeader(): TextBlock {
+    const b = new TextBlock(`BonniePDF - Headers & Footers - Page ${TextElementBase.CurrentPageToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.color = ColorPalette.slate[500];
     b.alignment = TextAlignment.Center;
     return b;
-  };
+  }
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+  settings.headerTemplate = pageTemplate({ default: pageHeader() });
+
+  function pageFooter(): TextBlock {
+    const b = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Center;
     return b;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Headers and Footers Demo';

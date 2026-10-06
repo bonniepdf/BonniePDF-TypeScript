@@ -16,7 +16,7 @@
 // amounts throughout. Nothing here is a statutory notice or legal advice, and
 // the interest and compensation figures are illustrative.
 
-import { Document, TextElementBase, Table } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, pageTemplate } from '@bonniepdf/core';
 
 import {
   INK,
@@ -129,11 +129,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(
+      footerTemplate: pageTemplate({
+        default: band(
           `${LETTER.reference} · account ${LETTER.account} · ${stage.name}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `${stage.name} — account ${LETTER.account}`,

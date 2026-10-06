@@ -32,6 +32,7 @@ import {
   Thickness,
   UnorderedList,
   VerticalStack,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const INK = Color.fromHex('#1b2a3a');
@@ -95,16 +96,18 @@ export function generate(): Document {
   settings.displayDocTitle = true;
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(BODY);
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
+  function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 7.5;
     f.color = MUTED;
     f.alignment = TextAlignment.Center;
     return f;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Grant award decision letter';

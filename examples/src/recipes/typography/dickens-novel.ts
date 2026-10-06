@@ -19,6 +19,8 @@ import {
   VerticalStack,
   PageBreak,
   StandardFonts,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
@@ -81,6 +83,29 @@ const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
 // ── Entry point ────────────────────────────────────────────────────────────
 
 export function generate(): Document {
+  function pageHeader() {
+    const stack = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
+    stack.add(
+      new TextBlock('A Tale of Two Cities', {
+        fontName: StandardFonts.TimesItalic,
+        fontSize: 9,
+        color: 'slate-500',
+        alignment: 'left',
+      }),
+      1
+    );
+    stack.add(
+      new TextBlock('Charles Dickens', {
+        fontName: StandardFonts.TimesItalic,
+        fontSize: 9,
+        color: 'slate-500',
+        alignment: 'right',
+      }),
+      1
+    );
+    return stack;
+  }
+
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -89,29 +114,7 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
       margin: 72,
       displayDocTitle: true,
-      headerTemplate: (pageNum: number) => {
-        if (pageNum <= 1) return undefined;
-        const stack = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
-        stack.add(
-          new TextBlock('A Tale of Two Cities', {
-            fontName: StandardFonts.TimesItalic,
-            fontSize: 9,
-            color: 'slate-500',
-            alignment: 'left',
-          }),
-          1
-        );
-        stack.add(
-          new TextBlock('Charles Dickens', {
-            fontName: StandardFonts.TimesItalic,
-            fontSize: 9,
-            color: 'slate-500',
-            alignment: 'right',
-          }),
-          1
-        );
-        return stack;
-      },
+      headerTemplate: pageTemplate({ firstPage: new Spacer({ height: 0 }), default: pageHeader() }),
       footerTemplate: (pageNum: number) => {
         if (pageNum <= 1) return undefined;
         return new TextBlock(String(pageNum), {

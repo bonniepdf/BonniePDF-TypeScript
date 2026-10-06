@@ -36,6 +36,7 @@ import {
   WidthDistribution,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -387,21 +388,25 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
   });
 
-  settings.headerTemplate = () => {
+  function pageHeader() {
     const header = new TextBlock(`${data.reference} · ${data.employer.name} and ${data.employee.name}`);
     header.fontName = StandardFonts.Helvetica;
     header.fontSize = 7;
     header.color = FAINT;
     return header;
-  };
-  settings.footerTemplate = (pageNumber: number) => {
-    const footer = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+  }
+
+  settings.headerTemplate = pageTemplate({ default: pageHeader() });
+  function pageFooter() {
+    const footer = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
     footer.fontName = StandardFonts.Helvetica;
     footer.fontSize = 7;
     footer.color = FAINT;
     footer.alignment = TextAlignment.Center;
     return footer;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const pages = data.outlinePages;
   settings.bookmarks = [

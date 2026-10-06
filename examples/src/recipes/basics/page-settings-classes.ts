@@ -14,6 +14,8 @@ import {
   StandardFonts,
   PdfAConformance,
   AccessibilityMode,
+  pageTemplate,
+  TextElementBase,
 } from '@bonniepdf/core';
 
 // PdfSize has no AllSizes static - enumerate the standard sizes explicitly.
@@ -56,14 +58,16 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const b = new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`);
+  function pageFooter(): TextBlock {
+    const b = new TextBlock(`Page ${TextElementBase.CurrentPageToken} - BonniePDF Standard Formats`);
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Center;
     return b;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Standard PDF Page Formats Gallery';

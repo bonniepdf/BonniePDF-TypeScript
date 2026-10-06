@@ -36,6 +36,7 @@ import {
   ColorPalette,
   type IElement,
   type TextBlockOptions,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -402,19 +403,21 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
 
   // A running header: on a document that will be printed, filed, and referred
   // back to, every page needs to say which agreement it belongs to.
-  settings.headerTemplate = () =>
-    new TextBlock(`${data.reference} · ${data.employer.name} and ${data.employee.name}`, {
+  settings.headerTemplate = pageTemplate({
+    default: new TextBlock(`${data.reference} · ${data.employer.name} and ${data.employee.name}`, {
       fontName: HELVETICA,
       fontSize: 7,
       color: FAINT,
-    });
-  settings.footerTemplate = (pageNumber: number) =>
-    new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+    }),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
       fontName: HELVETICA,
       fontSize: 7,
       color: FAINT,
       alignment: 'center',
-    });
+    }),
+  });
 
   // The outline. A reader opening a ten-clause agreement should be able to
   // jump to "Termination" rather than scroll for it.

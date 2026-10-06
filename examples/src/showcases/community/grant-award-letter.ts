@@ -24,6 +24,7 @@ import {
   VerticalStack,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const INK = '#1b2a3a';
@@ -80,9 +81,9 @@ export function generate(): Document {
       language: 'en-GB',
       displayDocTitle: true,
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: BODY },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
@@ -90,6 +91,7 @@ export function generate(): Document {
             alignment: 'center',
           }
         ),
+      }),
     },
     metadata: {
       title: 'Grant award decision letter',

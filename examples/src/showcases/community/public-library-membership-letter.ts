@@ -20,6 +20,8 @@ import {
   StandardFonts,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
+  TextElementBase,
 } from '@bonniepdf/core';
 
 const LIBRARY_INK = '#172033';
@@ -65,12 +67,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: LIBRARY_INK },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`, {
-          fontName: StandardFonts.Helvetica,
-          fontSize: 8,
-          color: LIBRARY_SECONDARY,
-        }),
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `Sample Libraries  -  Ref NBL-4471-208823  -  Page ${TextElementBase.CurrentPageToken}`,
+          {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 8,
+            color: LIBRARY_SECONDARY,
+          }
+        ),
+      }),
     },
     metadata: {
       title: 'Public library membership confirmation',

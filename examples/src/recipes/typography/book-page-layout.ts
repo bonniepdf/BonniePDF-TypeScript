@@ -1,4 +1,13 @@
-import { Document, Heading, TextBlock, VerticalStack, Container, StandardFonts, PageLabel } from '@bonniepdf/core';
+import {
+  Document,
+  Heading,
+  TextBlock,
+  VerticalStack,
+  Container,
+  StandardFonts,
+  PageLabel,
+  pageTemplate,
+} from '@bonniepdf/core';
 
 /**
  * A single book-chapter page - running head, a page-label counter that starts at
@@ -20,13 +29,14 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: StandardFonts.TimesRoman, fontSize: 11, color: 'slate-800' },
-      headerTemplate: () =>
-        new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS', {
+      headerTemplate: pageTemplate({
+        default: new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS', {
           fontName: StandardFonts.TimesItalic,
           fontSize: 8,
           color: 'slate-400',
           alignment: 'center',
         }),
+      }),
       // Viewer page counter starts at 42; footer text matches.
       pageLabel: new PageLabel({ startAt: 42 }),
       footerTemplate: (pageNumber: number) =>

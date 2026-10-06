@@ -37,6 +37,7 @@ import {
   Thickness,
   Border,
   BorderColors,
+  pageTemplate,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -141,8 +142,12 @@ export function generate(): Document {
   // Continuous pagination across the whole bundle, including the cover. A
   // bundle whose page numbers restart per section is a bundle nobody can
   // navigate from a transcript.
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    band(`${BUNDLE.matter} · ${BUNDLE.reference}`, `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+  settings.footerTemplate = pageTemplate({
+    default: band(
+      `${BUNDLE.matter} · ${BUNDLE.reference}`,
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `${BUNDLE.reference} — index and separators — ${BUNDLE.matter}`;

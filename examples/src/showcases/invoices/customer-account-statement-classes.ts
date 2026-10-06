@@ -35,6 +35,8 @@ import {
   Thickness,
   Border,
   BorderColors,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -278,15 +280,16 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1
-      ? undefined
-      : band(`Statement ${ACCOUNT.number} — ${ACCOUNT.customer}`, `As at ${gb(ACCOUNT.statementDate)}`);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    band(
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: band(`Statement ${ACCOUNT.number} — ${ACCOUNT.customer}`, `As at ${gb(ACCOUNT.statementDate)}`),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: band(
       `${ACCOUNT.supplier} · payment terms ${ACCOUNT.terms}`,
-      `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `Account statement ${ACCOUNT.number} — ${gb(ACCOUNT.periodFrom)} to ${gb(ACCOUNT.periodTo)}`;

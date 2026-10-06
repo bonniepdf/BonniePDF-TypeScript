@@ -35,6 +35,7 @@ import {
   ColorPalette,
   type ContainerOptions,
   type TextBlockOptions,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -484,11 +485,12 @@ export function createQuotationSettings(): DocumentSettings {
     language: 'en-GB',
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
   });
-  settings.footerTemplate = (pageNumber: number) =>
-    new TextBlock(
-      `${sampleQuotation.reference.quoteNumber} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+  settings.footerTemplate = pageTemplate({
+    default: new TextBlock(
+      `${sampleQuotation.reference.quoteNumber} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
       { fontName: HELVETICA, fontSize: 7, color: FAINT, alignment: 'center' }
-    );
+    ),
+  });
   return settings;
 }
 

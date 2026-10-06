@@ -36,6 +36,8 @@ import {
   Thickness,
   Border,
   BorderColors,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -341,13 +343,16 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : runningBand(`${REPORT.type} — ${REPORT.reference}`, REPORT.property);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    runningBand(
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: runningBand(`${REPORT.type} — ${REPORT.reference}`, REPORT.property),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: runningBand(
       'Retain for the tenancy — the check-out is compared against this',
-      `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `${REPORT.type} inventory and schedule of condition — ${REPORT.property}`;

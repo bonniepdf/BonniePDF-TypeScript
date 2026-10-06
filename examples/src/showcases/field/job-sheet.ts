@@ -26,6 +26,8 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 import {
@@ -163,13 +165,16 @@ export function generate(): Document {
       // The running header repeats the job number, because these get printed,
       // separated, and filed a page at a time. Page one carries the full title
       // block instead, so it is suppressed there.
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1 ? undefined : runningBand(`Job sheet ${VISIT.jobNumber}`, `${VISIT.client} — ${VISIT.site}`),
-      footerTemplate: (pageNumber: number) =>
-        runningBand(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: runningBand(`Job sheet ${VISIT.jobNumber}`, `${VISIT.client} — ${VISIT.site}`),
+      }),
+      footerTemplate: pageTemplate({
+        default: runningBand(
           'Customer copy — retain for your records',
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Job sheet ${VISIT.jobNumber} — ${VISIT.asset}`,

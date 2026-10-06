@@ -7,6 +7,7 @@ import {
   TableRow,
   StandardFonts,
   VerticalStack,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const EMPLOYEES: [string, string, string][] = [
@@ -96,12 +97,13 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+      footerTemplate: pageTemplate({
+        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
           fontSize: 9,
           color: 'slate-400',
           alignment: 'right',
         }),
+      }),
     },
     metadata: {
       title: 'Employee Directory',

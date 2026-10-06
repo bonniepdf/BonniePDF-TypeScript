@@ -9,7 +9,7 @@
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample organisations, references, and
 // amounts throughout.
 
-import { Document, TextElementBase, Container, VerticalStack, Table } from '@bonniepdf/core';
+import { Document, TextElementBase, Container, VerticalStack, Table, pageTemplate, Spacer } from '@bonniepdf/core';
 
 import {
   INK,
@@ -131,13 +131,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1 ? undefined : band(`Purchase order ${ORDER.number}`, ORDER.revision),
-      footerTemplate: (pageNumber: number) =>
-        band(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: band(`Purchase order ${ORDER.number}`, ORDER.revision),
+      }),
+      footerTemplate: pageTemplate({
+        default: band(
           `Quote ${ORDER.number} on all invoices, delivery notes, and correspondence`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Purchase order ${ORDER.number}`,

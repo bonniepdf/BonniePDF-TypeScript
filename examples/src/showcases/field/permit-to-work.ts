@@ -28,6 +28,8 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 import {
@@ -185,16 +187,17 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1
-          ? undefined
-          : runningBand(`Permit to work ${PERMIT.number} — ${PERMIT.type}`, PERMIT.site, STATUS.critical),
-      footerTemplate: (pageNumber: number) =>
-        runningBand(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: runningBand(`Permit to work ${PERMIT.number} — ${PERMIT.type}`, PERMIT.site, STATUS.critical),
+      }),
+      footerTemplate: pageTemplate({
+        default: runningBand(
           'This permit is void unless all three panels are signed. Display at the work location.',
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           MUTED
         ),
+      }),
     },
     metadata: {
       title: `Permit to work ${PERMIT.number} — ${PERMIT.type}`,

@@ -16,7 +16,7 @@
 // Tagged PDF/UA-1 and archival PDF/A-2a. Every patient, clinician, identifier,
 // and clinical value is a sample. Nothing here is clinical guidance.
 
-import { Document, TextElementBase, Table, type ColorInput } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, type ColorInput, pageTemplate, Spacer } from '@bonniepdf/core';
 
 import {
   INK,
@@ -167,12 +167,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1
-          ? undefined
-          : band(`Discharge summary ${EPISODE.reference}`, `${EPISODE.patient} · ${EPISODE.patientId}`),
-      footerTemplate: (pageNumber: number) =>
-        band('Confidential patient information', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`),
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: band(`Discharge summary ${EPISODE.reference}`, `${EPISODE.patient} · ${EPISODE.patientId}`),
+      }),
+      footerTemplate: pageTemplate({
+        default: band(
+          'Confidential patient information',
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+        ),
+      }),
     },
     metadata: {
       title: `Discharge summary ${EPISODE.reference} — ${EPISODE.patient}`,

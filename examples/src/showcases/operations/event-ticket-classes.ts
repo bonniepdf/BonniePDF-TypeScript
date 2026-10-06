@@ -33,6 +33,7 @@ import {
   BorderColors,
   StandardFonts,
   HorizontalAlignment,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const BG_IMAGE = 'images/danny-howe-bn-D2bCvpik-unsplash.jpg';
@@ -88,7 +89,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   const bgData = assets.get(BG_IMAGE);
   if (!bgData) throw new Error(`Missing required asset: ${BG_IMAGE}`);
-  settings.pageBackground = (): Container => {
+  function pageBackdrop(): Container {
     const bg = new Container();
     bg.height = 300;
     const img = new Image();
@@ -99,7 +100,9 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     img.isDecorative = true;
     bg.child = img;
     return bg;
-  };
+  }
+
+  settings.pageBackground = pageTemplate({ default: pageBackdrop() });
 
   const doc = new Document(settings, metadata);
 

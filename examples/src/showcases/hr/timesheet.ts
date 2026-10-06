@@ -14,7 +14,7 @@
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample people, projects, clients, and
 // rates throughout.
 
-import { Document, TextElementBase, Table, VerticalStack } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, VerticalStack, pageTemplate } from '@bonniepdf/core';
 
 import {
   INK,
@@ -178,11 +178,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(
+      footerTemplate: pageTemplate({
+        default: band(
           `${SHEET.reference} · ${SHEET.consultant} · week ending ${gbDate(SHEET.weekEnding)}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Timesheet ${SHEET.reference} — week ending ${gbDate(SHEET.weekEnding)}`,

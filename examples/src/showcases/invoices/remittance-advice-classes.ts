@@ -26,6 +26,7 @@ import {
   Color,
   Border,
   BorderColors,
+  pageTemplate,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -153,11 +154,12 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    band(
+  settings.footerTemplate = pageTemplate({
+    default: band(
       `Remittance advice ${REMITTANCE.reference} · bank reference ${REMITTANCE.bankReference}`,
-      `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `Remittance advice ${REMITTANCE.reference}`;

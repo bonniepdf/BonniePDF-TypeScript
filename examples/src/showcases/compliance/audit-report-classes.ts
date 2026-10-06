@@ -44,6 +44,8 @@ import {
   BarChart,
   PieChart,
   PdfAConformance,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -133,12 +135,17 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
   // Running header + footer (marked as decorative, excluded from screen readers).
-  settings.headerTemplate = (pageNumber: number): IElement | undefined => {
-    if (pageNumber === 1) return undefined;
-    return bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]);
-  };
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    bandRow('CONFIDENTIAL - not for distribution', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, MUTED);
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: bandRow(
+      'CONFIDENTIAL - not for distribution',
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+      MUTED
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Data Protection & Information Security Audit - AR-2026-014';

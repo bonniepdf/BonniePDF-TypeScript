@@ -25,6 +25,8 @@ import {
   BarChart,
   PieChart,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -115,16 +117,17 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       // Running header + footer (marked as decorative, excluded from screen readers).
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1
-          ? undefined
-          : bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]),
-      footerTemplate: (pageNumber: number) =>
-        bandRow(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: bandRow('Sample Company - Audit AR-2026-014', 'CONFIDENTIAL', ColorPalette.rose[600]),
+      }),
+      footerTemplate: pageTemplate({
+        default: bandRow(
           'CONFIDENTIAL - not for distribution',
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           MUTED
         ),
+      }),
     },
     metadata: {
       title: 'Data Protection & Information Security Audit - AR-2026-014',

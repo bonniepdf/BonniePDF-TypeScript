@@ -1,4 +1,4 @@
-import { Document, Heading, TextBlock, TextElementBase, StandardFonts } from '@bonniepdf/core';
+import { Document, Heading, TextBlock, TextElementBase, StandardFonts, pageTemplate } from '@bonniepdf/core';
 
 /**
  * Page header/footer templates in an accessible, archival document
@@ -53,20 +53,22 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
-      headerTemplate: (pageNumber: number) =>
-        new TextBlock(`BonniePDF - Headers & Footers - Page ${pageNumber}`, {
+      headerTemplate: pageTemplate({
+        default: new TextBlock(`BonniePDF - Headers & Footers - Page ${TextElementBase.CurrentPageToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
           color: 'slate-500',
           alignment: 'center',
         }),
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+      }),
+      footerTemplate: pageTemplate({
+        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
           color: 'slate-400',
           alignment: 'center',
         }),
+      }),
     },
     metadata: {
       title: 'Headers and Footers Demo',

@@ -21,6 +21,7 @@ import {
   LollipopChart,
   ChartOrientation,
   PdfAConformance,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const C_VIOLET = '#7c3aed';
@@ -40,7 +41,7 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
 
-  settings.footerTemplate = (pageNumber: number) => {
+  function pageFooter() {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
     const left = new TextBlock('BonniePDF - Horizontal Lollipop Chart');
@@ -48,14 +49,16 @@ export function generate(): Document {
     left.fontSize = 10;
     left.color = ColorPalette.slate[500];
     stack.add(left);
-    const right = new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+    const right = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
     right.color = ColorPalette.slate[500];
     right.alignment = TextAlignment.Right;
     stack.add(right, 1);
     return stack;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Horizontal Lollipop Chart';

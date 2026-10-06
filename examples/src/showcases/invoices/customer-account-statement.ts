@@ -27,6 +27,8 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 import { INK, MUTED, RULE } from './_kit';
@@ -258,15 +260,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1
-          ? undefined
-          : band(`Statement ${ACCOUNT.number} — ${ACCOUNT.customer}`, `As at ${gb(ACCOUNT.statementDate)}`),
-      footerTemplate: (pageNumber: number) =>
-        band(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: band(`Statement ${ACCOUNT.number} — ${ACCOUNT.customer}`, `As at ${gb(ACCOUNT.statementDate)}`),
+      }),
+      footerTemplate: pageTemplate({
+        default: band(
           `${ACCOUNT.supplier} · payment terms ${ACCOUNT.terms}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Account statement ${ACCOUNT.number} — ${gb(ACCOUNT.periodFrom)} to ${gb(ACCOUNT.periodTo)}`,

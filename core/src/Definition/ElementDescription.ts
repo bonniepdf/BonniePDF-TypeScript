@@ -468,6 +468,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "attachment"
       ],
       "via": "options"
+    },
+    "RotationMode": {
+      "tokens": [
+        "free",
+        "constrained"
+      ],
+      "via": "options"
     }
   },
   "mixins": {
@@ -1942,6 +1949,72 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           "kind": "color"
         }
       }
+    },
+    "Rotate": {
+      "uses": [
+        "Element"
+      ],
+      "keys": {
+        "child": {
+          "kind": "element"
+        },
+        "angle": {
+          "kind": "number"
+        },
+        "mode": {
+          "kind": "enum:RotationMode"
+        },
+        "contentWidth": {
+          "kind": "length"
+        }
+      },
+      "rules": [
+        "rotation"
+      ]
+    },
+    "Flip": {
+      "uses": [
+        "Element"
+      ],
+      "keys": {
+        "child": {
+          "kind": "element"
+        },
+        "contentWidth": {
+          "kind": "length"
+        },
+        "horizontal": {
+          "kind": "boolean"
+        },
+        "vertical": {
+          "kind": "boolean"
+        }
+      },
+      "rules": [
+        "transformWidth"
+      ]
+    },
+    "Translate": {
+      "uses": [
+        "Element"
+      ],
+      "keys": {
+        "child": {
+          "kind": "element"
+        },
+        "contentWidth": {
+          "kind": "length"
+        },
+        "x": {
+          "kind": "length"
+        },
+        "y": {
+          "kind": "length"
+        }
+      },
+      "rules": [
+        "transformWidth"
+      ]
     }
   },
   "root": {

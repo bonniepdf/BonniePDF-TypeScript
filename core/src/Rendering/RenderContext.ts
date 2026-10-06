@@ -1,3 +1,4 @@
+import { type PaintTransform, mapPaintBox } from '../Drawing/PaintTransform';
 import { PdfResourceRegistry, ResolvedTextRun } from './PdfResourceRegistry';
 import type { ShadingRequest } from './Pdf/GradientShading';
 import { PdfSize } from '../Configuration/PdfSize';
@@ -44,6 +45,10 @@ export class DeferredXObjectInfo {
 // (Elements/IElement.ts) so any drift between the two is a compile error.
 /** Carries page, canvas, resource, navigation, tagging, and cursor state through layout. */
 export class RenderContext implements RenderContextContract {
+  /** @internal */
+  public atomicLayoutBounds?: { top: number; bottom: number };
+  /** @internal */
+  public elementTransform?: PaintTransform;
   /** @internal */
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];
@@ -272,12 +277,14 @@ export class RenderContext implements RenderContextContract {
    * documents.
    */
   public get contentTop(): number {
+    if (this.atomicLayoutBounds) return this.atomicLayoutBounds.top;
     if (this.chromeReservationSuspended) return this.margin;
     return Math.max(this.margin, this.chrome.header);
   }
 
   /** Bottom of the body content band: `pageHeight - max(margin, footerHeight)`. */
   public get contentBottom(): number {
+    if (this.atomicLayoutBounds) return this.atomicLayoutBounds.bottom;
     if (this.chromeReservationSuspended) return this.pageSize.height - this.margin;
     return this.pageSize.height - Math.max(this.margin, this.chrome.footer);
   }
@@ -449,6 +456,7 @@ export class RenderContext implements RenderContextContract {
   }
 
   public newPage(): void {
+    if (this.atomicLayoutBounds) throw new Error('Transformed content cannot create a page.');
     // Header and footer chrome is painted at a fixed position in the margin band, which lies outside
     // the body's content area. An element in it that checks "does this fit?" (a Container, say)
     // would see the band as overflow and break the page in the middle of painting the chrome,
@@ -615,6 +623,23 @@ export class RenderContext implements RenderContextContract {
 
   /** @internal */
   public registerHyperlink(hyperlink: RegisteredLink): void {
+    if (this.elementTransform) {
+      const y = this.pageSize.height - hyperlink.renderY - hyperlink.renderHeight;
+      const [x0, y0, x1, y1] = mapPaintBox(this.elementTransform, [
+        hyperlink.renderX,
+        y,
+        hyperlink.renderX + hyperlink.renderWidth,
+        y + hyperlink.renderHeight,
+      ]);
+      if (hyperlink.setRenderBounds) hyperlink.setRenderBounds(x0, this.pageSize.height - y1, x1 - x0, y1 - y0);
+      else
+        Object.assign(hyperlink, {
+          renderX: x0,
+          renderY: this.pageSize.height - y1,
+          renderWidth: x1 - x0,
+          renderHeight: y1 - y0,
+        });
+    }
     if (!this.pageHyperlinks.has(this.currentPageIndex)) {
       this.pageHyperlinks.set(this.currentPageIndex, []);
     }

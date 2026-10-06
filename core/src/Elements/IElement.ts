@@ -7,6 +7,10 @@ import type { RegisteredLink } from '../Rendering/RegisteredLink';
 export { RenderStatus };
 
 export interface RenderContext {
+  /** @internal */
+  atomicLayoutBounds?: { top: number; bottom: number };
+  /** @internal */
+  elementTransform?: import('../Drawing/PaintTransform').PaintTransform;
   maxY: number;
   margin: number;
   /**

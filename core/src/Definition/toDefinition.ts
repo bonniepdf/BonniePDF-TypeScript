@@ -42,6 +42,9 @@ import { debugSourceOf } from '../Rendering/DebugSource';
 import { toPageSize } from '../Normalize/toPageSize';
 import { getPlatformIO } from '../Platform/PlatformIO';
 import type { IElement } from '../Elements/IElement';
+import { Flip } from '../Elements/Layout/Flip';
+import { Translate } from '../Elements/Layout/Translate';
+import { Rotate } from '../Elements/Layout/Rotate';
 import { Container } from '../Elements/Layout/Container';
 import { VerticalStack } from '../Elements/Layout/VerticalStack';
 import { HorizontalStack } from '../Elements/Layout/HorizontalStack';
@@ -158,6 +161,9 @@ type Ctor = abstract new (...args: never[]) => unknown;
 
 /** Catalogue name for each element class, matched exactly: a subclass is custom behaviour. */
 const TYPE_BY_CLASS = new Map<Ctor, string>([
+  [Flip, 'Flip'],
+  [Translate, 'Translate'],
+  [Rotate, 'Rotate'],
   [Container, 'Container'],
   [VerticalStack, 'VerticalStack'],
   [HorizontalStack, 'HorizontalStack'],
@@ -204,6 +210,9 @@ const TYPE_BY_CLASS = new Map<Ctor, string>([
 
 /** A fresh element of each type, for its defaults (`spec 15 §3.3`: a value equal to the default is left out). */
 const BLANK: Record<string, () => unknown> = {
+  Flip: () => new Flip(),
+  Translate: () => new Translate(),
+  Rotate: () => new Rotate(),
   Container: () => new Container(),
   VerticalStack: () => new VerticalStack(),
   HorizontalStack: () => new HorizontalStack(),
@@ -648,6 +657,9 @@ class Writer {
     const self = el as unknown as Obj;
     switch (`${type}.${key}`) {
       // single child
+      case 'Flip.child':
+      case 'Translate.child':
+      case 'Rotate.child':
       case 'Container.child':
         return this.child(self.child as IElement | undefined, at);
       case 'EnsureSpace.child':

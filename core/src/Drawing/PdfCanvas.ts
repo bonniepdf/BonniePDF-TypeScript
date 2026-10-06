@@ -891,6 +891,12 @@ export class PdfCanvas implements ICanvas {
     }
   }
 
+  /** @internal Apply a page-coordinate transform to every operator in an element subtree. */
+  public transformElement(transform: PaintTransform): void {
+    const { a, b, c, d, e, f } = transform;
+    this.concatAsSingle(a, -b, -c, d, c * this.height + e, this.height * (1 - d) - f);
+  }
+
   private multiplyCtm(a2: number, b2: number, c2: number, d2: number, e2: number, f2: number): void {
     const [a1, b1, c1, d1, e1, f1] = this.ctm;
     [a2, b2, c2, d2, e2, f2] = [f32(a2), f32(b2), f32(c2), f32(d2), f32(e2), f32(f2)];

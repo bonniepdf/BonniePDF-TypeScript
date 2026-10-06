@@ -23,6 +23,7 @@ export class PageBreak extends ElementBase {
   }
 
   public renderStateful(ctx: RenderContext, _width: number): RenderStatus {
+    if (ctx.atomicLayoutBounds) throw new Error('Transformed content cannot create a page.');
     if (!this.triggered) {
       this.triggered = true;
       if (ctx.currentY > ctx.contentTop) {

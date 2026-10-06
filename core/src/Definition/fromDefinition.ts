@@ -19,6 +19,9 @@ import { BorderColors } from '../Core/BorderColors';
 import { toColor } from '../Normalize/toColor';
 import type { IElement } from '../Elements/IElement';
 import type { Page } from '../Elements/Layout/Page';
+import { Flip } from '../Elements/Layout/Flip';
+import { Translate } from '../Elements/Layout/Translate';
+import { Rotate } from '../Elements/Layout/Rotate';
 import { Container } from '../Elements/Layout/Container';
 import { VerticalStack } from '../Elements/Layout/VerticalStack';
 import { HorizontalStack } from '../Elements/Layout/HorizontalStack';
@@ -334,6 +337,12 @@ class Builder {
     const child = node.child !== undefined ? this.element(node.child as Obj) : undefined;
 
     switch (type) {
+      case 'Flip':
+        return new Flip({ ...o, child });
+      case 'Translate':
+        return new Translate({ ...o, child });
+      case 'Rotate':
+        return new Rotate({ ...o, child });
       case 'Container':
         return new Container({ ...o, child });
       case 'VerticalStack':

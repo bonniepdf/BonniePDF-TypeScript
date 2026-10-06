@@ -2,6 +2,7 @@ import {
   renderAtomicTransform,
   renderAtomicTransformStateful,
   renderTransformedChild,
+  resetTransformChild,
 } from '../../Rendering/AtomicTransform';
 import { ElementBase } from '../ElementBase';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
@@ -53,7 +54,7 @@ export class Rotate extends ElementBase implements IContentContainer, IStatefulE
   }
   /** Reset the child for a fresh atomic render. */
   public resetState(): void {
-    (this.child as Partial<IStatefulElement> | undefined)?.resetState?.();
+    resetTransformChild(this.child);
   }
   private geometry(width: number) {
     if (!Number.isFinite(this.angle)) throw new Error('Rotate angle must be finite.');

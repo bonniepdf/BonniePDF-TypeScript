@@ -25,6 +25,22 @@ function context() {
 import { Flip } from '../../src/Elements/Layout/Flip';
 import { Translate } from '../../src/Elements/Layout/Translate';
 describe('native flip and translate', () => {
+  it.each([
+    [true, false, '-1 0 0 1 220 0 cm'],
+    [false, true, '1 0 0 -1 0 560 cm'],
+    [true, true, '-1 0 0 -1 220 560 cm'],
+  ] as const)(
+    'reflects a narrow child about the allocated box, horizontal=%s vertical=%s',
+    (horizontal, vertical, matrix) => {
+      const ctx = context();
+      const child = new CanvasElement(c => c.fillRect(0, 0, 80, 20, Color.black), { drawWidth: 80, drawHeight: 20 });
+      new Flip({ horizontal, vertical, child }).renderStateful(ctx, 200);
+      expect(stream(ctx)).toContain(matrix);
+      expect(stream(ctx)).toContain('10 270 80 20 re');
+      expect(ctx.currentX).toBe(10);
+      expect(ctx.currentY).toBe(30);
+    }
+  );
   it.each([Flip, Translate])('retains dimensions and wraps before painting', Type => {
     const element = new Type({ child: new Container({ width: 80, height: 20 }), margin: 3 });
     expect(element.measureHeight(200)).toBe(26);

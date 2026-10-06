@@ -145,6 +145,8 @@ A `Document` starts with its first page ready to use. Add elements in reading or
 
 ## Capabilities
 
+Native [rotation](https://www.bonniepdf.dev/docs/typescript/rotation) supports constrained quarter turns that swap layout dimensions and free angles around the child's centre. Use `rotate({ angle, mode, contentWidth, child })`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.
+
 | Area                  | Included                                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | Layout                | Automatic page flow, stacks, weighted rows, grids, containers, layers, clipping, rounded corners, headers, footers and page backgrounds   |

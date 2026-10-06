@@ -57,6 +57,8 @@ writeFileSync('output.pdf', bytes);
 
 ## Features
 
+Native [rotation](https://www.bonniepdf.dev/docs/typescript/rotation) is available through `Rotate` and `rotate(options)`: constrained quarter turns swap layout dimensions, while free angles keep the original flow box and turn about its centre. Text remains selectable, and SVG previews, links and layout inspection follow the transform. Rotated subtrees stay on one page and reject oversized content or child page breaks; free angles need surrounding clearance.
+
 | Category       | Capabilities                                                                                                 |
 | -------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Text**       | Built-in fonts + custom TTF/OTF, bold, italic, underline, strikethrough, letter-spacing, alignment, overflow |

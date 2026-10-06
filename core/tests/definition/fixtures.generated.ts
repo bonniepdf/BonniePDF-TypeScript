@@ -682,6 +682,323 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
           ]
         }
       ]
+    },
+    "rotation-geometry": {
+      "_fixture": {
+        "id": "document-definition/valid/rotation-geometry",
+        "description": "Shared four-corner bounds for cardinal and cancelling nested turns.",
+        "spec": "17"
+      },
+      "_expect": {
+        "pages": 1,
+        "roundTrip": true,
+        "rectangles": [
+          {
+            "id": "clockwise-box",
+            "x": 10,
+            "y": 10,
+            "width": 20,
+            "height": 80
+          },
+          {
+            "id": "counterclockwise-box",
+            "x": 10,
+            "y": 90,
+            "width": 20,
+            "height": 80
+          },
+          {
+            "id": "nested-box",
+            "x": 10,
+            "y": 170,
+            "width": 80,
+            "height": 20
+          }
+        ],
+        "contentStreamSha256": "9cbcbe9c369b335bfeb1ff8b706f3173ec865161e8059a28d402f327cbaf9a6e"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "margin": 10
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Rotate",
+              "angle": 90,
+              "mode": "constrained",
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "clockwise-box",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#44aa88"
+              }
+            },
+            {
+              "type": "Rotate",
+              "angle": -90,
+              "mode": "constrained",
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "counterclockwise-box",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#44aa88"
+              }
+            },
+            {
+              "type": "Rotate",
+              "angle": 30,
+              "contentWidth": 80,
+              "child": {
+                "type": "Rotate",
+                "angle": -30,
+                "contentWidth": 80,
+                "child": {
+                  "type": "Container",
+                  "id": "nested-box",
+                  "width": 80,
+                  "height": 20,
+                  "backgroundColor": "#44aa88"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "rotation": {
+      "_fixture": {
+        "id": "document-definition/valid/rotation",
+        "description": "Native rotations, quarter turns and nested free rotations.",
+        "spec": "17"
+      },
+      "_expect": {
+        "pages": 1,
+        "text": [
+          "Clockwise",
+          "Counterclockwise",
+          "Angled",
+          "Nested"
+        ],
+        "roundTrip": true
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Rotate",
+              "angle": 90,
+              "mode": "constrained",
+              "contentWidth": 100,
+              "child": {
+                "type": "TextBlock",
+                "text": "Clockwise"
+              }
+            },
+            {
+              "type": "Rotate",
+              "angle": -90,
+              "mode": "constrained",
+              "contentWidth": 100,
+              "child": {
+                "type": "TextBlock",
+                "text": "Counterclockwise"
+              }
+            },
+            {
+              "type": "Rotate",
+              "angle": 25,
+              "contentWidth": 100,
+              "margin": 10,
+              "child": {
+                "type": "TextBlock",
+                "text": "Angled"
+              }
+            },
+            {
+              "type": "Rotate",
+              "angle": 30,
+              "contentWidth": 100,
+              "child": {
+                "type": "Rotate",
+                "angle": -30,
+                "contentWidth": 100,
+                "child": {
+                  "type": "TextBlock",
+                  "text": "Nested"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "transforms": {
+      "_fixture": {
+        "id": "document-definition/valid/transforms",
+        "description": "Native mirror and translate with composed cardinal rotation.",
+        "spec": "18"
+      },
+      "_expect": {
+        "contentStreamSha256": "b5323607e876e52e29201a88a218b007e2da7167796be22ca1aee6c09a5216d0",
+        "pages": 1,
+        "roundTrip": true,
+        "text": [
+          "Mirrored text",
+          "Moved text"
+        ],
+        "rectangles": [
+          {
+            "id": "horizontal",
+            "x": 10,
+            "y": 10,
+            "width": 80,
+            "height": 20
+          },
+          {
+            "id": "vertical",
+            "x": 10,
+            "y": 30,
+            "width": 80,
+            "height": 20
+          },
+          {
+            "id": "both",
+            "x": 10,
+            "y": 50,
+            "width": 80,
+            "height": 20
+          },
+          {
+            "id": "shift",
+            "x": 15,
+            "y": 63,
+            "width": 80,
+            "height": 20
+          },
+          {
+            "id": "nested",
+            "x": 15,
+            "y": 83,
+            "width": 80,
+            "height": 20
+          }
+        ]
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "margin": 10
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Flip",
+              "horizontal": true,
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "horizontal",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#4499bb"
+              }
+            },
+            {
+              "type": "Flip",
+              "vertical": true,
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "vertical",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#4499bb"
+              }
+            },
+            {
+              "type": "Flip",
+              "horizontal": true,
+              "vertical": true,
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "both",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#4499bb"
+              }
+            },
+            {
+              "type": "Translate",
+              "x": "5pt",
+              "y": -7,
+              "contentWidth": 80,
+              "child": {
+                "type": "Container",
+                "id": "shift",
+                "width": 80,
+                "height": 20,
+                "backgroundColor": "#4499bb"
+              }
+            },
+            {
+              "type": "Translate",
+              "x": 5,
+              "y": -7,
+              "contentWidth": 80,
+              "child": {
+                "type": "Flip",
+                "horizontal": true,
+                "contentWidth": 80,
+                "child": {
+                  "type": "Rotate",
+                  "angle": 90,
+                  "mode": "constrained",
+                  "contentWidth": 20,
+                  "child": {
+                    "type": "Container",
+                    "id": "nested",
+                    "width": 20,
+                    "height": 80,
+                    "backgroundColor": "#4499bb"
+                  }
+                }
+              }
+            },
+            {
+              "type": "Flip",
+              "horizontal": true,
+              "contentWidth": 100,
+              "child": {
+                "type": "TextBlock",
+                "text": "Mirrored text"
+              }
+            },
+            {
+              "type": "Translate",
+              "x": {
+                "value": -1,
+                "unit": "cm"
+              },
+              "y": "2mm",
+              "child": {
+                "type": "TextBlock",
+                "text": "Moved text"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   "invalid": {
@@ -941,6 +1258,59 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "rotation": {
+      "_fixture": {
+        "id": "document-definition/invalid/rotation",
+        "description": "Constrained angles must be quarter turns; content width must be positive.",
+        "spec": "17"
+      },
+      "_expectErrors": [
+        {
+          "path": "/pages/0/content/0/angle",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/1/contentWidth",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/2/contentWidth",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/3/contentWidth",
+          "code": "invalid-value"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Rotate",
+              "mode": "constrained",
+              "angle": 45
+            },
+            {
+              "type": "Rotate",
+              "contentWidth": 0
+            },
+            {
+              "type": "Rotate",
+              "contentWidth": "-1mm"
+            },
+            {
+              "type": "Rotate",
+              "contentWidth": {
+                "value": 0,
+                "unit": "cm"
+              }
+            }
+          ]
+        }
+      ]
+    },
     "secret-in-definition": {
       "_fixture": {
         "id": "document-definition/invalid/secret-in-definition",
@@ -1060,6 +1430,55 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
               "headingIdentifiers": [
                 "absent"
               ]
+            }
+          ]
+        }
+      ]
+    },
+    "transforms": {
+      "_fixture": {
+        "id": "document-definition/invalid/transforms",
+        "description": "Reject invalid axes, offsets and nonpositive content widths.",
+        "spec": "18"
+      },
+      "_expectErrors": [
+        {
+          "path": "/pages/0/content/0/horizontal",
+          "code": "invalid-type"
+        },
+        {
+          "path": "/pages/0/content/1/contentWidth",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/2/x",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/3/contentWidth",
+          "code": "invalid-value"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Flip",
+              "horizontal": "yes"
+            },
+            {
+              "type": "Flip",
+              "contentWidth": "-1mm"
+            },
+            {
+              "type": "Translate",
+              "x": "nonsense"
+            },
+            {
+              "type": "Translate",
+              "contentWidth": 0
             }
           ]
         }

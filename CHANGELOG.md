@@ -9,6 +9,10 @@ change to `core/`; on release, rename it to the version being tagged.
 
 ## Unreleased
 
+- Added `Flip`/`flip()` and `Translate`/`translate()` native wrappers with signed offsets, unchanged flow boxes, composed geometry and JSON definitions.
+
+- Added native element rotation with free angles and constrained quarter turns, including document definitions, transformed previews and hyperlink bounds.
+
 ### Changed
 
 - **`loadFontFromUrl` resolves to nothing.** It returned the parsed font, a type that is not part of the public API. It still fetches, parses and registers the font, including its width metrics.

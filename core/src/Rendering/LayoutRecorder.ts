@@ -306,7 +306,9 @@ export interface LayoutSnapshot {
 }
 
 /** Internal mutable frame backing an open {@link LayoutNode}. */
+import { type PaintTransform, mapPaintBox } from '../Drawing/PaintTransform';
 interface OpenFrame {
+  transform?: PaintTransform;
   node: LayoutNode;
   /** Left edge and width of the node's band, reused when a rect resumes on a new page. */
   x: number;
@@ -337,6 +339,8 @@ interface OpenFrame {
  * chrome (watermarks, header/footer) so only body content forms the tree.
  */
 export class LayoutRecorder {
+  /** @internal */
+  public elementTransform?: PaintTransform;
   public capturing = true;
 
   private readonly root: LayoutNode = { id: 'n0', type: 'Document', rects: [], children: [] };
@@ -388,7 +392,7 @@ export class LayoutRecorder {
     const parent = this.stack[this.stack.length - 1];
     parent.node.children.push(node);
 
-    const frame: OpenFrame = { node, x, width, page, startY: y };
+    const frame: OpenFrame = { node, x, width, page, startY: y, transform: this.elementTransform };
     this.stack.push(frame);
     this.open.set(element, frame);
   }
@@ -427,6 +431,17 @@ export class LayoutRecorder {
     if (idx >= 0) this.stack.splice(idx);
   }
 
+  /** @internal Discard an interrupted subtree and all of its open frames. */
+  public abortNode(element: object): void {
+    const frame = this.open.get(element);
+    if (!frame) return;
+    const index = this.stack.indexOf(frame);
+    if (index >= 0) {
+      const removed = new Set(this.stack.splice(index));
+      for (const [key, value] of this.open) if (removed.has(value)) this.open.delete(key);
+    }
+  }
+
   /** Splits every open node's rect across a page boundary. */
   public pageBreak(outgoingBottomY: number, newPage: number, newTopY: number): void {
     if (!this.capturing) return;
@@ -443,7 +458,10 @@ export class LayoutRecorder {
   private pushRect(frame: OpenFrame, endY: number): void {
     const height = endY - frame.startY;
     if (height <= 0) return; // an element that drew nothing on this page gets no rect here
-    frame.node.rects.push({ page: frame.page, x: frame.x, y: frame.startY, width: frame.width, height });
+    const [x0, y0, x1, y1] = frame.transform
+      ? mapPaintBox(frame.transform, [frame.x, frame.startY, frame.x + frame.width, endY])
+      : [frame.x, frame.startY, frame.x + frame.width, endY];
+    frame.node.rects.push({ page: frame.page, x: x0, y: y0, width: x1 - x0, height: y1 - y0 });
   }
 
   /** Produces the immutable snapshot. Safe to call once rendering has finished. */

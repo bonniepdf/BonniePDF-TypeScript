@@ -13,6 +13,8 @@ import { generate as headersFooters } from './recipes/layout/headers-footers';
 import { generate as headersFootersClasses } from './recipes/layout/headers-footers-classes';
 import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
 import { generate as horizontalStacksClasses } from './recipes/layout/horizontal-stacks-classes';
+import { generate as multiColumnLayouts } from './recipes/layout/multi-column-layouts';
+import { generate as multiColumnLayoutsClasses } from './recipes/layout/multi-column-layouts-classes';
 import { generate as textBlockOverflow } from './conformance/text-block-overflow';
 import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
 import { generate as verticalStackOverflowClasses } from './recipes/layout/vertical-stack-overflow-classes';
@@ -1205,6 +1207,34 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'horizontal-stacks',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'multi-column-layouts',
+    name: 'Multi-Column Layouts',
+    category: 'Layout',
+    description:
+      'Newspaper-style columns built from stacks: a three-column article with images, two text columns sharing a divider, and balanced versus ragged column heights.',
+    filename: 'multi-column-layouts.pdf',
+    generate: multiColumnLayouts,
+    thumbnails: false,
+    dotnetClass: 'MultiColumnLayoutsExample',
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'multi-column-layouts-classes',
+    name: 'Multi-Column Layouts (Class API)',
+    category: 'Layout',
+    description:
+      'The same multi-column tour as Multi-Column Layouts, built with the class API: construct each element and assign properties. The output is identical.',
+    filename: 'multi-column-layouts-classes.pdf',
+    generate: multiColumnLayoutsClasses,
+    thumbnails: false,
+    dotnetClass: 'MultiColumnLayoutsExample',
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'multi-column-layouts',
     variantLabel: 'Class API',
   },
   {

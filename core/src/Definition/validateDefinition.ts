@@ -771,7 +771,27 @@ class Validator {
       if (typeof v === 'string') (defKind === 'anchor' ? this.anchors : this.tocIdentifiers).add(v);
     }
     for (const rule of spec.rules ?? []) {
-      if (rule === 'singleSeries') this.singleSeries(body, path, id);
+      if (rule === 'rotation' || rule === 'transformWidth') {
+        if (
+          body.mode === 'constrained' &&
+          typeof body.angle === 'number' &&
+          Number.isFinite(body.angle) &&
+          body.angle % 90 !== 0
+        )
+          this.error(`${path}/angle`, 'invalid-value', 'Constrained rotation requires a multiple of 90 degrees.', {
+            id,
+          });
+        const width =
+          typeof body.contentWidth === 'number'
+            ? body.contentWidth
+            : typeof body.contentWidth === 'string' && LENGTH_TOKEN.test(body.contentWidth)
+              ? Number.parseFloat(body.contentWidth)
+              : isObject(body.contentWidth) && typeof body.contentWidth.value === 'number'
+                ? body.contentWidth.value
+                : undefined;
+        if (width !== undefined && (!Number.isFinite(width) || width <= 0))
+          this.error(`${path}/contentWidth`, 'invalid-value', 'Transform contentWidth must be positive.', { id });
+      } else if (rule === 'singleSeries') this.singleSeries(body, path, id);
       else if (rule === 'chartDuplicates') this.chartDuplicates(body, path, id);
     }
     if (type === 'Table' || type === 'Grid') this.tableWidth(body, path, id);

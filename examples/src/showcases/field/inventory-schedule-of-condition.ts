@@ -27,6 +27,8 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 import {
@@ -334,13 +336,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1 ? undefined : runningBand(`${REPORT.type} — ${REPORT.reference}`, REPORT.property),
-      footerTemplate: (pageNumber: number) =>
-        runningBand(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: runningBand(`${REPORT.type} — ${REPORT.reference}`, REPORT.property),
+      }),
+      footerTemplate: pageTemplate({
+        default: runningBand(
           'Retain for the tenancy — the check-out is compared against this',
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `${REPORT.type} inventory and schedule of condition — ${REPORT.property}`,

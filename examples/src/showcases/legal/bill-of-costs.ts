@@ -15,7 +15,7 @@
 // and figures throughout. Nothing here is legal advice, a costs template, or a
 // statement of any court's requirements.
 
-import { Document, TextElementBase, Table, VerticalStack } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, VerticalStack, pageTemplate, Spacer } from '@bonniepdf/core';
 
 import {
   INK,
@@ -328,13 +328,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1 ? undefined : band(`${MATTER.matter} · ${MATTER.reference}`, MATTER.caseNumber),
-      footerTemplate: (pageNumber: number) =>
-        band(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: band(`${MATTER.matter} · ${MATTER.reference}`, MATTER.caseNumber),
+      }),
+      footerTemplate: pageTemplate({
+        default: band(
           `Bill of costs served ${gbDate(MATTER.served)} by ${MATTER.firm}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Bill of costs ${MATTER.reference} — ${MATTER.matter}`,

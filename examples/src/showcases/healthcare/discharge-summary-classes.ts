@@ -23,6 +23,8 @@ import {
   Color,
   Border,
   BorderColors,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -172,12 +174,16 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1
-      ? undefined
-      : band(`Discharge summary ${EPISODE.reference}`, `${EPISODE.patient} · ${EPISODE.patientId}`);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    band('Confidential patient information', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: band(`Discharge summary ${EPISODE.reference}`, `${EPISODE.patient} · ${EPISODE.patientId}`),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: band(
+      'Confidential patient information',
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `Discharge summary ${EPISODE.reference} — ${EPISODE.patient}`;

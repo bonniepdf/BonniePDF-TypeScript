@@ -6,6 +6,7 @@ import {
   ChartData,
   LineChart,
   StandardFonts,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -17,6 +18,27 @@ const C_VIOLET = '#7c3aed';
  * part of the `yAxis` / `xAxis` literals.
  */
 export function generate(): Document {
+  function pageFooter() {
+    const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+    stack.add(
+      new TextBlock('BonniePDF - Line Chart', {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        color: 'slate-500',
+      })
+    );
+    stack.add(
+      new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        color: 'slate-500',
+        alignment: 'right',
+      }),
+      1
+    );
+    return stack;
+  }
+
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -25,26 +47,7 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
-      footerTemplate: (pageNumber: number) => {
-        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
-        stack.add(
-          new TextBlock('BonniePDF - Line Chart', {
-            fontName: StandardFonts.Helvetica,
-            fontSize: 10,
-            color: 'slate-500',
-          })
-        );
-        stack.add(
-          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
-            fontName: StandardFonts.Helvetica,
-            fontSize: 10,
-            color: 'slate-500',
-            alignment: 'right',
-          }),
-          1
-        );
-        return stack;
-      },
+      footerTemplate: pageTemplate({ default: pageFooter() }),
     },
     metadata: {
       title: 'Line Chart',

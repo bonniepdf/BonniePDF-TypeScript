@@ -29,6 +29,7 @@ import {
   PdfAConformance,
   VerticalStack,
   PageBreak,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Body text generator ────────────────────────────────────────────────────
@@ -112,9 +113,7 @@ export function generate(): Document {
   settings.margin = 72;
   settings.displayDocTitle = true;
 
-  settings.headerTemplate = (pageNum: number) => {
-    if (pageNum <= 1) return undefined;
-
+  function pageHeader() {
     const stack = new HorizontalStack();
     stack.widthDistribution = WidthDistribution.Weighted;
     stack.spacing = 0;
@@ -134,7 +133,9 @@ export function generate(): Document {
     stack.add(right, 1);
 
     return stack;
-  };
+  }
+
+  settings.headerTemplate = pageTemplate({ firstPage: new Spacer({ height: 0 }), default: pageHeader() });
 
   settings.footerTemplate = (pageNum: number) => {
     if (pageNum <= 1) return undefined;

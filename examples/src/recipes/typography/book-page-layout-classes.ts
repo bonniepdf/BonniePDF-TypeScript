@@ -16,6 +16,7 @@ import {
   StandardFonts,
   PdfAConformance,
   PageLabel,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 /**
@@ -38,14 +39,16 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Times-Roman').withSize(11).withColor(ColorPalette.slate[800]);
   settings.margin = 60;
-  settings.headerTemplate = (): TextBlock => {
+  function pageHeader(): TextBlock {
     const h = new TextBlock('THE ARCHITECTURE OF CONSCIOUSNESS');
     h.fontName = StandardFonts.TimesItalic;
     h.fontSize = 8;
     h.color = ColorPalette.slate[400];
     h.alignment = TextAlignment.Center;
     return h;
-  };
+  }
+
+  settings.headerTemplate = pageTemplate({ default: pageHeader() });
   // Viewer page counter starts at 42; footer text matches.
   const pageLabel = new PageLabel();
   pageLabel.startAt = 42;

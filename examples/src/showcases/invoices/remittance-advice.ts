@@ -16,7 +16,7 @@
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample organisations, references, and
 // amounts throughout.
 
-import { Document, TextElementBase, Table, type ColorInput } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, type ColorInput, pageTemplate } from '@bonniepdf/core';
 
 import {
   INK,
@@ -143,11 +143,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(
+      footerTemplate: pageTemplate({
+        default: band(
           `Remittance advice ${REMITTANCE.reference} · bank reference ${REMITTANCE.bankReference}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Remittance advice ${REMITTANCE.reference}`,

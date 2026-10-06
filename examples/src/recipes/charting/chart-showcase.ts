@@ -12,6 +12,7 @@ import {
   GroupedBarChart,
   PieChart,
   StandardFonts,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Color palette ────────────────────────────────────────────────────────────
@@ -60,6 +61,27 @@ function pageHeader(doc: Document, title: string, subtitle: string): void {
 export function generate(): Document {
   const year = new Date().getFullYear();
 
+  function pageFooter() {
+    const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+    stack.add(
+      new TextBlock('BonniePDF Charting Examples', {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        color: 'slate-500',
+      })
+    );
+    stack.add(
+      new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 10,
+        color: 'slate-500',
+        alignment: 'right',
+      }),
+      1
+    );
+    return stack;
+  }
+
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -68,26 +90,7 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
-      footerTemplate: (pageNumber: number) => {
-        const stack = new HorizontalStack({ widthDistribution: 'weighted' });
-        stack.add(
-          new TextBlock('BonniePDF Charting Examples', {
-            fontName: StandardFonts.Helvetica,
-            fontSize: 10,
-            color: 'slate-500',
-          })
-        );
-        stack.add(
-          new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
-            fontName: StandardFonts.Helvetica,
-            fontSize: 10,
-            color: 'slate-500',
-            alignment: 'right',
-          }),
-          1
-        );
-        return stack;
-      },
+      footerTemplate: pageTemplate({ default: pageFooter() }),
     },
     metadata: {
       title: 'Charting Examples',

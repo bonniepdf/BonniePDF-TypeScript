@@ -30,6 +30,7 @@ import {
   StandardFonts,
   ColorPalette,
   VerticalStack,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 import {
@@ -114,11 +115,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(
+      footerTemplate: pageTemplate({
+        default: band(
           `Generated server-side for order ${REQUEST.orderId}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Receipt ${REQUEST.orderId}`,

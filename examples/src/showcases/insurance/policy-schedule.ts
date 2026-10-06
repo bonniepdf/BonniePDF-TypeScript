@@ -27,6 +27,7 @@ import {
   ColorPalette,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Brand tokens ──────────────────────────────────────────────────────────────
@@ -231,16 +232,18 @@ export function buildDocument(data: PolicyScheduleData): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `${data.insurer.name} · Policy ${data.policy.number} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      headerTemplate: pageTemplate({
+        default: new TextBlock(
+          `${data.insurer.name} · Policy ${data.policy.number} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Left }
         ),
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `${data.policy.product} · Renewal ${data.policy.renewal} · Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      }),
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `${data.policy.product} · Renewal ${data.policy.renewal} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Center }
         ),
+      }),
     },
     metadata: {
       title: `Policy Schedule — ${data.policy.product} — ${data.policy.number}`,

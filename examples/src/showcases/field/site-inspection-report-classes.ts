@@ -38,6 +38,8 @@ import {
   Thickness,
   Border,
   BorderColors,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -265,13 +267,16 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : runningBand(INSPECTION.reference, INSPECTION.project);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    runningBand(
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: runningBand(INSPECTION.reference, INSPECTION.project),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: runningBand(
       `Issued ${shortDate(INSPECTION.issued)} · re-inspection ${shortDate(INSPECTION.reinspection)}`,
-      `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
-    );
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `Site inspection report ${INSPECTION.reference} — ${INSPECTION.project}`;

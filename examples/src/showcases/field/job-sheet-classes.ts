@@ -34,6 +34,8 @@ import {
   Thickness,
   Border,
   BorderColors,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -169,10 +171,16 @@ export function generate(): Document {
   // The running header repeats the job number, because these get printed,
   // separated, and filed a page at a time. Page one carries the full title
   // block instead, so it is suppressed there.
-  settings.headerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : runningBand(`Job sheet ${VISIT.jobNumber}`, `${VISIT.client} — ${VISIT.site}`);
-  settings.footerTemplate = (pageNumber: number): IElement =>
-    runningBand('Customer copy — retain for your records', `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`);
+  settings.headerTemplate = pageTemplate({
+    firstPage: new Spacer({ height: 0 }),
+    default: runningBand(`Job sheet ${VISIT.jobNumber}`, `${VISIT.client} — ${VISIT.site}`),
+  });
+  settings.footerTemplate = pageTemplate({
+    default: runningBand(
+      'Customer copy — retain for your records',
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    ),
+  });
 
   const metadata = new DocumentMetadata();
   metadata.title = `Job sheet ${VISIT.jobNumber} — ${VISIT.asset}`;

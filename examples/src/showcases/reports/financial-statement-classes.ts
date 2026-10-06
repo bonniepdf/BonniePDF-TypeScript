@@ -36,6 +36,7 @@ import {
   StandardFonts,
   WidthDistribution,
   PdfAConformance,
+  pageTemplate,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -103,15 +104,17 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
+  function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = MUTED;
     return f;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Financial Statements - Sample Company Ltd';

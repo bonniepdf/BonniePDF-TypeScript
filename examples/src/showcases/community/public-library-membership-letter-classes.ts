@@ -28,6 +28,8 @@ import {
   BorderColors,
   StandardFonts,
   PdfAConformance,
+  pageTemplate,
+  TextElementBase,
 } from '@bonniepdf/core';
 
 const LIBRARY_INK = Color.fromHex('#172033');
@@ -83,13 +85,15 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(LIBRARY_INK);
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
-    const f = new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${pageNumber}`);
+  function pageFooter(): TextBlock {
+    const f = new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${TextElementBase.CurrentPageToken}`);
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = LIBRARY_SECONDARY;
     return f;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Public library membership confirmation';

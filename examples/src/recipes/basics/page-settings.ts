@@ -1,4 +1,14 @@
-import { Document, PdfSize, PageOrientation, TextBlock, VerticalStack, Line, StandardFonts } from '@bonniepdf/core';
+import {
+  Document,
+  PdfSize,
+  PageOrientation,
+  TextBlock,
+  VerticalStack,
+  Line,
+  StandardFonts,
+  pageTemplate,
+  TextElementBase,
+} from '@bonniepdf/core';
 
 // PdfSize has no AllSizes static - enumerate the standard sizes explicitly.
 const ALL_SIZES: PdfSize[] = [
@@ -39,13 +49,14 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(`Page ${pageNumber} - BonniePDF Standard Formats`, {
+      footerTemplate: pageTemplate({
+        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} - BonniePDF Standard Formats`, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
           color: 'slate-400',
           alignment: 'center',
         }),
+      }),
     },
     metadata: {
       title: 'Standard PDF Page Formats Gallery',

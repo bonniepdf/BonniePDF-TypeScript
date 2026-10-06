@@ -40,6 +40,7 @@ import {
   StandardFonts,
   WidthDistribution,
   PdfAConformance,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const CLINICAL_BLUE = Color.fromHex('#2563eb');
@@ -98,15 +99,17 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
-  settings.footerTemplate = (pageNumber: number): TextBlock => {
+  function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = MUTED;
     return f;
-  };
+  }
+
+  settings.footerTemplate = pageTemplate({ default: pageFooter() });
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Laboratory Report - specimen L26-118842';

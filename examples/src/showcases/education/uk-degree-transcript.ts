@@ -24,6 +24,7 @@ import {
   StandardFonts,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const NAVY = ColorPalette.blue[900]; // academic navy
@@ -72,11 +73,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `Sample University  ·  Transcript 20458812  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `Sample University  ·  Transcript 20458812  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
+      }),
     },
     metadata: {
       title: 'Academic Transcript - Sample Student',

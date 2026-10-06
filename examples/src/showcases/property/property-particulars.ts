@@ -28,6 +28,7 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 import {
@@ -220,8 +221,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(`${PROPERTY.agency} · ${PROPERTY.reference}`, `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`),
+      footerTemplate: pageTemplate({
+        default: band(
+          `${PROPERTY.agency} · ${PROPERTY.reference}`,
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+        ),
+      }),
     },
     metadata: {
       title: `${PROPERTY.headline} — ${PROPERTY.address}`,

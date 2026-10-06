@@ -31,6 +31,7 @@ import {
   ColorPalette,
   type ColorInput,
   type IElement,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -327,12 +328,13 @@ export function createPayslipSettings(): DocumentSettings {
     language: 'en-GB',
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 8.5, color: INK },
   });
-  settings.footerTemplate = (pageNumber: number) =>
-    cell(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+  settings.footerTemplate = pageTemplate({
+    default: cell(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
       size: 6.5,
       color: FAINT,
       align: TextAlignment.Center,
-    });
+    }),
+  });
   return settings;
 }
 

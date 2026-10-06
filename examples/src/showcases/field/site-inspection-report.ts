@@ -32,6 +32,8 @@ import {
   StandardFonts,
   ColorPalette,
   type ColorInput,
+  pageTemplate,
+  Spacer,
 } from '@bonniepdf/core';
 
 import {
@@ -261,13 +263,16 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      headerTemplate: (pageNumber: number) =>
-        pageNumber === 1 ? undefined : runningBand(INSPECTION.reference, INSPECTION.project),
-      footerTemplate: (pageNumber: number) =>
-        runningBand(
+      headerTemplate: pageTemplate({
+        firstPage: new Spacer({ height: 0 }),
+        default: runningBand(INSPECTION.reference, INSPECTION.project),
+      }),
+      footerTemplate: pageTemplate({
+        default: runningBand(
           `Issued ${shortDate(INSPECTION.issued)} · re-inspection ${shortDate(INSPECTION.reinspection)}`,
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Site inspection report ${INSPECTION.reference} — ${INSPECTION.project}`,

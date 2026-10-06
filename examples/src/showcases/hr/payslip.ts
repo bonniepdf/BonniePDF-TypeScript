@@ -26,6 +26,7 @@ import {
   type ContainerOptions,
   type TableOptions,
   type TextBlockOptions,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -284,13 +285,14 @@ export function createPayslipSettings(): DocumentSettings {
     language: 'en-GB',
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 8.5, color: INK },
   });
-  settings.footerTemplate = (pageNumber: number) =>
-    new TextBlock(`Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`, {
+  settings.footerTemplate = pageTemplate({
+    default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
       fontName: HELVETICA,
       fontSize: 6.5,
       color: FAINT,
       alignment: 'center',
-    });
+    }),
+  });
   return settings;
 }
 

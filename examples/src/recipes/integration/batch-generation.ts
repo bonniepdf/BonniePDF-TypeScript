@@ -20,7 +20,7 @@
 //
 // Tagged PDF/UA-1 and archival PDF/A-2a.
 
-import { Document, TextElementBase, Table } from '@bonniepdf/core';
+import { Document, TextElementBase, Table, pageTemplate } from '@bonniepdf/core';
 
 import {
   INK,
@@ -120,11 +120,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9.5, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        band(
+      footerTemplate: pageTemplate({
+        default: band(
           'Figures measured during the run that produced this document',
-          `Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
         ),
+      }),
     },
     metadata: {
       title: `Batch generation — ${RUN_SIZE} documents in one process`,

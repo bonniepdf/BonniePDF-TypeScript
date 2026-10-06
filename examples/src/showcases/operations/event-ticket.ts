@@ -22,6 +22,7 @@ import {
   StandardFonts,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const BG_IMAGE = 'images/danny-howe-bn-D2bCvpik-unsplash.jpg';
@@ -76,8 +77,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: BODY },
-      pageBackground: () =>
-        new Container({
+      pageBackground: pageTemplate({
+        default: new Container({
           height: 300,
           child: new Image({
             imageData: bgData,
@@ -87,6 +88,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
             isDecorative: true,
           }),
         }),
+      }),
     },
     metadata: {
       title: 'Event Ticket - Sample Sound Festival',

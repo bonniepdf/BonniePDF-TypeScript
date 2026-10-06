@@ -19,6 +19,7 @@ import {
   TextElementBase,
   UnorderedList,
   VerticalStack,
+  pageTemplate,
 } from '@bonniepdf/core';
 
 const INK = '#17324d';
@@ -41,9 +42,9 @@ export function generate(): Document {
       language: 'en-GB',
       displayDocTitle: true,
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: BODY },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
@@ -51,6 +52,7 @@ export function generate(): Document {
             alignment: 'center',
           }
         ),
+      }),
     },
     metadata: {
       title: 'Fictional Outpatient Appointment',

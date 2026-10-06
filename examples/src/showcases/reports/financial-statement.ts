@@ -22,6 +22,7 @@ import {
   StandardFonts,
   type ColorInput,
   type TextAlignmentInput,
+  pageTemplate,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -91,11 +92,12 @@ export function generate(): Document {
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
-      footerTemplate: (pageNumber: number) =>
-        new TextBlock(
-          `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${pageNumber} of ${TextElementBase.TotalPagesToken}`,
+      footerTemplate: pageTemplate({
+        default: new TextBlock(
+          `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
+      }),
     },
     metadata: {
       title: 'Financial Statements - Sample Company Ltd',

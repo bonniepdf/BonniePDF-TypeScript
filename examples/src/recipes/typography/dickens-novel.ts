@@ -1,20 +1,5 @@
-/**
- * Dickens: A Tale of Two Cities.
- * A tagged book layout with a visual table of contents, decorative running headers, footer page numbers, and justified text across three books and fourteen chapters.
- * Build with generate(); export with await doc.generateBytesAsync().
- */
-/**
- * Dickens Novel - multi-page book layout demo, authored through the
- * options-object front door.
- *
- * Demonstrates: running headers, footer page numbers, VisualToc, Heading
- * elements, justified body text, and automatic pagination across hundreds
- * of paragraphs. Body text is generated programmatically so this example
- * is self-contained without requiring a local file.
- *
- * To render from the real Project Gutenberg source, replace the body loop
- * with a parser that reads pg98.txt (A Tale of Two Cities, eBook #98).
- */
+/** A Tale of Two Cities: the complete public-domain Gutenberg text, with chapter navigation.
+ * Supply assets.get('novels/pg98.txt'); export with await doc.generateBytesAsync(). */
 import {
   Document,
   Heading,
@@ -24,105 +9,32 @@ import {
   VerticalStack,
   PageBreak,
   StandardFonts,
+  TextElementBase,
   pageTemplate,
-  Spacer,
 } from '@bonniepdf/core';
 
-// ── Body text generator ────────────────────────────────────────────────────
-
-const SENTENCES = [
-  'The morning light fell across the worn oak desk in long golden bars, illuminating dust motes that drifted without purpose through the still air of the library.',
-  'She had not spoken for several minutes, and the silence between them had grown into something almost tangible, a presence in the room as real as either of them.',
-  'He turned the letter over in his hands, reading it for the fourth time, each reading revealing some new shade of meaning he had previously overlooked.',
-  'Beyond the high windows the city carried on its indifferent business, the rattle of carriages on cobblestones a distant counterpoint to the quiet within.',
-  'Memory, he had long believed, was not a faithful record but a creative act - each recollection subtly rewritten by the act of remembering itself.',
-  'The candle had burned low by the time she reached the final page, and she sat for a long moment in the gathering dark before moving to light another.',
-  'There are decisions that appear small at the moment of making and reveal their true weight only years later, when their consequences have fully unfolded.',
-  'He said nothing, but his expression carried everything - the weariness of a man who has explained himself too many times to people determined not to understand.',
-  'The fog had come in off the river during the night and lay thick across the lower streets, muffling the sounds of the waking city in grey silence.',
-  'What we call courage, she thought, is often only the inability to clearly imagine the consequences of what we are about to do.',
-];
-
-const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
-  {
-    tocId: 'Book the First - Recalled to Life',
-    title: 'Book the First - Recalled to Life',
-    chapters: [
-      { tocId: 'The Period', number: 'CHAPTER I.', title: 'The Period', paragraphCount: 18 },
-      { tocId: 'The Mail', number: 'CHAPTER II.', title: 'The Mail', paragraphCount: 20 },
-      { tocId: 'The Night Shadows', number: 'CHAPTER III.', title: 'The Night Shadows', paragraphCount: 16 },
-      { tocId: 'The Preparation', number: 'CHAPTER IV.', title: 'The Preparation', paragraphCount: 19 },
-      { tocId: 'The Wine-shop', number: 'CHAPTER V.', title: 'The Wine-shop', paragraphCount: 22 },
-    ],
-  },
-  {
-    tocId: 'Book the Second - The Golden Thread',
-    title: 'Book the Second - The Golden Thread',
-    chapters: [
-      { tocId: 'Five Years Later', number: 'CHAPTER I.', title: 'Five Years Later', paragraphCount: 20 },
-      { tocId: 'A Sight', number: 'CHAPTER II.', title: 'A Sight', paragraphCount: 17 },
-      { tocId: 'A Disappointment', number: 'CHAPTER III.', title: 'A Disappointment', paragraphCount: 21 },
-      { tocId: 'Congratulatory', number: 'CHAPTER IV.', title: 'Congratulatory', paragraphCount: 15 },
-    ],
-  },
-  {
-    tocId: 'Book the Third - The Track of a Storm',
-    title: 'Book the Third - The Track of a Storm',
-    chapters: [
-      { tocId: 'In Secret', number: 'CHAPTER I.', title: 'In Secret', paragraphCount: 19 },
-      { tocId: 'The Grindstone', number: 'CHAPTER II.', title: 'The Grindstone', paragraphCount: 18 },
-      { tocId: 'The Shadow', number: 'CHAPTER III.', title: 'The Shadow', paragraphCount: 20 },
-      { tocId: 'Calm in Storm', number: 'CHAPTER IV.', title: 'Calm in Storm', paragraphCount: 16 },
-      { tocId: 'The Footsteps Die', number: 'CHAPTER V.', title: 'The Footsteps Die Out', paragraphCount: 22 },
-    ],
-  },
-];
-
-// ── Entry point ────────────────────────────────────────────────────────────
-
-export function generate(): Document {
-  function pageHeader() {
-    const stack = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
-    stack.add(
-      new TextBlock('A Tale of Two Cities', {
-        fontName: StandardFonts.TimesItalic,
-        fontSize: 9,
-        color: 'slate-500',
-        alignment: 'left',
-      }),
-      1
-    );
-    stack.add(
-      new TextBlock('Charles Dickens', {
-        fontName: StandardFonts.TimesItalic,
-        fontSize: 9,
-        color: 'slate-500',
-        alignment: 'right',
-      }),
-      1
-    );
-    return stack;
-  }
-
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+  const bytes = assets?.get('novels/pg98.txt');
+  if (!bytes) throw new Error('Supply novels/pg98.txt in the asset dictionary.');
+  const sections = parseNovel(new TextDecoder().decode(bytes));
+  const header = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
+  header.add(text('A Tale of Two Cities', StandardFonts.TimesItalic, 9, 'slate-500', 'left'), 1);
+  header.add(text('Charles Dickens', StandardFonts.TimesItalic, 9, 'slate-500', 'right'), 1);
   const doc = new Document({
     settings: {
+      pageSize: 'a4',
+      margin: 72,
+      version: '1.7',
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
-      margin: 72,
       displayDocTitle: true,
-      headerTemplate: pageTemplate({ firstPage: new Spacer({ height: 0 }), default: pageHeader() }),
-      footerTemplate: (pageNum: number) => {
-        if (pageNum <= 1) return undefined;
-        return new TextBlock(String(pageNum), {
-          fontName: StandardFonts.TimesRoman,
-          fontSize: 9,
-          color: 'slate-500',
-          alignment: 'center',
-          margin: { top: 2 },
-        });
-      },
+      defaultTextStyle: { fontFamily: StandardFonts.TimesRoman, fontSize: 11, color: 'slate-900' },
+      headerTemplate: pageNumber => (pageNumber === 1 ? null : header),
+      footerTemplate: pageNumber =>
+        pageNumber === 1
+          ? null
+          : text(TextElementBase.CurrentPageToken, StandardFonts.TimesRoman, 9, 'slate-500', 'center', 2),
     },
     metadata: {
       title: 'A Tale of Two Cities',
@@ -130,196 +42,122 @@ export function generate(): Document {
       subject: 'Project Gutenberg eBook #98 - A public domain classic.',
     },
   });
-
-  // ── Title page ─────────────────────────────────────────────────────────
-  doc.add(
-    new TextBlock('A TALE OF TWO CITIES', {
-      fontName: StandardFonts.TimesBold,
-      fontSize: 28,
-      color: 'slate-900',
-      alignment: 'center',
-      margin: { top: 100, bottom: 12 },
-    })
-  );
-
-  doc.add(
-    new TextBlock('A Story of the French Revolution', {
-      fontName: StandardFonts.TimesItalic,
-      fontSize: 15,
-      color: 'slate-600',
-      alignment: 'center',
-      margin: { bottom: 40 },
-    })
-  );
-
-  // The ornamental rule and attribution lines below were slate-300/400 -
-  // legible as decoration at a glance, but slate-400 never clears 4.5:1 as
-  // text (2.51-2.63:1) and slate-300 falls to 1.49:1. slate-600 keeps the
-  // quiet title-page tone while meeting WCAG 2.2 AA.
-  doc.add(
-    new TextBlock('---------------', {
-      fontName: StandardFonts.TimesRoman,
-      fontSize: 13,
-      color: 'slate-600',
-      alignment: 'center',
-      margin: { bottom: 40 },
-    })
-  );
-
-  doc.add(
-    new TextBlock('Charles Dickens', {
-      fontName: StandardFonts.TimesBold,
-      fontSize: 20,
-      color: 'slate-800',
-      alignment: 'center',
-      margin: { bottom: 60 },
-    })
-  );
-
-  doc.add(
-    new TextBlock('Project Gutenberg Edition · eBook #98', {
-      fontName: StandardFonts.TimesRoman,
-      fontSize: 10,
-      color: 'slate-600',
-      alignment: 'center',
-      margin: { bottom: 4 },
-    })
-  );
-
-  doc.add(
-    new TextBlock('Public domain - free to read, copy, and share.', {
-      fontName: StandardFonts.TimesItalic,
-      fontSize: 9,
-      color: 'slate-600',
-      alignment: 'center',
-    })
-  );
+  doc.add(heading('A TALE OF TWO CITIES', 'title', 1, 28, 'slate-900', 100, 12));
+  doc.add(text('A Story of the French Revolution', StandardFonts.TimesItalic, 15, 'slate-600', 'center', 0, 40));
+  doc.add(text('---------------', StandardFonts.TimesRoman, 13, 'slate-600', 'center', 0, 40));
+  doc.add(text('Charles Dickens', StandardFonts.TimesBold, 20, 'slate-800', 'center', 0, 60));
+  doc.add(text('Project Gutenberg Edition · eBook #98', StandardFonts.TimesRoman, 10, 'slate-600', 'center', 0, 4));
+  doc.add(text('Public domain - free to read, copy, and share.', StandardFonts.TimesItalic, 9, 'slate-600', 'center'));
   doc.addPage();
-
-  // ── Table of Contents ─────────────────────────────────────────────────
-  doc.add(
-    new TextBlock('Table of Contents', {
-      fontName: StandardFonts.TimesBold,
-      fontSize: 24,
-      color: 'slate-900',
-      alignment: 'center',
-      margin: { top: 40, bottom: 40 },
-    })
-  );
-
-  const tocIds: string[] = [];
-  for (const book of BOOKS) {
-    tocIds.push(book.tocId);
-    for (const ch of book.chapters) tocIds.push(ch.tocId);
-  }
-
+  doc.add(heading('Table of Contents', 'toc', 1, 24, 'slate-900', 40, 40));
   doc.add(
     new VisualToc({
-      headingIdentifiers: tocIds,
+      headingIdentifiers: sections.filter(s => s.kind !== 'paragraph').map(s => s.text),
       fontName: StandardFonts.TimesRoman,
       fontSize: 11,
       color: 'slate-800',
       margin: { bottom: 40 },
     })
   );
-
   doc.addPage();
-
-  // ── Body ──────────────────────────────────────────────────────────────
-  let paraIndex = 0;
-  for (const [bookIndex, book] of BOOKS.entries()) {
-    // Each book opens a fresh page (the first already follows the contents page).
-    if (bookIndex > 0) doc.add(new PageBreak());
-
-    doc.add(
-      new TextBlock('---------------', {
-        fontName: StandardFonts.TimesRoman,
-        fontSize: 11,
-        color: 'slate-600',
-        alignment: 'center',
-        margin: { top: 56, bottom: 14 },
-      })
-    );
-
-    doc.add(
-      new Heading(book.title.toUpperCase(), {
-        tocIdentifier: book.tocId,
-        fontName: StandardFonts.TimesBold,
-        fontSize: 14,
-        color: 'slate-800',
-        alignment: 'center',
-        margin: { bottom: 14 },
-      })
-    );
-
-    doc.add(
-      new TextBlock('---------------', {
-        fontName: StandardFonts.TimesRoman,
-        fontSize: 11,
-        color: 'slate-600',
-        alignment: 'center',
-        margin: { bottom: 32 },
-      })
-    );
-
-    for (const ch of book.chapters) {
-      // The chapter number, title and first paragraph are one block, so a chapter never
-      // opens at the foot of a page with its text on the next.
-      const opener = new VerticalStack({ breakAllowed: false });
-      opener.add(
-        new TextBlock(ch.number, {
-          fontName: StandardFonts.TimesBold,
-          fontSize: 10,
-          color: 'slate-500',
-          alignment: 'center',
-          margin: { top: 32, bottom: 6 },
-        })
-      );
-
-      opener.add(
-        new Heading(ch.title, {
-          tocIdentifier: ch.tocId,
-          fontName: StandardFonts.TimesBold,
-          fontSize: 17,
-          color: 'slate-900',
-          alignment: 'center',
-          margin: { bottom: 18 },
-        })
-      );
-
-      for (let i = 0; i < ch.paragraphCount; i++) {
-        const sentenceCount = 4 + (paraIndex % 4);
-        const paragraphParts: string[] = [];
-        for (let j = 0; j < sentenceCount; j++) {
-          paragraphParts.push(SENTENCES[(paraIndex + j) % SENTENCES.length]);
-        }
-        paraIndex++;
-
-        const paragraph = new TextBlock(paragraphParts.join(' '), {
-          fontName: StandardFonts.TimesRoman,
-          fontSize: 11,
-          color: 'slate-900',
-          alignment: 'justify',
-          margin: { bottom: 7 },
-        });
-        if (i === 0) {
-          opener.add(paragraph);
-          doc.add(opener);
-        } else {
-          doc.add(paragraph);
-        }
-      }
+  let opener: VerticalStack | null = null;
+  let firstBook = true;
+  for (const section of sections) {
+    if (section.kind === 'book') {
+      if (!firstBook) doc.add(new PageBreak());
+      firstBook = false;
+      opener = new VerticalStack({ breakAllowed: false });
+      opener.add(text('---------------', StandardFonts.TimesRoman, 11, 'slate-600', 'center', 56, 14));
+      opener.add(heading(section.text.toUpperCase(), section.text, 1, 14, 'slate-800', 0, 14));
+      opener.add(text('---------------', StandardFonts.TimesRoman, 11, 'slate-600', 'center', 0, 32));
+    } else if (section.kind === 'chapter') {
+      opener ??= new VerticalStack({ breakAllowed: false });
+      opener.add(text(section.number!, StandardFonts.TimesBold, 10, 'slate-500', 'center', 32, 6));
+      opener.add(heading(section.title!, section.text, 2, 17, 'slate-900', 0, 18));
+    } else {
+      const paragraph = text(section.text, StandardFonts.TimesRoman, 11, 'slate-900', 'justify', 0, 7);
+      if (opener) {
+        opener.add(paragraph);
+        doc.add(opener);
+        opener = null;
+      } else doc.add(paragraph);
     }
   }
-
+  if (opener) doc.add(opener);
   return doc;
 }
 
-// Local helpers and sample types used by this document.
-
-interface Chapter {
-  tocId: string;
-  number: string;
-  title: string;
-  paragraphCount: number;
+// Local styling and text parsing helpers keep the example in one file.
+function text(
+  value: string,
+  fontName: string,
+  fontSize: number,
+  color: 'slate-500' | 'slate-600' | 'slate-800' | 'slate-900',
+  alignment: 'left' | 'right' | 'center' | 'justify',
+  top = 0,
+  bottom = 0
+): TextBlock {
+  return new TextBlock(value, { fontName, fontSize, color, alignment, margin: { top, bottom } });
+}
+function heading(
+  value: string,
+  tocIdentifier: string,
+  level: number,
+  fontSize: number,
+  color: 'slate-500' | 'slate-600' | 'slate-800' | 'slate-900',
+  top: number,
+  bottom: number
+): Heading {
+  return new Heading(value, {
+    tocIdentifier,
+    level,
+    fontName: StandardFonts.TimesBold,
+    fontSize,
+    color,
+    alignment: 'center',
+    margin: { top, bottom },
+  });
+}
+interface Section {
+  kind: 'book' | 'chapter' | 'paragraph';
+  text: string;
+  number?: string;
+  title?: string;
+}
+function parseNovel(raw: string): Section[] {
+  const lines = raw.replace(/\r\n/g, '\n').split('\n');
+  let pastHeader = false;
+  const start = lines.findIndex(line => {
+    if (line.includes('*** START OF THE PROJECT GUTENBERG')) {
+      pastHeader = true;
+      return false;
+    }
+    return pastHeader && /^Book the /i.test(line);
+  });
+  if (start < 0) throw new Error('The novel asset has no Gutenberg book body.');
+  const sections: Section[] = [];
+  let paragraph: string[] = [],
+    chapterNumber = '';
+  const flush = () => {
+    if (paragraph.length) sections.push({ kind: 'paragraph', text: paragraph.join(' ') });
+    paragraph = [];
+  };
+  for (const rawLine of lines.slice(start)) {
+    const line = rawLine.trim();
+    if (/^\*\*\* END OF THE PROJECT GUTENBERG/i.test(line)) break;
+    if (/^Book the /i.test(rawLine)) {
+      flush();
+      chapterNumber = '';
+      sections.push({ kind: 'book', text: line });
+    } else if (/^CHAPTER\s+[IVXLC]+\.$/.test(line)) {
+      flush();
+      chapterNumber = line;
+    } else if (chapterNumber && line) {
+      sections.push({ kind: 'chapter', number: chapterNumber, title: line, text: `${chapterNumber} - ${line}` });
+      chapterNumber = '';
+    } else if (!line) flush();
+    else if (!chapterNumber) paragraph.push(line);
+  }
+  flush();
+  return sections;
 }

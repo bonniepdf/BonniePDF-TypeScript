@@ -38,7 +38,7 @@ import {
 } from '@bonniepdf/core';
 
 const INK = ColorPalette.slate[900];
-const BODY = ColorPalette.slate[700];
+const BODY = ColorPalette.slate[600];
 const MUTE = ColorPalette.slate[500];
 const LINE = ColorPalette.slate[300];
 

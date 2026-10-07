@@ -80,7 +80,7 @@ function rowLabel(name: PaletteName): Container {
     height: BOX_HEIGHT,
     // Nudge the label down so it sits roughly centred against the box.
     padding: { top: 9, right: H_GAP },
-    child: new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-700' }),
+    child: new TextBlock(name, { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-600' }),
   });
 }
 

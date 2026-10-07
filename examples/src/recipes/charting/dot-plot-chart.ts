@@ -82,7 +82,7 @@ export function generate(): Document {
 
   const data = new ChartData({
     title: 'Product Sales',
-    series: [{ color: C_TEAL, dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
+    series: [{ color: C_TEAL, dataPoints: labels.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) }],
     yAxis: { prefix: '£', maxValue: 12000, stepCount: 5, legend: 'Sales' },
     xAxis: { legend: 'Product' },
   });

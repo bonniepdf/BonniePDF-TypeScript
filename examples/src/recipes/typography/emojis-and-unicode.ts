@@ -21,12 +21,7 @@
  */
 import { Document, Heading, TextBlock, RichText, TextStyle, VerticalStack, PdfVersion } from '@bonniepdf/core';
 
-const TEXT_FONT = '/fonts/NotoSans-Regular.ttf';
-const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
-const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
-const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
-
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       // PDF/A intentionally not claimed — emoji fonts include COLR/CBDT tables
@@ -36,7 +31,7 @@ export function generate(): Document {
       conformance: 'none',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
-      defaultTextStyle: { fontFamily: TEXT_FONT, fontSize: 11, color: 'slate-600' },
+      defaultTextStyle: { fontFamily: 'Noto Sans', fontSize: 11, color: 'slate-600' },
     },
     metadata: {
       title: 'Emojis & Unicode',
@@ -45,6 +40,18 @@ export function generate(): Document {
       keywords: 'pdf, pdf/ua, accessibility, emoji, unicode, fonts',
     },
   });
+
+  // Document-local faces give every symbol the same fallback coverage in any generation order.
+  function font(path: string): string {
+    const bytes = assets?.get(path);
+    if (!bytes) throw new Error(`Supply ${path} in the asset dictionary.`);
+    return doc.fonts.add(bytes).fontName;
+  }
+  const TEXT_FONT = font('fonts/NotoSans-Regular.ttf');
+  const MATH_FONT = font('fonts/NotoSansMath-Regular.ttf');
+  const SYMBOLS_FONT = font('fonts/NotoSansSymbols2-Regular.ttf');
+  const EMOJI_FONT = font('fonts/NotoEmoji-Regular.ttf');
+  doc.settings.defaultTextStyle.withFamily(TEXT_FONT);
 
   // ── Title ─────────────────────────────────────────────────────────────────────
 
@@ -160,43 +167,41 @@ export function generate(): Document {
   }
   doc.add(mixed);
 
+  /** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
+  function sectionHeading(title: string, tocId: string): Heading {
+    return new Heading(title, {
+      tocIdentifier: tocId,
+      level: 2,
+      fontName: TEXT_FONT,
+      fontSize: 13,
+      color: 'indigo-600',
+      margin: { top: 12, bottom: 4 },
+    });
+  }
+
+  function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
+    doc.add(
+      new VerticalStack({
+        breakAllowed: false,
+        children: [
+          sectionHeading(title, tocId),
+          new TextBlock(content, { fontName: font, fontSize: 12, color: 'slate-600', margin: { bottom: 4 } }),
+        ],
+      })
+    );
+  }
+
+  function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
+    doc.add(
+      new VerticalStack({
+        breakAllowed: false,
+        children: [
+          sectionHeading(title, tocId),
+          new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, color: 'slate-800', margin: { bottom: 4 } }),
+        ],
+      })
+    );
+  }
+
   return doc;
-}
-
-// Local helpers and sample types used by this document.
-
-/** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
-function sectionHeading(title: string, tocId: string): Heading {
-  return new Heading(title, {
-    tocIdentifier: tocId,
-    level: 2,
-    fontName: TEXT_FONT,
-    fontSize: 13,
-    color: 'indigo-600',
-    margin: { top: 12, bottom: 4 },
-  });
-}
-
-function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
-  doc.add(
-    new VerticalStack({
-      breakAllowed: false,
-      children: [
-        sectionHeading(title, tocId),
-        new TextBlock(content, { fontName: font, fontSize: 12, color: 'slate-600', margin: { bottom: 4 } }),
-      ],
-    })
-  );
-}
-
-function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
-  doc.add(
-    new VerticalStack({
-      breakAllowed: false,
-      children: [
-        sectionHeading(title, tocId),
-        new TextBlock(content, { fontName: EMOJI_FONT, fontSize: 20, color: 'slate-800', margin: { bottom: 4 } }),
-      ],
-    })
-  );
 }

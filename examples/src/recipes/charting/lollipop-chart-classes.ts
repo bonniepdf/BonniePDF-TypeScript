@@ -93,6 +93,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = label;
     p.value = values[i];
+    p.labelFormat = 'N0';
     return p;
   });
 

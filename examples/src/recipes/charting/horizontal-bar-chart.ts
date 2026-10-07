@@ -107,11 +107,11 @@ export function generate(): Document {
     orientation: ChartOrientation.Horizontal,
     height: 380,
     stretchToFit: true,
+    showValueLabels: true,
     barColor: C_INDIGO,
     barWidthRatio: 0.55,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
-    showValueLabels: true,
     backgroundColor: '#fafafa',
   });
   doc.add(chart);

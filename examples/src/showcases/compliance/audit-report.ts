@@ -140,11 +140,11 @@ export function generate(): Document {
     })
   );
 
-  doc.add(eyebrow('AUDIT REPORT · CONFIDENTIAL'));
+  doc.add(eyebrow('AUDIT REPORT - CONFIDENTIAL'));
   doc.add(h1('Data Protection & Information Security Audit'));
   doc.add(
     body(
-      'Sample Company — assessment against the EU General Data Protection ' +
+      'Sample Company - assessment against the EU General Data Protection ' +
         'Regulation (2016/679), the UK GDPR / Data Protection Act 2018, and ' +
         'ISO/IEC 27001:2022.',
       { color: MUTED }
@@ -154,7 +154,7 @@ export function generate(): Document {
   // Meta line.
   const metaRow = new HorizontalStack({ widthDistribution: 'weighted', margin: { top: 4, bottom: 20 } });
   metaRow.add(metaItem('Report ref', 'AR-2026-014'), 1);
-  metaRow.add(metaItem('Audit period', 'Apr–Jun 2026'), 1);
+  metaRow.add(metaItem('Audit period', 'Apr-Jun 2026'), 1);
   metaRow.add(metaItem('Issued', longDate), 1);
   metaRow.add(metaItem('Auditor', 'Sample Assurance LLP'), 1);
   doc.add(metaRow);

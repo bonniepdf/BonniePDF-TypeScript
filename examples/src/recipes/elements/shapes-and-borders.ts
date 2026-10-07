@@ -82,7 +82,7 @@ export function generate(): Document {
       child: new TextBlock('A rounded border with no background fill. The stroke follows the curved path.', {
         fontName: StandardFonts.Helvetica,
         fontSize: 12,
-        color: 'slate-700',
+        color: 'slate-600',
       }),
     })
   );
@@ -151,7 +151,7 @@ export function generate(): Document {
         cornerRadius: r,
         padding: [12, 8],
         margin: { bottom: 6 },
-        child: new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700' }),
+        child: new TextBlock(label, { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-600' }),
       })
     );
   }

@@ -16,7 +16,7 @@ export function generate(): Document {
     settings: {
       pageSize: 'a4',
       margin: 60,
-      conformance: 'pdf/a-2b',
+      conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },

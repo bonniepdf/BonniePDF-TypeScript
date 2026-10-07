@@ -38,7 +38,7 @@ import {
  */
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 60);
-  settings.conformance = PdfAConformance.PdfA2b;
+  settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);

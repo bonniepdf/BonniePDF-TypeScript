@@ -64,7 +64,9 @@ export function generate(): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
   function pageFooter(): TextBlock {
-    const b = new TextBlock(`Page ${TextElementBase.CurrentPageToken} - BonniePDF Standard Formats`);
+    const b = new TextBlock(
+      `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken} - BonniePDF Standard Formats`
+    );
     b.fontName = StandardFonts.Helvetica;
     b.fontSize = 9;
     b.color = ColorPalette.slate[400];

@@ -52,7 +52,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Simple Document Example';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Demonstrating the Document API - TypeScript / Browser';
+  metadata.subject = 'Demonstrating the Document API';
   metadata.keywords = 'pdf, document, example, accessibility, BonniePDF';
 
   const doc = new Document(settings, metadata);
@@ -67,7 +67,7 @@ export function generate(): Document {
   h1.margin = new Thickness(0, 0, 0, 12);
   doc.add(h1);
 
-  const introduction = new TextBlock('This PDF was generated entirely in the browser using @bonniepdf/core.');
+  const introduction = new TextBlock('This PDF was created using the high-level Document API.');
   introduction.margin = new Thickness(0, 0, 0, 16);
   doc.add(introduction);
 
@@ -82,7 +82,7 @@ export function generate(): Document {
 
   const features = new UnorderedList();
   features.fontSize = 11;
-  features.itemSpacing = 6;
+  features.itemSpacing = 2;
   for (const item of [
     'Simple, intuitive API',
     'Built-in metadata support',
@@ -148,7 +148,7 @@ export function generate(): Document {
   p3title.margin = new Thickness(0, 50, 0, 0);
   doc.add(p3title);
 
-  const p3sub = new TextBlock(`${squareSize.width}pt × ${squareSize.height}pt`);
+  const p3sub = new TextBlock(`${squareSize.width}pt x ${squareSize.height}pt`);
   p3sub.alignment = TextAlignment.Center;
   doc.add(p3sub);
 

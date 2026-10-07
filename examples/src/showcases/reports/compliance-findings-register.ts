@@ -403,7 +403,7 @@ function priorityActions(critical: Finding[]): Container {
   for (const finding of critical) {
     const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id), {
       fontName: StandardFonts.HelveticaBold,
-      fontSize: 10.5,
+      fontSize: 10,
       color: ColorPalette.blue[700],
     });
     const onPage = new TextBlock('page', { fontSize: 10, color: ColorPalette.slate[600] });

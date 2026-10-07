@@ -78,7 +78,7 @@ export function generate(): Document {
 
   const physics = new RichText();
   physics
-    .span('Mass–energy equivalence: E = mc', base)
+    .span('Mass-energy equivalence: E = mc', base)
     .span('2', sup)
     .span('. See the appendix.', base)
     .span('1', supBlue);

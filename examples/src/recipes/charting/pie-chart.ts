@@ -99,7 +99,12 @@ export function generate(): Document {
 
   const data = new ChartData({
     title: `Monthly Sales ${year}`,
-    series: [{ color: '#4f46e5', dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i] })) }],
+    series: [
+      {
+        color: '#4f46e5',
+        dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })),
+      },
+    ],
   });
 
   const chart = new PieChart({

@@ -91,7 +91,7 @@ export function generate(): Document {
 
   function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -227,7 +227,7 @@ export function generate(): Document {
   authName.color = INK;
   authName.margin = new Thickness(0, 2, 0, 2);
   astack.add(authName);
-  const authMeta = new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503');
+  const authMeta = new TextBlock('Reported 06 Jul 2026 11:37  -  Analyser: Sysmex XN-1000 / Roche cobas c503');
   authMeta.fontSize = 8.5;
   authMeta.color = MUTED;
   astack.add(authMeta);

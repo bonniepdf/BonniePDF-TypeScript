@@ -119,6 +119,7 @@ export function generate(): Document {
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 380;
   chart.stretchToFit = true;
+  chart.showValueLabels = true;
   chart.barColor = Color.fromHex(C_INDIGO);
   chart.barWidthRatio = 0.55;
   chart.fontFamily = StandardFonts.Helvetica;

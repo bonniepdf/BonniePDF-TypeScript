@@ -36,7 +36,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[700]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
   settings.defaultZoom = ZoomLevel.FitPage;
   settings.displayDocTitle = true;
 
@@ -62,7 +62,7 @@ export function generate(): Document {
   basicLabel.level = 2;
   basicLabel.fontName = StandardFonts.HelveticaBold;
   basicLabel.fontSize = 14;
-  basicLabel.color = ColorPalette.slate[700];
+  basicLabel.color = ColorPalette.slate[600];
   basicLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(basicLabel);
 
@@ -82,7 +82,7 @@ export function generate(): Document {
   styledLabel.level = 2;
   styledLabel.fontName = StandardFonts.HelveticaBold;
   styledLabel.fontSize = 14;
-  styledLabel.color = ColorPalette.slate[700];
+  styledLabel.color = ColorPalette.slate[600];
   styledLabel.margin = new Thickness(0, 0, 0, 8);
   doc.add(styledLabel);
 
@@ -117,7 +117,7 @@ export function generate(): Document {
   marginLabel.level = 2;
   marginLabel.fontName = StandardFonts.HelveticaBold;
   marginLabel.fontSize = 14;
-  marginLabel.color = ColorPalette.slate[700];
+  marginLabel.color = ColorPalette.slate[600];
   doc.add(marginLabel);
 
   const before = new TextBlock('Text before link.');

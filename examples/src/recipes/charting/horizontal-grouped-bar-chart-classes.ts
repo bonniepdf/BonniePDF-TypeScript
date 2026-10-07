@@ -97,6 +97,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = q;
     p.value = [42000, 58000, 71000, 95000][i];
+    p.labelFormat = 'N0';
     return p;
   });
 
@@ -107,6 +108,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = q;
     p.value = [31000, 44000, 52000, 68000][i];
+    p.labelFormat = 'N0';
     return p;
   });
 
@@ -117,6 +119,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = q;
     p.value = [24000, 37000, 41000, 53000][i];
+    p.labelFormat = 'N0';
     return p;
   });
 
@@ -133,10 +136,11 @@ export function generate(): Document {
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 380;
   chart.stretchToFit = true;
+  chart.showValueLabels = true;
   chart.barWidthRatio = 0.7;
   chart.groupGapRatio = 0.25;
   chart.fontFamily = StandardFonts.Helvetica;
-  chart.showValueLabels = false;
+  chart.showValueLabels = true;
   chart.showLegend = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 

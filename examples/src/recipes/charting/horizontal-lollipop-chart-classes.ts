@@ -123,6 +123,7 @@ export function generate(): Document {
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 400;
   chart.stretchToFit = true;
+  chart.showValueLabels = true;
   chart.lollipopColor = Color.fromHex(C_VIOLET);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;

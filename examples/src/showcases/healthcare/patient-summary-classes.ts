@@ -99,7 +99,7 @@ export function generate(): Document {
   detailsLeft.add(detailRow('Phone', '+44 7700 900482'));
 
   const detailsRight = new VerticalStack();
-  detailsRight.add(detailRow('NHS number', '943 476 5919'));
+  detailsRight.add(detailRow('Patient ID', 'SAMPLE-9434765919'));
   detailsRight.add(detailRow('Ward', 'Cardiology - 4B'));
   detailsRight.add(detailRow('Admitted', '16 Jun 2026'));
 

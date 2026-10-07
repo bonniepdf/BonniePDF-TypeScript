@@ -85,7 +85,7 @@ export function generate(): Document {
 
   function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `Sample University  ·  Transcript 20458812  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+      `Sample University  -  Transcript 20458812  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -113,7 +113,7 @@ export function generate(): Document {
   crest.fontSize = 16;
   crest.color = NAVY;
   uni.add(crest);
-  const estd = new TextBlock('Founded 1887  ·  Registrar’s Office');
+  const estd = new TextBlock("Founded 1887 - Registrar's Office");
   estd.fontSize = 9;
   estd.color = MUTED;
   estd.margin = new Thickness(0, 2, 0, 0);
@@ -170,7 +170,7 @@ export function generate(): Document {
   // section headings below are H2. Styling is unchanged.
   const bval = h1('Upper Second-Class Honours (2:1)');
   bstack.add(bval);
-  const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`);
+  const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  -  ${total} credits  -  FHEQ Level 6`);
   bmeta.fontSize = 9;
   bmeta.color = INK;
   bstack.add(bmeta);

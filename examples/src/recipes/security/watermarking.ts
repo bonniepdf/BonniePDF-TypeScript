@@ -21,7 +21,7 @@ export function generate(): Document {
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
       // A tuned watermark: a large, faint diagonal DRAFT sits over the content on
       // every page. Font, size, colour, opacity and rotation are all exposed so
       // the stamp can be matched to the document's palette.
@@ -113,7 +113,7 @@ export function generate(): Document {
       {
         fontName: StandardFonts.Helvetica,
         fontSize: 11,
-        color: 'slate-700',
+        color: 'slate-600',
         alignment: 'justify',
         margin: { bottom: 12 },
       }
@@ -125,7 +125,7 @@ export function generate(): Document {
       'Key stakeholders include the VP of Engineering, the CTO, and department leads ' +
         'from Product, Security, and Operations. A steering committee will convene monthly ' +
         'to review progress against milestones and address any blockers or scope changes.',
-      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700', alignment: 'justify' }
+      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-600', alignment: 'justify' }
     )
   );
 
@@ -144,7 +144,7 @@ export function generate(): Document {
         'percent, cut average deployment time from hours to minutes, and improve service ' +
         'availability to four nines. These outcomes will be measured against a baseline ' +
         'captured during the discovery phase and reported to the steering committee.',
-      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-700', alignment: 'justify' }
+      { fontName: StandardFonts.Helvetica, fontSize: 11, color: 'slate-600', alignment: 'justify' }
     )
   );
 

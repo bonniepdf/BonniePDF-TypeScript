@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { EmbeddedFontInfo } from '../../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../../Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../../Typography/TrueType/TtfSubsetter';
@@ -24,9 +25,9 @@ export class FontWriter {
     this.writer.writeObject(
       id,
       new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/Type1'],
-        ['/BaseFont', `/${fontName}`],
+        [PdfKeys.Common.Type, '/Font'],
+        [PdfKeys.Common.Subtype, '/Type1'],
+        [PdfKeys.Font.BaseFont, `/${fontName}`],
       ])
     );
   }
@@ -109,12 +110,12 @@ export class FontWriter {
     this.writer.writeObject(
       type0Id,
       new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/Type0'],
-        ['/BaseFont', `/${baseFontName}`],
-        ['/Encoding', '/Identity-H'],
-        ['/DescendantFonts', `[ ${cidFontId} 0 R ]`],
-        ['/ToUnicode', `${toUnicodeId} 0 R`],
+        [PdfKeys.Common.Type, '/Font'],
+        [PdfKeys.Common.Subtype, '/Type0'],
+        [PdfKeys.Font.BaseFont, `/${baseFontName}`],
+        [PdfKeys.Font.Encoding, '/Identity-H'],
+        [PdfKeys.Font.DescendantFonts, `[ ${cidFontId} 0 R ]`],
+        [PdfKeys.Font.ToUnicode, `${toUnicodeId} 0 R`],
       ])
     );
 
@@ -124,7 +125,11 @@ export class FontWriter {
   // ─── Private helpers ─────────────────────────────────────────────────────────
 
   private writeFontFile2(id: number, fontData: Uint8Array): void {
-    this.writer.writeCompressedBinaryObject(id, new Map([['/Length1', fontData.length.toString()]]), fontData);
+    this.writer.writeCompressedBinaryObject(
+      id,
+      new Map([[PdfKeys.Stream.DecodedLength, fontData.length.toString()]]),
+      fontData
+    );
   }
 
   private writeCIDSet(id: number, maxCid: number): void {
@@ -161,18 +166,18 @@ export class FontWriter {
     const scale = 1000 / font.unitsPerEm;
     const bbox = font.bBox.map(v => Math.round(v * scale));
     const dict = new Map<string, string>([
-      ['/Type', '/FontDescriptor'],
-      ['/FontName', `/${baseFontName}`],
-      ['/Flags', font.flags.toString()],
-      ['/FontBBox', `[ ${bbox[0]} ${bbox[1]} ${bbox[2]} ${bbox[3]} ]`],
-      ['/ItalicAngle', font.italicAngle.toFixed(1)],
-      ['/Ascent', Math.round(font.ascender * scale).toString()],
-      ['/Descent', Math.round(font.descender * scale).toString()],
-      ['/CapHeight', Math.round(font.capHeight * scale).toString()],
-      ['/StemV', font.stemV.toString()],
-      ['/FontFile2', `${fontFile2Id} 0 R`],
+      [PdfKeys.Common.Type, '/FontDescriptor'],
+      [PdfKeys.FontDescriptor.Name, `/${baseFontName}`],
+      [PdfKeys.FontDescriptor.Flags, font.flags.toString()],
+      [PdfKeys.FontDescriptor.BoundingBox, `[ ${bbox[0]} ${bbox[1]} ${bbox[2]} ${bbox[3]} ]`],
+      [PdfKeys.FontDescriptor.ItalicAngle, font.italicAngle.toFixed(1)],
+      [PdfKeys.FontDescriptor.Ascent, Math.round(font.ascender * scale).toString()],
+      [PdfKeys.FontDescriptor.Descent, Math.round(font.descender * scale).toString()],
+      [PdfKeys.FontDescriptor.CapHeight, Math.round(font.capHeight * scale).toString()],
+      [PdfKeys.FontDescriptor.VerticalStemWidth, font.stemV.toString()],
+      [PdfKeys.FontDescriptor.TrueTypeProgram, `${fontFile2Id} 0 R`],
     ]);
-    if (cidSetId > 0) dict.set('/CIDSet', `${cidSetId} 0 R`);
+    if (cidSetId > 0) dict.set(PdfKeys.FontDescriptor.CidSet, `${cidSetId} 0 R`);
     this.writer.writeObject(id, dict);
   }
 
@@ -199,13 +204,13 @@ export class FontWriter {
     this.writer.writeObject(
       id,
       new Map([
-        ['/Type', '/Font'],
-        ['/Subtype', '/CIDFontType2'],
-        ['/BaseFont', `/${baseFontName}`],
-        ['/CIDSystemInfo', '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
-        ['/FontDescriptor', `${fontDescriptorId} 0 R`],
-        ['/W', widthArray],
-        ['/CIDToGIDMap', cidToGidMapRef],
+        [PdfKeys.Common.Type, '/Font'],
+        [PdfKeys.Common.Subtype, '/CIDFontType2'],
+        [PdfKeys.Font.BaseFont, `/${baseFontName}`],
+        [PdfKeys.Font.CidSystemInfo, '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>'],
+        [PdfKeys.Font.Descriptor, `${fontDescriptorId} 0 R`],
+        [PdfKeys.Font.Widths, widthArray],
+        [PdfKeys.Font.CidToGlyphMap, cidToGidMapRef],
       ])
     );
   }

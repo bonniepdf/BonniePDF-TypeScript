@@ -80,8 +80,8 @@ describe('Cartesian chart options (09a Phase 2.I)', () => {
   it('Line/Area/Lollipop/DotPlot accept colour tokens', () => {
     expect(new LineChart({ lineColor: 'rose-500' }).lineColor).toBe(ColorPalette.rose[500]);
     expect(new AreaChart({ areaColor: 'sky-400', fillOpacity: 0.5 }).fillOpacity).toBe(0.5);
-    expect(new LollipopChart({ lollipopColor: 'amber-600', headRadius: 10 }).headRadius).toBe(10);
-    expect(new DotPlotChart({ dotColor: 'teal-500', dotRadius: 6 }).dotRadius).toBe(6);
+    expect(new LollipopChart({ lollipopColor: 'amber-600', defaultHeadRadius: 10 }).defaultHeadRadius).toBe(10);
+    expect(new DotPlotChart({ dotColor: 'teal-500', defaultDotRadius: 6 }).defaultDotRadius).toBe(6);
     expect(new GroupedBarChart({ barWidthRatio: 0.7, groupGapRatio: 0.1 }).groupGapRatio).toBe(0.1);
   });
 

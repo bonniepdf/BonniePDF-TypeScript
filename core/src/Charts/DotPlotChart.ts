@@ -7,7 +7,6 @@ import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
-import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Dot plot chart that renders circular data points with value labels.
@@ -15,16 +14,14 @@ import { toLength, type LengthInput } from '../Normalize/toLength';
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
 /** Settable properties declared by {@link DotPlotChart} itself. */
-export const DOT_PLOT_CHART_OWN_OPTION_KEYS = ['defaultDotRadius', 'dotColor', 'dotRadius'] as const;
+export const DOT_PLOT_CHART_OWN_OPTION_KEYS = ['defaultDotRadius', 'dotColor'] as const;
 
 /** The full option surface, bases included. */
 export const DOT_PLOT_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...DOT_PLOT_CHART_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link DotPlotChart}. */
 export type DotPlotChartOptions = CartesianChartOptions &
-  Partial<Omit<Pick<DotPlotChart, (typeof DOT_PLOT_CHART_OWN_OPTION_KEYS)[number]>, 'dotColor' | 'dotRadius'>> & {
-    /** Dot radius. Accepts a length: `4`, `'2mm'`, or `{ value, unit }`. */
-    dotRadius?: LengthInput;
+  Partial<Omit<Pick<DotPlotChart, (typeof DOT_PLOT_CHART_OWN_OPTION_KEYS)[number]>, 'dotColor'>> & {
     /** dotColor colour. Accepts a palette token or hex. */
     dotColor?: ColorInput;
   };
@@ -58,20 +55,6 @@ export class DotPlotChart extends CartesianChartBase {
   }
   public set dotColor(value: ColorInput) {
     this._dotColor = toColor(value);
-  }
-
-  private _dotRadius: number = DotPlotChart.DEFAULT_DOT_RADIUS_VALUE;
-
-  /**
-   * Radius of the data point circles (backward compatibility).
-   *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
-   */
-  public get dotRadius(): number {
-    return this._dotRadius;
-  }
-  public set dotRadius(value: LengthInput) {
-    this._dotRadius = toLength(value);
   }
 
   /**

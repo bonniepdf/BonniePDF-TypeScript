@@ -4,16 +4,20 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
-This file is maintained by hand. Add an entry under **Unreleased** with each
-change to `core/`; on release, rename it to the version being tagged.
+This file is maintained by hand. Add an entry under the current version with
+each change to `core/`.
 
-## Unreleased
+## 2026.10.0
 
 - Added `Flip`/`flip()` and `Translate`/`translate()` native wrappers with signed offsets, unchanged flow boxes, composed geometry and JSON definitions.
 
 - Added native element rotation with free angles and constrained quarter turns, including document definitions, transformed previews and hyperlink bounds.
 
 ### Changed
+
+- Centralized PDF dictionary keys in documented, context-specific internal constants. Serialized PDF output is unchanged.
+
+- **Breaking: removed options that had no effect.** `LineChart.lineWidth` and `showDataPointMarkers` are replaced by `defaultLineWidth` and `defaultShowMarkers`; use `DotPlotChart.defaultDotRadius` and `LollipopChart.defaultStemWidth`/`defaultHeadRadius` instead of `dotRadius`, `stemWidth` and `headRadius`. Series styles still override these defaults. Removed `PieChart.totalLabelFontSize`/`totalValueFontSize` and SVG export `textMode`/`includeLinks` (including `SvgTextMode`); they never controlled rendering. Remove these keys from document definitions: ordinary validation warns, and strict validation rejects them.
 
 - **`loadFontFromUrl` resolves to nothing.** It returned the parsed font, a type that is not part of the public API. It still fetches, parses and registers the font, including its width metrics.
 

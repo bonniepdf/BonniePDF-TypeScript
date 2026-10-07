@@ -89,11 +89,9 @@ export function generate(): Document {
     height: 380,
     stretchToFit: true,
     lineColor: C_VIOLET,
-    lineWidth: 2.5,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    showDataPointMarkers: true,
     backgroundColor: '#fafafa',
   });
   doc.add(chart);

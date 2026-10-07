@@ -1776,12 +1776,6 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "lineColor": {
           "kind": "color"
-        },
-        "lineWidth": {
-          "kind": "length"
-        },
-        "showDataPointMarkers": {
-          "kind": "boolean"
         }
       },
       "rules": [
@@ -1831,9 +1825,6 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "dotColor": {
           "kind": "color"
-        },
-        "dotRadius": {
-          "kind": "length"
         }
       },
       "rules": [
@@ -1855,12 +1846,6 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "lollipopColor": {
           "kind": "color"
-        },
-        "stemWidth": {
-          "kind": "length"
-        },
-        "headRadius": {
-          "kind": "length"
         }
       },
       "rules": [
@@ -1881,12 +1866,6 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "totalLabel": {
           "kind": "string"
-        },
-        "totalLabelFontSize": {
-          "kind": "length"
-        },
-        "totalValueFontSize": {
-          "kind": "length"
         },
         "totalValueFormat": {
           "kind": "chartNumberFormat"

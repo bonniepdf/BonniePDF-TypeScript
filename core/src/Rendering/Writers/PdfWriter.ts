@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { PdfVersion } from '../../Configuration/PdfVersion';
 import { ZoomLevel } from '../../Configuration/ZoomLevel';
@@ -210,27 +211,27 @@ export class PdfWriter implements IPdfWriter {
    */
   public writeLinkAnnotation(id: number, link: RegisteredLink, pageIds: number[], structParentKey?: number): number {
     const dict = new Map<string, string>([
-      ['/Type', '/Annot'],
-      ['/Subtype', '/Link'],
-      ['/Rect', link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
-      ['/F', '4'], // Print flag (required for PDF/A-1B)
+      [PdfKeys.Common.Type, '/Annot'],
+      [PdfKeys.Common.Subtype, '/Link'],
+      [PdfKeys.Annotation.Rectangle, link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
+      [PdfKeys.Annotation.Flags, '4'], // Print flag (required for PDF/A-1B)
       // PDF/UA rule 7-18: /Contents must mirror the visible link
       // text. Emitted unconditionally - even untagged docs benefit, and
       // the field is a no-op for viewers that don't surface annotation
       // alt-text.
-      ['/Contents', `(${PdfSyntax.escape((link.text ?? '').toString())})`],
+      [PdfKeys.Annotation.Contents, `(${PdfSyntax.escape((link.text ?? '').toString())})`],
     ]);
 
     if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {
       const pageIdx = Math.max(0, Math.min(link.targetPageIndex, pageIds.length - 1));
-      dict.set('/A', `<< /S /GoTo /D [${pageIds[pageIdx]} 0 R /Fit] >>`);
+      dict.set(PdfKeys.Annotation.Action, `<< /S /GoTo /D [${pageIds[pageIdx]} 0 R /Fit] >>`);
     } else {
-      dict.set('/A', `<< /S /URI /URI (${PdfSyntax.escape(link.uri ?? '')}) >>`);
+      dict.set(PdfKeys.Annotation.Action, `<< /S /URI /URI (${PdfSyntax.escape(link.uri ?? '')}) >>`);
     }
 
     // /StructParent wires this annotation into the parent tree for
     // the reverse lookup annotation→StructElem.
-    if (structParentKey != null) dict.set('/StructParent', String(structParentKey));
+    if (structParentKey != null) dict.set(PdfKeys.Annotation.StructureParent, String(structParentKey));
 
     this.writeObject(id, dict);
     return id;
@@ -253,12 +254,12 @@ export class PdfWriter implements IPdfWriter {
    */
   public writeViewerPreferences(id: number, settings: ViewerPreferencesSettings): number {
     const dict = new Map<string, string>();
-    if (settings.hideToolbar) dict.set('/HideToolbar', 'true');
-    if (settings.hideMenubar) dict.set('/HideMenubar', 'true');
-    if (settings.hideWindowUI) dict.set('/HideWindowUI', 'true');
-    if (settings.fitWindow) dict.set('/FitWindow', 'true');
-    if (settings.centerWindow) dict.set('/CenterWindow', 'true');
-    if (settings.displayDocTitle) dict.set('/DisplayDocTitle', 'true');
+    if (settings.hideToolbar) dict.set(PdfKeys.ViewerPreferences.HideToolbar, 'true');
+    if (settings.hideMenubar) dict.set(PdfKeys.ViewerPreferences.HideMenubar, 'true');
+    if (settings.hideWindowUI) dict.set(PdfKeys.ViewerPreferences.HideWindowUi, 'true');
+    if (settings.fitWindow) dict.set(PdfKeys.ViewerPreferences.FitWindow, 'true');
+    if (settings.centerWindow) dict.set(PdfKeys.ViewerPreferences.CenterWindow, 'true');
+    if (settings.displayDocTitle) dict.set(PdfKeys.ViewerPreferences.DisplayDocumentTitle, 'true');
     if (dict.size === 0) return 0;
     this.writeObject(id, dict);
     return id;
@@ -276,51 +277,52 @@ export class PdfWriter implements IPdfWriter {
     options: CatalogOptions
   ): void {
     const dict = new Map<string, string>([
-      ['/Type', '/Catalog'],
-      ['/Pages', `${pagesId} 0 R`],
-      ['/OpenAction', this.getOpenActionString(firstPageId, settings)],
+      [PdfKeys.Common.Type, '/Catalog'],
+      [PdfKeys.Catalog.Pages, `${pagesId} 0 R`],
+      [PdfKeys.Catalog.OpenAction, this.getOpenActionString(firstPageId, settings)],
     ]);
 
-    if (options?.outlinesId) dict.set('/PageMode', '/UseOutlines');
+    if (options?.outlinesId) dict.set(PdfKeys.Catalog.PageMode, '/UseOutlines');
     else if (settings.pageMode && settings.pageMode !== PageModeEnum.UseNone)
-      dict.set('/PageMode', `/${settings.pageMode}`);
+      dict.set(PdfKeys.Catalog.PageMode, `/${settings.pageMode}`);
 
-    if (options?.viewerPrefsId) dict.set('/ViewerPreferences', `${options.viewerPrefsId} 0 R`);
-    if (options?.outlinesId) dict.set('/Outlines', `${options.outlinesId} 0 R`);
-    if (options?.xmpMetadataId) dict.set('/Metadata', `${options.xmpMetadataId} 0 R`);
+    if (options?.viewerPrefsId) dict.set(PdfKeys.Catalog.ViewerPreferences, `${options.viewerPrefsId} 0 R`);
+    if (options?.outlinesId) dict.set(PdfKeys.Catalog.Outlines, `${options.outlinesId} 0 R`);
+    if (options?.xmpMetadataId) dict.set(PdfKeys.Catalog.Metadata, `${options.xmpMetadataId} 0 R`);
     if (options?.outputIntentIds?.length > 0) {
       const refs = options.outputIntentIds.map(oid => `${oid} 0 R`).join(' ');
-      dict.set('/OutputIntents', `[ ${refs} ]`);
+      dict.set(PdfKeys.Catalog.OutputIntents, `[ ${refs} ]`);
     }
     // /MarkInfo whenever either PDF/A or tagging is on. Both standards
     // require /MarkInfo /Marked true; they're orthogonal flags so emitting
     // it once when either is set covers both cases.
-    if (options?.pdfAEnabled || options?.tagged) dict.set('/MarkInfo', '<< /Marked true >>');
+    if (options?.pdfAEnabled || options?.tagged) dict.set(PdfKeys.Catalog.MarkInfo, '<< /Marked true >>');
 
     // /StructTreeRoot when tagging is on.
     if (options?.structTreeRootId != null && options.structTreeRootId > 0) {
-      dict.set('/StructTreeRoot', `${options.structTreeRootId} 0 R`);
+      dict.set(PdfKeys.Catalog.StructureTreeRoot, `${options.structTreeRootId} 0 R`);
     }
 
     // /Lang when the document declares a natural language. Required by
     // PDF/UA-1; useful generally for assistive tech.
     if (options?.language) {
-      dict.set('/Lang', `(${PdfSyntax.escape(options.language)})`);
+      dict.set(PdfKeys.Catalog.Language, `(${PdfSyntax.escape(options.language)})`);
     }
 
-    if (options?.destsId != null && options.destsId > 0) dict.set('/Dests', `${options.destsId} 0 R`);
+    if (options?.destsId != null && options.destsId > 0)
+      dict.set(PdfKeys.Catalog.Destinations, `${options.destsId} 0 R`);
 
     if (options?.pageLabelsId != null && options.pageLabelsId > 0) {
-      dict.set('/PageLabels', `${options.pageLabelsId} 0 R`);
+      dict.set(PdfKeys.Catalog.PageLabels, `${options.pageLabelsId} 0 R`);
     }
 
     // /Names /EmbeddedFiles and /AF for document attachments (PDF/A-3).
     if (options?.namesEmbeddedFilesId != null && options.namesEmbeddedFilesId > 0) {
-      dict.set('/Names', `<< /EmbeddedFiles ${options.namesEmbeddedFilesId} 0 R >>`);
+      dict.set(PdfKeys.Catalog.Names, `<< /EmbeddedFiles ${options.namesEmbeddedFilesId} 0 R >>`);
     }
     if (options?.associatedFileIds?.length > 0) {
       const afRefs = options.associatedFileIds.map(fid => `${fid} 0 R`).join(' ');
-      dict.set('/AF', `[ ${afRefs} ]`);
+      dict.set(PdfKeys.Catalog.AssociatedFiles, `[ ${afRefs} ]`);
     }
 
     this.writeObject(id, dict);

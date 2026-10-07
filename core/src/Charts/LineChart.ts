@@ -7,7 +7,6 @@ import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
-import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Line chart that renders connected data points with straight lines.
@@ -20,8 +19,6 @@ export const LINE_CHART_OWN_OPTION_KEYS = [
   'defaultShowMarkers',
   'defaultMarkerRadius',
   'lineColor',
-  'lineWidth',
-  'showDataPointMarkers',
 ] as const;
 
 /** The full option surface, bases included. */
@@ -29,9 +26,7 @@ export const LINE_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LINE_C
 
 /** Options for {@link LineChart}. */
 export type LineChartOptions = CartesianChartOptions &
-  Partial<Omit<Pick<LineChart, (typeof LINE_CHART_OWN_OPTION_KEYS)[number]>, 'lineColor' | 'lineWidth'>> & {
-    /** Line thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
-    lineWidth?: LengthInput;
+  Partial<Omit<Pick<LineChart, (typeof LINE_CHART_OWN_OPTION_KEYS)[number]>, 'lineColor'>> & {
     /** lineColor colour. Accepts a palette token or hex. */
     lineColor?: ColorInput;
   };
@@ -76,25 +71,6 @@ export class LineChart extends CartesianChartBase {
   public set lineColor(value: ColorInput) {
     this._lineColor = toColor(value);
   }
-
-  private _lineWidth: number = 2;
-
-  /**
-   * Width of the line stroke for single-series charts (backward compatibility).
-   *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
-   */
-  public get lineWidth(): number {
-    return this._lineWidth;
-  }
-  public set lineWidth(value: LengthInput) {
-    this._lineWidth = toLength(value);
-  }
-
-  /**
-   * Whether to show circular markers at data points for single-series charts (backward compatibility).
-   */
-  showDataPointMarkers: boolean = true;
 
   /**
    * Draws the line chart elements for a single series (connecting line and optional data point markers).

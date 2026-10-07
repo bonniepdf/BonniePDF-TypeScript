@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { DocumentSettings } from '../../Configuration/DocumentSettings';
 import { AccessibilityMode } from '../../Configuration/AccessibilityMode';
@@ -25,8 +26,8 @@ export class MetadataWriter {
   public writeXmpMetadata(id: number, metadata: DocumentMetadata, settings: DocumentSettings): void {
     // XMP metadata is written unencrypted and uncompressed (PDF/A requirement).
     const dict = new Map<string, string>([
-      ['/Type', '/Metadata'],
-      ['/Subtype', '/XML'],
+      [PdfKeys.Common.Type, '/Metadata'],
+      [PdfKeys.Common.Subtype, '/XML'],
     ]);
 
     const blocks = MetadataWriter.buildConformanceBlocks(settings);
@@ -48,8 +49,8 @@ export class MetadataWriter {
   ): Promise<void> {
     if (!this.asyncWriter) throw new Error('Async writer not configured');
     const dict = new Map<string, string>([
-      ['/Type', '/Metadata'],
-      ['/Subtype', '/XML'],
+      [PdfKeys.Common.Type, '/Metadata'],
+      [PdfKeys.Common.Subtype, '/XML'],
     ]);
 
     const blocks = MetadataWriter.buildConformanceBlocks(settings);
@@ -66,15 +67,17 @@ export class MetadataWriter {
   /** Builds the /Info dictionary shared by the sync and async paths. */
   private static buildDocumentInfoDict(metadata: DocumentMetadata): Map<string, string> {
     const dict = new Map<string, string>();
-    if (metadata.title) dict.set('/Title', PdfSyntax.encodeMetadataString(metadata.title));
-    if (metadata.author) dict.set('/Author', PdfSyntax.encodeMetadataString(metadata.author));
-    if (metadata.subject) dict.set('/Subject', PdfSyntax.encodeMetadataString(metadata.subject));
-    if (metadata.keywords) dict.set('/Keywords', PdfSyntax.encodeMetadataString(metadata.keywords));
-    if (metadata.creator) dict.set('/Creator', PdfSyntax.encodeMetadataString(metadata.creator));
-    if (metadata.producer) dict.set('/Producer', PdfSyntax.encodeMetadataString(metadata.producer));
-    if (metadata.creationDate) dict.set('/CreationDate', `(${PdfSyntax.formatDate(metadata.creationDate)})`);
-    if (metadata.modifiedDate) dict.set('/ModDate', `(${PdfSyntax.formatDate(metadata.modifiedDate)})`);
-    if (metadata.trapped !== undefined) dict.set('/Trapped', metadata.trapped ? '/True' : '/False');
+    if (metadata.title) dict.set(PdfKeys.Information.Title, PdfSyntax.encodeMetadataString(metadata.title));
+    if (metadata.author) dict.set(PdfKeys.Information.Author, PdfSyntax.encodeMetadataString(metadata.author));
+    if (metadata.subject) dict.set(PdfKeys.Information.Subject, PdfSyntax.encodeMetadataString(metadata.subject));
+    if (metadata.keywords) dict.set(PdfKeys.Information.Keywords, PdfSyntax.encodeMetadataString(metadata.keywords));
+    if (metadata.creator) dict.set(PdfKeys.Information.Creator, PdfSyntax.encodeMetadataString(metadata.creator));
+    if (metadata.producer) dict.set(PdfKeys.Information.Producer, PdfSyntax.encodeMetadataString(metadata.producer));
+    if (metadata.creationDate)
+      dict.set(PdfKeys.Information.CreationDate, `(${PdfSyntax.formatDate(metadata.creationDate)})`);
+    if (metadata.modifiedDate)
+      dict.set(PdfKeys.Information.ModifiedDate, `(${PdfSyntax.formatDate(metadata.modifiedDate)})`);
+    if (metadata.trapped !== undefined) dict.set(PdfKeys.Information.Trapped, metadata.trapped ? '/True' : '/False');
     if (metadata.customProperties) {
       // customProperties is a Map; Object.entries() on a Map yields nothing,
       // which silently dropped every custom property before this was typed.

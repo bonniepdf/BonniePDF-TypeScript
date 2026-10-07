@@ -8,7 +8,6 @@ import { CartesianChartBase } from './CartesianChartBase';
 import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { ICanvas } from '../Drawing/ICanvas';
-import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Lollipop chart that renders vertical lines (stems) with circular markers (heads).
@@ -16,29 +15,14 @@ import { toLength, type LengthInput } from '../Normalize/toLength';
  * Uses the ICanvas interface for rendering, making it backend-agnostic.
  */
 /** Settable properties declared by {@link LollipopChart} itself. */
-export const LOLLIPOP_CHART_OWN_OPTION_KEYS = [
-  'defaultStemWidth',
-  'defaultHeadRadius',
-  'lollipopColor',
-  'stemWidth',
-  'headRadius',
-] as const;
+export const LOLLIPOP_CHART_OWN_OPTION_KEYS = ['defaultStemWidth', 'defaultHeadRadius', 'lollipopColor'] as const;
 
 /** The full option surface, bases included. */
 export const LOLLIPOP_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LOLLIPOP_CHART_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link LollipopChart}. */
 export type LollipopChartOptions = CartesianChartOptions &
-  Partial<
-    Omit<
-      Pick<LollipopChart, (typeof LOLLIPOP_CHART_OWN_OPTION_KEYS)[number]>,
-      'lollipopColor' | 'headRadius' | 'stemWidth'
-    >
-  > & {
-    /** Head radius. Accepts a length: `5`, `'2mm'`, or `{ value, unit }`. */
-    headRadius?: LengthInput;
-    /** Stem thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
-    stemWidth?: LengthInput;
+  Partial<Omit<Pick<LollipopChart, (typeof LOLLIPOP_CHART_OWN_OPTION_KEYS)[number]>, 'lollipopColor'>> & {
     /** lollipopColor colour. Accepts a palette token or hex. */
     lollipopColor?: ColorInput;
   };
@@ -77,34 +61,6 @@ export class LollipopChart extends CartesianChartBase {
   }
   public set lollipopColor(value: ColorInput) {
     this._lollipopColor = toColor(value);
-  }
-
-  private _stemWidth: number = 2;
-
-  /**
-   * Width of the stem line (backward compatibility).
-   *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
-   */
-  public get stemWidth(): number {
-    return this._stemWidth;
-  }
-  public set stemWidth(value: LengthInput) {
-    this._stemWidth = toLength(value);
-  }
-
-  private _headRadius: number = LollipopChart.DEFAULT_HEAD_RADIUS_VALUE;
-
-  /**
-   * Radius of the lollipop head (circle) (backward compatibility).
-   *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
-   */
-  public get headRadius(): number {
-    return this._headRadius;
-  }
-  public set headRadius(value: LengthInput) {
-    this._headRadius = toLength(value);
   }
 
   /**

@@ -29,6 +29,17 @@ describe('XmpMetadata', () => {
     expect(text).not.toContain('/Subtype /XML');
   });
 
+  it('XmpPacket_BeginsWithUtf8ByteOrderMark', () => {
+    doc = new Document();
+    asPdfA(doc.settings);
+    const bytes = doc.generateBytes();
+    const header = new TextEncoder().encode('<?xpacket begin="');
+    const at = indexOf(bytes, header);
+    expect(at).toBeGreaterThan(0);
+    // The begin attribute is U+FEFF, which UTF-8 encodes as EF BB BF.
+    expect([...bytes.subarray(at + header.length, at + header.length + 4)]).toEqual([0xef, 0xbb, 0xbf, 0x22]);
+  });
+
   it('PdfA_ContainsOutputIntents', () => {
     // XMP pdfaid namespace is deferred - test OutputIntents which IS written
     doc = new Document();
@@ -93,3 +104,11 @@ describe('XmpMetadata', () => {
     expect(text).toContain('SubjectText');
   });
 });
+
+function indexOf(haystack: Uint8Array, needle: Uint8Array): number {
+  outer: for (let i = 0; i <= haystack.length - needle.length; i++) {
+    for (let j = 0; j < needle.length; j++) if (haystack[i + j] !== needle[j]) continue outer;
+    return i;
+  }
+  return -1;
+}

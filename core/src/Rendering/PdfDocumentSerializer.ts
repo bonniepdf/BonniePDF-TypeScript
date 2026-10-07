@@ -1,3 +1,4 @@
+import * as PdfKeys from './Pdf/PdfKeys';
 import { throwIfAborted } from '../Core/throwIfAborted';
 import { Document } from '../Document';
 import { RenderContext } from './RenderContext';
@@ -206,19 +207,19 @@ export class PdfDocumentSerializer {
       // (see resourcesId comment above) so each page satisfies PDF/A-2b
       // clause 6.2.2.2 without duplicating the resources dict per page.
       const pageDict = new Map<string, string>([
-        ['/Type', '/Page'],
-        ['/Parent', `${pagesId} 0 R`],
-        ['/MediaBox', `[0 0 ${pageOutput.size.width} ${pageOutput.size.height}]`],
-        ['/Contents', `${contentId} 0 R`],
-        ['/Resources', `${resourcesId} 0 R`],
+        [PdfKeys.Common.Type, '/Page'],
+        [PdfKeys.Page.Parent, `${pagesId} 0 R`],
+        [PdfKeys.Page.MediaBox, `[0 0 ${pageOutput.size.width} ${pageOutput.size.height}]`],
+        [PdfKeys.Page.Contents, `${contentId} 0 R`],
+        [PdfKeys.Page.Resources, `${resourcesId} 0 R`],
       ]);
 
       // Tagged PDF: each page gets /StructParents = page index. The
       // /ParentTree emitted at the end by StructureTreeWriter keys off
       // the same number so MCID→StructElem reverse lookup works.
       if (taggingContext) {
-        pageDict.set('/StructParents', String(pageIndex - 1));
-        pageDict.set('/Tabs', '/S'); // Follow structure order for tab navigation
+        pageDict.set(PdfKeys.Page.StructureParents, String(pageIndex - 1));
+        pageDict.set(PdfKeys.Page.TabOrder, '/S'); // Follow structure order for tab navigation
       }
 
       // Write link annotations if present
@@ -242,7 +243,7 @@ export class PdfDocumentSerializer {
             });
           }
         }
-        pageDict.set('/Annots', '[ ' + annotIds.map(id => `${id} 0 R`).join(' ') + ' ]');
+        pageDict.set(PdfKeys.Page.Annotations, '[ ' + annotIds.map(id => `${id} 0 R`).join(' ') + ' ]');
       }
 
       writer.writeObject(pageId, pageDict);
@@ -267,9 +268,9 @@ export class PdfDocumentSerializer {
     writer.writeObject(
       pagesId,
       new Map<string, string>([
-        ['/Type', '/Pages'],
-        ['/Kids', '[ ' + pageIds.map(id => `${id} 0 R`).join(' ') + ' ]'],
-        ['/Count', pageIds.length.toString()],
+        [PdfKeys.Common.Type, '/Pages'],
+        [PdfKeys.PageTree.Kids, '[ ' + pageIds.map(id => `${id} 0 R`).join(' ') + ' ]'],
+        [PdfKeys.PageTree.Count, pageIds.length.toString()],
       ])
     );
 
@@ -365,7 +366,7 @@ export class PdfDocumentSerializer {
       if (label.prefix) parts.push(`/P (${label.prefix})`);
       if (label.startAt != null && label.startAt !== 1) parts.push(`/St ${label.startAt}`);
       const pageLabelsId = writer.getNewId();
-      writer.writeObject(pageLabelsId, new Map([['/Nums', `[ 0 << ${parts.join(' ')} >> ]`]]));
+      writer.writeObject(pageLabelsId, new Map([[PdfKeys.NumberTree.Numbers, `[ 0 << ${parts.join(' ')} >> ]`]]));
       catalogOptions.pageLabelsId = pageLabelsId;
     }
 

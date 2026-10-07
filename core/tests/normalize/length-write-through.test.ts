@@ -23,10 +23,7 @@ import { Watermark } from '../../src/Configuration/Watermark';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { Hyperlink } from '../../src/Core/Hyperlink';
 import { LineChart } from '../../src/Charts/LineChart';
-import { PieChart } from '../../src/Charts/PieChart';
 import { AreaChart } from '../../src/Charts/AreaChart';
-import { DotPlotChart } from '../../src/Charts/DotPlotChart';
-import { LollipopChart } from '../../src/Charts/LollipopChart';
 import { ChartSeries, ChartSeriesStyle } from '../../src/Charts/Models/ChartSeries';
 
 /**
@@ -88,14 +85,8 @@ const cases: [name: string, read: () => unknown][] = [
   ['Hyperlink.fontSize', () => new Hyperlink({ text: 'x', uri: 'https://example.com', fontSize: '1in' }).fontSize],
   ['LineChart.width', () => new LineChart({ width: '1in' }).width],
   ['LineChart.height', () => new LineChart({ height: '1in' }).height],
-  ['LineChart.lineWidth', () => new LineChart({ lineWidth: '1in' }).lineWidth],
   ['LineChart.labelFontSize', () => new LineChart({ labelFontSize: '1in' }).labelFontSize],
-  ['PieChart.totalLabelFontSize', () => new PieChart({ totalLabelFontSize: '1in' }).totalLabelFontSize],
-  ['PieChart.totalValueFontSize', () => new PieChart({ totalValueFontSize: '1in' }).totalValueFontSize],
   ['AreaChart.lineWidth', () => new AreaChart({ lineWidth: '1in' }).lineWidth],
-  ['DotPlotChart.dotRadius', () => new DotPlotChart({ dotRadius: '1in' }).dotRadius],
-  ['LollipopChart.headRadius', () => new LollipopChart({ headRadius: '1in' }).headRadius],
-  ['LollipopChart.stemWidth', () => new LollipopChart({ stemWidth: '1in' }).stemWidth],
   ['ChartSeriesStyle.lineWidth', () => new ChartSeriesStyle({ lineWidth: '1in' }).lineWidth],
   ['ChartSeriesStyle.markerRadius', () => new ChartSeriesStyle({ markerRadius: '1in' }).markerRadius],
   ['ChartSeriesStyle.stemWidth', () => new ChartSeriesStyle({ stemWidth: '1in' }).stemWidth],

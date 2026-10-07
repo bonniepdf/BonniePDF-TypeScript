@@ -103,7 +103,6 @@ export function generate(): Document {
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    showDataPointMarkers: true,
     backgroundColor: '#fafafa',
   });
   doc.add(chart);

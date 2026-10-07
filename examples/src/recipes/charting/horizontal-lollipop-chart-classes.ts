@@ -119,8 +119,6 @@ export function generate(): Document {
   chart.height = 400;
   chart.stretchToFit = true;
   chart.lollipopColor = Color.fromHex(C_VIOLET);
-  chart.stemWidth = 2;
-  chart.headRadius = 9;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;

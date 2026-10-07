@@ -104,7 +104,6 @@ export function generate(): Document {
   chart.height = 380;
   chart.stretchToFit = true;
   chart.dotColor = Color.fromHex(C_TEAL);
-  chart.dotRadius = 12;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;

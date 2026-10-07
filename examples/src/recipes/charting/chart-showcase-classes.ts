@@ -256,11 +256,9 @@ export function generate(): Document {
     chart.height = 400;
     chart.stretchToFit = true;
     chart.lineColor = Color.fromHex(C_VIOLET);
-    chart.lineWidth = 2.5;
     chart.fontFamily = StandardFonts.Helvetica;
     chart.labelFontSize = 9;
     chart.showValueLabels = true;
-    chart.showDataPointMarkers = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
     chart.data = data;
@@ -358,8 +356,6 @@ export function generate(): Document {
     chart.height = 400;
     chart.stretchToFit = true;
     chart.lollipopColor = Color.fromHex(C_PINK);
-    chart.stemWidth = 2.5;
-    chart.headRadius = 10;
     chart.fontFamily = StandardFonts.Helvetica;
     chart.labelFontSize = 9;
     chart.showValueLabels = true;
@@ -411,7 +407,6 @@ export function generate(): Document {
     chart.height = 400;
     chart.stretchToFit = true;
     chart.dotColor = Color.fromHex(C_TEAL);
-    chart.dotRadius = 12;
     chart.fontFamily = StandardFonts.Helvetica;
     chart.labelFontSize = 9;
     chart.showValueLabels = true;
@@ -522,7 +517,6 @@ export function generate(): Document {
     chart.fontFamily = StandardFonts.Helvetica;
     chart.labelFontSize = 9;
     chart.showValueLabels = true;
-    chart.showDataPointMarkers = true;
     chart.backgroundColor = Color.fromHex(CHART_BG);
 
     chart.data = data;

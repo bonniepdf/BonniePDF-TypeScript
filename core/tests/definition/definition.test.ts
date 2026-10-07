@@ -41,6 +41,11 @@ describe('valid fixtures', () => {
       const result = validateDefinition(fixture);
       expect(result.errors, 'errors').toEqual([]);
       expect(result.valid).toBe(true);
+      if ('_expectWarnings' in fixture) {
+        const expected = (fixture._expectWarnings as { path: string; code: string }[]).map(key).sort();
+        expect(result.warnings.map(key).sort()).toEqual(expected);
+        expect(validateDefinition(fixture, { strict: true }).errors.map(key).sort()).toEqual(expected);
+      }
 
       const doc = await fromDefinition(fixture);
       const exported = await doc.generateSvgDocumentAsync({ captureLayout: true });

@@ -104,11 +104,9 @@ export function generate(): Document {
   chart.height = 380;
   chart.stretchToFit = true;
   chart.lineColor = Color.fromHex(C_VIOLET);
-  chart.lineWidth = 2.5;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
   chart.data = data;

@@ -1,6 +1,6 @@
 {
   "name": "@bonniepdf/core",
-  "version": "2026.7.2",
+  "version": "2026.10.0",
   "description": "Zero-dependency PDF generation for TypeScript & JavaScript - runs in the browser, Node.js, and serverless. Layout engine with tables, charts, accessible (PDF/UA) and archival (PDF/A) output.",
   "type": "module",
   "main": "./dist/index.cjs",

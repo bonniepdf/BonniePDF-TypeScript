@@ -9,6 +9,8 @@ each change to `core/`.
 
 ## 2026.10.0
 
+- Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing. CI also verifies authoring equivalence and standalone playground execution for every example.
+
 - Fixed stable SVG identifiers and preloading for document-owned fonts, QR mask scoring against independent matrix vectors, encryption of PDF text strings, XMP metadata handling in synchronous and asynchronous writers, and AES-256 permissions. Accessible encrypted documents now pass independent validation.
 
 - Added `Flip`/`flip()` and `Translate`/`translate()` native wrappers with signed offsets, unchanged flow boxes, composed geometry and JSON definitions.

@@ -8,6 +8,7 @@ import { PieChart } from '../../src/Charts/PieChart';
 import { DotPlotChart } from '../../src/Charts/DotPlotChart';
 import { LollipopChart } from '../../src/Charts/LollipopChart';
 import { GroupedBarChart } from '../../src/Charts/GroupedBarChart';
+import { ChartOrientation } from '../../src/Charts/ChartOrientation';
 import { ChartData } from '../../src/Charts/Models/ChartData';
 import { ChartSeries } from '../../src/Charts/Models/ChartSeries';
 import { ChartDataPoint } from '../../src/Charts/Models/ChartDataPoint';
@@ -218,6 +219,60 @@ describe('GroupedBarChart', () => {
     const rectOps = canvas.operations.filter(op => op.startsWith('FillRect'));
     expect(rectOps.length).toBeGreaterThanOrEqual(4);
   });
+
+  it.each([ChartOrientation.Vertical, ChartOrientation.Horizontal])(
+    'value labels sit on their own bars (%s)',
+    orientation => {
+      const chart = new GroupedBarChart({ orientation });
+      const canvas = new MockCanvas();
+
+      const data = new ChartData();
+      data.yAxis.maxValue = 30;
+      const values = [
+        [10, 15],
+        [20, 25],
+      ];
+      for (let s = 0; s < values.length; s++) {
+        const series = new ChartSeries();
+        series.name = `Product ${s + 1}`;
+        values[s].forEach((value, i) => {
+          const pt = new ChartDataPoint();
+          pt.label = `Q${i + 1}`;
+          pt.value = value;
+          series.dataPoints.push(pt);
+        });
+        data.series.push(series);
+      }
+
+      chart.draw(canvas, data);
+
+      const numbers = (op: string, count: number): number[] =>
+        op
+          .slice(op.indexOf('(') + 1, op.lastIndexOf(')'))
+          .split(',')
+          .slice(0, count)
+          .map(Number);
+
+      // The bars are the first rectangles drawn, series by series: 1/Q1, 1/Q2, 2/Q1, 2/Q2.
+      const bars = canvas.operations
+        .filter(op => op.startsWith('FillRect('))
+        .slice(0, 4)
+        .map(op => numbers(op, 4));
+
+      values.flat().forEach((value, i) => {
+        const labels = canvas.operations.filter(op => op.startsWith('DrawText(') && op.includes(`,'${value}',`));
+        expect(labels).toHaveLength(1);
+        const [x, y] = numbers(labels[0], 2);
+        const [barX, barY, barWidth, barHeight] = bars[i];
+
+        if (orientation === ChartOrientation.Vertical) {
+          expect(x).toBeCloseTo(barX + barWidth / 2, 6);
+        } else {
+          expect(y + chart.labelFontSize / 2).toBeCloseTo(barY + barHeight / 2, 6);
+        }
+      });
+    }
+  );
 });
 
 describe('Chart PDF/UA tagging', () => {

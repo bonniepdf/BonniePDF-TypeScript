@@ -68,37 +68,118 @@ export class GroupedBarChart extends CartesianChartBase {
     const seriesIndex = data.series.indexOf(series);
 
     if (this.orientation === ChartOrientation.Horizontal) {
-      const totalGroupSpace = chartAreaHeight / categoryCount;
-      const groupPadding = totalGroupSpace * this.groupGapRatio;
-      const barGroupHeight = totalGroupSpace - groupPadding;
-      const barHeight = (barGroupHeight / seriesCount) * this.barWidthRatio;
       const topAreaY = baselineY - chartAreaHeight;
 
       for (let i = 0; i < coordinates.length; i++) {
         const p = coordinates[i];
         const barWidth = p.x - CartesianChartBase.LEFT_PADDING;
+        const slot = this.barSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
 
-        const groupStartY = topAreaY + i * totalGroupSpace + groupPadding / 2;
-        const barY =
-          groupStartY + seriesIndex * (barGroupHeight / seriesCount) + (barGroupHeight / seriesCount - barHeight) / 2;
-
-        canvas.fillRect(CartesianChartBase.LEFT_PADDING, barY, barWidth, barHeight, series.color);
+        canvas.fillRect(CartesianChartBase.LEFT_PADDING, slot.start, barWidth, slot.thickness, series.color);
       }
     } else {
-      const totalGroupSpace = chartAreaWidth / categoryCount;
-      const groupPadding = totalGroupSpace * this.groupGapRatio;
-      const barGroupWidth = totalGroupSpace - groupPadding;
-      const barWidth = (barGroupWidth / seriesCount) * this.barWidthRatio;
-
       for (let i = 0; i < coordinates.length; i++) {
         const p = coordinates[i];
         const barHeight = baselineY - p.y;
+        const slot = this.barSlot(
+          i,
+          seriesIndex,
+          seriesCount,
+          categoryCount,
+          CartesianChartBase.LEFT_PADDING,
+          chartAreaWidth
+        );
 
-        const groupStartX = CartesianChartBase.LEFT_PADDING + i * totalGroupSpace + groupPadding / 2;
-        const barX =
-          groupStartX + seriesIndex * (barGroupWidth / seriesCount) + (barGroupWidth / seriesCount - barWidth) / 2;
+        canvas.fillRect(slot.start, p.y, slot.thickness, barHeight, series.color);
+      }
+    }
+  }
 
-        canvas.fillRect(barX, p.y, barWidth, barHeight, series.color);
+  /**
+   * Where one bar sits along the category axis: its leading edge and its thickness.
+   * The axis runs from `axisStart` for `axisLength` (left to right in vertical mode, top to
+   * bottom in horizontal mode). Bars and their value labels both take their position from
+   * here, so a label always follows its bar.
+   */
+  private barSlot(
+    categoryIndex: number,
+    seriesIndex: number,
+    seriesCount: number,
+    categoryCount: number,
+    axisStart: number,
+    axisLength: number
+  ): { start: number; thickness: number } {
+    const totalGroupSpace = axisLength / categoryCount;
+    const groupPadding = totalGroupSpace * this.groupGapRatio;
+    const barGroupSize = totalGroupSpace - groupPadding;
+    const thickness = (barGroupSize / seriesCount) * this.barWidthRatio;
+
+    const groupStart = axisStart + categoryIndex * totalGroupSpace + groupPadding / 2;
+    const start =
+      groupStart + seriesIndex * (barGroupSize / seriesCount) + (barGroupSize / seriesCount - thickness) / 2;
+
+    return { start, thickness };
+  }
+
+  /**
+   * Draws each value label against its own bar: centred above it in vertical mode, and to the
+   * right of it, centred on its thickness, in horizontal mode. The base implementation places
+   * labels at the middle of the category, which is right for one mark per category but would
+   * print the labels of every series in a group on top of each other.
+   */
+  protected override drawValueLabels(
+    canvas: ICanvas,
+    data: ChartData,
+    chartAreaWidth: number,
+    chartAreaHeight: number,
+    baselineY: number,
+    _topY: number
+  ): void {
+    if (!this.showValueLabels) return;
+
+    const seriesCount = data.series.length;
+    const topAreaY = baselineY - chartAreaHeight;
+
+    for (let seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
+      const series = data.series[seriesIndex];
+      const categoryCount = series.dataPoints.length;
+      const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
+      const offset = this.getLabelVerticalOffset(series);
+
+      for (let i = 0; i < categoryCount; i++) {
+        const point = coordinates[i];
+        const text = series.dataPoints[i].formattedValue;
+
+        if (this.orientation === ChartOrientation.Horizontal) {
+          const slot = this.barSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
+          canvas.drawText(
+            point.x + offset,
+            slot.start + slot.thickness / 2 - this.labelFontSize / 2,
+            text,
+            series.color,
+            this.labelFontSize,
+            this.fontFamily,
+            TextAlignment.Left
+          );
+        } else {
+          const slot = this.barSlot(
+            i,
+            seriesIndex,
+            seriesCount,
+            categoryCount,
+            CartesianChartBase.LEFT_PADDING,
+            chartAreaWidth
+          );
+          canvas.drawText(
+            slot.start + slot.thickness / 2,
+            point.y - offset - this.labelFontSize,
+            text,
+            series.color,
+            this.labelFontSize,
+            this.fontFamily,
+            TextAlignment.Center
+          );
+        }
       }
     }
   }

@@ -8,6 +8,7 @@ import { FontMetrics } from '../../src/Typography/FontMetrics';
 import { beginDocumentFontMetricScope } from '../../src/Typography/DocumentFontMetricScope';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { pdfToText } from '../helpers/test-base';
+import { embeddedFontFamily } from '../../src/Drawing/SvgCanvas';
 
 /**
  * Document fonts - shared conformance fixture `fonts/document-font-resolution` (spec 16).
@@ -277,6 +278,43 @@ describe('document fonts in a document', () => {
     const { fontFaceCss } = await doc.generateSvgDocumentAsync();
 
     expect(fontFaceCss).toContain('@font-face');
+    doc.dispose();
+  });
+
+  it.each([
+    ['virtual:docfont/1/inter:400:n', 'bpf-docfont-inter-400-n'],
+    ['virtual:docfont/999/inter:400:n', 'bpf-docfont-inter-400-n'],
+    ['virtual:docfont/2/inter:700:i', 'bpf-docfont-inter-700-i'],
+    ['virtual:fallback:virtual:docfont/3/inter:400:n', 'bpf-virtual-fallback-docfont-inter-400-n'],
+    ['Helvetica-Bold', 'bpf-helvetica-bold'],
+  ])('uses a stable SVG face alias for %s', (input, expected) => {
+    expect(embeddedFontFamily(input)).toBe(expected);
+  });
+
+  it('exports the same SVG references for independently created documents', async () => {
+    const build = () => {
+      const doc = new Document();
+      const face = doc.fonts.add(sansRegular, { family: 'Inter' });
+      doc.add(new TextBlock({ text: 'Same face', fontName: face.fontName }));
+      return doc;
+    };
+    const a = build();
+    const b = build();
+    const first = await a.generateSvgDocumentAsync();
+    const second = await b.generateSvgDocumentAsync();
+    expect(first.pages).toEqual(second.pages);
+    expect(first.fontFaceCss).toContain("font-family:'bpf-docfont-inter-400-n'");
+    expect(second.fontFaceCss).toContain("font-family:'bpf-docfont-inter-400-n'");
+    expect(first.pages.join('')).not.toContain('virtual:docfont/');
+    a.dispose();
+    b.dispose();
+  });
+
+  it('embeds document-owned bytes before async PDF preloading', async () => {
+    const doc = new Document();
+    const face = doc.fonts.add(sansRegular, { family: 'Inter' });
+    doc.add(new TextBlock({ text: 'Owned font', fontName: face.fontName }));
+    expect(pdfToText(await doc.generateBytesAsync())).toContain('/FontFile2');
     doc.dispose();
   });
 

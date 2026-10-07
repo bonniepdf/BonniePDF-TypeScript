@@ -343,112 +343,70 @@ export class QrCodeEncoder {
   }
 
   private getPenaltyScore(): number {
-    const sz = this.size;
-    const mod = this.modules;
     let result = 0;
+    const size = this.size;
 
-    // Rule 1: 5+ consecutive same-color modules in row or column
-    for (let y = 0; y < sz; y++) {
-      for (let xOrY = 0; xOrY < 2; xOrY++) {
-        let runColor = false;
-        let runLen = 0;
-        for (let x = 0; x < sz; x++) {
-          const c = xOrY === 0 ? mod[y][x] : mod[x][y];
-          if (c === runColor) {
-            runLen++;
-            if (runLen === 5) result += 3;
-            else if (runLen > 5) result++;
-          } else {
-            runColor = c;
-            runLen = 1;
-          }
+    // A seven-run history detects scaled finder-like patterns and includes the
+    // light border beyond each edge, which a fixed eleven-module window misses.
+    const scoreLine = (read: (index: number) => boolean): number => {
+      const history = new Array<number>(7).fill(0);
+      const remember = (length: number): void => {
+        if (history[0] === 0) length += size;
+        history.pop();
+        history.unshift(length);
+      };
+      const finderPatterns = (): number => {
+        const unit = history[1];
+        const core =
+          unit > 0 && history[2] === unit && history[3] === 3 * unit && history[4] === unit && history[5] === unit;
+        return (
+          Number(core && history[0] >= 4 * unit && history[6] >= unit) +
+          Number(core && history[6] >= 4 * unit && history[0] >= unit)
+        );
+      };
+      let score = 0;
+      let color = false;
+      let length = 0;
+      for (let index = 0; index < size; index++) {
+        const next = read(index);
+        if (next === color) {
+          length++;
+          if (length === 5) score += 3;
+          else if (length > 5) score++;
+        } else {
+          remember(length);
+          if (!color) score += 40 * finderPatterns();
+          color = next;
+          length = 1;
         }
       }
+      if (color) {
+        remember(length);
+        length = 0;
+      }
+      remember(length + size);
+      return score + 40 * finderPatterns();
+    };
+    for (let index = 0; index < size; index++) {
+      result += scoreLine(position => this.modules[index][position]);
+      result += scoreLine(position => this.modules[position][index]);
     }
 
-    // Rule 2: 2×2 blocks of same color
-    for (let y = 0; y < sz - 1; y++) {
-      for (let x = 0; x < sz - 1; x++) {
-        const c = mod[y][x];
-        if (c === mod[y][x + 1] && c === mod[y + 1][x] && c === mod[y + 1][x + 1]) result += 3;
+    for (let y = 0; y < size - 1; y++) {
+      for (let x = 0; x < size - 1; x++) {
+        const color = this.modules[y][x];
+        if (
+          color === this.modules[y][x + 1] &&
+          color === this.modules[y + 1][x] &&
+          color === this.modules[y + 1][x + 1]
+        )
+          result += 3;
       }
     }
-
-    // Rule 3: patterns resembling finder pattern
-    for (let y = 0; y < sz; y++) {
-      for (let x = 0; x < sz - 10; x++) {
-        const r = mod[y];
-        if (
-          r[x] &&
-          !r[x + 1] &&
-          r[x + 2] &&
-          r[x + 3] &&
-          r[x + 4] &&
-          !r[x + 5] &&
-          r[x + 6] &&
-          !r[x + 7] &&
-          !r[x + 8] &&
-          !r[x + 9] &&
-          !r[x + 10]
-        )
-          result += 40;
-        if (
-          !r[x] &&
-          !r[x + 1] &&
-          !r[x + 2] &&
-          !r[x + 3] &&
-          r[x + 4] &&
-          !r[x + 5] &&
-          r[x + 6] &&
-          r[x + 7] &&
-          r[x + 8] &&
-          !r[x + 9] &&
-          r[x + 10]
-        )
-          result += 40;
-      }
-    }
-    for (let x = 0; x < sz; x++) {
-      for (let y = 0; y < sz - 10; y++) {
-        if (
-          mod[y][x] &&
-          !mod[y + 1][x] &&
-          mod[y + 2][x] &&
-          mod[y + 3][x] &&
-          mod[y + 4][x] &&
-          !mod[y + 5][x] &&
-          mod[y + 6][x] &&
-          !mod[y + 7][x] &&
-          !mod[y + 8][x] &&
-          !mod[y + 9][x] &&
-          !mod[y + 10][x]
-        )
-          result += 40;
-        if (
-          !mod[y][x] &&
-          !mod[y + 1][x] &&
-          !mod[y + 2][x] &&
-          !mod[y + 3][x] &&
-          mod[y + 4][x] &&
-          !mod[y + 5][x] &&
-          mod[y + 6][x] &&
-          mod[y + 7][x] &&
-          mod[y + 8][x] &&
-          !mod[y + 9][x] &&
-          mod[y + 10][x]
-        )
-          result += 40;
-      }
-    }
-
-    // Rule 4: proportion of dark modules deviating from 50%
     let dark = 0;
-    for (const row of mod) for (const c of row) if (c) dark++;
-    const total = sz * sz;
-    const k = Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1;
-    result += k * 10;
-
-    return result;
+    for (const row of this.modules) for (const color of row) if (color) dark++;
+    const total = size * size;
+    return result + (Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1) * 10;
   }
 
   // ---- Reed-Solomon GF(256) ----

@@ -164,7 +164,7 @@ export class PdfEncryptionKey {
     permBytes[3] = (permissions >> 24) & 0xff;
 
     let toHash: Uint8Array;
-    if (this.revision >= 3 && !encryptMetadata) {
+    if (this.revision >= 4 && !encryptMetadata) {
       // Add 0xFFFFFFFF if not encrypting metadata
       const noEncryptFlag = new Uint8Array([0xff, 0xff, 0xff, 0xff]);
       toHash = PdfEncryptionKey.concatenate(userPadded, oEntry, permBytes, documentId, noEncryptFlag);

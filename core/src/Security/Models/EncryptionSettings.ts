@@ -45,8 +45,9 @@ export class EncryptionSettings {
   public permissions: PdfPermissions;
 
   /**
-   * Gets or sets whether to encrypt document metadata.
-   * When false, metadata is not encrypted.
+   * Whether AES-256 encrypts the XMP metadata stream.
+   * When false, XMP remains readable without a password; other PDF strings stay encrypted.
+   * Legacy RC4 always encrypts metadata. Defaults to true.
    */
   public encryptMetadata: boolean;
 

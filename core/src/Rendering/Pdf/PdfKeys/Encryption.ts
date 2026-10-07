@@ -38,4 +38,7 @@ export const Encryption = {
 
   /** Name of the default crypt filter for strings. */
   StringFilter: '/StrF',
+
+  /** Whether the security handler encrypts document metadata streams. */
+  EncryptMetadata: '/EncryptMetadata',
 } as const;

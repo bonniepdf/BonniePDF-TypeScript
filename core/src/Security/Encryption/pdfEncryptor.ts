@@ -149,6 +149,7 @@ export class PdfEncryptor {
       [PdfKeys.Encryption.CryptFilters, '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
       [PdfKeys.Encryption.StreamFilter, '/StdCF'],
       [PdfKeys.Encryption.StringFilter, '/StdCF'],
+      [PdfKeys.Encryption.EncryptMetadata, this.settings.encryptMetadata ? 'true' : 'false'],
     ]);
   }
 

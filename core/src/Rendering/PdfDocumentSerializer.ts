@@ -487,8 +487,16 @@ export class PdfDocumentSerializer {
     const preRegistry = new PdfResourceRegistry();
     preRegistry.diagnostics = this.diagnostics;
     preRegistry.conformance = settings.conformance;
-    for (const path of embeddedPaths) {
-      preRegistry.registerFont(path); // registers with font=null initially
+    const registrationScope = beginDocumentFontMetricScope(
+      settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+      undefined,
+      undefined,
+      this.document.fonts
+    );
+    try {
+      for (const path of embeddedPaths) preRegistry.registerFont(path);
+    } finally {
+      registrationScope.dispose();
     }
     await preRegistry.preloadAllFontsAsync();
     throwIfAborted(signal);

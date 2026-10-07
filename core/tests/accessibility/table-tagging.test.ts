@@ -12,6 +12,7 @@ import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { SemanticRole } from '../../src/Rendering/Tagging/SemanticRole';
 import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
+import { PdfSize } from '../../src/Configuration/PdfSize';
 
 /**
  * table structure tagging. Mirrors the .NET TableTaggingTests:
@@ -20,6 +21,26 @@ import { pdfToText } from '../helpers/test-base';
  * the cell's StructElem.
  */
 describe('Table tagging', () => {
+  it('uses body groups for repeated headers after one head group', async () => {
+    const repeated = new Document({
+      settings: {
+        pageSize: new PdfSize(200, 150),
+        margin: 10,
+        accessibility: 'pdf/ua-1',
+        language: 'en-GB',
+      },
+    });
+    const table = new Table(100);
+    table.addHeader(new TextBlock('Column', { fontSize: 12 }));
+    for (let i = 0; i < 20; i++) table.addRow(new TextBlock('Value', { fontSize: 12 }));
+    repeated.add(table);
+    const pages = (await repeated.generateSvgDocumentAsync()).pages.length;
+    expect(pages).toBeGreaterThan(1);
+    const pdf = pdfToText(await repeated.generateBytesAsync());
+    expect(pdf.split('/S /THead').length - 1).toBe(1);
+    expect(pdf.split('/S /TBody').length - 1).toBe(pages * 2 - 1);
+    repeated.dispose();
+  });
   let doc: Document;
 
   afterEach(() => {

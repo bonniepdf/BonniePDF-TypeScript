@@ -100,7 +100,19 @@ export async function exportSvgDocumentAsync(
   // PDF/UA requires standard fonts to be embedded independently of PDF/A.
   // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
   registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
-  for (const path of embeddedPaths) registry.registerFont(path);
+  // Register document-owned bytes before asynchronous preloading can cache a missing face.
+  // Keep this scope synchronous so another document's async export cannot inherit it.
+  const registrationScope = beginDocumentFontMetricScope(
+    settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+    undefined,
+    undefined,
+    document.fonts
+  );
+  try {
+    for (const path of embeddedPaths) registry.registerFont(path);
+  } finally {
+    registrationScope.dispose();
+  }
   await registry.preloadAllFontsAsync();
   throwIfAborted(opts.signal);
 

@@ -1,4 +1,5 @@
 import * as PdfKeys from '../Pdf/PdfKeys';
+import { encryptPdfStrings } from '../Pdf/PdfStringEncryption';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { PdfVersion } from '../../Configuration/PdfVersion';
 import { ZoomLevel } from '../../Configuration/ZoomLevel';
@@ -78,6 +79,13 @@ export class PdfWriter implements IPdfWriter {
   private readonly _offsets = new Map<number, number>();
   private _currentObjId = 0;
   private _encryptId = 0;
+
+  private encryptObjectStrings(id: number, fragment: string): string {
+    const encryptor = this.encryptor;
+    return !encryptor || id === this._encryptId
+      ? fragment
+      : encryptPdfStrings(fragment, bytes => encryptor.encryptData(bytes, id));
+  }
   public encryptor: PdfEncryptor | null = null;
 
   constructor(version: (typeof PdfVersion)[keyof typeof PdfVersion] = PdfVersion.Pdf14) {
@@ -106,7 +114,7 @@ export class PdfWriter implements IPdfWriter {
 
     this._output.writeString(`${id} 0 obj\n<<\n`);
     for (const [key, value] of dictionary) {
-      this._output.writeString(`  ${key} ${value}\n`);
+      this._output.writeString(`  ${key} ${this.encryptObjectStrings(id, value)}\n`);
     }
 
     if (stream != null) {
@@ -130,7 +138,7 @@ export class PdfWriter implements IPdfWriter {
    */
   public writeRawObject(id: number, body: string): void {
     this._offsets.set(id, this._output.bytePosition);
-    this._output.writeString(`${id} 0 obj\n${body}\nendobj\n`);
+    this._output.writeString(`${id} 0 obj\n${this.encryptObjectStrings(id, body)}\nendobj\n`);
   }
 
   /**
@@ -152,7 +160,7 @@ export class PdfWriter implements IPdfWriter {
     this._offsets.set(id, this._output.bytePosition);
     this._output.writeString(`${id} 0 obj\n<<\n`);
     for (const [key, value] of dictionary) {
-      this._output.writeString(`  ${key} ${value}\n`);
+      this._output.writeString(`  ${key} ${this.encryptObjectStrings(id, value)}\n`);
     }
     this._output.writeString(`  /Length ${toWrite.length}\n>>\nstream\n`);
     this._output.writeBytes(toWrite);
@@ -183,7 +191,7 @@ export class PdfWriter implements IPdfWriter {
     this._offsets.set(id, this._output.bytePosition);
     this._output.writeString(`${id} 0 obj\n<<\n`);
     for (const [key, value] of dictionary) {
-      this._output.writeString(`  ${key} ${value}\n`);
+      this._output.writeString(`  ${key} ${this.encryptObjectStrings(id, value)}\n`);
     }
     this._output.writeString('  /Filter /FlateDecode\n');
     this._output.writeString(`  /Length ${toWrite.length}\n>>\nstream\n`);
@@ -193,13 +201,13 @@ export class PdfWriter implements IPdfWriter {
 
   /**
    * Writes a binary object bypassing encryption.
-   * Used for XMP metadata which must not be encrypted even when encryption is active.
+   * Used for XMP metadata when metadata encryption is explicitly disabled.
    */
   public writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void {
     this._offsets.set(id, this._output.bytePosition);
     this._output.writeString(`${id} 0 obj\n<<\n`);
     for (const [key, value] of dictionary) {
-      this._output.writeString(`  ${key} ${value}\n`);
+      this._output.writeString(`  ${key} ${this.encryptObjectStrings(id, value)}\n`);
     }
     this._output.writeString(`  /Length ${bytes.length}\n>>\nstream\n`);
     this._output.writeBytes(bytes);

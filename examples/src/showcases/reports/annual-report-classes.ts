@@ -49,7 +49,7 @@ const TERTIARY_TEXT = ColorPalette.amber[700];
 
 const COVER_BG = ColorPalette.blue[900]; // deepest primary tint - cover field
 const BAND_BG = ColorPalette.blue[100]; // lightest primary tint - header/footer bands
-const INK = ColorPalette.slate[700]; // body copy
+const INK = ColorPalette.slate[600]; // body copy
 const HEADING = ColorPalette.blue[800]; // section headings
 
 // A4 portrait. The generous margin doubles as the height of the full-bleed
@@ -71,7 +71,7 @@ const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
-}).format(new Date())}`;
+}).format(new Date(2026, 5, 16, 10, 30, 0))}`;
 
 export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PAGE, MARGIN);

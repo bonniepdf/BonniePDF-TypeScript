@@ -81,7 +81,7 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: pageTemplate({
         default: new TextBlock(
-          `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+          `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
       }),
@@ -226,7 +226,7 @@ export function generate(): Document {
             color: INK,
             margin: { top: 2, bottom: 2 },
           }),
-          new TextBlock('Reported 06 Jul 2026 11:37  ·  Analyser: Sysmex XN-1000 / Roche cobas c503', {
+          new TextBlock('Reported 06 Jul 2026 11:37  -  Analyser: Sysmex XN-1000 / Roche cobas c503', {
             fontSize: 8.5,
             color: MUTED,
           }),

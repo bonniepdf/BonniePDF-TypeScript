@@ -128,7 +128,7 @@ function rowLabel(name: PaletteName): Container {
   const text = new TextBlock(name);
   text.fontName = StandardFonts.Helvetica;
   text.fontSize = 9;
-  text.color = ColorPalette.slate[700];
+  text.color = ColorPalette.slate[600];
 
   const box = new Container();
   box.width = LABEL_WIDTH;

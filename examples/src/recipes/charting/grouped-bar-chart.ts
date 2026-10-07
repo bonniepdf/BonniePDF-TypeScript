@@ -82,7 +82,7 @@ export function generate(): Document {
   const series = (name: string, color: ColorInput, values: number[]) => ({
     name,
     color,
-    dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i] })),
+    dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })),
   });
 
   const data = new ChartData({

@@ -157,10 +157,10 @@ export function generate(): Document {
   s9.add(dashList);
   doc.add(s9);
 
-  const s10 = section('Custom (★)', 's-custom');
-  const customList = new UnorderedList({ bulletStyle: 'custom', customBullet: '★', fontSize: 12, itemSpacing: 6 });
+  const s10 = section('Custom (*)', 's-custom');
+  const customList = new UnorderedList({ bulletStyle: 'custom', customBullet: '*', fontSize: 12, itemSpacing: 6 });
   customList.addItem('Any character can serve as a bullet.');
-  customList.addItem('Stars, arrows, or checkmarks all work.');
+  customList.addItem('Choose a marker supported by the selected font.');
   customList.addItem('Choose one that suits the document tone.');
   s10.add(customList);
   doc.add(s10);

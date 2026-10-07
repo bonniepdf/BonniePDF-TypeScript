@@ -6,17 +6,17 @@
 /**
  * Custom Fonts — TrueType font embedding with full Unicode coverage.
  *
- * Set `fontName` on any TextBlock to the URL (browser) or file path (Node.js) of a
- * TrueType / OpenType font. BonniePDF embeds a compact glyph subset so only the
- * characters actually used are stored in the PDF.
+ * Supply three font files as bytes in the asset dictionary and register them on
+ * this document. Set each block's fontName to the returned face identifier.
+ * BonniePDF embeds only the glyphs used; the document's fallback faces cover
+ * symbols missing from the primary font.
  *
  * This example uses three Noto fonts to cover different Unicode blocks:
  *   NotoSans          — Latin, Greek, Cyrillic, currency (BMP)
  *   NotoSansMath      — Arrows (U+2190–U+21FF) and Mathematical Operators (U+2200–U+22FF)
  *   NotoSansSymbols2  — Miscellaneous Symbols (U+2600) and Dingbats (U+2700)
  *
- * Serve the fonts as static assets (e.g. public/fonts/) and reference by URL.
- * In Node.js, use absolute file paths instead.
+ * Load the bytes in your application host; the builder works in Node or the browser.
  */
 import {
   Document,
@@ -32,10 +32,6 @@ import {
   PdfAConformance,
 } from '@bonniepdf/core';
 
-const FONT = '/fonts/NotoSans-Regular.ttf';
-const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
-const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
-
 /**
  * The **class / construct-then-mutate** companion to `custom-fonts.ts`.
  *
@@ -48,12 +44,12 @@ const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
  * `custom-fonts.ts` (an equivalence test binds the two). Reach for the options
  * form first; this variant exists to show what it desugars to.
  */
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily(FONT).withSize(11).withColor(ColorPalette.slate[600]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Noto Sans').withSize(11).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Custom Fonts';
@@ -62,6 +58,16 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, pdf/a, accessibility, fonts, unicode, truetype';
 
   const doc = new Document(settings, metadata);
+
+  function font(path: string): string {
+    const bytes = assets?.get(path);
+    if (!bytes) throw new Error(`Supply ${path} in the asset dictionary.`);
+    return doc.fonts.add(bytes).fontName;
+  }
+  const FONT = font('fonts/NotoSans-Regular.ttf');
+  const MATH_FONT = font('fonts/NotoSansMath-Regular.ttf');
+  const SYMBOLS_FONT = font('fonts/NotoSansSymbols2-Regular.ttf');
+  doc.settings.defaultTextStyle.withFamily(FONT);
 
   // ── Title ─────────────────────────────────────────────────────────────────────
 
@@ -163,18 +169,16 @@ export function generate(): Document {
   embedded.fontName = FONT;
   doc.add(embedded);
 
+  function section(doc: Document, title: string, tocId: string): void {
+    const h = new Heading(title);
+    h.tocIdentifier = tocId;
+    h.level = 2;
+    h.fontName = FONT;
+    h.fontSize = 13;
+    h.color = ColorPalette.indigo[600];
+    h.margin = new Thickness(0, 12, 0, 6);
+    doc.add(h);
+  }
+
   return doc;
-}
-
-// Local helpers and sample types used by this document.
-
-function section(doc: Document, title: string, tocId: string): void {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = FONT;
-  h.fontSize = 13;
-  h.color = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 12, 0, 6);
-  doc.add(h);
 }

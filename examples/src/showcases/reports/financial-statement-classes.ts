@@ -102,7 +102,7 @@ export function generate(): Document {
 
   function pageFooter(): TextBlock {
     const f = new TextBlock(
-      `Sample Company Ltd  ·  Company no. 07741122  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+      `Sample Company Ltd  -  Company no. 07741122  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -123,7 +123,7 @@ export function generate(): Document {
   doc.add(company('Sample Company Ltd'));
   doc.add(h1('Annual Report and Financial Statements'));
   doc.add(sub('For the year ended 31 March 2026'));
-  doc.add(sub('Company registration number 07741122 (England & Wales)  ·  Prepared under UK-adopted IFRS'));
+  doc.add(sub('Company registration number 07741122 (England & Wales)  -  Prepared under UK-adopted IFRS'));
   doc.add(gap(18));
 
   // ── Statement 1: Comprehensive income ─────────────────────────────────────

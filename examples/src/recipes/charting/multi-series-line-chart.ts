@@ -80,7 +80,7 @@ export function generate(): Document {
     })
   );
 
-  const points = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i] }));
+  const points = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' }));
 
   const data = new ChartData({
     title: 'Year-over-Year Revenue Comparison',

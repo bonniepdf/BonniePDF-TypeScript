@@ -87,7 +87,9 @@ export function generate(): Document {
 
   const data = new ChartData({
     title: 'Monthly Sales',
-    series: [{ color: C_INDIGO, dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i] })) }],
+    series: [
+      { color: C_INDIGO, dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) },
+    ],
     yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
   });
 

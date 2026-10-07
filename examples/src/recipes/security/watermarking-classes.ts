@@ -41,7 +41,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
 
   // A tuned watermark: a large, faint diagonal DRAFT sits over the content on
   // every page. Watermark exposes the font, size, colour, opacity and
@@ -135,7 +135,7 @@ export function generate(): Document {
   );
   para1.fontName = StandardFonts.Helvetica;
   para1.fontSize = 11;
-  para1.color = ColorPalette.slate[700];
+  para1.color = ColorPalette.slate[600];
   para1.alignment = TextAlignment.Justify;
   para1.margin = new Thickness(0, 0, 0, 12);
   doc.add(para1);
@@ -147,7 +147,7 @@ export function generate(): Document {
   );
   para2.fontName = StandardFonts.Helvetica;
   para2.fontSize = 11;
-  para2.color = ColorPalette.slate[700];
+  para2.color = ColorPalette.slate[600];
   para2.alignment = TextAlignment.Justify;
   doc.add(para2);
 
@@ -166,7 +166,7 @@ export function generate(): Document {
   );
   para3.fontName = StandardFonts.Helvetica;
   para3.fontSize = 11;
-  para3.color = ColorPalette.slate[700];
+  para3.color = ColorPalette.slate[600];
   para3.alignment = TextAlignment.Justify;
   doc.add(para3);
 

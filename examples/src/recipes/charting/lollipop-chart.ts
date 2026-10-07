@@ -82,7 +82,7 @@ export function generate(): Document {
 
   const data = new ChartData({
     title: 'Quarterly Revenue',
-    series: [{ color: C_PINK, dataPoints: labels.map((label, i) => ({ label, value: values[i] })) }],
+    series: [{ color: C_PINK, dataPoints: labels.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) }],
     yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
     xAxis: { legend: 'Quarter' },
   });

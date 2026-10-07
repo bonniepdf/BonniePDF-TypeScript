@@ -19,7 +19,7 @@ export function generate(): Document {
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-700' },
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
       defaultZoom: 'fit-page',
       displayDocTitle: true,
     },
@@ -109,7 +109,7 @@ function sectionLabel(text: string, marginBottom?: number): Heading {
     level: 2,
     fontName: StandardFonts.HelveticaBold,
     fontSize: 14,
-    color: 'slate-700',
+    color: 'slate-600',
     margin: marginBottom === undefined ? undefined : { bottom: marginBottom },
   });
 }

@@ -53,7 +53,7 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const CHART_BG = '#fafafa';
 
 /** Twelve monthly data points from a values array. */
-const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i] }));
+const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' }));
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
@@ -226,7 +226,11 @@ export function generate(): Document {
         series: [
           {
             color: C_PINK,
-            dataPoints: ['Q1', 'Q2', 'Q3', 'Q4'].map((label, i) => ({ label, value: [4500, 6200, 8500, 11500][i] })),
+            dataPoints: ['Q1', 'Q2', 'Q3', 'Q4'].map((label, i) => ({
+              label,
+              value: [4500, 6200, 8500, 11500][i],
+              labelFormat: 'N0',
+            })),
           },
         ],
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
@@ -255,7 +259,7 @@ export function generate(): Document {
           {
             color: C_TEAL,
             dataPoints: ['Prod A', 'Prod B', 'Prod C', 'Prod D', 'Prod E', 'Prod F', 'Prod G', 'Prod H'].map(
-              (label, i) => ({ label, value: [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500][i] })
+              (label, i) => ({ label, value: [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500][i], labelFormat: 'N0' })
             ),
           },
         ],
@@ -305,7 +309,7 @@ export function generate(): Document {
   pageHeader(
     doc,
     'Multi-Series Line Chart: Year-over-Year Comparison',
-    `Comparing ${year - 1} and ${year} revenue with a shared axis`
+    `Comparing ${year - 1} and ${year} revenue with multiple series`
   );
   doc.add(
     new LineChart({

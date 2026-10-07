@@ -55,12 +55,15 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' },
       footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} - BonniePDF Standard Formats`, {
-          fontName: StandardFonts.Helvetica,
-          fontSize: 9,
-          color: 'slate-400',
-          alignment: 'center',
-        }),
+        default: new TextBlock(
+          `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken} - BonniePDF Standard Formats`,
+          {
+            fontName: StandardFonts.Helvetica,
+            fontSize: 9,
+            color: 'slate-400',
+            alignment: 'center',
+          }
+        ),
       }),
     },
     metadata: {

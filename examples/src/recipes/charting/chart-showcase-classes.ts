@@ -133,6 +133,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -180,6 +181,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -190,6 +192,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -200,6 +203,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -245,6 +249,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -294,6 +299,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -345,6 +351,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [4500, 6200, 8500, 11500][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -395,6 +402,7 @@ export function generate(): Document {
         const p = new ChartDataPoint();
         p.label = label;
         p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500][i];
+        p.labelFormat = 'N0';
         return p;
       }
     );
@@ -447,6 +455,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [7234, 4891, 8456, 3127, 9542, 6789, 5234, 8901, 2456, 7890, 6123, 9876][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -480,7 +489,7 @@ export function generate(): Document {
     title.margin = new Thickness(0, 0, 0, 10);
     doc.add(title);
 
-    const subtitle = new TextBlock(`Comparing ${year - 1} and ${year} revenue with a shared axis`);
+    const subtitle = new TextBlock(`Comparing ${year - 1} and ${year} revenue with multiple series`);
     subtitle.fontSize = 14;
     subtitle.color = ColorPalette.slate[600];
     subtitle.alignment = TextAlignment.Center;
@@ -494,6 +503,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000][i];
+      p.labelFormat = 'N0';
       return p;
     });
 
@@ -504,6 +514,7 @@ export function generate(): Document {
       const p = new ChartDataPoint();
       p.label = label;
       p.value = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000][i];
+      p.labelFormat = 'N0';
       return p;
     });
 

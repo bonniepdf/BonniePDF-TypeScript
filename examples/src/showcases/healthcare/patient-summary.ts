@@ -96,7 +96,7 @@ export function generate(): Document {
 
   const detailsRight = new VerticalStack({
     children: [
-      detailRow('NHS number', '943 476 5919'),
+      detailRow('Patient ID', 'SAMPLE-9434765919'),
       detailRow('Ward', 'Cardiology - 4B'),
       detailRow('Admitted', '16 Jun 2026'),
     ],

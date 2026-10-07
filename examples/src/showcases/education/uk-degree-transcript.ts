@@ -72,7 +72,7 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: pageTemplate({
         default: new TextBlock(
-          `Sample University  ·  Transcript 20458812  ·  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+          `Sample University  -  Transcript 20458812  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
           { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
       }),
@@ -94,7 +94,7 @@ export function generate(): Document {
           fontSize: 16,
           color: NAVY,
         }),
-        new TextBlock('Founded 1887  ·  Registrar’s Office', { fontSize: 9, color: MUTED, margin: { top: 2 } }),
+        new TextBlock("Founded 1887 - Registrar's Office", { fontSize: 9, color: MUTED, margin: { top: 2 } }),
       ],
     }),
     new TextBlock('ACADEMIC TRANSCRIPT', {
@@ -149,7 +149,7 @@ export function generate(): Document {
           // the first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede
           // any H2); the section headings below are H2. Styling is unchanged.
           h1('Upper Second-Class Honours (2:1)'),
-          new TextBlock(`Weighted average ${weighted.toFixed(1)}%  ·  ${total} credits  ·  FHEQ Level 6`, {
+          new TextBlock(`Weighted average ${weighted.toFixed(1)}%  -  ${total} credits  -  FHEQ Level 6`, {
             fontSize: 9,
             color: INK,
           }),

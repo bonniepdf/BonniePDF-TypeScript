@@ -85,7 +85,7 @@ export function generate(): Document {
   const series = (name: string, color: ColorInput, values: number[]) => ({
     name,
     color,
-    dataPoints: quarters.map((label, i) => ({ label, value: values[i] })),
+    dataPoints: quarters.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })),
   });
 
   const data = new ChartData({
@@ -104,10 +104,11 @@ export function generate(): Document {
     orientation: ChartOrientation.Horizontal,
     height: 380,
     stretchToFit: true,
+    showValueLabels: true,
     barWidthRatio: 0.7,
     groupGapRatio: 0.25,
     fontFamily: StandardFonts.Helvetica,
-    showValueLabels: false,
+
     showLegend: true,
     backgroundColor: '#fafafa',
   });

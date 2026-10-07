@@ -31,7 +31,7 @@ export function generate(): Document {
     metadata: {
       title: 'Simple Document Example',
       author: 'BonniePDF',
-      subject: 'Demonstrating the Document API - TypeScript / Browser',
+      subject: 'Demonstrating the Document API',
       keywords: 'pdf, document, example, accessibility, BonniePDF',
     },
   });
@@ -49,7 +49,7 @@ export function generate(): Document {
   );
 
   doc.add(
-    new TextBlock('This PDF was generated entirely in the browser using @bonniepdf/core.', {
+    new TextBlock('This PDF was created using the high-level Document API.', {
       margin: { bottom: 16 },
     })
   );
@@ -68,7 +68,7 @@ export function generate(): Document {
   doc.add(
     new UnorderedList({
       fontSize: 11,
-      itemSpacing: 6,
+      itemSpacing: 2,
       items: [
         'Simple, intuitive API',
         'Built-in metadata support',
@@ -134,7 +134,7 @@ export function generate(): Document {
     })
   );
 
-  doc.add(new TextBlock(`${squareSize.width}pt × ${squareSize.height}pt`, { alignment: 'center' }));
+  doc.add(new TextBlock(`${squareSize.width}pt x ${squareSize.height}pt`, { alignment: 'center' }));
 
   return doc;
 }

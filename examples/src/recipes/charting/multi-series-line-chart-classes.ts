@@ -96,6 +96,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = label;
     p.value = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000][i];
+    p.labelFormat = 'N0';
     return p;
   });
 
@@ -106,6 +107,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = label;
     p.value = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000][i];
+    p.labelFormat = 'N0';
     return p;
   });
 

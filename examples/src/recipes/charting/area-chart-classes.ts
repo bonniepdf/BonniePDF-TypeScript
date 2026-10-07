@@ -93,6 +93,7 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = label;
     p.value = values[i];
+    p.labelFormat = 'N0';
     return p;
   });
 
@@ -103,6 +104,7 @@ export function generate(): Document {
   data.yAxis.maxValue = 15000;
   data.yAxis.stepCount = 5;
   data.yAxis.legend = 'Sales';
+  data.yAxis.verticalLegend = true;
   data.xAxis.legend = 'Month';
 
   const chart = new AreaChart();

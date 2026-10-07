@@ -81,14 +81,7 @@ const ORDER_NO = '4021';
  * `edge-receipt.ts`.
  */
 export function generate(): Document {
-  const now = new Date();
-  const stamp = new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(now);
+  const stamp = '16 Jun 2026 10:30';
 
   const settings = new DocumentSettings(PAGE, 16);
   settings.conformance = PdfAConformance.PdfA2a;
@@ -120,7 +113,7 @@ export function generate(): Document {
   // ── Order meta ──────────────────────────────────────────────────────────
   doc.add(kv('Order', `#${ORDER_NO}`));
   doc.add(kv('Date', stamp));
-  doc.add(kv('Served', 'Register 3 · Alex'));
+  doc.add(kv('Served', 'Register 3 - Alex'));
 
   doc.add(rule());
 
@@ -141,7 +134,7 @@ export function generate(): Document {
 
   doc.add(rule());
 
-  doc.add(kv('Card ···· 4242', gbp(total)));
+  doc.add(kv('Card **** 4242', gbp(total)));
   doc.add(kv('Approved', 'AUTH 06Q41X'));
 
   doc.add(rule());
@@ -178,7 +171,7 @@ export function generate(): Document {
   // ── Footer ──────────────────────────────────────────────────────────────
   doc.add(center('Thank you! Returns within 30 days', 8, INK));
   doc.add(center('with your receipt.', 8, MUTE));
-  doc.add(center('Generated at the edge with BonniePDF', 7, MUTE, 8));
+  doc.add(center('Generated with BonniePDF', 7, MUTE, 8));
 
   return doc;
 }

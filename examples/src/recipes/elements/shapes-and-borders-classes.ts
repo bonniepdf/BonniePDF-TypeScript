@@ -104,7 +104,7 @@ export function generate(): Document {
   const strokeText = new TextBlock('A rounded border with no background fill. The stroke follows the curved path.');
   strokeText.fontName = StandardFonts.Helvetica;
   strokeText.fontSize = 12;
-  strokeText.color = ColorPalette.slate[700];
+  strokeText.color = ColorPalette.slate[600];
   const strokeBox = new Container();
   strokeBox.border = new Border(2);
   strokeBox.borderColors = new BorderColors(ColorPalette.indigo[500]);
@@ -205,7 +205,7 @@ export function generate(): Document {
     const t = new TextBlock(label);
     t.fontName = StandardFonts.Helvetica;
     t.fontSize = 11;
-    t.color = ColorPalette.slate[700];
+    t.color = ColorPalette.slate[600];
     const c = new Container();
     c.backgroundColor = ColorPalette.slate[100];
     c.border = new Border(1);

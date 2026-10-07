@@ -34,11 +34,6 @@ import {
   PdfVersion,
 } from '@bonniepdf/core';
 
-const TEXT_FONT = '/fonts/NotoSans-Regular.ttf';
-const MATH_FONT = '/fonts/NotoSansMath-Regular.ttf';
-const SYMBOLS_FONT = '/fonts/NotoSansSymbols2-Regular.ttf';
-const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
-
 /**
  * The **class / construct-then-mutate** companion to `emojis-and-unicode.ts`.
  *
@@ -51,7 +46,7 @@ const EMOJI_FONT = '/fonts/NotoEmoji-Regular.ttf';
  * `emojis-and-unicode.ts` (an equivalence test binds the two). Reach for the
  * options form first; this variant exists to show what it desugars to.
  */
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings();
   // PDF/A intentionally not claimed — emoji fonts include COLR/CBDT tables
   // that archival validators reject. PDF/UA-1 is still applied; set the
@@ -60,7 +55,7 @@ export function generate(): Document {
   settings.conformance = PdfAConformance.None;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily(TEXT_FONT).withSize(11).withColor(ColorPalette.slate[600]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Noto Sans').withSize(11).withColor(ColorPalette.slate[600]);
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Emojis & Unicode';
@@ -69,6 +64,18 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, accessibility, emoji, unicode, fonts';
 
   const doc = new Document(settings, metadata);
+
+  // Document-local faces give every symbol the same fallback coverage in any generation order.
+  function font(path: string): string {
+    const bytes = assets?.get(path);
+    if (!bytes) throw new Error(`Supply ${path} in the asset dictionary.`);
+    return doc.fonts.add(bytes).fontName;
+  }
+  const TEXT_FONT = font('fonts/NotoSans-Regular.ttf');
+  const MATH_FONT = font('fonts/NotoSansMath-Regular.ttf');
+  const SYMBOLS_FONT = font('fonts/NotoSansSymbols2-Regular.ttf');
+  const EMOJI_FONT = font('fonts/NotoEmoji-Regular.ttf');
+  doc.settings.defaultTextStyle.withFamily(TEXT_FONT);
 
   // ── Title ─────────────────────────────────────────────────────────────────────
 
@@ -183,45 +190,43 @@ export function generate(): Document {
   }
   doc.add(mixed);
 
+  /** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
+  function sectionHeading(title: string, tocId: string): Heading {
+    const h = new Heading(title);
+    h.tocIdentifier = tocId;
+    h.level = 2;
+    h.fontName = TEXT_FONT;
+    h.fontSize = 13;
+    h.color = ColorPalette.indigo[600];
+    h.margin = new Thickness(0, 12, 0, 4);
+    return h;
+  }
+
+  function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
+    const section = new VerticalStack();
+    section.breakAllowed = false;
+    section.add(sectionHeading(title, tocId));
+    const b = new TextBlock(content);
+    b.fontName = font;
+    b.fontSize = 12;
+    b.color = ColorPalette.slate[600];
+    b.margin = new Thickness(0, 0, 0, 4);
+    section.add(b);
+    doc.add(section);
+  }
+
+  function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
+    const section = new VerticalStack();
+    section.breakAllowed = false;
+    section.add(sectionHeading(title, tocId));
+    const b = new TextBlock(content);
+    b.fontName = EMOJI_FONT;
+    b.fontSize = 20;
+    b.color = ColorPalette.slate[800];
+    b.margin = new Thickness(0, 0, 0, 4);
+    section.add(b);
+    doc.add(section);
+  }
+
   return doc;
-}
-
-// Local helpers and sample types used by this document.
-
-/** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
-function sectionHeading(title: string, tocId: string): Heading {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = TEXT_FONT;
-  h.fontSize = 13;
-  h.color = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 12, 0, 4);
-  return h;
-}
-
-function bmpSection(doc: Document, title: string, tocId: string, content: string, font: string): void {
-  const section = new VerticalStack();
-  section.breakAllowed = false;
-  section.add(sectionHeading(title, tocId));
-  const b = new TextBlock(content);
-  b.fontName = font;
-  b.fontSize = 12;
-  b.color = ColorPalette.slate[600];
-  b.margin = new Thickness(0, 0, 0, 4);
-  section.add(b);
-  doc.add(section);
-}
-
-function emojiSection(doc: Document, title: string, tocId: string, content: string): void {
-  const section = new VerticalStack();
-  section.breakAllowed = false;
-  section.add(sectionHeading(title, tocId));
-  const b = new TextBlock(content);
-  b.fontName = EMOJI_FONT;
-  b.fontSize = 20;
-  b.color = ColorPalette.slate[800];
-  b.margin = new Thickness(0, 0, 0, 4);
-  section.add(b);
-  doc.add(section);
 }

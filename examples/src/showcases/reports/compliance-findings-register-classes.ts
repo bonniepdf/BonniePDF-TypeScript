@@ -422,7 +422,7 @@ function priorityActions(critical: Finding[]): Container {
 
     const link = new SectionLink(`${finding.id} - ${finding.title}`, anchorFor(finding.id));
     link.fontName = StandardFonts.HelveticaBold;
-    link.fontSize = 10.5;
+    link.fontSize = 10;
     link.color = ColorPalette.blue[700];
     row.add(link, link.getPreferredWidth());
 

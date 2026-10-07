@@ -54,11 +54,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Format
+        env:
+          FORMAT_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           pnpm format
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet || (git add -A && git commit -m "chore: auto-format with Prettier" && git push origin HEAD:${{ github.head_ref || github.ref_name }})
+          git diff --quiet || (git add -A && git commit -m "chore: auto-format with Prettier" && git push origin "HEAD:$FORMAT_BRANCH")
 
       - name: Typecheck
         run: pnpm turbo typecheck
@@ -68,6 +70,12 @@ jobs:
 
       - name: Test
         run: pnpm --filter @bonniepdf/core run test
+
+      - name: Verify example authoring parity
+        run: pnpm --filter @bonniepdf/examples run verify-equivalence
+
+      - name: Verify self-contained playground examples
+        run: pnpm --filter @bonniepdf/examples run verify-standalone
 
       - name: Verify package exports
         run: node --input-type=module -e "import('@bonniepdf/core')"

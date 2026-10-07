@@ -49,6 +49,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Require cross-engine gallery validation
+        env:
+          GH_TOKEN: ${{ secrets.PARITY_WORKFLOW_TOKEN }}
+          PARITY_WORKFLOW_REPOSITORY: ${{ vars.PARITY_WORKFLOW_REPOSITORY }}
+          GALLERY_ENGINE: typescript
+        run: bash scripts/verify-gallery-gate.sh
+
       - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v7

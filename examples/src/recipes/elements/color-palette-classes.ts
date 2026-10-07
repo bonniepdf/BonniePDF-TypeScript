@@ -1,3 +1,8 @@
+/**
+ * Colour Palette (Class API).
+ * The same 22-ramp swatch grid as Colour Palette, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -25,48 +30,6 @@ const BOX_HEIGHT = 28;
 const H_GAP = 4;
 const V_GAP = 3;
 const LABEL_WIDTH = 56;
-
-/** A single colour square for one palette/shade. */
-function swatch(name: PaletteName, shade: (typeof SHADES)[number]): Container {
-  const cell = new Container();
-  // No fixed width: under the row's Weighted distribution the stack stretches each swatch
-  // to fill the page, so the 11 boxes span the full width minus the label gutter.
-  cell.height = BOX_HEIGHT;
-  cell.backgroundColor = ColorPalette[name][shade];
-  // A hairline border keeps the lightest shades (50) visible against the white page.
-  cell.border = new Border(0.5);
-  cell.borderColors = new BorderColors(ColorPalette.slate[200]);
-  cell.cornerRadius = 2;
-  return cell;
-}
-
-/** The left-hand row label carrying the palette name. */
-function rowLabel(name: PaletteName): Container {
-  const text = new TextBlock(name);
-  text.fontName = StandardFonts.Helvetica;
-  text.fontSize = 9;
-  text.color = ColorPalette.slate[700];
-
-  const box = new Container();
-  box.width = LABEL_WIDTH;
-  box.height = BOX_HEIGHT;
-  // Nudge the label down so it sits roughly centred against the box.
-  box.padding = new Thickness(0, 9, H_GAP, 0);
-  box.child = text;
-  return box;
-}
-
-/** A centred header cell carrying a shade number (50, 100, … 950). */
-function headerCell(label: string): TextBlock {
-  const text = new TextBlock(label);
-  text.fontName = StandardFonts.Helvetica;
-  text.fontSize = 7;
-  text.color = ColorPalette.slate[500];
-  // Centred via alignment; no wrapping Container needed — the cell it lands in
-  // already stretches with its column so the number stays centred over the swatch.
-  text.alignment = TextAlignment.Center;
-  return text;
-}
 
 /**
  * The **class / construct-then-mutate** companion to `color-palette.ts`.
@@ -142,4 +105,48 @@ export function generate(): Document {
   doc.add(grid);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+/** A single colour square for one palette/shade. */
+function swatch(name: PaletteName, shade: (typeof SHADES)[number]): Container {
+  const cell = new Container();
+  // No fixed width: under the row's Weighted distribution the stack stretches each swatch
+  // to fill the page, so the 11 boxes span the full width minus the label gutter.
+  cell.height = BOX_HEIGHT;
+  cell.backgroundColor = ColorPalette[name][shade];
+  // A hairline border keeps the lightest shades (50) visible against the white page.
+  cell.border = new Border(0.5);
+  cell.borderColors = new BorderColors(ColorPalette.slate[200]);
+  cell.cornerRadius = 2;
+  return cell;
+}
+
+/** The left-hand row label carrying the palette name. */
+function rowLabel(name: PaletteName): Container {
+  const text = new TextBlock(name);
+  text.fontName = StandardFonts.Helvetica;
+  text.fontSize = 9;
+  text.color = ColorPalette.slate[700];
+
+  const box = new Container();
+  box.width = LABEL_WIDTH;
+  box.height = BOX_HEIGHT;
+  // Nudge the label down so it sits roughly centred against the box.
+  box.padding = new Thickness(0, 9, H_GAP, 0);
+  box.child = text;
+  return box;
+}
+
+/** A centred header cell carrying a shade number (50, 100, … 950). */
+function headerCell(label: string): TextBlock {
+  const text = new TextBlock(label);
+  text.fontName = StandardFonts.Helvetica;
+  text.fontSize = 7;
+  text.color = ColorPalette.slate[500];
+  // Centred via alignment; no wrapping Container needed — the cell it lands in
+  // already stretches with its column so the number stays centred over the swatch.
+  text.alignment = TextAlignment.Center;
+  return text;
 }

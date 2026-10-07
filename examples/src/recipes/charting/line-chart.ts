@@ -1,3 +1,8 @@
+/**
+ * Line Chart.
+ * A line chart of monthly revenue trends: connected data points with circular markers and value labels, a legend, and alt text describing the series.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

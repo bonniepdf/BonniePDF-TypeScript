@@ -1,3 +1,8 @@
+/**
+ * Text Decorations.
+ * Underline and strikethrough decorations applied individually, combined, and across all text alignments and font sizes, with a practical price-list example.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, Line, StandardFonts } from '@bonniepdf/core';
 
 /**
@@ -132,6 +137,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string): void {
   doc.add(

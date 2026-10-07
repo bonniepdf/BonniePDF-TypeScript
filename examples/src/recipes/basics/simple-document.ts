@@ -1,3 +1,8 @@
+/**
+ * Simple Document.
+ * A three-page tour of the core Document API: semantic headings, body text, spacers, a custom square page, and a QR code with alt text. A good first example.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, UnorderedList, QRCode, Line, PdfSize, StandardFonts } from '@bonniepdf/core';
 
 /**

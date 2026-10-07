@@ -1,3 +1,8 @@
+/**
+ * Images (Class API).
+ * The same raster-image tour as Images, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -165,6 +170,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A caption + its content (image or container), kept together on one page. */
 type Block = IElement[];

@@ -1,3 +1,8 @@
+/**
+ * Multi-Column Layouts.
+ * Newspaper-style columns built from stacks: a three-column article with images, two text columns sharing a divider, and balanced versus ragged column heights.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,
@@ -190,6 +195,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** The section heading used throughout - a level-2 Heading in the house style. */
 function sectionHeading(text: string, tocIdentifier: string, topMargin: number): Heading {

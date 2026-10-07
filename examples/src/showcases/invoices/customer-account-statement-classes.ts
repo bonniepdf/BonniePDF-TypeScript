@@ -1,18 +1,8 @@
-// ── Customer account statement (class API) ───────────────────────────────────
-//
-// A period statement: the opening balance, every invoice, payment and credit
-// that moved it, the running balance after each, the closing balance, and an
-// ageing analysis of what is overdue. The running balance is computed and the
-// ageing is reconciled against it, because a statement that does not reconcile
-// is worse than no statement.
-//
-// The **class / construct-then-mutate** companion to
-// `customer-account-statement.ts`. Same statement, authored the long way: `new`
-// each element and assign its properties one at a time, with the enum members
-// rather than their string literals. It renders **byte-for-byte identically** to
-// the options-object form (an equivalence test binds the two). Reach for the
-// options form first; this variant exists to show what it desugars to.
-
+/**
+ * Customer Account Statement (Class API).
+ * The same customer account statement as Customer account statement, built with the class API: construct each element and assign its properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -37,24 +27,33 @@ import {
   BorderColors,
   pageTemplate,
   Spacer,
+  type IElement,
+  TextBlock,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
-import {
-  INK,
-  MUTED,
-  RULE,
-  band,
-  cell,
-  gbDate as gb,
-  h2,
-  lines,
-  money,
-  partyBlock,
-  th,
-  tile,
-  totalLine,
-} from './_trade-kit-classes';
+const INK = ColorPalette.slate[700];
+
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
+
+const reportAccent = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
+
+// ── Customer account statement (class API) ───────────────────────────────────
+//
+// A period statement: the opening balance, every invoice, payment and credit
+// that moved it, the running balance after each, the closing balance, and an
+// ageing analysis of what is overdue. The running balance is computed and the
+// ageing is reconciled against it, because a statement that does not reconcile
+// is worse than no statement.
+//
+// The **class / construct-then-mutate** companion to
+// `customer-account-statement.ts`. Same statement, authored the long way: `new`
+// each element and assign its properties one at a time, with the enum members
+// rather than their string literals. It renders **byte-for-byte identically** to
+// the options-object form (an equivalence test binds the two). Reach for the
+// options form first; this variant exists to show what it desugars to.
 
 const ACCENT = ColorPalette.indigo[700];
 const OVERDUE = ColorPalette.rose[700];
@@ -75,19 +74,6 @@ const ACCOUNT = {
   creditLimit: 25000,
   openingBalance: 6280.5,
 };
-
-type EntryKind = 'Invoice' | 'Payment' | 'Credit note' | 'Adjustment';
-
-interface Entry {
-  date: string;
-  kind: EntryKind;
-  reference: string;
-  detail: string;
-  /** Positive increases what the customer owes; negative reduces it. */
-  amount: number;
-  /** Ageing bucket for the outstanding-items analysis; absent once settled. */
-  due?: string;
-}
 
 const ENTRIES: Entry[] = [
   {
@@ -199,25 +185,6 @@ const ENTRIES: Entry[] = [
   },
 ];
 
-/**
- * The items still outstanding at the statement date, with the date each fell
- * due.
- *
- * The ageing analysis is computed from these, not written down beside them. Two
- * of the sample rows are deliberately netted (an invoice less its credit note),
- * because that is how an open item actually ages — the credit does not sit in
- * its own bucket.
- *
- * `reconcile()` asserts that these sum to the ledger's closing balance. A
- * statement whose ageing does not tie to its own closing figure is worse than
- * no statement, and it is the single defect this document must not have.
- */
-interface OpenItem {
-  reference: string;
-  due: Date;
-  amount: number;
-}
-
 const OPEN_ITEMS: OpenItem[] = [
   { reference: 'INV-2026-3180', due: new Date(Date.UTC(2026, 6, 15)), amount: 1460.0 },
   { reference: 'INV-2026-3312', due: new Date(Date.UTC(2026, 8, 2)), amount: 1450.0 },
@@ -230,16 +197,6 @@ const OPEN_ITEMS: OpenItem[] = [
 ];
 
 const BUCKETS = ['Current', '1\u201330 days', '31\u201360 days', '61\u201390 days', 'Over 90 days'] as const;
-
-/** Which ageing bucket an item falls into at the statement date. */
-function bucketFor(item: OpenItem, asAt: Date): (typeof BUCKETS)[number] {
-  const daysOverdue = Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000);
-  if (daysOverdue <= 0) return 'Current';
-  if (daysOverdue <= 30) return '1\u201330 days';
-  if (daysOverdue <= 60) return '31\u201360 days';
-  if (daysOverdue <= 90) return '61\u201390 days';
-  return 'Over 90 days';
-}
 
 const KIND_COLOUR: Record<EntryKind, Color> = {
   Invoice: INK,
@@ -508,6 +465,50 @@ export function generate(): Document {
   return doc;
 }
 
+// Local helpers and sample types used by this document.
+
+type EntryKind = 'Invoice' | 'Payment' | 'Credit note' | 'Adjustment';
+
+interface Entry {
+  date: string;
+  kind: EntryKind;
+  reference: string;
+  detail: string;
+  /** Positive increases what the customer owes; negative reduces it. */
+  amount: number;
+  /** Ageing bucket for the outstanding-items analysis; absent once settled. */
+  due?: string;
+}
+
+/**
+ * The items still outstanding at the statement date, with the date each fell
+ * due.
+ *
+ * The ageing analysis is computed from these, not written down beside them. Two
+ * of the sample rows are deliberately netted (an invoice less its credit note),
+ * because that is how an open item actually ages — the credit does not sit in
+ * its own bucket.
+ *
+ * `reconcile()` asserts that these sum to the ledger's closing balance. A
+ * statement whose ageing does not tie to its own closing figure is worse than
+ * no statement, and it is the single defect this document must not have.
+ */
+interface OpenItem {
+  reference: string;
+  due: Date;
+  amount: number;
+}
+
+/** Which ageing bucket an item falls into at the statement date. */
+function bucketFor(item: OpenItem, asAt: Date): (typeof BUCKETS)[number] {
+  const daysOverdue = Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000);
+  if (daysOverdue <= 0) return 'Current';
+  if (daysOverdue <= 30) return '1\u201330 days';
+  if (daysOverdue <= 60) return '31\u201360 days';
+  if (daysOverdue <= 90) return '61\u201390 days';
+  return 'Over 90 days';
+}
+
 // ── Local helpers ────────────────────────────────────────────────────────────
 
 function remittanceRow(label: string, value: string): HorizontalStack {
@@ -525,5 +526,107 @@ function remittanceRow(label: string, value: string): HorizontalStack {
     valueStack.add(writeOn);
   }
   row.add(valueStack, 1.5);
+  return row;
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+// ── Formatting ───────────────────────────────────────────────────────────────
+
+/**
+ * Sterling, with the sign outside the symbol.
+ *
+ * Prepending the currency symbol to a signed number prints a credit
+ * as "£-420.00". On a statement or a credit note, where the sign is the most
+ * important character in the cell, it belongs in front of the symbol.
+ */
+
+function money(value: number, symbol = '£', locale = 'en-GB'): string {
+  const sign = value < 0 ? '-' : '';
+  return sign + symbol + Math.abs(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function gb(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
+}
+
+// ── Building blocks, the long way ────────────────────────────────────────────
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  align?: TextAlignment;
+  mt?: number;
+  mb?: number;
+}
+
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const block = new TextBlock(text);
+  block.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  block.fontSize = o.size ?? 9;
+  block.color = o.color ?? INK;
+  block.alignment = o.align ?? TextAlignment.Left;
+  block.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
+  return block;
+}
+
+function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
+}
+
+function th(text: string, align: TextAlignment = TextAlignment.Left): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: Color.white, align });
+}
+
+function h2(text: string, color: Color = reportAccent): Heading {
+  const heading = new Heading(text);
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 13;
+  heading.color = color;
+  heading.margin = new Thickness(0, 16, 0, 8);
+  return heading;
+}
+
+/** A summary tile. */
+
+function tile(value: string, label: string, accent: Color = reportAccent): Container {
+  const body = new VerticalStack();
+  body.add(cell(value, { bold: true, size: 14, color: accent, mb: 2 }));
+  body.add(cell(label, { size: 8, color: MUTED }));
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(11, 10);
+  box.child = body;
+  return box;
+}
+
+function partyBlock(label: string, address: string[]): VerticalStack {
+  const stack = new VerticalStack();
+  stack.add(cell(label.toUpperCase(), { bold: true, size: 7, color: MUTED, mb: 3 }));
+  stack.add(lines(address, { size: 9 }));
+  return stack;
+}
+
+function totalLine(label: string, value: string, o: CellOpts = {}): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 3, 0, 3);
+  row.add(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
+  row.add(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
+  return row;
+}
+
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: TextAlignment.Right }), 2);
   return row;
 }

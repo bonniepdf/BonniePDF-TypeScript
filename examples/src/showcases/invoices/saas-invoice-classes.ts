@@ -1,3 +1,8 @@
+/**
+ * SaaS Invoice (Class API).
+ * The same accessible subscription invoice as SaaS Invoice, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -30,25 +35,6 @@ const MUTE = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
 const BRAND = ColorPalette.indigo[600];
 const PANEL = ColorPalette.slate[50];
-
-function tb(
-  content: string,
-  size: number,
-  color: Color,
-  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
-): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.color = color;
-  if (opts.align !== undefined) t.alignment = opts.align;
-  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
-  return t;
-}
-
-function cell(content: string, size: number, color: Color, align: TextAlignment, bold = false): TextBlock {
-  return tb(content, size, color, { bold, align });
-}
 
 /**
  * Accessible SaaS invoice (gallery #1): PDF/A-2a + PDF/UA-1 tagged output with a
@@ -206,6 +192,27 @@ export function generate(): Document {
   doc.add(tb('Thank you for your business. Payment is due within 14 days.', 8.5, MUTE, { mb: 0 }));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: Color,
+  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
+): TextBlock {
+  const t = new TextBlock(content);
+  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = size;
+  t.color = color;
+  if (opts.align !== undefined) t.alignment = opts.align;
+  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
+  return t;
+}
+
+function cell(content: string, size: number, color: Color, align: TextAlignment, bold = false): TextBlock {
+  return tb(content, size, color, { bold, align });
 }
 
 function rule(mtop: number): Container {

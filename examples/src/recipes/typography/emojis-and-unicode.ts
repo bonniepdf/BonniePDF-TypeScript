@@ -1,4 +1,9 @@
 /**
+ * Emojis & Unicode.
+ * Full Unicode range: BMP symbols, Greek, Cyrillic, dingbats, and supplementary emoji across multiple embedded fonts, with a mixed text and emoji status line.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Emojis & Unicode — full Unicode range including supplementary planes.
  *
  * Four fonts cover different blocks:
@@ -157,6 +162,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
 function sectionHeading(title: string, tocId: string): Heading {

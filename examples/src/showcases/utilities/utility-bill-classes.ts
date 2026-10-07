@@ -1,3 +1,8 @@
+/**
+ * Utility Bill (Class API).
+ * The same energy bill as Utility Bill, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Utility bill (energy, consumer billing) — class companion ────────────────
 //
 // The **class / construct-then-mutate** companion to `utility-bill.ts`. Same
@@ -47,31 +52,6 @@ const PANEL = ColorPalette.slate[50];
 const ACCENT = ColorPalette.amber[600];
 const ACCENT_SOFT = ColorPalette.amber[50];
 const ACCENT_DEEP = ColorPalette.amber[700];
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface MeterCharge {
-  fuel: string;
-  meterSerial: string;
-  previousReading: number;
-  currentReading: number;
-  unitRatePence: number;
-  standingChargePence: number;
-  days: number;
-}
-
-export interface UtilityBillData {
-  supplier: { name: string; address: string; phone: string; regulator: string };
-  customer: { name: string; address: string; accountNumber: string };
-  period: { from: string; to: string; issued: string; dueBy: string };
-  charges: MeterCharge[];
-  broughtForward: number;
-  vatRatePercent: number;
-  history: { month: string; units: number }[];
-  payment: { reference: string; sortCode: string; accountNumber: string };
-  locale: string;
-  currency: string;
-}
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleUtilityBill: UtilityBillData = {
@@ -127,6 +107,37 @@ export const sampleUtilityBill: UtilityBillData = {
   locale: 'en-GB',
   currency: 'GBP',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleUtilityBill);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface MeterCharge {
+  fuel: string;
+  meterSerial: string;
+  previousReading: number;
+  currentReading: number;
+  unitRatePence: number;
+  standingChargePence: number;
+  days: number;
+}
+
+export interface UtilityBillData {
+  supplier: { name: string; address: string; phone: string; regulator: string };
+  customer: { name: string; address: string; accountNumber: string };
+  period: { from: string; to: string; issued: string; dueBy: string };
+  charges: MeterCharge[];
+  broughtForward: number;
+  vatRatePercent: number;
+  history: { month: string; units: number }[];
+  payment: { reference: string; sortCode: string; accountNumber: string };
+  locale: string;
+  currency: string;
+}
 
 // ── Derivation — every figure on the bill comes from here ────────────────────
 
@@ -487,8 +498,4 @@ export function buildDocument(
   doc.add(cutLine());
   doc.add(remittanceSlip(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleUtilityBill);
 }

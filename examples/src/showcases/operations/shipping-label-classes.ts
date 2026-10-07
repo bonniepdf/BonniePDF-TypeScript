@@ -1,3 +1,8 @@
+/**
+ * Shipping Label (Class API).
+ * A 4 × 6 in carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // The **class / construct-then-mutate** companion to `shipping-label.ts`.
 // Same carrier-style 4x6in shipping label, authored the long way: `new` each
 // element and assign properties. It renders **byte-for-byte identically** to
@@ -36,38 +41,6 @@ const INK = ColorPalette.slate[900];
 const BODY = ColorPalette.slate[700];
 const MUTE = ColorPalette.slate[500];
 const LINE = ColorPalette.slate[300];
-
-function tb(
-  content: string,
-  size: number,
-  color: Color,
-  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
-): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.color = color;
-  if (opts.align !== undefined) t.alignment = opts.align;
-  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
-  return t;
-}
-
-// A full-bleed black band with white text (carrier header / service class).
-function band(text: string, size: number, bg: Color, fg: Color, align = TextAlignment.Left): Container {
-  const c = new Container();
-  c.backgroundColor = bg;
-  c.padding = new Thickness(10, 5, 10, 5);
-  c.child = tb(text, size, fg, { bold: true, align });
-  return c;
-}
-
-function hrule(mt: number, mb: number): Container {
-  const r = new Container();
-  r.backgroundColor = LINE;
-  r.height = 1;
-  r.margin = new Thickness(0, mt, 0, mb);
-  return r;
-}
 
 /**
  * Carrier-style 4x6in shipping label (gallery #6): PDF/A-2a + PDF/UA-1 with a
@@ -183,4 +156,38 @@ export function generate(): Document {
   doc.add(bottom);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: Color,
+  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
+): TextBlock {
+  const t = new TextBlock(content);
+  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = size;
+  t.color = color;
+  if (opts.align !== undefined) t.alignment = opts.align;
+  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
+  return t;
+}
+
+// A full-bleed black band with white text (carrier header / service class).
+function band(text: string, size: number, bg: Color, fg: Color, align = TextAlignment.Left): Container {
+  const c = new Container();
+  c.backgroundColor = bg;
+  c.padding = new Thickness(10, 5, 10, 5);
+  c.child = tb(text, size, fg, { bold: true, align });
+  return c;
+}
+
+function hrule(mt: number, mb: number): Container {
+  const r = new Container();
+  r.backgroundColor = LINE;
+  r.height = 1;
+  r.margin = new Thickness(0, mt, 0, mb);
+  return r;
 }

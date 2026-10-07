@@ -1,3 +1,8 @@
+/**
+ * Advanced Typography.
+ * Superscript and subscript with baseline shift (H₂O, E=mc²), plus decoration styling: overlines, and coloured or thick underlines and strikethroughs.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, RichText, TextStyle, StandardFonts } from '@bonniepdf/core';
 
 /**
@@ -157,6 +162,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A level-2 section label with the shared style used across this example. */
 function sectionLabel(text: string): Heading {

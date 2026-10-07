@@ -1,3 +1,8 @@
+/**
+ * Horizontal Bar Chart.
+ * Horizontal bars ranking full-year sales across six UK regions, with value labels. The orientation reads better when category names are long.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

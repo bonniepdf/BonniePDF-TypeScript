@@ -1,3 +1,8 @@
+/**
+ * VerticalStack Overflow.
+ * A sheet of Code 128 asset labels in a VerticalStack. Barcodes do not split across pages, so the stack moves labels that would fall off the page onto the next one.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,

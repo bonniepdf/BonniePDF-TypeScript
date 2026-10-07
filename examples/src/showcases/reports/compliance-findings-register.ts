@@ -1,3 +1,8 @@
+/**
+ * Compliance Findings Register.
+ * A GRC audit findings register: 18 severity-coloured finding cards, each with a badge, heading, and remediation steps, paginating cleanly across pages.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Compliance Findings Register
 //
 // A compliance / audit findings register - the kind of report a GRC, audit, or
@@ -22,18 +27,6 @@ import {
   type ColorInput,
   pageTemplate,
 } from '@bonniepdf/core';
-
-interface Finding {
-  id: string;
-  category: string;
-  severity: Severity;
-  title: string;
-  description: string;
-  /** Optional related finding id, rendered as a clickable "see F-XXX (page N)" cross-reference. */
-  related?: string;
-}
-
-type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved';
 
 // Badge is 700, not 600: white bold 9pt text on orange/amber/green 600 falls to
 // 3.20-3.60:1 against the 4.5:1 WCAG AA threshold. 700 clears it on all three
@@ -217,6 +210,77 @@ const FINDINGS: Finding[] = [
   },
 ];
 
+export function generate(): Document {
+  const doc = new Document({
+    settings: {
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: ColorPalette.slate[700] },
+      footerTemplate: pageTemplate({
+        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 9,
+          color: ColorPalette.slate[400],
+          alignment: 'right',
+        }),
+      }),
+    },
+    metadata: {
+      title: 'Compliance Findings Register',
+      author: 'BonniePDF',
+      subject: 'An accessible PDF/A-2a + PDF/UA-1 compliance findings register.',
+      keywords: 'pdf, accessibility, compliance, audit, findings register, GRC, BonniePDF',
+    },
+  });
+
+  doc.add(
+    new Heading('Compliance Findings Register', {
+      tocIdentifier: 'intro',
+      level: 1,
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      color: ColorPalette.slate[800],
+      margin: { bottom: 10 },
+    })
+  );
+
+  doc.add(
+    new TextBlock(
+      'Findings from the quarterly security and compliance review, ordered by identifier and colour-coded by severity. Each entry records the affected control category, a summary, and the recommended remediation.',
+      { margin: { bottom: 16 } }
+    )
+  );
+
+  // Executive summary: a clickable index of the Critical findings, each showing
+  // the live page number where the detail card lands (resolved by two-pass
+  // layout). This is the "jump to detail" pattern real audit reports lead with.
+  const critical = FINDINGS.filter(f => f.severity === 'Critical');
+  doc.add(priorityActions(critical));
+
+  const register = new VerticalStack();
+  for (const finding of FINDINGS) {
+    register.add(findingCard(finding));
+  }
+  doc.add(register);
+
+  return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Finding {
+  id: string;
+  category: string;
+  severity: Severity;
+  title: string;
+  description: string;
+  /** Optional related finding id, rendered as a clickable "see F-XXX (page N)" cross-reference. */
+  related?: string;
+}
+
+type Severity = 'Critical' | 'High' | 'Medium' | 'Low' | 'Resolved';
+
 /** Normalises a finding id (e.g. "F-011") into its anchor/toc key ("f-011"). */
 function anchorFor(id: string): string {
   return id.toLowerCase();
@@ -364,61 +428,4 @@ function priorityActions(critical: Finding[]): Container {
     border: { width: 1, color: ColorPalette.red[200] },
     margin: { bottom: 16 },
   });
-}
-
-export function generate(): Document {
-  const doc = new Document({
-    settings: {
-      conformance: 'pdf/a-2a',
-      accessibility: 'pdf/ua-1',
-      language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: ColorPalette.slate[700] },
-      footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
-          fontName: StandardFonts.Helvetica,
-          fontSize: 9,
-          color: ColorPalette.slate[400],
-          alignment: 'right',
-        }),
-      }),
-    },
-    metadata: {
-      title: 'Compliance Findings Register',
-      author: 'BonniePDF',
-      subject: 'An accessible PDF/A-2a + PDF/UA-1 compliance findings register.',
-      keywords: 'pdf, accessibility, compliance, audit, findings register, GRC, BonniePDF',
-    },
-  });
-
-  doc.add(
-    new Heading('Compliance Findings Register', {
-      tocIdentifier: 'intro',
-      level: 1,
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 22,
-      color: ColorPalette.slate[800],
-      margin: { bottom: 10 },
-    })
-  );
-
-  doc.add(
-    new TextBlock(
-      'Findings from the quarterly security and compliance review, ordered by identifier and colour-coded by severity. Each entry records the affected control category, a summary, and the recommended remediation.',
-      { margin: { bottom: 16 } }
-    )
-  );
-
-  // Executive summary: a clickable index of the Critical findings, each showing
-  // the live page number where the detail card lands (resolved by two-pass
-  // layout). This is the "jump to detail" pattern real audit reports lead with.
-  const critical = FINDINGS.filter(f => f.severity === 'Critical');
-  doc.add(priorityActions(critical));
-
-  const register = new VerticalStack();
-  for (const finding of FINDINGS) {
-    register.add(findingCard(finding));
-  }
-  doc.add(register);
-
-  return doc;
 }

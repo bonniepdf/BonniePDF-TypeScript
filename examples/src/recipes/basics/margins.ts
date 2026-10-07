@@ -1,3 +1,8 @@
+/**
+ * Margins and Padding.
+ * Margin is the space outside an element; padding is the space inside its border. Both are shown side by side on text, containers, tables, and stacks.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,
@@ -177,6 +182,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** Builds a level-2 section heading with the shared style used across this example. */
 function sectionHeading(text: string): Heading {

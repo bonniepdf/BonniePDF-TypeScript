@@ -1,3 +1,8 @@
+/**
+ * Patient Summary.
+ * An A4 patient-summary sheet built from rounded cards, each clipping a full-bleed coloured header band to its outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Patient Summary
 //
 // An A4 portrait healthcare patient-summary sheet built from rounded-corner
@@ -32,59 +37,7 @@ const TINT = '#f8fafc'; // slate-50   page tint
 const TEAL = '#0a7164'; // patient band
 const INDIGO = '#4f46e5'; // vitals band
 const ROSE = '#e11d48'; // allergy band / alerts
-const CREAM = '#f1f5f9'; // band caption text
-
-// ── Tiny text helper ─────────────────────────────────────────────────────────
-function tb(
-  content: string,
-  size: number,
-  color: ColorInput,
-  opts: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
-): TextBlock {
-  return new TextBlock(content, {
-    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
-    fontSize: size,
-    color: color,
-    alignment: opts.align,
-    margin: opts.top ? { top: opts.top } : undefined,
-  });
-}
-
-/**
- * A rounded "card": a clipped, rounded-corner container whose first child is a
- * full-bleed coloured header band. The clip (`clipContent`) is what makes
- * the band follow the rounded top corners instead of poking square corners out
- * past the card edge — the same reason the white body is masked at the bottom.
- */
-function card(bandColor: ColorInput, bandTitle: string, body: TextBlock | VerticalStack | Table): Container {
-  return new Container({
-    backgroundColor: CARD,
-    cornerRadius: 14,
-    clipContent: true, // ← mask the bleed band + body to the rounded outline
-    border: { width: 0.75, color: HAIRLINE },
-    child: new VerticalStack({
-      children: [
-        new Container({
-          backgroundColor: bandColor,
-          padding: [16, 10],
-          child: tb(bandTitle, 10, '#ffffff', { bold: true }),
-        }),
-        new Container({
-          backgroundColor: CARD,
-          padding: { left: 16, top: 14, right: 16, bottom: 16 },
-          child: body,
-        }),
-      ],
-    }),
-  });
-}
-
-// A label/value pair as one borderless 2-column row.
-function detailRow(label: string, value: string): Table {
-  const row = new Grid({ columns: [1, 1.6], border: 0, cellPadding: 3 });
-  row.addRow(tb(label.toUpperCase(), 7.5, MUTE), tb(value, 10, BODY, { bold: true }));
-  return row;
-}
+const CREAM = '#f1f5f9';
 
 export function generate(): Document {
   const doc = new Document({
@@ -209,4 +162,60 @@ export function generate(): Document {
   doc.add(pad(alertsCard));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+// band caption text
+
+// ── Tiny text helper ─────────────────────────────────────────────────────────
+function tb(
+  content: string,
+  size: number,
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
+): TextBlock {
+  return new TextBlock(content, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color: color,
+    alignment: opts.align,
+    margin: opts.top ? { top: opts.top } : undefined,
+  });
+}
+
+/**
+ * A rounded "card": a clipped, rounded-corner container whose first child is a
+ * full-bleed coloured header band. The clip (`clipContent`) is what makes
+ * the band follow the rounded top corners instead of poking square corners out
+ * past the card edge — the same reason the white body is masked at the bottom.
+ */
+function card(bandColor: ColorInput, bandTitle: string, body: TextBlock | VerticalStack | Table): Container {
+  return new Container({
+    backgroundColor: CARD,
+    cornerRadius: 14,
+    clipContent: true, // ← mask the bleed band + body to the rounded outline
+    border: { width: 0.75, color: HAIRLINE },
+    child: new VerticalStack({
+      children: [
+        new Container({
+          backgroundColor: bandColor,
+          padding: [16, 10],
+          child: tb(bandTitle, 10, '#ffffff', { bold: true }),
+        }),
+        new Container({
+          backgroundColor: CARD,
+          padding: { left: 16, top: 14, right: 16, bottom: 16 },
+          child: body,
+        }),
+      ],
+    }),
+  });
+}
+
+// A label/value pair as one borderless 2-column row.
+function detailRow(label: string, value: string): Table {
+  const row = new Grid({ columns: [1, 1.6], border: 0, cellPadding: 3 });
+  row.addRow(tb(label.toUpperCase(), 7.5, MUTE), tb(value, 10, BODY, { bold: true }));
+  return row;
 }

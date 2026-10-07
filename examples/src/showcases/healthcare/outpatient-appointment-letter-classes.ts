@@ -1,3 +1,8 @@
+/**
+ * Outpatient Appointment (Class API).
+ * An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider’s branding.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Accessible Outpatient Appointment
 //
 // This fictional document borrows broad information-design principles common
@@ -232,6 +237,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function sectionHeading(text: string, tocIdentifier: string): Heading {
   const h = new Heading(text);

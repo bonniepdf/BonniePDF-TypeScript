@@ -1,3 +1,8 @@
+/**
+ * Pathology Lab Report.
+ * A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, generated client-side so data never leaves the browser.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── UK / EU laboratory (pathology) report ────────────────────────────────────
 //
 // Portfolio #3, in a fictional UK / EU clinical laboratory idiom. A pathology laboratory report: patient
@@ -38,21 +43,6 @@ const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
 // 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
 const LOW = ColorPalette.amber[700];
-
-type Flag = 'H' | 'L' | '';
-
-interface Analyte {
-  name: string;
-  result: string;
-  units: string;
-  range: string;
-  flag: Flag;
-}
-
-interface Panel {
-  title: string;
-  rows: Analyte[];
-}
 
 const PANELS: Panel[] = [
   {
@@ -247,6 +237,23 @@ export function generate(): Document {
   doc.add(sign);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+type Flag = 'H' | 'L' | '';
+
+interface Analyte {
+  name: string;
+  result: string;
+  units: string;
+  range: string;
+  flag: Flag;
+}
+
+interface Panel {
+  title: string;
+  rows: Analyte[];
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

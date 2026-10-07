@@ -1,3 +1,8 @@
+/**
+ * Product Gallery.
+ * A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically, each led by an engine-drawn colour tile.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -10,26 +15,6 @@ import {
   StandardFonts,
   pageTemplate,
 } from '@bonniepdf/core';
-
-/**
- * A retail product gallery / look-book - the kind of branded catalogue an
- * e-commerce or marketplace platform generates. Products are laid out
- * two-per-row as cards with a name, SKU, price and blurb, in an accessible
- * PDF/A-2a + PDF/UA-1 document that paginates automatically.
- *
- * Each card leads with a deterministic colour-blocked tile - a per-product tint
- * with the product's initial - drawn natively by the engine, so the catalogue
- * is self-contained and needs no bundled photography. Swap the tile for an
- * `Image` (Figure + alt-text) when real product shots are available.
- *
- * Authored through the options-object front door.
- */
-interface Product {
-  name: string;
-  sku: string;
-  price: string;
-  blurb: string;
-}
 
 const PRODUCTS: Product[] = [
   {
@@ -99,64 +84,6 @@ const TILE_HUES = [
   ColorPalette.indigo,
 ];
 
-function productMedia(product: Product, index: number): Container {
-  const hue = TILE_HUES[index % TILE_HUES.length];
-  // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
-  // [100] tint (2.87:1); every other hue already clears it at [600].
-  const monogramColor = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
-  return new Container({
-    height: CARD_HEIGHT_IMAGE,
-    backgroundColor: hue[100],
-    cornerRadius: CARD_IMAGE_RADIUS,
-    child: new TextBlock(product.name.charAt(0).toUpperCase(), {
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 40,
-      color: monogramColor,
-      alignment: 'center',
-      margin: { top: 40 },
-    }),
-  });
-}
-
-function productCard(product: Product, index: number): Container {
-  const meta = new HorizontalStack({ widthDistribution: 'weighted' });
-  meta.add(new TextBlock(product.sku, { fontSize: 9, color: ColorPalette.slate[500] }), 1);
-  meta.add(
-    new TextBlock(product.price, {
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 12,
-      color: ACCENT,
-      alignment: 'right',
-    }),
-    1
-  );
-
-  const body = new VerticalStack({
-    spacing: 4,
-    children: [
-      productMedia(product, index),
-      new Heading(product.name, {
-        tocIdentifier: product.sku.toLowerCase(),
-        level: 2,
-        fontName: StandardFonts.HelveticaBold,
-        fontSize: 12,
-        color: ColorPalette.slate[800],
-        margin: { top: 6 },
-      }),
-      meta,
-      new TextBlock(product.blurb, { fontSize: 9.5, color: ColorPalette.slate[600] }),
-    ],
-  });
-
-  return new Container({
-    child: body,
-    padding: 12,
-    backgroundColor: '#ffffff',
-    cornerRadius: 8,
-    border: { width: 1, color: ColorPalette.slate[200] },
-  });
-}
-
 export function generate(): Document {
   const doc = new Document({
     settings: {
@@ -213,4 +140,84 @@ export function generate(): Document {
   doc.add(gallery);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+/**
+ * A retail product gallery / look-book - the kind of branded catalogue an
+ * e-commerce or marketplace platform generates. Products are laid out
+ * two-per-row as cards with a name, SKU, price and blurb, in an accessible
+ * PDF/A-2a + PDF/UA-1 document that paginates automatically.
+ *
+ * Each card leads with a deterministic colour-blocked tile - a per-product tint
+ * with the product's initial - drawn natively by the engine, so the catalogue
+ * is self-contained and needs no bundled photography. Swap the tile for an
+ * `Image` (Figure + alt-text) when real product shots are available.
+ *
+ * Authored through the options-object front door.
+ */
+interface Product {
+  name: string;
+  sku: string;
+  price: string;
+  blurb: string;
+}
+
+function productMedia(product: Product, index: number): Container {
+  const hue = TILE_HUES[index % TILE_HUES.length];
+  // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
+  // [100] tint (2.87:1); every other hue already clears it at [600].
+  const monogramColor = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
+  return new Container({
+    height: CARD_HEIGHT_IMAGE,
+    backgroundColor: hue[100],
+    cornerRadius: CARD_IMAGE_RADIUS,
+    child: new TextBlock(product.name.charAt(0).toUpperCase(), {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 40,
+      color: monogramColor,
+      alignment: 'center',
+      margin: { top: 40 },
+    }),
+  });
+}
+
+function productCard(product: Product, index: number): Container {
+  const meta = new HorizontalStack({ widthDistribution: 'weighted' });
+  meta.add(new TextBlock(product.sku, { fontSize: 9, color: ColorPalette.slate[500] }), 1);
+  meta.add(
+    new TextBlock(product.price, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 12,
+      color: ACCENT,
+      alignment: 'right',
+    }),
+    1
+  );
+
+  const body = new VerticalStack({
+    spacing: 4,
+    children: [
+      productMedia(product, index),
+      new Heading(product.name, {
+        tocIdentifier: product.sku.toLowerCase(),
+        level: 2,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 12,
+        color: ColorPalette.slate[800],
+        margin: { top: 6 },
+      }),
+      meta,
+      new TextBlock(product.blurb, { fontSize: 9.5, color: ColorPalette.slate[600] }),
+    ],
+  });
+
+  return new Container({
+    child: body,
+    padding: 12,
+    backgroundColor: '#ffffff',
+    cornerRadius: 8,
+    border: { width: 1, color: ColorPalette.slate[200] },
+  });
 }

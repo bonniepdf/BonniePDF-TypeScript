@@ -1,3 +1,8 @@
+/**
+ * Your First PDF.
+ * The four-line minimum from the getting-started page: one Document, one TextBlock, one PDF. The output of exactly the snippet the docs show.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, TextBlock } from '@bonniepdf/core';
 
 /**

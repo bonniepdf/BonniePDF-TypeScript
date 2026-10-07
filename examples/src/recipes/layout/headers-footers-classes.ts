@@ -1,3 +1,8 @@
+/**
+ * Headers & Footers (Class API).
+ * The same running-header/footer document as Headers & Footers, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

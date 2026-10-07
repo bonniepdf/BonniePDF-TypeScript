@@ -1,3 +1,8 @@
+/**
+ * Page Settings.
+ * A gallery of every standard page size in portrait and landscape, each page listing its dimensions in points, inches, and millimetres, with a running footer.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   PdfSize,

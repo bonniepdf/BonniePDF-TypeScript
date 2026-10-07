@@ -1,3 +1,8 @@
+/**
+ * Colour Palette.
+ * The full ColorPalette drawn as a swatch grid: all 22 Tailwind v4 ramps × 11 shades, each addressed in code as ColorPalette[name][shade] for consistent colours.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -16,6 +21,44 @@ const BOX_HEIGHT = 28;
 const H_GAP = 4;
 const V_GAP = 3;
 const LABEL_WIDTH = 56;
+
+export function generate(): Document {
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 36,
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
+    },
+    metadata: {
+      title: 'ColorPalette Swatches',
+      author: 'BonniePDF',
+    },
+  });
+
+  // ── Title ──
+  doc.add(new TextBlock('ColorPalette', { fontName: StandardFonts.HelveticaBold, fontSize: 18, color: 'slate-800' }));
+
+  doc.add(
+    new TextBlock(
+      'Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].',
+      { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-500', margin: { top: 4, bottom: 8 } }
+    )
+  );
+
+  // ── Grid ── one row per palette, lightest (50) on the left to darkest (950) on the right.
+  const names = Object.keys(ColorPalette) as PaletteName[];
+  doc.add(
+    new VerticalStack({
+      spacing: V_GAP,
+      children: [headerRow(), ...names.map(paletteRow)],
+    })
+  );
+
+  return doc;
+}
+
+// Local helpers and sample types used by this document.
 
 /** A single colour square for one palette/shade. */
 function swatch(name: PaletteName, shade: (typeof SHADES)[number]): Container {
@@ -69,40 +112,4 @@ function paletteRow(name: PaletteName): HorizontalStack {
   row.add(rowLabel(name));
   for (const shade of SHADES) row.add(swatch(name, shade), 1);
   return row;
-}
-
-export function generate(): Document {
-  const doc = new Document({
-    settings: {
-      pageSize: 'a4',
-      margin: 36,
-      language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 12, color: 'slate-600' },
-    },
-    metadata: {
-      title: 'ColorPalette Swatches',
-      author: 'BonniePDF',
-    },
-  });
-
-  // ── Title ──
-  doc.add(new TextBlock('ColorPalette', { fontName: StandardFonts.HelveticaBold, fontSize: 18, color: 'slate-800' }));
-
-  doc.add(
-    new TextBlock(
-      'Every Tailwind v4 ramp in the palette - 22 colours × 11 shades, drawn as ColorPalette[name][shade].',
-      { fontName: StandardFonts.Helvetica, fontSize: 9, color: 'slate-500', margin: { top: 4, bottom: 8 } }
-    )
-  );
-
-  // ── Grid ── one row per palette, lightest (50) on the left to darkest (950) on the right.
-  const names = Object.keys(ColorPalette) as PaletteName[];
-  doc.add(
-    new VerticalStack({
-      spacing: V_GAP,
-      children: [headerRow(), ...names.map(paletteRow)],
-    })
-  );
-
-  return doc;
 }

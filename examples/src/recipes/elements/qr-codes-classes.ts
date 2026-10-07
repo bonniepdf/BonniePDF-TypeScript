@@ -1,3 +1,8 @@
+/**
+ * QR Codes (Class API).
+ * The same native vector-QR tour as QR Codes, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

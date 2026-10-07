@@ -1,3 +1,8 @@
+/**
+ * Business Invoice (Class API).
+ * The same branded invoice as Business Invoice, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -32,78 +37,6 @@ const BORDER_GRAY = Color.fromHex('#D9D9D9');
 const TEXT_DARK = Color.fromHex('#333333');
 const TEXT_MEDIUM = Color.fromHex('#555555');
 const TEXT_LIGHT = Color.fromHex('#707070');
-
-// ── Local helpers ───────────────────────────────────────────────────────────
-// Small builders in the style of the sibling invoice showcases: a styled text
-// block plus the two repeated compositions (a label/value grid row and a
-// payment-method column). Defaults match the document's defaultTextStyle
-// (Helvetica 9, TEXT_MEDIUM) so plain body text needs no options.
-
-interface TextOpts {
-  size?: number;
-  color?: Color;
-  bold?: boolean;
-  align?: TextAlignment;
-  mt?: number;
-  mb?: number;
-}
-
-function tb(content: string, o: TextOpts = {}): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = o.size ?? 9;
-  t.color = o.color ?? TEXT_MEDIUM;
-  if (o.align !== undefined) t.alignment = o.align;
-  if (o.mt !== undefined || o.mb !== undefined) t.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
-  return t;
-}
-
-/** A full-width coloured strip (accent bars and dividers). */
-function bar(color: Color, thickness: number, margin?: Thickness): Container {
-  const c = new Container();
-  c.backgroundColor = color;
-  c.height = thickness;
-  if (margin) c.margin = margin;
-  return c;
-}
-
-/** A borderless two-column grid row (used for detail lines and totals). */
-function kvRow(left: number, right: number, padding: number, label: TextBlock, value: TextBlock): Grid {
-  const g = new Grid(left, right);
-  g.cellPadding = padding;
-  g.border = Border.none;
-  g.addRow(label, value);
-  return g;
-}
-
-/** A bold label + plain value line in the Details column. */
-function detailRow(label: string, value: string): Grid {
-  return kvRow(0.9, 1, 0, tb(label, { bold: true, color: TEXT_DARK }), tb(value));
-}
-
-/** A totals line: left label, right-aligned amount, with per-row colour/weight. */
-function moneyRow(
-  label: string,
-  value: string,
-  o: { labelColor?: Color; valueColor?: Color; bold?: boolean; size?: number } = {}
-): Grid {
-  const size = o.size ?? 9;
-  return kvRow(
-    1,
-    1,
-    6,
-    tb(label, { size, bold: o.bold, color: o.labelColor ?? TEXT_MEDIUM }),
-    tb(value, { size, bold: o.bold, color: o.valueColor ?? TEXT_DARK, align: TextAlignment.Right })
-  );
-}
-
-/** A payment-method column: green eyebrow over a multi-line body (one paragraph). */
-function paymentColumn(title: string, body: string): VerticalStack {
-  const s = new VerticalStack();
-  s.add(tb(title, { size: 8, bold: true, color: ACCENT_GREEN_TEXT, mb: 4 }));
-  s.add(tb(body, { size: 8 }));
-  return s;
-}
 
 const usd = (n: number): string =>
   `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -311,4 +244,78 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Local helpers ───────────────────────────────────────────────────────────
+// Small builders in the style of the sibling invoice showcases: a styled text
+// block plus the two repeated compositions (a label/value grid row and a
+// payment-method column). Defaults match the document's defaultTextStyle
+// (Helvetica 9, TEXT_MEDIUM) so plain body text needs no options.
+
+interface TextOpts {
+  size?: number;
+  color?: Color;
+  bold?: boolean;
+  align?: TextAlignment;
+  mt?: number;
+  mb?: number;
+}
+
+function tb(content: string, o: TextOpts = {}): TextBlock {
+  const t = new TextBlock(content);
+  t.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = o.size ?? 9;
+  t.color = o.color ?? TEXT_MEDIUM;
+  if (o.align !== undefined) t.alignment = o.align;
+  if (o.mt !== undefined || o.mb !== undefined) t.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
+  return t;
+}
+
+/** A full-width coloured strip (accent bars and dividers). */
+function bar(color: Color, thickness: number, margin?: Thickness): Container {
+  const c = new Container();
+  c.backgroundColor = color;
+  c.height = thickness;
+  if (margin) c.margin = margin;
+  return c;
+}
+
+/** A borderless two-column grid row (used for detail lines and totals). */
+function kvRow(left: number, right: number, padding: number, label: TextBlock, value: TextBlock): Grid {
+  const g = new Grid(left, right);
+  g.cellPadding = padding;
+  g.border = Border.none;
+  g.addRow(label, value);
+  return g;
+}
+
+/** A bold label + plain value line in the Details column. */
+function detailRow(label: string, value: string): Grid {
+  return kvRow(0.9, 1, 0, tb(label, { bold: true, color: TEXT_DARK }), tb(value));
+}
+
+/** A totals line: left label, right-aligned amount, with per-row colour/weight. */
+function moneyRow(
+  label: string,
+  value: string,
+  o: { labelColor?: Color; valueColor?: Color; bold?: boolean; size?: number } = {}
+): Grid {
+  const size = o.size ?? 9;
+  return kvRow(
+    1,
+    1,
+    6,
+    tb(label, { size, bold: o.bold, color: o.labelColor ?? TEXT_MEDIUM }),
+    tb(value, { size, bold: o.bold, color: o.valueColor ?? TEXT_DARK, align: TextAlignment.Right })
+  );
+}
+
+/** A payment-method column: green eyebrow over a multi-line body (one paragraph). */
+function paymentColumn(title: string, body: string): VerticalStack {
+  const s = new VerticalStack();
+  s.add(tb(title, { size: 8, bold: true, color: ACCENT_GREEN_TEXT, mb: 4 }));
+  s.add(tb(body, { size: 8 }));
+  return s;
 }

@@ -1,3 +1,8 @@
+/**
+ * Text Decorations (Class API).
+ * The same underline/strikethrough tour as Text Decorations, built with the class API: construct each element and assign properties, using the TextDecoration flag enum. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -157,6 +162,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string): void {
   const h = new Heading(title);

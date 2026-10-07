@@ -1,4 +1,9 @@
 /**
+ * Dickens: A Tale of Two Cities (Class API).
+ * The same multi-page book layout as Dickens: A Tale of Two Cities, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Dickens Novel - multi-page book layout demo.
  *
  * Demonstrates: running headers, footer page numbers, VisualToc, Heading
@@ -46,13 +51,6 @@ const SENTENCES = [
   'The fog had come in off the river during the night and lay thick across the lower streets, muffling the sounds of the waking city in grey silence.',
   'What we call courage, she thought, is often only the inability to clearly imagine the consequences of what we are about to do.',
 ];
-
-interface Chapter {
-  tocId: string;
-  number: string;
-  title: string;
-  paragraphCount: number;
-}
 
 const BOOKS: Array<{ tocId: string; title: string; chapters: Chapter[] }> = [
   {
@@ -307,4 +305,13 @@ export function generate(): Document {
   }
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Chapter {
+  tocId: string;
+  number: string;
+  title: string;
+  paragraphCount: number;
 }

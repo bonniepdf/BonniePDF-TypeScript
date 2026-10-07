@@ -1,3 +1,8 @@
+/**
+ * Multi-Series Line Chart.
+ * Two overlapping line series comparing this year’s monthly revenue with last year’s on a shared axis, with a legend and alt text.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

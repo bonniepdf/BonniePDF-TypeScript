@@ -1,3 +1,8 @@
+/**
+ * Hyperlinks.
+ * External hyperlinks to real websites with custom font, size, and colour styling, plus links spaced with vertical margins. Every link is tagged for screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, Hyperlink, StandardFonts } from '@bonniepdf/core';
 
 /**
@@ -95,6 +100,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A level-2 section label with the shared style used across this example. */
 function sectionLabel(text: string, marginBottom?: number): Heading {

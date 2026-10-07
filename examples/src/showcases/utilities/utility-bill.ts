@@ -1,3 +1,8 @@
+/**
+ * Utility Bill.
+ * A domestic energy bill calculated from meter readings: the amount due, a tariff breakdown, a twelve-month usage chart, and a detachable payment slip.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Utility bill (energy, consumer billing) ──────────────────────────────────
 //
 // A domestic energy bill. The interesting problem is not the arithmetic — it is
@@ -62,36 +67,6 @@ const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, 
 const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED };
 const rightBody: TextBlockOptions = { ...bodyText, alignment: 'right' };
 
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-/** One metered fuel on the bill, with the readings the charge derives from. */
-export interface MeterCharge {
-  fuel: string;
-  meterSerial: string;
-  previousReading: number;
-  currentReading: number;
-  /** Pence per unit consumed. */
-  unitRatePence: number;
-  /** Pence per day for being connected, charged across `days`. */
-  standingChargePence: number;
-  days: number;
-}
-
-export interface UtilityBillData {
-  supplier: { name: string; address: string; phone: string; regulator: string };
-  customer: { name: string; address: string; accountNumber: string };
-  period: { from: string; to: string; issued: string; dueBy: string };
-  charges: MeterCharge[];
-  /** Balance carried in from the previous bill; positive means owed. */
-  broughtForward: number;
-  vatRatePercent: number;
-  /** Twelve prior months of total consumption, oldest first, for the chart. */
-  history: { month: string; units: number }[];
-  payment: { reference: string; sortCode: string; accountNumber: string };
-  locale: string;
-  currency: string;
-}
-
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleUtilityBill: UtilityBillData = {
   supplier: {
@@ -146,6 +121,42 @@ export const sampleUtilityBill: UtilityBillData = {
   locale: 'en-GB',
   currency: 'GBP',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleUtilityBill);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+/** One metered fuel on the bill, with the readings the charge derives from. */
+export interface MeterCharge {
+  fuel: string;
+  meterSerial: string;
+  previousReading: number;
+  currentReading: number;
+  /** Pence per unit consumed. */
+  unitRatePence: number;
+  /** Pence per day for being connected, charged across `days`. */
+  standingChargePence: number;
+  days: number;
+}
+
+export interface UtilityBillData {
+  supplier: { name: string; address: string; phone: string; regulator: string };
+  customer: { name: string; address: string; accountNumber: string };
+  period: { from: string; to: string; issued: string; dueBy: string };
+  charges: MeterCharge[];
+  /** Balance carried in from the previous bill; positive means owed. */
+  broughtForward: number;
+  vatRatePercent: number;
+  /** Twelve prior months of total consumption, oldest first, for the chart. */
+  history: { month: string; units: number }[];
+  payment: { reference: string; sortCode: string; accountNumber: string };
+  locale: string;
+  currency: string;
+}
 
 // ── Derivation — every figure on the bill comes from here ────────────────────
 
@@ -508,8 +519,4 @@ export function buildDocument(
   doc.add(cutLine());
   doc.add(remittanceSlip(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleUtilityBill);
 }

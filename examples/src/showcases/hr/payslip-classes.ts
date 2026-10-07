@@ -1,3 +1,8 @@
+/**
+ * Payslip (Class API).
+ * The same encrypted payslip as Payslip, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Payslip / earnings statement (UK, HR / payroll) — class companion ────────
 //
 // The **class / construct-then-mutate** companion to `payslip.ts`. Same UK
@@ -44,37 +49,6 @@ const BRAND = ColorPalette.blue[600];
 const NET_PANEL = ColorPalette.blue[50];
 const NET_AMOUNT = ColorPalette.blue[700];
 
-// ── Domain model (the data-to-document boundary) ─────────────────────────────
-
-export type DeductionKind = 'tax' | 'ni' | 'pension' | 'other';
-
-export interface MoneyLine {
-  label: string;
-  amount: number; // this pay period
-  ytd: number; // cumulative for the tax year to date
-  units?: number; // optional, e.g. overtime hours
-  rate?: number; // optional, pay rate behind `amount`
-  kind?: DeductionKind; // deductions only
-}
-
-export interface PayslipData {
-  employer: { name: string; address: string; payeReference: string };
-  employee: {
-    name: string;
-    payrollId: string;
-    niNumber: string; // shown masked
-    niCategory: string; // NI category letter, e.g. "A"
-    taxCode: string; // e.g. "1257L"
-    payFrequency: string; // e.g. "Monthly"
-    paidTo: string; // masked bank details, shown on the net-pay band
-  };
-  payPeriod: { payDate: string; taxMonth: number; taxYear: string };
-  payments: MoneyLine[];
-  deductions: MoneyLine[];
-  locale: string;
-  currency: string;
-}
-
 // ── Deterministic sample fixture ──────────────────────────────────────────────
 export const samplePayslip: PayslipData = {
   employer: {
@@ -110,6 +84,49 @@ export const samplePayslip: PayslipData = {
 // The demo password is printed on the slip (see `disclaimer`) so a developer who
 // downloads the encrypted PDF can open it. Real payslips would never do this.
 const DEMO_PASSWORD = 'demo123';
+
+// ── generate(): encrypted wrapper around the pure builder ────────────────────
+
+export function generate(): Document {
+  const settings = createPayslipSettings();
+  withEncryptionAes256(settings, opts =>
+    opts.withUserPassword(DEMO_PASSWORD).withOwnerPassword(DEMO_PASSWORD).allowPrinting().allowAccessibility()
+  );
+  return buildDocument(samplePayslip, settings);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model (the data-to-document boundary) ─────────────────────────────
+
+export type DeductionKind = 'tax' | 'ni' | 'pension' | 'other';
+
+export interface MoneyLine {
+  label: string;
+  amount: number; // this pay period
+  ytd: number; // cumulative for the tax year to date
+  units?: number; // optional, e.g. overtime hours
+  rate?: number; // optional, pay rate behind `amount`
+  kind?: DeductionKind; // deductions only
+}
+
+export interface PayslipData {
+  employer: { name: string; address: string; payeReference: string };
+  employee: {
+    name: string;
+    payrollId: string;
+    niNumber: string; // shown masked
+    niCategory: string; // NI category letter, e.g. "A"
+    taxCode: string; // e.g. "1257L"
+    payFrequency: string; // e.g. "Monthly"
+    paidTo: string; // masked bank details, shown on the net-pay band
+  };
+  payPeriod: { payDate: string; taxMonth: number; taxYear: string };
+  payments: MoneyLine[];
+  deductions: MoneyLine[];
+  locale: string;
+  currency: string;
+}
 
 // ── Small formatting helpers ────────────────────────────────────────────────
 
@@ -355,14 +372,4 @@ export function buildDocument(data: PayslipData, settings: DocumentSettings = cr
   doc.add(yearToDate(data));
   doc.add(disclaimer());
   return doc;
-}
-
-// ── generate(): encrypted wrapper around the pure builder ────────────────────
-
-export function generate(): Document {
-  const settings = createPayslipSettings();
-  withEncryptionAes256(settings, opts =>
-    opts.withUserPassword(DEMO_PASSWORD).withOwnerPassword(DEMO_PASSWORD).allowPrinting().allowAccessibility()
-  );
-  return buildDocument(samplePayslip, settings);
 }

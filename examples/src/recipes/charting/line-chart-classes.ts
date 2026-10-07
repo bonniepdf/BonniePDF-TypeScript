@@ -1,3 +1,8 @@
+/**
+ * Line Chart (Class API).
+ * The same monthly-revenue line chart as Line Chart, built with the class API: construct each chart model and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

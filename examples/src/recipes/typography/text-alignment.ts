@@ -1,3 +1,8 @@
+/**
+ * Text Alignment.
+ * Left, centre, right, and justified text, from short sentences to book-style paragraphs where word spacing stretches to both margins, readable by screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, StandardFonts, type TextAlignmentInput } from '@bonniepdf/core';
 
 /**
@@ -79,6 +84,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput = 'left'): void {
   doc.add(

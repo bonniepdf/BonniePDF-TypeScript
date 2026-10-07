@@ -1,3 +1,8 @@
+/**
+ * IFRS Financial Statements.
+ * IFRS-style statutory accounts: income and financial-position statements with prior-year comparatives, note references, bracketed negatives, and total rules.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── UK / EU statutory financial statements ───────────────────────────────────
 //
 // Portfolio #2, framed for UK/EU rather than US. This is a real *statutory*
@@ -30,15 +35,6 @@ const NAVY = ColorPalette.slate[800];
 const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[300];
-
-interface Line {
-  label: string;
-  note?: string;
-  cur?: number;
-  prior?: number;
-  kind?: 'line' | 'section' | 'subtotal' | 'total';
-  indent?: boolean;
-}
 
 const INCOME: Line[] = [
   { label: 'Revenue', note: '2', cur: 48210, prior: 42880 },
@@ -138,6 +134,17 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Line {
+  label: string;
+  note?: string;
+  cur?: number;
+  prior?: number;
+  kind?: 'line' | 'section' | 'subtotal' | 'total';
+  indent?: boolean;
 }
 
 // ── Row rendering ─────────────────────────────────────────────────────────────

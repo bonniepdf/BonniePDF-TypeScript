@@ -1,3 +1,8 @@
+/**
+ * Book Page Layout (Class API).
+ * The same typeset chapter page as Book Page Layout, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

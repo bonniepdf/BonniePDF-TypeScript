@@ -1,3 +1,8 @@
+/**
+ * Bar Chart.
+ * A vertical bar chart of monthly sales from January to December, with grid lines, value labels, a running page footer, and alt text describing the trend.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

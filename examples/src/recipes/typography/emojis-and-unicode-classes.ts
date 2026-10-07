@@ -1,4 +1,9 @@
 /**
+ * Emojis & Unicode (Class API).
+ * The same full-Unicode / emoji tour as Emojis & Unicode, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Emojis & Unicode — full Unicode range including supplementary planes.
  *
  * Four fonts cover different blocks:
@@ -180,6 +185,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A section heading. Each section is added as one keep-together block, so a heading never sits on a page apart from its content. */
 function sectionHeading(title: string, tocId: string): Heading {

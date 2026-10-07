@@ -1,3 +1,8 @@
+/**
+ * Lists (Class API).
+ * The same ordered/unordered list tour as Lists, built with the class API: construct each list and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   VerticalStack,
@@ -244,6 +249,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function category(doc: Document, title: string, tocId: string): void {
   const h = new Heading(title);

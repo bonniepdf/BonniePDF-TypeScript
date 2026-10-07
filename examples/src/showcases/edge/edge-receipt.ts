@@ -1,3 +1,8 @@
+/**
+ * Point-of-Sale Receipt.
+ * A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. A few KB with no WASM, so it runs in a Cloudflare Worker.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Browser / Cloudflare Worker receipt ──────────────────────────────────────
 //
 // The showcase for BonniePDF's defining platform story: generating a real PDF
@@ -46,12 +51,6 @@ const MUTE = ColorPalette.slate[500];
 
 // 80 mm thermal receipt width = 226.77pt; a comfortable single-page height.
 const PAGE = new PdfSize(226.77, 720, 'Receipt 80mm');
-
-interface Item {
-  qty: number;
-  name: string;
-  price: number; // line total in GBP, VAT-inclusive
-}
 
 const ITEMS: Item[] = [
   { qty: 2, name: 'Flat White', price: 5.6 },
@@ -172,6 +171,14 @@ export function generate(): Document {
   doc.add(center('Generated at the edge with BonniePDF', 7, MUTE, 8));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Item {
+  qty: number;
+  name: string;
+  price: number; // line total in GBP, VAT-inclusive
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

@@ -1,3 +1,8 @@
+/**
+ * Images.
+ * PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Informative images carry alt text; the decorative divider is skipped.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, Container, VerticalStack, Image, StandardFonts } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
@@ -131,6 +136,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A caption + its content (image or container), kept together on one page. */
 type Block = IElement[];

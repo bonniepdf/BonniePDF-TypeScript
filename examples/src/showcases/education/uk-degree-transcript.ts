@@ -1,3 +1,8 @@
+/**
+ * UK Degree Transcript.
+ * A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level that flows across pages, and a QR verification link.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── UK university degree transcript ──────────────────────────────────────────
 //
 // The education showcase, in the UK academic idiom: an official degree
@@ -35,14 +40,6 @@ const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 // 700, not 500: bold 12pt text on white needs 4.5:1 and 500 falls to 2.13:1.
 const GOLD = ColorPalette.amber[700];
-
-interface Module {
-  level: number;
-  code: string;
-  title: string;
-  credits: number;
-  mark: number;
-}
 
 const MODULES: Module[] = [
   { level: 4, code: 'CS4101', title: 'Programming Fundamentals', credits: 20, mark: 68 },
@@ -224,6 +221,16 @@ export function generate(): Document {
   doc.add(verify);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Module {
+  level: number;
+  code: string;
+  title: string;
+  credits: number;
+  mark: number;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

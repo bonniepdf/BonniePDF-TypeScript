@@ -1,3 +1,8 @@
+/**
+ * Barcodes (Class API).
+ * The same native 1D-barcode tour as Barcodes, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

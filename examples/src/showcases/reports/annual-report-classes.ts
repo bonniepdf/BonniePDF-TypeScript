@@ -1,3 +1,9 @@
+/**
+ * Annual Report: Classic (Class API).
+ * A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 // The **class / construct-then-mutate** companion to `annual-report.ts`.
 // Same three-page annual report, authored the long way: `new` each element
 // and assign properties. It renders **byte-for-byte identically** to the
@@ -183,6 +189,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 // ── Background slot builders ────────────────────────────────────────────────
 //

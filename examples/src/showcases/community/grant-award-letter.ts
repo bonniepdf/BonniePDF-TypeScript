@@ -1,3 +1,8 @@
+/**
+ * Grant Award Letter.
+ * A fictional grant funding decision: a headline “Awarded” block with key dates, an award-breakdown table, next steps, and an alternative-formats notice.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Grant Award Letter
 //
 // The accessibility-first public-sector award showcase. A funding decision is a
@@ -41,12 +46,6 @@ const NOTICE_BORDER = '#d69e00';
 
 const MARGIN = 50;
 
-interface Money {
-  label: string;
-  amount: string;
-  note: string;
-}
-
 // Fictional award breakdown. The components add up to the total award, which is
 // then split into equal instalments.
 const CALCULATION: Money[] = [
@@ -57,11 +56,6 @@ const CALCULATION: Money[] = [
 
 const AWARD_TOTAL = '£7,900';
 const INSTALMENT_AMOUNT = '£3,950';
-
-interface Detail {
-  label: string;
-  value: string;
-}
 
 const DECISION_DETAILS: Detail[] = [
   { label: 'Decision', value: 'Awarded' },
@@ -289,6 +283,19 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface Money {
+  label: string;
+  amount: string;
+  note: string;
+}
+
+interface Detail {
+  label: string;
+  value: string;
 }
 
 function h1(text: string): Heading {

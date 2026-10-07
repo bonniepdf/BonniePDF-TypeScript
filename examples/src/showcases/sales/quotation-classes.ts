@@ -1,3 +1,8 @@
+/**
+ * Quotation (Class API).
+ * The same tiered quotation as Quotation, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Quotation / proposal (B2B pre-sales) — class companion ───────────────────
 //
 // The **class / construct-then-mutate** companion to `quotation.ts`. Same
@@ -53,36 +58,6 @@ const TIER_CARD_HEIGHT = 178;
 const TIER_PAD = 12;
 const TIER_BORDER_ON = 1.5;
 const TIER_BORDER_OFF = 0.75;
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface QuoteTier {
-  name: string;
-  tagline: string;
-  price: number;
-  cadence: string;
-  includes: string[];
-  recommended?: boolean;
-}
-
-export interface QuoteAddOn {
-  label: string;
-  detail: string;
-  price: number;
-  cadence: string;
-}
-
-export interface QuotationData {
-  supplier: { name: string; address: string; email: string; registration: string };
-  customer: { company: string; contact: string; address: string };
-  reference: { quoteNumber: string; issued: string; validUntil: string; owner: string };
-  scope: string[];
-  tiers: QuoteTier[];
-  addOns: QuoteAddOn[];
-  assumptions: string[];
-  locale: string;
-  currency: string;
-}
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleQuotation: QuotationData = {
@@ -160,6 +135,42 @@ export const sampleQuotation: QuotationData = {
   locale: 'en-GB',
   currency: 'GBP',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleQuotation);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface QuoteTier {
+  name: string;
+  tagline: string;
+  price: number;
+  cadence: string;
+  includes: string[];
+  recommended?: boolean;
+}
+
+export interface QuoteAddOn {
+  label: string;
+  detail: string;
+  price: number;
+  cadence: string;
+}
+
+export interface QuotationData {
+  supplier: { name: string; address: string; email: string; registration: string };
+  customer: { company: string; contact: string; address: string };
+  reference: { quoteNumber: string; issued: string; validUntil: string; owner: string };
+  scope: string[];
+  tiers: QuoteTier[];
+  addOns: QuoteAddOn[];
+  assumptions: string[];
+  locale: string;
+  currency: string;
+}
 
 // ── Small formatting helpers ─────────────────────────────────────────────────
 
@@ -496,8 +507,4 @@ export function buildDocument(data: QuotationData, settings: DocumentSettings = 
   doc.add(assumptionsSection(data));
   doc.add(acceptanceBlock(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleQuotation);
 }

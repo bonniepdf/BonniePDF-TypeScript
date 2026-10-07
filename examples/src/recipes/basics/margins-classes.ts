@@ -1,3 +1,8 @@
+/**
+ * Margins and Padding (Class API).
+ * The same margins-and-padding tour as Margins and Padding, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -198,6 +203,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** Builds a level-2 section heading with the shared style used across this example. */
 function sectionHeading(text: string): Heading {

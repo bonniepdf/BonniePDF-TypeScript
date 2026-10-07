@@ -1,3 +1,8 @@
+/**
+ * Retail Shelf Label (EU/UK) (Class API).
+ * The same EU/UK shelf-edge label as Retail Shelf Label, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // EU / UK retail shelf-edge label
 //
 // The retail showcase, framed for EU/UK rather than US. The distinguishing
@@ -108,6 +113,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function retailerStrip(): Container {
   const row = new HorizontalStack();

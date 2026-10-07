@@ -1,3 +1,8 @@
+/**
+ * Area Chart.
+ * A filled area under the line with configurable opacity, showing monthly sales performance through the year, with a legend and alt text.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

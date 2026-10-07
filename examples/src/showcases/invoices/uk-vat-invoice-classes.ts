@@ -1,12 +1,8 @@
-// ── UK VAT invoice ───────────────────────────────────────────────────────────
-//
-// An HMRC-style VAT invoice. Post-Brexit the UK runs its own VAT regime, and a
-// valid VAT invoice must show the supplier's VAT registration number, a tax
-// point (supply date), and - crucially - a VAT breakdown by rate. This showcase
-// mixes standard-rated (20%), reduced-rated (5%), and zero-rated (0%) lines and
-// summarises the net / VAT / gross per rate, the way UK accounting software does.
-// GBP throughout; fictional company data.
-
+/**
+ * UK VAT Invoice (Class API).
+ * The same UK VAT invoice as UK VAT Invoice, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -28,19 +24,33 @@ import {
   WidthDistribution,
   TextStyle,
   PdfAConformance,
+  TextBlock,
+  Color,
+  type IElement,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
-import { cell, money, lines, labelled, totalLine, divider, accentBar, INK, MUTED, HEADER_BG, RULE } from './_kit';
+
+const INK = ColorPalette.slate[700];
+
+// 600, not 500: reads against tinted panels in the invoices that use it, and 500
+// falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
+
+const HEADER_BG = ColorPalette.slate[100];
+
+const RULE = ColorPalette.slate[200];
+
+// ── UK VAT invoice ───────────────────────────────────────────────────────────
+//
+// An HMRC-style VAT invoice. Post-Brexit the UK runs its own VAT regime, and a
+// valid VAT invoice must show the supplier's VAT registration number, a tax
+// point (supply date), and - crucially - a VAT breakdown by rate. This showcase
+// mixes standard-rated (20%), reduced-rated (5%), and zero-rated (0%) lines and
+// summarises the net / VAT / gross per rate, the way UK accounting software does.
+// GBP throughout; fictional company data.
 
 const ACCENT = ColorPalette.rose[700]; // British racing-adjacent claret
 const GBP = '£';
-
-interface UkLine {
-  description: string;
-  qty: number;
-  unitPrice: number;
-  vatRate: number; // 0.20 | 0.05 | 0
-  rateLabel: string;
-}
 
 const ITEMS: UkLine[] = [
   { description: 'Consultancy services (May 2025)', qty: 12, unitPrice: 480, vatRate: 0.2, rateLabel: 'S' },
@@ -54,7 +64,7 @@ const ITEMS: UkLine[] = [
  *
  * Same UK VAT invoice, authored the long way: `new` each element and assign
  * properties, added directly with `doc.add(...)` (no redundant parent
- * VerticalStack). Shares the `_kit` building blocks. Renders **byte-for-byte
+ * VerticalStack). Includes its own formatting helpers below. Renders **byte-for-byte
  * identically** to the options-style `uk-vat-invoice.ts`.
  */
 export function generate(): Document {
@@ -213,9 +223,94 @@ export function generate(): Document {
   return doc;
 }
 
+// Local helpers and sample types used by this document.
+
+interface UkLine {
+  description: string;
+  qty: number;
+  unitPrice: number;
+  vatRate: number; // 0.20 | 0.05 | 0
+  rateLabel: string;
+}
+
 function rateName(rate: number): string {
   if (rate === 0.2) return 'Standard (20%)';
   if (rate === 0.05) return 'Reduced (5%)';
   if (rate === 0) return 'Zero-rated (0%)';
   return `${(rate * 100).toFixed(0)}%`;
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  /** Text alignment. Accepts the `TextAlignment` enum or a token (`'left'`, `'right'`, …). */
+  align?: TextAlignmentInput;
+  margin?: Thickness;
+}
+
+/** A styled text cell with invoice-friendly defaults (9pt Helvetica, slate ink). */
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const b = new TextBlock(text);
+  b.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  b.fontSize = o.size ?? 9;
+  b.color = o.color ?? INK;
+  if (o.align) b.alignment = o.align;
+  if (o.margin) b.margin = o.margin;
+  return b;
+}
+
+/** A right-aligned monetary cell using the region's symbol and locale. */
+function money(value: number, symbol: string, locale = 'en-US'): string {
+  return symbol + value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** A block of plain text lines, e.g. a postal address. A single TextBlock
+ * using hard `\n` breaks, so the block tags as one paragraph under PDF/UA. */
+function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
+}
+
+/** A labelled block: a bold eyebrow label over a body stack, returned in a
+ * Container so callers can add padding/background to the block. */
+function labelled(label: string, body: IElement, accent: Color): Container {
+  const stack = new VerticalStack();
+  stack.add(cell(label, { bold: true, size: 8, color: accent, margin: new Thickness(0, 0, 0, 5) }));
+  stack.add(body);
+  const box = new Container();
+  box.child = stack;
+  return box;
+}
+
+/** A single "label ....... value" totals line, weighted so the value hugs the right edge. */
+function totalLine(
+  label: string,
+  value: string,
+  o: { bold?: boolean; size?: number; color?: Color } = {}
+): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 3, 0, 3);
+  row.add(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
+  row.add(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
+  return row;
+}
+
+/** A thin horizontal divider used between totals and the grand total. */
+function divider(color: Color = INK, thickness = 0.6): Container {
+  const d = new Container();
+  d.backgroundColor = color;
+  d.height = thickness;
+  d.margin = new Thickness(0, 5, 0, 5);
+  return d;
+}
+
+/** A full-width coloured accent bar - the top rule that anchors each invoice. */
+function accentBar(color: Color, height = 5): Container {
+  const bar = new Container();
+  bar.backgroundColor = color;
+  bar.height = height;
+  return bar;
 }

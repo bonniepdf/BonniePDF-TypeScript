@@ -1,3 +1,9 @@
+/**
+ * Event Ticket.
+ * A concert ticket in boarding-pass style: a background image, a QR entry pass, a Code 128 ticket-id barcode, and a tear-off stub on a custom page size.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 // Event Ticket
 //
 // Event ticket / boarding-pass style card (gallery #8): PDF/A-2a + PDF/UA-1
@@ -35,27 +41,6 @@ const BODY = ColorPalette.slate[300];
 // to 3.32:1 against the 4.5:1 WCAG AA threshold; 400 clears it (5.13:1).
 const ACCENT = ColorPalette.violet[400];
 const STUB = ColorPalette.slate[800];
-
-function tb(
-  content: string,
-  size: number,
-  color: ColorInput,
-  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
-): TextBlock {
-  return new TextBlock(content, {
-    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
-    fontSize: size,
-    color: color,
-    alignment: opts.align,
-    margin: opts.mb ? { bottom: opts.mb } : undefined,
-  });
-}
-
-function field(label: string, value: string, color: ColorInput, labelColor: ColorInput): VerticalStack {
-  return new VerticalStack({
-    children: [tb(label, 7, labelColor, { bold: true, mb: 2 }), tb(value, 11, color, { bold: true })],
-  });
-}
 
 /**
  * Event ticket / boarding-pass style card (gallery #8): PDF/A-2a + PDF/UA-1 with
@@ -185,4 +170,27 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(ticket);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
+): TextBlock {
+  return new TextBlock(content, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color: color,
+    alignment: opts.align,
+    margin: opts.mb ? { bottom: opts.mb } : undefined,
+  });
+}
+
+function field(label: string, value: string, color: ColorInput, labelColor: ColorInput): VerticalStack {
+  return new VerticalStack({
+    children: [tb(label, 7, labelColor, { bold: true, mb: 2 }), tb(value, 11, color, { bold: true })],
+  });
 }

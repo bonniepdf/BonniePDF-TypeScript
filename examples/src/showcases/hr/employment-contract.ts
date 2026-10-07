@@ -1,3 +1,8 @@
+/**
+ * Employment Contract.
+ * A written statement of employment particulars: numbered clauses, defined terms, a running header, a schedule page, and signature and witness fields.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Employment contract (HR / legal) ─────────────────────────────────────────
 //
 // A multi-page written statement of employment particulars. Where the payslip
@@ -54,37 +59,6 @@ const HELVETICA_BOLD = StandardFonts.HelveticaBold;
 
 const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9.5, color: INK };
 const mutedText: TextBlockOptions = { ...bodyText, fontSize: 8.5, color: MUTED };
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-/** One numbered clause. `paragraphs` are the indented sub-clauses. */
-export interface Clause {
-  heading: string;
-  /** Lead-in prose, rendered before any sub-clauses. Optional. */
-  intro?: string;
-  /** Sub-clauses. Rendered as an indented numbered list beneath the heading. */
-  paragraphs: string[];
-}
-
-export interface ContractData {
-  employer: { name: string; address: string; registration: string };
-  employee: { name: string; address: string };
-  role: { title: string; department: string; reportsTo: string; startDate: string };
-  terms: { salary: string; hours: string; holiday: string; probation: string; notice: string; location: string };
-  reference: string;
-  definitions: [term: string, meaning: string][];
-  clauses: Clause[];
-  /**
-   * 0-based page each outline entry targets. Pagination is resolved at render
-   * time, not while the element tree is built, so a bookmark cannot discover
-   * its own page — the outline has to be told. Collected here, rather than as
-   * literals spread through `createContractSettings`, so that re-flowing the
-   * sample prose is one visible edit. `clauses[i]` is the page clause `i + 1`
-   * opens on.
-   */
-  outlinePages: { particulars: number; definitions: number; clauses: number[]; schedule: number; execution: number };
-  locale: string;
-}
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleContract: ContractData = {
@@ -177,6 +151,43 @@ export const sampleContract: ContractData = {
   outlinePages: { particulars: 0, definitions: 0, clauses: [0, 1, 1, 1, 1], schedule: 2, execution: 2 },
   locale: 'en-GB',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleContract);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+/** One numbered clause. `paragraphs` are the indented sub-clauses. */
+export interface Clause {
+  heading: string;
+  /** Lead-in prose, rendered before any sub-clauses. Optional. */
+  intro?: string;
+  /** Sub-clauses. Rendered as an indented numbered list beneath the heading. */
+  paragraphs: string[];
+}
+
+export interface ContractData {
+  employer: { name: string; address: string; registration: string };
+  employee: { name: string; address: string };
+  role: { title: string; department: string; reportsTo: string; startDate: string };
+  terms: { salary: string; hours: string; holiday: string; probation: string; notice: string; location: string };
+  reference: string;
+  definitions: [term: string, meaning: string][];
+  clauses: Clause[];
+  /**
+   * 0-based page each outline entry targets. Pagination is resolved at render
+   * time, not while the element tree is built, so a bookmark cannot discover
+   * its own page — the outline has to be told. Collected here, rather than as
+   * literals spread through `createContractSettings`, so that re-flowing the
+   * sample prose is one visible edit. `clauses[i]` is the page clause `i + 1`
+   * opens on.
+   */
+  outlinePages: { particulars: number; definitions: number; clauses: number[]; schedule: number; execution: number };
+  locale: string;
+}
 
 // ── Section builders ─────────────────────────────────────────────────────────
 
@@ -458,8 +469,4 @@ export function buildDocument(data: ContractData, settings: DocumentSettings = c
   doc.add(schedule(data));
   doc.add(execution(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleContract);
 }

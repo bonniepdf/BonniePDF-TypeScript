@@ -1,17 +1,8 @@
-// ── Dunning letter — final reminder before escalation (class API) ────────────
-//
-// The collections letter: a letter in tone and structure, but carrying a
-// schedule of overdue items and an arithmetic that has to be right. Days overdue
-// are derived from the due dates against the letter date, and the escalation
-// stage drives the tone, the deadline, and the consequences paragraph.
-//
-// The **class / construct-then-mutate** companion to `dunning-letter.ts`. Same
-// letter, authored the long way: `new` each element and assign its properties
-// one at a time, with the enum members rather than their string literals. It
-// renders **byte-for-byte identically** to the options-object form (an
-// equivalence test binds the two). Reach for the options form first; this
-// variant exists to show what it desugars to.
-
+/**
+ * Dunning Letter (Class API).
+ * The same dunning letter as Dunning letter, built with the class API: construct each element and assign its properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -27,31 +18,44 @@ import {
   Border,
   BorderColors,
   pageTemplate,
+  type IElement,
+  TextBlock,
+  Heading,
+  VerticalStack,
+  HorizontalStack,
+  WidthDistribution,
+  Container,
+  ColorPalette,
+  Thickness,
+  StandardFonts,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
-import {
-  INK,
-  MUTED,
-  ACCENT,
-  RULE,
-  NEGATIVE,
-  accentBar,
-  band,
-  cell,
-  divider,
-  gbDate,
-  h1,
-  h2,
-  lines,
-  money,
-  panel,
-  td,
-  th,
-  totalLine,
-  totalsPanel,
-  weightedRow,
-} from './_trade-kit-classes';
+const INK = ColorPalette.slate[700];
+
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
+
+const HEADING = ColorPalette.slate[800];
+
+const ACCENT = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
+
+const NEGATIVE = ColorPalette.rose[700];
+
+// ── Dunning letter — final reminder before escalation (class API) ────────────
+//
+// The collections letter: a letter in tone and structure, but carrying a
+// schedule of overdue items and an arithmetic that has to be right. Days overdue
+// are derived from the due dates against the letter date, and the escalation
+// stage drives the tone, the deadline, and the consequences paragraph.
+//
+// The **class / construct-then-mutate** companion to `dunning-letter.ts`. Same
+// letter, authored the long way: `new` each element and assign its properties
+// one at a time, with the enum members rather than their string literals. It
+// renders **byte-for-byte identically** to the options-object form (an
+// equivalence test binds the two). Reach for the options form first; this
+// variant exists to show what it desugars to.
 
 /** The escalation ladder. The stage drives tone, deadline, and consequences. */
 const STAGES = {
@@ -59,8 +63,6 @@ const STAGES = {
   2: { name: 'Second reminder', days: 10, tone: 'firm' },
   3: { name: 'Final notice before escalation', days: 7, tone: 'final' },
 } as const;
-
-type Stage = keyof typeof STAGES;
 
 const LETTER = {
   reference: 'COL-2026-002281',
@@ -79,13 +81,6 @@ const LETTER = {
   interestRate: 0.08,
   compensationPerInvoice: 40,
 };
-
-interface OverdueItem {
-  reference: string;
-  issued: Date;
-  due: Date;
-  amount: number;
-}
 
 const OVERDUE: OverdueItem[] = [
   {
@@ -107,10 +102,6 @@ const OVERDUE: OverdueItem[] = [
     amount: 1360.0,
   },
 ];
-
-function daysOverdue(item: OverdueItem, asAt: Date): number {
-  return Math.max(0, Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000));
-}
 
 export function generate(): Document {
   const stage = STAGES[LETTER.stage];
@@ -322,4 +313,171 @@ export function generate(): Document {
   doc.add(cell(`${LETTER.phone} · ${LETTER.contact}`, { size: 9, color: MUTED }));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+type Stage = keyof typeof STAGES;
+
+interface OverdueItem {
+  reference: string;
+  issued: Date;
+  due: Date;
+  amount: number;
+}
+
+function daysOverdue(item: OverdueItem, asAt: Date): number {
+  return Math.max(0, Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000));
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+// ── Formatting ───────────────────────────────────────────────────────────────
+
+/**
+ * Sterling, with the sign outside the symbol.
+ *
+ * Prepending the currency symbol to a signed number prints a credit
+ * as "£-420.00". On a statement or a credit note, where the sign is the most
+ * important character in the cell, it belongs in front of the symbol.
+ */
+
+function money(value: number, symbol = '£', locale = 'en-GB'): string {
+  const sign = value < 0 ? '-' : '';
+  return sign + symbol + Math.abs(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function gbDate(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
+}
+
+// ── Building blocks, the long way ────────────────────────────────────────────
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  align?: TextAlignment;
+  mt?: number;
+  mb?: number;
+}
+
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const block = new TextBlock(text);
+  block.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  block.fontSize = o.size ?? 9;
+  block.color = o.color ?? INK;
+  block.alignment = o.align ?? TextAlignment.Left;
+  block.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
+  return block;
+}
+
+function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
+}
+
+function th(text: string, align: TextAlignment = TextAlignment.Left): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: Color.white, align });
+}
+
+function td(text: string, o: CellOpts = {}): TextBlock {
+  return cell(text, { ...o, size: o.size ?? 8.5 });
+}
+
+function h1(text: string): Heading {
+  const heading = new Heading(text);
+  heading.level = 1;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 21;
+  heading.color = HEADING;
+  heading.margin = new Thickness(0, 0, 0, 4);
+  return heading;
+}
+
+function h2(text: string, color: Color = ACCENT): Heading {
+  const heading = new Heading(text);
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 13;
+  heading.color = color;
+  heading.margin = new Thickness(0, 16, 0, 8);
+  return heading;
+}
+
+/** The full-width accent rule at the top of each document. */
+
+function accentBar(color: Color = ACCENT, height = 4): Container {
+  const bar = new Container();
+  bar.backgroundColor = color;
+  bar.height = height;
+  bar.margin = new Thickness(0, 0, 0, 14);
+  return bar;
+}
+
+function weightedRow(items: IElement[], o: { spacing?: number; mt?: number; mb?: number } = {}): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.spacing = o.spacing ?? 14;
+  row.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 14);
+  for (const item of items) row.add(item, 1);
+  return row;
+}
+
+function totalLine(label: string, value: string, o: CellOpts = {}): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 3, 0, 3);
+  row.add(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
+  row.add(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
+  return row;
+}
+
+function totalsPanel(children: IElement[], weight = 1.6): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 10, 0, 4);
+  row.add(new Container(), 2);
+  const body = new VerticalStack();
+  for (const child of children) body.add(child);
+  const box = new Container();
+  box.backgroundColor = ColorPalette.indigo[50];
+  box.cornerRadius = 6;
+  box.padding = new Thickness(12);
+  box.child = body;
+  row.add(box, weight);
+  return row;
+}
+
+function panel(title: string, children: IElement[], accent: Color = ACCENT): Container {
+  const body = new VerticalStack();
+  body.spacing = 4;
+  body.add(cell(title, { bold: true, size: 9.5, color: accent, mb: 4 }));
+  for (const child of children) body.add(child);
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(12);
+  box.margin = new Thickness(0, 4, 0, 12);
+  box.child = body;
+  return box;
+}
+
+function divider(): Container {
+  const rule = new Container();
+  rule.backgroundColor = RULE;
+  rule.height = 0.75;
+  rule.margin = new Thickness(0, 5, 0, 5);
+  return rule;
+}
+
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: TextAlignment.Right }), 2);
+  return row;
 }

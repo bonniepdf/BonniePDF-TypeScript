@@ -1,3 +1,8 @@
+/**
+ * Shapes & Borders.
+ * Rounded rectangles at several corner radii, bordered containers with and without fills, card layouts, and alert-style status banners.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, TextBlock, HorizontalStack, VerticalStack, Container, Line, StandardFonts } from '@bonniepdf/core';
 
 /**
@@ -208,6 +213,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A bold indigo section header (a styled TextBlock, matching the original). */
 function sectionHeader(text: string): TextBlock {

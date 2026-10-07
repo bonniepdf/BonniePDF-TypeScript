@@ -1,3 +1,8 @@
+/**
+ * Employment Contract (Class API).
+ * The same statement of employment particulars as Employment Contract, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Employment contract (HR / legal) — class companion ───────────────────────
 //
 // The **class / construct-then-mutate** companion to `employment-contract.ts`.
@@ -46,26 +51,6 @@ const FAINT = ColorPalette.slate[600];
 const LINE = ColorPalette.slate[200];
 const PANEL = ColorPalette.slate[50];
 const ACCENT = ColorPalette.teal[700];
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface Clause {
-  heading: string;
-  intro?: string;
-  paragraphs: string[];
-}
-
-export interface ContractData {
-  employer: { name: string; address: string; registration: string };
-  employee: { name: string; address: string };
-  role: { title: string; department: string; reportsTo: string; startDate: string };
-  terms: { salary: string; hours: string; holiday: string; probation: string; notice: string; location: string };
-  reference: string;
-  definitions: [term: string, meaning: string][];
-  clauses: Clause[];
-  outlinePages: { particulars: number; definitions: number; clauses: number[]; schedule: number; execution: number };
-  locale: string;
-}
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleContract: ContractData = {
@@ -155,6 +140,32 @@ export const sampleContract: ContractData = {
   outlinePages: { particulars: 0, definitions: 0, clauses: [0, 1, 1, 1, 1], schedule: 2, execution: 2 },
   locale: 'en-GB',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleContract);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface Clause {
+  heading: string;
+  intro?: string;
+  paragraphs: string[];
+}
+
+export interface ContractData {
+  employer: { name: string; address: string; registration: string };
+  employee: { name: string; address: string };
+  role: { title: string; department: string; reportsTo: string; startDate: string };
+  terms: { salary: string; hours: string; holiday: string; probation: string; notice: string; location: string };
+  reference: string;
+  definitions: [term: string, meaning: string][];
+  clauses: Clause[];
+  outlinePages: { particulars: number; definitions: number; clauses: number[]; schedule: number; execution: number };
+  locale: string;
+}
 
 // ── Small formatting helpers ─────────────────────────────────────────────────
 
@@ -445,8 +456,4 @@ export function buildDocument(data: ContractData, settings: DocumentSettings = c
   doc.add(schedule(data));
   doc.add(execution(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleContract);
 }

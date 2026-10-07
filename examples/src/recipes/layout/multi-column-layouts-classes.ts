@@ -1,3 +1,8 @@
+/**
+ * Multi-Column Layouts (Class API).
+ * The same multi-column tour as Multi-Column Layouts, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -212,6 +217,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** The section heading used throughout - a level-2 Heading in the house style. */
 function sectionHeading(text: string, tocIdentifier: string, topMargin: number): Heading {

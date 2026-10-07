@@ -1,3 +1,8 @@
+/**
+ * Advanced Typography (Class API).
+ * The same super/subscript + decoration-styling tour as Advanced Typography, built with the class API: construct each element and assign properties, per-span TextStyles via the fluent builders. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -164,6 +169,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A level-2 section label with the shared style used across this example. */
 function sectionLabel(text: string): Heading {

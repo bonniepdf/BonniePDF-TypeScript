@@ -1,20 +1,9 @@
-// ── EU E-Invoice · Factur-X / ZUGFeRD (EN 16931) ────────────────────────────
-//
-// The single EU e-invoice showcase: the polished human-readable invoice layout
-// *and* the real machine-readable half. `applyFacturX` binds the caller-supplied
-// EN 16931 CII XML - it forces PDF/A-3 and embeds `factur-x.xml` as an associated
-// file.
-//
-// The visible totals mirror the embedded XML exactly (net 4000.00, VAT 760.00,
-// gross 4760.00) - a real e-invoice's human- and machine-readable views must
-// agree. The XML is a caller input (loaded from the assets map); BonniePDF does
-// not generate it.
-//
-// Shares the regional-invoice visual grammar via `_kit`. Validated in CI (on the
-// .NET side, where the Java toolchain lives) by veraPDF (PDF/A-3b) and the
-// Mustang project (ZUGFeRD / EN 16931). Parity peer of the .NET
-// FacturXInvoiceExample.
-
+/**
+ * EU E-Invoice (Factur-X / ZUGFeRD, EN 16931) (Class API).
+ * The same EU Factur-X e-invoice as EU E-Invoice, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 import {
   Document,
   DocumentSettings,
@@ -34,21 +23,39 @@ import {
   WidthDistribution,
   applyFacturX,
   FacturXProfile,
+  TextBlock,
+  StandardFonts,
+  Color,
+  type IElement,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
-import {
-  cell,
-  money,
-  lines,
-  labelled,
-  totalLine,
-  divider,
-  accentBar,
-  INK,
-  MUTED,
-  HEADER_BG,
-  RULE,
-  type LineItem,
-} from './_kit';
+
+const INK = ColorPalette.slate[700];
+
+// 600, not 500: reads against tinted panels in the invoices that use it, and 500
+// falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
+
+const HEADER_BG = ColorPalette.slate[100];
+
+const RULE = ColorPalette.slate[200];
+
+// ── EU E-Invoice · Factur-X / ZUGFeRD (EN 16931) ────────────────────────────
+//
+// The single EU e-invoice showcase: the polished human-readable invoice layout
+// *and* the real machine-readable half. `applyFacturX` binds the caller-supplied
+// EN 16931 CII XML - it forces PDF/A-3 and embeds `factur-x.xml` as an associated
+// file.
+//
+// The visible totals mirror the embedded XML exactly (net 4000.00, VAT 760.00,
+// gross 4760.00) - a real e-invoice's human- and machine-readable views must
+// agree. The XML is a caller input (loaded from the assets map); BonniePDF does
+// not generate it.
+//
+// Includes its own regional-invoice formatting helpers. Validated in CI (on the
+// .NET side, where the Java toolchain lives) by veraPDF (PDF/A-3b) and the
+// Mustang project (ZUGFeRD / EN 16931). Parity peer of the .NET
+// FacturXInvoiceExample.
 
 const ACCENT = ColorPalette.blue[800]; // EU-flag blue
 const EUR = '€';
@@ -211,4 +218,90 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   applyFacturX(doc, xmlBytes, { profile: FacturXProfile.En16931 });
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+// Local helpers keep this example ready to copy into a single file.
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  /** Text alignment. Accepts the `TextAlignment` enum or a token (`'left'`, `'right'`, …). */
+  align?: TextAlignmentInput;
+  margin?: Thickness;
+}
+
+/** A styled text cell with invoice-friendly defaults (9pt Helvetica, slate ink). */
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const b = new TextBlock(text);
+  b.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  b.fontSize = o.size ?? 9;
+  b.color = o.color ?? INK;
+  if (o.align) b.alignment = o.align;
+  if (o.margin) b.margin = o.margin;
+  return b;
+}
+
+/** A right-aligned monetary cell using the region's symbol and locale. */
+function money(value: number, symbol: string, locale = 'en-US'): string {
+  return symbol + value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** A block of plain text lines, e.g. a postal address. A single TextBlock
+ * using hard `\n` breaks, so the block tags as one paragraph under PDF/UA. */
+function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
+}
+
+/** A labelled block: a bold eyebrow label over a body stack, returned in a
+ * Container so callers can add padding/background to the block. */
+function labelled(label: string, body: IElement, accent: Color): Container {
+  const stack = new VerticalStack();
+  stack.add(cell(label, { bold: true, size: 8, color: accent, margin: new Thickness(0, 0, 0, 5) }));
+  stack.add(body);
+  const box = new Container();
+  box.child = stack;
+  return box;
+}
+
+/** A single "label ....... value" totals line, weighted so the value hugs the right edge. */
+function totalLine(
+  label: string,
+  value: string,
+  o: { bold?: boolean; size?: number; color?: Color } = {}
+): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.margin = new Thickness(0, 3, 0, 3);
+  row.add(cell(label, { size: o.size ?? 9, bold: o.bold, color: o.color ?? MUTED }), 3);
+  row.add(cell(value, { size: o.size ?? 9, bold: o.bold, color: o.color ?? INK, align: TextAlignment.Right }), 2);
+  return row;
+}
+
+/** A thin horizontal divider used between totals and the grand total. */
+function divider(color: Color = INK, thickness = 0.6): Container {
+  const d = new Container();
+  d.backgroundColor = color;
+  d.height = thickness;
+  d.margin = new Thickness(0, 5, 0, 5);
+  return d;
+}
+
+/** A full-width coloured accent bar - the top rule that anchors each invoice. */
+function accentBar(color: Color, height = 5): Container {
+  const bar = new Container();
+  bar.backgroundColor = color;
+  bar.height = height;
+  return bar;
+}
+
+interface LineItem {
+  description: string;
+  detail?: string;
+  qty: number;
+  unitPrice: number;
+  /** Region tax hint shown in a dedicated column (e.g. VAT rate, HSN code, tax code). */
+  taxNote?: string;
 }

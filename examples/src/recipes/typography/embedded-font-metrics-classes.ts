@@ -1,4 +1,9 @@
 /**
+ * Embedded-Font Metrics (Class API).
+ * The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Embedded-Font Metrics — why an embedded font makes alignment edges exact.
  *
  * The standard-14 Type1 fonts (Helvetica, Times, …) are measured from approximate
@@ -112,6 +117,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
   const h = new Heading(title);

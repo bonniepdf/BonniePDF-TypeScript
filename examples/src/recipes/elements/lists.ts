@@ -1,3 +1,8 @@
+/**
+ * Lists.
+ * Ordered (decimal, roman, alpha, custom start) and unordered (disc, circle, square, dash, coloured) lists with nesting, each item structured for screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,
@@ -191,6 +196,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function category(doc: Document, title: string, tocId: string): void {
   doc.add(

@@ -1,3 +1,8 @@
+/**
+ * Barcodes.
+ * Native vector 1D barcodes (Code 128, EAN-13, UPC-A, ITF-14) for UK, EU, and US retail and logistics, with automatic check digits and readable labels.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -139,6 +144,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A bold indigo section header (a styled TextBlock, matching the original). */
 function sectionHeader(text: string): TextBlock {

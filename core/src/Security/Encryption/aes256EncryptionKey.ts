@@ -49,7 +49,7 @@ export class Aes256EncryptionKey {
 
     await instance.computeUserEntries(settings.userPassword ?? '');
     await instance.computeOwnerEntries(settings.ownerPassword ?? '');
-    await instance.computePermsEntry();
+    await instance.computePermsEntry(settings.encryptMetadata);
 
     return instance;
   }
@@ -92,7 +92,7 @@ export class Aes256EncryptionKey {
     this.ownerEncryptionEntry = await cipher.encryptNoPadding(this.fileEncryptionKey, new Uint8Array(16));
   }
 
-  private async computePermsEntry(): Promise<void> {
+  private async computePermsEntry(encryptMetadata: boolean): Promise<void> {
     const permsBlock = new Uint8Array(16);
     // Bytes 0-3: permissions (little-endian)
     permsBlock[0] = this.permissionsValue & 0xff;
@@ -101,8 +101,8 @@ export class Aes256EncryptionKey {
     permsBlock[3] = (this.permissionsValue >> 24) & 0xff;
     // Bytes 4-7: 0xFFFFFFFF
     permsBlock[4] = permsBlock[5] = permsBlock[6] = permsBlock[7] = 0xff;
-    // Byte 8: 'T' (always encrypt metadata)
-    permsBlock[8] = 0x54;
+    // Byte 8 records whether metadata is encrypted.
+    permsBlock[8] = encryptMetadata ? 0x54 : 0x46;
     // Bytes 9-11: 'adb'
     permsBlock[9] = 0x61;
     permsBlock[10] = 0x64;

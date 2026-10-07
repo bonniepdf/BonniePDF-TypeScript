@@ -9,6 +9,8 @@ each change to `core/`.
 
 ## 2026.10.0
 
+- Fixed stable SVG identifiers and preloading for document-owned fonts, QR mask scoring against independent matrix vectors, encryption of PDF text strings, XMP metadata handling in synchronous and asynchronous writers, and AES-256 permissions. Accessible encrypted documents now pass independent validation.
+
 - Added `Flip`/`flip()` and `Translate`/`translate()` native wrappers with signed offsets, unchanged flow boxes, composed geometry and JSON definitions.
 
 - Added native element rotation with free angles and constrained quarter turns, including document definitions, transformed previews and hyperlink bounds.

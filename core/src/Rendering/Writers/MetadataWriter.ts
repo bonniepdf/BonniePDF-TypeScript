@@ -1,3 +1,4 @@
+import { EncryptionAlgorithm } from '../../Security/Models/EncryptionAlgorithm';
 import * as PdfKeys from '../Pdf/PdfKeys';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { DocumentSettings } from '../../Configuration/DocumentSettings';
@@ -24,7 +25,7 @@ export class MetadataWriter {
   }
 
   public writeXmpMetadata(id: number, metadata: DocumentMetadata, settings: DocumentSettings): void {
-    // XMP metadata is written unencrypted and uncompressed (PDF/A requirement).
+    // Metadata encryption must agree with the security handler declaration.
     const dict = new Map<string, string>([
       [PdfKeys.Common.Type, '/Metadata'],
       [PdfKeys.Common.Subtype, '/XML'],
@@ -33,7 +34,13 @@ export class MetadataWriter {
     const blocks = MetadataWriter.buildConformanceBlocks(settings);
     const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
     const bytes = new TextEncoder().encode(xmpXml);
-    this.writer.writeUnencryptedBinaryObject(id, dict, bytes);
+    if (
+      this.writer.encryptor &&
+      (this.writer.encryptor.settings.encryptMetadata ||
+        this.writer.encryptor.settings.algorithm !== EncryptionAlgorithm.AES_256)
+    )
+      this.writer.writeBinaryObject(id, dict, bytes);
+    else this.writer.writeUnencryptedBinaryObject(id, dict, bytes);
   }
 
   public async writeDocumentInfoAsync(id: number, metadata: DocumentMetadata): Promise<number> {
@@ -56,12 +63,13 @@ export class MetadataWriter {
     const blocks = MetadataWriter.buildConformanceBlocks(settings);
     const xmpXml = XmpMetadataWriter.generateXmpXml(metadata, blocks);
     const bytes = new TextEncoder().encode(xmpXml);
-    // No async unencrypted-binary helper today; the sync writer would
-    // be fine here but stays the async writer's contract - write via
-    // writeObjectAsync with a stream string. The byte content is what
-    // matters; encoding follows the same UTF-8 path.
-    void bytes;
-    await this.asyncWriter.writeObjectAsync(id, dict);
+    if (
+      this.asyncWriter.encryptor &&
+      (this.asyncWriter.encryptor.settings.encryptMetadata ||
+        this.asyncWriter.encryptor.settings.algorithm !== EncryptionAlgorithm.AES_256)
+    )
+      await this.asyncWriter.writeBinaryObjectAsync(id, dict, bytes);
+    else await this.asyncWriter.writeUnencryptedBinaryObjectAsync(id, dict, bytes);
   }
 
   /** Builds the /Info dictionary shared by the sync and async paths. */

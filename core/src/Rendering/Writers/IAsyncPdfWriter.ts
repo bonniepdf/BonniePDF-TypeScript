@@ -20,6 +20,7 @@ export interface IAsyncPdfWriter {
     length?: number,
     ct?: unknown
   ): Promise<void>;
+  writeUnencryptedBinaryObjectAsync(id: number, dictionary: Map<string, string>, bytes: Uint8Array): Promise<void>;
   writeCompressedBinaryObjectAsync(
     id: number,
     dictionary: Map<string, string>,

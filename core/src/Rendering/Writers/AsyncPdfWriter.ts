@@ -68,6 +68,14 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     this._inner.writeBinaryObject(id, dictionary, slice);
   }
 
+  public async writeUnencryptedBinaryObjectAsync(
+    id: number,
+    dictionary: Map<string, string>,
+    bytes: Uint8Array
+  ): Promise<void> {
+    this._inner.writeUnencryptedBinaryObject(id, dictionary, bytes);
+  }
+
   public async writeCompressedBinaryObjectAsync(
     id: number,
     dictionary: Map<string, string>,

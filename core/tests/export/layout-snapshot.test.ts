@@ -7,6 +7,12 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { LAYOUT_SNAPSHOT_VERSION, LayoutNode } from '../../src/Rendering/LayoutRecorder';
 import { markDebugSource } from '../../src/Rendering/DebugSource';
 import { pdfToText } from '../helpers/test-base';
+import { paintOf } from '../../src/Rendering/LayoutRecorder';
+import { Barcode } from '../../src/Elements/Shapes/Barcode';
+import { QRCode } from '../../src/Elements/Shapes/QRCode';
+import { DataMatrix } from '../../src/Elements/Shapes/DataMatrix';
+import { BarChart } from '../../src/Charts/BarChart';
+import { Color } from '../../src/Core/Color';
 
 /** Depth-first walk of the snapshot tree. */
 function walk(node: LayoutNode, visit: (n: LayoutNode) => void): void {
@@ -21,6 +27,22 @@ function collect(node: LayoutNode): LayoutNode[] {
 }
 
 describe('Layout snapshot capture (this feature / structure view)', () => {
+  it.each([
+    ['Barcode', '#ffffff'],
+    ['QRCode', '#ffffff'],
+    ['DataMatrix', '#ffffff'],
+    ['BarChart', '#fafafa'],
+  ])('captures the background of %s', (type, expected) => {
+    const element =
+      type === 'Barcode'
+        ? new Barcode()
+        : type === 'QRCode'
+          ? new QRCode()
+          : type === 'DataMatrix'
+            ? new DataMatrix()
+            : new BarChart({ backgroundColor: Color.fromHex('#fafafa') });
+    expect(paintOf(element, type)?.background).toBe(expected);
+  });
   let doc: Document;
   afterEach(() => doc?.dispose());
 

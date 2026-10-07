@@ -84,6 +84,7 @@ export function embeddedFontFamily(fontFamily: string): string {
   return (
     'bpf-' +
     fontFamily
+      .replace(/virtual:docfont\/\d+\//g, 'docfont/')
       .replace(/[^a-zA-Z0-9]+/g, '-')
       .toLowerCase()
       .replace(/^-+|-+$/g, '')

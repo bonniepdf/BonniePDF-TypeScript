@@ -1,3 +1,8 @@
+/**
+ * Watermarking: Confidential.
+ * A CONFIDENTIAL variant of the diagonal watermark, tinted red and repeated behind every page of a multi-section quarterly financial report.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, TextBlock, Table, StandardFonts } from '@bonniepdf/core';
 
 /**

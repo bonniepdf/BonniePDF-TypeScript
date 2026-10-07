@@ -1,3 +1,8 @@
+/**
+ * VerticalStack Overflow (Class API).
+ * The same warehouse asset-label sheet as VerticalStack Overflow, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

@@ -1,3 +1,8 @@
+/**
+ * Cross-References (Class API).
+ * The same cross-reference field guide as Cross-References, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

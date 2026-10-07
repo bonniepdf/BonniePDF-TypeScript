@@ -1,4 +1,9 @@
 /**
+ * Embedded-Font Metrics.
+ * Why embedded TrueType makes alignment edges exact: BonniePDF measures from the font’s own advance widths, not approximate standard-14 tables. Set in Liberation Sans.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Embedded-Font Metrics — why an embedded font makes alignment edges exact.
  *
  * The standard-14 Type1 fonts (Helvetica, Times, …) are measured from approximate
@@ -91,6 +96,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput = 'left'): void {
   doc.add(

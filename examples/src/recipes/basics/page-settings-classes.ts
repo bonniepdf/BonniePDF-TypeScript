@@ -1,3 +1,8 @@
+/**
+ * Page Settings (Class API).
+ * The same standard-page-formats gallery as Page Settings, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

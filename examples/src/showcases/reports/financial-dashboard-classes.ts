@@ -1,3 +1,8 @@
+/**
+ * Financial Dashboard (Class API).
+ * Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // The **class / construct-then-mutate** companion to `financial-dashboard.ts`.
 // Same single-page quarterly dashboard, authored the long way: `new` each
 // element and assign properties. It renders **byte-for-byte identically** to

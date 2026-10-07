@@ -1,3 +1,8 @@
+/**
+ * Financial Dashboard.
+ * A single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Financial Dashboard
 //
 // Single-page A4 quarterly report with a full-bleed header, four KPI metrics,
@@ -27,39 +32,6 @@ const HEADER_MUTE = '#b99a88';
 const ROW_ALT = '#e8e0d8';
 const DELTA_POS = '#2d7a3a';
 const DELTA_NEG = '#b94040';
-
-function tb(
-  text: string,
-  size: number,
-  color: ColorInput,
-  opts: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
-): TextBlock {
-  return new TextBlock(text, {
-    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
-    fontSize: size,
-    color: color,
-    alignment: opts.align,
-    margin: opts.top ? { top: opts.top } : undefined,
-  });
-}
-
-function kpiCard(value: string, label: string, delta: string, deltaColor: ColorInput, withRule: boolean): Container {
-  return new Container({
-    padding: [20, 16],
-    border: withRule ? { left: 0.75, color: SAND } : undefined,
-    child: new VerticalStack({
-      children: [
-        tb(value, 18, ESPRESSO, { bold: true }),
-        tb(label, 7, BROWN, { top: 4 }),
-        tb(delta, 7, deltaColor, { bold: true, top: 4 }),
-      ],
-    }),
-  });
-}
-
-function rule(): Container {
-  return new Container({ backgroundColor: SAND, height: 0.75 });
-}
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export function generate(): Document {
@@ -192,4 +164,39 @@ export function generate(): Document {
   doc.add(new Container({ padding: [24, 0, 24, 20], child: productTable }));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  text: string,
+  size: number,
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
+): TextBlock {
+  return new TextBlock(text, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color: color,
+    alignment: opts.align,
+    margin: opts.top ? { top: opts.top } : undefined,
+  });
+}
+
+function kpiCard(value: string, label: string, delta: string, deltaColor: ColorInput, withRule: boolean): Container {
+  return new Container({
+    padding: [20, 16],
+    border: withRule ? { left: 0.75, color: SAND } : undefined,
+    child: new VerticalStack({
+      children: [
+        tb(value, 18, ESPRESSO, { bold: true }),
+        tb(label, 7, BROWN, { top: 4 }),
+        tb(delta, 7, deltaColor, { bold: true, top: 4 }),
+      ],
+    }),
+  });
+}
+
+function rule(): Container {
+  return new Container({ backgroundColor: SAND, height: 0.75 });
 }

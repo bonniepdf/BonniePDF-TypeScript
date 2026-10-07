@@ -15,6 +15,7 @@
     "generate-svgs": "tsx scripts/generate-svgs.ts",
     "verify-equivalence": "tsx scripts/verify-equivalence.ts",
     "verify-examples": "tsx scripts/verify-examples.ts",
+    "verify-standalone": "tsx scripts/verify-standalone.ts",
     "export-example": "tsx scripts/export-example.ts"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/node": "26.6.4",
     "tsx": "^4.23.12",
+    "sucrase": "^3.35.1",
     "typescript": "7.0.2"
   }
 }

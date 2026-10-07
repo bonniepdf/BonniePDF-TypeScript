@@ -1,3 +1,8 @@
+/**
+ * Rich Text Styles (Class API).
+ * The same inline mixed-style RichText tour as Rich Text Styles, built with the class API: fluent per-span TextStyle builders and construct-then-mutate. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -246,6 +251,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string): void {
   const h = new Heading(title);

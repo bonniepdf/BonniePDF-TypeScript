@@ -1,3 +1,8 @@
+/**
+ * Tables (Class API).
+ * The same multi-page employee table + prose as Tables, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

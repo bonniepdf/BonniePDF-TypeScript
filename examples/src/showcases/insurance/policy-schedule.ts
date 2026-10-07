@@ -1,3 +1,8 @@
+/**
+ * Policy Schedule.
+ * An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Insurance policy schedule & coverage summary ─────────────────────────────
 //
 // A regulated-document flagship for the Insurance vertical: policyholder and
@@ -44,41 +49,6 @@ const BRAND_SOFT = ColorPalette.teal[50];
 // 3.20:1.
 const ACCENT = ColorPalette.amber[700];
 const DANGER = ColorPalette.rose[700];
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface Coverage {
-  peril: string; // e.g. "Fire, lightning"
-  section: string; // e.g. "Buildings"
-  limit: number; // sum insured
-  deductible: number;
-}
-
-export interface PremiumLine {
-  label: string;
-  amount: number;
-}
-
-export interface Endorsement {
-  code: string;
-  title: string;
-  detail: string;
-  type: 'endorsement' | 'exclusion';
-}
-
-export interface PolicyScheduleData {
-  insurer: { name: string; address: string; authCode: string };
-  policy: { number: string; product: string; inception: string; renewal: string; status: string };
-  policyholder: { name: string; address: string; email: string };
-  insuredRisk: { type: string; address: string; yearBuilt: number; rebuild: number };
-  coverages: Coverage[];
-  premiums: PremiumLine[];
-  endorsements: Endorsement[];
-  claims: { phone: string; email: string; hours: string };
-  portalUrl: string;
-  locale: string;
-  currency: string;
-}
 
 // ── Sample fixture ────────────────────────────────────────────────────────────
 
@@ -169,6 +139,47 @@ export const samplePolicySchedule: PolicyScheduleData = {
   locale: 'en-GB',
   currency: 'GBP',
 };
+
+export function generate(): Document {
+  return buildDocument(samplePolicySchedule);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface Coverage {
+  peril: string; // e.g. "Fire, lightning"
+  section: string; // e.g. "Buildings"
+  limit: number; // sum insured
+  deductible: number;
+}
+
+export interface PremiumLine {
+  label: string;
+  amount: number;
+}
+
+export interface Endorsement {
+  code: string;
+  title: string;
+  detail: string;
+  type: 'endorsement' | 'exclusion';
+}
+
+export interface PolicyScheduleData {
+  insurer: { name: string; address: string; authCode: string };
+  policy: { number: string; product: string; inception: string; renewal: string; status: string };
+  policyholder: { name: string; address: string; email: string };
+  insuredRisk: { type: string; address: string; yearBuilt: number; rebuild: number };
+  coverages: Coverage[];
+  premiums: PremiumLine[];
+  endorsements: Endorsement[];
+  claims: { phone: string; email: string; hours: string };
+  portalUrl: string;
+  locale: string;
+  currency: string;
+}
 
 // ── Local helpers ─────────────────────────────────────────────────────────────
 
@@ -457,8 +468,4 @@ export function buildDocument(data: PolicyScheduleData): Document {
   );
 
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(samplePolicySchedule);
 }

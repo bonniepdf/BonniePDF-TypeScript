@@ -1,3 +1,8 @@
+/**
+ * Dot Plot Chart.
+ * Circular markers positioned along a value axis to compare the sales of eight products at a glance, with a legend and alt text for screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

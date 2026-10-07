@@ -1,3 +1,8 @@
+/**
+ * Text Alignment (Class API).
+ * The same alignment tour as Text Alignment, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -104,6 +109,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
   const h = new Heading(title);

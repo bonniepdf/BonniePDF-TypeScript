@@ -1,3 +1,8 @@
+/**
+ * Course Certificate.
+ * A landscape course certificate: an ornamental frame behind the wording, a vector monogram crest, centred serif type, and a verification code. Decoration stays out of reading order.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Course completion certificate (education / training) ─────────────────────
 //
 // Every other showcase here is an information-dense business document read for
@@ -61,19 +66,6 @@ const FRAME_HEIGHT = 595.276 - PAGE_MARGIN * 2;
 const centred: TextBlockOptions = { alignment: 'center', color: INK };
 const caption: TextBlockOptions = { fontName: SANS, fontSize: 7.5, color: MUTED, alignment: 'center' };
 
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface CertificateData {
-  institution: { name: string; department: string };
-  recipient: string;
-  course: { title: string; creditHours: number; grade: string };
-  award: { statement: string; awarded: string; certificateId: string };
-  signatories: [{ name: string; role: string }, { name: string; role: string }];
-  /** Where a holder can check this certificate is genuine. */
-  verificationUrl: string;
-  locale: string;
-}
-
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleCertificate: CertificateData = {
   institution: { name: 'Sample Institute', department: 'School of Applied Computing' },
@@ -91,6 +83,25 @@ export const sampleCertificate: CertificateData = {
   verificationUrl: 'https://example.com/verify/SI-ADE-2026-04188',
   locale: 'en-GB',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleCertificate);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface CertificateData {
+  institution: { name: string; department: string };
+  recipient: string;
+  course: { title: string; creditHours: number; grade: string };
+  award: { statement: string; awarded: string; certificateId: string };
+  signatories: [{ name: string; role: string }, { name: string; role: string }];
+  /** Where a holder can check this certificate is genuine. */
+  verificationUrl: string;
+  locale: string;
+}
 
 // ── Ornament ─────────────────────────────────────────────────────────────────
 
@@ -370,8 +381,4 @@ export function buildDocument(
 
   doc.add(framed);
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleCertificate);
 }

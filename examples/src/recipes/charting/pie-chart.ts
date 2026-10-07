@@ -1,3 +1,8 @@
+/**
+ * Pie Chart.
+ * A donut chart of monthly sales share, with a colour legend and the total value in the centre, plus alt text describing the breakdown for screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

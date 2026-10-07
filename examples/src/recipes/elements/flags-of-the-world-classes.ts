@@ -1,3 +1,9 @@
+/**
+ * Flags of the World (Class API).
+ * The same SVG flag tour as Flags of the World, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 import {
   Document,
   DocumentSettings,
@@ -121,12 +127,6 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   return doc;
 }
 
-/** A flag's `flag-icons` country code and its display name. Mexico first: it is the full-width flag. */
-interface Flag {
-  readonly code: string;
-  readonly name: string;
-}
-
 const FLAGS: readonly Flag[] = [
   { code: 'mx', name: 'Mexico' },
   { code: 'gs', name: 'South Georgia' },
@@ -149,6 +149,14 @@ const CARD_FLAG_WIDTH = 140;
 
 /** A4 (595 pt) less the default 40 pt margins. */
 const PAGE_CONTENT_WIDTH = 515;
+
+// Local helpers and sample types used by this document.
+
+/** A flag's `flag-icons` country code and its display name. Mexico first: it is the full-width flag. */
+interface Flag {
+  readonly code: string;
+  readonly name: string;
+}
 
 function altText(flag: Flag): string {
   return `Flag of ${flag.name}`;

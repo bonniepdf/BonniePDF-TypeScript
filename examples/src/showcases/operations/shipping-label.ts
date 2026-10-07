@@ -1,3 +1,8 @@
+/**
+ * Shipping Label.
+ * A 4 × 6 in carrier shipping label on a custom page size: a routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Shipping Label
 //
 // Carrier-style 4x6in shipping label (gallery #6): PDF/A-2a + PDF/UA-1 with a
@@ -27,40 +32,6 @@ const INK = ColorPalette.slate[900];
 const BODY = ColorPalette.slate[700];
 const MUTE = ColorPalette.slate[500];
 const LINE = ColorPalette.slate[300];
-
-function tb(
-  content: string,
-  size: number,
-  color: ColorInput,
-  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
-): TextBlock {
-  return new TextBlock(content, {
-    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
-    fontSize: size,
-    color: color,
-    alignment: opts.align,
-    margin: opts.mb ? { bottom: opts.mb } : undefined,
-  });
-}
-
-// A full-bleed black band with white text (carrier header / service class).
-function band(
-  text: string,
-  size: number,
-  bg: ColorInput,
-  fg: ColorInput,
-  align: TextAlignmentInput = 'left'
-): Container {
-  return new Container({ backgroundColor: bg, padding: [10, 5], child: tb(text, size, fg, { bold: true, align }) });
-}
-
-function hrule(mt: number, mb: number): Container {
-  return new Container({
-    backgroundColor: LINE,
-    height: 1,
-    margin: { top: mt, bottom: mb },
-  });
-}
 
 /**
  * Carrier-style 4x6in shipping label (gallery #6): PDF/A-2a + PDF/UA-1 with a
@@ -183,4 +154,40 @@ export function generate(): Document {
   doc.add(bottom);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
+): TextBlock {
+  return new TextBlock(content, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color: color,
+    alignment: opts.align,
+    margin: opts.mb ? { bottom: opts.mb } : undefined,
+  });
+}
+
+// A full-bleed black band with white text (carrier header / service class).
+function band(
+  text: string,
+  size: number,
+  bg: ColorInput,
+  fg: ColorInput,
+  align: TextAlignmentInput = 'left'
+): Container {
+  return new Container({ backgroundColor: bg, padding: [10, 5], child: tb(text, size, fg, { bold: true, align }) });
+}
+
+function hrule(mt: number, mb: number): Container {
+  return new Container({
+    backgroundColor: LINE,
+    height: 1,
+    margin: { top: mt, bottom: mb },
+  });
 }

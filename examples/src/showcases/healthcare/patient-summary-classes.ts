@@ -1,3 +1,8 @@
+/**
+ * Patient Summary (Class API).
+ * A4 portrait healthcare patient-summary sheet built from rounded-corner cards. Each card clips a full-bleed coloured header band to its rounded outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // The **class / construct-then-mutate** companion to `patient-summary.ts`.
 // Same rounded-card patient summary, authored the long way: `new` each
 // element and assign properties. It renders **byte-for-byte identically** to
@@ -35,63 +40,7 @@ const TINT = Color.fromHex('#f8fafc'); // slate-50   page tint
 const TEAL = Color.fromHex('#0a7164'); // patient band
 const INDIGO = Color.fromHex('#4f46e5'); // vitals band
 const ROSE = Color.fromHex('#e11d48'); // allergy band / alerts
-const CREAM = Color.fromHex('#f1f5f9'); // band caption text
-
-// ── Tiny text helper ─────────────────────────────────────────────────────────
-function tb(
-  content: string,
-  size: number,
-  color: Color,
-  opts: { bold?: boolean; align?: TextAlignment; top?: number } = {}
-): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.color = color;
-  if (opts.align !== undefined) t.alignment = opts.align;
-  if (opts.top) t.margin = new Thickness(0, opts.top, 0, 0);
-  return t;
-}
-
-/**
- * A rounded "card": a clipped, rounded-corner container whose first child is a
- * full-bleed coloured header band. The clip (`clipContent`) is what makes
- * the band follow the rounded top corners instead of poking square corners out
- * past the card edge — the same reason the white body is masked at the bottom.
- */
-function card(bandColor: Color, bandTitle: string, body: TextBlock | VerticalStack | Table): Container {
-  const band = new Container();
-  band.backgroundColor = bandColor;
-  band.padding = new Thickness(16, 10, 16, 10);
-  band.child = tb(bandTitle, 10, Color.white, { bold: true });
-
-  const bodyWrap = new Container();
-  bodyWrap.backgroundColor = CARD;
-  bodyWrap.padding = new Thickness(16, 14, 16, 16);
-  bodyWrap.child = body;
-
-  const stack = new VerticalStack();
-  stack.add(band);
-  stack.add(bodyWrap);
-
-  const c = new Container();
-  c.backgroundColor = CARD;
-  c.cornerRadius = 14;
-  c.clipContent = true; // ← mask the bleed band + body to the rounded outline
-  c.border = new Border(0.75);
-  c.borderColors = new BorderColors(HAIRLINE);
-  c.child = stack;
-  return c;
-}
-
-// A label/value pair as one borderless 2-column row.
-function detailRow(label: string, value: string): Table {
-  const row = new Grid(1, 1.6);
-  row.border = Border.none;
-  row.cellPadding = 3;
-  row.addRow(tb(label.toUpperCase(), 7.5, MUTE), tb(value, 10, BODY, { bold: true }));
-  return row;
-}
+const CREAM = Color.fromHex('#f1f5f9');
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Portrait, 0);
@@ -223,4 +172,64 @@ export function generate(): Document {
   doc.add(pad(alertsCard));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+// band caption text
+
+// ── Tiny text helper ─────────────────────────────────────────────────────────
+function tb(
+  content: string,
+  size: number,
+  color: Color,
+  opts: { bold?: boolean; align?: TextAlignment; top?: number } = {}
+): TextBlock {
+  const t = new TextBlock(content);
+  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = size;
+  t.color = color;
+  if (opts.align !== undefined) t.alignment = opts.align;
+  if (opts.top) t.margin = new Thickness(0, opts.top, 0, 0);
+  return t;
+}
+
+/**
+ * A rounded "card": a clipped, rounded-corner container whose first child is a
+ * full-bleed coloured header band. The clip (`clipContent`) is what makes
+ * the band follow the rounded top corners instead of poking square corners out
+ * past the card edge — the same reason the white body is masked at the bottom.
+ */
+function card(bandColor: Color, bandTitle: string, body: TextBlock | VerticalStack | Table): Container {
+  const band = new Container();
+  band.backgroundColor = bandColor;
+  band.padding = new Thickness(16, 10, 16, 10);
+  band.child = tb(bandTitle, 10, Color.white, { bold: true });
+
+  const bodyWrap = new Container();
+  bodyWrap.backgroundColor = CARD;
+  bodyWrap.padding = new Thickness(16, 14, 16, 16);
+  bodyWrap.child = body;
+
+  const stack = new VerticalStack();
+  stack.add(band);
+  stack.add(bodyWrap);
+
+  const c = new Container();
+  c.backgroundColor = CARD;
+  c.cornerRadius = 14;
+  c.clipContent = true; // ← mask the bleed band + body to the rounded outline
+  c.border = new Border(0.75);
+  c.borderColors = new BorderColors(HAIRLINE);
+  c.child = stack;
+  return c;
+}
+
+// A label/value pair as one borderless 2-column row.
+function detailRow(label: string, value: string): Table {
+  const row = new Grid(1, 1.6);
+  row.border = Border.none;
+  row.cellPadding = 3;
+  row.addRow(tb(label.toUpperCase(), 7.5, MUTE), tb(value, 10, BODY, { bold: true }));
+  return row;
 }

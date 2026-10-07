@@ -1,3 +1,9 @@
+/**
+ * Event Ticket (Class API).
+ * Event ticket / boarding-pass style card with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 // The **class / construct-then-mutate** companion to `event-ticket.ts`. Same
 // boarding-pass style ticket, authored the long way: `new` each element and
 // assign properties. It renders **byte-for-byte identically** to the
@@ -44,28 +50,6 @@ const MUTE = ColorPalette.slate[400];
 const BODY = ColorPalette.slate[300];
 const ACCENT = ColorPalette.violet[400];
 const STUB = ColorPalette.slate[800];
-
-function tb(
-  content: string,
-  size: number,
-  color: Color,
-  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
-): TextBlock {
-  const t = new TextBlock(content);
-  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
-  t.fontSize = size;
-  t.color = color;
-  if (opts.align !== undefined) t.alignment = opts.align;
-  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
-  return t;
-}
-
-function field(label: string, value: string, color: Color, labelColor: Color): VerticalStack {
-  const v = new VerticalStack();
-  v.add(tb(label, 7, labelColor, { bold: true, mb: 2 }));
-  v.add(tb(value, 11, color, { bold: true }));
-  return v;
-}
 
 /**
  * Event ticket / boarding-pass style card (gallery #8): PDF/A-2a + PDF/UA-1 with
@@ -198,4 +182,28 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(ticket);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: Color,
+  opts: { bold?: boolean; align?: TextAlignment; mb?: number } = {}
+): TextBlock {
+  const t = new TextBlock(content);
+  t.fontName = opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = size;
+  t.color = color;
+  if (opts.align !== undefined) t.alignment = opts.align;
+  if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
+  return t;
+}
+
+function field(label: string, value: string, color: Color, labelColor: Color): VerticalStack {
+  const v = new VerticalStack();
+  v.add(tb(label, 7, labelColor, { bold: true, mb: 2 }));
+  v.add(tb(value, 11, color, { bold: true }));
+  return v;
 }

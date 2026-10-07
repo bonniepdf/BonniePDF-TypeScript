@@ -1,3 +1,8 @@
+/**
+ * Encryption (Class API).
+ * The same AES-256 encrypted document as Encryption, built with the class API: construct settings/elements and assign properties (encryption uses the same preset builder). The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

@@ -1,3 +1,40 @@
+/**
+ * Hospital Discharge Summary.
+ * A hospital discharge summary: diagnoses, key investigations with reference ranges, a medication reconciliation flagging every change, and actions for the GP.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+import {
+  Document,
+  TextElementBase,
+  Table,
+  type ColorInput,
+  pageTemplate,
+  Spacer,
+  TextBlock,
+  Heading,
+  Container,
+  VerticalStack,
+  HorizontalStack,
+  StandardFonts,
+  ColorPalette,
+  type IElement,
+} from '@bonniepdf/core';
+
+const INK = ColorPalette.slate[700];
+
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
+
+const HEADING = ColorPalette.slate[800];
+
+const ACCENT = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
+
+const POSITIVE = ColorPalette.emerald[700];
+
+const NEGATIVE = ColorPalette.rose[700];
+
 // ── Hospital discharge summary ───────────────────────────────────────────────
 //
 // The document healthcare software is actually built around, and the one the
@@ -15,28 +52,6 @@
 //
 // Tagged PDF/UA-1 and archival PDF/A-2a. Every patient, clinician, identifier,
 // and clinical value is a sample. Nothing here is clinical guidance.
-
-import { Document, TextElementBase, Table, type ColorInput, pageTemplate, Spacer } from '@bonniepdf/core';
-
-import {
-  INK,
-  MUTED,
-  ACCENT,
-  RULE,
-  POSITIVE,
-  NEGATIVE,
-  accentBar,
-  band,
-  cell,
-  field,
-  gbDate,
-  h1,
-  h2,
-  panel,
-  td,
-  th,
-  weightedRow,
-} from '../invoices/_trade-kit';
 
 const EPISODE = {
   reference: 'DS-2026-44127',
@@ -58,17 +73,6 @@ const DIAGNOSES = {
   primary: 'Non-ST-elevation myocardial infarction',
   secondary: ['Type 2 diabetes mellitus, diet controlled', 'Essential hypertension', 'Stage 2 chronic kidney disease'],
 };
-
-type MedChange = 'Unchanged' | 'New' | 'Dose changed' | 'Stopped';
-
-interface Medication {
-  drug: string;
-  dose: string;
-  route: string;
-  frequency: string;
-  change: MedChange;
-  note: string;
-}
 
 const MEDICATIONS: Medication[] = [
   {
@@ -374,4 +378,121 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+type MedChange = 'Unchanged' | 'New' | 'Dose changed' | 'Stopped';
+
+interface Medication {
+  drug: string;
+  dose: string;
+  route: string;
+  frequency: string;
+  change: MedChange;
+  note: string;
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+interface TextOpts {
+  size?: number;
+  bold?: boolean;
+  color?: ColorInput;
+  align?: 'left' | 'right' | 'center' | 'justify';
+  mt?: number;
+  mb?: number;
+}
+
+/** A styled text cell with trade-document defaults. */
+function cell(text: string, o: TextOpts = {}): TextBlock {
+  return new TextBlock(text, {
+    fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: o.size ?? 9,
+    color: o.color ?? INK,
+    alignment: o.align ?? 'left',
+    margin: { top: o.mt ?? 0, bottom: o.mb ?? 0 },
+  });
+}
+
+/** Table header cell — white on the accent band. */
+function th(text: string, align: TextOpts['align'] = 'left'): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: '#ffffff', align });
+}
+
+/** Table body cell. */
+function td(text: string, o: TextOpts = {}): TextBlock {
+  return cell(text, { size: o.size ?? 8.5, ...o });
+}
+
+function h1(text: string): Heading {
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 21,
+    color: HEADING,
+    margin: { bottom: 4 },
+  });
+}
+
+function h2(text: string, color: ColorInput = ACCENT): Heading {
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 13,
+    color: color,
+    margin: { top: 16, bottom: 8 },
+  });
+}
+
+/** The full-width accent rule at the top of each document. */
+function accentBar(color: ColorInput = ACCENT, height = 4): Container {
+  return new Container({ backgroundColor: color, height, margin: { bottom: 14 } });
+}
+
+/** One label/value pair for the reference grid. */
+function field(label: string, value: string): VerticalStack {
+  return new VerticalStack({
+    children: [cell(label.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 2 }), cell(value, { size: 9.5 })],
+  });
+}
+
+/** A row of evenly weighted elements. */
+function weightedRow(items: IElement[], o: { spacing?: number; mt?: number; mb?: number } = {}): HorizontalStack {
+  const row = new HorizontalStack({
+    widthDistribution: 'weighted',
+    spacing: o.spacing ?? 14,
+    margin: { top: o.mt ?? 0, bottom: o.mb ?? 14 },
+  });
+  for (const item of items) row.add(item, 1);
+  return row;
+}
+
+/** A bordered panel with a heading — terms, notes, declarations. */
+function panel(title: string, children: IElement[], o: { accent?: ColorInput } = {}): Container {
+  return new Container({
+    backgroundColor: ColorPalette.slate[50],
+    border: { width: 0.75, color: RULE },
+    cornerRadius: 6,
+    padding: 12,
+    margin: { top: 4, bottom: 12 },
+    child: new VerticalStack({
+      spacing: 4,
+      children: [cell(title, { bold: true, size: 9.5, color: o.accent ?? ACCENT, mb: 4 }), ...children],
+    }),
+  });
+}
+
+/** The running header / footer band. */
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack({ widthDistribution: 'weighted' });
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: 'right' }), 2);
+  return row;
+}
+
+function gbDate(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
 }

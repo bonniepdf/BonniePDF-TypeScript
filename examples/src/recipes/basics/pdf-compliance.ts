@@ -1,3 +1,8 @@
+/**
+ * Archival & Accessible PDF.
+ * A concise archival and accessible document: the PDF/A-2a and PDF/UA-1 settings it uses, what BonniePDF handles for you, and what the author must supply to keep the claim true.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, Line, StandardFonts, TextBlock, UnorderedList } from '@bonniepdf/core';
 
 /**

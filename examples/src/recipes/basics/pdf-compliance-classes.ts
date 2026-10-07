@@ -1,3 +1,8 @@
+/**
+ * Archival & Accessible PDF (Class API).
+ * The same concise conformance example, authored by constructing and mutating every object without helper functions.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   AccessibilityMode,
   ColorPalette,

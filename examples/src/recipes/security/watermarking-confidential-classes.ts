@@ -1,3 +1,8 @@
+/**
+ * Watermarking: Confidential (Class API).
+ * The same red CONFIDENTIAL watermarked report as Watermarking: Confidential, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

@@ -1,3 +1,8 @@
+/**
+ * Public Library Membership.
+ * A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // Public Library Membership
 //
 // The accessibility-first public-service showcase. UK public-sector documents
@@ -31,12 +36,6 @@ const LIBRARY_MIDGREY = '#cbd5e1';
 const LIBRARY_LIGHT = '#f1f5f9';
 
 const MARGIN = 50;
-
-interface InfoLine {
-  label: string;
-  value: string;
-  note: string;
-}
 
 const MEMBERSHIP: InfoLine[] = [
   { label: 'Books', value: '12 items', note: '3 week loan, renewable up to 4 times' },
@@ -224,6 +223,14 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface InfoLine {
+  label: string;
+  value: string;
+  note: string;
 }
 
 function h1(text: string): Heading {

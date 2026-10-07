@@ -1,3 +1,8 @@
+/**
+ * Rich Text Styles.
+ * Bold, italic, coloured, highlighted, and mixed-size spans within flowing paragraphs. Reusable style objects, justified alignment, and a practical legal disclaimer.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, RichText, TextStyle, Line, StandardFonts } from '@bonniepdf/core';
 
 /**
@@ -196,6 +201,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string): void {
   doc.add(

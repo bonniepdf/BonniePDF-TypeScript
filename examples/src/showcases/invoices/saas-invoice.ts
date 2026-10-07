@@ -1,3 +1,8 @@
+/**
+ * SaaS Invoice.
+ * An accessible subscription invoice for a Pro plan: per-seat and storage line items, proration, a QR payment code, VAT, and totals, in a clean UK layout.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -20,25 +25,6 @@ const MUTE = ColorPalette.slate[500];
 const RULE = ColorPalette.slate[200];
 const BRAND = ColorPalette.indigo[600];
 const PANEL = ColorPalette.slate[50];
-
-function tb(
-  content: string,
-  size: number,
-  color: ColorInput,
-  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
-): TextBlock {
-  return new TextBlock(content, {
-    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
-    fontSize: size,
-    color: color,
-    alignment: opts.align,
-    margin: opts.mb ? { bottom: opts.mb } : undefined,
-  });
-}
-
-function cell(content: string, size: number, color: ColorInput, align: TextAlignmentInput, bold = false): TextBlock {
-  return tb(content, size, color, { bold, align });
-}
 
 /**
  * Accessible SaaS invoice (gallery #1): PDF/A-2a + PDF/UA-1 tagged output with a
@@ -190,6 +176,27 @@ export function generate(): Document {
   doc.add(tb('Thank you for your business. Payment is due within 14 days.', 8.5, MUTE, { mb: 0 }));
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+function tb(
+  content: string,
+  size: number,
+  color: ColorInput,
+  opts: { bold?: boolean; align?: TextAlignmentInput; mb?: number } = {}
+): TextBlock {
+  return new TextBlock(content, {
+    fontName: opts.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color: color,
+    alignment: opts.align,
+    margin: opts.mb ? { bottom: opts.mb } : undefined,
+  });
+}
+
+function cell(content: string, size: number, color: ColorInput, align: TextAlignmentInput, bold = false): TextBlock {
+  return tb(content, size, color, { bold, align });
 }
 
 function rule(mtop: number): Container {

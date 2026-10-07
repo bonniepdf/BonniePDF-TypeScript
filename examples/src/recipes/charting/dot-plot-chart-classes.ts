@@ -1,3 +1,8 @@
+/**
+ * Dot Plot Chart (Class API).
+ * The same chart as Dot Plot Chart, built with the class API: construct each chart model and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

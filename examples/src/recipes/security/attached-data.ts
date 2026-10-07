@@ -1,3 +1,8 @@
+/**
+ * Report with Embedded Data.
+ * A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them. Built with the general-purpose attachment API.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Report with Embedded Data (PDF/A-3 with an embedded CSV) ─────────
 //
 // A PDF/A-3 report that carries its underlying data as an embedded associated
@@ -81,6 +86,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function buildCsv(): Uint8Array {
   let csv = 'quarter,revenue_eur,customers\n';

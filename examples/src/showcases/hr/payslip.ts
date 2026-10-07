@@ -1,3 +1,8 @@
+/**
+ * Payslip.
+ * A payslip run: earnings, deductions, taxes, employer contributions, and year-to-date totals, with masked identifiers and AES-256 encryption, generated in the browser.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Payslip / earnings statement (UK, HR / payroll) ──────────────────────────
 //
 // A UK payslip built from a typed domain model (`PayslipData`) and a pure
@@ -67,41 +72,6 @@ const tableChrome: Omit<TableOptions, 'columns'> = {
   headerBackgroundColor: PANEL,
 };
 
-// ── Domain model (the data-to-document boundary) ─────────────────────────────
-// Amounts are positive magnitudes; a line's meaning (paid vs deducted) comes
-// from which array it lives in. Every line also carries its year-to-date figure.
-
-/** Classifies a deduction so the year-to-date summary can pick out the
- *  statutory lines (tax, NI, pension) without matching on display labels. */
-export type DeductionKind = 'tax' | 'ni' | 'pension' | 'other';
-
-export interface MoneyLine {
-  label: string;
-  amount: number; // this pay period
-  ytd: number; // cumulative for the tax year to date
-  units?: number; // optional, e.g. overtime hours
-  rate?: number; // optional, pay rate behind `amount`
-  kind?: DeductionKind; // deductions only
-}
-
-export interface PayslipData {
-  employer: { name: string; address: string; payeReference: string };
-  employee: {
-    name: string;
-    payrollId: string;
-    niNumber: string; // shown masked
-    niCategory: string; // NI category letter, e.g. "A"
-    taxCode: string; // e.g. "1257L"
-    payFrequency: string; // e.g. "Monthly"
-    paidTo: string; // masked bank details, shown on the net-pay panel
-  };
-  payPeriod: { payDate: string; taxMonth: number; taxYear: string };
-  payments: MoneyLine[];
-  deductions: MoneyLine[];
-  locale: string;
-  currency: string;
-}
-
 // ── Deterministic sample fixture ──────────────────────────────────────────────
 // Reconciles to tax code 1257L and NI Category A for month 4 (July) of 2026/27,
 // so the year-to-date figures are 4× the monthly ones.
@@ -139,6 +109,51 @@ export const samplePayslip: PayslipData = {
 // Printed on the slip (see the footnote in buildDocument) so a developer who
 // downloads the encrypted PDF can open it. Real payslips would never do this.
 const DEMO_PASSWORD = 'demo123';
+
+export function generate(): Document {
+  const settings = createPayslipSettings();
+  withEncryptionAes256(settings, opts =>
+    opts.withUserPassword(DEMO_PASSWORD).withOwnerPassword(DEMO_PASSWORD).allowPrinting().allowAccessibility()
+  );
+  return buildDocument(samplePayslip, settings);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model (the data-to-document boundary) ─────────────────────────────
+// Amounts are positive magnitudes; a line's meaning (paid vs deducted) comes
+// from which array it lives in. Every line also carries its year-to-date figure.
+
+/** Classifies a deduction so the year-to-date summary can pick out the
+ *  statutory lines (tax, NI, pension) without matching on display labels. */
+export type DeductionKind = 'tax' | 'ni' | 'pension' | 'other';
+
+export interface MoneyLine {
+  label: string;
+  amount: number; // this pay period
+  ytd: number; // cumulative for the tax year to date
+  units?: number; // optional, e.g. overtime hours
+  rate?: number; // optional, pay rate behind `amount`
+  kind?: DeductionKind; // deductions only
+}
+
+export interface PayslipData {
+  employer: { name: string; address: string; payeReference: string };
+  employee: {
+    name: string;
+    payrollId: string;
+    niNumber: string; // shown masked
+    niCategory: string; // NI category letter, e.g. "A"
+    taxCode: string; // e.g. "1257L"
+    payFrequency: string; // e.g. "Monthly"
+    paidTo: string; // masked bank details, shown on the net-pay panel
+  };
+  payPeriod: { payDate: string; taxMonth: number; taxYear: string };
+  payments: MoneyLine[];
+  deductions: MoneyLine[];
+  locale: string;
+  currency: string;
+}
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
@@ -333,12 +348,4 @@ export function buildDocument(data: PayslipData, settings: DocumentSettings = cr
   );
   doc.add(new TextBlock(`Sample payslip · fictional data · encrypted PDF (open password: ${DEMO_PASSWORD})`, footnote));
   return doc;
-}
-
-export function generate(): Document {
-  const settings = createPayslipSettings();
-  withEncryptionAes256(settings, opts =>
-    opts.withUserPassword(DEMO_PASSWORD).withOwnerPassword(DEMO_PASSWORD).allowPrinting().allowAccessibility()
-  );
-  return buildDocument(samplePayslip, settings);
 }

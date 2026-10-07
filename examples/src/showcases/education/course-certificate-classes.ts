@@ -1,3 +1,8 @@
+/**
+ * Course Certificate (Class API).
+ * The same certificate as Course Certificate, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Course completion certificate (education / training) — class companion ───
 //
 // The **class / construct-then-mutate** companion to `course-certificate.ts`.
@@ -51,18 +56,6 @@ const SANS = StandardFonts.Helvetica;
 const PAGE_MARGIN = 34;
 const FRAME_HEIGHT = 595.276 - PAGE_MARGIN * 2;
 
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-export interface CertificateData {
-  institution: { name: string; department: string };
-  recipient: string;
-  course: { title: string; creditHours: number; grade: string };
-  award: { statement: string; awarded: string; certificateId: string };
-  signatories: [{ name: string; role: string }, { name: string; role: string }];
-  verificationUrl: string;
-  locale: string;
-}
-
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleCertificate: CertificateData = {
   institution: { name: 'Sample Institute', department: 'School of Applied Computing' },
@@ -80,6 +73,24 @@ export const sampleCertificate: CertificateData = {
   verificationUrl: 'https://example.com/verify/SI-ADE-2026-04188',
   locale: 'en-GB',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleCertificate);
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+export interface CertificateData {
+  institution: { name: string; department: string };
+  recipient: string;
+  course: { title: string; creditHours: number; grade: string };
+  award: { statement: string; awarded: string; certificateId: string };
+  signatories: [{ name: string; role: string }, { name: string; role: string }];
+  verificationUrl: string;
+  locale: string;
+}
 
 // ── Small formatting helpers ─────────────────────────────────────────────────
 
@@ -371,8 +382,4 @@ export function buildDocument(
 
   doc.add(framed);
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleCertificate);
 }

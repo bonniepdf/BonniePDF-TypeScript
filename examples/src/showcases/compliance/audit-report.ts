@@ -1,3 +1,8 @@
+/**
+ * GDPR ISO 27001 Audit Report.
+ * A GDPR and ISO/IEC 27001 audit: a CONFIDENTIAL running header, KPI tiles, a control-status donut, a severity chart, and a findings register across pages.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── EU / UK data-protection & security audit report ──────────────────────────
 //
 // The enterprise compliance showcase. A GDPR (EU 2016/679 + UK GDPR / DPA 2018)
@@ -42,16 +47,6 @@ const SEV = {
   Medium: ColorPalette.blue[600],
   Low: ColorPalette.emerald[700],
 };
-
-type Severity = keyof typeof SEV;
-
-interface Finding {
-  id: string;
-  area: string;
-  requirement: string;
-  severity: Severity;
-  status: 'Open' | 'In progress' | 'Remediated';
-}
 
 const FINDINGS: Finding[] = [
   {
@@ -240,6 +235,18 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+type Severity = keyof typeof SEV;
+
+interface Finding {
+  id: string;
+  area: string;
+  requirement: string;
+  severity: Severity;
+  status: 'Open' | 'In progress' | 'Remediated';
 }
 
 // ── Charts ────────────────────────────────────────────────────────────────────

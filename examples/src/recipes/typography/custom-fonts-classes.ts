@@ -1,4 +1,9 @@
 /**
+ * Custom Fonts (Class API).
+ * The same TrueType-embedding / Unicode-coverage tour as Custom Fonts, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
+/**
  * Custom Fonts — TrueType font embedding with full Unicode coverage.
  *
  * Set `fontName` on any TextBlock to the URL (browser) or file path (Node.js) of a
@@ -160,6 +165,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function section(doc: Document, title: string, tocId: string): void {
   const h = new Heading(title);

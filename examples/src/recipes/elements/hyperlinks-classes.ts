@@ -1,3 +1,8 @@
+/**
+ * Hyperlinks (Class API).
+ * The same hyperlink tour as Hyperlinks, built with the class API: construct each link and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

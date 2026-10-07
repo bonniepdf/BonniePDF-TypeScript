@@ -1,3 +1,8 @@
+/**
+ * Chart Showcase.
+ * Eight landscape pages covering every chart type, from bar and line to pie and lollipop charts, each chart carrying alt text for screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -49,12 +54,6 @@ const CHART_BG = '#fafafa';
 
 /** Twelve monthly data points from a values array. */
 const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i] }));
-
-/** Adds a centred title + subtitle above a chart page. */
-function pageHeader(doc: Document, title: string, subtitle: string): void {
-  doc.add(new TextBlock(title, { fontSize: 24, color: 'slate-800', alignment: 'center', margin: { bottom: 10 } }));
-  doc.add(new TextBlock(subtitle, { fontSize: 14, color: 'slate-600', alignment: 'center', margin: { bottom: 20 } }));
-}
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
@@ -338,4 +337,12 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+/** Adds a centred title + subtitle above a chart page. */
+function pageHeader(doc: Document, title: string, subtitle: string): void {
+  doc.add(new TextBlock(title, { fontSize: 24, color: 'slate-800', alignment: 'center', margin: { bottom: 10 } }));
+  doc.add(new TextBlock(subtitle, { fontSize: 14, color: 'slate-600', alignment: 'center', margin: { bottom: 20 } }));
 }

@@ -1,3 +1,8 @@
+/**
+ * Cross-References.
+ * Section anchors, SectionLink internal jumps, and PageNumberOf “see page N” references, all resolved automatically by two-pass layout.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,

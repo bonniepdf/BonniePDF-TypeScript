@@ -15,6 +15,8 @@ each change to `core/`.
 
 ### Changed
 
+- Made every example a single-file introduction with local sample data and helpers. Added a standalone playground execution check for the complete catalogue; binary and text assets remain explicit host-supplied inputs.
+
 - Centralized PDF dictionary keys in documented, context-specific internal constants. Serialized PDF output is unchanged.
 
 - **Breaking: removed options that had no effect.** `LineChart.lineWidth` and `showDataPointMarkers` are replaced by `defaultLineWidth` and `defaultShowMarkers`; use `DotPlotChart.defaultDotRadius` and `LollipopChart.defaultStemWidth`/`defaultHeadRadius` instead of `dotRadius`, `stemWidth` and `headRadius`. Series styles still override these defaults. Removed `PieChart.totalLabelFontSize`/`totalValueFontSize` and SVG export `textMode`/`includeLinks` (including `SvgTextMode`); they never controlled rendering. Remove these keys from document definitions: ordinary validation warns, and strict validation rejects them.

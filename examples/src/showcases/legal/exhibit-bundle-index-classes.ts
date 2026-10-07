@@ -1,18 +1,8 @@
-// ── Indexed exhibit bundle — cover, index, and separators (class API) ────────
-//
-// The generated apparatus of a bundle: the cover sheet, the hyperlinked index
-// with resolved page references, and the separator sheet introducing each
-// section, all under continuous pagination. BonniePDF generates documents — it
-// does not merge existing PDFs, and combining this apparatus with the exhibits
-// themselves is a separate assembly step.
-//
-// The **class / construct-then-mutate** companion to `exhibit-bundle-index.ts`.
-// Same apparatus, authored the long way: `new` each element and assign its
-// properties one at a time, with the enum members rather than their string
-// literals. It renders **byte-for-byte identically** to the options-object form
-// (an equivalence test binds the two). Reach for the options form first; this
-// variant exists to show what it desugars to.
-
+/**
+ * Exhibit Bundle Index (Class API).
+ * The same exhibit bundle index as Exhibit bundle index, built with the class API: construct each element and assign its properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -38,25 +28,37 @@ import {
   Border,
   BorderColors,
   pageTemplate,
+  type IElement,
+  TextBlock,
+  Heading,
+  ColorPalette,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
-import {
-  INK,
-  MUTED,
-  ACCENT,
-  RULE,
-  accentBar,
-  band,
-  cell,
-  field,
-  gbDate,
-  h1,
-  panel,
-  td,
-  th,
-  weightedRow,
-} from '../invoices/_trade-kit-classes';
+const INK = ColorPalette.slate[700];
+
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
+
+const HEADING = ColorPalette.slate[800];
+
+const ACCENT = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
+
+// ── Indexed exhibit bundle — cover, index, and separators (class API) ────────
+//
+// The generated apparatus of a bundle: the cover sheet, the hyperlinked index
+// with resolved page references, and the separator sheet introducing each
+// section, all under continuous pagination. BonniePDF generates documents — it
+// does not merge existing PDFs, and combining this apparatus with the exhibits
+// themselves is a separate assembly step.
+//
+// The **class / construct-then-mutate** companion to `exhibit-bundle-index.ts`.
+// Same apparatus, authored the long way: `new` each element and assign its
+// properties one at a time, with the enum members rather than their string
+// literals. It renders **byte-for-byte identically** to the options-object form
+// (an equivalence test binds the two). Reach for the options form first; this
+// variant exists to show what it desugars to.
 
 const BUNDLE = {
   reference: 'Bundle A — Claimant',
@@ -69,14 +71,6 @@ const BUNDLE = {
   preparedOn: new Date(Date.UTC(2026, 8, 25)),
   volume: 'Volume 1 of 1',
 };
-
-interface BundleSection {
-  id: string;
-  tab: string;
-  title: string;
-  description: string;
-  items: { reference: string; description: string; dated: string; pages: number }[];
-}
 
 const SECTIONS: BundleSection[] = [
   {
@@ -295,4 +289,111 @@ export function generate(): Document {
   }
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+interface BundleSection {
+  id: string;
+  tab: string;
+  title: string;
+  description: string;
+  items: { reference: string; description: string; dated: string; pages: number }[];
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+function gbDate(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
+}
+
+// ── Building blocks, the long way ────────────────────────────────────────────
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  align?: TextAlignment;
+  mt?: number;
+  mb?: number;
+}
+
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const block = new TextBlock(text);
+  block.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  block.fontSize = o.size ?? 9;
+  block.color = o.color ?? INK;
+  block.alignment = o.align ?? TextAlignment.Left;
+  block.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
+  return block;
+}
+
+function th(text: string, align: TextAlignment = TextAlignment.Left): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: Color.white, align });
+}
+
+function td(text: string, o: CellOpts = {}): TextBlock {
+  return cell(text, { ...o, size: o.size ?? 8.5 });
+}
+
+function h1(text: string): Heading {
+  const heading = new Heading(text);
+  heading.level = 1;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 21;
+  heading.color = HEADING;
+  heading.margin = new Thickness(0, 0, 0, 4);
+  return heading;
+}
+
+/** The full-width accent rule at the top of each document. */
+
+function accentBar(color: Color = ACCENT, height = 4): Container {
+  const bar = new Container();
+  bar.backgroundColor = color;
+  bar.height = height;
+  bar.margin = new Thickness(0, 0, 0, 14);
+  return bar;
+}
+
+function field(label: string, value: string): VerticalStack {
+  const stack = new VerticalStack();
+  stack.add(cell(label.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 2 }));
+  stack.add(cell(value, { size: 9.5 }));
+  return stack;
+}
+
+function weightedRow(items: IElement[], o: { spacing?: number; mt?: number; mb?: number } = {}): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.spacing = o.spacing ?? 14;
+  row.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 14);
+  for (const item of items) row.add(item, 1);
+  return row;
+}
+
+function panel(title: string, children: IElement[], accent: Color = ACCENT): Container {
+  const body = new VerticalStack();
+  body.spacing = 4;
+  body.add(cell(title, { bold: true, size: 9.5, color: accent, mb: 4 }));
+  for (const child of children) body.add(child);
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(12);
+  box.margin = new Thickness(0, 4, 0, 12);
+  box.child = body;
+  return box;
+}
+
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: TextAlignment.Right }), 2);
+  return row;
 }

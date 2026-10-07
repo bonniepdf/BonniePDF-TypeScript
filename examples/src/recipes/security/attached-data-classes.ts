@@ -1,3 +1,8 @@
+/**
+ * Report with Embedded Data (Class API).
+ * The same PDF/A-3 report with embedded CSV as Report with Embedded Data, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Report with Embedded Data (PDF/A-3 with an embedded CSV) ─────────
 //
 // A PDF/A-3 report that carries its underlying data as an embedded associated
@@ -94,6 +99,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function buildCsv(): Uint8Array {
   let csv = 'quarter,revenue_eur,customers\n';

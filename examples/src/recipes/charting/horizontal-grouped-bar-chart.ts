@@ -1,3 +1,8 @@
+/**
+ * Horizontal Grouped Bar Chart.
+ * Grouped horizontal bars comparing three product lines across four quarters of sales, with grid lines and a colour legend.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

@@ -1,3 +1,8 @@
+/**
+ * Horizontal Lollipop Chart.
+ * Horizontal stems with circular heads ranking year-to-date revenue for eight product lines: less ink than bars without losing clarity.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,

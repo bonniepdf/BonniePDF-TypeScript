@@ -1,3 +1,8 @@
+/**
+ * Data Matrix.
+ * Native vector Data Matrix (ECC200) symbols with automatic encodation, Reed-Solomon error correction, square and rectangular sizes, and custom colours.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -231,6 +236,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A bold indigo section header (a styled TextBlock, matching the original). */
 function sectionHeader(text: string): TextBlock {

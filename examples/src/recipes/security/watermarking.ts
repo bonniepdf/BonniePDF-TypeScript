@@ -1,3 +1,8 @@
+/**
+ * Watermarking.
+ * A semi-transparent diagonal DRAFT watermark behind the content of every page of a multi-section strategy proposal. The watermark is skipped by screen readers.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, TextBlock, VerticalStack, Container, StandardFonts } from '@bonniepdf/core';
 
 /**

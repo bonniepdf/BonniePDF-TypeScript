@@ -1,20 +1,8 @@
-// ── Customer account statement ───────────────────────────────────────────────
-//
-// The second-most-generated document in business software after the invoice,
-// and the one most often missing from a PDF library's examples: a period
-// statement showing the opening balance, every invoice, payment and credit that
-// moved it, the running balance after each, the closing balance, and an ageing
-// analysis of what is overdue.
-//
-// Two things make it a real test rather than a table demo. The running balance
-// has to be arithmetically correct and tie back to the closing figure — a
-// statement that does not reconcile is worse than no statement. And the ledger
-// is long, so it flows across pages with a repeating header, with the ageing
-// summary and remittance advice kept whole at the end.
-//
-// Tagged PDF/UA-1 and archival PDF/A-2a. Sample organisations, references, and
-// amounts throughout.
-
+/**
+ * Customer Account Statement.
+ * A customer statement: opening balance, every invoice, payment, and credit, a running balance calculated from the rows, ageing, and a remittance slip.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -31,7 +19,30 @@ import {
   Spacer,
 } from '@bonniepdf/core';
 
-import { INK, MUTED, RULE } from './_kit';
+const INK = ColorPalette.slate[700];
+
+// 600, not 500: reads against tinted panels in the invoices that use it, and 500
+// falls to 4.35-4.38:1 there against the 4.5:1 WCAG AA threshold.
+const MUTED = ColorPalette.slate[600];
+
+const RULE = ColorPalette.slate[200];
+
+// ── Customer account statement ───────────────────────────────────────────────
+//
+// The second-most-generated document in business software after the invoice,
+// and the one most often missing from a PDF library's examples: a period
+// statement showing the opening balance, every invoice, payment and credit that
+// moved it, the running balance after each, the closing balance, and an ageing
+// analysis of what is overdue.
+//
+// Two things make it a real test rather than a table demo. The running balance
+// has to be arithmetically correct and tie back to the closing figure — a
+// statement that does not reconcile is worse than no statement. And the ledger
+// is long, so it flows across pages with a repeating header, with the ageing
+// summary and remittance advice kept whole at the end.
+//
+// Tagged PDF/UA-1 and archival PDF/A-2a. Sample organisations, references, and
+// amounts throughout.
 
 const ACCENT = ColorPalette.indigo[700];
 const OVERDUE = ColorPalette.rose[700];
@@ -52,19 +63,6 @@ const ACCOUNT = {
   creditLimit: 25000,
   openingBalance: 6280.5,
 };
-
-type EntryKind = 'Invoice' | 'Payment' | 'Credit note' | 'Adjustment';
-
-interface Entry {
-  date: string;
-  kind: EntryKind;
-  reference: string;
-  detail: string;
-  /** Positive increases what the customer owes; negative reduces it. */
-  amount: number;
-  /** Ageing bucket for the outstanding-items analysis; absent once settled. */
-  due?: string;
-}
 
 const ENTRIES: Entry[] = [
   {
@@ -176,25 +174,6 @@ const ENTRIES: Entry[] = [
   },
 ];
 
-/**
- * The items still outstanding at the statement date, with the date each fell
- * due.
- *
- * The ageing analysis is computed from these, not written down beside them. Two
- * of the sample rows are deliberately netted (an invoice less its credit note),
- * because that is how an open item actually ages — the credit does not sit in
- * its own bucket.
- *
- * `reconcile()` asserts that these sum to the ledger's closing balance. A
- * statement whose ageing does not tie to its own closing figure is worse than
- * no statement, and it is the single defect this document must not have.
- */
-interface OpenItem {
-  reference: string;
-  due: Date;
-  amount: number;
-}
-
 const OPEN_ITEMS: OpenItem[] = [
   { reference: 'INV-2026-3180', due: new Date(Date.UTC(2026, 6, 15)), amount: 1460.0 },
   { reference: 'INV-2026-3312', due: new Date(Date.UTC(2026, 8, 2)), amount: 1450.0 },
@@ -207,16 +186,6 @@ const OPEN_ITEMS: OpenItem[] = [
 ];
 
 const BUCKETS = ['Current', '1\u201330 days', '31\u201360 days', '61\u201390 days', 'Over 90 days'] as const;
-
-/** Which ageing bucket an item falls into at the statement date. */
-function bucketFor(item: OpenItem, asAt: Date): (typeof BUCKETS)[number] {
-  const daysOverdue = Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000);
-  if (daysOverdue <= 0) return 'Current';
-  if (daysOverdue <= 30) return '1\u201330 days';
-  if (daysOverdue <= 60) return '31\u201360 days';
-  if (daysOverdue <= 90) return '61\u201390 days';
-  return 'Over 90 days';
-}
 
 const KIND_COLOUR: Record<EntryKind, ColorInput> = {
   Invoice: INK,
@@ -482,6 +451,50 @@ export function generate(): Document {
   return doc;
 }
 
+// Local helpers and sample types used by this document.
+
+type EntryKind = 'Invoice' | 'Payment' | 'Credit note' | 'Adjustment';
+
+interface Entry {
+  date: string;
+  kind: EntryKind;
+  reference: string;
+  detail: string;
+  /** Positive increases what the customer owes; negative reduces it. */
+  amount: number;
+  /** Ageing bucket for the outstanding-items analysis; absent once settled. */
+  due?: string;
+}
+
+/**
+ * The items still outstanding at the statement date, with the date each fell
+ * due.
+ *
+ * The ageing analysis is computed from these, not written down beside them. Two
+ * of the sample rows are deliberately netted (an invoice less its credit note),
+ * because that is how an open item actually ages — the credit does not sit in
+ * its own bucket.
+ *
+ * `reconcile()` asserts that these sum to the ledger's closing balance. A
+ * statement whose ageing does not tie to its own closing figure is worse than
+ * no statement, and it is the single defect this document must not have.
+ */
+interface OpenItem {
+  reference: string;
+  due: Date;
+  amount: number;
+}
+
+/** Which ageing bucket an item falls into at the statement date. */
+function bucketFor(item: OpenItem, asAt: Date): (typeof BUCKETS)[number] {
+  const daysOverdue = Math.floor((asAt.getTime() - item.due.getTime()) / 86_400_000);
+  if (daysOverdue <= 0) return 'Current';
+  if (daysOverdue <= 30) return '1\u201330 days';
+  if (daysOverdue <= 60) return '31\u201360 days';
+  if (daysOverdue <= 90) return '61\u201390 days';
+  return 'Over 90 days';
+}
+
 // ── Local helpers ────────────────────────────────────────────────────────────
 
 interface TextOpts {
@@ -496,10 +509,8 @@ interface TextOpts {
 /**
  * A styled text cell.
  *
- * Local rather than imported from `_kit`: that kit's `cell` takes `Thickness`
- * and `Color` instances, which predates the forgiving-input surface. This one
- * takes tokens and plain numbers, matching how the rest of the catalogue is now
- * written.
+ * Accepts colour tokens and plain spacing options, with defaults suitable for
+ * ledger rows and address blocks.
  */
 function cell(text: string, o: TextOpts = {}): TextBlock {
   return new TextBlock(text, {

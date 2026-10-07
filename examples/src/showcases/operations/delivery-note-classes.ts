@@ -1,16 +1,8 @@
-// ── Delivery note / packing slip (class API) ─────────────────────────────────
-//
-// What travels with the goods. Quantities are ordered, despatched, and
-// back-ordered as three separate columns, because a part-shipment is the normal
-// case; it ends with a goods-received signature and a discrepancy notice period.
-//
-// The **class / construct-then-mutate** companion to `delivery-note.ts`. Same
-// note, authored the long way: `new` each element and assign its properties one
-// at a time, with the enum members rather than their string literals. It renders
-// **byte-for-byte identically** to the options-object form (an equivalence test
-// binds the two). Reach for the options form first; this variant exists to show
-// what it desugars to.
-
+/**
+ * Delivery Note (Class API).
+ * The same delivery note as Delivery note, built with the class API: construct each element and assign its properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,
@@ -29,30 +21,42 @@ import {
   Border,
   BorderColors,
   pageTemplate,
+  type IElement,
+  TextBlock,
+  Heading,
+  HorizontalStack,
+  WidthDistribution,
+  ColorPalette,
+  StandardFonts,
 } from '@bonniepdf/core';
-import type { IElement } from '@bonniepdf/core';
 
-import {
-  INK,
-  MUTED,
-  ACCENT,
-  RULE,
-  POSITIVE,
-  NEGATIVE,
-  accentBar,
-  band,
-  cell,
-  field,
-  gbDate,
-  h1,
-  h2,
-  panel,
-  partyBlock,
-  td,
-  th,
-  tile,
-  weightedRow,
-} from '../invoices/_trade-kit-classes';
+const INK = ColorPalette.slate[700];
+
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
+
+const HEADING = ColorPalette.slate[800];
+
+const ACCENT = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
+
+const POSITIVE = ColorPalette.emerald[700];
+
+const NEGATIVE = ColorPalette.rose[700];
+
+// ── Delivery note / packing slip (class API) ─────────────────────────────────
+//
+// What travels with the goods. Quantities are ordered, despatched, and
+// back-ordered as three separate columns, because a part-shipment is the normal
+// case; it ends with a goods-received signature and a discrepancy notice period.
+//
+// The **class / construct-then-mutate** companion to `delivery-note.ts`. Same
+// note, authored the long way: `new` each element and assign its properties one
+// at a time, with the enum members rather than their string literals. It renders
+// **byte-for-byte identically** to the options-object form (an equivalence test
+// binds the two). Reach for the options form first; this variant exists to show
+// what it desugars to.
 
 const DELIVERY = {
   number: 'DN-2026-018844',
@@ -67,16 +71,6 @@ const DELIVERY = {
   to: ['Sample Buyer Ltd', 'Goods Inwards, Gate 3', 'Sample Distribution Centre', 'Sample Town', 'ST9 2LD'],
   hours: 'Deliveries accepted 07:00–15:00, working days only',
 };
-
-interface DeliveryLine {
-  orderLine: number;
-  partCode: string;
-  description: string;
-  ordered: number;
-  despatched: number;
-  unit: string;
-  packedIn: string;
-}
 
 const LINES: DeliveryLine[] = [
   {
@@ -289,6 +283,18 @@ export function generate(): Document {
   return doc;
 }
 
+// Local helpers and sample types used by this document.
+
+interface DeliveryLine {
+  orderLine: number;
+  partCode: string;
+  description: string;
+  ordered: number;
+  despatched: number;
+  unit: string;
+  packedIn: string;
+}
+
 function receiptSlot(role: string, hint: string): VerticalStack {
   const stack = new VerticalStack();
   stack.add(cell(role.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 20 }));
@@ -301,4 +307,138 @@ function receiptSlot(role: string, hint: string): VerticalStack {
 
   stack.add(cell(hint, { size: 8, color: MUTED }));
   return stack;
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+function gbDate(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
+}
+
+// ── Building blocks, the long way ────────────────────────────────────────────
+
+interface CellOpts {
+  size?: number;
+  bold?: boolean;
+  color?: Color;
+  align?: TextAlignment;
+  mt?: number;
+  mb?: number;
+}
+
+function cell(text: string, o: CellOpts = {}): TextBlock {
+  const block = new TextBlock(text);
+  block.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  block.fontSize = o.size ?? 9;
+  block.color = o.color ?? INK;
+  block.alignment = o.align ?? TextAlignment.Left;
+  block.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
+  return block;
+}
+
+function lines(items: string[], o: CellOpts = {}): TextBlock {
+  return cell(items.join('\n'), o);
+}
+
+function th(text: string, align: TextAlignment = TextAlignment.Left): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: Color.white, align });
+}
+
+function td(text: string, o: CellOpts = {}): TextBlock {
+  return cell(text, { ...o, size: o.size ?? 8.5 });
+}
+
+function h1(text: string): Heading {
+  const heading = new Heading(text);
+  heading.level = 1;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 21;
+  heading.color = HEADING;
+  heading.margin = new Thickness(0, 0, 0, 4);
+  return heading;
+}
+
+function h2(text: string, color: Color = ACCENT): Heading {
+  const heading = new Heading(text);
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 13;
+  heading.color = color;
+  heading.margin = new Thickness(0, 16, 0, 8);
+  return heading;
+}
+
+/** The full-width accent rule at the top of each document. */
+
+function accentBar(color: Color = ACCENT, height = 4): Container {
+  const bar = new Container();
+  bar.backgroundColor = color;
+  bar.height = height;
+  bar.margin = new Thickness(0, 0, 0, 14);
+  return bar;
+}
+
+/** A summary tile. */
+
+function tile(value: string, label: string, accent: Color = ACCENT): Container {
+  const body = new VerticalStack();
+  body.add(cell(value, { bold: true, size: 14, color: accent, mb: 2 }));
+  body.add(cell(label, { size: 8, color: MUTED }));
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(11, 10);
+  box.child = body;
+  return box;
+}
+
+function partyBlock(label: string, address: string[]): VerticalStack {
+  const stack = new VerticalStack();
+  stack.add(cell(label.toUpperCase(), { bold: true, size: 7, color: MUTED, mb: 3 }));
+  stack.add(lines(address, { size: 9 }));
+  return stack;
+}
+
+function field(label: string, value: string): VerticalStack {
+  const stack = new VerticalStack();
+  stack.add(cell(label.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 2 }));
+  stack.add(cell(value, { size: 9.5 }));
+  return stack;
+}
+
+function weightedRow(items: IElement[], o: { spacing?: number; mt?: number; mb?: number } = {}): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.spacing = o.spacing ?? 14;
+  row.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 14);
+  for (const item of items) row.add(item, 1);
+  return row;
+}
+
+function panel(title: string, children: IElement[], accent: Color = ACCENT): Container {
+  const body = new VerticalStack();
+  body.spacing = 4;
+  body.add(cell(title, { bold: true, size: 9.5, color: accent, mb: 4 }));
+  for (const child of children) body.add(child);
+  const box = new Container();
+  box.backgroundColor = ColorPalette.slate[50];
+  box.border = new Border(0.75);
+  box.borderColors = new BorderColors(RULE);
+  box.cornerRadius = 6;
+  box.padding = new Thickness(12);
+  box.margin = new Thickness(0, 4, 0, 12);
+  box.child = body;
+  return box;
+}
+
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: TextAlignment.Right }), 2);
+  return row;
 }

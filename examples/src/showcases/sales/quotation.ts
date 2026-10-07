@@ -1,3 +1,8 @@
+/**
+ * Quotation.
+ * A B2B sales quotation: a three-tier pricing comparison with the recommended tier highlighted, a scope of work, optional add-ons, and an acceptance block.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── Quotation / proposal (B2B pre-sales) ─────────────────────────────────────
 //
 // A sales quotation is not an invoice with a different heading. An invoice
@@ -58,21 +63,6 @@ const bodyText: TextBlockOptions = { fontName: HELVETICA, fontSize: 9, color: IN
 const boldText: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 9, color: INK };
 const mutedText: TextBlockOptions = { ...bodyText, color: MUTED };
 const fieldLabel: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 6.5, color: FAINT };
-/**
- * Section titles are real level-2 headings rather than styled body text, so
- * assistive technology gets a navigable outline of the quotation instead of a
- * flat wall of paragraphs. They nest under the level-1 masthead.
- */
-function sectionTitle(text: string, id: string): Heading {
-  return new Heading(text, {
-    level: 2,
-    tocIdentifier: id,
-    fontName: HELVETICA_BOLD,
-    fontSize: 11,
-    color: INK,
-    margin: { bottom: 6 },
-  });
-}
 const columnHead: TextBlockOptions = { fontName: HELVETICA_BOLD, fontSize: 7.5, color: MUTED };
 const moneyRight: TextBlockOptions = { ...bodyText, alignment: 'right' };
 
@@ -83,43 +73,6 @@ const TIER_CARD_HEIGHT = 178;
 const TIER_PAD = 12;
 const TIER_BORDER_ON = 1.5;
 const TIER_BORDER_OFF = 0.75;
-
-// ── Domain model ─────────────────────────────────────────────────────────────
-
-/** One purchasable tier. `price` is the recurring or one-off headline figure. */
-export interface QuoteTier {
-  name: string;
-  tagline: string;
-  price: number;
-  /** Billing cadence shown under the price, e.g. "per month". */
-  cadence: string;
-  /** What the customer gets. Rendered as the tier's feature list. */
-  includes: string[];
-  /** Exactly one tier should set this; it is promoted visually. */
-  recommended?: boolean;
-}
-
-/** A priced optional extra the customer can add to any tier. */
-export interface QuoteAddOn {
-  label: string;
-  detail: string;
-  price: number;
-  cadence: string;
-}
-
-export interface QuotationData {
-  supplier: { name: string; address: string; email: string; registration: string };
-  customer: { company: string; contact: string; address: string };
-  reference: { quoteNumber: string; issued: string; validUntil: string; owner: string };
-  /** Numbered deliverables — what the engagement actually covers. */
-  scope: string[];
-  tiers: QuoteTier[];
-  addOns: QuoteAddOn[];
-  /** Bulleted caveats. A quote without these is an argument waiting to happen. */
-  assumptions: string[];
-  locale: string;
-  currency: string;
-}
 
 // ── Deterministic sample fixture ─────────────────────────────────────────────
 export const sampleQuotation: QuotationData = {
@@ -197,6 +150,65 @@ export const sampleQuotation: QuotationData = {
   locale: 'en-GB',
   currency: 'GBP',
 };
+
+export function generate(): Document {
+  return buildDocument(sampleQuotation);
+}
+
+// Local helpers and sample types used by this document.
+
+/**
+ * Section titles are real level-2 headings rather than styled body text, so
+ * assistive technology gets a navigable outline of the quotation instead of a
+ * flat wall of paragraphs. They nest under the level-1 masthead.
+ */
+function sectionTitle(text: string, id: string): Heading {
+  return new Heading(text, {
+    level: 2,
+    tocIdentifier: id,
+    fontName: HELVETICA_BOLD,
+    fontSize: 11,
+    color: INK,
+    margin: { bottom: 6 },
+  });
+}
+
+// ── Domain model ─────────────────────────────────────────────────────────────
+
+/** One purchasable tier. `price` is the recurring or one-off headline figure. */
+export interface QuoteTier {
+  name: string;
+  tagline: string;
+  price: number;
+  /** Billing cadence shown under the price, e.g. "per month". */
+  cadence: string;
+  /** What the customer gets. Rendered as the tier's feature list. */
+  includes: string[];
+  /** Exactly one tier should set this; it is promoted visually. */
+  recommended?: boolean;
+}
+
+/** A priced optional extra the customer can add to any tier. */
+export interface QuoteAddOn {
+  label: string;
+  detail: string;
+  price: number;
+  cadence: string;
+}
+
+export interface QuotationData {
+  supplier: { name: string; address: string; email: string; registration: string };
+  customer: { company: string; contact: string; address: string };
+  reference: { quoteNumber: string; issued: string; validUntil: string; owner: string };
+  /** Numbered deliverables — what the engagement actually covers. */
+  scope: string[];
+  tiers: QuoteTier[];
+  addOns: QuoteAddOn[];
+  /** Bulleted caveats. A quote without these is an argument waiting to happen. */
+  assumptions: string[];
+  locale: string;
+  currency: string;
+}
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -513,8 +525,4 @@ export function buildDocument(data: QuotationData, settings: DocumentSettings = 
   doc.add(assumptionsSection(data));
   doc.add(acceptanceBlock(data));
   return doc;
-}
-
-export function generate(): Document {
-  return buildDocument(sampleQuotation);
 }

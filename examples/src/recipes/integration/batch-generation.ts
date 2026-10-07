@@ -1,82 +1,34 @@
-// ── Batch generation — many documents in one process ─────────────────────────
-//
-// The other half of the server question: what happens when you generate ten
-// thousand of these rather than one?
-//
-// This example generates a run of statements, measures it, and reports the run
-// in the document it produces — so the numbers on the page are the numbers from
-// the run that made it, not a claim typed into a template.
-//
-// What it demonstrates, and what a batch job has to get right:
-//
-//   · One process, many documents. Fonts and the licence declaration are
-//     process-wide, so the per-document cost excludes them after the first.
-//   · Dispose each document as it is written. The peak memory of a batch is the
-//     size of one document, not of the run, if you release each one.
-//   · Reuse the data pipeline, not the Document. A Document is not reusable
-//     after generation; build a fresh one per record.
-//   · The licence notice fires once per process, not once per document — which
-//     is what makes it acceptable in a job that runs nightly.
-//
-// Tagged PDF/UA-1 and archival PDF/A-2a.
-
-import { Document, TextElementBase, Table, pageTemplate } from '@bonniepdf/core';
-
+/**
+ * Batch Generation.
+ * Generating 250 documents in one process. The output reports the timings of its own run and covers per-document lifecycle, disposal in the loop, and one-time setup.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
-  INK,
-  MUTED,
-  ACCENT,
-  RULE,
-  accentBar,
-  band,
-  cell,
-  field,
-  gbDate,
-  h1,
-  h2,
-  panel,
-  td,
-  th,
-  tile,
-  weightedRow,
-} from '../../showcases/invoices/_trade-kit';
+  Document,
+  TextElementBase,
+  Table,
+  pageTemplate,
+  TextBlock,
+  Heading,
+  Container,
+  VerticalStack,
+  HorizontalStack,
+  StandardFonts,
+  ColorPalette,
+  type ColorInput,
+  type IElement,
+} from '@bonniepdf/core';
 
-/** One record in the run. */
-interface Record {
-  account: string;
-  customer: string;
-  balance: number;
-}
+const INK = ColorPalette.slate[700];
 
-/** A deterministic synthetic ledger, so the run is repeatable. */
-function records(count: number): Record[] {
-  return Array.from({ length: count }, (_, i) => ({
-    account: `ACC-${(4000 + i).toString().padStart(6, '0')}`,
-    customer: `Sample Customer ${i + 1}`,
-    // Deterministic pseudo-amounts: no randomness, so two runs compare.
-    balance: Math.round(((i * 7919) % 45000) + 250 + (((i * 31) % 100) / 100) * 100) / 100,
-  }));
-}
+/** 600, not 400: 400 never clears 4.5:1 as body text on white. */
+const MUTED = ColorPalette.slate[600];
 
-/** Builds one small statement. A fresh Document per record, by design. */
-function buildOne(record: Record): Document {
-  const doc = new Document({
-    settings: {
-      pageSize: 'a4',
-      margin: 46,
-      conformance: 'pdf/a-2a',
-      accessibility: 'pdf/ua-1',
-      language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
-    },
-    metadata: { title: `Statement ${record.account}`, author: 'Sample Supplier Ltd' },
-  });
-  doc.add(accentBar());
-  doc.add(h1(`Statement ${record.account}`));
-  doc.add(cell(record.customer, { color: MUTED, mb: 10 }));
-  doc.add(cell(`Balance: £${record.balance.toFixed(2)}`, { bold: true, size: 12 }));
-  return doc;
-}
+const HEADING = ColorPalette.slate[800];
+
+const ACCENT = ColorPalette.indigo[700];
+
+const RULE = ColorPalette.slate[200];
 
 const RUN_SIZE = 250;
 
@@ -246,4 +198,182 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+// ── Batch generation — many documents in one process ─────────────────────────
+//
+// The other half of the server question: what happens when you generate ten
+// thousand of these rather than one?
+//
+// This example generates a run of statements, measures it, and reports the run
+// in the document it produces — so the numbers on the page are the numbers from
+// the run that made it, not a claim typed into a template.
+//
+// What it demonstrates, and what a batch job has to get right:
+//
+//   · One process, many documents. Fonts and the licence declaration are
+//     process-wide, so the per-document cost excludes them after the first.
+//   · Dispose each document as it is written. The peak memory of a batch is the
+//     size of one document, not of the run, if you release each one.
+//   · Reuse the data pipeline, not the Document. A Document is not reusable
+//     after generation; build a fresh one per record.
+//   · The licence notice fires once per process, not once per document — which
+//     is what makes it acceptable in a job that runs nightly.
+//
+// Tagged PDF/UA-1 and archival PDF/A-2a.
+
+/** One record in the run. */
+interface Record {
+  account: string;
+  customer: string;
+  balance: number;
+}
+
+/** A deterministic synthetic ledger, so the run is repeatable. */
+function records(count: number): Record[] {
+  return Array.from({ length: count }, (_, i) => ({
+    account: `ACC-${(4000 + i).toString().padStart(6, '0')}`,
+    customer: `Sample Customer ${i + 1}`,
+    // Deterministic pseudo-amounts: no randomness, so two runs compare.
+    balance: Math.round(((i * 7919) % 45000) + 250 + (((i * 31) % 100) / 100) * 100) / 100,
+  }));
+}
+
+/** Builds one small statement. A fresh Document per record, by design. */
+function buildOne(record: Record): Document {
+  const doc = new Document({
+    settings: {
+      pageSize: 'a4',
+      margin: 46,
+      conformance: 'pdf/a-2a',
+      accessibility: 'pdf/ua-1',
+      language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
+    },
+    metadata: { title: `Statement ${record.account}`, author: 'Sample Supplier Ltd' },
+  });
+  doc.add(accentBar());
+  doc.add(h1(`Statement ${record.account}`));
+  doc.add(cell(record.customer, { color: MUTED, mb: 10 }));
+  doc.add(cell(`Balance: £${record.balance.toFixed(2)}`, { bold: true, size: 12 }));
+  return doc;
+}
+
+// Local helpers keep this example ready to copy into a single file.
+
+interface TextOpts {
+  size?: number;
+  bold?: boolean;
+  color?: ColorInput;
+  align?: 'left' | 'right' | 'center' | 'justify';
+  mt?: number;
+  mb?: number;
+}
+
+/** A styled text cell with trade-document defaults. */
+function cell(text: string, o: TextOpts = {}): TextBlock {
+  return new TextBlock(text, {
+    fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: o.size ?? 9,
+    color: o.color ?? INK,
+    alignment: o.align ?? 'left',
+    margin: { top: o.mt ?? 0, bottom: o.mb ?? 0 },
+  });
+}
+
+/** Table header cell — white on the accent band. */
+function th(text: string, align: TextOpts['align'] = 'left'): TextBlock {
+  return cell(text, { bold: true, size: 8.5, color: '#ffffff', align });
+}
+
+/** Table body cell. */
+function td(text: string, o: TextOpts = {}): TextBlock {
+  return cell(text, { size: o.size ?? 8.5, ...o });
+}
+
+function h1(text: string): Heading {
+  return new Heading(text, {
+    level: 1,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 21,
+    color: HEADING,
+    margin: { bottom: 4 },
+  });
+}
+
+function h2(text: string, color: ColorInput = ACCENT): Heading {
+  return new Heading(text, {
+    level: 2,
+    fontName: StandardFonts.HelveticaBold,
+    fontSize: 13,
+    color: color,
+    margin: { top: 16, bottom: 8 },
+  });
+}
+
+/** The full-width accent rule at the top of each document. */
+function accentBar(color: ColorInput = ACCENT, height = 4): Container {
+  return new Container({ backgroundColor: color, height, margin: { bottom: 14 } });
+}
+
+/** One label/value pair for the reference grid. */
+function field(label: string, value: string): VerticalStack {
+  return new VerticalStack({
+    children: [cell(label.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 2 }), cell(value, { size: 9.5 })],
+  });
+}
+
+/** A row of evenly weighted elements. */
+function weightedRow(items: IElement[], o: { spacing?: number; mt?: number; mb?: number } = {}): HorizontalStack {
+  const row = new HorizontalStack({
+    widthDistribution: 'weighted',
+    spacing: o.spacing ?? 14,
+    margin: { top: o.mt ?? 0, bottom: o.mb ?? 14 },
+  });
+  for (const item of items) row.add(item, 1);
+  return row;
+}
+
+/** A bordered panel with a heading — terms, notes, declarations. */
+function panel(title: string, children: IElement[], o: { accent?: ColorInput } = {}): Container {
+  return new Container({
+    backgroundColor: ColorPalette.slate[50],
+    border: { width: 0.75, color: RULE },
+    cornerRadius: 6,
+    padding: 12,
+    margin: { top: 4, bottom: 12 },
+    child: new VerticalStack({
+      spacing: 4,
+      children: [cell(title, { bold: true, size: 9.5, color: o.accent ?? ACCENT, mb: 4 }), ...children],
+    }),
+  });
+}
+
+/** A summary tile. */
+function tile(value: string, label: string, accent: ColorInput = ACCENT): Container {
+  return new Container({
+    backgroundColor: ColorPalette.slate[50],
+    border: { width: 0.75, color: RULE },
+    cornerRadius: 6,
+    padding: [11, 10],
+    child: new VerticalStack({
+      children: [cell(value, { bold: true, size: 14, color: accent, mb: 2 }), cell(label, { size: 8, color: MUTED })],
+    }),
+  });
+}
+
+/** The running header / footer band. */
+function band(left: string, right: string): HorizontalStack {
+  const row = new HorizontalStack({ widthDistribution: 'weighted' });
+  row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
+  row.add(cell(right, { size: 7.5, color: MUTED, align: 'right' }), 2);
+  return row;
+}
+
+function gbDate(d: Date): string {
+  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
+    d
+  );
 }

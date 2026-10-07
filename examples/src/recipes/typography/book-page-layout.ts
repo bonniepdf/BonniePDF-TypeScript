@@ -1,3 +1,8 @@
+/**
+ * Book Page Layout.
+ * A typeset monograph chapter page: Times fonts, justified body text, an inset bordered pull-quote, a bold/italic emphasis break, and a chapter footer with imprint.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   Heading,

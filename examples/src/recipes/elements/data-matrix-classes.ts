@@ -1,3 +1,8 @@
+/**
+ * Data Matrix (Class API).
+ * The same native Data Matrix tour as Data Matrix, built with the class API: construct each element and assign properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

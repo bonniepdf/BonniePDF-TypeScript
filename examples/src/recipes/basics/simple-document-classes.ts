@@ -1,3 +1,8 @@
+/**
+ * Simple Document (Class API).
+ * The same document as Simple Document, built with the class API: construct each object with `new`, then set properties. The output is identical.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   DocumentSettings,

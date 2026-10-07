@@ -1,3 +1,9 @@
+/**
+ * Annual Report: Classic.
+ * An A4 annual-report template: a full-bleed navy cover with a hero photograph, then inner pages framed by blue header and footer bands with the logo, generation time, and page numbers.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
+ */
 // Annual Report - Classic
 //
 // A4 portrait annual-report template: a full-bleed navy front cover with a
@@ -178,6 +184,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 // ── Background slot builders ────────────────────────────────────────────────
 //

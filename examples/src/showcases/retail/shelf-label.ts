@@ -1,3 +1,8 @@
+/**
+ * Retail Shelf Label (EU/UK).
+ * An EU/UK shelf-edge label on a custom 110 × 75 mm card: product details, was/now promotional pricing, the mandatory unit price, and an EAN-13 barcode.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // EU / UK retail shelf-edge label
 //
 // The retail showcase, framed for EU/UK rather than US. The distinguishing
@@ -87,6 +92,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 function retailerStrip(): Container {
   const row = new HorizontalStack({ widthDistribution: 'weighted', alignment: 'center' });

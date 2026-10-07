@@ -1,3 +1,8 @@
+/**
+ * QR Codes.
+ * Native vector QR codes from a full ISO/IEC 18004 encoder: all four error correction levels, custom colours, and transparent backgrounds, sharp at any zoom.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import {
   Document,
   TextBlock,
@@ -212,6 +217,8 @@ export function generate(): Document {
 
   return doc;
 }
+
+// Local helpers and sample types used by this document.
 
 /** A bold indigo section header (a styled TextBlock, matching the original). */
 function sectionHeader(text: string): TextBlock {

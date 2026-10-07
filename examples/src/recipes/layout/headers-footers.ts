@@ -1,3 +1,8 @@
+/**
+ * Headers & Footers.
+ * Running header and footer templates on every page. The templates are marked decorative, so screen readers skip them, while the numbered body sections are fully structured.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 import { Document, Heading, TextBlock, TextElementBase, StandardFonts, pageTemplate } from '@bonniepdf/core';
 
 /**

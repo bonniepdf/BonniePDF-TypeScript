@@ -1,3 +1,8 @@
+/**
+ * Pathology Lab Report (Class API).
+ * A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser.
+ * Build with generate(); export with await doc.generateBytesAsync().
+ */
 // ── UK / EU laboratory (pathology) report ────────────────────────────────────
 //
 // Portfolio #3, in a fictional UK / EU clinical laboratory idiom. A pathology laboratory report: patient
@@ -50,21 +55,6 @@ const RULE = ColorPalette.slate[200];
 const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
 const LOW = ColorPalette.amber[700];
-
-type Flag = 'H' | 'L' | '';
-
-interface Analyte {
-  name: string;
-  result: string;
-  units: string;
-  range: string;
-  flag: Flag;
-}
-
-interface Panel {
-  title: string;
-  rows: Analyte[];
-}
 
 const PANELS: Panel[] = [
   {
@@ -246,6 +236,23 @@ export function generate(): Document {
   doc.add(sign);
 
   return doc;
+}
+
+// Local helpers and sample types used by this document.
+
+type Flag = 'H' | 'L' | '';
+
+interface Analyte {
+  name: string;
+  result: string;
+  units: string;
+  range: string;
+  flag: Flag;
+}
+
+interface Panel {
+  title: string;
+  rows: Analyte[];
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

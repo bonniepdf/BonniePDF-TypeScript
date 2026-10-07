@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 // IPdfWriter / IAsyncPdfWriter live alongside their implementations in
 // PdfWriter.ts - the standalone `./IPdfWriter` / `./IAsyncPdfWriter`
 // files are shadow definitions that drift from the real ones, so this
@@ -170,26 +171,26 @@ function buildStructElemDict(
   pageIds: number[] | undefined
 ): Map<string, string> {
   const dict = new Map<string, string>();
-  dict.set('/Type', '/StructElem');
-  dict.set('/S', '/' + toPdfTag(element.role));
-  dict.set('/P', `${parentObjectId} 0 R`);
+  dict.set(PdfKeys.Common.Type, '/StructElem');
+  dict.set(PdfKeys.Structure.Role, '/' + toPdfTag(element.role));
+  dict.set(PdfKeys.Structure.Parent, `${parentObjectId} 0 R`);
 
   const built = buildKidsAndPg(element, elementIds, pageIds);
-  if (built.kids !== null) dict.set('/K', built.kids);
-  if (built.singlePageObjectId !== undefined) dict.set('/Pg', `${built.singlePageObjectId} 0 R`);
+  if (built.kids !== null) dict.set(PdfKeys.Structure.Kids, built.kids);
+  if (built.singlePageObjectId !== undefined) dict.set(PdfKeys.Structure.Page, `${built.singlePageObjectId} 0 R`);
 
   // PDF text strings: use encodeMetadataString so non-Latin-1 chars
   // (em-dash, smart quotes, CJK, etc.) become a UTF-16BE hex literal
   // <FEFF…> rather than getting byte-truncated by the Latin-1 writer.
-  if (element.alt) dict.set('/Alt', PdfSyntax.encodeMetadataString(element.alt));
-  if (element.actualText) dict.set('/ActualText', PdfSyntax.encodeMetadataString(element.actualText));
-  if (element.lang) dict.set('/Lang', PdfSyntax.encodeMetadataString(element.lang));
-  if (element.title) dict.set('/T', PdfSyntax.encodeMetadataString(element.title));
+  if (element.alt) dict.set(PdfKeys.Structure.AlternativeText, PdfSyntax.encodeMetadataString(element.alt));
+  if (element.actualText) dict.set(PdfKeys.Structure.ActualText, PdfSyntax.encodeMetadataString(element.actualText));
+  if (element.lang) dict.set(PdfKeys.Structure.Language, PdfSyntax.encodeMetadataString(element.lang));
+  if (element.title) dict.set(PdfKeys.Structure.Title, PdfSyntax.encodeMetadataString(element.title));
 
   // /A - attributes dictionary (raw PDF syntax provided by caller).
   // Tables use this for /ColSpan; future stages may use it for
   // /RowSpan and list characteristics.
-  if (element.attributes) dict.set('/A', element.attributes);
+  if (element.attributes) dict.set(PdfKeys.Structure.Attributes, element.attributes);
 
   return dict;
 }
@@ -202,11 +203,11 @@ function buildStructTreeRootDict(
   annotBindings?: AnnotBinding[]
 ): Map<string, string> {
   const dict = new Map<string, string>();
-  dict.set('/Type', '/StructTreeRoot');
-  dict.set('/K', `[ ${elementIds.get(documentRoot)} 0 R ]`);
+  dict.set(PdfKeys.Common.Type, '/StructTreeRoot');
+  dict.set(PdfKeys.Structure.Kids, `[ ${elementIds.get(documentRoot)} 0 R ]`);
 
   if (parentTreeId > 0 && parentTreeNums) {
-    dict.set('/ParentTree', `${parentTreeId} 0 R`);
+    dict.set(PdfKeys.Structure.ParentTree, `${parentTreeId} 0 R`);
     // /ParentTreeNextKey = max key used + 1.
     // Annotation keys (10_000+) may exceed the page count, so use the
     // max of page count and maxAnnotKey + 1.
@@ -215,7 +216,7 @@ function buildStructTreeRootDict(
       const maxAnnotKey = Math.max(...annotBindings.map(b => b.structParentKey));
       nextKey = Math.max(nextKey, maxAnnotKey + 1);
     }
-    dict.set('/ParentTreeNextKey', nextKey.toString());
+    dict.set(PdfKeys.Structure.ParentTreeNextKey, nextKey.toString());
   }
 
   return dict;
@@ -253,7 +254,7 @@ function buildParentTreeDict(
     }
   }
 
-  return new Map<string, string>([['/Nums', '[ ' + parts.join(' ') + ' ]']]);
+  return new Map<string, string>([[PdfKeys.NumberTree.Numbers, '[ ' + parts.join(' ') + ' ]']]);
 }
 
 function buildKidsAndPg(

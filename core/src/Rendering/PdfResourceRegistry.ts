@@ -1,3 +1,4 @@
+import * as PdfKeys from './Pdf/PdfKeys';
 import { ImageInfo, ImageFormat } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { Color } from '../Core/Color';
@@ -786,10 +787,10 @@ export class PdfResourceRegistry {
       writer.writeObject(
         id,
         new Map([
-          ['/Type', '/XObject'],
-          ['/Subtype', '/Form'],
-          ['/BBox', `[0 -${info.fontSize * 2} 100 0]`],
-          ['/Resources', `<< /Font << ${info.fontResourceName} ${fontObjId} 0 R >> >>`],
+          [PdfKeys.Common.Type, '/XObject'],
+          [PdfKeys.Common.Subtype, '/Form'],
+          [PdfKeys.Form.BoundingBox, `[0 -${info.fontSize * 2} 100 0]`],
+          [PdfKeys.Form.Resources, `<< /Font << ${info.fontResourceName} ${fontObjId} 0 R >> >>`],
         ]),
         content
       );
@@ -833,9 +834,9 @@ export class PdfResourceRegistry {
       writer.writeObject(
         objectId,
         new Map<string, string>([
-          ['/Type', '/ExtGState'],
-          ['/ca', alphaValue.toFixed(4)],
-          ['/CA', alphaValue.toFixed(4)],
+          [PdfKeys.Common.Type, '/ExtGState'],
+          [PdfKeys.GraphicsState.FillAlpha, alphaValue.toFixed(4)],
+          [PdfKeys.GraphicsState.StrokeAlpha, alphaValue.toFixed(4)],
         ])
       );
       graphicsStateRefs.push(`${resourceName} ${objectId} 0 R`);
@@ -857,12 +858,12 @@ export class PdfResourceRegistry {
       writer.writeObject(
         formId,
         new Map<string, string>([
-          ['/Type', '/XObject'],
-          ['/Subtype', '/Form'],
-          ['/FormType', '1'],
-          ['/BBox', `[${fmt(x0)} ${fmt(y0)} ${fmt(x1)} ${fmt(y1)}]`],
-          ['/Group', '<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>'],
-          ['/Resources', `<< /Shading << /ShM ${buildAlphaShadingDict(request)} >> >>`],
+          [PdfKeys.Common.Type, '/XObject'],
+          [PdfKeys.Common.Subtype, '/Form'],
+          [PdfKeys.Form.FormType, '1'],
+          [PdfKeys.Form.BoundingBox, `[${fmt(x0)} ${fmt(y0)} ${fmt(x1)} ${fmt(y1)}]`],
+          [PdfKeys.Form.Group, '<< /Type /Group /S /Transparency /CS /DeviceGray /I true >>'],
+          [PdfKeys.Form.Resources, `<< /Shading << /ShM ${buildAlphaShadingDict(request)} >> >>`],
         ]),
         '/ShM sh\n'
       );
@@ -871,10 +872,10 @@ export class PdfResourceRegistry {
       writer.writeObject(
         gsId,
         new Map<string, string>([
-          ['/Type', '/ExtGState'],
-          ['/SMask', `<< /Type /Mask /S /Luminosity /G ${formId} 0 R >>`],
-          ['/ca', '1'],
-          ['/CA', '1'],
+          [PdfKeys.Common.Type, '/ExtGState'],
+          [PdfKeys.GraphicsState.SoftMask, `<< /Type /Mask /S /Luminosity /G ${formId} 0 R >>`],
+          [PdfKeys.GraphicsState.FillAlpha, '1'],
+          [PdfKeys.GraphicsState.StrokeAlpha, '1'],
         ])
       );
       graphicsStateRefs.push(`${softMaskGsName} ${gsId} 0 R`);

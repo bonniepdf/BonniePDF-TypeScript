@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { IPdfWriter } from './IPdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
@@ -46,12 +47,12 @@ export class NavigationWriter {
 
     const rootChildren = childrenByParent.get(rootId) ?? [];
     const rootDict = new Map<string, string>([
-      ['/Type', '/Outlines'],
-      ['/Count', countVisible(rootId).toString()],
+      [PdfKeys.Common.Type, '/Outlines'],
+      [PdfKeys.Outline.Count, countVisible(rootId).toString()],
     ]);
     if (rootChildren.length > 0) {
-      rootDict.set('/First', `${flatList[rootChildren[0]].id} 0 R`);
-      rootDict.set('/Last', `${flatList[rootChildren[rootChildren.length - 1]].id} 0 R`);
+      rootDict.set(PdfKeys.Outline.First, `${flatList[rootChildren[0]].id} 0 R`);
+      rootDict.set(PdfKeys.Outline.Last, `${flatList[rootChildren[rootChildren.length - 1]].id} 0 R`);
     }
     this.writer.writeObject(rootId, rootDict);
 
@@ -61,18 +62,22 @@ export class NavigationWriter {
       const siblingIdx = siblings.indexOf(i);
 
       const dict = new Map<string, string>([
-        ['/Title', `(${PdfSyntax.escape(item.title)})`],
-        ['/Parent', `${parentId} 0 R`],
-        ['/Dest', `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`],
+        [PdfKeys.Outline.Title, `(${PdfSyntax.escape(item.title)})`],
+        [PdfKeys.Outline.Parent, `${parentId} 0 R`],
+        [
+          PdfKeys.Outline.Destination,
+          `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`,
+        ],
       ]);
-      if (siblingIdx > 0) dict.set('/Prev', `${flatList[siblings[siblingIdx - 1]].id} 0 R`);
-      if (siblingIdx < siblings.length - 1) dict.set('/Next', `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
+      if (siblingIdx > 0) dict.set(PdfKeys.Outline.Previous, `${flatList[siblings[siblingIdx - 1]].id} 0 R`);
+      if (siblingIdx < siblings.length - 1)
+        dict.set(PdfKeys.Outline.Next, `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
 
       const myChildren = childrenByParent.get(itemId);
       if (myChildren && myChildren.length > 0) {
-        dict.set('/Count', countVisible(itemId).toString());
-        dict.set('/First', `${flatList[myChildren[0]].id} 0 R`);
-        dict.set('/Last', `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
+        dict.set(PdfKeys.Outline.Count, countVisible(itemId).toString());
+        dict.set(PdfKeys.Outline.First, `${flatList[myChildren[0]].id} 0 R`);
+        dict.set(PdfKeys.Outline.Last, `${flatList[myChildren[myChildren.length - 1]].id} 0 R`);
       }
       this.writer.writeObject(itemId, dict);
     }

@@ -19,19 +19,6 @@ export interface SvgPageExportOptions {
   embedImages?: 'data-uri' | 'external-ref' | 'omit';
 
   /**
-   * `text` (default) keeps text selectable and compact, positioning glyphs with
-   * the document's real font metrics. `paths` is reserved for a future
-   * glyph-outline mode that removes any dependency on viewer-installed fonts.
-   */
-  textMode?: 'text' | 'paths';
-
-  /**
-   * Include SVG `<a>` wrappers for PDF hyperlinks where possible. Defaults to
-   * false; page previews are primarily visual assets.
-   */
-  includeLinks?: boolean;
-
-  /**
    * Include `<title>`, `<desc>`, `role`, and `aria-label` on the root `<svg>`
    * element. This is a lightweight preview affordance, not PDF/UA structure
    * export. Defaults to true.
@@ -85,8 +72,6 @@ export const SVG_PAGE_EXPORT_DEFAULTS: Required<
 > = {
   precision: 3,
   embedImages: 'data-uri',
-  textMode: 'text',
-  includeLinks: false,
   includeAccessibilityMetadata: true,
   shapeRendering: 'auto',
 };

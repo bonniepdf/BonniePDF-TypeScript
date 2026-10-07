@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { IPdfWriter } from './IPdfWriter';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import { Md5Hash } from '../../Security/Encryption/md5';
@@ -77,23 +78,23 @@ export class AttachmentWriter {
     params += ` /CheckSum <${AttachmentWriter.md5Hex(a.content)}> >>`;
 
     const dict = new Map<string, string>([
-      ['/Type', '/EmbeddedFile'],
-      ['/Params', params],
+      [PdfKeys.Common.Type, '/EmbeddedFile'],
+      [PdfKeys.EmbeddedFile.Parameters, params],
     ]);
-    if (a.mediaType) dict.set('/Subtype', '/' + AttachmentWriter.encodeName(a.mediaType));
+    if (a.mediaType) dict.set(PdfKeys.Common.Subtype, '/' + AttachmentWriter.encodeName(a.mediaType));
     return dict;
   }
 
   private static buildFilespecDict(a: FileAttachment, streamId: number): Map<string, string> {
     const relationship = a.relationship ?? AttachmentRelationship.Unspecified;
     const dict = new Map<string, string>([
-      ['/Type', '/Filespec'],
-      ['/F', PdfSyntax.encodeMetadataString(a.fileName)],
-      ['/UF', PdfSyntax.encodeMetadataString(a.fileName)],
-      ['/EF', `<< /F ${streamId} 0 R /UF ${streamId} 0 R >>`],
-      ['/AFRelationship', '/' + relationship],
+      [PdfKeys.Common.Type, '/Filespec'],
+      [PdfKeys.FileSpecification.FileName, PdfSyntax.encodeMetadataString(a.fileName)],
+      [PdfKeys.FileSpecification.UnicodeFileName, PdfSyntax.encodeMetadataString(a.fileName)],
+      [PdfKeys.FileSpecification.EmbeddedFiles, `<< /F ${streamId} 0 R /UF ${streamId} 0 R >>`],
+      [PdfKeys.FileSpecification.AssociatedFileRelationship, '/' + relationship],
     ]);
-    if (a.description) dict.set('/Desc', PdfSyntax.encodeMetadataString(a.description));
+    if (a.description) dict.set(PdfKeys.FileSpecification.Description, PdfSyntax.encodeMetadataString(a.description));
     return dict;
   }
 
@@ -103,7 +104,7 @@ export class AttachmentWriter {
       names += `${PdfSyntax.encodeMetadataString(name)} ${filespecId} 0 R `;
     }
     names += ']';
-    return new Map<string, string>([['/Names', names]]);
+    return new Map<string, string>([[PdfKeys.NameTree.Names, names]]);
   }
 
   private static md5Hex(data: Uint8Array): string {

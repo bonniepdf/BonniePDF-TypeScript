@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { IPdfWriter } from '../Writers/IPdfWriter';
 import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
 import { PdfAConformance } from '../../Configuration/PdfAConformance';
@@ -62,17 +63,17 @@ export class ImageWriter {
    */
   public writeJpegImage(id: number, image: ImageInfo, _resourceName: string): number {
     const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', this.resolveColorSpace(image));
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/DCTDecode'); // JPEG compression filter
+    dict.set(PdfKeys.Common.Type, '/XObject');
+    dict.set(PdfKeys.Common.Subtype, '/Image');
+    dict.set(PdfKeys.Image.Width, image.width.toString());
+    dict.set(PdfKeys.Image.Height, image.height.toString());
+    dict.set(PdfKeys.Image.ColorSpace, this.resolveColorSpace(image));
+    dict.set(PdfKeys.Image.BitsPerComponent, image.bitsPerComponent.toString());
+    dict.set(PdfKeys.Stream.Filter, '/DCTDecode'); // JPEG compression filter
     if (image.invertCmykColors && image.colorSpace === ImageColorSpace.DeviceCMYK) {
       // Photoshop-exported CMYK JPEGs store inverted ink values; tell PDF to
       // invert each component back during decoding.
-      dict.set('/Decode', '[1 0 1 0 1 0 1 0]');
+      dict.set(PdfKeys.Image.Decode, '[1 0 1 0 1 0 1 0]');
     }
 
     this.writer.writeBinaryObject(id, dict, image.data);
@@ -96,21 +97,21 @@ export class ImageWriter {
     const compressedData = this.compressData(pixelData);
 
     const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/FlateDecode');
+    dict.set(PdfKeys.Common.Type, '/XObject');
+    dict.set(PdfKeys.Common.Subtype, '/Image');
+    dict.set(PdfKeys.Image.Width, image.width.toString());
+    dict.set(PdfKeys.Image.Height, image.height.toString());
+    dict.set(PdfKeys.Image.BitsPerComponent, image.bitsPerComponent.toString());
+    dict.set(PdfKeys.Stream.Filter, '/FlateDecode');
 
     // Handle color space - ICC profile (when present) overrides device space.
-    dict.set('/ColorSpace', this.resolveColorSpace(image));
+    dict.set(PdfKeys.Image.ColorSpace, this.resolveColorSpace(image));
 
     // Handle alpha channel (soft mask)
     if (writeSmask) {
       const smaskId = this.writer.getNewId();
       this.writeSoftMask(smaskId, image);
-      dict.set('/SMask', `${smaskId} 0 R`);
+      dict.set(PdfKeys.Image.SoftMask, `${smaskId} 0 R`);
     }
 
     this.writer.writeBinaryObject(id, dict, compressedData);
@@ -174,9 +175,9 @@ export class ImageWriter {
   private writeIccProfile(id: number, profile: Uint8Array, components: number, alternate: string): void {
     const compressed = this.compressData(profile);
     const dict = new Map<string, string>();
-    dict.set('/N', components.toString());
-    dict.set('/Alternate', alternate);
-    dict.set('/Filter', '/FlateDecode');
+    dict.set(PdfKeys.ColorProfile.Components, components.toString());
+    dict.set(PdfKeys.ColorProfile.Alternate, alternate);
+    dict.set(PdfKeys.Stream.Filter, '/FlateDecode');
     this.writer.writeBinaryObject(id, dict, compressed);
   }
 
@@ -187,13 +188,13 @@ export class ImageWriter {
     const compressedAlpha = this.compressData(image.alphaData);
 
     const dict = new Map<string, string>();
-    dict.set('/Type', '/XObject');
-    dict.set('/Subtype', '/Image');
-    dict.set('/Width', image.width.toString());
-    dict.set('/Height', image.height.toString());
-    dict.set('/ColorSpace', '/DeviceGray');
-    dict.set('/BitsPerComponent', image.bitsPerComponent.toString());
-    dict.set('/Filter', '/FlateDecode');
+    dict.set(PdfKeys.Common.Type, '/XObject');
+    dict.set(PdfKeys.Common.Subtype, '/Image');
+    dict.set(PdfKeys.Image.Width, image.width.toString());
+    dict.set(PdfKeys.Image.Height, image.height.toString());
+    dict.set(PdfKeys.Image.ColorSpace, '/DeviceGray');
+    dict.set(PdfKeys.Image.BitsPerComponent, image.bitsPerComponent.toString());
+    dict.set(PdfKeys.Stream.Filter, '/FlateDecode');
 
     this.writer.writeBinaryObject(id, dict, compressedAlpha);
   }

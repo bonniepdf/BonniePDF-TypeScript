@@ -179,11 +179,9 @@ export function generate(): Document {
       height: 400,
       stretchToFit: true,
       lineColor: C_VIOLET,
-      lineWidth: 2.5,
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       showValueLabels: true,
-      showDataPointMarkers: true,
       backgroundColor: CHART_BG,
     })
   );
@@ -239,8 +237,6 @@ export function generate(): Document {
       height: 400,
       stretchToFit: true,
       lollipopColor: C_PINK,
-      stemWidth: 2.5,
-      headRadius: 10,
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       showValueLabels: true,
@@ -271,7 +267,6 @@ export function generate(): Document {
       height: 400,
       stretchToFit: true,
       dotColor: C_TEAL,
-      dotRadius: 12,
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       showValueLabels: true,
@@ -338,7 +333,6 @@ export function generate(): Document {
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       showValueLabels: true,
-      showDataPointMarkers: true,
       backgroundColor: CHART_BG,
     })
   );

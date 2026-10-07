@@ -117,7 +117,6 @@ export function generate(): Document {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.showDataPointMarkers = true;
   chart.backgroundColor = Color.fromHex('#fafafa');
 
   chart.data = data;

@@ -1,3 +1,4 @@
+import * as PdfKeys from '../Pdf/PdfKeys';
 import { SRgbIccProfile } from '../../Metadata/SRgbIccProfile';
 import { IPdfWriter } from './IPdfWriter';
 import { IAsyncPdfWriter } from './IAsyncPdfWriter';
@@ -13,7 +14,7 @@ export class ComplianceWriter {
 
   public writeIccProfile(id: number): void {
     const iccData = SRgbIccProfile.generate();
-    const dict = new Map<string, string>([['/N', '3']]);
+    const dict = new Map<string, string>([[PdfKeys.ColorProfile.Components, '3']]);
     this.writer.writeBinaryObject(id, dict, iccData);
   }
 
@@ -21,18 +22,18 @@ export class ComplianceWriter {
     this.writer.writeObject(
       id,
       new Map<string, string>([
-        ['/Type', '/OutputIntent'],
-        ['/S', '/GTS_PDFA1'],
-        ['/OutputConditionIdentifier', '(sRGB IEC61966-2.1)'],
-        ['/RegistryName', '(http://www.color.org)'],
-        ['/DestOutputProfile', `${iccProfileId} 0 R`],
+        [PdfKeys.Common.Type, '/OutputIntent'],
+        [PdfKeys.OutputIntent.Subtype, '/GTS_PDFA1'],
+        [PdfKeys.OutputIntent.ConditionIdentifier, '(sRGB IEC61966-2.1)'],
+        [PdfKeys.OutputIntent.RegistryName, '(http://www.color.org)'],
+        [PdfKeys.OutputIntent.DestinationProfile, `${iccProfileId} 0 R`],
       ])
     );
   }
 
   public async writeIccProfileAsync(id: number): Promise<void> {
     const iccData = SRgbIccProfile.generate();
-    const dict = new Map<string, string>([['/N', '3']]);
+    const dict = new Map<string, string>([[PdfKeys.ColorProfile.Components, '3']]);
     await this.asyncWriter!.writeBinaryObjectAsync(id, dict, iccData, iccData.length);
   }
 

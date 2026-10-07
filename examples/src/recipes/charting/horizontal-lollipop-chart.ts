@@ -103,8 +103,6 @@ export function generate(): Document {
     height: 400,
     stretchToFit: true,
     lollipopColor: C_VIOLET,
-    stemWidth: 2,
-    headRadius: 9,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,

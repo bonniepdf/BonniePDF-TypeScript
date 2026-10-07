@@ -88,7 +88,6 @@ export function generate(): Document {
     height: 380,
     stretchToFit: true,
     dotColor: C_TEAL,
-    dotRadius: 12,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,

@@ -1,3 +1,4 @@
+import * as PdfKeys from '../../Rendering/Pdf/PdfKeys';
 import { PdfEncryptionKey } from './pdfEncryptionKey';
 import { Aes256EncryptionKey } from './aes256EncryptionKey';
 import { AesCipher } from './aesCipher';
@@ -120,33 +121,34 @@ export class PdfEncryptor {
 
   private getRc4EncryptDictionary(): Map<string, string> {
     const dict = new Map<string, string>([
-      ['/Filter', '/Standard'],
-      ['/V', this.settings.versionValue.toString()],
-      ['/R', this.settings.revisionValue.toString()],
-      ['/O', PdfEncryptor.fmtHex(this.key!.ownerEntry)],
-      ['/U', PdfEncryptor.fmtHex(this.key!.userEntry)],
-      ['/P', this.key!.permissionsValue.toString()],
+      [PdfKeys.Encryption.Handler, '/Standard'],
+      [PdfKeys.Encryption.AlgorithmVersion, this.settings.versionValue.toString()],
+      [PdfKeys.Encryption.HandlerRevision, this.settings.revisionValue.toString()],
+      [PdfKeys.Encryption.OwnerEntry, PdfEncryptor.fmtHex(this.key!.ownerEntry)],
+      [PdfKeys.Encryption.UserEntry, PdfEncryptor.fmtHex(this.key!.userEntry)],
+      [PdfKeys.Encryption.Permissions, this.key!.permissionsValue.toString()],
     ]);
-    if (this.settings.revisionValue >= 3) dict.set('/Length', this.settings.keyLengthBits.toString());
+    if (this.settings.revisionValue >= 3)
+      dict.set(PdfKeys.Encryption.KeyLength, this.settings.keyLengthBits.toString());
     return dict;
   }
 
   private getAes256EncryptDictionary(): Map<string, string> {
     if (!this.aesKey) throw new Error('PdfEncryptor: AES-256 key not initialised - use PdfEncryptor.create()');
     return new Map<string, string>([
-      ['/Filter', '/Standard'],
-      ['/V', '5'],
-      ['/R', '6'],
-      ['/Length', '256'],
-      ['/O', PdfEncryptor.fmtHex(this.aesKey.ownerEntry)],
-      ['/U', PdfEncryptor.fmtHex(this.aesKey.userEntry)],
-      ['/OE', PdfEncryptor.fmtHex(this.aesKey.ownerEncryptionEntry)],
-      ['/UE', PdfEncryptor.fmtHex(this.aesKey.userEncryptionEntry)],
-      ['/Perms', PdfEncryptor.fmtHex(this.aesKey.permsEntry)],
-      ['/P', this.aesKey.permissionsValue.toString()],
-      ['/CF', '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
-      ['/StmF', '/StdCF'],
-      ['/StrF', '/StdCF'],
+      [PdfKeys.Encryption.Handler, '/Standard'],
+      [PdfKeys.Encryption.AlgorithmVersion, '5'],
+      [PdfKeys.Encryption.HandlerRevision, '6'],
+      [PdfKeys.Encryption.KeyLength, '256'],
+      [PdfKeys.Encryption.OwnerEntry, PdfEncryptor.fmtHex(this.aesKey.ownerEntry)],
+      [PdfKeys.Encryption.UserEntry, PdfEncryptor.fmtHex(this.aesKey.userEntry)],
+      [PdfKeys.Encryption.OwnerEncryptionEntry, PdfEncryptor.fmtHex(this.aesKey.ownerEncryptionEntry)],
+      [PdfKeys.Encryption.UserEncryptionEntry, PdfEncryptor.fmtHex(this.aesKey.userEncryptionEntry)],
+      [PdfKeys.Encryption.EncryptedPermissions, PdfEncryptor.fmtHex(this.aesKey.permsEntry)],
+      [PdfKeys.Encryption.Permissions, this.aesKey.permissionsValue.toString()],
+      [PdfKeys.Encryption.CryptFilters, '<< /StdCF << /CFM /AESV3 /AuthEvent /DocOpen /Length 32 >> >>'],
+      [PdfKeys.Encryption.StreamFilter, '/StdCF'],
+      [PdfKeys.Encryption.StringFilter, '/StdCF'],
     ]);
   }
 

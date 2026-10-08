@@ -1,5 +1,5 @@
 // GENERATED from spec/api/surface.json (spec 06). Do not edit.
-// Regenerate with `node spec/schema/sync.mjs` in the specification repository.
+// Regenerate with `node schema/sync.mjs` in the specification repository.
 export const INTERNAL_NAMES: readonly string[] = [
   "applyBorderedElementOptions",
   "applyDocumentSettingsOptions",

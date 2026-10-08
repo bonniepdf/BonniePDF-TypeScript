@@ -1,5 +1,5 @@
 // GENERATED from the Document Definition element description (spec 15 §13). Do not edit.
-// Regenerate with `node spec/schema/sync.mjs` in the specification repository.
+// Regenerate with `node schema/sync.mjs` in the specification repository.
 import type { ElementDescription } from './ElementDescriptionTypes';
 
 export const ELEMENT_DESCRIPTION: ElementDescription = {

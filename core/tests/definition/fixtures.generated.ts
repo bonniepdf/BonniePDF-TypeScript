@@ -1,5 +1,5 @@
 // GENERATED from spec/fixtures/document-definition (spec 15 §15). Do not edit.
-// Regenerate with `node spec/schema/sync.mjs` in the specification repository.
+// Regenerate with `node schema/sync.mjs` in the specification repository.
 export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable' | 'settings-rules', Record<string, any>> = {
   "valid": {
     "defaults-equivalence": {

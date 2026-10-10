@@ -21,6 +21,7 @@ export const TEXT_ELEMENT_OWN_OPTION_KEYS = [
   'decorationStyle',
   'letterSpacing',
   'wordSpacing',
+  'fontFeatures',
   'lineHeight',
 ] as const;
 

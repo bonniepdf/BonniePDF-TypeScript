@@ -1,3 +1,4 @@
+import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { ICanvas } from './ICanvas';
 import { ellipseToBeziers } from './EllipseGeometry';
 import { Color } from '../Core/Color';
@@ -26,6 +27,7 @@ type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softM
 
 /** A maximal substring that renders with one font, after glyph-fallback resolution. */
 interface TextRun {
+  tracker?: GlyphUsageTracker | null;
   resourceName: string;
   embeddedFont: TtfFont | null;
   fontIdentifier: string;
@@ -42,6 +44,10 @@ export class PdfCanvas implements ICanvas {
   public readonly width: number = 0;
   public readonly height: number;
 
+  private _fontFeatures?: Readonly<Record<string, number>>;
+  public setTextFeatures(features?: Readonly<Record<string, number>>): void {
+    this._fontFeatures = features;
+  }
   private readonly stream: string[] = [];
   private readonly xOffset: number;
   private readonly yOffset: number;
@@ -362,7 +368,7 @@ export class PdfCanvas implements ICanvas {
     PdfOperators.setWordSpacing(this.stream, wordSpacing);
     PdfOperators.setTextPosition(this.stream, pdfX, pdfY);
 
-    this.emitShowText(runs, fontSize);
+    this.emitShowText(runs, fontSize, wordSpacing);
 
     PdfOperators.setWordSpacing(this.stream, 0);
     PdfOperators.endText(this.stream);
@@ -706,16 +712,18 @@ export class PdfCanvas implements ICanvas {
     let total = 0;
     for (const run of runs) {
       const font = run.embeddedFont;
-      if (font && typeof font.getCharWidthInPoints === 'function') {
-        for (const char of run.text) {
-          const cp = char.codePointAt(0)!;
-          if (cp < 32) continue;
-          total += font.getCharWidthInPoints(cp, fontSize) as number;
-        }
+      if (font) {
+        total +=
+          (font.shape(run.text, this._fontFeatures).reduce((sum, g) => sum + g.advanceX, 0) * fontSize) /
+          font.unitsPerEm;
       } else {
         total += FontMetrics.getStringWidth(run.text, run.fontIdentifier, fontSize);
       }
-      total += this.spacingWidth(run.text);
+      total +=
+        this.spacingWidth(run.text) +
+        (font
+          ? (font.shape(run.text, this._fontFeatures).length - Array.from(run.text).length) * this._letterSpacing
+          : 0);
     }
     return total;
   }
@@ -739,34 +747,63 @@ export class PdfCanvas implements ICanvas {
     return glyphs * this._letterSpacing + spaces * this._wordSpacing;
   }
 
-  private emitShowText(runs: TextRun[], fontSize: number): void {
+  private emitShowText(runs: TextRun[], fontSize: number, wordSpacing = this._wordSpacing): void {
     for (const run of runs) {
-      if (run.text.length === 0) continue;
+      if (!run.text) continue;
       this._glyphTracker(run.fontIdentifier, run.text);
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
-      if (run.embeddedFont != null) {
-        // Word spacing (Tw) does not apply to composite fonts, so when it
-        // is set, inject it into the TJ array (combined with any kerning).
-        // Letter spacing is handled universally by Tc, above.
-        if (this._wordSpacing !== 0 && run.text.includes(' ')) {
+      const font = run.embeddedFont;
+      if (!font) {
+        PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
+        continue;
+      }
+      const glyphs = font.shape(run.text, this._fontFeatures);
+      const codes = run.tracker?.markShaped(run.text, glyphs) ?? glyphs.map(g => g.id);
+      this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
+      if (glyphs.every(g => g.offsetY === 0)) {
+        let hex = '',
+          array = '[',
+          adjusted = false;
+        const adjust = (n: number) => {
+          if (n === 0) return;
+          array += `<${hex}> ${PdfSyntax.formatDecimal(n)} `;
+          hex = '';
+          adjusted = true;
+        };
+        for (const [index, g] of glyphs.entries()) {
+          adjust((-g.offsetX * 1000) / font.unitsPerEm);
+          hex += codes[index].toString(16).toUpperCase().padStart(4, '0');
+          adjust(
+            ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
+              (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ' && fontSize > 0
+                ? (wordSpacing * 1000) / fontSize
+                : 0)
+          );
+        }
+        if (adjusted) PdfOperators.showTextPositioned(this.stream, `${array}<${hex}>]`);
+        else PdfOperators.showText(this.stream, `<${hex}>`);
+        this.stream.push('EMC\n');
+        continue;
+      }
+      for (const [index, g] of glyphs.entries()) {
+        const rise = (g.offsetY * fontSize) / font.unitsPerEm;
+        if (rise !== 0) this.stream.push(`${PdfSyntax.formatDecimal(rise)} Ts\n`);
+        const before = (-g.offsetX * 1000) / font.unitsPerEm;
+        const after =
+          ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
+          (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ' && fontSize > 0
+            ? (wordSpacing * 1000) / fontSize
+            : 0);
+        const hex = `<${codes[index].toString(16).toUpperCase().padStart(4, '0')}>`;
+        if (before === 0 && after === 0) PdfOperators.showText(this.stream, hex);
+        else
           PdfOperators.showTextPositioned(
             this.stream,
-            PdfSyntax.toSpacedGlyphArray(run.text, run.embeddedFont, fontSize, this._wordSpacing)
+            `[${before !== 0 ? PdfSyntax.formatDecimal(before) + ' ' : ''}${hex}${after !== 0 ? ' ' + PdfSyntax.formatDecimal(after) : ''}]`
           );
-          continue;
-        }
-        // Embedded fonts with kern pairs paint with `TJ` so the PDF
-        // matches the kerned widths the layout engine reserved (and the
-        // kerned SVG export). Unkerned strings keep the `Tj` path.
-        const kerned = run.embeddedFont.hasKerning ? PdfSyntax.toKernedGlyphArray(run.text, run.embeddedFont) : null;
-        if (kerned != null) {
-          PdfOperators.showTextPositioned(this.stream, kerned);
-        } else {
-          PdfOperators.showText(this.stream, PdfSyntax.toGlyphIdHexString(run.text, run.embeddedFont));
-        }
-      } else {
-        PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
+        if (rise !== 0) this.stream.push('0 Ts\n');
       }
+      this.stream.push('EMC\n');
     }
   }
 

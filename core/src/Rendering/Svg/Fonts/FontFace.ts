@@ -8,11 +8,8 @@
  * its own. Callers supply fonts through a `FontProvider`; at fold-in, BonniePDF's
  * registered fonts fill it, exactly as `VectorSink` is filled by its `ICanvas`.
  *
- * Unlike `VectorSink` this is not a copy of a BonniePDF interface, because
- * BonniePDF has nothing to copy: it embeds and subsets TrueType fonts but has
- * never decoded a glyph outline. `TrueTypeFace` in this folder is the reference
- * implementation, and whether its decoding moves upstream into BonniePDF's
- * `TtfFont` at fold-in is an open decision.
+ * Consumers adapt their shared font reader to this seam. The SVG engine owns
+ * no font decoder or font cache.
  */
 
 /**

@@ -61,6 +61,46 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "font-features": {
+      "_fixture": {
+        "id": "document-definition/valid/font-features",
+        "description": "OpenType features survive text-element and nested TextStyle round trips.",
+        "spec": "19"
+      },
+      "_expect": {
+        "pages": 1,
+        "roundTrip": true
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "office AV",
+              "fontFeatures": {
+                "liga": 0,
+                "kern": 0
+              }
+            },
+            {
+              "type": "RichText",
+              "spans": [
+                {
+                  "text": "office",
+                  "style": {
+                    "fontFeatures": {
+                      "smcp": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "minimal": {
       "_fixture": {
         "id": "document-definition/valid/minimal",
@@ -1227,6 +1267,45 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
               },
               "xAxis": {
                 "legend": "Quarter"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "font-features": {
+      "_fixture": {
+        "id": "document-definition/invalid/font-features",
+        "description": "Reject invalid feature tags and values before constructing a document.",
+        "spec": "19"
+      },
+      "_expectErrors": [
+        {
+          "path": "/pages/0/content/0/fontFeatures",
+          "code": "invalid-value"
+        },
+        {
+          "path": "/pages/0/content/1/fontFeatures",
+          "code": "invalid-value"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "office",
+              "fontFeatures": {
+                "bad": 1
+              }
+            },
+            {
+              "type": "TextBlock",
+              "text": "AV",
+              "fontFeatures": {
+                "kern": 65536
               }
             }
           ]

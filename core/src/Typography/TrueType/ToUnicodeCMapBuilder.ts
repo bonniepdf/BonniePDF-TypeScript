@@ -4,7 +4,7 @@
  * Supports the full Unicode range including supplementary planes (emoji, CJK Extension B+).
  */
 export class ToUnicodeCMapBuilder {
-  private readonly mappings: Array<{ glyphId: number; unicode: number }> = [];
+  private readonly mappings: Array<{ glyphId: number; unicode: string }> = [];
 
   /**
    * Gets the number of mappings added
@@ -20,7 +20,12 @@ export class ToUnicodeCMapBuilder {
     // Skip .notdef (GID 0) as it doesn't map to a real character
     if (glyphId === 0) return;
 
-    this.mappings.push({ glyphId, unicode });
+    this.addSourceMapping(glyphId, String.fromCodePoint(unicode));
+  }
+
+  /** @internal Adds an original source cluster, including ligatures. */
+  public addSourceMapping(glyphId: number, unicode: string): void {
+    if (glyphId !== 0 && unicode.length > 0) this.mappings.push({ glyphId, unicode });
   }
 
   /**
@@ -89,16 +94,10 @@ export class ToUnicodeCMapBuilder {
    * Formats a Unicode codepoint for the ToUnicode CMap.
    * BMP codepoints use 4-digit hex; supplementary codepoints use UTF-16 surrogate pairs.
    */
-  private formatUnicode(codepoint: number): string {
-    if (codepoint <= 0xffff) {
-      return `<${codepoint.toString(16).padStart(4, '0').toUpperCase()}>`;
-    }
-
-    // Supplementary plane: encode as UTF-16 surrogate pair
-    const offset = codepoint - 0x10000;
-    const highSurrogate = 0xd800 + (offset >> 10);
-    const lowSurrogate = 0xdc00 + (offset & 0x3ff);
-    return `<${highSurrogate.toString(16).padStart(4, '0').toUpperCase()}${lowSurrogate.toString(16).padStart(4, '0').toUpperCase()}>`;
+  private formatUnicode(text: string): string {
+    let hex = '';
+    for (let i = 0; i < text.length; i++) hex += text.charCodeAt(i).toString(16).padStart(4, '0').toUpperCase();
+    return `<${hex}>`;
   }
 
   private buildEmptyCMap(): string {

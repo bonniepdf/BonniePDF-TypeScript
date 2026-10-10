@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { RichText } from '../../src/Elements/Text/RichText';
 import { TextStyle } from '../../src/Elements/Text/TextStyle';
@@ -175,6 +176,18 @@ describe('RichText — horizontal alignment', () => {
 });
 
 describe('RichText — justify', () => {
+  it('keeps embedded shaping across spaces on a justified line', () => {
+    const serif = fileURLToPath(new URL('../../assets/fonts/LiberationSerif-Regular.ttf', import.meta.url));
+    const rt = new RichText();
+    rt.defaultStyle.fontFamily = serif;
+    rt.defaultStyle.fontSize = 12;
+    rt.span('A A A');
+    rt.alignment = TextAlignment.Justify;
+    const { ctx, canvas } = makeContext();
+    rt.render(ctx, 20);
+    expect(canvas.texts.filter(t => Math.abs(t.y) < 0.001).map(t => t.text)).toEqual(['A A']);
+  });
+
   it('stretches a non-last line to the full width but leaves the last line ragged', () => {
     const WIDTH = 80;
     // "Hello world" (62.004) fits on line 1; "Bonnie" is forced to line 2.

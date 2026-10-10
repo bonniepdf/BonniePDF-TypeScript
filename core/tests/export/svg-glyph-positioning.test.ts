@@ -127,7 +127,9 @@ describe('SVG glyph positioning', () => {
       // reset, which a presentation attribute would lose to; the generic keeps text
       // broadly right if the @font-face never loads.
       expect(svg).toContain('style="font-family:\'bpf-');
-      expect(svg).toMatch(/style="font-family:'bpf-[^']+',(serif|sans-serif|monospace)"/);
+      expect(svg).toMatch(
+        /style="font-family:'bpf-[^']+',(serif|sans-serif|monospace);font-kerning:none;font-variant-ligatures:none"/
+      );
     } finally {
       doc.dispose();
     }

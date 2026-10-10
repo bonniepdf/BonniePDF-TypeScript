@@ -1,3 +1,4 @@
+import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
 import { getActiveDocumentFonts } from '../../Typography/DocumentFontMetricScope';
@@ -38,6 +39,14 @@ export abstract class TextElementBase extends ElementBase {
 
   // ── Font properties (backing fields + explicit-set tracking) ─────────────
 
+  private _featureStyle = new TextStyle();
+  /** OpenType feature overrides for embedded text, such as { kern: 0, liga: 0 }. */
+  public get fontFeatures(): Readonly<Record<string, number>> | undefined {
+    return this._featureStyle.fontFeatures;
+  }
+  public set fontFeatures(value: Readonly<Record<string, number>> | undefined) {
+    this._featureStyle.fontFeatures = value;
+  }
   private _fontFamily?: string;
   private _fontWeight: FontWeight = FontWeight.Normal;
   private _italic = false;
@@ -240,6 +249,7 @@ export abstract class TextElementBase extends ElementBase {
    * can still override cascade values.
    */
   public applyDefaultStyleIfNotSet(style: TextStyle): void {
+    this.fontFeatures ??= style.fontFeatures;
     // Font: only apply if user hasn't touched any font property
     if (!this._fontExplicit) {
       if (style.fontFamily !== undefined) {
@@ -268,6 +278,7 @@ export abstract class TextElementBase extends ElementBase {
    * marks all set properties as explicit so cascade won't re-override them.
    */
   protected applyDefaultStyle(style: TextStyle): void {
+    this.fontFeatures ??= style.fontFeatures;
     if (style.fontFamily !== undefined) {
       this.fontFamily = style.fontFamily;
     }
@@ -367,7 +378,8 @@ export abstract class TextElementBase extends ElementBase {
     const lines: string[] = [];
     if (text === '') return lines;
 
-    let rest = Array.from(text);
+    const bounds = Graphemes.boundaries(text);
+    let rest = bounds.slice(0, -1).map((start, i) => text.slice(start, bounds[i + 1]));
     let limit = firstWidth;
     const fits = (count: number): boolean => this.measureTextWidth(rest.slice(0, count).join('')) <= limit;
 
@@ -391,7 +403,20 @@ export abstract class TextElementBase extends ElementBase {
         if (fits(mid)) lo = mid;
         else hi = mid - 1;
       }
-      const count = lo;
+      let count = lo;
+      for (let safe = count; safe > 0; safe--) {
+        if (
+          FontMetrics.isSafeTextBreak(
+            rest.join(''),
+            this.fontName,
+            rest.slice(0, safe).join('').length,
+            this.fontFeatures
+          )
+        ) {
+          count = safe;
+          break;
+        }
+      }
 
       let cut = -1;
       if (rest[count] === ' ' && rest.slice(0, count).some(c => c !== ' ')) {
@@ -464,7 +489,10 @@ export abstract class TextElementBase extends ElementBase {
     const measuredText = text
       .replace(TextElementBase.TotalPagesToken, '00')
       .replace(TextElementBase.CurrentPageToken, '00');
-    return FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize) + this.spacingWidth(measuredText);
+    return (
+      FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize, this.fontFeatures) +
+      this.spacingWidth(measuredText)
+    );
   }
 
   /**
@@ -474,6 +502,6 @@ export abstract class TextElementBase extends ElementBase {
    * Zero when no spacing is set.
    */
   protected spacingWidth(text: string): number {
-    return getTextSpacingWidth(text, this.letterSpacing, this.wordSpacing);
+    return getTextSpacingWidth(text, this.letterSpacing, this.wordSpacing, this.fontName, this.fontFeatures);
   }
 }

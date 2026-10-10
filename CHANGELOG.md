@@ -7,6 +7,11 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 This file is maintained by hand. Add an entry under the current version with
 each change to `core/`.
 
+## Unreleased
+
+- Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `fontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
+- Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
+
 ## 2026.10.0
 
 - Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing. CI also verifies authoring equivalence and standalone playground execution for every example.

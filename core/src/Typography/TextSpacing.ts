@@ -1,5 +1,12 @@
+import { FontMetrics } from './FontMetrics';
 /** Calculates the extra advance contributed by letter and word spacing. */
-export function getTextSpacingWidth(text: string, letterSpacing: number, wordSpacing: number): number {
+export function getTextSpacingWidth(
+  text: string,
+  letterSpacing: number,
+  wordSpacing: number,
+  fontIdentifier?: string,
+  features?: Readonly<Record<string, number>>
+): number {
   if (letterSpacing === 0 && wordSpacing === 0) return 0;
 
   let glyphs = 0;
@@ -11,5 +18,6 @@ export function getTextSpacingWidth(text: string, letterSpacing: number, wordSpa
     if (rune === ' ') spaces++;
   }
 
+  if (fontIdentifier) glyphs = FontMetrics.getGlyphCount(text, fontIdentifier, features);
   return glyphs * letterSpacing + spaces * wordSpacing;
 }

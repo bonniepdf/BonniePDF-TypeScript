@@ -7,6 +7,9 @@ import type { FillRule, StrokeStyle } from './StrokeStyle';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 
 export interface ICanvas {
+  /** Select OpenType features for following text operations; omitted values use defaults. */
+  setTextFeatures?(features?: Readonly<Record<string, number>>): void;
+
   readonly width: number;
   readonly height: number;
 

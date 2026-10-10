@@ -552,6 +552,22 @@ class Validator {
         return;
       case 'array':
         return this.checkArray(arg, spec, value, path, owner, depth);
+      case 'fontFeatures':
+        if (!value || typeof value !== 'object' || Array.isArray(value))
+          return this.wrongType(path, 'an object', value, owner);
+        if (
+          Object.entries(value).length > 256 ||
+          Object.entries(value).some(
+            ([tag, n]) => !/^[ -~]{4}$/.test(tag) || typeof n !== 'number' || !Number.isInteger(n) || n < 0 || n > 65535
+          )
+        )
+          this.error(
+            path,
+            'invalid-value',
+            'Font features require four printable ASCII characters and integer values from 0 to 65535 (at most 256 tags).',
+            { id: owner }
+          );
+        return;
       case 'map':
         return this.checkMap(arg, spec, value, path, owner, depth);
       case 'object': {

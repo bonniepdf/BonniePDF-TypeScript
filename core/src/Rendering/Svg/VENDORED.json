@@ -2,15 +2,13 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "svg-engine-typescript",
   "source": {
-    "commit": "0a5693738fce522311c9e7bffa42bd019efef499",
+    "commit": "7a03218fb4fc0694f0a4c7b03ee9e372a95b58ea",
     "dirty": false
   },
   "files": {
     "Emit.ts": "3d9a8a303bfc479b7399d500ec033e81ba51f23bb0da599c922f4121179885cb",
-    "Fonts/FontFace.ts": "50250a9012a9c488c08a82ab2e7addb3170405ef967c8bd8fb85c5cfcd3a566c",
+    "Fonts/FontFace.ts": "ded9fffba65fcf0f18447c2fd1ae5610eabe435d8177210337f3dd168cd3ebf5",
     "Fonts/FontSet.ts": "9e1669a744184928c5b6844d59c3d36b71558195156f899d5af57721662d70d5",
-    "Fonts/Kerning.ts": "e47affae5ca67fd658384d767cbfbf65c785d5836c78df876fe05a3a0a6b3c6e",
-    "Fonts/TrueTypeFace.ts": "a1fb00ddb21041900c866b51de98ac3e172464430bf358aed4a1b649a8a93d6e",
     "Geometry/Matrix.ts": "b447772673c50490c635201c4c004d7a9e71496b985f073da6fc17ece4ac21b3",
     "ImportSvg.ts": "2d6c51e5c57035ee031a342ef8134e22526160654e4520c6d5f0352c87aeb41a",
     "Ir/BoundingBox.ts": "bf8b984ab82d59b5498d36b675cda66c9c3691ca06eb2ab174776c7a496e0be9",

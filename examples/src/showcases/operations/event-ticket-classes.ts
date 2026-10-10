@@ -73,11 +73,12 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   const bgData = assets.get(BG_IMAGE);
   if (!bgData) throw new Error(`Missing required asset: ${BG_IMAGE}`);
+  const background = bgData;
   function pageBackdrop(): Container {
     const bg = new Container();
     bg.height = 300;
     const img = new Image();
-    img.imageData = bgData;
+    img.imageData = background;
     img.width = 640;
     img.height = 300;
     img.fitMode = ImageFitMode.Cover;

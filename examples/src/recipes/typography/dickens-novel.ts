@@ -30,10 +30,10 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       language: 'en-GB',
       displayDocTitle: true,
       defaultTextStyle: { fontFamily: StandardFonts.TimesRoman, fontSize: 11, color: 'slate-900' },
-      headerTemplate: pageNumber => (pageNumber === 1 ? null : header),
+      headerTemplate: pageNumber => (pageNumber === 1 ? undefined : header),
       footerTemplate: pageNumber =>
         pageNumber === 1
-          ? null
+          ? undefined
           : text(TextElementBase.CurrentPageToken, StandardFonts.TimesRoman, 9, 'slate-500', 'center', 2),
     },
     metadata: {

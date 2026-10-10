@@ -404,18 +404,14 @@ export abstract class TextElementBase extends ElementBase {
         else hi = mid - 1;
       }
       let count = lo;
+      const isSafeBreak = FontMetrics.getTextBreakPredicate(rest.join(''), this.fontName, this.fontFeatures);
+      let breakOffset = rest.slice(0, count).join('').length;
       for (let safe = count; safe > 0; safe--) {
-        if (
-          FontMetrics.isSafeTextBreak(
-            rest.join(''),
-            this.fontName,
-            rest.slice(0, safe).join('').length,
-            this.fontFeatures
-          )
-        ) {
+        if (isSafeBreak(breakOffset)) {
           count = safe;
           break;
         }
+        breakOffset -= rest[safe - 1].length;
       }
 
       let cut = -1;

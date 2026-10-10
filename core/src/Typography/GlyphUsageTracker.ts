@@ -26,11 +26,13 @@ export class GlyphUsageTracker {
       const first = glyphs[i];
       let end = i + 1;
       while (end < glyphs.length && glyphs[end].cluster === first.cluster) end++;
-      const chars = Array.from(text.slice(first.cluster, first.cluster + first.sourceLength));
+      const clusterSource = text.slice(first.cluster, first.cluster + first.sourceLength);
+      const chars = end === i + 1 ? null : Array.from(clusterSource);
       for (let j = i; j < end; j++) {
         const g = glyphs[j];
         this.usedGlyphs.add(g.id);
-        const source = j === end - 1 ? chars.slice(j - i).join('') : (chars[j - i] ?? '');
+        const source =
+          chars === null ? clusterSource : j === end - 1 ? chars.slice(j - i).join('') : (chars[j - i] ?? '');
         const key = g.id + ':' + source;
         let code = this.sourceCids.get(key);
         if (code === undefined) {
@@ -113,9 +115,9 @@ export class GlyphUsageTracker {
   /**
    * Marks all characters in a string as used
    */
-  public markUsedText(text: string): void {
-    if (!text) return;
-    this.markShaped(text, this.font.shape(text));
+  public markUsedText(text: string, glyphs?: readonly GlyphInfo[]): readonly number[] {
+    if (!text) return [];
+    const codes = this.markShaped(text, glyphs ?? this.font.shape(text));
 
     for (let i = 0; i < text.length; i++) {
       const code = text.charCodeAt(i);
@@ -134,6 +136,7 @@ export class GlyphUsageTracker {
 
       this.markUsed(code);
     }
+    return codes;
   }
 
   /**

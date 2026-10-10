@@ -14,6 +14,13 @@ export function shapeEmbeddedText(
   const options = features
     ? new ShapeOptions({ features: Object.entries(features).map(([tag, value]) => new ShapeFeature(tag, { value })) })
     : undefined;
+  if (text.length > 0 && /^[\x20-\x7e]*$/.test(text)) {
+    try {
+      return LatinShaper.shape(font.engineFace, text, options).glyphs;
+    } catch (error) {
+      if (!(error instanceof FontError) || error.name !== 'NotSupportedException') throw error;
+    }
+  }
   const isLatin = (cp: number): boolean =>
     cp <= 0x36f ||
     (cp >= 0x1d00 && cp <= 0x1eff) ||

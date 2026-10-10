@@ -1,5 +1,5 @@
 import { FontManager } from './FontManager';
-import { shapeTextRuns } from './TextRunShaper';
+import { primaryCovers, shapeTextRuns } from './TextRunShaper';
 import { getActiveDocumentFonts } from './DocumentFontMetricScope';
 import { TtfFont } from './TrueType/TtfFont';
 import {
@@ -213,6 +213,8 @@ export class FontMetrics {
   ): number {
     if (!text || !font) return 0;
 
+    if (primaryCovers(text, font))
+      return (font.shape(text, features).reduce((sum, g) => sum + g.advanceX, 0) * fontSize) / font.unitsPerEm;
     const candidates = [
       { fontIdentifier: 'primary', font },
       ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
@@ -275,6 +277,7 @@ export class FontMetrics {
   public static getGlyphCount(text: string, identifier: string, features?: Readonly<Record<string, number>>): number {
     const font = this.metricFace(identifier);
     if (!font) return Array.from(text).filter(c => c.codePointAt(0)! >= 32).length;
+    if (primaryCovers(text, font)) return font.shape(text, features).length;
     const candidates = [
       { fontIdentifier: 'primary', font },
       ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
@@ -293,16 +296,21 @@ export class FontMetrics {
     offset: number,
     features?: Readonly<Record<string, number>>
   ): boolean {
-    const face = this.metricFace(identifier);
-    return (
-      !face ||
-      face
-        .shape(text, features)
-        .every(
-          g =>
-            !(g.cluster < offset && offset < g.cluster + g.sourceLength) && !(g.cluster === offset && g.unsafeToBreak)
-        )
-    );
+    return this.getTextBreakPredicate(text, identifier, features)(offset);
+  }
+
+  /** @internal Retains one shaped remainder while checking successive emergency breaks. */
+  public static getTextBreakPredicate(
+    text: string,
+    identifier: string,
+    features?: Readonly<Record<string, number>>
+  ): (offset: number) => boolean {
+    const glyphs = this.metricFace(identifier)?.shape(text, features);
+    return offset =>
+      !glyphs ||
+      glyphs.every(
+        g => !(g.cluster < offset && offset < g.cluster + g.sourceLength) && !(g.cluster === offset && g.unsafeToBreak)
+      );
   }
 
   private static getStandardFontTable(fontName: string): readonly number[] | null {

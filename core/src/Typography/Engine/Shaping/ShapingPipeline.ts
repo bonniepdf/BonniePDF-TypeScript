@@ -29,26 +29,38 @@ export class ShapingPipeline {
     const hebrew = settings.script === 'hebr', arabic = settings.script === 'arab', nativeRtl = hebrew || arabic;
     if (arabic && !segmentation.arabic) unsupported('Arabic requires the full Shaper.');
     if (hebrew && !segmentation.hebrew) unsupported('Hebrew requires the full Shaper.');
-    const input = segmentation.scalars(text, nativeRtl || itemized, arabic); let offset = 0;
-    const tokens: SourceScalar[] = input.map(scalar => { const start = offset; offset += scalar > 65535 ? 2 : 1; return { scalar, start, end: offset }; });
-    let normalized = new CanonicalNormalizer(limits, cp => face.covers(cp), hebrew ? segmentation.hebrew!.combiningClass : undefined,
-      hebrew ? cp => cp >= 0xfb1d && cp <= 0xfb4e && face.covers(cp) : undefined, hebrew ? 32 : Infinity).normalize(tokens);
-    if (hebrew) normalized = segmentation.hebrew!.compose(face, normalized);
-    if (arabic) normalized = segmentation.arabic!.reorder(face, normalized);
-    const points = normalized.map(token => { const mirrored = settings.direction === TextDirection.RightToLeft ? Unicode.mirror(token.scalar) : token.scalar; return face.covers(mirrored) ? mirrored : token.scalar; });
     const run: ShapingGlyph[] = [];
-    for (const cluster of segmentation.split(points, !arabic)) {
-      let sourceOffset = normalized[cluster.start].start;
-      for (let i = cluster.start + 1; i < cluster.end; i++) sourceOffset = Math.min(sourceOffset, normalized[i].start);
-      for (let i = cluster.start; i < cluster.end; i++) {
-        const scalar = points[i];
-        if ((scalar === 0xfe0e || scalar === 0xfe0f) && i > cluster.start && face.mapVariation(points[i - 1], scalar).consumed) continue;
-        let id = i + 1 < cluster.end && (points[i + 1] === 0xfe0e || points[i + 1] === 0xfe0f) ? face.mapVariation(scalar, points[i + 1]).glyph : face.mapGlyph(scalar);
-        const width = id === 0 ? spaceWidth(face.font, scalar) : null; if (width !== null) id = face.mapGlyph(32);
-        if (id === 0 && !Unicode.isIgnorable(scalar)) unsupported('Font has no glyph for U+' + scalar.toString(16).toUpperCase().padStart(4, '0') + '.');
-        const ownControl = nativeRtl && Unicode.isIgnorable(scalar) && scalar !== 0x200d && scalar !== 0x34f && scalar !== 0xfe0e && scalar !== 0xfe0f;
-        const glyph = new ShapingGlyph(id, scalar, ownControl ? normalized[i].start : sourceOffset); glyph.advanceOverride = width; run.push(glyph);
-        glyph.mirrored = scalar !== normalized[i].scalar;
+    // ASCII needs neither normalization nor multi-scalar segmentation. Low
+    // operation/glyph limits still take the generic path, preserving its errors.
+    const ascii = settings.script === 'latn' && settings.direction === TextDirection.LeftToRight &&
+      text.length <= limits.maxGlyphs && text.length * 3 <= limits.maxOperations && /^[\x20-\x7e]*$/.test(text);
+    if (ascii) {
+      for (let i = 0; i < text.length; i++) {
+        const cp = text.charCodeAt(i), id = face.mapGlyph(cp);
+        if (!id) unsupported('Font has no glyph for U+' + cp.toString(16).toUpperCase().padStart(4, '0') + '.');
+        run.push(new ShapingGlyph(id, cp, i));
+      }
+    } else {
+      const input = segmentation.scalars(text, nativeRtl || itemized, arabic); let offset = 0;
+      const tokens: SourceScalar[] = input.map(scalar => { const start = offset; offset += scalar > 65535 ? 2 : 1; return { scalar, start, end: offset }; });
+      let normalized = new CanonicalNormalizer(limits, cp => face.covers(cp), hebrew ? segmentation.hebrew!.combiningClass : undefined,
+        hebrew ? cp => cp >= 0xfb1d && cp <= 0xfb4e && face.covers(cp) : undefined, hebrew ? 32 : Infinity).normalize(tokens);
+      if (hebrew) normalized = segmentation.hebrew!.compose(face, normalized);
+      if (arabic) normalized = segmentation.arabic!.reorder(face, normalized);
+      const points = normalized.map(token => { const mirrored = settings.direction === TextDirection.RightToLeft ? Unicode.mirror(token.scalar) : token.scalar; return face.covers(mirrored) ? mirrored : token.scalar; });
+      for (const cluster of segmentation.split(points, !arabic)) {
+        let sourceOffset = normalized[cluster.start].start;
+        for (let i = cluster.start + 1; i < cluster.end; i++) sourceOffset = Math.min(sourceOffset, normalized[i].start);
+        for (let i = cluster.start; i < cluster.end; i++) {
+          const scalar = points[i];
+          if ((scalar === 0xfe0e || scalar === 0xfe0f) && i > cluster.start && face.mapVariation(points[i - 1], scalar).consumed) continue;
+          let id = i + 1 < cluster.end && (points[i + 1] === 0xfe0e || points[i + 1] === 0xfe0f) ? face.mapVariation(scalar, points[i + 1]).glyph : face.mapGlyph(scalar);
+          const width = id === 0 ? spaceWidth(face.font, scalar) : null; if (width !== null) id = face.mapGlyph(32);
+          if (id === 0 && !Unicode.isIgnorable(scalar)) unsupported('Font has no glyph for U+' + scalar.toString(16).toUpperCase().padStart(4, '0') + '.');
+          const ownControl = nativeRtl && Unicode.isIgnorable(scalar) && scalar !== 0x200d && scalar !== 0x34f && scalar !== 0xfe0e && scalar !== 0xfe0f;
+          const glyph = new ShapingGlyph(id, scalar, ownControl ? normalized[i].start : sourceOffset); glyph.advanceOverride = width; run.push(glyph);
+          glyph.mirrored = scalar !== normalized[i].scalar;
+        }
       }
     }
     if ((!nativeRtl && settings.direction === TextDirection.RightToLeft) || (nativeRtl && settings.direction === TextDirection.LeftToRight)) {

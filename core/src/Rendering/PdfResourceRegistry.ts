@@ -20,7 +20,7 @@ import {
 } from '../Typography/DocumentFontMetricScope';
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
-import { shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
+import { primaryCovers, shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
 import { ShadingRequest, buildColorShadingDict, buildAlphaShadingDict } from './Pdf/GradientShading';
 
 /** Identifier prefix for glyph-fallback fonts registered on demand. */
@@ -34,6 +34,8 @@ const FALLBACK_PREFIX = 'virtual:fallback:';
  */
 export interface ResolvedTextRun {
   tracker?: GlyphUsageTracker | null;
+  // Shared parsed faces may back distinct resources with separate trackers.
+  canTrackPreparedGlyphs?: boolean;
   resourceName: string;
   embeddedFont: TtfFont | null;
   fontIdentifier: string;
@@ -449,6 +451,19 @@ export class PdfResourceRegistry {
       return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
     }
 
+    const primaryInfo = Array.from(this.embeddedFonts.values()).find(f => f.font === primaryFont);
+    if (primaryCovers(text, primaryFont))
+      return [
+        {
+          resourceName,
+          embeddedFont: primaryFont,
+          tracker: primaryInfo?.tracker,
+          canTrackPreparedGlyphs: primaryInfo?.resourceName === resourceName,
+          fontIdentifier: primaryFontIdentifier,
+          text,
+        },
+      ];
+
     // candidates[0] is the primary font; fallbackByIndex is aligned to
     // candidates (index 0 is the primary and has no FallbackFont entry).
     const candidates: ShaperFont[] = [{ fontIdentifier: primaryFontIdentifier, font: primaryFont }];
@@ -482,17 +497,20 @@ export class PdfResourceRegistry {
           embeddedFont: primaryFont,
           fontIdentifier: primaryFontIdentifier,
           text: run.text,
-          tracker: Array.from(this.embeddedFonts.values()).find(f => f.font === primaryFont)?.tracker,
+          tracker: primaryInfo?.tracker,
+          canTrackPreparedGlyphs: primaryInfo?.resourceName === resourceName,
         };
       }
       const fb = fallbackByIndex[run.fontIndex]!;
       const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
       const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
       const fbFont = this.resolveEmbeddedFont(fbIdentifier);
+      const fbInfo = Array.from(this.embeddedFonts.values()).find(f => f.font === fbFont);
       return {
         resourceName: fbResource,
         embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
-        tracker: Array.from(this.embeddedFonts.values()).find(f => f.font === fbFont)?.tracker,
+        tracker: fbInfo?.tracker,
+        canTrackPreparedGlyphs: fbInfo?.resourceName === fbResource,
         fontIdentifier: fbIdentifier,
         text: run.text,
       };

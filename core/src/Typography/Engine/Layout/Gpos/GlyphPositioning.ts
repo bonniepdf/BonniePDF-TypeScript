@@ -28,6 +28,7 @@ export class GlyphPositioning {
   private readonly kerningLookups!: number[];
   get hasKerning(): boolean { return this.kerningLookups.length != 0; }
   private operations: number = 0;
+  private readonly charge = () => this.tick();
   private readonly limits!: ShapingLimits;
   get shapingLimits(): ShapingLimits { return this.limits; }
 
@@ -82,12 +83,12 @@ export class GlyphPositioning {
         if (this.filter.isMark(glyphs[i])) continue;
         if (previous >= 0)
         {
-          if (this.options.featureValue("kern", glyphs[previous].featureCluster, 1, () => this.tick()) == 0 ||
-            this.options.featureValue("kern", glyphs[i].featureCluster, 1, () => this.tick()) == 0) { previous = i; continue; }
+          if (this.options.featureValue("kern", glyphs[previous].featureCluster, 1, this.charge) == 0 ||
+            this.options.featureValue("kern", glyphs[i].featureCluster, 1, this.charge) == 0) { previous = i; continue; }
 
           for (let step = 0; step < legacyKerning.workPerPair; step++) this.tick();
           const [first, second] = legacyKerning.split(glyphs[previous].id, glyphs[i].id);
-          if (first != 0 || second != 0) UnsafeRange.mark(glyphs, previous, i, () => this.tick());
+          if (first != 0 || second != 0) UnsafeRange.mark(glyphs, previous, i, this.charge);
           adjustments[previous].xAdvance = checked(adjustments[previous].xAdvance + first);
           adjustments[i].xAdvance = checked(adjustments[i].xAdvance + second);
           adjustments[i].xPlacement = checked(adjustments[i].xPlacement + second);
@@ -116,7 +117,7 @@ export class GlyphPositioning {
       invalid("Invalid GPOS lookup index.");
     if (at < 0 || at >= glyphs.length)
       return 0;
-    if (depth == 0 && this.activeRule != null && this.activeRule.value(glyphs[at].featureCluster, () => this.tick()) == 0) return 0;
+    if (depth == 0 && this.activeRule != null && this.activeRule.value(glyphs[at].featureCluster, this.charge) == 0) return 0;
     let lookup = this.offset(this.lookupList, this.lookupList + 2 + index * 2);
     let type = this.data.u16(lookup), flags = this.data.u16(lookup + 2), count = this.data.u16(lookup + 4);
     this.data.check(lookup + 6, count * 2);
@@ -179,7 +180,7 @@ export class GlyphPositioning {
     let secondFormat = this.data.u16(sub + 6), secondSize = GlyphPositioning.valueSize(secondFormat);
     if (next >= glyphs.length)
       return 0;
-    if (this.activeRule != null && this.activeRule.value(glyphs[next].featureCluster, () => this.tick()) == 0) return 0;
+    if (this.activeRule != null && this.activeRule.value(glyphs[next].featureCluster, this.charge) == 0) return 0;
     let pair: number, valueOrigin = sub;
     if (format == 1)
     {
@@ -228,7 +229,7 @@ export class GlyphPositioning {
     this.value(valueOrigin, pair + firstSize, secondFormat, adjustments[next]);
     if (oldFirstAdvance != adjustments[at].xAdvance || oldFirstX != adjustments[at].xPlacement || oldFirstY != adjustments[at].yPlacement ||
       oldSecondAdvance != adjustments[next].xAdvance || oldSecondX != adjustments[next].xPlacement || oldSecondY != adjustments[next].yPlacement)
-      UnsafeRange.mark(glyphs, at, next, () => this.tick());
+      UnsafeRange.mark(glyphs, at, next, this.charge);
     // A null second ValueRecord permits overlapping pairs (AV, VA in AVA).
     return secondFormat == 0 ? 1 : -1;
   }
@@ -280,7 +281,7 @@ export class GlyphPositioning {
     let markAnchor = this.anchor(this.offset(marks, record + 2));
     let baseAnchor = this.anchor(this.offset(anchorOrigin, baseField));
     let adjustment = adjustments[at];
-    UnsafeRange.mark(glyphs, parent, at, () => this.tick());
+    UnsafeRange.mark(glyphs, parent, at, this.charge);
     adjustment.parent = parent;
     adjustment.cursiveParent = -1;
     adjustment.xPlacement = checked(baseAnchor.x - markAnchor.x);
@@ -429,7 +430,7 @@ export class GlyphPositioning {
       adjustments[next].xAdvance = checked(adjustments[next].xAdvance - entryAdjustment);
       adjustments[next].xPlacement = checked(adjustments[next].xPlacement - entryAdjustment);
     }
-    UnsafeRange.mark(glyphs, at, next, () => this.tick());
+    UnsafeRange.mark(glyphs, at, next, this.charge);
     let child = (flags & 1) == 0 ? next : at, parent = (flags & 1) == 0 ? at : next;
     // Reversing an existing cursive connection must not create a cycle.
     // Keep the old parent's current baseline when breaking that connection.
@@ -509,7 +510,7 @@ export class GlyphPositioning {
       this.tick();
       if (position < 0 || position >= glyphs.length)
         return false;
-      if (requireFeature && (this.activeRule != null && this.activeRule.value(glyphs[position].featureCluster, () => this.tick()) == 0)) return false;
+      if (requireFeature && (this.activeRule != null && this.activeRule.value(glyphs[position].featureCluster, this.charge) == 0)) return false;
       let id = glyphs[position].id, expected = this.data.u16(record + j * 2);
       let same = mode == 2 ? this.coverage(checked(sub + expected), id) >= 0 :
         (mode == 1 ? this.class(classDefinition, id) : id) == expected;
@@ -562,7 +563,7 @@ export class GlyphPositioning {
         records = this.data.u16(p);
         p += 2;
       }
-      if (match) UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), () => this.tick());
+      if (match) UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), this.charge);
       return match ? this.applyRecords(p, records, matched, glyphs, adjustments, at, depth, advanceWidth) : 0;
     }
     if (format != 1 && format != 2)
@@ -632,7 +633,7 @@ export class GlyphPositioning {
       }
       if (match)
       {
-        UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), () => this.tick());
+        UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), this.charge);
         return this.applyRecords(p, records, matched, glyphs, adjustments, at, depth, advanceWidth);
       }
     }

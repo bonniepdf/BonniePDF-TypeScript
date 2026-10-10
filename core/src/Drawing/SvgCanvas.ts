@@ -1,3 +1,4 @@
+import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
 import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
 import { ICanvas } from './ICanvas';
 import { isIdentityPaintTransform, type PaintTransform } from './PaintTransform';
@@ -27,6 +28,10 @@ export interface SvgTextRun {
   fontFamily: string;
   font: TtfFont;
   text: string;
+}
+
+interface PreparedSvgTextRun extends SvgTextRun {
+  glyphs: readonly GlyphInfo[];
 }
 
 /**
@@ -387,7 +392,9 @@ export class SvgCanvas implements ICanvas {
       // The placeholder is substituted with the real total at view time, so the
       // subset must carry every digit, not just those in "00".
       for (let cp = 48; cp <= 57; cp++) usage.codePoints.add(cp);
-      const runs: SvgTextRun[] = [{ fontFamily, font, text: placeholder }];
+      const runs: PreparedSvgTextRun[] = [
+        { fontFamily, font, text: placeholder, glyphs: font.shape(placeholder, this.fontFeatures) },
+      ];
       this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, attr));
       return;
     }
@@ -779,13 +786,15 @@ export class SvgCanvas implements ICanvas {
    * through the viewer's own standard-14 faces (no embedded font), which is the
    * signal for callers to take the plain `<text>` path.
    */
-  private resolveRuns(fontFamily: string, text: string): SvgTextRun[] {
+  private resolveRuns(fontFamily: string, text: string): PreparedSvgTextRun[] {
     if (!this.fontResolver) return [];
+    let runs: SvgTextRun[];
     try {
-      return this.fontResolver.resolveRuns(fontFamily, text);
+      runs = this.fontResolver.resolveRuns(fontFamily, text);
     } catch {
       return [];
     }
+    return runs.map(run => ({ ...run, glyphs: run.font.shape(run.text, this.fontFeatures) }));
   }
 
   /**
@@ -799,7 +808,7 @@ export class SvgCanvas implements ICanvas {
   private glyphPositionedRuns(
     startX: number,
     baselineY: number,
-    runs: readonly SvgTextRun[],
+    runs: readonly PreparedSvgTextRun[],
     fillHex: string,
     fontSize: number,
     extraPerSpace: number,
@@ -823,7 +832,7 @@ export class SvgCanvas implements ICanvas {
         this.embeddedFontUsage.set(run.fontFamily, usage);
       }
 
-      const glyphs = font.shape(run.text, this.fontFeatures);
+      const glyphs = run.glyphs;
       const simple =
         glyphs.length === Array.from(run.text).length &&
         glyphs.every(
@@ -877,13 +886,18 @@ export class SvgCanvas implements ICanvas {
 
   /** Total advance width of a resolved run list, matching what
    * {@link glyphPositionedRuns} paints. */
-  private getRunsWidth(runs: readonly SvgTextRun[], fontSize: number, extraPerSpace = 0, letterSpacing = 0): number {
+  private getRunsWidth(
+    runs: readonly PreparedSvgTextRun[],
+    fontSize: number,
+    extraPerSpace = 0,
+    letterSpacing = 0
+  ): number {
     // Kerned, mirroring both the layout engine's reserved widths and the
     // kerned glyph positions painted by glyphPositionedRuns / the PDF `TJ` path.
     let width = 0;
     for (const run of runs) {
       const { font } = run;
-      for (const g of font.shape(run.text, this.fontFeatures)) {
+      for (const g of run.glyphs) {
         width += (g.advanceX * fontSize) / font.unitsPerEm + letterSpacing;
         if (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ') width += extraPerSpace;
       }

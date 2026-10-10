@@ -24,6 +24,7 @@ export class GlyphSubstitution {
   private activeRule: LookupRule | null = null;
   private readonly arabic: boolean;
   private operations: number = 0;
+  private readonly charge = () => this.tick();
   private readonly limits!: ShapingLimits;
   constructor(bytes: Uint8Array | null, glyphCount: number, gdef: Uint8Array | null, limits: ShapingLimits | null = null, options: ShapeOptions | null = null) {
     this.arabic = options?.script === 'arab';
@@ -75,7 +76,7 @@ export class GlyphSubstitution {
   }
 
   private ignored(glyph: ShapingGlyph, flags: number, set: number): boolean { return (this.arabic && glyph.scalar !== 0x200c && glyph.scalar !== 0x200d && Unicode.isIgnorable(glyph.scalar)) || this.filter.ignored(glyph.id,flags,set); }
-  private enabled(glyph: ShapingGlyph): boolean { return this.activeRule == null || this.activeRule.value(glyph.featureCluster, () => this.tick(), glyph.mirrored, glyph.joiningForm) != 0; }
+  private enabled(glyph: ShapingGlyph): boolean { return this.activeRule == null || this.activeRule.value(glyph.featureCluster, this.charge, glyph.mirrored, glyph.joiningForm) != 0; }
 
   private applyAt(index: number, glyphs: ShapingGlyph[], at: number, depth: number): number {
     this.tick();
@@ -172,7 +173,7 @@ export class GlyphSubstitution {
         invalid("Invalid alternate substitution.");
       let set = this.data.relative16(sub, sub + 6 + coverage * 2), count = this.data.u16(set);
       this.data.check(set + 2, count * 2);
-      let value = this.activeRule == null ? 1 : this.activeRule.value(glyphs[at].featureCluster, () => this.tick(), glyphs[at].mirrored, glyphs[at].joiningForm);
+      let value = this.activeRule == null ? 1 : this.activeRule.value(glyphs[at].featureCluster, this.charge, glyphs[at].mirrored, glyphs[at].joiningForm);
       if (value < 1 || value > count) return 0;
       this.setGlyph(glyphs[at], this.data.u16(set + value * 2));
       return 1;
@@ -202,7 +203,7 @@ export class GlyphSubstitution {
       let count = this.data.u16(p);
       this.data.check(p + 2, count * 2);
       if (coverage >= count) invalid("Invalid reverse chaining coverage index.");
-      UnsafeRange.mark(glyphs, first, position, () => this.tick());
+      UnsafeRange.mark(glyphs, first, position, this.charge);
       this.setGlyph(glyphs[at], this.data.u16(p + 2 + coverage * 2));
       return 1;
     }
@@ -374,7 +375,7 @@ export class GlyphSubstitution {
         records = this.data.u16(p);
         p += 2;
       }
-      if (match) UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), () => this.tick());
+      if (match) UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), this.charge);
       return match ? this.applyRecords(p, records, matched, glyphs, at, depth) : 0;
     }
     if (format != 1 && format != 2)
@@ -444,7 +445,7 @@ export class GlyphSubstitution {
       }
       if (match)
       {
-        UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), () => this.tick());
+        UnsafeRange.mark(glyphs, contextFirst, Math.max(contextLast, glyphs.indexOf(matched[matched.length - 1])), this.charge);
         return this.applyRecords(p, records, matched, glyphs, at, depth);
       }
     }

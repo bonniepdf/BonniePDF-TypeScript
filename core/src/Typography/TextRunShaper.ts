@@ -42,13 +42,20 @@ export function shapeTextRuns(text: string, candidates: ShaperFont[]): ShapeResu
   const unsupported: number[] = [];
   if (!text || candidates.length === 0) return { runs, unsupported };
 
-  let current: ShapedRun | null = null;
+  if (primaryCovers(text, candidates[0].font)) return { runs: [{ fontIndex: 0, text }], unsupported };
+
+  let currentFont = -1;
+  let fragments: string[] = [];
+  const flush = () => {
+    if (currentFont >= 0) runs.push({ fontIndex: currentFont, text: fragments.join('') });
+    fragments = [];
+  };
   const append = (chosen: number, source: string) => {
-    if (current && current.fontIndex === chosen) current.text += source;
-    else {
-      current = { fontIndex: chosen, text: source };
-      runs.push(current);
+    if (currentFont !== chosen) {
+      flush();
+      currentFont = chosen;
     }
+    fragments.push(source);
   };
   const boundaries = Graphemes.boundaries(text);
   for (let b = 0; b + 1 < boundaries.length; b++) {
@@ -69,5 +76,15 @@ export function shapeTextRuns(text: string, candidates: ShaperFont[]): ShapeResu
     }
   }
 
+  flush();
   return { runs, unsupported };
+}
+
+/** @internal Whether fallback and filtering would leave a printable run unchanged. */
+export function primaryCovers(text: string, font: TtfFont): boolean {
+  for (const ch of text) {
+    const cp = ch.codePointAt(0)!;
+    if (!isRenderableCodePoint(cp) || font.getGlyphId(cp) === 0) return false;
+  }
+  return true;
 }

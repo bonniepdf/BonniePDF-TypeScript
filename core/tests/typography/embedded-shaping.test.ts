@@ -238,3 +238,40 @@ describe('embedded Latin shaping', () => {
     }
   });
 });
+
+describe('shaping reuse', () => {
+  it('keys immutable results by feature values and original text', () => {
+    const face = TtfFont.loadFromBytes(bytes);
+    const features = { liga: 0, kern: 1 };
+    const separate = face.shape('ffi', features);
+    expect(separate).toHaveLength(3);
+    expect(face.shape('ffi', { kern: 1, liga: 0 })).toBe(separate);
+    features.liga = 1;
+    expect(face.shape('ffi', features)).toHaveLength(1);
+    expect(separate).toHaveLength(3);
+    expect(face.shape('ffi', {})).toBe(face.shape('ffi'));
+    expect(face.shape('é')).not.toBe(face.shape('e\u0301'));
+    expect(Object.isFrozen(separate)).toBe(true);
+    expect(separate.every(Object.isFrozen)).toBe(true);
+  });
+  it('evicts unique text and bypasses long runs', () => {
+    const face = TtfFont.loadFromBytes(bytes);
+    const first = face.shape('first');
+    for (let i = 0; i < 300; i++) face.shape('unique ' + i);
+    expect(face.shape('first')).not.toBe(first);
+    const budgetText = 'a'.repeat(500);
+    const budgetFirst = face.shape(budgetText + '0');
+    for (let i = 1; i < 40; i++) face.shape(budgetText + i);
+    expect(face.shape(budgetText + '0')).not.toBe(budgetFirst);
+    expect(face.shape('a'.repeat(513))).not.toBe(face.shape('a'.repeat(513)));
+  });
+  it('retains filtering and missing glyph diagnostics', () => {
+    const candidates = [{ fontIdentifier: 'primary', font }];
+    expect(shapeTextRuns('office', candidates).runs).toEqual([{ fontIndex: 0, text: 'office' }]);
+    expect(shapeTextRuns('a\tb\u200bc', candidates).runs).toEqual([{ fontIndex: 0, text: 'abc' }]);
+    expect(shapeTextRuns('a\u{10ffff}b', candidates)).toEqual({
+      runs: [{ fontIndex: 0, text: 'ab' }],
+      unsupported: [0x10ffff],
+    });
+  });
+});

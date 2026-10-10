@@ -1,5 +1,5 @@
 import { FontFace } from '../Engine/Fonts/FontFace';
-import { shapeEmbeddedText } from '../EmbeddedTextShaping';
+import { ShapedTextCache } from '../ShapedTextCache';
 import { BigEndianReader } from '../../Rendering/Images/BigEndianReader';
 import { getPlatformIO } from '../../Platform/PlatformIO';
 
@@ -26,9 +26,10 @@ export class TtfFont {
   public get engineFace(): FontFace {
     return (this._engineFace ??= new FontFace(this.rawData));
   }
+  private readonly shapedText = new ShapedTextCache();
   /** @internal Shapes one printable line in original UTF-16 coordinates. */
   public shape(text: string, features?: Readonly<Record<string, number>>) {
-    return shapeEmbeddedText(this, text, features);
+    return this.shapedText.get(this, text, features);
   }
 
   // =====================================================

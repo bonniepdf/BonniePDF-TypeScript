@@ -1,3 +1,4 @@
+import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
 import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { ICanvas } from './ICanvas';
 import { ellipseToBeziers } from './EllipseGeometry';
@@ -28,10 +29,15 @@ type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softM
 /** A maximal substring that renders with one font, after glyph-fallback resolution. */
 interface TextRun {
   tracker?: GlyphUsageTracker | null;
+  canTrackPreparedGlyphs?: boolean;
   resourceName: string;
   embeddedFont: TtfFont | null;
   fontIdentifier: string;
   text: string;
+}
+
+interface PreparedTextRun extends TextRun {
+  glyphs?: readonly GlyphInfo[];
 }
 
 interface PathCmd {
@@ -696,34 +702,33 @@ export class PdfCanvas implements ICanvas {
 
   // -- Private: text rendering helpers ------------------------------------
 
-  private resolveRuns(text: string, fontFamily: string): TextRun[] {
-    if (this._textRunResolver) return this._textRunResolver(fontFamily, text);
-    return [
-      {
-        resourceName: this._fontResolver(fontFamily),
-        embeddedFont: this._embeddedFontResolver(fontFamily),
-        fontIdentifier: fontFamily,
-        text,
-      },
-    ];
+  private resolveRuns(text: string, fontFamily: string): PreparedTextRun[] {
+    const runs = this._textRunResolver
+      ? this._textRunResolver(fontFamily, text)
+      : [
+          {
+            resourceName: this._fontResolver(fontFamily),
+            embeddedFont: this._embeddedFontResolver(fontFamily),
+            fontIdentifier: fontFamily,
+            text,
+          },
+        ];
+    // Copy resolver-owned runs; retain glyphs only for this operation.
+    return runs.map(run => ({ ...run, glyphs: run.embeddedFont?.shape(run.text, this._fontFeatures) }));
   }
 
-  private measureRuns(runs: TextRun[], fontSize: number): number {
+  private measureRuns(runs: PreparedTextRun[], fontSize: number): number {
     let total = 0;
     for (const run of runs) {
       const font = run.embeddedFont;
       if (font) {
-        total +=
-          (font.shape(run.text, this._fontFeatures).reduce((sum, g) => sum + g.advanceX, 0) * fontSize) /
-          font.unitsPerEm;
+        total += (run.glyphs!.reduce((sum, g) => sum + g.advanceX, 0) * fontSize) / font.unitsPerEm;
       } else {
         total += FontMetrics.getStringWidth(run.text, run.fontIdentifier, fontSize);
       }
       total +=
         this.spacingWidth(run.text) +
-        (font
-          ? (font.shape(run.text, this._fontFeatures).length - Array.from(run.text).length) * this._letterSpacing
-          : 0);
+        (font ? (run.glyphs!.length - Array.from(run.text).length) * this._letterSpacing : 0);
     }
     return total;
   }
@@ -747,18 +752,26 @@ export class PdfCanvas implements ICanvas {
     return glyphs * this._letterSpacing + spaces * this._wordSpacing;
   }
 
-  private emitShowText(runs: TextRun[], fontSize: number, wordSpacing = this._wordSpacing): void {
+  private emitShowText(runs: PreparedTextRun[], fontSize: number, wordSpacing = this._wordSpacing): void {
     for (const run of runs) {
       if (!run.text) continue;
-      this._glyphTracker(run.fontIdentifier, run.text);
-      PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       const font = run.embeddedFont;
-      if (!font) {
+      const glyphs = run.glyphs;
+      let codes: readonly number[] | undefined;
+      if (run.canTrackPreparedGlyphs && run.tracker && font) {
+        // Preserve default-feature tracking before allocating feature-specific CIDs.
+        const defaults = !this._fontFeatures || Object.keys(this._fontFeatures).length === 0;
+        codes = run.tracker.markUsedText(run.text, defaults ? glyphs! : font.shape(run.text));
+        if (!defaults) codes = run.tracker.markShaped(run.text, glyphs!);
+      } else {
+        this._glyphTracker(run.fontIdentifier, run.text);
+        if (glyphs) codes = run.tracker?.markShaped(run.text, glyphs) ?? glyphs.map(g => g.id);
+      }
+      PdfOperators.setFont(this.stream, run.resourceName, fontSize);
+      if (!font || !glyphs || !codes) {
         PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
         continue;
       }
-      const glyphs = font.shape(run.text, this._fontFeatures);
-      const codes = run.tracker?.markShaped(run.text, glyphs) ?? glyphs.map(g => g.id);
       this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
       if (glyphs.every(g => g.offsetY === 0)) {
         let hex = '',

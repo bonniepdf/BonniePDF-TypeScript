@@ -67,7 +67,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const FONT = font('fonts/NotoSans-Regular.ttf');
   const MATH_FONT = font('fonts/NotoSansMath-Regular.ttf');
   const SYMBOLS_FONT = font('fonts/NotoSansSymbols2-Regular.ttf');
-  doc.settings.defaultTextStyle.withFamily(FONT);
+  doc.settings.defaultTextStyle!.withFamily(FONT);
 
   // ── Title ─────────────────────────────────────────────────────────────────────
 

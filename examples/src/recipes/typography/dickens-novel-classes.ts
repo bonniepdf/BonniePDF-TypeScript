@@ -37,10 +37,10 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     .withFamily(StandardFonts.TimesRoman)
     .withSize(11)
     .withColor(ColorPalette.slate[900]);
-  doc.settings.headerTemplate = pageNumber => (pageNumber === 1 ? null : header);
+  doc.settings.headerTemplate = pageNumber => (pageNumber === 1 ? undefined : header);
   doc.settings.footerTemplate = pageNumber =>
     pageNumber === 1
-      ? null
+      ? undefined
       : text(TextElementBase.CurrentPageToken, StandardFonts.TimesRoman, 9, 'slate-500', 'center', 2);
   doc.metadata = new DocumentMetadata();
   doc.metadata.title = 'A Tale of Two Cities';

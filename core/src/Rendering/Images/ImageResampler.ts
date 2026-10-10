@@ -97,6 +97,21 @@ export class ImageResampler {
     targetWidth: number,
     targetHeight: number
   ): { color: Uint8Array; alpha?: Uint8Array } {
+    // Constant opaque alpha cancels out of the premultiplied average exactly.
+    // Preserve the alpha plane and the PDF representation.
+    if (alpha && alpha.every(value => value === 255)) {
+      const opaque = ImageResampler.resample(
+        color,
+        undefined,
+        sourceWidth,
+        sourceHeight,
+        components,
+        targetWidth,
+        targetHeight
+      );
+      return { color: opaque.color, alpha: new Uint8Array(targetWidth * targetHeight).fill(255) };
+    }
+
     const cc = components;
     const outColor = new Uint8Array(targetWidth * targetHeight * cc);
     const outAlpha = alpha ? new Uint8Array(targetWidth * targetHeight) : undefined;

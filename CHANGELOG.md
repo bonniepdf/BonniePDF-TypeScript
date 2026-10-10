@@ -9,6 +9,8 @@ each change to `core/`.
 
 ## Unreleased
 
+- Faster resampling of fully opaque RGBA images while preserving exact pixel values, the alpha plane and resolution settings.
+
 - Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `fontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
 - Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
 

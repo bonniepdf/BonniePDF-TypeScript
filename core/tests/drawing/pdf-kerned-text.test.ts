@@ -70,7 +70,7 @@ describe('this feature kerned PDF output', () => {
     doc.add(t);
 
     const pdf = pdfToText(doc.generateBytes());
-    expect(pdf).toContain('[<0024> 129 <0039>] TJ');
+    expect(pdf).toContain('[<0024> 128.906 <0039>] TJ');
     expect(pdf).not.toContain('<00240039> Tj');
   });
 

@@ -1,6 +1,6 @@
 import { getPlatformIO } from '../Platform/PlatformIO';
 import type { FontFace, FontProvider } from '../Rendering/Svg/Fonts/FontFace';
-import { TrueTypeFace } from '../Rendering/Svg/Fonts/TrueTypeFace';
+import { TextFontFaceAdapter } from './TextFontFaceAdapter';
 import { FontFamilyResolver } from '../Typography/FontFamilyResolver';
 import { getDocumentFontBytes } from '../Typography/DocumentFontMetricScope';
 import { FontManager } from '../Typography/FontManager';
@@ -58,7 +58,7 @@ export class BonniePdfFontProvider implements FontProvider {
 
 function parse(bytes: Uint8Array, family: string): FontFace | undefined {
   try {
-    return new TrueTypeFace(bytes, family);
+    return new TextFontFaceAdapter(bytes, family);
   } catch {
     // A font the importer cannot outline (CFF, say) is skipped like one that is
     // absent, and the importer reports the text if nothing else covers it.

@@ -1,3 +1,4 @@
+import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
 import { ICanvas } from './ICanvas';
 import { isIdentityPaintTransform, type PaintTransform } from './PaintTransform';
 import { ellipseToBeziers } from './EllipseGeometry';
@@ -157,6 +158,11 @@ export class SvgIdAllocator {
 
 /** Translates drawing operations into SVG markup. */
 export class SvgCanvas implements ICanvas {
+  private fontFeatures?: Readonly<Record<string, number>>;
+  public setTextFeatures(features?: Readonly<Record<string, number>>): void {
+    this.fontFeatures = features;
+  }
+
   public readonly width: number;
   public readonly height: number;
 
@@ -817,31 +823,39 @@ export class SvgCanvas implements ICanvas {
         this.embeddedFontUsage.set(run.fontFamily, usage);
       }
 
-      // Apply kern pairs between adjacent glyphs so the preview matches
-      // the kerned `TJ` output the PDF painter now emits (and the kerned widths
-      // the layout engine reserves).
-      let prevGid = 0;
-      let hasPrev = false;
-      for (const rune of run.text) {
-        const code = rune.codePointAt(0) ?? 0;
-        const gid = font.getGlyphId(code);
-        // The run resolver already dropped anything unrenderable; a zero GID
-        // here would mean a face changed under us. Skip rather than emit a
-        // character the embedded subset cannot draw.
-        if (gid === 0) continue;
-        usage.codePoints.add(code);
-        if (hasPrev && font.hasKerning) {
-          cursor += font.getKerning(prevGid, gid) * scale;
+      const glyphs = font.shape(run.text, this.fontFeatures);
+      const simple =
+        glyphs.length === Array.from(run.text).length &&
+        glyphs.every(
+          g =>
+            g.sourceLength === (run.text.codePointAt(g.cluster)! > 65535 ? 2 : 1) &&
+            g.id === font.getGlyphId(run.text.codePointAt(g.cluster)!) &&
+            g.offsetY === 0 &&
+            !g.isMark
+        );
+      if (!simple) {
+        const paths: string[] = [];
+        for (const g of glyphs) {
+          const d = glyphOutlinePath(font.engineFace, g.id);
+          if (d)
+            paths.push(
+              `<path d="${d}" transform="translate(${this.n(cursor + g.offsetX * scale)} ${this.n(baselineY - g.offsetY * scale)}) scale(${Number(scale.toFixed(9))} ${Number((-scale).toFixed(9))})"/>`
+            );
+          cursor += g.advanceX * scale + letterSpacing;
+          if (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ') cursor += extraPerSpace;
         }
-        xs.push(this.n(cursor));
-        chars += rune;
-        cursor += font.getGlyphWidth(gid) * scale;
-        // Letter spacing after every glyph; word spacing after spaces
-        // (extraPerSpace also carries justification spacing when present).
-        cursor += letterSpacing;
-        if (rune === ' ') cursor += extraPerSpace;
-        prevGid = gid;
-        hasPrev = true;
+        elements.push(
+          `<g fill="${fillHex}" aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${paths.join('')}</g>`
+        );
+        continue;
+      }
+      for (const g of glyphs) {
+        const source = run.text.slice(g.cluster, g.cluster + g.sourceLength);
+        usage.codePoints.add(source.codePointAt(0)!);
+        xs.push(this.n(cursor + g.offsetX * scale));
+        chars += source;
+        cursor += g.advanceX * scale + letterSpacing;
+        if (source === ' ') cursor += extraPerSpace;
       }
 
       if (xs.length === 0) continue;
@@ -852,7 +866,7 @@ export class SvgCanvas implements ICanvas {
       elements.push(
         `<text x="${xs.join(' ')}" y="${this.n(baselineY)}" fill="${fillHex}" font-size="${this.n(
           fontSize
-        )}" style="${familyStyle}" xml:space="preserve"${extraAttributes}${transformAttr}>` +
+        )}" style="${familyStyle};font-kerning:none;font-variant-ligatures:none" xml:space="preserve"${extraAttributes}${transformAttr}>` +
           escapeXml(chars) +
           '</text>'
       );
@@ -869,22 +883,9 @@ export class SvgCanvas implements ICanvas {
     let width = 0;
     for (const run of runs) {
       const { font } = run;
-      const scale = fontSize / font.unitsPerEm;
-      let prevGid = 0;
-      let hasPrev = false;
-      for (const rune of run.text) {
-        const code = rune.codePointAt(0) ?? 0;
-        const gid = font.getGlyphId(code);
-        if (gid === 0) continue;
-        if (hasPrev && font.hasKerning) {
-          width += font.getKerning(prevGid, gid) * scale;
-        }
-        width += font.getGlyphWidth(gid) * scale;
-        // Match glyphPositionedRuns' per-glyph and per-space advances.
-        width += letterSpacing;
-        if (rune === ' ') width += extraPerSpace;
-        prevGid = gid;
-        hasPrev = true;
+      for (const g of font.shape(run.text, this.fontFeatures)) {
+        width += (g.advanceX * fontSize) / font.unitsPerEm + letterSpacing;
+        if (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ') width += extraPerSpace;
       }
     }
     return width;

@@ -1,3 +1,4 @@
+import { ShapeFeature } from '../../Typography/Engine/Api/ShapeFeature';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
 import { FontWeight } from '../../Typography/FontWeight';
 import { Color } from '../../Core/Color';
@@ -41,6 +42,7 @@ export const TEXT_STYLE_OPTION_KEYS = [
   'baselineShift',
   'letterSpacing',
   'wordSpacing',
+  'fontFeatures',
   'lineHeight',
 ] as const;
 
@@ -136,6 +138,16 @@ export class TextStyle {
 
   /** Font family name (e.g. "Helvetica") or TTF file path. Null = inherit from parent. */
   public fontFamily?: string;
+  private _fontFeatures?: Readonly<Record<string, number>>;
+  /** OpenType feature overrides, e.g. { kern: 0, liga: 0, smcp: 1 }. Omitted values use font defaults. */
+  public get fontFeatures(): Readonly<Record<string, number>> | undefined {
+    return this._fontFeatures;
+  }
+  public set fontFeatures(value: Readonly<Record<string, number>> | undefined) {
+    if (value) for (const [tag, number] of Object.entries(value)) new ShapeFeature(tag, { value: number });
+    if (value && Object.keys(value).length > 256) throw new RangeError('At most 256 font features are supported.');
+    this._fontFeatures = value ? Object.freeze({ ...value }) : undefined;
+  }
 
   private _fontWeight: FontWeight = FontWeight.Normal;
 
@@ -349,6 +361,7 @@ export class TextStyle {
       this.baselineAlignment !== BaselineAlignment.Baseline ? this.baselineAlignment : baseStyle.baselineAlignment;
     merged.baselineShift = this.baselineShift ?? baseStyle.baselineShift;
     merged.letterSpacing = this.letterSpacing ?? baseStyle.letterSpacing;
+    merged.fontFeatures = this.fontFeatures ?? baseStyle.fontFeatures;
     merged.wordSpacing = this.wordSpacing ?? baseStyle.wordSpacing;
     merged.lineHeight = this.lineHeight ?? baseStyle.lineHeight;
 

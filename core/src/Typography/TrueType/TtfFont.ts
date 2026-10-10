@@ -1,3 +1,5 @@
+import { FontFace } from '../Engine/Fonts/FontFace';
+import { shapeEmbeddedText } from '../EmbeddedTextShaping';
 import { BigEndianReader } from '../../Rendering/Images/BigEndianReader';
 import { getPlatformIO } from '../../Platform/PlatformIO';
 
@@ -19,7 +21,15 @@ export class TtfFont {
   private numberOfHMetrics = 0;
 
   // Kern pairs: (leftGid, rightGid) -> adjustment in font units
-  private readonly kernPairs = new Map<string, number>();
+  private _engineFace?: FontFace;
+  /** @internal Shared reader used by shaping and outline consumers. */
+  public get engineFace(): FontFace {
+    return (this._engineFace ??= new FontFace(this.rawData));
+  }
+  /** @internal Shapes one printable line in original UTF-16 coordinates. */
+  public shape(text: string, features?: Readonly<Record<string, number>>) {
+    return shapeEmbeddedText(this, text, features);
+  }
 
   // =====================================================
   // CONSTRUCTOR
@@ -169,15 +179,14 @@ export class TtfFont {
    * @param rightGid - Right glyph ID
    */
   public getKerning(leftGid: number, rightGid: number): number {
-    const key = `${leftGid},${rightGid}`;
-    return this.kernPairs.get(key) ?? 0;
+    return this.engineFace.getPairKerning(leftGid, rightGid);
   }
 
   /**
    * Returns true if this font has any kern pairs defined.
    */
   public get hasKerning(): boolean {
-    return this.kernPairs.size > 0;
+    return this.tables.has('kern') || this.tables.has('GPOS');
   }
 
   /**
@@ -248,10 +257,6 @@ export class TtfFont {
 
     if (this.tables.has('post')) {
       this.parsePostTable(reader);
-    }
-
-    if (this.tables.has('kern')) {
-      this.parseKernTable(reader);
     }
   }
 
@@ -606,38 +611,5 @@ export class TtfFont {
 
     reader.skip(4); // version
     this.italicAngle = reader.readFixed();
-  }
-
-  private parseKernTable(reader: BigEndianReader): void {
-    const info = this.tables.get('kern');
-    if (!info) return;
-
-    reader.seek(info.offset);
-    reader.readUInt16(); // version
-    const nTables = reader.readUInt16();
-
-    for (let t = 0; t < nTables; t++) {
-      const tableStart = reader.getPosition();
-      reader.readUInt16(); // version
-      const length = reader.readUInt16();
-      const coverage = reader.readUInt16();
-      const format = coverage >> 8;
-      const isHorizontal = (coverage & 0x01) !== 0;
-
-      if (format !== 0 || !isHorizontal) {
-        reader.seek(tableStart + length);
-        continue;
-      }
-
-      const nPairs = reader.readUInt16();
-      reader.skip(6); // searchRange, entrySelector, rangeShift
-
-      for (let i = 0; i < nPairs; i++) {
-        const left = reader.readUInt16();
-        const right = reader.readUInt16();
-        const value = reader.readInt16();
-        this.kernPairs.set(`${left},${right}`, value);
-      }
-    }
   }
 }

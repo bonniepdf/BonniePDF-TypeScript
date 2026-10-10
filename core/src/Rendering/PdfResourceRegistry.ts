@@ -33,6 +33,7 @@ const FALLBACK_PREFIX = 'virtual:fallback:';
  * string rather than glyph IDs.
  */
 export interface ResolvedTextRun {
+  tracker?: GlyphUsageTracker | null;
   resourceName: string;
   embeddedFont: TtfFont | null;
   fontIdentifier: string;
@@ -476,7 +477,13 @@ export class PdfResourceRegistry {
 
     return runs.map(run => {
       if (run.fontIndex === 0) {
-        return { resourceName, embeddedFont: primaryFont, fontIdentifier: primaryFontIdentifier, text: run.text };
+        return {
+          resourceName,
+          embeddedFont: primaryFont,
+          fontIdentifier: primaryFontIdentifier,
+          text: run.text,
+          tracker: Array.from(this.embeddedFonts.values()).find(f => f.font === primaryFont)?.tracker,
+        };
       }
       const fb = fallbackByIndex[run.fontIndex]!;
       const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
@@ -485,6 +492,7 @@ export class PdfResourceRegistry {
       return {
         resourceName: fbResource,
         embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
+        tracker: Array.from(this.embeddedFonts.values()).find(f => f.font === fbFont)?.tracker,
         fontIdentifier: fbIdentifier,
         text: run.text,
       };

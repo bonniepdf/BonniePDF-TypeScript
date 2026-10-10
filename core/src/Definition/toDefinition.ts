@@ -508,6 +508,8 @@ class Writer {
         return enumToken(arg, value);
       case 'array':
         return (value as unknown[]).map(v => this.wire(arg, v));
+      case 'fontFeatures':
+        return { ...(value as Record<string, number>) };
       case 'map':
         return Object.fromEntries(
           (value instanceof Map ? [...value.entries()] : Object.entries(value as Obj)).map(([k, v]) => [

@@ -540,6 +540,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       "lineHeight": {
         "kind": "number",
         "min": 0
+      },
+      "fontFeatures": {
+        "kind": "fontFeatures"
       }
     },
     "TextBlockKeys": {
@@ -706,6 +709,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "lineHeight": {
           "kind": "number",
           "min": 0
+        },
+        "fontFeatures": {
+          "kind": "fontFeatures"
         }
       }
     },

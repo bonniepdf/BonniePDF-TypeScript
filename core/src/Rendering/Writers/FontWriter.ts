@@ -1,3 +1,4 @@
+import { PdfSyntax } from '../Pdf/PdfSyntax';
 import * as PdfKeys from '../Pdf/PdfKeys';
 import { EmbeddedFontInfo } from '../../Typography/EmbeddedFontInfo';
 import { TtfFont } from '../../Typography/TrueType/TtfFont';
@@ -76,12 +77,16 @@ export class FontWriter {
     }
     this.writeFontFile2(fontFile2Id, fontData);
 
+    const codes = tracker.getCidToGlyphMap();
+    const cidMap = new Map(subsetter?.getOldToNewGidMap() ?? codes);
+    for (const [cid, gid] of codes) cidMap.set(cid, subsetter?.getOldToNewGidMap().get(gid) ?? gid);
+    const maxCid = Math.max(0, ...cidMap.keys());
     // 2. CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap domain
     //    (0..maxOriginalGid) - see buildCIDSetData.
     let cidSetId = 0;
     if (enableSubsetting && subsetter) {
       cidSetId = this.writer.getNewId();
-      this.writeCIDSet(cidSetId, subsetter.maxOriginalGid);
+      this.writeCIDSet(cidSetId, maxCid);
     }
 
     // 3. FontDescriptor
@@ -89,9 +94,9 @@ export class FontWriter {
 
     // 4. CIDToGIDMap
     let cidToGidMapRef: string;
-    if (enableSubsetting && subsetter) {
+    if (subsetter || Array.from(codes).some(([cid, gid]) => cid !== gid)) {
       const cidToGidMapId = this.writer.getNewId();
-      this.writeCIDToGIDMap(cidToGidMapId, subsetter.getOldToNewGidMap(), subsetter.maxOriginalGid);
+      this.writeCIDToGIDMap(cidToGidMapId, cidMap, maxCid);
       cidToGidMapRef = `${cidToGidMapId} 0 R`;
     } else {
       cidToGidMapRef = '/Identity';
@@ -103,6 +108,7 @@ export class FontWriter {
 
     // 6. ToUnicode CMap
     const cmapBuilder = new ToUnicodeCMapBuilder();
+    for (const [gid, source] of tracker.getGlyphSources()) cmapBuilder.addSourceMapping(gid, source);
     cmapBuilder.addMappings(tracker.getUsedCharToGlyphMap());
     this.writeToUnicodeCMap(toUnicodeId, cmapBuilder.build());
 
@@ -221,7 +227,8 @@ export class FontWriter {
 
   private generateWidthArray(font: TtfFont, tracker: GlyphUsageTracker): string {
     const scale = 1000 / font.unitsPerEm;
-    const glyphs = Array.from(tracker.getUsedGlyphIds() as ReadonlySet<number>).sort((a, b) => a - b);
+    const codes = tracker.getCidToGlyphMap();
+    const glyphs = Array.from(codes.keys()).sort((a, b) => a - b);
 
     let result = '[ ';
     let i = 0;
@@ -230,7 +237,7 @@ export class FontWriter {
       result += `${startGid} [ `;
       let j = i;
       while (j < glyphs.length && glyphs[j] === startGid + (j - i)) {
-        result += `${Math.round(font.getGlyphWidth(glyphs[j]) * scale)} `;
+        result += `${PdfSyntax.formatDecimal(font.getGlyphWidth(codes.get(glyphs[j])!) * scale)} `;
         j++;
       }
       result += '] ';

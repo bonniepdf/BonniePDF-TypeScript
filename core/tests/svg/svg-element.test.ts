@@ -12,7 +12,7 @@ import { Svg, SvgUnsupportedFeatureError } from '../../src/Elements/Media/Svg';
 import { ImageFitMode } from '../../src/Elements/Media/ImageFitMode';
 import { Heading } from '../../src/Elements/Text/Heading';
 import { evaluateCompliance } from '../../src/Compliance/ComplianceEvaluator';
-import { TrueTypeFace } from '../../src/Rendering/Svg/Fonts/TrueTypeFace';
+import { TextFontFaceAdapter } from '../../src/Drawing/TextFontFaceAdapter';
 import { FontManager } from '../../src/Typography/FontManager';
 import { SemanticRole } from '../../src/Rendering/Tagging/SemanticRole';
 import { firstContentStream, pdfToText } from '../helpers/test-base';
@@ -143,7 +143,7 @@ describe('Svg element: fonts', () => {
     return JSON.stringify(face.outline(face.glyphIndex(0x41)));
   }
   const liberation = (file: string): string =>
-    outlineOf(new TrueTypeFace(readFileSync(join(fontsDir, file)), 'reference'));
+    outlineOf(new TextFontFaceAdapter(readFileSync(join(fontsDir, file)), 'reference'));
 
   it('alias-resolves: Arial is Helvetica, drawn from Liberation Sans', () => {
     const face = new BonniePdfFontProvider().resolve('Arial', 400, false);

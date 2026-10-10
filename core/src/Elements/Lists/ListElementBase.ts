@@ -71,6 +71,8 @@ export abstract class ListElementBase extends TextElementBase {
    * top-level and nested lists. Delegates actual content to {@link renderItems}.
    */
   protected override renderContent(ctx: RenderContext, contentWidth: number): void {
+    ctx.canvas.setTextFeatures?.(this.fontFeatures);
+    ctx.canvas.setTextSpacing(this.letterSpacing, this.wordSpacing);
     const tagging = ctx.tagging;
     if (tagging) {
       tagging.tree.begin(SemanticRole.L);
@@ -79,6 +81,8 @@ export abstract class ListElementBase extends TextElementBase {
     try {
       this.renderItems(ctx, contentWidth);
     } finally {
+      ctx.canvas.setTextFeatures?.(undefined);
+      ctx.canvas.setTextSpacing(0, 0);
       if (tagging) {
         ctx.canvas.endMarkedContent();
         tagging.tree.end();
@@ -157,6 +161,8 @@ export abstract class ListElementBase extends TextElementBase {
   ): void {
     if (lines.length === 0) return;
 
+    ctx.canvas.setTextFeatures?.(this.fontFeatures);
+    ctx.canvas.setTextSpacing(this.letterSpacing, this.wordSpacing);
     const tagging = ctx.tagging;
 
     // Open LI container around the whole item when tagging
@@ -208,6 +214,8 @@ export abstract class ListElementBase extends TextElementBase {
         tagging.tree.end(); // end LBody
       }
     } finally {
+      ctx.canvas.setTextFeatures?.(undefined);
+      ctx.canvas.setTextSpacing(0, 0);
       if (tagging) {
         ctx.canvas.endMarkedContent(); // end LI BMC
         tagging.tree.end(); // end LI StructElem

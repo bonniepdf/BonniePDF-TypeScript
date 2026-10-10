@@ -1,3 +1,4 @@
+import { Graphemes } from './Engine/Unicode/Segmentation/Graphemes';
 import { TtfFont } from './TrueType/TtfFont';
 import { isRenderableCodePoint } from './TextEncoding';
 
@@ -42,28 +43,29 @@ export function shapeTextRuns(text: string, candidates: ShaperFont[]): ShapeResu
   if (!text || candidates.length === 0) return { runs, unsupported };
 
   let current: ShapedRun | null = null;
-  for (const ch of text) {
-    const cp = ch.codePointAt(0)!;
-    if (!isRenderableCodePoint(cp)) continue;
-
-    let chosen = -1;
-    for (let i = 0; i < candidates.length; i++) {
-      if (candidates[i].font.getGlyphId(cp) !== 0) {
-        chosen = i;
-        break;
-      }
+  const append = (chosen: number, source: string) => {
+    if (current && current.fontIndex === chosen) current.text += source;
+    else {
+      current = { fontIndex: chosen, text: source };
+      runs.push(current);
     }
-
-    if (chosen === -1) {
-      unsupported.push(cp);
+  };
+  const boundaries = Graphemes.boundaries(text);
+  for (let b = 0; b + 1 < boundaries.length; b++) {
+    const chars = Array.from(text.slice(boundaries[b], boundaries[b + 1])).filter(ch =>
+      isRenderableCodePoint(ch.codePointAt(0)!)
+    );
+    if (chars.length === 0) continue;
+    const whole = candidates.findIndex(c => chars.every(ch => c.font.getGlyphId(ch.codePointAt(0)!) !== 0));
+    if (whole >= 0) {
+      append(whole, chars.join(''));
       continue;
     }
-
-    if (current && current.fontIndex === chosen) {
-      current.text += ch;
-    } else {
-      current = { fontIndex: chosen, text: ch };
-      runs.push(current);
+    for (const ch of chars) {
+      const cp = ch.codePointAt(0)!;
+      const chosen = candidates.findIndex(c => c.font.getGlyphId(cp) !== 0);
+      if (chosen >= 0) append(chosen, ch);
+      else unsupported.push(cp);
     }
   }
 

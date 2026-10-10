@@ -1,3 +1,4 @@
+import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { TextElementBase } from './TextElementBase';
 import { toTextAlignment, type TextAlignmentInput } from '../../Normalize/toEnum';
 import { IStatefulElement } from '../IElement';
@@ -345,11 +346,13 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     // painters advance by the same amount the layout reserved. No-op (and
     // byte-identical) when both are zero.
     const spaced = this.letterSpacing !== 0 || this.wordSpacing !== 0;
+    ctx.canvas.setTextFeatures?.(this.fontFeatures);
     if (spaced) ctx.canvas.setTextSpacing(this.letterSpacing, this.wordSpacing);
     try {
       this.drawSingleLineInner(ctx, line, contentWidth, y, baseX, isLastLine);
     } finally {
       if (spaced) ctx.canvas.setTextSpacing(0, 0);
+      ctx.canvas.setTextFeatures?.();
     }
   }
 
@@ -634,7 +637,8 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       if (lastSpace > 0) {
         last = last.slice(0, lastSpace).replace(/\s+$/, '');
       } else {
-        last = last.slice(0, -1).replace(/\s+$/, '');
+        const boundaries = Graphemes.boundaries(last);
+        last = last.slice(0, boundaries[boundaries.length - 2]).replace(/\s+$/, '');
       }
     }
 

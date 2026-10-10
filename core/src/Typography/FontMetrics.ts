@@ -1,3 +1,6 @@
+import { FontManager } from './FontManager';
+import { shapeTextRuns } from './TextRunShaper';
+import { getActiveDocumentFonts } from './DocumentFontMetricScope';
 import { TtfFont } from './TrueType/TtfFont';
 import {
   cacheDocumentFontInstance,
@@ -148,7 +151,12 @@ export class FontMetrics {
    * @param fontSize - The font size in points
    * @returns The width of the text in points
    */
-  public static getStringWidth(text: string, fontIdentifier: string, fontSize: number): number {
+  public static getStringWidth(
+    text: string,
+    fontIdentifier: string,
+    fontSize: number,
+    features?: Readonly<Record<string, number>>
+  ): number {
     if (!text) return 0;
 
     // A. IS IT A CUSTOM TTF FILE (direct path)?
@@ -160,17 +168,17 @@ export class FontMetrics {
     if (lowerIdentifier.endsWith('.ttf') || lowerIdentifier.endsWith('.otf')) {
       const pathInstance = getFontInstanceAlias(fontIdentifier);
       if (pathInstance) {
-        return this.getKernedStringWidth(text, pathInstance, fontSize);
+        return this.getKernedStringWidth(text, pathInstance, fontSize, features);
       }
-      return this.getTtfWidth(text, fontIdentifier, fontSize);
+      return this.getTtfWidth(text, fontIdentifier, fontSize, features);
     }
 
     // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
     const fontInstance = getFontInstanceAlias(fontIdentifier);
-    if (fontInstance) return this.getKernedStringWidth(text, fontInstance, fontSize);
+    if (fontInstance) return this.getKernedStringWidth(text, fontInstance, fontSize, features);
 
     const ttfPath = getFontPathAlias(fontIdentifier);
-    if (ttfPath) return this.getTtfWidth(text, ttfPath, fontSize);
+    if (ttfPath) return this.getTtfWidth(text, ttfPath, fontSize, features);
 
     // PDF/A and PDF/UA embed registered substitutes for the standard 12 Latin
     // Type-1 fonts. Resolve the exact face before layout makes its first
@@ -179,7 +187,7 @@ export class FontMetrics {
       const embedded = resolveStandardFontMetric(fontIdentifier);
       if (embedded) {
         cacheDocumentFontInstance(fontIdentifier, embedded);
-        return this.getKernedStringWidth(text, embedded, fontSize);
+        return this.getKernedStringWidth(text, embedded, fontSize, features);
       }
     }
 
@@ -189,50 +197,42 @@ export class FontMetrics {
 
   /**
    * Measures the width of a string using actual per-glyph advances and kerning
-   * from an embedded TrueType font. More accurate than getStringWidth for
-   * embedded fonts because it accounts for kern pairs.
+   * from an embedded TrueType font. This is the embedded-font measurement path
+   * used by getStringWidth, including feature overrides and font fallback.
    * Returns 0 if font is null or text is empty.
    * @param text - The text to measure
    * @param font - The embedded TTF font
    * @param fontSize - The font size in points
    * @internal
    */
-  public static getKernedStringWidth(text: string, font: TtfFont, fontSize: number): number {
+  public static getKernedStringWidth(
+    text: string,
+    font: TtfFont,
+    fontSize: number,
+    features?: Readonly<Record<string, number>>
+  ): number {
     if (!text || !font) return 0;
 
-    const scale = fontSize / font.unitsPerEm;
-    let width = 0;
-
-    let prevGid = 0;
-    let hasPrev = false;
-
-    for (const rune of text) {
-      // `for...of` yields one Unicode code point per iteration (so `rune` is a
-      // string of length 1 for BMP chars, 2 for surrogate-pair supplementary
-      // chars). `charCodeAt(0)` only sees the high surrogate of supplementary
-      // chars (e.g. 0xD83D for U+1F600), causing emoji to miss their glyph and
-      // fall through to a 500-unit fallback - which under-measures wide emoji
-      // glyphs and prevents word-wrap from triggering. Use codePointAt to get
-      // the full code point so the cmap lookup succeeds.
-      const code = rune.codePointAt(0) ?? 0;
-      if (code < 32) continue; // Skip control chars
-
-      const gid = font.getGlyphId(code);
-
-      if (hasPrev && font.hasKerning) {
-        const kern = font.getKerning(prevGid, gid);
-        width += kern * scale;
-      }
-
-      width += font.getGlyphWidth(gid) * scale;
-      prevGid = gid;
-      hasPrev = true;
-    }
-
-    return width;
+    const candidates = [
+      { fontIdentifier: 'primary', font },
+      ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
+        .filter(f => f.font !== font)
+        .map(f => ({ fontIdentifier: f.key, font: f.font })),
+    ];
+    return shapeTextRuns(text, candidates).runs.reduce((sum, run) => {
+      const face = candidates[run.fontIndex].font;
+      return (
+        sum + (face.shape(run.text, features).reduce((total, g) => total + g.advanceX, 0) * fontSize) / face.unitsPerEm
+      );
+    }, 0);
   }
 
-  private static getTtfWidth(text: string, filepath: string, fontSize: number): number {
+  private static getTtfWidth(
+    text: string,
+    filepath: string,
+    fontSize: number,
+    features?: Readonly<Record<string, number>>
+  ): number {
     // Parse the TTF (once per path) and measure with real per-glyph advances and
     // kern pairs. This replaces the former approximation that returned a flat 500-unit
     // advance for every character, which mis-measured every embedded-by-path font
@@ -249,11 +249,60 @@ export class FontMetrics {
     }
 
     if (font) {
-      return this.getKernedStringWidth(text, font, fontSize);
+      return this.getKernedStringWidth(text, font, fontSize, features);
     }
 
     // Fallback when the font cannot be loaded (e.g. browser, missing/corrupt file).
     return text.length * (fontSize * 0.5);
+  }
+
+  private static metricFace(identifier: string): TtfFont | null {
+    const face =
+      getFontInstanceAlias(identifier) ??
+      this.TtfInstanceCache.get(identifier) ??
+      (shouldUseEmbeddedStandardMetrics() ? resolveStandardFontMetric(identifier) : null);
+    if (face) return face;
+    identifier = getFontPathAlias(identifier) ?? identifier;
+    if (/\.(?:ttf|otf)$/i.test(identifier) && !this.TtfInstanceCache.has(identifier))
+      this.getTtfWidth('', identifier, 1);
+    return this.TtfInstanceCache.get(identifier) ?? null;
+  }
+  /** @internal Whether layout is using an embedded font face. */
+  public static usesEmbeddedMetrics(identifier: string): boolean {
+    return this.metricFace(identifier) !== null;
+  }
+  /** @internal Number of painted glyphs, after substitutions and fallback. */
+  public static getGlyphCount(text: string, identifier: string, features?: Readonly<Record<string, number>>): number {
+    const font = this.metricFace(identifier);
+    if (!font) return Array.from(text).filter(c => c.codePointAt(0)! >= 32).length;
+    const candidates = [
+      { fontIdentifier: 'primary', font },
+      ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
+        .filter(f => f.font !== font)
+        .map(f => ({ fontIdentifier: f.key, font: f.font })),
+    ];
+    return shapeTextRuns(text, candidates).runs.reduce(
+      (sum, run) => sum + candidates[run.fontIndex].font.shape(run.text, features).length,
+      0
+    );
+  }
+  /** @internal Emergency wrapping prefers safe shaped cluster boundaries. */
+  public static isSafeTextBreak(
+    text: string,
+    identifier: string,
+    offset: number,
+    features?: Readonly<Record<string, number>>
+  ): boolean {
+    const face = this.metricFace(identifier);
+    return (
+      !face ||
+      face
+        .shape(text, features)
+        .every(
+          g =>
+            !(g.cluster < offset && offset < g.cluster + g.sourceLength) && !(g.cluster === offset && g.unsafeToBreak)
+        )
+    );
   }
 
   private static getStandardFontTable(fontName: string): readonly number[] | null {

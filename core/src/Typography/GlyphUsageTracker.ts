@@ -1,3 +1,4 @@
+import type { GlyphInfo } from './Engine/Api/GlyphInfo';
 import { TtfFont } from './TrueType/TtfFont';
 
 /**
@@ -6,6 +7,46 @@ import { TtfFont } from './TrueType/TtfFont';
  * Supports the full Unicode range (BMP + supplementary planes).
  */
 export class GlyphUsageTracker {
+  private readonly sources = new Map<number, string>();
+  private readonly cidGlyphs = new Map<number, number>();
+  private readonly sourceCids = new Map<string, number>();
+  private nextCid = 0;
+  /** @internal Source text for each painted PDF character code. */
+  public getGlyphSources(): ReadonlyMap<number, string> {
+    return this.sources;
+  }
+  /** @internal Includes original glyph codes and source-specific aliases. */
+  public getCidToGlyphMap(): ReadonlyMap<number, number> {
+    return new Map([...Array.from(this.usedGlyphs, g => [g, g] as const), ...this.cidGlyphs]);
+  }
+  /** @internal Tracks substituted glyphs and returns source-specific PDF codes. */
+  public markShaped(text: string, glyphs: readonly GlyphInfo[]): readonly number[] {
+    const codes: number[] = [];
+    for (let i = 0; i < glyphs.length;) {
+      const first = glyphs[i];
+      let end = i + 1;
+      while (end < glyphs.length && glyphs[end].cluster === first.cluster) end++;
+      const chars = Array.from(text.slice(first.cluster, first.cluster + first.sourceLength));
+      for (let j = i; j < end; j++) {
+        const g = glyphs[j];
+        this.usedGlyphs.add(g.id);
+        const source = j === end - 1 ? chars.slice(j - i).join('') : (chars[j - i] ?? '');
+        const key = g.id + ':' + source;
+        let code = this.sourceCids.get(key);
+        if (code === undefined) {
+          code = this.sources.has(g.id) ? Math.max(this.nextCid, this.font.numberOfGlyphs) : g.id;
+          if (code > 65535) throw new RangeError('PDF font character-code capacity exceeded.');
+          if (code >= this.font.numberOfGlyphs) this.nextCid = code + 1;
+          this.sources.set(code, source);
+          this.sourceCids.set(key, code);
+          this.cidGlyphs.set(code, g.id);
+        }
+        codes.push(code);
+      }
+      i = end;
+    }
+    return codes;
+  }
   private readonly font: TtfFont;
   private readonly usedCodepoints = new Set<number>();
   private readonly usedGlyphs = new Set<number>();
@@ -74,6 +115,7 @@ export class GlyphUsageTracker {
    */
   public markUsedText(text: string): void {
     if (!text) return;
+    this.markShaped(text, this.font.shape(text));
 
     for (let i = 0; i < text.length; i++) {
       const code = text.charCodeAt(i);

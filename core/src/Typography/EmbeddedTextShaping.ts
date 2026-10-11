@@ -4,8 +4,10 @@ import type { GlyphInfo } from './Engine/Api/GlyphInfo';
 import { LatinShaper } from './Engine/Shaping/LatinShaper';
 import { ShapeOptions } from './Engine/Api/ShapeOptions';
 import { ShapeFeature } from './Engine/Api/ShapeFeature';
+import { ShapingPipeline } from './Engine/Shaping/ShapingPipeline';
+import { scalars, split } from './Engine/Unicode/Segmentation/EmojiClusters';
 
-/** Document integration shapes Latin; other scripts retain direct glyph mapping. */
+/** Shapes Latin and registered colour emoji; other scripts retain direct glyph mapping. */
 export function shapeEmbeddedText(
   font: TtfFont,
   text: string,
@@ -14,6 +16,13 @@ export function shapeEmbeddedText(
   const options = features
     ? new ShapeOptions({ features: Object.entries(features).map(([tag, value]) => new ShapeFeature(tag, { value })) })
     : undefined;
+  if (font.hasColour) {
+    try {
+      return ShapingPipeline.shape(font.engineFace, text, options, { scalars, split }).glyphs;
+    } catch (error) {
+      if (!(error instanceof FontError) || error.name !== 'NotSupportedException') throw error;
+    }
+  }
   if (text.length > 0 && /^[\x20-\x7e]*$/.test(text)) {
     try {
       return LatinShaper.shape(font.engineFace, text, options).glyphs;

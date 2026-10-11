@@ -231,3 +231,9 @@ The check runs at most once per process, and **never changes a byte of output** 
 Issues and pull requests are welcome in the [BonniePDF-TypeScript repository](https://github.com/bonniepdf/BonniePDF-TypeScript). For substantial changes, please open an issue first so the behaviour can be coordinated with the shared specification and .NET implementation.
 
 © 2026 CodeFocus Limited
+
+### Emoji rendering
+
+Monochrome outlines remain the default. To use a registered colour font, set `doc.settings.emojiRendering = 'colour'`. COLRv0 artwork renders as vector fills and CBDT/CBLC PNG artwork as embedded images in PDF and SVG. Register the font bytes with the document; no system emoji font is selected automatically. Original ZWJ, variation-selector, skin-tone and flag sequences remain selectable and extractable. A bitmap-only font requires colour mode because it has no monochrome outlines.
+
+Use `await doc.generateBytesAsync()` for bitmap emoji so PNG artwork can be decoded before PDF resources are written.

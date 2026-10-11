@@ -1,5 +1,6 @@
 import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
 import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
+import { drawColourGlyph } from '../Typography/ColourGlyphPainter';
 import { ICanvas } from './ICanvas';
 import { isIdentityPaintTransform, type PaintTransform } from './PaintTransform';
 import { ellipseToBeziers } from './EllipseGeometry';
@@ -163,6 +164,9 @@ export class SvgIdAllocator {
 
 /** Translates drawing operations into SVG markup. */
 export class SvgCanvas implements ICanvas {
+  /** @internal */
+  public emojiRendering: () => 'outline' | 'colour' = () => 'outline';
+
   private fontFeatures?: Readonly<Record<string, number>>;
   public setTextFeatures(features?: Readonly<Record<string, number>>): void {
     this.fontFeatures = features;
@@ -350,7 +354,8 @@ export class SvgCanvas implements ICanvas {
           this.wordSpacing,
           '',
           undefined,
-          this.letterSpacing
+          this.letterSpacing,
+          color.scA
         )
       );
       return;
@@ -395,7 +400,9 @@ export class SvgCanvas implements ICanvas {
       const runs: PreparedSvgTextRun[] = [
         { fontFamily, font, text: placeholder, glyphs: font.shape(placeholder, this.fontFeatures) },
       ];
-      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, attr));
+      this.svgElements.push(
+        this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, attr, undefined, 0, color.scA)
+      );
       return;
     }
 
@@ -424,7 +431,9 @@ export class SvgCanvas implements ICanvas {
     const transform = `rotate(${this.n(-angleDegrees)} ${this.n(x)} ${this.n(baselineY)})`;
 
     if (runs.length > 0) {
-      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, '', transform));
+      this.svgElements.push(
+        this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, 0, '', transform, 0, color.scA)
+      );
       return;
     }
     if (this.resolveFont(fontFamily)) return;
@@ -462,7 +471,9 @@ export class SvgCanvas implements ICanvas {
     const runs = this.resolveRuns(fontFamily, text);
 
     if (runs.length > 0) {
-      this.svgElements.push(this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, extraPerSpace));
+      this.svgElements.push(
+        this.glyphPositionedRuns(x, baselineY, runs, hex, fontSize, extraPerSpace, '', undefined, 0, color.scA)
+      );
       return;
     }
     if (this.resolveFont(fontFamily)) return;
@@ -814,7 +825,8 @@ export class SvgCanvas implements ICanvas {
     extraPerSpace: number,
     extraAttributes = '',
     transform?: string,
-    letterSpacing = 0
+    letterSpacing = 0,
+    colourAlpha = 1
   ): string {
     const transformAttr = transform ? ` transform="${transform}"` : '';
     const elements: string[] = [];
@@ -833,6 +845,24 @@ export class SvgCanvas implements ICanvas {
       }
 
       const glyphs = run.glyphs;
+      if (font.hasColour && this.emojiRendering() === 'colour') {
+        const graphics = new SvgCanvas(this.width, this.height, undefined, this.options);
+        if (colourAlpha < 1) graphics.setGlobalAlpha(colourAlpha);
+        for (const g of glyphs) {
+          const source = run.text.slice(g.cluster, g.cluster + g.sourceLength);
+          drawColourGlyph(graphics, font, g, source, cursor, baselineY, fontSize, Color.fromHex(fillHex));
+          cursor += g.advanceX * scale + letterSpacing;
+          if (source === ' ') cursor += extraPerSpace;
+        }
+        elements.push(
+          `<g aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${graphics.getInnerSvg()}</g>`
+        );
+        continue;
+      }
+      if (font.hasColour && !font.hasOutlines)
+        throw new Error(
+          'The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.'
+        );
       const simple =
         glyphs.length === Array.from(run.text).length &&
         glyphs.every(

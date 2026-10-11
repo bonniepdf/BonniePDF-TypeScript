@@ -521,6 +521,11 @@ export class PdfResourceRegistry {
     return ++this.imageCounter;
   }
 
+  /** Images discovered by synchronous layout whose decoding requires the async writer path. */
+  public deferredImages(): ImageInfo[] {
+    return [...this.loadedImages.values()].filter(image => image.prepareDeferred !== undefined);
+  }
+
   public registerImage(info: ImageInfo): number {
     const key = this.imageKey(info);
 

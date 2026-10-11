@@ -12,6 +12,8 @@ export enum ImageFormat {
 
 /** Contains decoded image metadata and the byte streams needed for PDF embedding. */
 export class ImageInfo {
+  /** @internal Decodes graphics discovered during layout before resource serialization. */
+  public prepareDeferred?: () => Promise<void>;
   public data: Uint8Array = new Uint8Array();
   public originalData: Uint8Array = new Uint8Array();
   /** Pixel dimensions as stored in the bitstream - the values that go into the PDF XObject's /Width and /Height. */

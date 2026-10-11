@@ -1,4 +1,5 @@
 import { applyOptions } from '../Core/applyOptions';
+import { EmojiRendering } from './EmojiRendering';
 import { PdfSize } from './PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
 import { Color } from '../Core/Color';
@@ -36,6 +37,7 @@ import type { PageTemplate } from './PageTemplate';
  */
 /** Every settable {@link DocumentSettings} property. */
 export const DOCUMENT_SETTINGS_OPTION_KEYS = [
+  'emojiRendering',
   'pageSize',
   'pageColor',
   'orientation',
@@ -130,6 +132,15 @@ export type DocumentSettingsOptions = Partial<
 
 /** Configures document-wide page, output, security, accessibility, and metadata behavior. */
 export class DocumentSettings {
+  private _emojiRendering: EmojiRendering = EmojiRendering.Outline;
+  /** Emoji paint mode; colour requires a registered colour font. Defaults to outlines. */
+  public get emojiRendering(): EmojiRendering | 'outline' | 'colour' {
+    return this._emojiRendering;
+  }
+  public set emojiRendering(value: EmojiRendering | 'outline' | 'colour') {
+    if (value !== 'outline' && value !== 'colour') throw new RangeError('Invalid emoji rendering mode');
+    this._emojiRendering = value as EmojiRendering;
+  }
   /**
    * Template function for generating page headers.
    * Called with the page number (1-based) and should return an IElement to render at the top of each page.

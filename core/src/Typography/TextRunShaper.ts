@@ -65,7 +65,7 @@ export function shapeTextRuns(text: string, candidates: ShaperFont[]): ShapeResu
     if (chars.length === 0) continue;
     const whole = candidates.findIndex(c => chars.every(ch => c.font.getGlyphId(ch.codePointAt(0)!) !== 0));
     if (whole >= 0) {
-      append(whole, chars.join(''));
+      append(whole, candidates[whole].font.hasColour ? text.slice(boundaries[b], boundaries[b + 1]) : chars.join(''));
       continue;
     }
     for (const ch of chars) {

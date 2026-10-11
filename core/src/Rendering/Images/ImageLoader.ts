@@ -411,6 +411,7 @@ export class ImageLoader {
 
     const idatChunks: Uint8Array[] = [];
     let palette: Uint8Array | null = null;
+    let paletteAlpha: Uint8Array | undefined;
     let colorType = 0;
     let bitDepth = 8;
     let compressedIccProfile: Uint8Array | null = null;
@@ -467,6 +468,10 @@ export class ImageLoader {
         case 'PLTE':
           palette = new Uint8Array(chunkLength);
           palette.set(data.subarray(pos, pos + chunkLength));
+          break;
+
+        case 'tRNS':
+          if (colorType === 3) paletteAlpha = data.slice(pos, pos + chunkLength);
           break;
 
         case 'IDAT': {
@@ -554,6 +559,28 @@ export class ImageLoader {
       info.components -= 1; // e.g. 4 (RGBA) → 3 (RGB), 2 (GA) → 1 (Gray)
     }
 
+    if (colorType === 3 && paletteAlpha) {
+      const rowBytes = Math.ceil((info.width * bitDepth) / 8);
+      const rgb = new Uint8Array(info.width * info.height * 3);
+      const alpha = new Uint8Array(info.width * info.height);
+      const mask = (1 << bitDepth) - 1;
+      for (let y = 0; y < info.height; y++)
+        for (let x = 0; x < info.width; x++) {
+          const index =
+            (info.data[y * rowBytes + Math.floor((x * bitDepth) / 8)] >> (8 - bitDepth - ((x * bitDepth) % 8))) & mask;
+          if (index * 3 + 2 >= info.palette.length) throw new Error('PNG pixel index exceeds its palette.');
+          const pixel = y * info.width + x;
+          rgb.set(info.palette.subarray(index * 3, index * 3 + 3), pixel * 3);
+          alpha[pixel] = index < paletteAlpha.length ? paletteAlpha[index] : 255;
+        }
+      info.data = rgb;
+      info.alphaData = alpha;
+      info.hasAlpha = true;
+      info.colorSpace = ImageColorSpace.DeviceRGB;
+      info.components = 3;
+      info.bitsPerComponent = 8;
+      info.palette = new Uint8Array();
+    }
     return info;
   }
 
@@ -566,15 +593,15 @@ export class ImageLoader {
     const rawScanlines = preInflated ?? this.inflateZlib(compressedData);
 
     // Step 2: walk scanlines, reverse PNG filters, separate colour from alpha.
-    const bpp = info.components * (info.bitsPerComponent / 8); // bytes per pixel
-    const rowBytes = info.width * bpp; // colour+alpha bytes per row
+    const bpp = Math.max(1, Math.ceil((info.components * info.bitsPerComponent) / 8)); // filter distance
+    const rowBytes = Math.ceil((info.width * info.components * info.bitsPerComponent) / 8); // colour+alpha bytes per row
     const stride = 1 + rowBytes; // +1 for filter byte
 
     const hasAlpha = info.hasAlpha;
     const colorBpp = hasAlpha ? bpp - 1 : bpp; // bytes per pixel excl. alpha
-    const colorRowBytes = info.width * colorBpp;
+    const colorRowBytes = hasAlpha ? info.width * colorBpp : rowBytes;
 
-    const pixelData = new Uint8Array(info.width * info.height * colorBpp);
+    const pixelData = new Uint8Array(info.height * colorRowBytes);
     const alphaData = hasAlpha ? new Uint8Array(info.width * info.height) : undefined;
 
     const prevRow = new Uint8Array(rowBytes); // previous unfiltered scanline (zeros for row 0)

@@ -16,3 +16,9 @@ core/tests/api/surface.generated.ts
 
 # Independent shaping fixture copied verbatim from the shared specification.
 core/tests/typography/fixtures/harfbuzz.json
+
+# Independent CFF fixtures and upstream notices are copied verbatim.
+core/tests/typography/fixtures/cff.json
+core/tests/typography/fixtures/SourceSans3-CFF-LICENSE.md
+core/tests/typography/fixtures/SourceSerif4-CFF-LICENSE.md
+core/tests/typography/fixtures/emoji.json

@@ -42,26 +42,82 @@
     {
       "bits": 1,
       "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABAQMAAAAhLob3AAAABlBMVEX/AAAA/wDSh+9xAAAAAnRSTlMAgJsrThgAAAANSURBVHgBAQIA/f8AQABCAEEgsJnLAAAAAElFTkSuQmCC",
-      "rgb": [255, 0, 0, 0, 255, 0, 255, 0, 0],
-      "alpha": [0, 128, 0]
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        255,
+        0,
+        0
+      ],
+      "alpha": [
+        0,
+        128,
+        0
+      ]
     },
     {
       "bits": 2,
       "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABAgMAAABmjvwnAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAANSURBVHgBAQIA/f8AGAAaABkvzLsPAAAAAElFTkSuQmCC",
-      "rgb": [255, 0, 0, 0, 255, 0, 0, 0, 255],
-      "alpha": [0, 128, 255]
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
     },
     {
       "bits": 4,
       "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABBAMAAADpzgmHAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAAOSURBVHgBAQMA/P8AASAAJQAiPj1SfwAAAABJRU5ErkJggg==",
-      "rgb": [255, 0, 0, 0, 255, 0, 0, 0, 255],
-      "alpha": [0, 128, 255]
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
     },
     {
       "bits": 8,
       "base64": "iVBORw0KGgoAAAANSUhEUgAAAAMAAAABCAMAAAAsPuSGAAAACVBMVEX/AAAA/wAAAP8tSs2KAAAAAnRSTlMAgJsrThgAAAAPSURBVHgBAQQA+/8AAAECAAgABK2lTk4AAAAASUVORK5CYII=",
-      "rgb": [255, 0, 0, 0, 255, 0, 0, 0, 255],
-      "alpha": [0, 128, 255]
+      "rgb": [
+        255,
+        0,
+        0,
+        0,
+        255,
+        0,
+        0,
+        0,
+        255
+      ],
+      "alpha": [
+        0,
+        128,
+        255
+      ]
     }
   ],
   "fonts": [

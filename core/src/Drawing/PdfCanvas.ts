@@ -2,6 +2,7 @@ import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
 import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { ICanvas } from './ICanvas';
 import { ellipseToBeziers } from './EllipseGeometry';
+import { drawColourGlyph } from '../Typography/ColourGlyphPainter';
 import { Color } from '../Core/Color';
 import { Point, Size } from '../Core';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
@@ -47,6 +48,9 @@ interface PathCmd {
 
 /** Translates drawing operations into a PDF page content stream. */
 export class PdfCanvas implements ICanvas {
+  /** @internal */
+  public emojiRendering: () => 'outline' | 'colour' = () => 'outline';
+
   public readonly width: number = 0;
   public readonly height: number;
 
@@ -295,6 +299,7 @@ export class PdfCanvas implements ICanvas {
 
     this.endTextSpacing();
     PdfOperators.endText(this.stream);
+    this.paintColourRuns(runs, fontSize, pdfX - this.xOffset, this.height - pdfY - this.yOffset, color);
     this.endColorAlpha(color);
   }
 
@@ -342,6 +347,7 @@ export class PdfCanvas implements ICanvas {
 
     this.endTextSpacing();
     PdfOperators.endText(this.stream);
+    this.paintColourRuns(runs, fontSize, -this.xOffset, this.height - this.yOffset, color);
     PdfOperators.restoreState(this.stream);
   }
 
@@ -378,6 +384,7 @@ export class PdfCanvas implements ICanvas {
 
     PdfOperators.setWordSpacing(this.stream, 0);
     PdfOperators.endText(this.stream);
+    this.paintColourRuns(runs, fontSize, pdfX - this.xOffset, this.height - pdfY - this.yOffset, color, wordSpacing);
     this.endColorAlpha(color);
   }
 
@@ -772,6 +779,12 @@ export class PdfCanvas implements ICanvas {
         PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
         continue;
       }
+      const colourFont = font.hasColour && this.emojiRendering() === 'colour';
+      if (font.hasColour && !font.hasOutlines && !colourFont)
+        throw new Error(
+          'The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.'
+        );
+      if (colourFont) this.stream.push('3 Tr\n');
       this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
       if (glyphs.every(g => g.offsetY === 0)) {
         let hex = '',
@@ -796,6 +809,7 @@ export class PdfCanvas implements ICanvas {
         if (adjusted) PdfOperators.showTextPositioned(this.stream, `${array}<${hex}>]`);
         else PdfOperators.showText(this.stream, `<${hex}>`);
         this.stream.push('EMC\n');
+        if (colourFont) this.stream.push('0 Tr\n');
         continue;
       }
       for (const [index, g] of glyphs.entries()) {
@@ -817,6 +831,32 @@ export class PdfCanvas implements ICanvas {
         if (rise !== 0) this.stream.push('0 Ts\n');
       }
       this.stream.push('EMC\n');
+      if (colourFont) this.stream.push('0 Tr\n');
+    }
+  }
+
+  private paintColourRuns(
+    runs: PreparedTextRun[],
+    size: number,
+    x: number,
+    baseline: number,
+    colour: Color,
+    wordSpacing = this._wordSpacing
+  ): void {
+    if (this.emojiRendering() !== 'colour') return;
+    let cursor = x;
+    for (const run of runs) {
+      const font = run.embeddedFont;
+      if (!font) {
+        cursor += FontMetrics.getStringWidth(run.text, run.fontIdentifier, size) + this.spacingWidth(run.text);
+        continue;
+      }
+      for (const glyph of run.glyphs!) {
+        const source = run.text.slice(glyph.cluster, glyph.cluster + glyph.sourceLength);
+        if (font.hasColour) drawColourGlyph(this, font, glyph, source, cursor, baseline, size, colour);
+        cursor += (glyph.advanceX * size) / font.unitsPerEm + this._letterSpacing;
+        if (source === ' ') cursor += wordSpacing;
+      }
     }
   }
 

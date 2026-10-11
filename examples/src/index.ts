@@ -32,6 +32,7 @@ import { generate as textDecorations } from './recipes/typography/text-decoratio
 import { generate as textDecorationsClasses } from './recipes/typography/text-decorations-classes';
 import { generate as customFonts } from './recipes/typography/custom-fonts';
 import { generate as customFontsClasses } from './recipes/typography/custom-fonts-classes';
+import { generate as colourEmojis } from './recipes/typography/colour-emojis';
 import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
 import { generate as emojisAndUnicodeClasses } from './recipes/typography/emojis-and-unicode-classes';
 import { generate as advancedTypography } from './recipes/typography/advanced-typography';
@@ -1537,6 +1538,24 @@ export const examples: ExampleDef[] = [
     gallery: false,
     variantOf: 'embedded-font-metrics',
     variantLabel: 'Class API',
+  },
+  {
+    id: 'colour-emojis',
+    name: 'Colour Emojis',
+    category: 'Typography',
+    description:
+      'Colour emoji alongside regular text, including joined families, skin tones, flags and keycaps. PDF/A-2b and PDF/UA-1.',
+    filename: 'colour-emojis.pdf',
+    generate: colourEmojis,
+    requiredAssets: [
+      'fonts/NotoSans-Regular.ttf',
+      'fonts/TwemojiMozilla.ttf',
+      'fonts/TwemojiMozilla-LICENSE.md',
+      'fonts/TwemojiMozilla-CC-BY-4.0.txt',
+      'fonts/TwemojiMozilla-APACHE-2.0.txt',
+    ],
+    dotnetClass: 'ColourEmojiExample',
+    pdfUa1: true,
   },
   {
     id: 'emojis-and-unicode',

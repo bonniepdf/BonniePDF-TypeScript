@@ -61,6 +61,35 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "emoji-rendering": {
+      "_fixture": {
+        "id": "document-definition/valid/emoji-rendering",
+        "description": "Colour artwork is opt-in; settings survive a definition round trip.",
+        "spec": "20"
+      },
+      "_expect": {
+        "pages": 1,
+        "text": [
+          "Hello"
+        ],
+        "roundTrip": true
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "emojiRendering": "colour"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
     "font-features": {
       "_fixture": {
         "id": "document-definition/valid/font-features",
@@ -1270,6 +1299,29 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
               }
             }
           ]
+        }
+      ]
+    },
+    "emoji-rendering": {
+      "_fixture": {
+        "id": "document-definition/invalid/emoji-rendering",
+        "description": "Unknown emoji rendering modes are rejected.",
+        "spec": "20"
+      },
+      "_expectErrors": [
+        {
+          "path": "/settings/emojiRendering",
+          "code": "invalid-value"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "emojiRendering": "automatic"
+      },
+      "pages": [
+        {
+          "content": []
         }
       ]
     },

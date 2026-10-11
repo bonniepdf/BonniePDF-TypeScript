@@ -148,6 +148,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       ],
       "via": "options"
     },
+    "EmojiRendering": {
+      "tokens": [
+        "outline",
+        "colour"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2056,6 +2063,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "accessibility": {
           "kind": "enum:AccessibilityMode"
+        },
+        "emojiRendering": {
+          "kind": "enum:EmojiRendering"
         },
         "language": {
           "kind": "string"

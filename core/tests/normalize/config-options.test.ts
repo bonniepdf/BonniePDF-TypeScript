@@ -210,8 +210,8 @@ describe('DocumentSettings options', () => {
     expect(s.conformance).not.toBe(PdfAConformance.None);
   });
 
-  it('covers its settable surface (30 keys)', () => {
-    expect(DOCUMENT_SETTINGS_OPTION_KEYS).toHaveLength(30);
+  it('covers its settable surface (31 keys)', () => {
+    expect(DOCUMENT_SETTINGS_OPTION_KEYS).toHaveLength(31);
     expect(settableSurface(new DocumentSettings())).toEqual([...DOCUMENT_SETTINGS_OPTION_KEYS].sort());
   });
 

@@ -46,6 +46,8 @@ export class DeferredXObjectInfo {
 /** Carries page, canvas, resource, navigation, tagging, and cursor state through layout. */
 export class RenderContext implements RenderContextContract {
   /** @internal */
+  public emojiRendering: 'outline' | 'colour' = 'outline';
+  /** @internal */
   public atomicLayoutBounds?: { top: number; bottom: number };
   /** @internal */
   public elementTransform?: PaintTransform;
@@ -184,7 +186,7 @@ export class RenderContext implements RenderContextContract {
 
   /** Factory for an SVG canvas wired to this context's font resolver + options. */
   private createSvgCanvas(): SvgCanvas {
-    return new SvgCanvas(
+    const canvas = new SvgCanvas(
       this.pageSize.width,
       this.pageSize.height,
       {
@@ -208,6 +210,8 @@ export class RenderContext implements RenderContextContract {
       this.svgOptions,
       this.svgIdAllocator
     );
+    canvas.emojiRendering = () => this.emojiRendering;
+    return canvas;
   }
 
   public get pdfAEnabled(): boolean {
@@ -364,6 +368,7 @@ export class RenderContext implements RenderContextContract {
         this.registerShading.bind(this),
         this.resources.noteImagePlacement.bind(this.resources)
       );
+      pdfCanvas.emojiRendering = () => this.emojiRendering;
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
     }
@@ -393,6 +398,7 @@ export class RenderContext implements RenderContextContract {
       this.registerShading.bind(this),
       this.resources.noteImagePlacement.bind(this.resources)
     );
+    pdfCanvas.emojiRendering = () => this.emojiRendering;
     if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
     return pdfCanvas;
   }

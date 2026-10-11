@@ -1,3 +1,4 @@
+import type { ImageInfo } from './Images/ImageInfo';
 import * as PdfKeys from './Pdf/PdfKeys';
 import { throwIfAborted } from '../Core/throwIfAborted';
 import { Document } from '../Document';
@@ -71,13 +72,17 @@ export class PdfDocumentSerializer {
       this.document.fonts
     );
     try {
-      this.serializeWithinFontScope(writer, preloadedResources);
+      for (const _ of this.serializeWithinFontScope(writer, preloadedResources))
+        throw new Error('Bitmap emoji require Document.generateBytesAsync() to decode PNG artwork.');
     } finally {
       fontScope.dispose();
     }
   }
 
-  private serializeWithinFontScope(writer: IPdfWriter, preloadedResources?: PdfResourceRegistry): void {
+  private *serializeWithinFontScope(
+    writer: IPdfWriter,
+    preloadedResources?: PdfResourceRegistry
+  ): Generator<ImageInfo[], void> {
     const settings = this.document.settings;
     let conformancePlan = ConformancePlan.fromSettings(settings);
 
@@ -248,6 +253,9 @@ export class PdfDocumentSerializer {
 
       writer.writeObject(pageId, pageDict);
     }
+
+    const deferredImages = ctx.resources.deferredImages();
+    if (deferredImages.length > 0) yield deferredImages;
 
     // 4. Write global resource dictionary (fonts, images)
     const globalResources: string = ctx.resources.writeResources(writer, pageIds.length) ?? '<< >>';
@@ -533,7 +541,35 @@ export class PdfDocumentSerializer {
     // ── Phase 3: Real serialization with the pre-loaded registry ────────────
     // Only pass the registry when there are actually embedded fonts to inject -
     // otherwise let serialize() create its own fresh registry (no-op optimisation).
-    this.serialize(syncWriter, embeddedPaths.size > 0 ? preRegistry : undefined);
+    const resources = embeddedPaths.size > 0 ? preRegistry : undefined;
+    const rendering = this.serializeWithinFontScope(syncWriter, resources);
+    try {
+      while (true) {
+        throwIfAborted(signal);
+        // Metric scopes are synchronous. Never retain the global active font scope
+        // across an await: concurrent documents must not inherit each other's fonts.
+        const scope = beginDocumentFontMetricScope(
+          settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+          getRegistryFontInstances(resources),
+          getRegistryFontPaths(resources),
+          this.document.fonts
+        );
+        let step: IteratorResult<ImageInfo[], void>;
+        try {
+          step = rendering.next();
+        } finally {
+          scope.dispose();
+        }
+        if (step.done) break;
+        // Sequential decoding bounds transient pixel buffers for large emoji sets.
+        for (const image of step.value) {
+          throwIfAborted(signal);
+          await image.prepareDeferred?.();
+        }
+      }
+    } finally {
+      rendering.return();
+    }
   }
 }
 

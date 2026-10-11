@@ -30,9 +30,11 @@ export class PdfRenderPipeline {
 
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin);
+    ctx.emojiRendering = settings.emojiRendering;
     // Header/footer consume body content height (spec: Layout & Pagination
     // §5.1). Installed before any layout so the very first page's cursor and
     // break threshold already account for the chrome.
+    ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
     const result = new PdfRenderResult(ctx, orientedPageSize);
@@ -194,6 +196,7 @@ export class PdfRenderPipeline {
     // Header/footer consume body content height (spec: Layout & Pagination
     // §5.1). The context is supplied by the caller here, so the reservation is
     // installed at the top of the run rather than at construction.
+    ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
     const pageDimensions = new Map<

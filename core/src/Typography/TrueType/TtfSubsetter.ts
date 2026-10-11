@@ -323,9 +323,14 @@ export class TtfSubsetter {
     }
 
     // Copy original maxp table
-    const data = new Uint8Array(info.length);
+    let data = new Uint8Array(info.length);
     data.set(this.originalData.subarray(info.offset, info.offset + info.length));
 
+    if (!this.tables.has('glyf') && this.tables.has('CBDT')) {
+      data = new Uint8Array(32);
+      data[1] = 1;
+      data[15] = 1;
+    }
     // Update numGlyphs
     const numGlyphs = this.newToOldGid.size;
     data[4] = (numGlyphs >> 8) & 0xff;
@@ -595,6 +600,8 @@ export class TtfSubsetter {
   }
 
   private buildGlyfAndLocaTables(): { glyfData: Uint8Array; locaData: Uint8Array } {
+    if (!this.tables.has('glyf') && !this.tables.has('loca') && this.tables.has('CBDT'))
+      return { glyfData: new Uint8Array(4), locaData: new Uint8Array((this.newToOldGid.size + 1) * 4) };
     const glyfInfo = this.tables.get('glyf');
     const locaInfo = this.tables.get('loca');
 
@@ -663,7 +670,10 @@ export class TtfSubsetter {
     this.writeUInt32BE(locaData, glyfData.length);
 
     return {
-      glyfData: new Uint8Array(glyfData),
+      glyfData:
+        glyfData.length === 0 && (this.tables.has('COLR') || this.tables.has('CBDT'))
+          ? new Uint8Array(4)
+          : new Uint8Array(glyfData),
       locaData: new Uint8Array(locaData),
     };
   }

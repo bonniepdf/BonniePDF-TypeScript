@@ -54,7 +54,7 @@ export class FontWriter {
     // 1. FontFile2 (embedded TTF binary)
     let fontData: Uint8Array;
     let subsetter: TtfSubsetter | null = null;
-    if (enableSubsetting) {
+    if (enableSubsetting || (!font.hasOutlines && font.hasColour)) {
       try {
         subsetter = new TtfSubsetter(font);
         const usedGlyphIds = new Set<number>(tracker.getUsedGlyphIds() as ReadonlySet<number>);
@@ -84,7 +84,7 @@ export class FontWriter {
     // 2. CIDSet (PDF/A-1b + PDF/UA-1). Mirrors the CIDToGIDMap domain
     //    (0..maxOriginalGid) - see buildCIDSetData.
     let cidSetId = 0;
-    if (enableSubsetting && subsetter) {
+    if (subsetter) {
       cidSetId = this.writer.getNewId();
       this.writeCIDSet(cidSetId, maxCid);
     }

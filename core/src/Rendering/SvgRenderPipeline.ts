@@ -69,6 +69,7 @@ export class SvgRenderPipeline {
 
     // Header/footer consume body content height (spec: Layout & Pagination
     // §5.1), so the SVG preview paginates exactly where the PDF does.
+    ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
     const pageDimensions = new Map<

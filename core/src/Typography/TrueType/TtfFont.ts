@@ -18,6 +18,14 @@ export class TtfFont {
 
   // Table directory
   private readonly tables = new Map<string, { offset: number; length: number }>();
+  /** @internal */
+  public get hasColour(): boolean {
+    return this.tables.has('COLR') || this.tables.has('CBDT');
+  }
+  /** @internal */
+  public get hasOutlines(): boolean {
+    return this.tables.has('glyf') && this.tables.has('loca');
+  }
   private numberOfHMetrics = 0;
 
   // Kern pairs: (leftGid, rightGid) -> adjustment in font units

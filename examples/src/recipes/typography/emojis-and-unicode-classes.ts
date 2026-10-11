@@ -12,8 +12,7 @@
  *   NotoSansSymbols2  — Miscellaneous Symbols (U+2600) and Dingbats (U+2700)
  *   NotoEmoji         — Supplementary emoji (U+1F000 and above)
  *
- * PDF/A is intentionally not claimed — emoji fonts include COLR/CBDT tables
- * that archival validators reject. PDF/UA-1 accessibility is still applied.
+ * This example keeps its monochrome outline appearance and PDF/UA-1 accessibility.
  *
  * Font downloads (free / open-source):
  *   https://fonts.google.com/noto
@@ -48,9 +47,8 @@ import {
  */
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings();
-  // PDF/A intentionally not claimed — emoji fonts include COLR/CBDT tables
-  // that archival validators reject. PDF/UA-1 is still applied; set the
-  // version explicitly to PDF 1.7 (required for PDF/UA-1).
+  // Keep this example monochrome; the colour sample opts in separately.
+  settings.emojiRendering = 'outline';
   settings.version = PdfVersion.Pdf17;
   settings.conformance = PdfAConformance.None;
   settings.accessibility = AccessibilityMode.PdfUa1;

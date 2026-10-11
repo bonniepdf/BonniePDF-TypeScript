@@ -1,3 +1,5 @@
+import { TextFlow } from './TextFlow';
+import { TextItemizer } from './Engine/Shaping/TextItemizer';
 import type { TtfFont } from './TrueType/TtfFont';
 import { FontError } from './Engine/Api/FontError';
 import type { GlyphInfo } from './Engine/Api/GlyphInfo';
@@ -16,6 +18,17 @@ export function shapeEmbeddedText(
   const options = features
     ? new ShapeOptions({ features: Object.entries(features).map(([tag, value]) => new ShapeFeature(tag, { value })) })
     : undefined;
+  if (text.length > 0 && (TextFlow.rightToLeft || TextFlow.needsBidi(text))) {
+    let line = TextFlow.line;
+    if (line && line.paragraph.slice(line.start, line.end) !== text) line = undefined;
+    const paragraph = line?.paragraph ?? text,
+      start = line?.start ?? 0,
+      end = line?.end ?? text.length;
+    const resolved = TextItemizer.resolve(paragraph, () => font.engineFace, TextFlow.rightToLeft ? 'rtl' : 'ltr');
+    return resolved
+      .shapeLine(start, end, options)
+      .flatMap(item => item.glyphs.map(g => ({ ...g, cluster: g.cluster - start })));
+  }
   if (font.hasColour) {
     try {
       return ShapingPipeline.shape(font.engineFace, text, options, { scalars, split }).glyphs;

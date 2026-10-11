@@ -1,4 +1,5 @@
 import { throwIfAborted } from './Core/throwIfAborted';
+import { applyContentDirection } from './Elements/ContentDirectionResolver';
 import { DocumentSettings, type DocumentSettingsOptions } from './Configuration/DocumentSettings';
 import { DocumentMetadata, type DocumentMetadataOptions } from './Configuration/DocumentMetadata';
 import { IElement } from './Elements/IElement';
@@ -523,6 +524,8 @@ export class Document {
   // ─── Default style cascade ────────────────────────────────────────────────────
 
   private applyDefaultStyleToTree(): void {
+    for (const page of this._pages)
+      for (const element of page.getElements()) applyContentDirection(element, this.settings.contentDirection);
     const style = this.settings.defaultTextStyle;
     if (!style) return;
     for (const page of this._pages) {

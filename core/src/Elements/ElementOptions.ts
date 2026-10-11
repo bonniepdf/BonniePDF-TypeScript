@@ -1,3 +1,4 @@
+import type { ContentDirectionInput } from '../Configuration/ContentDirection';
 import type { ElementBase } from './ElementBase';
 import type { ThicknessInput } from '../Normalize/toThickness';
 
@@ -9,12 +10,12 @@ import type { ThicknessInput } from '../Normalize/toThickness';
  * not in its options is a knob TypeScript callers can reach and C# callers
  * cannot, which is a parity defect rather than a spelling difference.
  */
-export const ELEMENT_OPTION_KEYS = ['margin', 'breakAllowed', 'captureName'] as const;
+export const ELEMENT_OPTION_KEYS = ['margin', 'breakAllowed', 'captureName', 'contentDirection'] as const;
 
 type ElementOptionKey = (typeof ELEMENT_OPTION_KEYS)[number];
 
 /** Keys whose accepted input is wider than the stored type (asymmetric accessor). */
-type ElementWidenedKey = 'margin';
+type ElementWidenedKey = 'margin' | 'contentDirection';
 
 /**
  * Options common to every element.
@@ -30,4 +31,6 @@ export type ElementOptions = Partial<Omit<Pick<ElementBase, ElementOptionKey>, E
    * `{ bottom: 12 }`; omitted sides are zero.
    */
   margin?: ThicknessInput;
+  /** Inline progression and paragraph base direction; omitted inherits. */
+  contentDirection?: ContentDirectionInput;
 };

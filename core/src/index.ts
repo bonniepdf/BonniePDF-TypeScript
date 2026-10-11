@@ -36,6 +36,7 @@ export { type BookmarkItemOptions, BookmarkItem } from './Configuration/Bookmark
 export { type WatermarkOptions, Watermark } from './Configuration/Watermark';
 export { type DocumentMetadataOptions, DocumentMetadata } from './Configuration/DocumentMetadata';
 export { type DocumentSettingsOptions, DocumentSettings } from './Configuration/DocumentSettings';
+export { ContentDirection, type ContentDirectionInput } from './Configuration/ContentDirection';
 export { EmojiRendering } from './Configuration/EmojiRendering';
 export { pageTemplate, type PageTemplate, type PageTemplateElements } from './Configuration/PageTemplate';
 export {

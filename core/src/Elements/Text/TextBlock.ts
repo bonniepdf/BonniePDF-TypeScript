@@ -1,3 +1,4 @@
+import { TextFlow, type TextFlowLine } from '../../Typography/TextFlow';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { TextElementBase } from './TextElementBase';
 import { toTextAlignment, type TextAlignmentInput } from '../../Normalize/toEnum';
@@ -39,7 +40,7 @@ export type TextBlockOptions = TextElementOptions &
     firstLineIndent?: LengthInput;
     /** Gap after each paragraph. Accepts a length: `8`, `'3mm'`, or `{ value, unit }`. */
     paragraphSpacing?: LengthInput;
-    /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. */
+    /** Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify' | 'start' | 'end'`. */
     alignment?: TextAlignmentInput;
   };
 
@@ -49,6 +50,7 @@ export type TextBlockOptions = TextElementOptions &
  */
 export class TextBlock extends TextElementBase implements IStatefulElement, IRoleProvider {
   private cachedContentWidth = -1;
+  private _bidiLines?: (TextFlowLine | undefined)[];
   private cachedLines?: string[];
 
   // State tracking for multipage rendering
@@ -66,9 +68,13 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   }
   private _alignment: TextAlignment = TextAlignment.Left;
   private _alignmentExplicit = false;
+  /** @internal */
+  public get alignmentIsExplicit(): boolean {
+    return this._alignmentExplicit;
+  }
 
   /**
-   * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. When not set
+   * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify' | 'start' | 'end'`. When not set
    * explicitly, an enclosing Container whose horizontalAlignment is Start/Center/End supplies an ambient
    * default instead of the plain Left below (spec 01 "Document Model" §3.2); see `effectiveAlignment`.
    */
@@ -82,9 +88,12 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
 
   /** The alignment this render actually uses: the explicit value, or the render context's ambient. */
   private effectiveAlignment(ctx: RenderContext): TextAlignment {
-    return this._alignmentExplicit
+    const alignment = this._alignmentExplicit
       ? this._alignment
-      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Left);
+      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Start);
+    if (alignment === TextAlignment.Start) return this.isRightToLeft ? TextAlignment.Right : TextAlignment.Left;
+    if (alignment === TextAlignment.End) return this.isRightToLeft ? TextAlignment.Left : TextAlignment.Right;
+    return alignment;
   }
 
   /**
@@ -272,14 +281,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     for (let i = startLine; i < endLine; i++) {
       const isLastLine = i === lines.length - 1;
       y += this.spaceBeforeOf(i); // paragraph leading (0 when unused)
-      this.drawSingleLine(
-        ctx,
-        lines[i],
-        contentWidth,
-        y,
-        ctx.currentX + this.margin.left + this.indentOf(i),
-        isLastLine
-      );
+      this.drawSingleLine(ctx, lines[i], contentWidth, y, ctx.currentX + this.margin.left, isLastLine, i);
       y += this.effectiveLineHeight;
     }
 
@@ -300,6 +302,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public resetState(): void {
     this.lastLineRendered = -1;
     this.cachedLines = undefined;
+    this._bidiLines = undefined;
     this.cachedIndents = undefined;
     this.cachedSpaceBefore = undefined;
     this.cachedContentWidth = -1;
@@ -323,7 +326,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     for (let i = 0; i < lines.length; i++) {
       const isLastLine = i === lines.length - 1;
       y += this.spaceBeforeOf(i); // paragraph leading (0 when unused)
-      this.drawSingleLine(ctx, lines[i], contentWidth, y, ctx.currentX + this.indentOf(i), isLastLine);
+      this.drawSingleLine(ctx, lines[i], contentWidth, y, ctx.currentX, isLastLine, i);
       y += this.effectiveLineHeight;
     }
 
@@ -340,8 +343,13 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     contentWidth: number,
     y: number,
     baseX: number,
-    isLastLine: boolean
+    isLastLine: boolean,
+    lineIndex: number
   ): void {
+    const restoreDirection = TextFlow.enter(this.effectiveContentDirection, this._bidiLines?.[lineIndex]);
+    const indent = this.indentOf(lineIndex);
+    contentWidth -= indent;
+    if (!this.isRightToLeft) baseX += indent;
     // Apply letter/word spacing as canvas state around this line so the
     // painters advance by the same amount the layout reserved. No-op (and
     // byte-identical) when both are zero.
@@ -353,6 +361,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     } finally {
       if (spaced) ctx.canvas.setTextSpacing(0, 0);
       ctx.canvas.setTextFeatures?.();
+      restoreDirection();
     }
   }
 
@@ -400,7 +409,12 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       }
     } else {
       // For justified last lines, fall back to left alignment
-      const effectiveAlign = alignment === TextAlignment.Justify ? TextAlignment.Left : alignment;
+      const effectiveAlign =
+        alignment === TextAlignment.Justify
+          ? this.isRightToLeft
+            ? TextAlignment.Right
+            : TextAlignment.Left
+          : alignment;
 
       let x = baseX;
       if (effectiveAlign === TextAlignment.Center) {
@@ -536,6 +550,8 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       spaceBefore = spaceBefore.slice(0, lines.length);
     }
 
+    this._bidiLines =
+      this.isRightToLeft || TextFlow.needsBidi(this.text) ? TextFlow.mapLines(this.text, lines) : undefined;
     this.cachedLines = lines;
     this.cachedIndents = indents;
     this.cachedSpaceBefore = spaceBefore;
@@ -587,14 +603,14 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    */
   /** Ordinary word wrapping, or the whitespace-preserving form when {@link preserveWhitespace} is set. */
   protected override wrapSegment(text: string, maxWidth: number): string[] {
-    return this.preserveWhitespace
+    return this.preserveWhitespace || this.isRightToLeft || TextFlow.needsBidi(text)
       ? this.wrapPreservingWhitespace(text, maxWidth, maxWidth)
       : super.wrapSegment(text, maxWidth);
   }
 
   private wrapWithFirstIndent(segment: string, contentWidth: number): string[] {
     if (segment === '') return [];
-    if (this.preserveWhitespace) {
+    if (this.preserveWhitespace || this.isRightToLeft || TextFlow.needsBidi(segment)) {
       return this.wrapPreservingWhitespace(segment, contentWidth - this.firstLineIndent, contentWidth);
     }
     const words = segment.split(' ');

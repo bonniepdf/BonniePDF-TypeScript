@@ -3,7 +3,7 @@
 import type { ElementDescription } from './ElementDescriptionTypes';
 
 export const ELEMENT_DESCRIPTION: ElementDescription = {
-  "$comment": "Generated input for the Document Definition readers and writers (spec 15 §13). Edit this file, then run sync.mjs. Do not hand-edit the copies in the cores.",
+  "$comment": "Generated input for the Document Definition readers and writers (spec 15 Â§13). Edit this file, then run sync.mjs. Do not hand-edit the copies in the cores.",
   "format": "bonniepdf-document-definition-elements",
   "descriptionVersion": 1,
   "definition": {
@@ -88,7 +88,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "center",
         "right",
         "middle",
-        "justify"
+        "justify",
+        "start",
+        "end"
       ],
       "via": "options"
     },
@@ -97,7 +99,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "start",
         "center",
         "end",
-        "stretch"
+        "stretch",
+        "left",
+        "right"
       ],
       "via": "options"
     },
@@ -482,6 +486,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "constrained"
       ],
       "via": "options"
+    },
+    "ContentDirection": {
+      "tokens": [
+        "leftToRight",
+        "rightToLeft"
+      ],
+      "via": "options"
     }
   },
   "mixins": {
@@ -491,6 +502,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       },
       "breakAllowed": {
         "kind": "boolean"
+      },
+      "contentDirection": {
+        "kind": "enum:ContentDirection"
       }
     },
     "Bordered": {
@@ -2125,6 +2139,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "pageChrome": {
           "kind": "object:PageChrome"
+        },
+        "contentDirection": {
+          "kind": "enum:ContentDirection"
         }
       }
     },
@@ -2253,7 +2270,7 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
     }
   },
   "settingsRules": {
-    "$comment": "Cross-key rules of `settings`, evaluated in this order against the settings as written (spec 15 §5.2). `error` rules produce `incompatible-settings` when every `when` holds and any `require` does not; `sets` rules record what the generator raises the PDF version to, so later rules see the raised value. Conditions: `in` / `notIn` list tokens; `present` tests that a key is given (a non-empty list for bookmarks). Dotted keys reach into objects. Defaults apply to absent keys.",
+    "$comment": "Cross-key rules of `settings`, evaluated in this order against the settings as written (spec 15 Â§5.2). `error` rules produce `incompatible-settings` when every `when` holds and any `require` does not; `sets` rules record what the generator raises the PDF version to, so later rules see the raised value. Conditions: `in` / `notIn` list tokens; `present` tests that a key is given (a non-empty list for bookmarks). Dotted keys reach into objects. Defaults apply to absent keys.",
     "defaults": {
       "pdfVersion": "pdf-1.4",
       "conformance": "none",

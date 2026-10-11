@@ -2,6 +2,47 @@
 // Regenerate with `node schema/sync.mjs` in the specification repository.
 export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable' | 'settings-rules', Record<string, any>> = {
   "valid": {
+    "content-direction": {
+      "_fixture": {
+        "id": "document-definition/valid/content-direction",
+        "description": "Direction overrides and physical/logical alignment survive a definition round trip.",
+        "spec": "22"
+      },
+      "_expect": {
+        "pages": 1,
+        "text": [
+          "Invoice",
+          "PDF"
+        ],
+        "roundTrip": true
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "contentDirection": "rightToLeft"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Container",
+              "horizontalAlignment": "end",
+              "child": {
+                "type": "TextBlock",
+                "text": "Invoice",
+                "alignment": "start"
+              }
+            },
+            {
+              "type": "TextBlock",
+              "text": "PDF",
+              "contentDirection": "leftToRight",
+              "alignment": "end"
+            }
+          ]
+        }
+      ]
+    },
     "defaults-equivalence": {
       "_fixture": {
         "id": "document-definition/valid/defaults-equivalence",

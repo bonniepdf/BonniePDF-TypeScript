@@ -1,3 +1,4 @@
+import { ContentDirection, toContentDirection, type ContentDirectionInput } from '../Configuration/ContentDirection';
 import { IMargin } from './IMargin';
 import { IElement, RenderContext } from './IElement';
 import { Thickness } from '../Core/Thickness';
@@ -13,6 +14,28 @@ export abstract class ElementBase implements IElement, IMargin {
    * The starting Y position when rendering begins (used for Y-position tracking)
    */
   protected startingY: number = 0;
+  private _contentDirection?: ContentDirection;
+  private _inheritedContentDirection = ContentDirection.LeftToRight;
+  /** Inline direction override. Undefined inherits the enclosing direction. */
+  public get contentDirection(): ContentDirection | undefined {
+    return this._contentDirection;
+  }
+  public set contentDirection(value: ContentDirectionInput | undefined) {
+    this._contentDirection = value === undefined ? undefined : toContentDirection(value);
+  }
+  /** @internal */
+  public inheritContentDirection(value: ContentDirection): void {
+    this._inheritedContentDirection = value;
+  }
+  /** @internal */
+  public get effectiveContentDirection(): ContentDirection {
+    return this._contentDirection ?? this._inheritedContentDirection;
+  }
+  /** @internal */
+  public get isRightToLeft(): boolean {
+    return this.effectiveContentDirection === ContentDirection.RightToLeft;
+  }
+
   private _margin: Thickness = new Thickness(0);
 
   /**

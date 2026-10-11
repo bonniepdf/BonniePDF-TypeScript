@@ -1,3 +1,4 @@
+import { TextFlow } from './TextFlow';
 import type { TtfFont } from './TrueType/TtfFont';
 import type { GlyphInfo } from './Engine/Api/GlyphInfo';
 import { shapeEmbeddedText } from './EmbeddedTextShaping';
@@ -8,13 +9,14 @@ export class ShapedTextCache {
   private glyphCount = 0;
 
   public get(font: TtfFont, text: string, features?: Readonly<Record<string, number>>): readonly GlyphInfo[] {
-    if (text.length > 512) return shapeEmbeddedText(font, text, features);
+    if (text.length > 512 || (TextFlow.line?.paragraph.length ?? 0) > 512)
+      return shapeEmbeddedText(font, text, features);
     const settings = features
       ? Object.keys(features)
           .sort()
           .map(tag => [tag, features[tag]])
       : [];
-    const key = JSON.stringify(settings) + text;
+    const key = JSON.stringify(settings) + TextFlow.cacheKey + '|' + text;
     const existing = this.entries.get(key);
     if (existing) {
       this.entries.delete(key);

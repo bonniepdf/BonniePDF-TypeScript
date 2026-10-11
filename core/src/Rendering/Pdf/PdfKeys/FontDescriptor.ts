@@ -24,6 +24,9 @@ export const FontDescriptor = {
   /** Width of a representative vertical stem, in glyph-space units. */
   VerticalStemWidth: '/StemV',
 
+  /** Reference to an embedded CFF font program. */
+  CffProgram: '/FontFile3',
+
   /** Reference to the embedded TrueType font-program stream. */
   TrueTypeProgram: '/FontFile2',
 

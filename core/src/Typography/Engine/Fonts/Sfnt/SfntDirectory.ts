@@ -34,8 +34,9 @@ export class SfntDirectory {
     if (!Number.isInteger(faceIndex) || faceIndex < 0 || faceIndex >= count) argument('faceIndex');
     if (!(countOnly && collection)) {
       const sfnt = data.u32(origin);
-      if (sfnt !== 0x10000 && sfnt !== 0x74727565) unsupported('Use static TrueType outlines or CBDT bitmaps. CFF and WOFF are unsupported.');
+      if (sfnt !== 0x10000 && sfnt !== 0x74727565 && sfnt !== 0x4f54544f) unsupported('Use static TrueType or CFF 1 OpenType fonts, or CBDT bitmaps. WOFF is unsupported.');
     }
+    if (collection && data.u32(origin) === 0x4f54544f) unsupported('CFF collections are unsupported; supply an individual OTF.');
     return { origin, count };
   }
   constructor(bytes: Uint8Array, faceIndex = 0) {

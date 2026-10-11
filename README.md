@@ -147,16 +147,16 @@ A `Document` starts with its first page ready to use. Add elements in reading or
 
 Native [rotation](https://www.bonniepdf.dev/docs/typescript/rotation) supports constrained quarter turns that swap layout dimensions and free angles around the child's centre. Use `rotate({ angle, mode, contentWidth, child })`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.
 
-| Area                  | Included                                                                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Layout                | Automatic page flow, stacks, weighted rows, grids, containers, layers, clipping, rounded corners, headers, footers and page backgrounds   |
-| Text                  | Standard PDF fonts, embedded TrueType/OpenType fonts with subsetting, Unicode, emoji, rich text, alignment, decoration and fallback fonts |
-| Tables and lists      | Weighted columns, styled cells, repeating headers, ordered/unordered lists and nested content                                             |
-| Charts                | Bar, grouped bar, line, area, pie, lollipop and dot-plot charts rendered as PDF vectors or exported as SVG                                |
-| Images and codes      | JPEG, PNG with alpha, SVG drawn as vectors, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes                  |
-| Standards             | PDF/A-1 through PDF/A-4, PDF/UA-1 tagging, XMP metadata, output intents and compliance preflight                                          |
-| Security and exchange | AES-256 encryption, passwords, permissions and file attachments                                                                           |
-| Runtime               | Browser, Node.js 18+, Bun, Deno and edge runtimes; native ESM and CommonJS                                                                |
+| Area                  | Included                                                                                                                                                              |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layout                | Automatic page flow, stacks, weighted rows, grids, containers, layers, clipping, rounded corners, headers, footers and page backgrounds                               |
+| Text                  | Standard PDF fonts, embedded TrueType fonts with subsetting and static CFF OpenType (.otf) fonts, Unicode, emoji, rich text, alignment, decoration and fallback fonts |
+| Tables and lists      | Weighted columns, styled cells, repeating headers, ordered/unordered lists and nested content                                                                         |
+| Charts                | Bar, grouped bar, line, area, pie, lollipop and dot-plot charts rendered as PDF vectors or exported as SVG                                                            |
+| Images and codes      | JPEG, PNG with alpha, SVG drawn as vectors, contain/cover/fill modes, image masking, QR, Data Matrix and linear barcodes                                              |
+| Standards             | PDF/A-1 through PDF/A-4, PDF/UA-1 tagging, XMP metadata, output intents and compliance preflight                                                                      |
+| Security and exchange | AES-256 encryption, passwords, permissions and file attachments                                                                                                       |
+| Runtime               | Browser, Node.js 18+, Bun, Deno and edge runtimes; native ESM and CommonJS                                                                                            |
 
 ## Browser and server usage
 

@@ -1,7 +1,12 @@
 import type { FontFace } from './Engine/Fonts/FontFace';
 export function glyphOutlinePath(face: FontFace, glyph: number): string {
   const parts: string[] = [];
-  for (const contour of face.readGlyph(glyph).contours) {
+  const outline = face.readGlyph(glyph);
+  for (const c of outline.commands)
+    parts.push(
+      c[0] === 0 ? `M${c[1]} ${c[2]}` : c[0] === 1 ? `L${c[1]} ${c[2]}` : c[0] === 2 ? `C${c.slice(1).join(' ')}` : 'Z'
+    );
+  for (const contour of outline.contours) {
     if (contour.length < 2) continue;
     const points: { x: number; y: number; onCurve: boolean }[] = [];
     for (let i = 0; i < contour.length; i++) {

@@ -1,3 +1,4 @@
+import { cffProgram, cffEncoding } from '../../Typography/CffProgramWriter';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 import * as PdfKeys from '../Pdf/PdfKeys';
 import { EmbeddedFontInfo } from '../../Typography/EmbeddedFontInfo';
@@ -43,6 +44,7 @@ export class FontWriter {
   public writeEmbeddedTtfFont(type0Id: number, fontInfo: EmbeddedFontInfo, enableSubsetting = true): number {
     const font = fontInfo.font as TtfFont;
     const tracker = fontInfo.tracker as GlyphUsageTracker;
+    if (font.hasCff) return this.writeEmbeddedCff(type0Id, fontInfo);
 
     const cidFontId = this.writer.getNewId();
     const fontDescriptorId = this.writer.getNewId();
@@ -128,6 +130,65 @@ export class FontWriter {
     return type0Id;
   }
 
+  private writeEmbeddedCff(type0Id: number, fontInfo: EmbeddedFontInfo): number {
+    const font = fontInfo.font as TtfFont,
+      tracker = fontInfo.tracker as GlyphUsageTracker,
+      name = font.postScriptName;
+    if (!/^[A-Za-z0-9_.+-]{1,127}$/.test(name)) throw new Error('Invalid CFF PostScript font name.');
+    const cid = this.writer.getNewId(),
+      descriptor = this.writer.getNewId(),
+      program = this.writer.getNewId(),
+      unicode = this.writer.getNewId(),
+      encoding = this.writer.getNewId();
+    this.writer.writeCompressedBinaryObject(
+      program,
+      new Map([[PdfKeys.Common.Subtype, '/CIDFontType0C']]),
+      cffProgram(font, name)
+    );
+    this.writeFontDescriptor(descriptor, font, name, program);
+    const system = '<< /Registry (Adobe) /Ordering (Identity) /Supplement 0 >>';
+    this.writer.writeObject(
+      encoding,
+      new Map([
+        [PdfKeys.Common.Type, '/CMap'],
+        [PdfKeys.Font.CMapName, '/BonnieCffIdentity'],
+        [PdfKeys.Font.CidSystemInfo, system],
+      ]),
+      cffEncoding(tracker.getCidToGlyphMap())
+    );
+    const gids = [...new Set(tracker.getCidToGlyphMap().values())].sort((a, b) => a - b),
+      scale = 1000 / font.unitsPerEm;
+    const widths =
+      '[ ' + gids.map(g => `${g} [ ${PdfSyntax.formatDecimal(font.getGlyphWidth(g) * scale)} ]`).join(' ') + ' ]';
+    this.writer.writeObject(
+      cid,
+      new Map([
+        [PdfKeys.Common.Type, '/Font'],
+        [PdfKeys.Common.Subtype, '/CIDFontType0'],
+        [PdfKeys.Font.BaseFont, `/${name}`],
+        [PdfKeys.Font.CidSystemInfo, system],
+        [PdfKeys.Font.Descriptor, `${descriptor} 0 R`],
+        [PdfKeys.Font.Widths, widths],
+      ])
+    );
+    const cmap = new ToUnicodeCMapBuilder();
+    for (const [code, source] of tracker.getGlyphSources()) cmap.addSourceMapping(code, source);
+    cmap.addMappings(tracker.getUsedCharToGlyphMap());
+    this.writeToUnicodeCMap(unicode, cmap.build());
+    this.writer.writeObject(
+      type0Id,
+      new Map([
+        [PdfKeys.Common.Type, '/Font'],
+        [PdfKeys.Common.Subtype, '/Type0'],
+        [PdfKeys.Font.BaseFont, `/${name}`],
+        [PdfKeys.Font.Encoding, `${encoding} 0 R`],
+        [PdfKeys.Font.DescendantFonts, `[ ${cid} 0 R ]`],
+        [PdfKeys.Font.ToUnicode, `${unicode} 0 R`],
+      ])
+    );
+    return type0Id;
+  }
+
   // ─── Private helpers ─────────────────────────────────────────────────────────
 
   private writeFontFile2(id: number, fontData: Uint8Array): void {
@@ -181,7 +242,7 @@ export class FontWriter {
       [PdfKeys.FontDescriptor.Descent, Math.round(font.descender * scale).toString()],
       [PdfKeys.FontDescriptor.CapHeight, Math.round(font.capHeight * scale).toString()],
       [PdfKeys.FontDescriptor.VerticalStemWidth, font.stemV.toString()],
-      [PdfKeys.FontDescriptor.TrueTypeProgram, `${fontFile2Id} 0 R`],
+      [font.hasCff ? PdfKeys.FontDescriptor.CffProgram : PdfKeys.FontDescriptor.TrueTypeProgram, `${fontFile2Id} 0 R`],
     ]);
     if (cidSetId > 0) dict.set(PdfKeys.FontDescriptor.CidSet, `${cidSetId} 0 R`);
     this.writer.writeObject(id, dict);

@@ -6,6 +6,9 @@ export const Font = {
   /** Character encoding or CMap used to interpret the font's character codes. */
   Encoding: '/Encoding',
 
+  /** Name identifying an embedded character mapping. */
+  CMapName: '/CMapName',
+
   /** Array containing the descendant CID font of a composite font. */
   DescendantFonts: '/DescendantFonts',
 

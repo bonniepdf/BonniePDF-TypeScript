@@ -9,6 +9,8 @@ each change to `core/`.
 
 ## Unreleased
 
+- Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.
+
 - Add opt-in colour emoji with `emojiRendering: 'colour'`: COLRv0 vector layers and CBDT PNG artwork in PDF and SVG, preserving original Unicode sequences for extraction. `'outline'` remains the default; the existing Emojis & Unicode example stays monochrome. Use `generateBytesAsync()` for bitmap emoji.
 - Decode indexed PNG transparency, including packed 1/2/4-bit palette indices, partial alpha and omitted opaque entries.
 

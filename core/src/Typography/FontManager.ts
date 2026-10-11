@@ -105,7 +105,7 @@ export class FontManager {
   private static readonly fallbackCache = new Map<string, TtfFont | null>();
 
   /**
-   * Registers a TrueType font from raw bytes.
+   * Registers a TrueType or static CFF OpenType font from raw bytes.
    * The family name is read from the font's name table (ID 1) unless overridden.
    *
    * ```typescript
@@ -129,7 +129,7 @@ export class FontManager {
   }
 
   /**
-   * Registers a TrueType font from a file path (Node.js only).
+   * Registers a TrueType or static CFF OpenType font from a file path (Node.js only).
    * Loading is deferred until the font is first needed.
    *
    * Called automatically by `autoRegisterBundledFonts()`.

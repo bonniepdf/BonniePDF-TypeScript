@@ -61,6 +61,8 @@ export const toTextAlignment = resolver<TextAlignmentToken, TextAlignment>({
   right: TextAlignment.Right,
   middle: TextAlignment.Middle,
   justify: TextAlignment.Justify,
+  start: TextAlignment.Start,
+  end: TextAlignment.End,
 });
 
 export type HorizontalAlignmentInput = HorizontalAlignment | HorizontalAlignmentToken;
@@ -69,6 +71,8 @@ export const toHorizontalAlignment = resolver<HorizontalAlignmentToken, Horizont
   center: HorizontalAlignment.Center,
   end: HorizontalAlignment.End,
   stretch: HorizontalAlignment.Stretch,
+  left: HorizontalAlignment.Left,
+  right: HorizontalAlignment.Right,
 });
 
 export type VerticalAlignmentInput = VerticalAlignment | VerticalAlignmentToken;

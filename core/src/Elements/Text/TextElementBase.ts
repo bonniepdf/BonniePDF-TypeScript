@@ -1,3 +1,4 @@
+import { TextFlow } from '../../Typography/TextFlow';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
@@ -37,7 +38,7 @@ export abstract class TextElementBase extends ElementBase {
    */
   public static readonly CurrentPageToken = '{{CurrentPage}}';
 
-  // ── Font properties (backing fields + explicit-set tracking) ─────────────
+  // â”€â”€ Font properties (backing fields + explicit-set tracking) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private _featureStyle = new TextStyle();
   /** OpenType feature overrides for embedded text, such as { kern: 0, liga: 0 }. */
@@ -60,7 +61,7 @@ export abstract class TextElementBase extends ElementBase {
    */
   public get fontName(): string {
     // While a document with its own fonts is being generated, a family is resolved
-    // against them (spec 16 §4). Otherwise the name resolved when the family was set stands.
+    // against them (spec 16 Â§4). Otherwise the name resolved when the family was set stands.
     if (this._fontFamily !== undefined && getActiveDocumentFonts()) {
       return FontFamilyResolver.resolve(this._fontFamily, this._fontWeight, this._italic);
     }
@@ -79,7 +80,7 @@ export abstract class TextElementBase extends ElementBase {
     super();
   }
 
-  // ── Nullable backing fields for cascade-aware properties ─────────────────
+  // â”€â”€ Nullable backing fields for cascade-aware properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   private _fontSize?: number;
   private _textColor?: Color;
@@ -137,7 +138,7 @@ export abstract class TextElementBase extends ElementBase {
    * Thickness of the decoration lines in points. Null = the default derived from
    * font size (`max(0.5, fontSize / 18)`).
    *
-   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (Â§4A.3).
    */
   public get decorationThickness(): number | undefined {
     return this._decorationThickness;
@@ -153,7 +154,7 @@ export abstract class TextElementBase extends ElementBase {
    * Default 0. Changes advances, so it is reflected in measurement and both
    * PDF and SVG output.
    *
-   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (Â§4A.3).
    */
   public get letterSpacing(): number {
     return this._letterSpacing;
@@ -167,7 +168,7 @@ export abstract class TextElementBase extends ElementBase {
   /**
    * Word spacing in points, added after every space. Default 0.
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (Â§4A.3).
    */
   public get wordSpacing(): number {
     return this._wordSpacing;
@@ -188,7 +189,7 @@ export abstract class TextElementBase extends ElementBase {
     this._decorationStyle = toDecorationStyle(value);
   }
 
-  // ── Smart font getters/setters (mark _fontExplicit on assignment) ─────────
+  // â”€â”€ Smart font getters/setters (mark _fontExplicit on assignment) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Font family name (e.g. "Helvetica", "Times", "Arial") for weight/italic resolution.
@@ -237,7 +238,7 @@ export abstract class TextElementBase extends ElementBase {
     this.resolveFontName();
   }
 
-  // ── Cascade application ───────────────────────────────────────────────────
+  // â”€â”€ Cascade application â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Applies style properties from `style` only for properties that have not
@@ -299,7 +300,7 @@ export abstract class TextElementBase extends ElementBase {
     }
   }
 
-  // ── Font resolution ───────────────────────────────────────────────────────
+  // â”€â”€ Font resolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Resolves fontName from fontFamily + fontWeight + italic via FontFamilyResolver.
@@ -314,7 +315,7 @@ export abstract class TextElementBase extends ElementBase {
     this._fontName = FontFamilyResolver.resolve(family, this._fontWeight, this._italic);
   }
 
-  // ── Line height ───────────────────────────────────────────────────────────
+  // â”€â”€ Line height â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Line-height multiplier applied to font size. Defaults to 1.2 if not set.
@@ -334,7 +335,7 @@ export abstract class TextElementBase extends ElementBase {
     return this.fontSize * this.lineHeight;
   }
 
-  // ── Text measurement and wrapping ─────────────────────────────────────────
+  // â”€â”€ Text measurement and wrapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /**
    * Computes wrapped lines for text.
@@ -481,14 +482,19 @@ export abstract class TextElementBase extends ElementBase {
    * Handles substitution tokens like {{TotalPages}} by measuring a placeholder.
    */
   protected measureTextWidth(text: string): number {
-    // Replace tokens with estimated placeholders (2 digits) for measurement
-    const measuredText = text
-      .replace(TextElementBase.TotalPagesToken, '00')
-      .replace(TextElementBase.CurrentPageToken, '00');
-    return (
-      FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize, this.fontFeatures) +
-      this.spacingWidth(measuredText)
-    );
+    const restoreDirection = TextFlow.enter(this.effectiveContentDirection);
+    try {
+      // Replace tokens with estimated placeholders (2 digits) for measurement
+      const measuredText = text
+        .replace(TextElementBase.TotalPagesToken, '00')
+        .replace(TextElementBase.CurrentPageToken, '00');
+      return (
+        FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize, this.fontFeatures) +
+        this.spacingWidth(measuredText)
+      );
+    } finally {
+      restoreDirection();
+    }
   }
 
   /**

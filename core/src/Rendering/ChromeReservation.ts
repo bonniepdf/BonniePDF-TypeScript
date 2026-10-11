@@ -1,3 +1,4 @@
+import { applyContentDirection } from '../Elements/ContentDirectionResolver';
 import type { IElement } from '../Elements/IElement';
 import type { DocumentSettings } from '../Configuration/DocumentSettings';
 import type { RenderContext } from './RenderContext';
@@ -42,14 +43,15 @@ export function chromeReservationFor(
   return (pageNumber: number): ChromeReservation => {
     const contentWidth = ctx.pageSize.width - ctx.margin * 2;
     return {
-      header: measure(headerTemplate?.(pageNumber), contentWidth),
-      footer: measure(footerTemplate?.(pageNumber), contentWidth),
+      header: measure(headerTemplate?.(pageNumber), contentWidth, settings),
+      footer: measure(footerTemplate?.(pageNumber), contentWidth, settings),
     };
   };
 }
 
-function measure(element: IElement | undefined, contentWidth: number): number {
+function measure(element: IElement | undefined, contentWidth: number, settings: DocumentSettings): number {
   if (!element) return 0;
+  applyContentDirection(element, settings.contentDirection);
   const height = element.measureHeight(contentWidth);
   return Number.isFinite(height) && height > 0 ? height : 0;
 }

@@ -206,13 +206,14 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     const [childWidths] = this.calculateChildWidths(this.getContentWidth(width));
     if (first) ctx.currentY += this.margin.top;
     const startY = ctx.currentY;
-    let x = ctx.currentX + this.margin.left;
+    let x = ctx.currentX + this.margin.left + (this.isRightToLeft ? this.getContentWidth(width) : 0);
     let endY = startY;
     let progress = false;
     let allDone = true;
 
     for (let i = 0; i < this._children.length; i++) {
       const child = this._children[i];
+      if (this.isRightToLeft) x -= childWidths[i];
       if (!done[i]) {
         ctx.currentX = x;
         ctx.currentY = startY;
@@ -239,7 +240,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       }
 
       if (!done[i]) allDone = false;
-      x += childWidths[i] + this.spacing;
+      x += this.isRightToLeft ? -this.spacing : childWidths[i] + this.spacing;
     }
 
     ctx.currentX = entryX;
@@ -333,11 +334,13 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
     }
 
     const originalX = ctx.currentX;
+    let offset = 0;
 
     // Render each child
     for (let i = 0; i < this._children.length; i++) {
       const child = this._children[i];
       const childWidth = childWidths[i];
+      ctx.currentX = originalX + (this.isRightToLeft ? contentWidth - offset - childWidth : offset);
       const childHeight = childHeights[i];
 
       // Calculate vertical offset based on alignment
@@ -364,7 +367,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
       }
 
       ctx.currentY = yBefore;
-      ctx.currentX += childWidth + this.spacing;
+      offset += childWidth + this.spacing;
     }
 
     // Restore original X and advance Y by max height

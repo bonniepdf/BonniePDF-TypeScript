@@ -1,8 +1,10 @@
 /** Defines horizontal alignment within an available layout region. */
 export class HorizontalAlignment {
-  /**
-   * Align to the start (left for LTR languages)
-   */
+  /** Physical left edge, independent of direction. */
+  static readonly Left = 'Left' as const;
+  /** Physical right edge, independent of direction. */
+  static readonly Right = 'Right' as const;
+  /** Inline start: left in LTR, right in RTL. */
   static readonly Start = 'Start' as const;
   /**
    * Align to the center

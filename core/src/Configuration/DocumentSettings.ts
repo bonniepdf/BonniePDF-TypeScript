@@ -1,3 +1,4 @@
+import { ContentDirection, toContentDirection, type ContentDirectionInput } from './ContentDirection';
 import { applyOptions } from '../Core/applyOptions';
 import { EmojiRendering } from './EmojiRendering';
 import { PdfSize } from './PdfSize';
@@ -38,6 +39,7 @@ import type { PageTemplate } from './PageTemplate';
 /** Every settable {@link DocumentSettings} property. */
 export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'emojiRendering',
+  'contentDirection',
   'pageSize',
   'pageColor',
   'orientation',
@@ -132,6 +134,15 @@ export type DocumentSettingsOptions = Partial<
 
 /** Configures document-wide page, output, security, accessibility, and metadata behavior. */
 export class DocumentSettings {
+  private _contentDirection = ContentDirection.LeftToRight;
+  /** Default inline progression and paragraph base direction. */
+  public get contentDirection(): ContentDirection {
+    return this._contentDirection;
+  }
+  public set contentDirection(value: ContentDirectionInput) {
+    this._contentDirection = toContentDirection(value);
+  }
+
   private _emojiRendering: EmojiRendering = EmojiRendering.Outline;
   /** Emoji paint mode; colour requires a registered colour font. Defaults to outlines. */
   public get emojiRendering(): EmojiRendering | 'outline' | 'colour' {

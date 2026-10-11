@@ -16,4 +16,8 @@ export enum TextAlignment {
 
   /** Text is justified to fill the full width (spreads words evenly) */
   Justify = 4,
+  /** Inline start, resolved using content direction. */
+  Start = 5,
+  /** Inline end, resolved using content direction. */
+  End = 6,
 }

@@ -766,7 +766,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       tb.fontName = content.fontName;
       tb.fontSize = content.fontSize;
       tb.color = textColor;
-      tb.alignment = content.alignment;
+      if (content.alignmentIsExplicit) tb.alignment = content.alignment;
+      tb.contentDirection = content.effectiveContentDirection;
       content = tb;
     }
 
@@ -848,7 +849,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     try {
       const startX = ctx.currentX;
-      let currentX = startX;
+      let currentX = startX + (this.isRightToLeft ? widths.reduce((a, b) => a + b, 0) : 0);
 
       // `col` tracks the column the cell starts in, which runs ahead of the cell
       // index `i` once any cell in the row spans more than one column.
@@ -865,6 +866,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
           colWidth += widths[col + j];
         }
 
+        if (this.isRightToLeft) currentX -= colWidth;
         capture.openCell(cell, currentX, colWidth);
 
         let childTag: ChildTagToken | null = null;
@@ -896,7 +898,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
           capture.closeCell(cell);
         }
 
-        currentX += colWidth;
+        if (!this.isRightToLeft) currentX += colWidth;
         col += span;
       }
 

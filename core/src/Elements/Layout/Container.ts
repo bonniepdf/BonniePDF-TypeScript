@@ -348,7 +348,11 @@ export class Container extends BorderedElementBase implements IContentContainer,
     const frame = this.absorbsTable;
     let childWidth = effectiveWidth - this.padding.left - this.padding.right - inset.horizontalWidth;
     let childX = boxX + inset.left + this.padding.left;
-    const align = this.horizontalAlignment;
+    let align = this.horizontalAlignment;
+    if (align === HorizontalAlignment.Left) align = HorizontalAlignment.Start;
+    else if (align === HorizontalAlignment.Right) align = HorizontalAlignment.End;
+    else if (this.isRightToLeft && align === HorizontalAlignment.Start) align = HorizontalAlignment.End;
+    else if (this.isRightToLeft && align === HorizontalAlignment.End) align = HorizontalAlignment.Start;
     if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
       const preferred = child.getPreferredWidth();
       if (preferred > 0 && preferred < childWidth) {
@@ -369,7 +373,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
     let status: RenderStatus;
     const token = beginChildTag(ctx, child);
     const savedAmbient = ctx.ambientHorizontalTextAlignment;
-    const newAmbient = Container.ambientTextAlignmentFor(this.horizontalAlignment);
+    const newAmbient = this.ambientTextAlignmentFor(this.horizontalAlignment);
     if (newAmbient !== undefined) ctx.ambientHorizontalTextAlignment = newAmbient;
     try {
       status = child.renderStateful(ctx, childWidth);
@@ -516,7 +520,11 @@ export class Container extends BorderedElementBase implements IContentContainer,
     ctx.currentY += inset.top + this.padding.top;
     let childWidth = effectiveWidth - this.padding.left - this.padding.right - inset.horizontalWidth;
 
-    const align = this.horizontalAlignment;
+    let align = this.horizontalAlignment;
+    if (align === HorizontalAlignment.Left) align = HorizontalAlignment.Start;
+    else if (align === HorizontalAlignment.Right) align = HorizontalAlignment.End;
+    else if (this.isRightToLeft && align === HorizontalAlignment.Start) align = HorizontalAlignment.End;
+    else if (this.isRightToLeft && align === HorizontalAlignment.End) align = HorizontalAlignment.Start;
     if (align === HorizontalAlignment.Center || align === HorizontalAlignment.End) {
       const preferred = this.child.getPreferredWidth();
       if (preferred > 0 && preferred < childWidth) {
@@ -567,7 +575,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
     const token = beginChildTag(ctx, this.child);
     const savedAmbient = ctx.ambientHorizontalTextAlignment;
-    const newAmbient = Container.ambientTextAlignmentFor(this.horizontalAlignment);
+    const newAmbient = this.ambientTextAlignmentFor(this.horizontalAlignment);
     if (newAmbient !== undefined) ctx.ambientHorizontalTextAlignment = newAmbient;
     try {
       // Render the child statelessly (atomic), matching the .NET reference
@@ -587,14 +595,18 @@ export class Container extends BorderedElementBase implements IContentContainer,
    * (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch and unset
    * (undefined) return undefined, leaving whatever ambient an enclosing container established untouched.
    */
-  private static ambientTextAlignmentFor(alignment: HorizontalAlignment | undefined): TextAlignment | undefined {
+  private ambientTextAlignmentFor(alignment: HorizontalAlignment | undefined): TextAlignment | undefined {
     switch (alignment) {
       case HorizontalAlignment.Start:
+        return this.isRightToLeft ? TextAlignment.Right : TextAlignment.Left;
+      case HorizontalAlignment.Left:
         return TextAlignment.Left;
+      case HorizontalAlignment.Right:
+        return TextAlignment.Right;
       case HorizontalAlignment.Center:
         return TextAlignment.Center;
       case HorizontalAlignment.End:
-        return TextAlignment.Right;
+        return this.isRightToLeft ? TextAlignment.Left : TextAlignment.Right;
       default:
         return undefined;
     }

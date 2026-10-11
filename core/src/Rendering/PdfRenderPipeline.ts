@@ -1,3 +1,5 @@
+import { ContentDirection } from '../Configuration/ContentDirection';
+import { applyContentDirection } from '../Elements/ContentDirectionResolver';
 import { IElement, IStatefulElement } from '../Elements/IElement';
 import { Color } from '../Core/Color';
 import { PdfSize } from '../Configuration/PdfSize';
@@ -262,9 +264,9 @@ export class PdfRenderPipeline {
       // painter's-model stream. A per-page Page.pageBackground element overrides
       // the document-level template for this page.
       if (dimensions?.pageBackground) {
-        this.renderPageSlotElement(ctx, dimensions.pageBackground, i, true);
+        this.renderPageSlotElement(ctx, dimensions.pageBackground, i, true, settings.contentDirection);
       } else {
-        this.renderPageSlot(ctx, settings.pageBackground, i, true);
+        this.renderPageSlot(ctx, settings.pageBackground, i, true, settings.contentDirection);
       }
 
       // Solid page colour: prepended last so it lands at the very front of the
@@ -286,9 +288,9 @@ export class PdfRenderPipeline {
       // margins (explicit stamps / overlays). A per-page Page.pageForeground
       // element overrides the document-level template for this page.
       if (dimensions?.pageForeground) {
-        this.renderPageSlotElement(ctx, dimensions.pageForeground, i, false);
+        this.renderPageSlotElement(ctx, dimensions.pageForeground, i, false, settings.contentDirection);
       } else {
-        this.renderPageSlot(ctx, settings.pageForeground, i, false);
+        this.renderPageSlot(ctx, settings.pageForeground, i, false, settings.contentDirection);
       }
 
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
@@ -397,6 +399,7 @@ export class PdfRenderPipeline {
 
       if (hasHeader) {
         const headerElement = settings.headerTemplate!(pageNumber);
+        applyContentDirection(headerElement, settings.contentDirection);
         if (headerElement) {
           const headerHeight = headerElement.measureHeight(contentWidth);
           ctx.currentX = startX;
@@ -409,6 +412,7 @@ export class PdfRenderPipeline {
 
       if (hasFooter) {
         const footerElement = settings.footerTemplate!(pageNumber);
+        applyContentDirection(footerElement, settings.contentDirection);
         if (footerElement) {
           const footerHeight = footerElement.measureHeight(contentWidth);
           // Centred in the bottom margin band while it fits there, flush to the
@@ -452,14 +456,15 @@ export class PdfRenderPipeline {
     ctx: RenderContext,
     template: ((pageNumber: number) => IElement | undefined) | undefined,
     pageIndex: number,
-    isBackground: boolean
+    isBackground: boolean,
+    direction: ContentDirection
   ): void {
     if (!template) return;
 
     const element = template(pageIndex + 1);
     if (!element) return;
 
-    this.renderPageSlotElement(ctx, element, pageIndex, isBackground);
+    this.renderPageSlotElement(ctx, element, pageIndex, isBackground, direction);
   }
 
   /**
@@ -473,8 +478,10 @@ export class PdfRenderPipeline {
     ctx: RenderContext,
     element: IElement,
     pageIndex: number,
-    isBackground: boolean
+    isBackground: boolean,
+    direction: ContentDirection
   ): void {
+    applyContentDirection(element, direction);
     const originalCanvas = ctx.canvas;
     const originalX = ctx.currentX;
     const originalY = ctx.currentY;

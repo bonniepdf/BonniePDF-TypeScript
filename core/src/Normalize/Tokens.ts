@@ -73,8 +73,8 @@ export type PageSizeToken =
 
 // ── Enumerations (§4A.4) ─────────────────────────────────────────────────────
 
-export type TextAlignmentToken = 'left' | 'center' | 'right' | 'middle' | 'justify';
-export type HorizontalAlignmentToken = 'start' | 'center' | 'end' | 'stretch';
+export type TextAlignmentToken = 'left' | 'center' | 'right' | 'middle' | 'justify' | 'start' | 'end';
+export type HorizontalAlignmentToken = 'start' | 'center' | 'end' | 'stretch' | 'left' | 'right';
 export type VerticalAlignmentToken = 'top' | 'middle' | 'bottom' | 'stretch';
 export type PageOrientationToken = 'portrait' | 'landscape';
 export type ImageFitModeToken = 'contain' | 'cover' | 'fill' | 'fit-height' | 'actual-size';

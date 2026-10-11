@@ -80,9 +80,12 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
   /** The alignment this render actually uses: the explicit value, or the render context's ambient. */
   private effectiveAlignment(ctx: RenderContext): TextAlignment {
-    return this._alignmentExplicit
+    const alignment = this._alignmentExplicit
       ? this._alignment
-      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Left);
+      : ((ctx.ambientHorizontalTextAlignment as TextAlignment | undefined) ?? TextAlignment.Start);
+    if (alignment === TextAlignment.Start) return this.isRightToLeft ? TextAlignment.Right : TextAlignment.Left;
+    if (alignment === TextAlignment.End) return this.isRightToLeft ? TextAlignment.Left : TextAlignment.Right;
+    return alignment;
   }
 
   /**

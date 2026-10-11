@@ -22,3 +22,4 @@ core/tests/typography/fixtures/cff.json
 core/tests/typography/fixtures/SourceSans3-CFF-LICENSE.md
 core/tests/typography/fixtures/SourceSerif4-CFF-LICENSE.md
 core/tests/typography/fixtures/emoji.json
+core/tests/typography/fixtures/rtl.json

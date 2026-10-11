@@ -1,5 +1,6 @@
 // Vendored file: maintained upstream and copied into this folder by tooling.
 // Do not edit it here. A hand edit fails the vendored-files check; see VENDORED.json.
+import { CffFont } from '../Outlines/CffFont';
 import { BigEndianData } from '../../Data/BigEndianData';
 import { invalid, unsupported } from '../../Api/FontError';
 import { SfntDirectory } from './SfntDirectory';
@@ -21,6 +22,7 @@ export class TrueTypeFont {
   readonly #tables: ReadonlyMap<string, FontTable>;
   readonly #cache = new Map<number, DecodedOutline>();
   private cachedPoints = 0;
+  readonly cff: CffFont | null;
   private readonly locations: number[];
   private readonly metricCount: number;
   private readonly characterMap: CharacterMap;
@@ -35,6 +37,7 @@ export class TrueTypeFont {
     this.faceIndex = options.faceIndex ?? 0;
     const directory = new SfntDirectory(this.#data.copy(), this.faceIndex);
     this.#tables = directory.tables; this.faceCount = directory.faceCount;
+    if (this.hasTable('CFF2')) unsupported('CFF2 fonts are unsupported; supply a static CFF 1 font.');
     if (this.hasTable('fvar')) unsupported('Variable fonts are unsupported; use a static font.');
     const d = this.#data, head = this.tableOffset('head', 54), hhea = this.tableOffset('hhea', 36);
     this.unitsPerEm = d.u16(head + 18);
@@ -52,7 +55,8 @@ export class TrueTypeFont {
         if (relative > this.#tables.get('glyf')!.length || (i > 0 && glyf + relative < this.locations[i - 1])) invalid('Invalid glyph locations.');
         this.locations[i] = glyf + relative;
       }
-    } else if (!this.hasTable('CBDT')) unsupported('Font must contain TrueType outlines or CBDT colour bitmaps.');
+    } else if (!this.hasTable('CBDT') && !this.hasTable('CFF ')) unsupported('Font must contain TrueType outlines or CBDT colour bitmaps.');
+    this.cff = this.hasTable('CFF ') ? new CffFont(this.getTableData('CFF ')!, this.glyphCount, this.unitsPerEm, this.outlineLimits) : null;
     const cmap = this.getTableData('cmap'); if (!cmap) invalid("Missing or truncated 'cmap' FontTable.");
     this.characterMap = new CharacterMap(cmap, this.glyphCount);
     this.metrics = new FontMetrics(this.getTableData('head')!, this.getTableData('hhea')!, this.getTableData('OS/2'), this.getTableData('post'));
@@ -71,7 +75,7 @@ export class TrueTypeFont {
     this.validateGlyph(id); const p = this.tableOffset('hmtx');
     return this.#data.i16(id < this.metricCount ? p + id * 4 + 2 : p + this.metricCount * 4 + (id - this.metricCount) * 2);
   }
-  readGlyph(id: number): Glyph { return this.decodeGlyph(id, 0, new OutlineReadContext(this.outlineLimits)).glyph.clone(); }
+  readGlyph(id: number): Glyph { this.validateGlyph(id); return this.cff ? this.cff.readGlyph(id) : this.decodeGlyph(id, 0, new OutlineReadContext(this.outlineLimits)).glyph.clone(); }
   private decodeGlyph(id: number, depth: number, context: OutlineReadContext): DecodedOutline {
     this.validateGlyph(id); if (depth > this.outlineLimits.maxDepth) invalid('Outline depth limit exceeded.');
     const cached = this.#cache.get(id);

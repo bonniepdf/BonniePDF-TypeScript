@@ -24,7 +24,11 @@ export class TtfFont {
   }
   /** @internal */
   public get hasOutlines(): boolean {
-    return this.tables.has('glyf') && this.tables.has('loca');
+    return this.hasCff || (this.tables.has('glyf') && this.tables.has('loca'));
+  }
+  /** @internal */
+  public get hasCff(): boolean {
+    return this.tables.has('CFF ');
   }
   private numberOfHMetrics = 0;
 

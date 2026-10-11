@@ -872,7 +872,7 @@ export class SvgCanvas implements ICanvas {
             g.offsetY === 0 &&
             !g.isMark
         );
-      if (!simple) {
+      if (font.hasCff || !simple) {
         const paths: string[] = [];
         for (const g of glyphs) {
           const d = glyphOutlinePath(font.engineFace, g.id);

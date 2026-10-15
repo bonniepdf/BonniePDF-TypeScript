@@ -14,6 +14,7 @@ import { GlyphFilter } from '../Common/GlyphFilter';
 import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
 import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 import { FirstGlyphSet } from '../Common/FirstGlyphSet';
+import { ContextFormat3, inputsWithin, backtrackCharge } from '../Common/ContextFormat3';
 
 export class GlyphSubstitution {
 
@@ -23,6 +24,10 @@ export class GlyphSubstitution {
   private readonly lookupList: number = 0;
   private readonly headers!: LookupHeaderCache;
   private readonly firstGlyphs = new Map<number, FirstGlyphSet | null>();
+  private readonly contexts = new Map<number, (ContextFormat3 | null)[] | null>();
+  // The plans of the lookup applyAt last served, so a run of glyphs does not look them up per glyph.
+  private selected = -1;
+  private selectedContexts: (ContextFormat3 | null)[] | null = null;
   private readonly glyphCount: number = 0;
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
@@ -52,12 +57,15 @@ export class GlyphSubstitution {
       this.activeRule = this.rules[i];
       let lookup = this.lookups[i];
       const first = this.firstGlyphSet(lookup);
-      const rejectedCharge = first === null ? -1 : this.rejectedCharge(lookup);
+      const rejection = first === null ? null : this.rejectedCharge(lookup);
+      const rejectedCharge = rejection === null ? -1 : rejection.charge, inputCharge = rejection === null ? 0 : rejection.inputCharge;
+      // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+      const charged = inputCharge !== 0 ? this.contextPlans(lookup) : null;
       if (this.isReverse(lookup))
       {
         for (let at = glyphs.length - 1; at >= 0; at--) {
           const rejected = first !== null && !first.contains(glyphs[at].id);
-          if (rejected && rejectedCharge >= 0) this.chargeSubtables(rejectedCharge);
+          if (rejected && rejectedCharge >= 0) this.chargeSubtables(rejectedCharge + inputCharge * inputsWithin(charged, glyphs.length) + backtrackCharge(charged, glyphs, at));
           else this.applyAt(lookup, glyphs, at, 0, rejected);
         }
       }
@@ -66,7 +74,7 @@ export class GlyphSubstitution {
         {
           const rejected = first !== null && !first.contains(glyphs[at].id);
           let consumed: number;
-          if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge); consumed = 0; }
+          if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge + inputCharge * inputsWithin(charged, glyphs.length) + backtrackCharge(charged, glyphs, at)); consumed = 0; }
           else consumed = this.applyAt(lookup, glyphs, at, 0, rejected);
           at += Math.max(consumed, 1);
           if (glyphs.length > this.limits.maxGlyphs)
@@ -91,10 +99,19 @@ export class GlyphSubstitution {
   }
 
   private ignored(glyph: ShapingGlyph, flags: number, set: number): boolean { return (this.arabic && glyph.scalar !== 0x200c && glyph.scalar !== 0x200d && Unicode.isIgnorable(glyph.scalar)) || this.filter.ignored(glyph.id,flags,set); }
-  private enabled(glyph: ShapingGlyph): boolean { return this.activeRule == null || this.activeRule.value(glyph.featureCluster, this.charge, glyph.mirrored, glyph.joiningForm) != 0; }
+  private enabled(glyph: ShapingGlyph): boolean { return this.activeRule == null || this.ruleValue(glyph) != 0; }
 
-  // A lookup's first-glyph set, or null when any subtable reads before its coverage
-  // test (contextual format 3) or fails the checks that precede it.
+  // The active rule's value; when it cannot depend on the glyph (LookupRule.constant), its
+  // operations are charged in one step instead of one at a time.
+  private ruleValue(glyph: ShapingGlyph): number {
+    const constant = this.activeRule!.constant();
+    if (constant !== null) { this.chargeSubtables(constant.ticks); return constant.value; }
+    return this.activeRule!.value(glyph.featureCluster, this.charge, glyph.mirrored, glyph.joiningForm);
+  }
+
+  // A lookup's first-glyph set, or null when any subtable fails the checks that precede its
+  // coverage test. A format 3 context contributes its first input coverage when it has a
+  // plan (ContextFormat3); without one it makes the set null.
   private firstGlyphSet(index: number): FirstGlyphSet | null {
     let first = this.firstGlyphs.get(index);
     if (first === undefined) { first = this.buildFirstGlyphs(index); this.firstGlyphs.set(index, first); }
@@ -112,7 +129,11 @@ export class GlyphSubstitution {
           type = this.data.u16(sub + 2);
           sub = checked(sub + this.data.offset32(sub + 4));
         }
-        if ((type === 5 || type === 6) && this.data.u16(sub) === 3) return null;
+        if ((type === 5 || type === 6) && this.data.u16(sub) === 3) {
+          const plan = this.contextPlans(index)?.[i] ?? null;
+          if (plan === null || !first.addCoverage(this.data, plan.firstInputOffset)) return null;
+          continue;
+        }
         if (!first.addCoverage(this.data, this.data.relative16(sub, sub + 2))) return null;
       }
       return first;
@@ -121,18 +142,76 @@ export class GlyphSubstitution {
     }
   }
 
-  // What applyAt charges for every rejected glyph of this lookup, when that cannot
-  // depend on the glyph: a constant feature rule and no glyph filtering. Otherwise -1.
-  private rejectedCharge(index: number): number {
+  // What applyAt charges for every rejected glyph of this lookup, apart from what depends on
+  // the run, when the glyph cannot change it: a constant feature rule and no glyph filtering.
+  // Otherwise null. Each format 3 context adds inputCharge when its input fits in the run
+  // (inputsWithin), as its first input test is reached only then, and the tests of a
+  // backtrack longer than one glyph (backtrackCharge).
+  private rejectedCharge(index: number): { charge: number; inputCharge: number } | null {
     const header = this.headers.get(index);
-    if (this.arabic || (header.flags & 0xff1e) !== 0 || this.limits.maxNesting < 0) return -1;
+    if (this.arabic || (header.flags & 0xff1e) !== 0 || this.limits.maxNesting < 0) return null;
     let value = 1, ticks = 0;
     if (this.activeRule !== null) {
       const constant = this.activeRule.constant();
-      if (constant === null) return -1;
+      if (constant === null) return null;
       value = constant.value; ticks = constant.ticks;
     }
-    return 1 + ticks + (value !== 0 ? header.count : 0);
+    if (value === 0) return { charge: 1 + ticks, inputCharge: 0 };
+    let charge = 1 + ticks + header.count;
+    const plans = this.contextPlans(index);
+    if (plans === null) return { charge, inputCharge: 0 };
+    for (const plan of plans) if (plan !== null && plan.chained) charge += 1 + (plan.backtrack.length < 2 ? plan.backtrack.length : 0);
+    return { charge, inputCharge: 1 + ticks };
+  }
+
+  // Each subtable's format 3 plan (null where it has none), or null when it has none at all.
+  private contextPlans(index: number): (ContextFormat3 | null)[] | null {
+    let plans = this.contexts.get(index);
+    if (plans === undefined) { plans = this.buildContexts(index); this.contexts.set(index, plans); }
+    return plans;
+  }
+
+  private buildContexts(index: number): (ContextFormat3 | null)[] | null {
+    let header;
+    try { header = this.headers.get(index); } catch { return null; }
+    if (header.type !== 5 && header.type !== 6 && header.type !== 7) return null;
+    let plans: (ContextFormat3 | null)[] | null = null;
+    for (let i = 0; i < header.count; i++) {
+      try {
+        let sub = this.data.relative16(header.offset, header.offset + 6 + i * 2), type = header.type;
+        if (type === 7) {
+          if (this.data.u16(sub) !== 1 || this.data.u16(sub + 2) === 7) continue;
+          type = this.data.u16(sub + 2);
+          sub = checked(sub + this.data.offset32(sub + 4));
+        }
+        if (type !== 5 && type !== 6) continue;
+        const plan = ContextFormat3.tryBuild(this.data, this.reads, sub, type === 6);
+        if (plan === null) continue;
+        if (plans === null) plans = new Array<ContextFormat3 | null>(header.count).fill(null);
+        plans[i] = plan;
+      } catch { /* left to subtable */ }
+    }
+    return plans;
+  }
+
+  // Charges what context charges for a glyph that the plan's first input coverage does not
+  // list: the walk back over the backtrack, each backtrack test it reaches (a test fails at
+  // the first uncovered glyph), then the first input test when the input fits.
+  private chargeContext(plan: ContextFormat3, glyphs: ShapingGlyph[], at: number, flags: number, markSet: number): void {
+    if (plan.chained) {
+      let position = this.walk(glyphs, at, -1, flags, markSet);
+      const backtrack = plan.backtrack;
+      if (backtrack.length <= glyphs.length)
+        for (let j = 0; j < backtrack.length; j++) {
+          this.tick();
+          if (position < 0 || position >= glyphs.length || !backtrack[j].covers(glyphs[position].id)) break;
+          if (j + 1 < backtrack.length) position = this.walk(glyphs, position, -1, flags, markSet);
+        }
+    }
+    if (plan.inputCount <= glyphs.length) {
+      this.tick();
+      this.enabled(glyphs[at]);
+    }
   }
 
   // Charges what the subtable loop would charge for a glyph no subtable covers.
@@ -152,10 +231,26 @@ export class GlyphSubstitution {
     let lookup = header.offset, type = header.type, flags = header.flags, count = header.count, markSet = header.markSet;
     if (this.ignored(glyphs[at], flags, markSet))
       return 0;
-    if (rejected) { this.chargeSubtables(count); return 0; }
+    if (index !== this.selected) { this.selectedContexts = this.contextPlans(index); this.selected = index; }
+    const plans = this.selectedContexts;
+    if (rejected) {
+      if (plans === null) { this.chargeSubtables(count); return 0; }
+      for (let i = 0; i < count; i++) {
+        this.tick();
+        const plan = plans[i];
+        if (plan !== null) this.chargeContext(plan, glyphs, at, flags, markSet);
+      }
+      return 0;
+    }
     for (let i = 0; i < count; i++)
     {
       this.tick();
+      // A format 3 context that cannot start here is charged without being read.
+      const plan = plans === null ? null : plans[i];
+      if (plan !== null && !plan.firstInput.covers(glyphs[at].id)) {
+        this.chargeContext(plan, glyphs, at, flags, markSet);
+        continue;
+      }
       let sub = this.data.relative16(lookup, lookup + 6 + i * 2);
       let result = this.subtable(type, sub, glyphs, at, depth, flags, markSet);
       if (result != 0)
@@ -231,7 +326,7 @@ export class GlyphSubstitution {
         invalid("Invalid alternate substitution.");
       let set = this.data.relative16(sub, sub + 6 + coverage * 2), count = this.data.u16(set);
       this.data.check(set + 2, count * 2);
-      let value = this.activeRule == null ? 1 : this.activeRule.value(glyphs[at].featureCluster, this.charge, glyphs[at].mirrored, glyphs[at].joiningForm);
+      let value = this.activeRule == null ? 1 : this.ruleValue(glyphs[at]);
       if (value < 1 || value > count) return 0;
       this.setGlyph(glyphs[at], this.data.u16(set + value * 2));
       return 1;
@@ -532,3 +627,4 @@ export class GlyphSubstitution {
     return Math.max(1, end < 0 ? 1 : end - at);
   }
 }
+

@@ -4,13 +4,21 @@ import { BigEndianData } from '../../Data/BigEndianData';
 import { checked, divide } from '../../Data/Integer';
 import { invalid, unsupported } from '../../Api/FontError';
 import { ShapingGlyph } from './ShapingGlyph';
-import { LayoutReadCache } from './OpenTypeLayout';
+import { LayoutReadCache, OpenTypeLayout } from './OpenTypeLayout';
+import { CoverageMap, ClassMap } from './CoverageMap';
 import * as UnicodeData from '../../Unicode/Generated/UnicodeData';
 
 export class GlyphFilter {
 
   private readonly data!: BigEndianData;
   private readonly reads = new LayoutReadCache();
+  // The glyph class definition's offset (0 for none) and map, read on first use; -1 until a
+  // read succeeds, so a table that cannot be read throws on every call as before.
+  private classOffset = -1;
+  private classMap: ClassMap | null = null;
+  private attachOffset = -1;
+  private attachMap: ClassMap | null = null;
+  private readonly markSets: (CoverageMap | undefined)[] = [];
 
   constructor(bytes: Uint8Array | null) {
     if (bytes != null)
@@ -18,9 +26,16 @@ export class GlyphFilter {
   }
 
   class(glyph: number): number {
-    if (this.data == null || this.data.u16(4) == 0)
+    if (this.data == null)
       return 0;
-    let kind = this.reads.class(this.data, this.data.u16(4), glyph);
+    if (this.classOffset < 0) {
+      const offset = this.data.u16(4);
+      this.classMap = offset === 0 ? null : this.reads.classMap(this.data, offset);
+      this.classOffset = offset;
+    }
+    if (this.classOffset === 0)
+      return 0;
+    let kind = this.classMap !== null ? this.classMap.class(glyph) : OpenTypeLayout.class(this.data, this.classOffset, glyph);
     if (kind > 4)
       invalid("Invalid GDEF glyph class.");
     return kind;
@@ -65,11 +80,23 @@ export class GlyphFilter {
       return false;
     if (markSet >= 0)
     {
+      const known = this.markSets[markSet];
+      if (known !== undefined) return !known.covers(glyph);
       let sets = this.data.u16(12), delta = this.data.offset32(sets + 4 + markSet * 4);
       if (delta == 0)
         invalid("Missing GDEF mark set coverage.");
-      return this.reads.coverage(this.data, checked(sets + delta), glyph) < 0;
+      const offset = checked(sets + delta), map = this.reads.coverageMap(this.data, offset);
+      if (map === null) return OpenTypeLayout.coverage(this.data, offset, glyph) < 0;
+      this.markSets[markSet] = map;
+      return !map.covers(glyph);
     }
-    return (flags & 0xff00) != 0 && this.reads.class(this.data, this.data.u16(10), glyph) != flags >> 8;
+    if ((flags & 0xff00) == 0)
+      return false;
+    if (this.attachOffset < 0) {
+      const offset = this.data.u16(10);
+      this.attachMap = this.reads.classMap(this.data, offset);
+      this.attachOffset = offset;
+    }
+    return (this.attachMap !== null ? this.attachMap.class(glyph) : OpenTypeLayout.class(this.data, this.attachOffset, glyph)) != flags >> 8;
   }
 }

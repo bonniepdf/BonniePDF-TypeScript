@@ -105,8 +105,13 @@ export class PdfRenderPipeline {
     }
   }
 
-  /** Safety cap - prevents infinite loops if an element never returns Complete. */
-  private static readonly maxPageGuard = 500;
+  /**
+   * Consecutive WrapRequired results tolerated before an element is abandoned.
+   * WrapRequired means the element made no progress even after a page break, so
+   * a third in a row can only loop forever. Overflow means progress was made and
+   * resets the count: an element may span any number of pages.
+   */
+  private static readonly maxWrapAttempts = 2;
 
   private static renderElementWithOverflow(element: IElement, ctx: RenderContext, contentWidth: number): void {
     // When tagging is on and the element declares a structure role, wrap
@@ -152,20 +157,24 @@ export class PdfRenderPipeline {
         ctx.currentY,
         contentWidth
       );
-      let guard = 0;
-      let status: RenderStatus;
-      do {
+      let wrapAttempts = 0;
+      for (;;) {
+        let status: RenderStatus;
         try {
           ctx.canvas.saveState();
           status = stateful.renderStateful(ctx, contentWidth);
         } finally {
           ctx.canvas.restoreState();
         }
-        if (status === RenderStatus.Overflow || status === RenderStatus.WrapRequired) {
-          ctx.newPage();
+        if (status === RenderStatus.Complete) break;
+        if (status === RenderStatus.WrapRequired) {
+          // The element cannot fit even on a fresh page: skip it rather than loop.
+          if (++wrapAttempts > this.maxWrapAttempts) break;
+        } else {
+          wrapAttempts = 0;
         }
-        guard++;
-      } while (status !== RenderStatus.Complete && guard < this.maxPageGuard);
+        ctx.newPage();
+      }
 
       ctx.layoutRecorder?.closeNode(element, ctx.currentPageIndex, ctx.currentY, true);
 

@@ -9,6 +9,8 @@ each change to `core/`.
 
 ## Unreleased
 
+- Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
+
 - Add inherited content direction through `settings.contentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
 
 - Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.

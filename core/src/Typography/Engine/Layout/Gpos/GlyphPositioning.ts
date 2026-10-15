@@ -26,6 +26,7 @@ export class GlyphPositioning {
   private readonly lookupList: number = 0;
   private readonly headers!: LookupHeaderCache;
   private readonly firstGlyphs = new Map<number, FirstGlyphSet | null>();
+  private readonly subtableMasks = new Map<number, Uint32Array | null>();
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
   private readonly options!: ShapeOptions;
@@ -160,6 +161,37 @@ export class GlyphPositioning {
     }
   }
 
+  // For a lookup of 4 to 32 single or pair adjustment subtables, which subtables' coverage
+  // lists each glyph (bit i for subtable i), or null. These subtables read nothing and
+  // charge nothing before their coverage test, which applyAt relies on to skip them.
+  private subtableMaskSet(index: number): Uint32Array | null {
+    let masks = this.subtableMasks.get(index);
+    if (masks === undefined) { masks = this.buildSubtableMasks(index); this.subtableMasks.set(index, masks); }
+    return masks;
+  }
+
+  private buildSubtableMasks(index: number): Uint32Array | null {
+    try {
+      const header = this.headers.get(index);
+      if (header.count < 4 || header.count > 32) return null;
+      let masks: Uint32Array | null = new Uint32Array(0);
+      for (let i = 0; i < header.count; i++) {
+        let sub = this.offset(header.offset, header.offset + 6 + i * 2), type = header.type, format = this.data.u16(sub);
+        if (type === 9) {
+          const extended = this.data.u16(sub + 2), delta = this.data.offset32(sub + 4);
+          if (format !== 1 || extended < 1 || extended > 8 || delta === 0) return null;
+          type = extended; sub = checked(sub + delta); format = this.data.u16(sub);
+        }
+        if ((type !== 1 && type !== 2) || (format !== 1 && format !== 2)) return null;
+        masks = FirstGlyphSet.addCoverageBit(this.data, this.offset(sub, sub + 2), masks, i);
+        if (masks === null) return null;
+      }
+      return masks;
+    } catch {
+      return null;
+    }
+  }
+
   // What applyAt charges for every rejected glyph of this lookup, when that cannot
   // depend on the glyph: a constant feature rule, no glyph filtering (so the walk to
   // the next glyph is one step) and no Arabic ignorables. Otherwise -1.
@@ -197,6 +229,26 @@ export class GlyphPositioning {
       return 0;
     let next = this.walk(glyphs, at, 1, flags, markSet);
     if (rejected) { this.chargeSubtables(count); return 0; }
+    const masks = this.subtableMaskSet(index);
+    if (masks !== null) {
+      // Only the subtables whose coverage lists this glyph can act on it; each of the others
+      // would cost its loop tick and return at the coverage test, so they are charged that
+      // tick without being read.
+      const id = glyphs[at].id;
+      let mask = id < masks.length ? masks[id] : 0, done = 0;
+      for (let i = 0; mask !== 0; i++, mask >>>= 1) {
+        if ((mask & 1) === 0) continue;
+        this.chargeSubtables(i - done);
+        this.tick();
+        let consumed = this.subtable(type, this.offset(lookup, lookup + 6 + i * 2), glyphs, adjustments,
+          at, next, flags, markSet, advanceWidth, depth);
+        if (consumed != 0)
+          return consumed == -1 ? next + 1 - at : consumed;
+        done = i + 1;
+      }
+      this.chargeSubtables(count - done);
+      return 0;
+    }
     for (let i = 0; i < count; i++)
     {
       this.tick();

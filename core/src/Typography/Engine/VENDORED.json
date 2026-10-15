@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-typescript",
   "source": {
-    "commit": "95c397dae944b160b70f248e7254a52f567605a2",
+    "commit": "cb5fdd4d05d2c60e6087dfc2cf014cac02cbf9c8",
     "dirty": false
   },
   "files": {
@@ -40,7 +40,7 @@
     "Fonts/Tables/FontNames.ts": "6caafc9def6d0dda52348c48936f420417c8dbdf454db9e74331b3daf5d19b19",
     "Fonts/Tables/LegacyKerning.ts": "743a5c27b105535e3a940b3c03746d9ae51da8bf20600a6e66a59981e845f46b",
     "Fonts/Tables/LegacyKerningSubtable.ts": "d3c890285967b5b7c80600f76694a2c4513e7ac4e12e9d34b4a8be6e792ec8f1",
-    "Layout/Common/FirstGlyphSet.ts": "7c27fd5c3e6e86b606b272fcbc4c2ac75ae3c27b8665c8ca034939e2f1729fc6",
+    "Layout/Common/FirstGlyphSet.ts": "93a4c3f05303c031a8ad8ad39024162330c66a1c235fc89dfc1c991a8d445903",
     "Layout/Common/GlyphFilter.ts": "9cf46a226646f23763c8d4b692b1475e44fb9ae834538d5b546a703c8039b95e",
     "Layout/Common/LookupHeaderCache.ts": "26fb993cb27aef30a43e6895e8450359373444d3351502049c9aeb250d01ae4f",
     "Layout/Common/LookupRule.ts": "b82885ad2f1c9bfc223db5bc134ffef58fac0b934d9b6d7495f7eadee4e54593",
@@ -50,7 +50,7 @@
     "Layout/Common/UnsafeRange.ts": "6a007969b4b1be6aace179c425ecda818f75844e4cf91dc70a251502ce31b32b",
     "Layout/Gpos/FontAnchor.ts": "3b93b22d179622152d4240e46bdeae564b0cc7b4af270e8691097b62aff6d52a",
     "Layout/Gpos/GlyphAdjustment.ts": "e9c728fd81607a553ac9465639aa8c144d1c071aa75cef8db4bf0c66ceb9d073",
-    "Layout/Gpos/GlyphPositioning.ts": "4f84aec9b6542b7c7f6e7ee69b562773102a13d8af0f59715d11355d0ecc5528",
+    "Layout/Gpos/GlyphPositioning.ts": "f439e6ee426815a92c2713b6cb2d18983a91f91d4612a7086098fed4a9755b25",
     "Layout/Gsub/GlyphSubstitution.ts": "08bbb1b84379bab111a4c71aaa66d0f74dd7ceca7ac3ba61750216b8f884f338",
     "Shaping/ArabicJoining.ts": "ec2f2a0e28fa14a15658d4df29ce0113a6f871f64ad513005e493fe2af736375",
     "Shaping/FallbackMarkPositioning.ts": "f2c6dfd9a4b50f47b133421ce49cb98e770c0dbf546c3eb3f1b8a6e25250837e",

@@ -31,6 +31,24 @@ export class FirstGlyphSet {
     return true;
   }
 
+  // Adds every glyph listed in a coverage table to masks (grown as needed) as bit `bit`, and
+  // returns the masks; null for a table addCoverage rejects. A glyph a table does not list
+  // cannot be found by its binary search, so a clear bit proves the table does not cover it.
+  static addCoverageBit(data: BigEndianData, offset: number, masks: Uint32Array, bit: number): Uint32Array | null {
+    const format = data.u16(offset), count = data.u16(offset + 2);
+    if (format !== 1 && format !== 2) return null;
+    const stride = format === 1 ? 2 : 6;
+    data.check(offset + 4, count * stride);
+    for (let i = 0; i < count; i++) {
+      const record = offset + 4 + i * stride;
+      const start = data.u16(record), end = format === 1 ? start : data.u16(record + 2);
+      if (end < start) return null;
+      if (end >= masks.length) { const next = new Uint32Array(end + 1); next.set(masks); masks = next; }
+      for (let glyph = start; glyph <= end; glyph++) masks[glyph] = (masks[glyph] | (1 << bit)) >>> 0;
+    }
+    return masks;
+  }
+
   private grow(glyph: number): void {
     const words = (glyph >> 5) + 1;
     if (words > this.bits.length) { const next = new Uint32Array(words); next.set(this.bits); this.bits = next; }

@@ -312,6 +312,11 @@ export class PdfRenderPipeline {
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
 
       yield output;
+
+      // The page has been written: drop its content and links so a long document's
+      // memory falls as it is written rather than being held until the end.
+      ctx.pages[i] = '';
+      ctx.pageHyperlinks.delete(i);
     }
   }
 

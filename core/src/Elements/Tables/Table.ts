@@ -374,7 +374,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
   private renderStatefulRows(ctx: RenderContext, width: number, tagging: TaggingContext | undefined): RenderStatus {
     const contentWidth = this.getContentWidth(width);
-    const widths = this.calculateColumnWidths(contentWidth);
+    const widths = this.paginatedColumnWidths(contentWidth);
     // Layout (presentation) tables emit no TR/TH/TD and therefore no row-groups.
     const groupTagging = tagging != null && !this.isLayoutGrid;
     // PDF/UA 7.2: rows must sit inside a THead/TBody/TFoot row-group. Groups are
@@ -464,6 +464,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this.taggedHeaderEmitted = false;
     this._bottomsAbove = undefined;
     this._edgePlan.clear();
+    this._paginatedWidths = undefined;
   }
 
   // --- Border collapse ---
@@ -914,6 +915,21 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     }
   }
 
+  /**
+   * Column widths for the page fragments of one render. Finding the column count
+   * scans every row, so recomputing it on each page made one table O(rows x pages).
+   * The tree is frozen while it renders; resetState() drops the cache.
+   */
+  private paginatedColumnWidths(totalWidth: number): number[] {
+    if (this._paginatedWidths === undefined || this._paginatedWidthsFor !== totalWidth) {
+      this._paginatedWidths = this.calculateColumnWidths(totalWidth);
+      this._paginatedWidthsFor = totalWidth;
+    }
+    return this._paginatedWidths;
+  }
+  private _paginatedWidths: number[] | undefined;
+  private _paginatedWidthsFor = 0;
+
   private calculateColumnWidths(totalWidth: number): number[] {
     const weights = this.effectiveColumnWeights();
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
@@ -942,10 +958,12 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private columnCount(): number {
     let columns = this.columnWeights.length;
 
-    for (const row of [...this.headers, ...this._rows, ...this.footers]) {
-      let spanned = 0;
-      for (const cell of row.cells) spanned += Math.max(1, cell.columnSpan);
-      if (spanned > columns) columns = spanned;
+    for (const rows of [this.headers, this._rows, this.footers]) {
+      for (const row of rows) {
+        let spanned = 0;
+        for (const cell of row.cells) spanned += Math.max(1, cell.columnSpan);
+        if (spanned > columns) columns = spanned;
+      }
     }
 
     return columns;

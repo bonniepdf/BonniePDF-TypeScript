@@ -11,13 +11,16 @@ import { LookupRule } from '../Common/LookupRule';
 import { ShapePlan } from '../Common/ShapePlan';
 import { UnsafeRange } from '../Common/UnsafeRange';
 import { GlyphFilter } from '../Common/GlyphFilter';
-import { OpenTypeLayout } from '../Common/OpenTypeLayout';
+import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
+import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 
 export class GlyphSubstitution {
 
   private readonly data!: BigEndianData;
+  private readonly reads = new LayoutReadCache();
   private readonly filter!: GlyphFilter;
   private readonly lookupList: number = 0;
+  private readonly headers!: LookupHeaderCache;
   private readonly glyphCount: number = 0;
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
@@ -36,6 +39,7 @@ export class GlyphSubstitution {
     if (bytes == null) return;
     this.data = new BigEndianData(bytes);
     this.lookupList = OpenTypeLayout.offset16(this.data, 0, 8);
+    this.headers = new LookupHeaderCache(this.data, this.lookupList, this.filter, false);
   }
   apply(glyphs: ShapingGlyph[]): void {
     this.operations = 0;
@@ -85,14 +89,8 @@ export class GlyphSubstitution {
     if (at < 0 || at >= glyphs.length)
       return 0;
     if (depth == 0 && !this.enabled(glyphs[at])) return 0;
-    if (index >= this.data.u16(this.lookupList))
-      invalid("Invalid GSUB lookup index.");
-    let lookup = this.data.relative16(this.lookupList, this.lookupList + 2 + index * 2);
-    let type = this.data.u16(lookup), flags = this.data.u16(lookup + 2);
-    let count = this.data.u16(lookup + 4);
-    this.data.check(lookup + 6, count * 2);
-    let markSet = (flags & 16) != 0 ? this.data.u16(lookup + 6 + count * 2) : -1;
-    this.filter.validate(flags, markSet);
+    const header = this.headers.get(index);
+    let lookup = header.offset, type = header.type, flags = header.flags, count = header.count, markSet = header.markSet;
     if (this.ignored(glyphs[at], flags, markSet))
       return 0;
     for (let i = 0; i < count; i++)
@@ -288,10 +286,10 @@ export class GlyphSubstitution {
   }
 
   private coverage(offset: number, glyph: number): number {
-    return OpenTypeLayout.coverage(this.data, offset, glyph);
+    return this.reads.coverage(this.data, offset, glyph);
   }
   private class(offset: number, glyph: number): number {
-    return OpenTypeLayout.class(this.data, offset, glyph);
+    return this.reads.class(this.data, offset, glyph);
   }
 
   private tick(): void {

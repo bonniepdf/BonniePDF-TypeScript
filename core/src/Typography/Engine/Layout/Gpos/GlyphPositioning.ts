@@ -11,7 +11,8 @@ import { LookupRule } from '../Common/LookupRule';
 import { ShapePlan } from '../Common/ShapePlan';
 import { UnsafeRange } from '../Common/UnsafeRange';
 import { GlyphFilter } from '../Common/GlyphFilter';
-import { OpenTypeLayout } from '../Common/OpenTypeLayout';
+import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
+import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 import { GlyphAdjustment } from './GlyphAdjustment';
 import { FontAnchor } from './FontAnchor';
 import { LegacyKerning } from '../../Fonts/Tables/LegacyKerning';
@@ -19,8 +20,10 @@ import { LegacyKerning } from '../../Fonts/Tables/LegacyKerning';
 export class GlyphPositioning {
 
   private readonly data!: BigEndianData;
+  private readonly reads = new LayoutReadCache();
   private readonly filter!: GlyphFilter;
   private readonly lookupList: number = 0;
+  private readonly headers!: LookupHeaderCache;
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
   private readonly options!: ShapeOptions;
@@ -41,6 +44,7 @@ export class GlyphPositioning {
     if (bytes == null) return;
     this.data = new BigEndianData(bytes);
     this.lookupList = OpenTypeLayout.offset16(this.data, 0, 8);
+    this.headers = new LookupHeaderCache(this.data, this.lookupList, this.filter, true);
   }
 
 
@@ -113,16 +117,13 @@ export class GlyphPositioning {
     if (this.options.script === 'arab' && Unicode.isIgnorable(glyphs[at].scalar)) return 0;
     if (depth > this.limits.maxNesting)
       invalid("GPOS recursion limit exceeded.");
-    if (index < 0 || index >= this.data.u16(this.lookupList))
+    if (index < 0 || index >= this.headers.count)
       invalid("Invalid GPOS lookup index.");
     if (at < 0 || at >= glyphs.length)
       return 0;
     if (depth == 0 && this.activeRule != null && this.activeRule.value(glyphs[at].featureCluster, this.charge) == 0) return 0;
-    let lookup = this.offset(this.lookupList, this.lookupList + 2 + index * 2);
-    let type = this.data.u16(lookup), flags = this.data.u16(lookup + 2), count = this.data.u16(lookup + 4);
-    this.data.check(lookup + 6, count * 2);
-    let markSet = (flags & 16) != 0 ? this.data.u16(lookup + 6 + count * 2) : -1;
-    this.filter.validate(flags, markSet);
+    const header = this.headers.get(index);
+    let lookup = header.offset, type = header.type, flags = header.flags, count = header.count, markSet = header.markSet;
     if (this.filter.ignored(glyphs[at].id, flags, markSet))
       return 0;
     let next = this.walk(glyphs, at, 1, flags, markSet);
@@ -159,7 +160,7 @@ export class GlyphPositioning {
       unsupported("Unsupported GPOS lookup type " + type + ".");
     if (format != 1 && format != 2)
       invalid("Invalid GPOS adjustment format.");
-    let coverage = OpenTypeLayout.coverage(this.data, this.offset(sub, sub + 2), glyphs[at].id);
+    let coverage = this.reads.coverage(this.data, this.offset(sub, sub + 2), glyphs[at].id);
     if (coverage < 0)
       return 0;
     let firstFormat = this.data.u16(sub + 4), firstSize = GlyphPositioning.valueSize(firstFormat);
@@ -214,8 +215,8 @@ export class GlyphPositioning {
     }
     else
     {
-      let c1 = OpenTypeLayout.class(this.data, this.offset(sub, sub + 8), glyphs[at].id);
-      let c2 = OpenTypeLayout.class(this.data, this.offset(sub, sub + 10), glyphs[next].id);
+      let c1 = this.reads.class(this.data, this.offset(sub, sub + 8), glyphs[at].id);
+      let c2 = this.reads.class(this.data, this.offset(sub, sub + 10), glyphs[next].id);
       let rows = this.data.u16(sub + 12), columns = this.data.u16(sub + 14);
       if (c1 >= rows || c2 >= columns)
         invalid("Invalid GPOS pair class index.");
@@ -237,7 +238,7 @@ export class GlyphPositioning {
   private attach(type: number, sub: number, glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], at: number, flags: number, markSet: number, advanceWidth: ((glyph: number) => number) | null): number {
     if (this.data.u16(sub) != 1)
       invalid("Invalid GPOS mark attachment format.");
-    let markIndex = OpenTypeLayout.coverage(this.data, this.offset(sub, sub + 2), glyphs[at].id);
+    let markIndex = this.reads.coverage(this.data, this.offset(sub, sub + 2), glyphs[at].id);
     if (markIndex < 0)
       return 0;
     let parent = this.previous(glyphs, at, type != 6, flags, markSet);
@@ -246,7 +247,7 @@ export class GlyphPositioning {
     if (type == 6 && glyphs[at].markLigature != null && glyphs[parent].markLigature == glyphs[at].markLigature &&
       glyphs[parent].markComponent != glyphs[at].markComponent)
       return 0;
-    let baseIndex = OpenTypeLayout.coverage(this.data, this.offset(sub, sub + 4), glyphs[parent].id);
+    let baseIndex = this.reads.coverage(this.data, this.offset(sub, sub + 4), glyphs[parent].id);
     if (baseIndex < 0)
       return 0;
     let classes = this.data.u16(sub + 6), marks = this.offset(sub, sub + 8), bases = this.offset(sub, sub + 10);
@@ -334,7 +335,20 @@ export class GlyphPositioning {
   }
 
   private resolve(glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], advanceWidth: ((glyph: number) => number) | null): void {
-
+    if (!adjustments.some(a => a.parent >= 0 || a.cursiveParent >= 0)) {
+      // Independent placements already contain their final offsets.
+      // Retain the pen overflow checks and exactly the same operation
+      // charges as placements/resolveAxis, without their scratch arrays.
+      let x = 0, y = 0;
+      for (let i = 0; i < glyphs.length; i++) {
+        this.tick();
+        x = checked(x + (advanceWidth == null ? 0 : advanceWidth(glyphs[i].id)) + adjustments[i].xAdvance);
+        y = checked(y + adjustments[i].yAdvance);
+      }
+      for (let axis = 0; axis < 2; axis++)
+        for (let i = 0; i < glyphs.length; i++) { this.tick(); this.tick(); }
+      return;
+    }
     const [penX, penY, placedX, placedY] = this.placements(glyphs, adjustments, advanceWidth);
     for (let i = 0; i < adjustments.length; i++)
     {
@@ -653,8 +667,8 @@ export class GlyphPositioning {
     return glyphs.indexOf(matched[matched.length - 1]) + 1 - at;
   }
 
-  private coverage(offset: number, glyph: number): number { return OpenTypeLayout.coverage(this.data, offset, glyph); }
-  private class(offset: number, glyph: number): number { return OpenTypeLayout.class(this.data, offset, glyph); }
+  private coverage(offset: number, glyph: number): number { return this.reads.coverage(this.data, offset, glyph); }
+  private class(offset: number, glyph: number): number { return this.reads.class(this.data, offset, glyph); }
 
   // Scalar pair seam: first glyph's horizontal advance adjustment from
   // the default kern feature, without GSUB or mark advance suppression.

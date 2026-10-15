@@ -614,20 +614,28 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     }
     const words = segment.split(' ');
     const lines: string[] = [];
-    let current = '';
+    const widths = words.length >= 3 ? this.paragraphWidthsFor(segment) : null;
     let widthLimit = contentWidth - this.firstLineIndent;
 
-    for (const word of words) {
-      const test = current === '' ? word : current + ' ' + word;
-      if (this.measureTextWidth(test) > widthLimit && current !== '') {
-        lines.push(current);
-        current = word;
+    // As in wrapSegment, the current line and each candidate are spans of the segment.
+    let lineStart = 0,
+      lineEnd = 0,
+      wordStart = 0;
+    for (let w = 0; w < words.length; w++) {
+      const wordEnd = wordStart + words[w].length;
+      const lineEmpty = lineStart === lineEnd;
+      const testStart = lineEmpty ? wordStart : lineStart;
+      if (this.measureSpan(segment, testStart, wordEnd, widths) > widthLimit && !lineEmpty) {
+        this.addLine(lines, segment, lineStart, lineEnd, widths);
+        lineStart = wordStart;
         widthLimit = contentWidth; // subsequent lines are full width
       } else {
-        current = test;
+        lineStart = testStart;
       }
+      lineEnd = wordEnd;
+      wordStart = wordEnd + 1;
     }
-    if (current !== '') lines.push(current);
+    if (lineStart !== lineEnd) this.addLine(lines, segment, lineStart, lineEnd, widths);
     return lines;
   }
 

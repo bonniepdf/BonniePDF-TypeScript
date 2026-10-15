@@ -18,7 +18,7 @@ import {
  */
 export class FontMetrics {
   /**
-   * Cache of TTF fonts parsed from a file path (used by {@link getTtfWidth}).
+   * Cache of TTF fonts parsed from a file path (used by {@link loadMeasuringTtf}).
    * A cached `null` records a path that failed to load so we don't retry it.
    */
   private static readonly TtfInstanceCache: Map<string, TtfFont | null> = new Map();
@@ -159,26 +159,39 @@ export class FontMetrics {
   ): number {
     if (!text) return 0;
 
+    const resolved = this.resolveShapingFont(fontIdentifier);
+    if (resolved.font) return this.getKernedStringWidth(text, resolved.font, fontSize, features);
+    // Fallback when the font cannot be loaded (e.g. browser, missing/corrupt file).
+    if (resolved.unparsed) return text.length * (fontSize * 0.5);
+
+    // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
+    return this.getStandardFontWidth(text, fontIdentifier, fontSize);
+  }
+
+  /**
+   * The font {@link getStringWidth} measures `fontIdentifier` with by shaping (through
+   * {@link getKernedStringWidth}), or `font: null` when it uses a width table: a standard
+   * font, or a TrueType file that could not be loaded (`unparsed`).
+   * @internal
+   */
+  public static resolveShapingFont(fontIdentifier: string): { font: TtfFont | null; unparsed: boolean } {
     // A. IS IT A CUSTOM TTF FILE (direct path)?
     // Prefer a pre-loaded TtfFont instance registered under this exact path -
     // populated by PdfResourceRegistry after async font preloading, or
-    // explicitly by `loadFontFromUrl(url)`. Falling through to `getTtfWidth`
-    // uses an approximate width table that under-measures supplementary-plane glyphs.
+    // explicitly by `loadFontFromUrl(url)`. Falling back to a load from the path otherwise.
     const lowerIdentifier = fontIdentifier.toLowerCase();
     if (lowerIdentifier.endsWith('.ttf') || lowerIdentifier.endsWith('.otf')) {
       const pathInstance = getFontInstanceAlias(fontIdentifier);
-      if (pathInstance) {
-        return this.getKernedStringWidth(text, pathInstance, fontSize, features);
-      }
-      return this.getTtfWidth(text, fontIdentifier, fontSize, features);
+      if (pathInstance) return { font: pathInstance, unparsed: false };
+      return this.loadMeasuringTtf(fontIdentifier);
     }
 
     // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
     const fontInstance = getFontInstanceAlias(fontIdentifier);
-    if (fontInstance) return this.getKernedStringWidth(text, fontInstance, fontSize, features);
+    if (fontInstance) return { font: fontInstance, unparsed: false };
 
     const ttfPath = getFontPathAlias(fontIdentifier);
-    if (ttfPath) return this.getTtfWidth(text, ttfPath, fontSize, features);
+    if (ttfPath) return this.loadMeasuringTtf(ttfPath);
 
     // PDF/A and PDF/UA embed registered substitutes for the standard 12 Latin
     // Type-1 fonts. Resolve the exact face before layout makes its first
@@ -187,12 +200,10 @@ export class FontMetrics {
       const embedded = resolveStandardFontMetric(fontIdentifier);
       if (embedded) {
         cacheDocumentFontInstance(fontIdentifier, embedded);
-        return this.getKernedStringWidth(text, embedded, fontSize, features);
+        return { font: embedded, unparsed: false };
       }
     }
-
-    // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
-    return this.getStandardFontWidth(text, fontIdentifier, fontSize);
+    return { font: null, unparsed: false };
   }
 
   /**
@@ -228,17 +239,10 @@ export class FontMetrics {
     }, 0);
   }
 
-  private static getTtfWidth(
-    text: string,
-    filepath: string,
-    fontSize: number,
-    features?: Readonly<Record<string, number>>
-  ): number {
-    // Parse the TTF (once per path) and measure with real per-glyph advances and
-    // kern pairs. This replaces the former approximation that returned a flat 500-unit
-    // advance for every character, which mis-measured every embedded-by-path font
-    // and broke wrapping/alignment. In non-Node contexts (no filesystem) the
-    // sync load throws and we fall back to a coarse estimate.
+  // Parse the TTF (once per path) for measuring with real per-glyph advances and kern
+  // pairs. In non-Node contexts (no filesystem) the sync load throws, and the caller falls
+  // back to a coarse estimate.
+  private static loadMeasuringTtf(filepath: string): { font: TtfFont | null; unparsed: boolean } {
     let font = this.TtfInstanceCache.get(filepath);
     if (font === undefined) {
       try {
@@ -248,13 +252,7 @@ export class FontMetrics {
       }
       this.TtfInstanceCache.set(filepath, font);
     }
-
-    if (font) {
-      return this.getKernedStringWidth(text, font, fontSize, features);
-    }
-
-    // Fallback when the font cannot be loaded (e.g. browser, missing/corrupt file).
-    return text.length * (fontSize * 0.5);
+    return font ? { font, unparsed: false } : { font: null, unparsed: true };
   }
 
   private static metricFace(identifier: string): TtfFont | null {
@@ -264,8 +262,7 @@ export class FontMetrics {
       (shouldUseEmbeddedStandardMetrics() ? resolveStandardFontMetric(identifier) : null);
     if (face) return face;
     identifier = getFontPathAlias(identifier) ?? identifier;
-    if (/\.(?:ttf|otf)$/i.test(identifier) && !this.TtfInstanceCache.has(identifier))
-      this.getTtfWidth('', identifier, 1);
+    if (/\.(?:ttf|otf)$/i.test(identifier) && !this.TtfInstanceCache.has(identifier)) this.loadMeasuringTtf(identifier);
     return this.TtfInstanceCache.get(identifier) ?? null;
   }
   /** @internal Whether layout is using an embedded font face. */

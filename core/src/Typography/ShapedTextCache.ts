@@ -11,12 +11,15 @@ export class ShapedTextCache {
   public get(font: TtfFont, text: string, features?: Readonly<Record<string, number>>): readonly GlyphInfo[] {
     if (text.length > 512 || (TextFlow.line?.paragraph.length ?? 0) > 512)
       return shapeEmbeddedText(font, text, features);
+    // '[]' is JSON.stringify([]), the key prefix for no feature overrides.
     const settings = features
-      ? Object.keys(features)
-          .sort()
-          .map(tag => [tag, features[tag]])
-      : [];
-    const key = JSON.stringify(settings) + TextFlow.cacheKey + '|' + text;
+      ? JSON.stringify(
+          Object.keys(features)
+            .sort()
+            .map(tag => [tag, features[tag]])
+        )
+      : '[]';
+    const key = settings + TextFlow.cacheKey + '|' + text;
     const existing = this.entries.get(key);
     if (existing) {
       this.entries.delete(key);
@@ -25,7 +28,11 @@ export class ShapedTextCache {
     }
     const shaped = shapeEmbeddedText(font, text, features);
     if (shaped.length > 16384) return shaped;
-    const glyphs = Object.freeze(shaped.map(g => Object.freeze(g)));
+    // A shaped run's glyphs are already a frozen array of frozen records; keep them.
+    const glyphs =
+      Object.isFrozen(shaped) && shaped.every(Object.isFrozen)
+        ? shaped
+        : Object.freeze(shaped.map(g => Object.freeze(g)));
     while (this.entries.size >= 256 || this.glyphCount + glyphs.length > 16384) {
       const oldest = this.entries.keys().next().value!;
       this.glyphCount -= this.entries.get(oldest)!.length;

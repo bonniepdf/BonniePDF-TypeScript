@@ -352,6 +352,12 @@ export abstract class TextElementBase extends ElementBase {
   protected computeLines(text: string, maxWidth: number): string[] {
     if (!text) return [];
 
+    // No hard breaks: the text is one segment, so its wrapped lines are the result.
+    if (text.indexOf('\n') < 0 && text.indexOf('\r') < 0) {
+      const single = this.wrapSegment(text, maxWidth);
+      return single.length === 0 ? [''] : single;
+    }
+
     const lines: string[] = [];
     // Normalise CRLF / CR to LF, then split on hard breaks.
     const segments = text.replace(/\r\n?/g, '\n').split('\n');

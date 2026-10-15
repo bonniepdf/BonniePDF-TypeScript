@@ -213,8 +213,7 @@ export class FontMetrics {
   ): number {
     if (!text || !font) return 0;
 
-    if (primaryCovers(text, font))
-      return (font.shape(text, features).reduce((sum, g) => sum + g.advanceX, 0) * fontSize) / font.unitsPerEm;
+    if (primaryCovers(text, font)) return (sumAdvances(font.shape(text, features)) * fontSize) / font.unitsPerEm;
     const candidates = [
       { fontIdentifier: 'primary', font },
       ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
@@ -353,4 +352,11 @@ export class FontMetrics {
     }
     return (totalWidth / 1000) * fontSize;
   }
+}
+
+/** The same left-to-right sum as `reduce((sum, g) => sum + g.advanceX, 0)`, without a closure. */
+function sumAdvances(glyphs: readonly { advanceX: number }[]): number {
+  let sum = 0;
+  for (let i = 0; i < glyphs.length; i++) sum += glyphs[i].advanceX;
+  return sum;
 }

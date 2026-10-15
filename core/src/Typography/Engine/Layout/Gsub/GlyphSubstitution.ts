@@ -14,6 +14,7 @@ import { GlyphFilter } from '../Common/GlyphFilter';
 import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
 import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 import { FirstGlyphSet } from '../Common/FirstGlyphSet';
+import { LookupStep } from '../Common/LookupStep';
 import { ContextFormat3, inputsWithin, backtrackCharge } from '../Common/ContextFormat3';
 
 export class GlyphSubstitution {
@@ -32,6 +33,7 @@ export class GlyphSubstitution {
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
   private activeRule: LookupRule | null = null;
+  private steps: (LookupStep | null)[] | null = null;
   private readonly arabic: boolean;
   private operations: number = 0;
   private readonly charge = () => this.tick();
@@ -56,12 +58,9 @@ export class GlyphSubstitution {
     {
       this.activeRule = this.rules[i];
       let lookup = this.lookups[i];
-      const first = this.firstGlyphSet(lookup);
-      const rejection = first === null ? null : this.rejectedCharge(lookup);
-      const rejectedCharge = rejection === null ? -1 : rejection.charge, inputCharge = rejection === null ? 0 : rejection.inputCharge;
-      // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
-      const charged = inputCharge !== 0 ? this.contextPlans(lookup) : null;
-      if (this.isReverse(lookup))
+      const step = this.step(i, lookup);
+      const first = step.first, rejectedCharge = step.rejectedCharge, inputCharge = step.inputCharge, charged = step.charged;
+      if (step.reverse)
       {
         for (let at = glyphs.length - 1; at >= 0; at--) {
           const rejected = first !== null && !first.contains(glyphs[at].id);
@@ -84,14 +83,32 @@ export class GlyphSubstitution {
     this.activeRule = null;
   }
 
-  private isReverse(index: number): boolean {
+  // Lookup i's step (see LookupStep), working it out on the first call. activeRule must
+  // already be rules[i].
+  private step(i: number, lookup: number): LookupStep {
+    const steps = this.steps ??= new Array<LookupStep | null>(this.lookups.length).fill(null);
+    let step = steps[i];
+    if (step !== null) { this.chargeSubtables(step.ticks); return step; }
+    step = new LookupStep();
+    step.first = this.firstGlyphSet(lookup);
+    const rejection = step.first === null ? null : this.rejectedCharge(lookup);
+    step.rejectedCharge = rejection === null ? -1 : rejection.charge; step.inputCharge = rejection === null ? 0 : rejection.inputCharge;
+    // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+    step.charged = step.inputCharge !== 0 ? this.contextPlans(lookup) : null;
+    step.reverse = this.isReverse(lookup, step);
+    steps[i] = step;
+    return step;
+  }
+
+  // Whether the lookup is reverse chaining; counts the operations it charges into step.ticks.
+  private isReverse(index: number, step: LookupStep): boolean {
     let lookup = this.data.relative16(this.lookupList, this.lookupList + 2 + index * 2), type = this.data.u16(lookup);
     if (type == 8) return true;
     if (type != 7) return false;
     let count = this.data.u16(lookup + 4);
     for (let i = 0; i < count; i++)
     {
-      this.tick();
+      this.tick(); step.ticks++;
       let sub = this.data.relative16(lookup, lookup + 6 + i * 2);
       if (this.data.u16(sub + 2) == 8) return true;
     }

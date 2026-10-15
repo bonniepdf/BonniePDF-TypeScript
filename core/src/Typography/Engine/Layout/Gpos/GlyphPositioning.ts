@@ -14,6 +14,7 @@ import { GlyphFilter } from '../Common/GlyphFilter';
 import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
 import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 import { FirstGlyphSet } from '../Common/FirstGlyphSet';
+import { LookupStep } from '../Common/LookupStep';
 import { ContextFormat3, inputsWithin, backtrackCharge } from '../Common/ContextFormat3';
 import { CoverageMap } from '../Common/CoverageMap';
 import { GlyphAdjustment } from './GlyphAdjustment';
@@ -41,6 +42,8 @@ export class GlyphPositioning {
   private readonly rules!: LookupRule[];
   private readonly options!: ShapeOptions;
   private activeRule: LookupRule | null = null;
+  private lookupSteps: (LookupStep | null)[] | null = null;
+  private kerningSteps: (LookupStep | null)[] | null = null;
   private readonly kerningLookups!: number[];
   get hasKerning(): boolean { return this.kerningLookups.length != 0; }
   private operations: number = 0;
@@ -74,6 +77,32 @@ export class GlyphPositioning {
 
   apply(glyphs: ShapingGlyph[], advanceWidth: ((glyph: number) => number) | null = null, legacyKerning: LegacyKerning | null = null): GlyphAdjustment[] {
     return this.applySelected(glyphs, advanceWidth, this.lookups, this.hasKerning ? null : legacyKerning);
+  }
+
+  // The kept steps for a selection: the shaping lookups and the kerning lookups each keep
+  // theirs; any other selection works its steps out afresh.
+  private stepsFor(selection: number[]): (LookupStep | null)[] {
+    if (selection === this.lookups) return this.lookupSteps ??= new Array<LookupStep | null>(selection.length).fill(null);
+    if (selection === this.kerningLookups) return this.kerningSteps ??= new Array<LookupStep | null>(selection.length).fill(null);
+    return new Array<LookupStep | null>(selection.length).fill(null);
+  }
+
+  // Lookup index's step (see LookupStep), working it out on the first call: the feature
+  // rule search charges one operation per rule examined.
+  private step(steps: (LookupStep | null)[], k: number, index: number): LookupStep {
+    let step = steps[k];
+    if (step !== null) { this.chargeSubtables(step.ticks); return step; }
+    step = new LookupStep();
+    this.activeRule = null;
+    for (const rule of this.rules) { this.tick(); step.ticks++; if (rule.index == index) { this.activeRule = rule; break; } }
+    step.rule = this.activeRule;
+    step.first = this.firstGlyphSet(index);
+    const rejection = step.first === null ? null : this.rejectedCharge(index);
+    step.rejectedCharge = rejection === null ? -1 : rejection.charge; step.inputCharge = rejection === null ? 0 : rejection.inputCharge;
+    // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+    step.charged = step.inputCharge !== 0 ? this.contextPlans(index) : null;
+    steps[k] = step;
+    return step;
   }
 
   private applySelected(glyphs: ShapingGlyph[], advanceWidth: ((glyph: number) => number) | null, selection: number[], legacyKerning: LegacyKerning | null = null): GlyphAdjustment[] {
@@ -118,15 +147,13 @@ export class GlyphPositioning {
         previous = i;
       }
     }
-    for (const index of selection)
+    const steps = this.stepsFor(selection);
+    for (let k = 0; k < selection.length; k++)
     {
-      this.activeRule = null;
-      for (const rule of this.rules) { this.tick(); if (rule.index == index) { this.activeRule = rule; break; } }
-      const first = this.firstGlyphSet(index);
-      const rejection = first === null ? null : this.rejectedCharge(index);
-      const rejectedCharge = rejection === null ? -1 : rejection.charge, inputCharge = rejection === null ? 0 : rejection.inputCharge;
-      // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
-      const charged = inputCharge !== 0 ? this.contextPlans(index) : null;
+      const index = selection[k];
+      const step = this.step(steps, k, index);
+      this.activeRule = step.rule;
+      const first = step.first, rejectedCharge = step.rejectedCharge, inputCharge = step.inputCharge, charged = step.charged;
       for (let at = 0; at < glyphs.length;) {
         const rejected = first !== null && !first.contains(glyphs[at].id);
         if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge + inputCharge * inputsWithin(charged, glyphs.length) + backtrackCharge(charged, glyphs, at)); at++; }

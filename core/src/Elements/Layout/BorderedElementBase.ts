@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { SharedBoxOptions } from '../SharedOptions';
 import { IBackgroundColor } from './IBackgroundColor';
 import { Border, BorderColors, Color } from '../../Core';
 import { RenderContext } from '../IElement';
@@ -11,8 +12,20 @@ import { toLength, type LengthInput } from '../../Normalize/toLength';
  * Provides common functionality for drawing borders and backgrounds.
  */
 export abstract class BorderedElementBase extends ElementBase implements IBackgroundColor {
-  private _border: Border = new Border(0);
-  private _backgroundColor?: Color;
+  // Border, border colours, background and corner radius, shared with every element that has the same values.
+  private _box: SharedBoxOptions = SharedBoxOptions.default;
+  private get _border(): Border {
+    return this._box.border;
+  }
+  private set _border(value: Border) {
+    this._box = this._box.with('border', value);
+  }
+  private get _backgroundColor(): Color | undefined {
+    return this._box.backgroundColor;
+  }
+  private set _backgroundColor(value: Color | undefined) {
+    this._box = this._box.with('backgroundColor', value);
+  }
 
   /**
    * Border widths for each side of the element.
@@ -31,7 +44,12 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   /**
    * Border colors for each side of the element
    */
-  public borderColors: BorderColors;
+  public get borderColors(): BorderColors {
+    return this._box.borderColors;
+  }
+  public set borderColors(value: BorderColors) {
+    this._box = this._box.with('borderColors', value);
+  }
 
   /**
    * Background color for this element (undefined = transparent).
@@ -44,7 +62,12 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   public set backgroundColor(value: ColorInput | undefined) {
     this._backgroundColor = value === undefined ? undefined : toColor(value);
   }
-  private _cornerRadius = 0;
+  private get _cornerRadius(): number {
+    return this._box.cornerRadius;
+  }
+  private set _cornerRadius(value: number) {
+    this._box = this._box.with('cornerRadius', value);
+  }
 
   /**
    * Corner radius for rounded rectangles. 0 = sharp corners (default).
@@ -60,7 +83,6 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
 
   constructor() {
     super();
-    this.borderColors = new BorderColors();
   }
 
   /**

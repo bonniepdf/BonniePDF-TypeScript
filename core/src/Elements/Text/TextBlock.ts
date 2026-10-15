@@ -44,14 +44,23 @@ export type TextBlockOptions = TextElementOptions &
     alignment?: TextAlignmentInput;
   };
 
+/** Wrapped lines with their paragraph metadata (parallel to `lines`) and bidi mapping. */
+interface LineLayout {
+  readonly lines: string[];
+  readonly indents: number[] | undefined;
+  readonly spaceBefore: number[] | undefined;
+  readonly bidi: (TextFlowLine | undefined)[] | undefined;
+}
+
 /**
  * A text block element that supports word wrapping, alignment, font customization,
  * and automatic pagination across page boundaries.
  */
 export class TextBlock extends TextElementBase implements IStatefulElement, IRoleProvider {
   private cachedContentWidth = -1;
-  private _bidiLines?: (TextFlowLine | undefined)[];
-  private cachedLines?: string[];
+  // The wrapped lines: undefined until computed; a string when there is one line and nothing
+  // else to record (most table cells), which then costs nothing; otherwise a LineLayout.
+  private layout: string | LineLayout | undefined = undefined;
 
   // State tracking for multipage rendering
   private lastLineRendered = -1;
@@ -66,8 +75,18 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public get semanticRole(): SemanticRole {
     return SemanticRole.P;
   }
-  private _alignment: TextAlignment = TextAlignment.Left;
-  private _alignmentExplicit = false;
+  private get _alignment(): TextAlignment {
+    return this._text.alignment;
+  }
+  private set _alignment(value: TextAlignment) {
+    this._text = this._text.with('alignment', value);
+  }
+  private get _alignmentExplicit(): boolean {
+    return this._text.alignmentExplicit;
+  }
+  private set _alignmentExplicit(value: boolean) {
+    this._text = this._text.with('alignmentExplicit', value);
+  }
   /** @internal */
   public get alignmentIsExplicit(): boolean {
     return this._alignmentExplicit;
@@ -101,29 +120,54 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * If fewer lines fit on the current page, the entire block moves to the next page.
    * Set to 1 to disable orphan control. Default is 2.
    */
-  public minLinesBeforeBreak = 2;
+  public get minLinesBeforeBreak(): number {
+    return this._text.minLinesBeforeBreak;
+  }
+  public set minLinesBeforeBreak(value: number) {
+    this._text = this._text.with('minLinesBeforeBreak', value);
+  }
 
   /**
    * Minimum number of lines that must appear after a page break (widow control).
    * If fewer lines remain for the next page, the break point is adjusted
    * to push more lines forward. Set to 1 to disable widow control. Default is 2.
    */
-  public minLinesAfterBreak = 2;
+  public get minLinesAfterBreak(): number {
+    return this._text.minLinesAfterBreak;
+  }
+  public set minLinesAfterBreak(value: number) {
+    this._text = this._text.with('minLinesAfterBreak', value);
+  }
 
   /**
    * Line clamp: maximum number of lines to render. When set and the text
    * wraps to more lines, the block is truncated to this many lines and
    * {@link ellipsis} is appended to the last visible line. Null = no clamp.
    */
-  public maxLines?: number;
+  public get maxLines(): number | undefined {
+    return this._text.maxLines;
+  }
+  public set maxLines(value: number | undefined) {
+    this._text = this._text.with('maxLines', value);
+  }
 
   /**
    * Ellipsis appended to the last line when {@link maxLines} clamps the text.
    * Default `…` (U+2026).
    */
-  public ellipsis = '…';
+  public get ellipsis(): string {
+    return this._text.ellipsis;
+  }
+  public set ellipsis(value: string) {
+    this._text = this._text.with('ellipsis', value);
+  }
 
-  private _firstLineIndent: number = 0;
+  private get _firstLineIndent(): number {
+    return this._text.firstLineIndent;
+  }
+  private set _firstLineIndent(value: number) {
+    this._text = this._text.with('firstLineIndent', value);
+  }
 
   /**
    * Paragraph layout: horizontal indent (points) applied to the first line
@@ -146,9 +190,19 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * line never overflows. Tabs are not expanded. Inherited by {@link Heading}; list items and
    * {@link RichText} do not take it. Spec 03 "Preserved whitespace".
    */
-  public preserveWhitespace = false;
+  public get preserveWhitespace(): boolean {
+    return this._text.preserveWhitespace;
+  }
+  public set preserveWhitespace(value: boolean) {
+    this._text = this._text.with('preserveWhitespace', value);
+  }
 
-  private _paragraphSpacing: number = 0;
+  private get _paragraphSpacing(): number {
+    return this._text.paragraphSpacing;
+  }
+  private set _paragraphSpacing(value: number) {
+    this._text = this._text.with('paragraphSpacing', value);
+  }
 
   /**
    * Paragraph layout: extra vertical space (points) inserted before each
@@ -162,11 +216,6 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   public set paragraphSpacing(value: LengthInput) {
     this._paragraphSpacing = toLength(value);
   }
-
-  /** Per-line horizontal indent, parallel to {@link cachedLines}. */
-  private cachedIndents?: number[];
-  /** Per-line extra leading above the line, parallel to {@link cachedLines}. */
-  private cachedSpaceBefore?: number[];
 
   /** Creates a text block, optionally with its text. */
   constructor(text?: string);
@@ -301,10 +350,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    */
   public resetState(): void {
     this.lastLineRendered = -1;
-    this.cachedLines = undefined;
-    this._bidiLines = undefined;
-    this.cachedIndents = undefined;
-    this.cachedSpaceBefore = undefined;
+    this.layout = undefined;
     this.cachedContentWidth = -1;
   }
 
@@ -346,7 +392,10 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     isLastLine: boolean,
     lineIndex: number
   ): void {
-    const restoreDirection = TextFlow.enter(this.effectiveContentDirection, this._bidiLines?.[lineIndex]);
+    const restoreDirection = TextFlow.enter(
+      this.effectiveContentDirection,
+      typeof this.layout === 'object' ? this.layout.bidi?.[lineIndex] : undefined
+    );
     const indent = this.indentOf(lineIndex);
     contentWidth -= indent;
     if (!this.isRightToLeft) baseX += indent;
@@ -527,8 +576,9 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    */
   private getOrComputeLines(contentWidth: number): string[] {
     // Use tolerance for floating point comparison
-    if (this.cachedLines && Math.abs(this.cachedContentWidth - contentWidth) < 0.001) {
-      return this.cachedLines;
+    const layout = this.layout;
+    if (layout !== undefined && Math.abs(this.cachedContentWidth - contentWidth) < 0.001) {
+      return typeof layout === 'string' ? [layout] : layout.lines;
     }
 
     const paragraphs = this.firstLineIndent !== 0 || this.paragraphSpacing !== 0;
@@ -549,23 +599,23 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
       spaceBefore = spaceBefore?.slice(0, lines.length);
     }
 
-    this._bidiLines =
-      this.isRightToLeft || TextFlow.needsBidi(this.text) ? TextFlow.mapLines(this.text, lines) : undefined;
-    this.cachedLines = lines;
-    this.cachedIndents = indents;
-    this.cachedSpaceBefore = spaceBefore;
+    const bidi = this.isRightToLeft || TextFlow.needsBidi(this.text) ? TextFlow.mapLines(this.text, lines) : undefined;
+    this.layout =
+      lines.length === 1 && bidi === undefined && indents === undefined && spaceBefore === undefined
+        ? lines[0]
+        : { lines, indents, spaceBefore, bidi };
     this.cachedContentWidth = contentWidth;
-    return this.cachedLines;
+    return lines;
   }
 
   /** Per-line horizontal indent; 0 when paragraph controls are unused. */
   private indentOf(i: number): number {
-    return this.cachedIndents?.[i] ?? 0;
+    return (typeof this.layout === 'object' ? this.layout.indents?.[i] : undefined) ?? 0;
   }
 
   /** Per-line extra leading above the line; 0 when unused. */
   private spaceBeforeOf(i: number): number {
-    return this.cachedSpaceBefore?.[i] ?? 0;
+    return (typeof this.layout === 'object' ? this.layout.spaceBefore?.[i] : undefined) ?? 0;
   }
 
   /**

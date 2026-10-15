@@ -27,7 +27,7 @@ import { SemanticRole } from '../../src/Rendering/Tagging/SemanticRole';
  */
 const INTERNAL_FIELDS = {
   elementBase: ['startingY'],
-  textBlock: ['cachedContentWidth', 'cachedLines', 'lastLineRendered', 'cachedIndents', 'cachedSpaceBefore'],
+  textBlock: ['cachedContentWidth', 'layout', 'lastLineRendered'],
   heading: ['tocRegistered'],
   richText: ['spans', 'cachedContentWidth', 'cachedLines', 'lastLineRendered'],
 } as const;

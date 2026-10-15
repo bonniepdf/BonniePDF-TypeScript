@@ -532,16 +532,17 @@ export abstract class TextElementBase extends ElementBase {
     const lines: string[] = [];
     if (text === '') return lines;
 
-    const words = text.split(' ');
-    const widths = words.length >= 3 ? this.paragraphWidthsFor(text) : null;
+    // Words are the spans between single spaces; only their ends are needed, so the text is not split.
+    const widths = hasTwoSpaces(text) ? this.paragraphWidthsFor(text) : null;
 
     // The current line and each candidate are spans of text: words joined by the single
     // spaces between them are exactly the text between their ends.
     let lineStart = 0,
       lineEnd = 0,
       wordStart = 0;
-    for (let w = 0; w < words.length; w++) {
-      const wordEnd = wordStart + words[w].length;
+    while (wordStart <= text.length) {
+      const space = text.indexOf(' ', wordStart);
+      const wordEnd = space < 0 ? text.length : space;
       const lineEmpty = lineStart === lineEnd;
       const testStart = lineEmpty ? wordStart : lineStart;
 
@@ -639,4 +640,10 @@ export abstract class TextElementBase extends ElementBase {
   protected spacingWidth(text: string): number {
     return getTextSpacingWidth(text, this.letterSpacing, this.wordSpacing, this.fontName, this.fontFeatures);
   }
+}
+
+/** @internal Whether `text` has at least two spaces, that is, at least three words. */
+export function hasTwoSpaces(text: string): boolean {
+  const first = text.indexOf(' ');
+  return first >= 0 && text.indexOf(' ', first + 1) >= 0;
 }

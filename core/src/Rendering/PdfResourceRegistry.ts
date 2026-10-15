@@ -42,6 +42,18 @@ export interface ResolvedTextRun {
   text: string;
 }
 
+/**
+ * @internal The font half of a {@link ResolvedTextRun}: everything but the text. One font that
+ * draws a whole string needs no run object per call, so the canvas keeps the text beside this.
+ */
+export interface TextRunFont {
+  readonly tracker?: GlyphUsageTracker | null;
+  readonly canTrackPreparedGlyphs?: boolean;
+  readonly resourceName: string;
+  readonly embeddedFont: TtfFont | null;
+  readonly fontIdentifier: string;
+}
+
 export type PdfAResourceIssueCode =
   'non-embedded-standard-font' | 'alpha-graphics-state-flattened' | 'png-soft-mask-flattened';
 
@@ -441,6 +453,50 @@ export class PdfResourceRegistry {
    * When the primary font covers the whole string (or is a non-embedded
    * Type1 font) the result is a single run identical to the legacy path.
    */
+  // The first registration of font, in insertion order, without copying the registrations.
+  private embeddedFontInfoFor(font: TtfFont | null): EmbeddedFontInfo | undefined {
+    for (const info of this.embeddedFonts.values()) if (info.font === font) return info;
+    return undefined;
+  }
+
+  readonly #wholeTextFonts = new Map<string, TextRunFont>();
+
+  /**
+   * @internal The font that draws all of `text`, when {@link resolveTextRuns} would return a
+   * single run for it, or null when it would not. Registers the font as that does.
+   */
+  public wholeTextFont(primaryFontIdentifier: string, text: string): TextRunFont | null {
+    const resourceName = this.registerFont(primaryFontIdentifier);
+    const resolved = this.resolveEmbeddedFont(primaryFontIdentifier);
+    const primaryFont = resolved instanceof TtfFont ? resolved : null;
+    let tracker: GlyphUsageTracker | null | undefined;
+    let canTrackPreparedGlyphs: boolean | undefined;
+    if (primaryFont) {
+      const primaryInfo = this.embeddedFontInfoFor(primaryFont);
+      if (!primaryCovers(text, primaryFont)) return null;
+      tracker = primaryInfo?.tracker;
+      canTrackPreparedGlyphs = primaryInfo?.resourceName === resourceName;
+    }
+    const kept = this.#wholeTextFonts.get(primaryFontIdentifier);
+    if (
+      kept &&
+      kept.resourceName === resourceName &&
+      kept.embeddedFont === primaryFont &&
+      kept.tracker === tracker &&
+      kept.canTrackPreparedGlyphs === canTrackPreparedGlyphs
+    )
+      return kept;
+    const font: TextRunFont = {
+      resourceName,
+      embeddedFont: primaryFont,
+      tracker,
+      canTrackPreparedGlyphs,
+      fontIdentifier: primaryFontIdentifier,
+    };
+    this.#wholeTextFonts.set(primaryFontIdentifier, font);
+    return font;
+  }
+
   public resolveTextRuns(primaryFontIdentifier: string, text: string): ResolvedTextRun[] {
     const resourceName = this.registerFont(primaryFontIdentifier);
     const primaryFont = this.resolveEmbeddedFont(primaryFontIdentifier);
@@ -451,7 +507,7 @@ export class PdfResourceRegistry {
       return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
     }
 
-    const primaryInfo = Array.from(this.embeddedFonts.values()).find(f => f.font === primaryFont);
+    const primaryInfo = this.embeddedFontInfoFor(primaryFont);
     if (primaryCovers(text, primaryFont))
       return [
         {
@@ -505,7 +561,7 @@ export class PdfResourceRegistry {
       const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
       const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
       const fbFont = this.resolveEmbeddedFont(fbIdentifier);
-      const fbInfo = Array.from(this.embeddedFonts.values()).find(f => f.font === fbFont);
+      const fbInfo = this.embeddedFontInfoFor(fbFont);
       return {
         resourceName: fbResource,
         embeddedFont: fbFont instanceof TtfFont ? fbFont : null,

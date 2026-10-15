@@ -2,14 +2,14 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-typescript",
   "source": {
-    "commit": "e94fd52a27c50f02a89b9368982d82876c32168f",
+    "commit": "0a2fa99fc4148990dcce6b90c6ba1ae91894156e",
     "dirty": false
   },
   "files": {
     "Api/ColourReadLimits.ts": "f9be400daf967975434246c7ab3e644bbacbf6f675006833392f02e631250be1",
     "Api/FontError.ts": "e988fdc8a4ca956b70f6efc24ae6151b9155f812a877b85bb2c7cc01eb8c03a9",
     "Api/GlyphInfo.ts": "16f1c58f0300a6b17ed4e07dc6716372b7d64bb60f2da19862bb2018dd0ddf01",
-    "Api/GlyphRun.ts": "a71c70825de71b580b1501da6afc5413f13a0cca3596fd3e1573cfa78ca7a745",
+    "Api/GlyphRun.ts": "44d95dd43360a925003511d96e8f24df02c6b7eec6078355fb54c48b414b35dd",
     "Api/ShapeFeature.ts": "8871b44fcdbf04b967e2acc1750b841bfbf9c75b67227c33e44448d5f5019da8",
     "Api/ShapeOptions.ts": "84062379241b8b9186a2c5185c13500a53709a8143f69972559ec0ff56b93e95",
     "Api/ShapedRun.ts": "744451710e88598d88fdcddf4f7cc10464124b3ce640c92f558c72fad2241aa0",
@@ -62,7 +62,7 @@
     "Shaping/Shaper.ts": "b8166fe2a755367d4c581ffc59f821be24225f08ccef951f0d029e79fe4c427c",
     "Shaping/Shapers/ArabicShaper.ts": "e65d007d0dc76a4b38d820a315bb980fb8cb02d915c70bebb622aed316505a27",
     "Shaping/Shapers/HebrewShaper.ts": "e30eb58de9dd19b57c989fcb0fa17ca866d7497d0f16f26ec20158213e2d794d",
-    "Shaping/ShapingPipeline.ts": "e5f047894bb5f458d0e81c326662f0eba888c4c7de07f811170816ea8b9518cc",
+    "Shaping/ShapingPipeline.ts": "320ca4ebe35e43624db15a391ec6e98c4ae3e595fee04b149b9324bcd58e757b",
     "Shaping/ShapingProgram.ts": "b5164481bddf68538ccb5a784263e3cecb3acb351d2a2a637226a62dea1e33bc",
     "Shaping/SpaceFallback.ts": "cac238b743433eef2016251dffc46ed4625ded883beec918e8391b6dc86479f7",
     "Shaping/TextItemizer.ts": "534c284fbc85ecf78286a14e72f09a2d06d7905446bc25ae0203b22b2a53490f",

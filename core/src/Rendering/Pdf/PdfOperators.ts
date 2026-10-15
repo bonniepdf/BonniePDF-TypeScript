@@ -1,4 +1,9 @@
 import { PdfSyntax } from './PdfSyntax';
+import { Color } from '../../Core/Color';
+
+// The fill-colour operator per colour: a Color is never changed once made, and text sets its
+// colour on every draw.
+const fillColorOperators = new WeakMap<Color, string>();
 /** Creates PDF content-stream operators for text, paths, graphics state, and marked content. */
 export class PdfOperators {
   public static saveState(s: string[]): void {
@@ -37,7 +42,13 @@ export class PdfOperators {
   }
 
   public static setFillColor(s: string[], color: { scR: number; scG: number; scB: number }): void {
-    s.push(`${PdfSyntax.formatColor(color)} rg\n`);
+    if (!(color instanceof Color)) {
+      s.push(`${PdfSyntax.formatColor(color)} rg\n`);
+      return;
+    }
+    let operator = fillColorOperators.get(color);
+    if (operator === undefined) fillColorOperators.set(color, (operator = `${PdfSyntax.formatColor(color)} rg\n`));
+    s.push(operator);
   }
 
   public static setStrokeColor(s: string[], color: { scR: number; scG: number; scB: number }): void {

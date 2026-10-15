@@ -74,34 +74,42 @@ const CODE_LENGTH_ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2
  * inflates to garbage rather than failing loudly.
  */
 class BitWriter {
-  private readonly bytes: number[] = [];
+  private bytes = new Uint8Array(1024);
+  private length = 0;
   private bitBuffer = 0;
   private bitCount = 0;
 
-  /** Writes `count` low bits of `value`, least-significant bit first. */
+  private push(byte: number): void {
+    if (this.length === this.bytes.length) {
+      const grown = new Uint8Array(this.bytes.length * 2);
+      grown.set(this.bytes);
+      this.bytes = grown;
+    }
+    this.bytes[this.length++] = byte;
+  }
+
+  /** Writes `count` (at most 16) low bits of `value`, least-significant bit first. */
   public writeBits(value: number, count: number): void {
-    for (let i = 0; i < count; i++) {
-      this.bitBuffer |= ((value >>> i) & 1) << this.bitCount;
-      this.bitCount++;
-      if (this.bitCount === 8) {
-        this.bytes.push(this.bitBuffer & 0xff);
-        this.bitBuffer = 0;
-        this.bitCount = 0;
-      }
+    this.bitBuffer |= (value & ((1 << count) - 1)) << this.bitCount;
+    this.bitCount += count;
+    while (this.bitCount >= 8) {
+      this.push(this.bitBuffer & 0xff);
+      this.bitBuffer >>>= 8;
+      this.bitCount -= 8;
     }
   }
 
   /** Writes a Huffman code, whose bits travel most-significant first. */
   public writeHuffman(code: number, length: number): void {
-    for (let i = length - 1; i >= 0; i--) {
-      this.writeBits((code >>> i) & 1, 1);
-    }
+    let reversed = 0;
+    for (let i = 0; i < length; i++) reversed |= ((code >>> i) & 1) << (length - 1 - i);
+    this.writeBits(reversed, length);
   }
 
   /** Pads to the next byte boundary — required before a stored block's header. */
   public alignToByte(): void {
     if (this.bitCount > 0) {
-      this.bytes.push(this.bitBuffer & 0xff);
+      this.push(this.bitBuffer & 0xff);
       this.bitBuffer = 0;
       this.bitCount = 0;
     }
@@ -109,13 +117,13 @@ class BitWriter {
 
   /** Appends whole bytes. Only valid immediately after {@link alignToByte}. */
   public writeBytes(data: Uint8Array): void {
-    for (const b of data) this.bytes.push(b);
+    for (const b of data) this.push(b);
   }
 
   /** Flushes any partial byte and returns the stream. */
   public finish(): Uint8Array {
     this.alignToByte();
-    return new Uint8Array(this.bytes);
+    return this.bytes.slice(0, this.length);
   }
 }
 
@@ -134,27 +142,43 @@ interface Tokens {
   readonly count: number;
 }
 
+// lz77's working arrays, kept between calls and grown as needed: compression runs
+// synchronously, one stream at a time, and its tokens are read before the next call.
+let scratchLiterals = new Uint16Array(0);
+let scratchDistances = new Uint16Array(0);
+let scratchPrev = new Int32Array(0);
+const scratchHead = new Int32Array(HASH_SIZE);
+
 /** Splits `data` into literals and back-references. */
 function lz77(data: Uint8Array): Tokens {
-  const literals = new Uint16Array(data.length + 1);
-  const distances = new Uint16Array(data.length + 1);
+  if (scratchLiterals.length < data.length + 1) {
+    scratchLiterals = new Uint16Array(data.length + 1);
+    scratchDistances = new Uint16Array(data.length + 1);
+  }
+  if (scratchPrev.length < data.length) scratchPrev = new Int32Array(data.length);
+  const literals = scratchLiterals;
+  const distances = scratchDistances;
   let count = 0;
 
   // head[h] = most recent position with hash h; prev[p] = previous position
   // sharing that hash. Together they form the chains walked below. -1 = empty,
   // which is why these are Int32Array rather than Uint32Array.
-  const head = new Int32Array(HASH_SIZE).fill(-1);
-  const prev = new Int32Array(data.length).fill(-1);
+  const head = scratchHead.fill(-1);
+  const prev = scratchPrev;
+  prev.fill(-1, 0, data.length);
 
   const hashAt = (pos: number): number =>
     ((data[pos]! << 10) ^ (data[pos + 1]! << 5) ^ data[pos + 2]!) & (HASH_SIZE - 1);
 
-  /** Best match for `pos`, or length 0 when there is none worth taking. */
-  const findMatch = (pos: number): { length: number; distance: number } => {
-    if (pos + MIN_MATCH > data.length) return { length: 0, distance: 0 };
+  // The distance of the match findMatch last returned.
+  let matchDistance = 0;
+
+  /** Length of the best match for `pos` (its distance in matchDistance), or 0 when there is none worth taking. */
+  const findMatch = (pos: number): number => {
+    matchDistance = 0;
+    if (pos + MIN_MATCH > data.length) return 0;
 
     let bestLength = 0;
-    let bestDistance = 0;
     let candidate = head[hashAt(pos)]!;
     let chain = 0;
     const limit = Math.max(0, pos - WINDOW_SIZE);
@@ -168,7 +192,7 @@ function lz77(data: Uint8Array): Tokens {
         while (length < maxLength && data[candidate + length] === data[pos + length]) length++;
         if (length > bestLength) {
           bestLength = length;
-          bestDistance = pos - candidate;
+          matchDistance = pos - candidate;
           if (length === maxLength) break; // cannot do better
         }
       }
@@ -176,7 +200,7 @@ function lz77(data: Uint8Array): Tokens {
       chain++;
     }
 
-    return { length: bestLength, distance: bestDistance };
+    return bestLength;
   };
 
   /** Adds `pos` to its hash chain so later positions can match against it. */
@@ -189,25 +213,23 @@ function lz77(data: Uint8Array): Tokens {
 
   let pos = 0;
   while (pos < data.length) {
-    const match = findMatch(pos);
+    let useLength = findMatch(pos);
+    let useDistance = matchDistance;
     insert(pos);
-
-    let useLength = match.length;
-    let useDistance = match.distance;
 
     // Lazy matching: a match starting one byte later may be longer, in which
     // case emitting this byte as a literal and taking that match costs less.
     // Skipped once a match is already long enough to be worth taking outright.
     if (useLength >= MIN_MATCH && useLength < GOOD_MATCH && pos + 1 < data.length) {
-      const next = findMatch(pos + 1);
-      if (next.length > useLength) {
+      const nextLength = findMatch(pos + 1);
+      if (nextLength > useLength) {
         literals[count] = data[pos]!;
         distances[count] = 0;
         count++;
         pos++;
         insert(pos);
-        useLength = next.length;
-        useDistance = next.distance;
+        useLength = nextLength;
+        useDistance = matchDistance;
       }
     }
 
@@ -260,57 +282,81 @@ function huffmanLengths(freqs: Uint32Array, maxBits: number): Uint8Array {
   const n = freqs.length;
   const lengths = new Uint8Array(n);
   const working = Uint32Array.from(freqs);
+  // Leaves are 0..used-1 in symbol order; merged nodes follow. Each node keeps its weight,
+  // its first symbol (the order's tie-break) and its parent, from which leaf depths are read.
+  const symbol = new Int32Array(n);
+  const weight = new Float64Array(2 * n);
+  const first = new Int32Array(2 * n);
+  const parent = new Int32Array(2 * n);
+  const queue = new Int32Array(n);
 
   for (;;) {
-    const used: number[] = [];
-    for (let i = 0; i < n; i++) if (working[i]! > 0) used.push(i);
+    let used = 0;
+    for (let i = 0; i < n; i++) if (working[i]! > 0) symbol[used++] = i;
 
-    if (used.length === 0) return lengths;
-    if (used.length === 1) {
+    if (used === 0) return lengths;
+    if (used === 1) {
       // A single symbol still needs one bit: a zero-length code is not decodable.
-      lengths[used[0]!] = 1;
+      lengths[symbol[0]!] = 1;
       return lengths;
     }
 
-    // Nodes are [weight, depth-carrying children]. Sorting by weight and
-    // repeatedly merging the two smallest is Huffman's algorithm; tracking the
-    // member symbols lets us read the depths off at the end.
-    type Node = { weight: number; symbols: number[] };
-    const nodes: Node[] = used.map(s => ({ weight: working[s]!, symbols: [s] }));
-    // Deterministic ordering: ties broken by lowest symbol, so the same input
-    // always yields the same code lengths.
-    nodes.sort((a, b) => a.weight - b.weight || a.symbols[0]! - b.symbols[0]!);
-
-    const depth = new Map<number, number>();
-    for (const s of used) depth.set(s, 0);
-
-    const queue = nodes.slice();
-    while (queue.length > 1) {
-      const a = queue.shift()!;
-      const b = queue.shift()!;
-      for (const s of a.symbols) depth.set(s, depth.get(s)! + 1);
-      for (const s of b.symbols) depth.set(s, depth.get(s)! + 1);
-      const merged: Node = { weight: a.weight + b.weight, symbols: [...a.symbols, ...b.symbols] };
-      // Insert keeping the queue sorted (stable on weight, then symbol).
-      let lo = 0;
-      let hi = queue.length;
-      while (lo < hi) {
-        const mid = (lo + hi) >> 1;
-        const cmp = queue[mid]!.weight - merged.weight || queue[mid]!.symbols[0]! - merged.symbols[0]!;
-        if (cmp < 0) lo = mid + 1;
-        else hi = mid;
+    // Huffman's algorithm: keep the nodes ordered by weight, ties broken by lowest first
+    // symbol so the same input always yields the same code lengths, and repeatedly merge
+    // the two smallest. A merged node's first symbol is its first child's.
+    const before = (x: number, y: number): boolean =>
+      weight[x]! < weight[y]! || (weight[x] === weight[y] && first[x]! < first[y]!);
+    for (let i = 0; i < used; i++) {
+      weight[i] = working[symbol[i]!]!;
+      first[i] = symbol[i]!;
+      parent[i] = -1;
+      // Insertion sort into the queue; the nodes start in symbol order.
+      let at = i;
+      while (at > 0 && before(i, queue[at - 1]!)) {
+        queue[at] = queue[at - 1]!;
+        at--;
       }
-      queue.splice(lo, 0, merged);
+      queue[at] = i;
+    }
+
+    let head = 0;
+    let size = used;
+    let next = used;
+    while (size - head > 1) {
+      const a = queue[head++]!;
+      const b = queue[head++]!;
+      const merged = next++;
+      weight[merged] = weight[a]! + weight[b]!;
+      first[merged] = first[a]!;
+      parent[merged] = -1;
+      parent[a] = merged;
+      parent[b] = merged;
+      // The queue grows at its end by one and shrinks at its head by two, so it holds at most
+      // n live nodes; when it reaches the end of its n entries, move them back to the start.
+      if (size === n) {
+        queue.copyWithin(0, head, size);
+        size -= head;
+        head = 0;
+      }
+      // Insert before the first node that does not come before it.
+      let at = size;
+      while (at > head && before(merged, queue[at - 1]!)) {
+        queue[at] = queue[at - 1]!;
+        at--;
+      }
+      queue[at] = merged;
+      size++;
     }
 
     let overflow = false;
-    for (const s of used) {
-      const d = depth.get(s)!;
+    for (let i = 0; i < used; i++) {
+      let d = 0;
+      for (let node = i; parent[node] !== -1; node = parent[node]!) d++;
       if (d > maxBits) {
         overflow = true;
         break;
       }
-      lengths[s] = d;
+      lengths[symbol[i]!] = d;
     }
     if (!overflow) return lengths;
 
@@ -428,6 +474,12 @@ function fixedDistanceLengths(): Uint8Array {
   return new Uint8Array(DISTANCE_SYMBOLS).fill(5);
 }
 
+// The fixed tables and their codes, made once; nothing writes to them.
+const FIXED_LITERAL_LENGTHS = fixedLiteralLengths();
+const FIXED_DISTANCE_LENGTHS = fixedDistanceLengths();
+const FIXED_LITERAL_CODES = canonicalCodes(FIXED_LITERAL_LENGTHS, MAX_CODE_BITS);
+const FIXED_DISTANCE_CODES = canonicalCodes(FIXED_DISTANCE_LENGTHS, MAX_CODE_BITS);
+
 // ── Block emission ───────────────────────────────────────────────────────────
 
 /** Bits needed to emit `tokens` with the given code lengths, excluding headers. */
@@ -532,8 +584,8 @@ function deflateRaw(data: Uint8Array): Uint8Array {
   while (hclen > 4 && clLengths[CODE_LENGTH_ORDER[hclen - 1]!] === 0) hclen--;
 
   // ── Cost of each block form, in bits ───────────────────────────────────────
-  const fixedLit = fixedLiteralLengths();
-  const fixedDist = fixedDistanceLengths();
+  const fixedLit = FIXED_LITERAL_LENGTHS;
+  const fixedDist = FIXED_DISTANCE_LENGTHS;
   const fixedCost = 3 + tokenCost(tokens, fixedLit, fixedDist);
 
   let dynamicHeader = 3 + 5 + 5 + 4 + hclen * 3;
@@ -560,14 +612,7 @@ function deflateRaw(data: Uint8Array): Uint8Array {
   if (fixedCost <= dynamicCost) {
     writer.writeBits(1, 1);
     writer.writeBits(1, 2);
-    writeTokens(
-      writer,
-      tokens,
-      fixedLit,
-      canonicalCodes(fixedLit, MAX_CODE_BITS),
-      fixedDist,
-      canonicalCodes(fixedDist, MAX_CODE_BITS)
-    );
+    writeTokens(writer, tokens, fixedLit, FIXED_LITERAL_CODES, fixedDist, FIXED_DISTANCE_CODES);
     return writer.finish();
   }
 

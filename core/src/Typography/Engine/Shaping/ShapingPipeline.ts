@@ -90,7 +90,12 @@ export class ShapingPipeline {
     for (let i = 1; i < run.length; i++) if (run[i].cluster < run[i - 1].cluster) { ordered = false; break; }
     let wide = false;
     for (let i = 0; i < run.length && !wide; i++) wide = needsWide(adjustments[i].yAdvance, adjustments[i].yPlacement, run[i].componentCount, run[i].markComponent);
-    const output = new GlyphRun(run.length, wide);
+    // One glyph per UTF-16 unit, clusters consecutive to the end of the text, and nothing
+    // offset, marked or ligated: the compact layout holds it (see GlyphRun).
+    let compact = !wide && ordered && run.length > 0 && run[0].cluster + run.length === text.length;
+    for (let i = 0; i < run.length && compact; i++)
+      compact = run[i].cluster === run[0].cluster + i && adjustments[i].xPlacement === 0 && !adjustments[i].zeroMarkAdvance && !run[i].ligature;
+    const output = new GlyphRun(run.length, wide, compact ? run[0].cluster : undefined);
     if (ordered) {
       // Logical LTR clusters are usually already ordered. Walk each equal-cluster
       // group once instead of building sets and maps merely to recover source lengths.

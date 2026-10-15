@@ -29,6 +29,17 @@ export class FontFace {
   readonly defaultOptions = new ShapeOptions();
   // advanceWidth as a function value, created once rather than on every shape call.
   readonly advanceWidthOf = (glyph: number): number => this.font.advanceWidth(glyph);
+  // Glyph ids of printable ASCII (U+0020 to U+007E), plus one; 0 until first mapped.
+  #asciiGlyphs: Int32Array | null = null;
+  // The font's glyph for a printable ASCII character, as mapGlyph returns it.
+  asciiGlyph(code: number): number {
+    const glyphs = this.#asciiGlyphs ??= new Int32Array(95);
+    const known = glyphs[code - 32];
+    if (known !== 0) return known - 1;
+    const id = this.mapGlyph(code);
+    glyphs[code - 32] = id + 1;
+    return id;
+  }
   // Starts a shape call: an empty run, and every pooled glyph record free again.
   beginRun(): ShapingGlyph[] { this.#run.length = 0; this.#glyphsRented = 0; return this.#run; }
   rentGlyph(id: number, scalar: number, cluster: number): ShapingGlyph {

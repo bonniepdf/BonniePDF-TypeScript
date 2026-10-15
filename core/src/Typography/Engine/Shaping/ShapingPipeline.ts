@@ -37,7 +37,7 @@ export class ShapingPipeline {
       text.length <= limits.maxGlyphs && text.length * 3 <= limits.maxOperations && /^[\x20-\x7e]*$/.test(text);
     if (ascii) {
       for (let i = 0; i < text.length; i++) {
-        const cp = text.charCodeAt(i), id = face.mapGlyph(cp);
+        const cp = text.charCodeAt(i), id = face.asciiGlyph(cp);
         if (!id) unsupported('Font has no glyph for U+' + cp.toString(16).toUpperCase().padStart(4, '0') + '.');
         run.push(face.rentGlyph(id, cp, i));
       }

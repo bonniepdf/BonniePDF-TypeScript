@@ -129,7 +129,15 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private readonly columnWeights: number[];
   private readonly footers: TableRow[] = [];
   private readonly headers: TableRow[] = [];
-  private readonly _rows: TableRow[] = [];
+  // Body rows. A row added as plain content (addRow with elements, none a TableCell) is kept as
+  // that content alone: the element for a one-cell row, a copy of the elements otherwise. Its row
+  // and cell objects would hold only defaults, and the table made them, so no caller holds them.
+  // Layout reads a temporary row with the same values (rowForLayout); reading `rows` or
+  // `getAllRows()` replaces compact entries with real rows, which are then kept.
+  private readonly _rows: Array<TableRow | IElement | IElement[]> = [];
+  // Set once `rows` has handed out the array itself: later rows are stored as real rows, so a
+  // caller holding the array never sees a compact entry.
+  #rowsExposed = false;
 
   // State tracking for multipage rendering
   private lastRowRendered = -1;
@@ -303,8 +311,42 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   public addRow(cells: TableCell[]): void;
   public addRow(row: TableRow): void;
   public addRow(...args: Array<IElement | TableCell[] | TableRow>): void {
+    if (!this.#rowsExposed && isPlainContent(args)) {
+      const contents = args as IElement[];
+      // A single null content stays in an array, so it is not mistaken for a null row.
+      this._rows.push(contents.length === 1 && contents[0] != null ? contents[0] : contents.slice());
+      return;
+    }
     const row = this.createRowFromArgs(args);
     this._rows.push(row);
+  }
+
+  /** Body row `index` as a real row, replacing a compact entry with it (and keeping it). */
+  private materialiseRow(index: number): TableRow {
+    const entry = this._rows[index];
+    if (entry instanceof TableRow || entry == null) return entry as TableRow;
+    const row = buildRow(entry);
+    this._rows[index] = row;
+    return row;
+  }
+
+  /** Body row `index` for measuring and drawing: the stored row, or a temporary equal to it. */
+  private rowForLayout(index: number): TableRow {
+    const entry = this._rows[index];
+    return entry instanceof TableRow || entry == null ? (entry as TableRow) : buildRow(entry);
+  }
+
+  /**
+   * @internal The rows that exist as objects (headers, body rows that have been materialised,
+   * footers), for the serializer's tree walk. Compact body rows have only default cells, whose
+   * contents {@link getChildren} already yields.
+   */
+  public walkRows(): readonly TableRow[] {
+    return [
+      ...this.headers,
+      ...this._rows.filter((entry): entry is TableRow => entry instanceof TableRow),
+      ...this.footers,
+    ];
   }
 
   private createRowFromArgs(args: Array<IElement | TableCell[] | TableRow>): TableRow {
@@ -323,22 +365,35 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
   /** The body rows, in order: not the header or footer rows (see {@link getAllRows}). Add rows with {@link addRow}. */
   public get rows(): ReadonlyArray<TableRow> {
-    return this._rows;
+    for (let i = 0; i < this._rows.length; i++) this.materialiseRow(i);
+    this.#rowsExposed = true;
+    return this._rows as TableRow[];
   }
 
   /** Returns all rows (headers + data rows + footers) for tree-walking. */
   public getAllRows(): ReadonlyArray<TableRow> {
-    return [...this.headers, ...this._rows, ...this.footers];
+    for (let i = 0; i < this._rows.length; i++) this.materialiseRow(i);
+    return [...this.headers, ...(this._rows as TableRow[]), ...this.footers];
   }
 
   /** @inheritdoc - every cell's content across headers, body rows, and footers. */
   public getChildren(): readonly IElement[] {
+    // Read without materialising compact body rows.
     const children: IElement[] = [];
-    for (const row of this.getAllRows()) {
+    const addCells = (row: TableRow): void => {
       for (const cell of row.cells) {
         if (cell?.content) children.push(cell.content);
       }
+    };
+    for (const row of this.headers) addCells(row);
+    for (const entry of this._rows) {
+      if (entry instanceof TableRow || entry == null) {
+        if (entry) addCells(entry);
+      } else if (Array.isArray(entry)) {
+        for (const content of entry) if (content) children.push(content);
+      } else children.push(entry);
     }
+    for (const row of this.footers) addCells(row);
     return children;
   }
 
@@ -418,7 +473,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Render data rows
     let tbodyOpen = false;
     for (let i = startRow; i < this._rows.length; i++) {
-      const row = this._rows[i];
+      const row = this.rowForLayout(i);
       const rowHeight = this.measureRowHeight(row, widths);
 
       // Pagination check
@@ -574,8 +629,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     }
 
     // Data rows
-    for (const row of this._rows) {
-      totalHeight += this.measureRowHeight(row, widths);
+    for (let i = 0; i < this._rows.length; i++) {
+      totalHeight += this.measureRowHeight(this.rowForLayout(i), widths);
     }
 
     // Footers
@@ -627,7 +682,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     if (this._rows.length > 0) {
       if (groupTagging) tagging!.tree.begin(SemanticRole.TBody);
       try {
-        for (const row of this._rows) {
+        for (let i = 0; i < this._rows.length; i++) {
+          const row = this.rowForLayout(i);
           const rowHeight = this.measureRowHeight(row, widths);
 
           // Pagination check
@@ -960,12 +1016,19 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private columnCount(): number {
     let columns = this.columnWeights.length;
 
-    for (const rows of [this.headers, this._rows, this.footers]) {
+    for (const rows of [this.headers, this.footers]) {
       for (const row of rows) {
         let spanned = 0;
         for (const cell of row.cells) spanned += Math.max(1, cell.columnSpan);
         if (spanned > columns) columns = spanned;
       }
+    }
+    // Body rows, without materialising compact ones: their default cells each span one column.
+    for (const entry of this._rows) {
+      let spanned = 0;
+      if (entry instanceof TableRow) for (const cell of entry.cells) spanned += Math.max(1, cell.columnSpan);
+      else spanned = Array.isArray(entry) ? entry.length : 1;
+      if (spanned > columns) columns = spanned;
     }
 
     return columns;
@@ -1022,4 +1085,15 @@ function sumWidths(widths: readonly number[]): number {
   let sum = 0;
   for (let i = 0; i < widths.length; i++) sum += widths[i];
   return sum;
+}
+
+/** Whether addRow's arguments are plain content: elements, none of them a TableCell or TableRow. */
+function isPlainContent(args: ReadonlyArray<IElement | TableCell[] | TableRow>): boolean {
+  for (const arg of args) if (arg instanceof TableCell || arg instanceof TableRow || Array.isArray(arg)) return false;
+  return true;
+}
+
+/** The row TableRow.fromElements builds for a compact entry. */
+function buildRow(entry: IElement | IElement[]): TableRow {
+  return Array.isArray(entry) ? TableRow.fromElements(...entry) : TableRow.fromElements(entry);
 }

@@ -17,6 +17,7 @@ import { TtfFont } from '../../src/Typography/TrueType/TtfFont';
 import { shapeTextRuns } from '../../src/Typography/TextRunShaper';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { pdfToText } from '../helpers/test-base';
+import { records } from '../helpers/glyph-records';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/emoji.json', import.meta.url), 'utf8')) as {
   fonts: { file: string; sha256: string }[];
@@ -104,14 +105,14 @@ describe('colour emoji integration', () => {
       if (font.hasOutlines) return;
       const resources = new PdfResourceRegistry();
       const canvas = new PdfCanvas(800, 0, 0, undefined, image => '/I' + resources.registerImage(image));
-      const glyph = font.shape('😀')[0];
-      for (let i = 0; i < 10; i++) drawColourGlyph(canvas, font, glyph, '😀', i * 24, 40, 24, Color.black);
+      const glyphs = font.shape('😀');
+      for (let i = 0; i < 10; i++) drawColourGlyph(canvas, font, glyphs, 0, '😀', i * 24, 40, 24, Color.black);
       expect(resources.loadedImages.size).toBe(1);
       const first = [...resources.loadedImages.values()][0];
       await first.prepareDeferred?.();
       expect(first.hasAlpha).toBe(true);
       expect(first.alphaData[0]).toBe(0);
-      drawColourGlyph(canvas, font, glyph, '😀', 0, 40, 24, Color.black);
+      drawColourGlyph(canvas, font, glyphs, 0, '😀', 0, 40, 24, Color.black);
       expect([...resources.loadedImages.values()][0]).toBe(first);
       expect(resources.deferredImages()).toEqual([]);
     });
@@ -121,7 +122,7 @@ describe('colour emoji integration', () => {
         const result = shapeTextRuns(c.text, [{ fontIdentifier: 'emoji', font }]);
         expect(result.unsupported).toEqual([]);
         expect(result.runs.map(r => r.text).join('')).toBe(c.text);
-        const glyphs = font.shape(c.text);
+        const glyphs = records(font.shape(c.text));
         expect(glyphs.length).toBeGreaterThan(0);
         expect(glyphs.every(g => g.id !== 0)).toBe(true);
         if (c.id !== 'repeated') expect(glyphs).toHaveLength(1);

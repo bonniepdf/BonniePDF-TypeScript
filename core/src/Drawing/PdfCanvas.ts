@@ -1,4 +1,4 @@
-import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
+import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
 import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { ICanvas } from './ICanvas';
 import { ellipseToBeziers } from './EllipseGeometry';
@@ -38,7 +38,7 @@ interface TextRun {
 }
 
 interface PreparedTextRun extends TextRun {
-  glyphs?: readonly GlyphInfo[];
+  glyphs?: GlyphRun;
 }
 
 interface PathCmd {
@@ -749,13 +749,13 @@ export class PdfCanvas implements ICanvas {
     for (const run of runs) {
       const font = run.embeddedFont;
       if (font) {
-        total += (run.glyphs!.reduce((sum, g) => sum + g.advanceX, 0) * fontSize) / font.unitsPerEm;
+        total += (run.glyphs!.totalAdvanceX() * fontSize) / font.unitsPerEm;
       } else {
         total += FontMetrics.getStringWidth(run.text, run.fontIdentifier, fontSize);
       }
       total +=
         this.spacingWidth(run.text) +
-        (font ? (run.glyphs!.length - Array.from(run.text).length) * this._letterSpacing : 0);
+        (font ? (run.glyphs!.count - Array.from(run.text).length) * this._letterSpacing : 0);
     }
     return total;
   }
@@ -792,7 +792,9 @@ export class PdfCanvas implements ICanvas {
         if (!defaults) codes = run.tracker.markShaped(run.text, glyphs!);
       } else {
         this._glyphTracker(run.fontIdentifier, run.text);
-        if (glyphs) codes = run.tracker?.markShaped(run.text, glyphs) ?? glyphs.map(g => g.id);
+        if (glyphs)
+          codes =
+            run.tracker?.markShaped(run.text, glyphs) ?? Array.from({ length: glyphs.count }, (_, i) => glyphs.id(i));
       }
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       if (!font || !glyphs || !codes) {
@@ -816,13 +818,15 @@ export class PdfCanvas implements ICanvas {
           hex = '';
           adjusted = true;
         };
-        for (let index = 0; index < glyphs.length; index++) {
-          const g = glyphs[index];
-          adjust((-g.offsetX * 1000) / font.unitsPerEm);
+        for (let index = 0; index < glyphs.count; index++) {
+          const offsetX = glyphs.offsetX(index);
+          adjust((-offsetX * 1000) / font.unitsPerEm);
           hex += glyphCode(codes[index]);
           adjust(
-            ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
-              (isSpaceSource(run.text, g.cluster, g.sourceLength) && fontSize > 0 ? (wordSpacing * 1000) / fontSize : 0)
+            ((font.getGlyphWidth(glyphs.id(index)) + offsetX - glyphs.advanceX(index)) * 1000) / font.unitsPerEm -
+              (isSpaceSource(run.text, glyphs.cluster(index), glyphs.sourceLength(index)) && fontSize > 0
+                ? (wordSpacing * 1000) / fontSize
+                : 0)
           );
         }
         if (adjusted) PdfOperators.showTextPositioned(this.stream, `${array}<${hex}>]`);
@@ -831,13 +835,16 @@ export class PdfCanvas implements ICanvas {
         if (colourFont) this.stream.push('0 Tr\n');
         continue;
       }
-      for (const [index, g] of glyphs.entries()) {
-        const rise = (g.offsetY * fontSize) / font.unitsPerEm;
+      for (let index = 0; index < glyphs.count; index++) {
+        const rise = (glyphs.offsetY(index) * fontSize) / font.unitsPerEm;
         if (rise !== 0) this.stream.push(`${PdfSyntax.formatDecimal(rise)} Ts\n`);
-        const before = (-g.offsetX * 1000) / font.unitsPerEm;
+        const before = (-glyphs.offsetX(index) * 1000) / font.unitsPerEm;
         const after =
-          ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
-          (isSpaceSource(run.text, g.cluster, g.sourceLength) && fontSize > 0 ? (wordSpacing * 1000) / fontSize : 0);
+          ((font.getGlyphWidth(glyphs.id(index)) + glyphs.offsetX(index) - glyphs.advanceX(index)) * 1000) /
+            font.unitsPerEm -
+          (isSpaceSource(run.text, glyphs.cluster(index), glyphs.sourceLength(index)) && fontSize > 0
+            ? (wordSpacing * 1000) / fontSize
+            : 0);
         const hex = `<${codes[index].toString(16).toUpperCase().padStart(4, '0')}>`;
         if (before === 0 && after === 0) PdfOperators.showText(this.stream, hex);
         else
@@ -868,10 +875,11 @@ export class PdfCanvas implements ICanvas {
         cursor += FontMetrics.getStringWidth(run.text, run.fontIdentifier, size) + this.spacingWidth(run.text);
         continue;
       }
-      for (const glyph of run.glyphs!) {
-        const source = run.text.slice(glyph.cluster, glyph.cluster + glyph.sourceLength);
-        if (font.hasColour) drawColourGlyph(this, font, glyph, source, cursor, baseline, size, colour);
-        cursor += (glyph.advanceX * size) / font.unitsPerEm + this._letterSpacing;
+      const glyphs = run.glyphs!;
+      for (let glyph = 0; glyph < glyphs.count; glyph++) {
+        const source = run.text.slice(glyphs.cluster(glyph), glyphs.cluster(glyph) + glyphs.sourceLength(glyph));
+        if (font.hasColour) drawColourGlyph(this, font, glyphs, glyph, source, cursor, baseline, size, colour);
+        cursor += (glyphs.advanceX(glyph) * size) / font.unitsPerEm + this._letterSpacing;
         if (source === ' ') cursor += wordSpacing;
       }
     }
@@ -1744,7 +1752,7 @@ function isEmptyRecord(record: object): boolean {
 }
 
 /** `glyphs.every(g => g.offsetY === 0)` without a closure per run. */
-function allHorizontal(glyphs: readonly { offsetY: number }[]): boolean {
-  for (let i = 0; i < glyphs.length; i++) if (glyphs[i].offsetY !== 0) return false;
+function allHorizontal(glyphs: GlyphRun): boolean {
+  for (let i = 0; i < glyphs.count; i++) if (glyphs.offsetY(i) !== 0) return false;
   return true;
 }

@@ -1,3 +1,4 @@
+import type { GlyphRun } from './Engine/Api/GlyphRun';
 import { FontManager } from './FontManager';
 import { primaryCovers, shapeTextRuns } from './TextRunShaper';
 import { getActiveDocumentFonts } from './DocumentFontMetricScope';
@@ -233,9 +234,7 @@ export class FontMetrics {
     ];
     return shapeTextRuns(text, candidates).runs.reduce((sum, run) => {
       const face = candidates[run.fontIndex].font;
-      return (
-        sum + (face.shape(run.text, features).reduce((total, g) => total + g.advanceX, 0) * fontSize) / face.unitsPerEm
-      );
+      return sum + (sumAdvances(face.shape(run.text, features)) * fontSize) / face.unitsPerEm;
     }, 0);
   }
 
@@ -273,7 +272,7 @@ export class FontMetrics {
   public static getGlyphCount(text: string, identifier: string, features?: Readonly<Record<string, number>>): number {
     const font = this.metricFace(identifier);
     if (!font) return Array.from(text).filter(c => c.codePointAt(0)! >= 32).length;
-    if (primaryCovers(text, font)) return font.shape(text, features).length;
+    if (primaryCovers(text, font)) return font.shape(text, features).count;
     const candidates = [
       { fontIdentifier: 'primary', font },
       ...[...(getActiveDocumentFonts()?.fallbackFonts() ?? []), ...FontManager.getFallbackFonts()]
@@ -281,7 +280,7 @@ export class FontMetrics {
         .map(f => ({ fontIdentifier: f.key, font: f.font })),
     ];
     return shapeTextRuns(text, candidates).runs.reduce(
-      (sum, run) => sum + candidates[run.fontIndex].font.shape(run.text, features).length,
+      (sum, run) => sum + candidates[run.fontIndex].font.shape(run.text, features).count,
       0
     );
   }
@@ -302,11 +301,18 @@ export class FontMetrics {
     features?: Readonly<Record<string, number>>
   ): (offset: number) => boolean {
     const glyphs = this.metricFace(identifier)?.shape(text, features);
-    return offset =>
-      !glyphs ||
-      glyphs.every(
-        g => !(g.cluster < offset && offset < g.cluster + g.sourceLength) && !(g.cluster === offset && g.unsafeToBreak)
-      );
+    return offset => {
+      if (!glyphs) return true;
+      for (let i = 0; i < glyphs.count; i++) {
+        const cluster = glyphs.cluster(i);
+        if (
+          (cluster < offset && offset < cluster + glyphs.sourceLength(i)) ||
+          (cluster === offset && glyphs.unsafeToBreak(i))
+        )
+          return false;
+      }
+      return true;
+    };
   }
 
   private static getStandardFontTable(fontName: string): readonly number[] | null {
@@ -352,8 +358,7 @@ export class FontMetrics {
 }
 
 /** The same left-to-right sum as `reduce((sum, g) => sum + g.advanceX, 0)`, without a closure. */
-function sumAdvances(glyphs: readonly { advanceX: number }[]): number {
-  let sum = 0;
-  for (let i = 0; i < glyphs.length; i++) sum += glyphs[i].advanceX;
-  return sum;
+// Advances are integers summed left to right, so the total is exact.
+function sumAdvances(glyphs: GlyphRun): number {
+  return glyphs.totalAdvanceX();
 }

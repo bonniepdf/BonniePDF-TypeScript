@@ -14,6 +14,7 @@ import { TextStyle } from '../../src/Elements/Text/TextStyle';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Document } from '../../src/Document';
 import { pdfToText } from '../helpers/test-base';
+import { records } from '../helpers/glyph-records';
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/harfbuzz.json', import.meta.url), 'utf8')) as {
   font: { sha256: string; unitsPerEm: number };
   cases: { id: string; text: string; features: Record<string, number>; glyphs: number[][] }[];
@@ -35,18 +36,16 @@ describe('embedded Latin shaping', () => {
     expect(createHash('sha256').update(bytes).digest('hex')).toBe(fixture.font.sha256));
   for (const c of fixture.cases)
     it(c.id, () => {
-      const actual = font
-        .shape(c.text, c.features)
-        .map(g => [
-          g.id,
-          g.cluster,
-          g.advanceX,
-          g.advanceY,
-          g.offsetX,
-          g.offsetY,
-          g.unsafeToBreak ? 1 : 0,
-          g.sourceLength,
-        ]);
+      const actual = records(font.shape(c.text, c.features)).map(g => [
+        g.id,
+        g.cluster,
+        g.advanceX,
+        g.advanceY,
+        g.offsetX,
+        g.offsetY,
+        g.unsafeToBreak ? 1 : 0,
+        g.sourceLength,
+      ]);
       expect(actual).toEqual(c.glyphs);
       expect(FontMetrics.getStringWidth(c.text, path, 12, c.features)).toBeCloseTo(
         (c.glyphs.reduce((n, g) => n + g[2], 0) * 12) / fixture.font.unitsPerEm,
@@ -55,7 +54,7 @@ describe('embedded Latin shaping', () => {
     });
   it('preserves source coordinates across controls and non-Latin spans', () => {
     const source = 'fi\t\u03b1fi';
-    const glyphs = font.shape(source);
+    const glyphs = records(font.shape(source));
     expect(glyphs.map(g => source.slice(g.cluster, g.cluster + g.sourceLength))).toEqual(['fi', '\u03b1', 'fi']);
   });
   it('selects one fallback face for an entire combining grapheme', () => {
@@ -84,7 +83,7 @@ describe('embedded Latin shaping', () => {
     const block = new TextBlock('ffi', { fontName: path, fontSize: 12, preserveWhitespace: true });
     const lines = (block as unknown as { getOrComputeLines(width: number): string[] }).getOrComputeLines(8.4);
     expect(lines).toEqual(['ff', 'i']);
-    expect(font.shape(lines[0])).toHaveLength(1);
+    expect(font.shape(lines[0]).count).toBe(1);
   });
   it('allocates different PDF codes for the same glyph with different sources', () => {
     const tracker = new GlyphUsageTracker(font);
@@ -129,18 +128,18 @@ describe('embedded Latin shaping', () => {
     const tracker = new GlyphUsageTracker(font);
     const gs = font.shape('ffi');
     tracker.markShaped('ffi', gs);
-    expect(gs).toHaveLength(1);
-    expect(tracker.getUsedGlyphIds().has(gs[0].id)).toBe(true);
+    expect(gs.count).toBe(1);
+    expect(tracker.getUsedGlyphIds().has(gs.id(0))).toBe(true);
     const cmap = new ToUnicodeCMapBuilder();
-    cmap.addSourceMapping(gs[0].id, tracker.getGlyphSources().get(gs[0].id)!);
+    cmap.addSourceMapping(gs.id(0), tracker.getGlyphSources().get(gs.id(0))!);
     expect(cmap.build()).toContain('006600660069');
   });
   it('honours kerning and ligature opt-outs in measurement', () => {
     expect(FontMetrics.getStringWidth('AV', path, 12)).toBeLessThan(
       FontMetrics.getStringWidth('AV', path, 12, { kern: 0 })
     );
-    expect(font.shape('ffi')).toHaveLength(1);
-    expect(font.shape('ffi', { liga: 0 })).toHaveLength(3);
+    expect(font.shape('ffi').count).toBe(1);
+    expect(font.shape('ffi', { liga: 0 }).count).toBe(3);
   });
   it('protects ligature source boundaries', () => {
     expect(FontMetrics.isSafeTextBreak('ffi', path, 1)).toBe(false);
@@ -244,15 +243,15 @@ describe('shaping reuse', () => {
     const face = TtfFont.loadFromBytes(bytes);
     const features = { liga: 0, kern: 1 };
     const separate = face.shape('ffi', features);
-    expect(separate).toHaveLength(3);
+    expect(separate.count).toBe(3);
     expect(face.shape('ffi', { kern: 1, liga: 0 })).toBe(separate);
     features.liga = 1;
-    expect(face.shape('ffi', features)).toHaveLength(1);
-    expect(separate).toHaveLength(3);
+    expect(face.shape('ffi', features).count).toBe(1);
+    expect(separate.count).toBe(3);
     expect(face.shape('ffi', {})).toBe(face.shape('ffi'));
     expect(face.shape('é')).not.toBe(face.shape('e\u0301'));
+    // A packed run is frozen and keeps its glyphs in a private array, so cached glyphs cannot change.
     expect(Object.isFrozen(separate)).toBe(true);
-    expect(separate.every(Object.isFrozen)).toBe(true);
   });
   it('evicts unique text and bypasses long runs', () => {
     const face = TtfFont.loadFromBytes(bytes);

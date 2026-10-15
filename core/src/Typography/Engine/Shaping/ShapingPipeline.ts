@@ -3,7 +3,7 @@
 import { FontFace } from '../Fonts/FontFace';
 import type { ShapeOptions } from '../Api/ShapeOptions';
 import { ShapedRun } from '../Api/ShapedRun';
-import type { GlyphInfo } from '../Api/GlyphInfo';
+import { GlyphRun, needsWide } from '../Api/GlyphRun';
 import { TextDirection } from '../Api/TextDirection';
 import { FontError, unsupported } from '../Api/FontError';
 import { checked } from '../Data/Integer';
@@ -88,7 +88,9 @@ export class ShapingPipeline {
     if (nativeRtl) { run.reverse(); adjustments.reverse(); }
     let ordered = true;
     for (let i = 1; i < run.length; i++) if (run[i].cluster < run[i - 1].cluster) { ordered = false; break; }
-    const output: GlyphInfo[] = new Array<GlyphInfo>(run.length);
+    let wide = false;
+    for (let i = 0; i < run.length && !wide; i++) wide = needsWide(adjustments[i].yAdvance, adjustments[i].yPlacement, run[i].componentCount, run[i].markComponent);
+    const output = new GlyphRun(run.length, wide);
     if (ordered) {
       // Logical LTR clusters are usually already ordered. Walk each equal-cluster
       // group once instead of building sets and maps merely to recover source lengths.
@@ -96,21 +98,20 @@ export class ShapingPipeline {
         let end = first + 1, unsafeBefore = run[first].unsafeBefore;
         while (end < run.length && run[end].cluster === run[first].cluster) { unsafeBefore ||= run[end].unsafeBefore; end++; }
         const length = (end < run.length ? run[end].cluster : text.length) - run[first].cluster;
-        for (let i = first; i < end; i++) output[i] = emit(face, run[i], adjustments[i], length, unsafeBefore);
+        for (let i = first; i < end; i++) emit(face, output, i, run[i], adjustments[i], length, unsafeBefore);
         first = end;
       }
     } else {
       const starts = [...new Set(run.map(g => g.cluster))].sort((a, b) => a - b), unsafe = new Set(run.filter(g => g.unsafeBefore).map(g => g.cluster));
       const lengths = new Map(starts.map((start, i) => [start, (starts[i + 1] ?? text.length) - start]));
-      for (let i = 0; i < run.length; i++) output[i] = emit(face, run[i], adjustments[i], lengths.get(run[i].cluster)!, unsafe.has(run[i].cluster));
+      for (let i = 0; i < run.length; i++) emit(face, output, i, run[i], adjustments[i], lengths.get(run[i].cluster)!, unsafe.has(run[i].cluster));
     }
     return new ShapedRun(text, output);
   }
 }
 
-function emit(face: FontFace, g: ShapingGlyph, a: GlyphAdjustment, sourceLength: number, unsafeToBreak: boolean): GlyphInfo {
+function emit(face: FontFace, output: GlyphRun, i: number, g: ShapingGlyph, a: GlyphAdjustment, sourceLength: number, unsafeToBreak: boolean): void {
   if (g.id === 0) unsupported('A glyph remained unmapped after substitution.');
-  return { id: g.id, cluster: g.cluster, advanceX: checked(face.advanceWidth(g.id) + a.xAdvance), advanceY: a.yAdvance,
-    offsetX: a.xPlacement, offsetY: a.yPlacement, componentCount: g.componentCount, isMark: a.zeroMarkAdvance, isLigature: g.ligature,
-    sourceLength, unsafeToBreak, componentIndex: g.markComponent };
+  output.set(i, g.id, g.cluster, checked(face.advanceWidth(g.id) + a.xAdvance), a.yAdvance, a.xPlacement, a.yPlacement,
+    g.componentCount, a.zeroMarkAdvance, g.ligature, sourceLength, unsafeToBreak, g.markComponent);
 }

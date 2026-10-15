@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { FontMetrics } from '../../src/Typography/FontMetrics';
 import { ParagraphWidths } from '../../src/Typography/ParagraphWidths';
 import { primaryCovers } from '../../src/Typography/TextRunShaper';
+import { records } from '../helpers/glyph-records';
 
 // Word wrapping reads candidate-line widths from one shaping of the paragraph where both ends
 // of a line are safe-to-break boundaries. Those widths, and the line's glyphs, must be exactly
@@ -122,7 +123,9 @@ describe('paragraph widths', () => {
               answered++;
               const span = text.substring(s, e);
               expect(width, `${font} "${span}"`).toBe(FontMetrics.getStringWidth(span, font, 11, features));
-              expect(widths!.tryGetGlyphs(s, e), `${font} "${span}" glyphs`).toEqual(parsed.shape(span, features));
+              expect(records(widths!.tryGetGlyphs(s, e)!), `${font} "${span}" glyphs`).toEqual(
+                records(parsed.shape(span, features))
+              );
             }
           }
         }

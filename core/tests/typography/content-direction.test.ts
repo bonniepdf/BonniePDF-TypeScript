@@ -15,6 +15,7 @@ import { Table } from '../../src/Elements/Tables/Table';
 import { RenderContext } from '../../src/Rendering/RenderContext';
 import { PdfSize } from '../../src/Configuration/PdfSize';
 import { applyContentDirection } from '../../src/Elements/ContentDirectionResolver';
+import { records } from '../helpers/glyph-records';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/rtl.json', import.meta.url), 'utf8')) as {
   row: { ltrX: number[]; rtlX: number[] };
@@ -46,9 +47,15 @@ describe('content direction', () => {
       const restore = TextFlow.enter(ContentDirection.RightToLeft);
       try {
         expect(
-          font
-            .shape(sample.text)
-            .map(g => [g.id, g.cluster, g.advanceX, g.advanceY, g.offsetX, g.offsetY, g.sourceLength])
+          records(font.shape(sample.text)).map(g => [
+            g.id,
+            g.cluster,
+            g.advanceX,
+            g.advanceY,
+            g.offsetX,
+            g.offsetY,
+            g.sourceLength,
+          ])
         ).toEqual(sample.glyphs);
       } finally {
         restore();
@@ -60,15 +67,15 @@ describe('content direction', () => {
       new Uint8Array(readFileSync(new URL('./fixtures/NotoSansHebrew-Regular.ttf', import.meta.url)))
     );
     const text = 'שלום ',
-      ltr = font.shape(text).map(g => g.cluster);
+      ltr = records(font.shape(text)).map(g => g.cluster);
     const restore = TextFlow.enter(ContentDirection.RightToLeft);
     try {
-      expect(font.shape(text).map(g => g.cluster)).toEqual([4, 3, 2, 1, 0]);
+      expect(records(font.shape(text)).map(g => g.cluster)).toEqual([4, 3, 2, 1, 0]);
     } finally {
       restore();
     }
     expect(ltr).toEqual([3, 2, 1, 0, 4]);
-    expect(font.shape(text).map(g => g.cluster)).toEqual(ltr);
+    expect(records(font.shape(text)).map(g => g.cluster)).toEqual(ltr);
   });
 
   for (const rtl of [false, true])

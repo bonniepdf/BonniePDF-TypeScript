@@ -1,6 +1,6 @@
 import { FontFace } from '../Engine/Fonts/FontFace';
 import { ShapedTextCache } from '../ShapedTextCache';
-import type { GlyphInfo } from '../Engine/Api/GlyphInfo';
+import type { GlyphRun } from '../Engine/Api/GlyphRun';
 import { BigEndianReader } from '../../Rendering/Images/BigEndianReader';
 import { getPlatformIO } from '../../Platform/PlatformIO';
 
@@ -46,11 +46,7 @@ export class TtfFont {
   }
 
   /** @internal Records glyphs known to equal shaping `text` (see ShapedTextCache.seed). */
-  public seedShaped(
-    text: string,
-    features: Readonly<Record<string, number>> | undefined,
-    glyphs: readonly GlyphInfo[]
-  ): void {
+  public seedShaped(text: string, features: Readonly<Record<string, number>> | undefined, glyphs: GlyphRun): void {
     this.shapedText.seed(text, features, glyphs);
   }
 

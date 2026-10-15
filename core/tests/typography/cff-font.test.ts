@@ -10,6 +10,7 @@ import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { pdfToText } from '../helpers/test-base';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { records } from '../helpers/glyph-records';
 const corpus = JSON.parse(readFileSync(new URL('./fixtures/cff.json', import.meta.url), 'utf8')) as {
   fonts: {
     id: string;
@@ -27,7 +28,14 @@ describe('static CFF OpenType integration', () => {
       expect(font.hasOutlines).toBe(true);
       for (const c of f.cases)
         expect(
-          font.shape(c.text, c.features).map(g => [g.id, g.cluster, g.advanceX, g.advanceY, g.offsetX, g.offsetY])
+          records(font.shape(c.text, c.features)).map(g => [
+            g.id,
+            g.cluster,
+            g.advanceX,
+            g.advanceY,
+            g.offsetX,
+            g.offsetY,
+          ])
         ).toEqual(c.glyphs);
       const embedded = new CffFont(
         cffProgram(font, font.postScriptName),

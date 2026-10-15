@@ -3,7 +3,7 @@ import { Color } from '../Core/Color';
 import { ImageLoader } from '../Rendering/Images/ImageLoader';
 import { ImageInfo } from '../Rendering/Images/ImageInfo';
 import type { TtfFont } from './TrueType/TtfFont';
-import type { GlyphInfo } from './Engine/Api/GlyphInfo';
+import type { GlyphRun } from './Engine/Api/GlyphRun';
 import type { Glyph } from './Engine/Fonts/Outlines/Glyph';
 import type { FontPoint } from './Engine/Fonts/Outlines/FontPoint';
 import type { PaletteColour } from './Engine/Fonts/Colour/PaletteColour';
@@ -77,7 +77,8 @@ function read(font: TtfFont, glyph: number, ppem: number, textPresentation: bool
 export function drawColourGlyph(
   canvas: ICanvas,
   font: TtfFont,
-  glyph: GlyphInfo,
+  glyphs: GlyphRun,
+  glyph: number,
   source: string,
   x: number,
   baseline: number,
@@ -87,13 +88,13 @@ export function drawColourGlyph(
   if (!source.trim()) return;
   const art = read(
     font,
-    glyph.id,
+    glyphs.id(glyph),
     Math.max(1, Math.min(65535, Math.floor((size * 96) / 72 + 0.5))),
     source.includes('\ufe0e')
   );
   const scale = size / font.unitsPerEm;
-  x += glyph.offsetX * scale;
-  baseline -= glyph.offsetY * scale;
+  x += glyphs.offsetX(glyph) * scale;
+  baseline -= glyphs.offsetY(glyph) * scale;
   if (art.image && art.bitmap) {
     const b = art.bitmap,
       sx = size / b.ppemX,

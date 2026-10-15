@@ -9,6 +9,7 @@ each change to `core/`.
 
 ## Unreleased
 
+- Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
 - Faster text with feature overrides (`fontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.
 - Lower memory and allocation for large documents, with unchanged output: text elements store a font-feature style only when features are overridden, paragraph indent/spacing metadata only when those controls are used, repeated single characters reuse their PDF character codes, and integer operands are formatted without `toFixed`. A 100,000-line document holds about 23% less live heap after generation.
 - `doc.fonts.add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document; a service that keeps its font bytes in memory parses each font once. Family resolution is memoised per document.

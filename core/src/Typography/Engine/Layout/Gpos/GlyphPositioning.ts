@@ -13,6 +13,7 @@ import { UnsafeRange } from '../Common/UnsafeRange';
 import { GlyphFilter } from '../Common/GlyphFilter';
 import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
 import { LookupHeaderCache } from '../Common/LookupHeaderCache';
+import { FirstGlyphSet } from '../Common/FirstGlyphSet';
 import { GlyphAdjustment } from './GlyphAdjustment';
 import { FontAnchor } from './FontAnchor';
 import { LegacyKerning } from '../../Fonts/Tables/LegacyKerning';
@@ -24,6 +25,7 @@ export class GlyphPositioning {
   private readonly filter!: GlyphFilter;
   private readonly lookupList: number = 0;
   private readonly headers!: LookupHeaderCache;
+  private readonly firstGlyphs = new Map<number, FirstGlyphSet | null>();
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
   private readonly options!: ShapeOptions;
@@ -104,15 +106,77 @@ export class GlyphPositioning {
     {
       this.activeRule = null;
       for (const rule of this.rules) { this.tick(); if (rule.index == index) { this.activeRule = rule; break; } }
-      for (let at = 0; at < glyphs.length;)
-        at += Math.max(1, this.applyAt(index, glyphs, adjustments, at, 0, advanceWidth));
+      const first = this.firstGlyphSet(index);
+      const rejectedCharge = first === null ? -1 : this.rejectedCharge(index);
+      for (let at = 0; at < glyphs.length;) {
+        const rejected = first !== null && !first.contains(glyphs[at].id);
+        if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge); at++; }
+        else at += Math.max(1, this.applyAt(index, glyphs, adjustments, at, 0, advanceWidth, rejected));
+      }
     }
     this.activeRule = null;
     this.resolve(glyphs, adjustments, advanceWidth);
     return adjustments;
   }
 
-  private applyAt(index: number, glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], at: number, depth: number, advanceWidth: ((glyph: number) => number) | null): number {
+  // A lookup's first-glyph set, or null when any subtable reads before its coverage
+  // test (contextual format 3) or fails the checks that precede it.
+  private firstGlyphSet(index: number): FirstGlyphSet | null {
+    let first = this.firstGlyphs.get(index);
+    if (first === undefined) { first = this.buildFirstGlyphs(index); this.firstGlyphs.set(index, first); }
+    return first;
+  }
+
+  private buildFirstGlyphs(index: number): FirstGlyphSet | null {
+    try {
+      const header = this.headers.get(index);
+      const first = new FirstGlyphSet();
+      for (let i = 0; i < header.count; i++) {
+        let sub = this.offset(header.offset, header.offset + 6 + i * 2), type = header.type, format = this.data.u16(sub);
+        if (type === 9) {
+          const extended = this.data.u16(sub + 2), delta = this.data.offset32(sub + 4);
+          if (format !== 1 || extended < 1 || extended > 8 || delta === 0) return null;
+          type = extended; sub = checked(sub + delta); format = this.data.u16(sub);
+        }
+        if ((type === 7 || type === 8) && format === 3) return null;
+        if (type === 3) {
+          if (format !== 1) return null;
+          this.data.check(sub + 6, this.data.u16(sub + 4) * 4);
+        } else if (type >= 4 && type <= 6) {
+          if (format !== 1) return null;
+        } else if (type === 1 || type === 2) {
+          if (format !== 1 && format !== 2) return null;
+        } else if (type !== 7 && type !== 8) return null;
+        if (!first.addCoverage(this.data, this.offset(sub, sub + 2))) return null;
+      }
+      return first;
+    } catch {
+      return null;
+    }
+  }
+
+  // What applyAt charges for every rejected glyph of this lookup, when that cannot
+  // depend on the glyph: a constant feature rule, no glyph filtering (so the walk to
+  // the next glyph is one step) and no Arabic ignorables. Otherwise -1.
+  private rejectedCharge(index: number): number {
+    const header = this.headers.get(index);
+    if (this.options.script === 'arab' || (header.flags & 0xff1e) !== 0 || this.limits.maxNesting < 0) return -1;
+    let value = 1, ticks = 0;
+    if (this.activeRule !== null) {
+      const constant = this.activeRule.constant();
+      if (constant === null) return -1;
+      value = constant.value; ticks = constant.ticks;
+    }
+    return 1 + ticks + (value !== 0 ? 1 + header.count : 0);
+  }
+
+  // Charges what the subtable loop would charge for a glyph no subtable covers.
+  private chargeSubtables(count: number): void {
+    if (count > 0 && (this.operations += count) > this.limits.maxOperations)
+      invalid("GPOS operation limit exceeded.");
+  }
+
+  private applyAt(index: number, glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], at: number, depth: number, advanceWidth: ((glyph: number) => number) | null, rejected = false): number {
     this.tick();
     if (this.options.script === 'arab' && Unicode.isIgnorable(glyphs[at].scalar)) return 0;
     if (depth > this.limits.maxNesting)
@@ -127,6 +191,7 @@ export class GlyphPositioning {
     if (this.filter.ignored(glyphs[at].id, flags, markSet))
       return 0;
     let next = this.walk(glyphs, at, 1, flags, markSet);
+    if (rejected) { this.chargeSubtables(count); return 0; }
     for (let i = 0; i < count; i++)
     {
       this.tick();

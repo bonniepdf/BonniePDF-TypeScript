@@ -723,6 +723,24 @@ export class PdfCanvas implements ICanvas {
     return this.artifactDepth;
   }
 
+  /** @internal Depth of MCID-bearing marked-content scopes currently open on this canvas. */
+  public get openTaggedDepth(): number {
+    return this.openTaggedCount;
+  }
+
+  /**
+   * @internal Adopts the open-scope depths of another canvas writing into the same content
+   * stream. A positioned canvas from `getCanvas` appends to the stream of the canvas already
+   * rendering; without these depths it believes it is at top level, and a chart or drawing
+   * inside a `/Figure` opened by its parent wraps its marks in `/Artifact`, an artifact nested
+   * in tagged content (PDF/UA-1 7.1). Only the counters are copied, never the emit stacks: this
+   * canvas did not open those scopes and must never close them.
+   */
+  public inheritOpenScopes(openTaggedCount: number, artifactDepth: number): void {
+    this.openTaggedCount = openTaggedCount;
+    this.artifactDepth = artifactDepth;
+  }
+
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
     const width = this.measureRuns(this.resolveRuns(text, fontFamily), fontSize);
     return new Size(width, fontSize * 1.2);

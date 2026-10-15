@@ -428,13 +428,20 @@ export class RenderContext implements RenderContextContract {
       // A positioned canvas resolves glyph fallback like the page's, so chart labels and
       // canvas drawings get the same fallback fonts as body text (spec 16, glyph fallback).
       this.resolveTextRuns.bind(this),
-      undefined,
+      this.reportUntaggedImage.bind(this),
       this.registerShading.bind(this),
       this.resources.noteImagePlacement.bind(this.resources)
     );
     pdfCanvas.emojiRendering = () => this.emojiRendering;
     pdfCanvas.wholeTextFontResolver = this.wholeTextFont;
-    if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
+    if (this.tagging) {
+      pdfCanvas.setTaggingContext(this.tagging);
+      // The new canvas appends to the same stream as the one already rendering, so it has to
+      // see the marked-content scopes that canvas has open - otherwise it treats itself as top
+      // level and wraps its marks in a redundant /Artifact nested inside them.
+      if (this.canvas instanceof PdfCanvas)
+        pdfCanvas.inheritOpenScopes(this.canvas.openTaggedDepth, this.canvas.openArtifactDepth);
+    }
     return pdfCanvas;
   }
 

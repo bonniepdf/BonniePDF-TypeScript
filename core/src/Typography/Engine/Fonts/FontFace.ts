@@ -3,7 +3,8 @@
 import { TrueTypeFont } from './Sfnt/TrueTypeFont';
 import { SfntDirectory } from './Sfnt/SfntDirectory';
 import { ShapingLimits, type ShapingLimitOptions } from '../Api/ShapingLimits';
-import type { ShapeOptions } from '../Api/ShapeOptions';
+import { ShapeOptions } from '../Api/ShapeOptions';
+import { ShapingGlyph } from '../Layout/Common/ShapingGlyph';
 import { requireInteger, argument, unsupported } from '../Api/FontError';
 import { ColourLayers } from './Colour/ColourLayers';
 import { BitmapStrikes } from './Colour/BitmapStrikes';
@@ -19,6 +20,21 @@ export class FontFace {
   readonly #colours: ColourLayers | null; readonly #programs = new Map<ShapeOptions, ShapingProgram>();
   readonly #programsByValue = new Map<string, ShapingProgram>();
   #defaultProgram: ShapingProgram | null = null;
+  // Per-call scratch for the shaping pipeline. A face serves one caller at a time, so a
+  // shape call reuses the previous call's glyph records.
+  readonly #run: ShapingGlyph[] = [];
+  readonly #glyphPool: ShapingGlyph[] = [];
+  #glyphsRented = 0;
+  // Options are immutable; shape calls without options share one default.
+  readonly defaultOptions = new ShapeOptions();
+  // advanceWidth as a function value, created once rather than on every shape call.
+  readonly advanceWidthOf = (glyph: number): number => this.font.advanceWidth(glyph);
+  // Starts a shape call: an empty run, and every pooled glyph record free again.
+  beginRun(): ShapingGlyph[] { this.#run.length = 0; this.#glyphsRented = 0; return this.#run; }
+  rentGlyph(id: number, scalar: number, cluster: number): ShapingGlyph {
+    if (this.#glyphsRented < this.#glyphPool.length) return this.#glyphPool[this.#glyphsRented++].reset(id, scalar, cluster);
+    const glyph = new ShapingGlyph(id, scalar, cluster); this.#glyphPool.push(glyph); this.#glyphsRented++; return glyph;
+  }
   constructor(bytes: Uint8Array, options: FaceOptions = {}) {
     this.limits = new ShapingLimits(options.limits);
     this.font = new TrueTypeFont(bytes, { faceIndex: options.faceIndex, outlines: this.limits.outlines });

@@ -685,13 +685,15 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // nodes either — the cell *contents* (tagged in reading order) nest directly
     // under the table's Div node, mirroring the structure tree.
     const rec = this.isLayoutGrid ? undefined : ctx.layoutRecorder;
+    // Without a recorder (every PDF save), share no-op callbacks instead of allocating three per row.
+    if (!rec) return noRowCapture;
     const page = ctx.currentPageIndex;
     const endY = rowY + rowHeight;
-    rec?.openNode(row, captureTypeOf(row), captureNameOf(row), page, rowX, rowY, rowWidth);
+    rec.openNode(row, captureTypeOf(row), captureNameOf(row), page, rowX, rowY, rowWidth);
     return {
-      openCell: (cell, x, width) => rec?.openNode(cell, captureTypeOf(cell), captureNameOf(cell), page, x, rowY, width),
-      closeCell: cell => rec?.closeNode(cell, page, endY, true),
-      closeRow: () => rec?.closeNode(row, page, endY, true),
+      openCell: (cell, x, width) => rec.openNode(cell, captureTypeOf(cell), captureNameOf(cell), page, x, rowY, width),
+      closeCell: cell => rec.closeNode(cell, page, endY, true),
+      closeRow: () => rec.closeNode(row, page, endY, true),
     };
   }
 
@@ -845,12 +847,12 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       ctx.canvas.beginContainerContent('TR');
     }
 
-    const rowWidth = widths.reduce((a, b) => a + b, 0);
+    const rowWidth = sumWidths(widths);
     const capture = this.captureRow(ctx, row, ctx.currentX, ctx.currentY, rowWidth, rowHeight);
 
     try {
       const startX = ctx.currentX;
-      let currentX = startX + (this.isRightToLeft ? widths.reduce((a, b) => a + b, 0) : 0);
+      let currentX = startX + (this.isRightToLeft ? rowWidth : 0);
 
       // `col` tracks the column the cell starts in, which runs ahead of the cell
       // index `i` once any cell in the row spans more than one column.
@@ -1003,4 +1005,21 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private isLastPage(ctx: RenderContext): boolean {
     return ctx.isLastPage;
   }
+}
+
+const noRowCapture: {
+  openCell(cell: TableCell, x: number, width: number): void;
+  closeCell(cell: TableCell): void;
+  closeRow(): void;
+} = {
+  openCell: () => {},
+  closeCell: () => {},
+  closeRow: () => {},
+};
+
+/** The same left-to-right sum as `widths.reduce((a, b) => a + b, 0)`, without a closure. */
+function sumWidths(widths: readonly number[]): number {
+  let sum = 0;
+  for (let i = 0; i < widths.length; i++) sum += widths[i];
+  return sum;
 }

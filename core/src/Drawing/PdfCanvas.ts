@@ -787,7 +787,7 @@ export class PdfCanvas implements ICanvas {
       let codes: readonly number[] | undefined;
       if (run.canTrackPreparedGlyphs && run.tracker && font) {
         // Preserve default-feature tracking before allocating feature-specific CIDs.
-        const defaults = !this._fontFeatures || Object.keys(this._fontFeatures).length === 0;
+        const defaults = !this._fontFeatures || isEmptyRecord(this._fontFeatures);
         codes = run.tracker.markUsedText(run.text, defaults ? glyphs! : font.shape(run.text));
         if (!defaults) codes = run.tracker.markShaped(run.text, glyphs!);
       } else {
@@ -806,7 +806,7 @@ export class PdfCanvas implements ICanvas {
         );
       if (colourFont) this.stream.push('3 Tr\n');
       this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
-      if (glyphs.every(g => g.offsetY === 0)) {
+      if (allHorizontal(glyphs)) {
         let hex = '',
           array = '[',
           adjusted = false;
@@ -1736,3 +1736,15 @@ const f32 = Math.fround;
 
 /** A single-precision value, rounded as the .NET canvas prints it. */
 const single = PdfSyntax.roundAsSingle.bind(PdfSyntax);
+
+/** Whether a record has no own enumerable keys, without building the key array. */
+function isEmptyRecord(record: object): boolean {
+  for (const key in record) if (Object.prototype.hasOwnProperty.call(record, key)) return false;
+  return true;
+}
+
+/** `glyphs.every(g => g.offsetY === 0)` without a closure per run. */
+function allHorizontal(glyphs: readonly { offsetY: number }[]): boolean {
+  for (let i = 0; i < glyphs.length; i++) if (glyphs[i].offsetY !== 0) return false;
+  return true;
+}

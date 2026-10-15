@@ -33,6 +33,7 @@ export class GlyphPositioning {
   private readonly kerningLookups!: number[];
   get hasKerning(): boolean { return this.kerningLookups.length != 0; }
   private operations: number = 0;
+  private readonly adjustmentPool: GlyphAdjustment[] = [];
   private readonly charge = () => this.tick();
   private readonly limits!: ShapingLimits;
   get shapingLimits(): ShapingLimits { return this.limits; }
@@ -68,9 +69,13 @@ export class GlyphPositioning {
     if (glyphs.length > this.limits.maxGlyphs)
       invalid("GPOS glyph limit exceeded.");
     let adjustments = new Array<GlyphAdjustment>(glyphs.length);
+    // The records are reused across calls: a program serves one shape call at a time
+    // (operations is per-call state too), and callers read the adjustments before the
+    // next call.
+    while (this.adjustmentPool.length < glyphs.length) this.adjustmentPool.push(new GlyphAdjustment());
     for (let i = 0; i < glyphs.length; i++)
     {
-      adjustments[i] = new GlyphAdjustment();
+      adjustments[i] = this.adjustmentPool[i].reset();
       if (advanceWidth != null && glyphs[i].advanceOverride != null)
         adjustments[i].xAdvance = glyphs[i].advanceOverride! - advanceWidth(glyphs[i].id);
       if (advanceWidth != null && this.filter.isMark(glyphs[i]) && !(this.options.script === 'arab' && Unicode.isIgnorable(glyphs[i].scalar)))

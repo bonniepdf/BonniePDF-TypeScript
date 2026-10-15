@@ -46,6 +46,21 @@ interface PathCmd {
   args: number[];
 }
 
+const HEX_BYTES = Array.from({ length: 256 }, (_, i) => i.toString(16).toUpperCase().padStart(2, '0'));
+
+/** A glyph code as four uppercase hex digits, as `code.toString(16).toUpperCase().padStart(4, '0')`. */
+function glyphCode(code: number): string {
+  return code >= 0 && code <= 0xffff && Number.isInteger(code)
+    ? HEX_BYTES[code >> 8] + HEX_BYTES[code & 0xff]
+    : code.toString(16).toUpperCase().padStart(4, '0');
+}
+
+/** Whether `text.slice(cluster, cluster + length) === ' '`, without building the substring. */
+function isSpaceSource(text: string, cluster: number, length: number): boolean {
+  if (cluster < 0 || length < 1) return text.slice(cluster, cluster + length) === ' ';
+  return text.charCodeAt(cluster) === 32 && (length === 1 || cluster + 1 === text.length);
+}
+
 /** Translates drawing operations into a PDF page content stream. */
 export class PdfCanvas implements ICanvas {
   /** @internal */
@@ -801,14 +816,13 @@ export class PdfCanvas implements ICanvas {
           hex = '';
           adjusted = true;
         };
-        for (const [index, g] of glyphs.entries()) {
+        for (let index = 0; index < glyphs.length; index++) {
+          const g = glyphs[index];
           adjust((-g.offsetX * 1000) / font.unitsPerEm);
-          hex += codes[index].toString(16).toUpperCase().padStart(4, '0');
+          hex += glyphCode(codes[index]);
           adjust(
             ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
-              (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ' && fontSize > 0
-                ? (wordSpacing * 1000) / fontSize
-                : 0)
+              (isSpaceSource(run.text, g.cluster, g.sourceLength) && fontSize > 0 ? (wordSpacing * 1000) / fontSize : 0)
           );
         }
         if (adjusted) PdfOperators.showTextPositioned(this.stream, `${array}<${hex}>]`);
@@ -823,9 +837,7 @@ export class PdfCanvas implements ICanvas {
         const before = (-g.offsetX * 1000) / font.unitsPerEm;
         const after =
           ((font.getGlyphWidth(g.id) + g.offsetX - g.advanceX) * 1000) / font.unitsPerEm -
-          (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ' && fontSize > 0
-            ? (wordSpacing * 1000) / fontSize
-            : 0);
+          (isSpaceSource(run.text, g.cluster, g.sourceLength) && fontSize > 0 ? (wordSpacing * 1000) / fontSize : 0);
         const hex = `<${codes[index].toString(16).toUpperCase().padStart(4, '0')}>`;
         if (before === 0 && after === 0) PdfOperators.showText(this.stream, hex);
         else

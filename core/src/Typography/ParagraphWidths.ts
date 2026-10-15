@@ -1,7 +1,7 @@
 import { FontMetrics } from './FontMetrics';
 import { primaryCovers } from './TextRunShaper';
 import type { TtfFont } from './TrueType/TtfFont';
-import type { GlyphInfo } from './Engine/Api/GlyphInfo';
+import type { GlyphRun } from './Engine/Api/GlyphRun';
 import { FontError } from './Engine/Api/FontError';
 
 /**
@@ -26,7 +26,7 @@ export class ParagraphWidths {
     private readonly features: Readonly<Record<string, number>> | undefined,
     /** The font the paragraph was shaped with. */
     readonly font: TtfFont,
-    private readonly glyphs: readonly GlyphInfo[],
+    private readonly glyphs: GlyphRun,
     private readonly firstGlyph: Int32Array,
     private readonly advanceBefore: Float64Array,
     private readonly safe: Uint8Array,
@@ -52,7 +52,7 @@ export class ParagraphWidths {
     const font = FontMetrics.resolveShapingFont(fontIdentifier).font;
     if (!font || !primaryCovers(text, font)) return null;
 
-    let glyphs: readonly GlyphInfo[];
+    let glyphs: GlyphRun;
     try {
       glyphs = font.shape(text, features);
     } catch (error) {
@@ -66,20 +66,20 @@ export class ParagraphWidths {
     const safe = new Uint8Array(text.length + 1);
     let total = 0,
       previousCluster = -1;
-    for (let i = 0; i < glyphs.length; i++) {
-      const glyph = glyphs[i];
-      if (glyph.cluster < previousCluster || glyph.cluster >= text.length) return null;
-      if (glyph.cluster !== previousCluster) {
+    for (let i = 0; i < glyphs.count; i++) {
+      const cluster = glyphs.cluster(i);
+      if (cluster < previousCluster || cluster >= text.length) return null;
+      if (cluster !== previousCluster) {
         // The first glyph of each cluster carries whether a break before it is safe.
-        advanceBefore[glyph.cluster] = total;
-        firstGlyph[glyph.cluster] = i;
-        safe[glyph.cluster] = glyph.cluster === 0 || !glyph.unsafeToBreak ? 1 : 0;
-        previousCluster = glyph.cluster;
+        advanceBefore[cluster] = total;
+        firstGlyph[cluster] = i;
+        safe[cluster] = cluster === 0 || !glyphs.unsafeToBreak(i) ? 1 : 0;
+        previousCluster = cluster;
       }
-      total += glyph.advanceX;
+      total += glyphs.advanceX(i);
     }
     advanceBefore[text.length] = total;
-    firstGlyph[text.length] = glyphs.length;
+    firstGlyph[text.length] = glyphs.count;
     safe[text.length] = 1;
     return new ParagraphWidths(text, fontIdentifier, features, font, glyphs, firstGlyph, advanceBefore, safe, fontSize);
   }
@@ -105,19 +105,13 @@ export class ParagraphWidths {
    * The glyphs of `text[start..end)` shaped on its own, with clusters relative to `start`,
    * when they can be read from a shaping under the same rule as {@link tryGetWidth}.
    */
-  tryGetGlyphs(start: number, end: number): readonly GlyphInfo[] | undefined {
+  tryGetGlyphs(start: number, end: number): GlyphRun | undefined {
     if (start >= end) return undefined;
     if (!this.safe[start]) return this.windowAt(start, end)?.tryGetGlyphs(0, end - start);
     if (!this.safe[end]) return undefined;
-    const first = this.firstGlyph[start],
-      last = this.firstGlyph[end];
-    const line: GlyphInfo[] = new Array(last - first);
-    for (let i = first; i < last; i++) {
-      // A cluster's source length runs to the next cluster, which at the line's end is `end` in
-      // both shapings, so every field carries over with the cluster rebased.
-      line[i - first] = Object.freeze({ ...this.glyphs[i], cluster: this.glyphs[i].cluster - start });
-    }
-    return Object.freeze(line);
+    // A cluster's source length runs to the next cluster, which at the line's end is `end` in
+    // both shapings, so every field carries over with the cluster rebased.
+    return this.glyphs.slice(this.firstGlyph[start], this.firstGlyph[end], -start);
   }
 
   // The shaping of text from an unsafe line start, covering end; created once per line start.

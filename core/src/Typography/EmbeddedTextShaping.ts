@@ -2,7 +2,7 @@ import { TextFlow } from './TextFlow';
 import { TextItemizer } from './Engine/Shaping/TextItemizer';
 import type { TtfFont } from './TrueType/TtfFont';
 import { FontError } from './Engine/Api/FontError';
-import type { GlyphInfo } from './Engine/Api/GlyphInfo';
+import { GlyphRunBuilder, type GlyphRun } from './Engine/Api/GlyphRun';
 import { LatinShaper } from './Engine/Shaping/LatinShaper';
 import { ShapeOptions } from './Engine/Api/ShapeOptions';
 import { ShapeFeature } from './Engine/Api/ShapeFeature';
@@ -10,11 +10,7 @@ import { ShapingPipeline } from './Engine/Shaping/ShapingPipeline';
 import { scalars, split } from './Engine/Unicode/Segmentation/EmojiClusters';
 
 /** Shapes Latin and registered colour emoji; other scripts retain direct glyph mapping. */
-export function shapeEmbeddedText(
-  font: TtfFont,
-  text: string,
-  features?: Readonly<Record<string, number>>
-): readonly GlyphInfo[] {
+export function shapeEmbeddedText(font: TtfFont, text: string, features?: Readonly<Record<string, number>>): GlyphRun {
   const options = features
     ? new ShapeOptions({ features: Object.entries(features).map(([tag, value]) => new ShapeFeature(tag, { value })) })
     : undefined;
@@ -25,20 +21,35 @@ export function shapeEmbeddedText(
       start = line?.start ?? 0,
       end = line?.end ?? text.length;
     const resolved = TextItemizer.resolve(paragraph, () => font.engineFace, TextFlow.rightToLeft ? 'rtl' : 'ltr');
-    return resolved
-      .shapeLine(start, end, options)
-      .flatMap(item => item.glyphs.map(g => ({ ...g, cluster: g.cluster - start })));
+    const shapedLine = new GlyphRunBuilder();
+    for (const item of resolved.shapeLine(start, end, options))
+      for (const g of item.glyphs)
+        shapedLine.add(
+          g.id,
+          g.cluster - start,
+          g.advanceX,
+          g.advanceY,
+          g.offsetX,
+          g.offsetY,
+          g.componentCount,
+          g.isMark,
+          g.isLigature,
+          g.sourceLength,
+          g.unsafeToBreak,
+          g.componentIndex
+        );
+    return shapedLine.build();
   }
   if (font.hasColour) {
     try {
-      return ShapingPipeline.shape(font.engineFace, text, options, { scalars, split }).glyphs;
+      return ShapingPipeline.shape(font.engineFace, text, options, { scalars, split }).run;
     } catch (error) {
       if (!(error instanceof FontError) || error.name !== 'NotSupportedException') throw error;
     }
   }
   if (text.length > 0 && /^[\x20-\x7e]*$/.test(text)) {
     try {
-      return LatinShaper.shape(font.engineFace, text, options).glyphs;
+      return LatinShaper.shape(font.engineFace, text, options).run;
     } catch (error) {
       if (!(error instanceof FontError) || error.name !== 'NotSupportedException') throw error;
     }
@@ -56,39 +67,27 @@ export function shapeEmbeddedText(
     (cp >= 0xab30 && cp <= 0xab6f) ||
     (cp >= 0xfb00 && cp <= 0xfb06) ||
     cp === 0xfeff;
-  const glyphs: GlyphInfo[] = [];
+  const glyphs = new GlyphRunBuilder(text.length);
   let start = 0,
     span = '';
   const flush = (): void => {
     if (!span) return;
     try {
-      for (const g of LatinShaper.shape(font.engineFace, span, options).glyphs)
-        glyphs.push({ ...g, cluster: g.cluster + start });
+      const shaped = LatinShaper.shape(font.engineFace, span, options).run;
+      for (let i = 0; i < shaped.count; i++) glyphs.addFrom(shaped, i, start);
     } catch (error) {
       if (!(error instanceof FontError) || error.name !== 'NotSupportedException') throw error;
       let cluster = start;
       for (const c of span) {
         const id = font.getGlyphId(c.codePointAt(0)!);
-        if (id) glyphs.push(direct(id, cluster, c.length));
+        if (id) direct(id, cluster, c.length);
         cluster += c.length;
       }
     }
     span = '';
   };
-  const direct = (id: number, cluster: number, sourceLength: number): GlyphInfo => ({
-    id,
-    cluster,
-    sourceLength,
-    advanceX: font.getGlyphWidth(id),
-    advanceY: 0,
-    offsetX: 0,
-    offsetY: 0,
-    componentCount: 1,
-    componentIndex: 0,
-    isMark: false,
-    isLigature: false,
-    unsafeToBreak: false,
-  });
+  const direct = (id: number, cluster: number, sourceLength: number): void =>
+    glyphs.add(id, cluster, font.getGlyphWidth(id), 0, 0, 0, 1, false, false, sourceLength, false, 0);
   let cluster = 0;
   for (const c of text) {
     const cp = c.codePointAt(0)!;
@@ -99,11 +98,11 @@ export function shapeEmbeddedText(
       flush();
       if (cp >= 32 && !(cp >= 127 && cp <= 159)) {
         const id = font.getGlyphId(cp);
-        if (id) glyphs.push(direct(id, cluster, c.length));
+        if (id) direct(id, cluster, c.length);
       }
     }
     cluster += c.length;
   }
   flush();
-  return glyphs;
+  return glyphs.build();
 }

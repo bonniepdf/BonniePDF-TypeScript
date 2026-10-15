@@ -1,4 +1,4 @@
-import type { GlyphInfo } from './Engine/Api/GlyphInfo';
+import type { GlyphRun } from './Engine/Api/GlyphRun';
 import { TtfFont } from './TrueType/TtfFont';
 
 /**
@@ -21,35 +21,37 @@ export class GlyphUsageTracker {
     return new Map([...Array.from(this.usedGlyphs, g => [g, g] as const), ...this.cidGlyphs]);
   }
   /** @internal Tracks substituted glyphs and returns source-specific PDF codes. */
-  public markShaped(text: string, glyphs: readonly GlyphInfo[]): readonly number[] {
+  public markShaped(text: string, glyphs: GlyphRun): readonly number[] {
     const codes: number[] = [];
-    for (let i = 0; i < glyphs.length;) {
-      const first = glyphs[i];
+    for (let i = 0; i < glyphs.count;) {
+      const firstCluster = glyphs.cluster(i),
+        firstLength = glyphs.sourceLength(i);
       let end = i + 1;
-      while (end < glyphs.length && glyphs[end].cluster === first.cluster) end++;
-      if (end === i + 1 && first.sourceLength === 1 && first.cluster < text.length) {
+      while (end < glyphs.count && glyphs.cluster(end) === firstCluster) end++;
+      if (end === i + 1 && firstLength === 1 && firstCluster < text.length) {
         // One glyph for one UTF-16 unit, the common case: reuse its code without
         // building a source string or a string key.
-        this.usedGlyphs.add(first.id);
-        const unit = text.charCodeAt(first.cluster);
-        const key = first.id * 65536 + unit;
+        const id = glyphs.id(i);
+        this.usedGlyphs.add(id);
+        const unit = text.charCodeAt(firstCluster);
+        const key = id * 65536 + unit;
         let code = this.singleCharacterCids.get(key);
         if (code === undefined) {
-          code = this.registerSource(first.id, text[first.cluster]);
+          code = this.registerSource(id, text[firstCluster]);
           this.singleCharacterCids.set(key, code);
         }
         codes.push(code);
         i = end;
         continue;
       }
-      const clusterSource = text.slice(first.cluster, first.cluster + first.sourceLength);
+      const clusterSource = text.slice(firstCluster, firstCluster + firstLength);
       const chars = end === i + 1 ? null : Array.from(clusterSource);
       for (let j = i; j < end; j++) {
-        const g = glyphs[j];
-        this.usedGlyphs.add(g.id);
+        const id = glyphs.id(j);
+        this.usedGlyphs.add(id);
         const source =
           chars === null ? clusterSource : j === end - 1 ? chars.slice(j - i).join('') : (chars[j - i] ?? '');
-        codes.push(this.registerSource(g.id, source));
+        codes.push(this.registerSource(id, source));
       }
       i = end;
     }
@@ -134,7 +136,7 @@ export class GlyphUsageTracker {
   /**
    * Marks all characters in a string as used
    */
-  public markUsedText(text: string, glyphs?: readonly GlyphInfo[]): readonly number[] {
+  public markUsedText(text: string, glyphs?: GlyphRun): readonly number[] {
     if (!text) return [];
     const codes = this.markShaped(text, glyphs ?? this.font.shape(text));
 

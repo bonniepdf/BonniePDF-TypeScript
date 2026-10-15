@@ -1,4 +1,4 @@
-import type { GlyphInfo } from '../Typography/Engine/Api/GlyphInfo';
+import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
 import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
 import { drawColourGlyph } from '../Typography/ColourGlyphPainter';
 import { ICanvas } from './ICanvas';
@@ -32,7 +32,7 @@ export interface SvgTextRun {
 }
 
 interface PreparedSvgTextRun extends SvgTextRun {
-  glyphs: readonly GlyphInfo[];
+  glyphs: GlyphRun;
 }
 
 /**
@@ -848,10 +848,10 @@ export class SvgCanvas implements ICanvas {
       if (font.hasColour && this.emojiRendering() === 'colour') {
         const graphics = new SvgCanvas(this.width, this.height, undefined, this.options);
         if (colourAlpha < 1) graphics.setGlobalAlpha(colourAlpha);
-        for (const g of glyphs) {
-          const source = run.text.slice(g.cluster, g.cluster + g.sourceLength);
-          drawColourGlyph(graphics, font, g, source, cursor, baselineY, fontSize, Color.fromHex(fillHex));
-          cursor += g.advanceX * scale + letterSpacing;
+        for (let g = 0; g < glyphs.count; g++) {
+          const source = run.text.slice(glyphs.cluster(g), glyphs.cluster(g) + glyphs.sourceLength(g));
+          drawColourGlyph(graphics, font, glyphs, g, source, cursor, baselineY, fontSize, Color.fromHex(fillHex));
+          cursor += glyphs.advanceX(g) * scale + letterSpacing;
           if (source === ' ') cursor += extraPerSpace;
         }
         elements.push(
@@ -863,37 +863,36 @@ export class SvgCanvas implements ICanvas {
         throw new Error(
           'The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.'
         );
-      const simple =
-        glyphs.length === Array.from(run.text).length &&
-        glyphs.every(
-          g =>
-            g.sourceLength === (run.text.codePointAt(g.cluster)! > 65535 ? 2 : 1) &&
-            g.id === font.getGlyphId(run.text.codePointAt(g.cluster)!) &&
-            g.offsetY === 0 &&
-            !g.isMark
-        );
+      let simple = glyphs.count === Array.from(run.text).length;
+      for (let g = 0; simple && g < glyphs.count; g++)
+        simple =
+          glyphs.sourceLength(g) === (run.text.codePointAt(glyphs.cluster(g))! > 65535 ? 2 : 1) &&
+          glyphs.id(g) === font.getGlyphId(run.text.codePointAt(glyphs.cluster(g))!) &&
+          glyphs.offsetY(g) === 0 &&
+          !glyphs.isMark(g);
       if (font.hasCff || !simple) {
         const paths: string[] = [];
-        for (const g of glyphs) {
-          const d = glyphOutlinePath(font.engineFace, g.id);
+        for (let g = 0; g < glyphs.count; g++) {
+          const d = glyphOutlinePath(font.engineFace, glyphs.id(g));
           if (d)
             paths.push(
-              `<path d="${d}" transform="translate(${this.n(cursor + g.offsetX * scale)} ${this.n(baselineY - g.offsetY * scale)}) scale(${Number(scale.toFixed(9))} ${Number((-scale).toFixed(9))})"/>`
+              `<path d="${d}" transform="translate(${this.n(cursor + glyphs.offsetX(g) * scale)} ${this.n(baselineY - glyphs.offsetY(g) * scale)}) scale(${Number(scale.toFixed(9))} ${Number((-scale).toFixed(9))})"/>`
             );
-          cursor += g.advanceX * scale + letterSpacing;
-          if (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ') cursor += extraPerSpace;
+          cursor += glyphs.advanceX(g) * scale + letterSpacing;
+          if (run.text.slice(glyphs.cluster(g), glyphs.cluster(g) + glyphs.sourceLength(g)) === ' ')
+            cursor += extraPerSpace;
         }
         elements.push(
           `<g fill="${fillHex}" aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${paths.join('')}</g>`
         );
         continue;
       }
-      for (const g of glyphs) {
-        const source = run.text.slice(g.cluster, g.cluster + g.sourceLength);
+      for (let g = 0; g < glyphs.count; g++) {
+        const source = run.text.slice(glyphs.cluster(g), glyphs.cluster(g) + glyphs.sourceLength(g));
         usage.codePoints.add(source.codePointAt(0)!);
-        xs.push(this.n(cursor + g.offsetX * scale));
+        xs.push(this.n(cursor + glyphs.offsetX(g) * scale));
         chars += source;
-        cursor += g.advanceX * scale + letterSpacing;
+        cursor += glyphs.advanceX(g) * scale + letterSpacing;
         if (source === ' ') cursor += extraPerSpace;
       }
 
@@ -927,9 +926,11 @@ export class SvgCanvas implements ICanvas {
     let width = 0;
     for (const run of runs) {
       const { font } = run;
-      for (const g of run.glyphs) {
-        width += (g.advanceX * fontSize) / font.unitsPerEm + letterSpacing;
-        if (run.text.slice(g.cluster, g.cluster + g.sourceLength) === ' ') width += extraPerSpace;
+      const glyphs = run.glyphs;
+      for (let g = 0; g < glyphs.count; g++) {
+        width += (glyphs.advanceX(g) * fontSize) / font.unitsPerEm + letterSpacing;
+        if (run.text.slice(glyphs.cluster(g), glyphs.cluster(g) + glyphs.sourceLength(g)) === ' ')
+          width += extraPerSpace;
       }
     }
     return width;

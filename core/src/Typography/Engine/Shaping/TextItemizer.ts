@@ -56,8 +56,9 @@ export class ItemizedParagraph {
       const settings = new ShapeOptions({ script: item.script === 'Zyyy' || item.script === 'Zinh' ? 'DFLT' : item.script.toLowerCase(),language: options.language,
         direction: item.level % 2 ? TextDirection.RightToLeft : TextDirection.LeftToRight,features,limits: options.limits ?? this.limits });
       const result = Shaper.shape(item.face,text.slice(item.start,item.end),settings,true);
-      glyphs += result.glyphs.length; if (glyphs > Math.min(this.limits.maxGlyphs,options.limits?.maxGlyphs ?? this.limits.maxGlyphs)) invalid('Paragraph glyph limit exceeded.');
-      shaped.push(Object.freeze({ ...item,glyphs: Object.freeze(result.glyphs.map(g => Object.freeze({ ...g,cluster: item.start+g.cluster }))) }));
+      const packed = result.run;
+      glyphs += packed.count; if (glyphs > Math.min(this.limits.maxGlyphs,options.limits?.maxGlyphs ?? this.limits.maxGlyphs)) invalid('Paragraph glyph limit exceeded.');
+      shaped.push(Object.freeze({ ...item,glyphs: Object.freeze(Array.from({ length: packed.count }, (_, g) => Object.freeze({ ...packed.info(g),cluster: item.start+packed.cluster(g) }))) }));
     }
     // L2 over directional runs; glyphs inside each run are already in visual order.
     let max = 0, minOdd = 127;

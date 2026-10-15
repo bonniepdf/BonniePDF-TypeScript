@@ -694,6 +694,7 @@ interface WalkableElement {
   getSpans?(): unknown;
   rows?: unknown;
   getRows?(): unknown;
+  walkRows?(): unknown;
 }
 
 interface WalkableRow {
@@ -707,6 +708,12 @@ interface WalkableCell {
 
 /** Resolves a Table-style row collection from `.rows` / `.getRows()`. */
 function resolveRows(element: WalkableElement): unknown[] {
+  // A Table lists only the rows that exist as objects, so the walk does not materialise
+  // compact rows (their default cells add nothing beyond the contents getChildren yields).
+  if (typeof element.walkRows === 'function') {
+    const r = element.walkRows();
+    if (Array.isArray(r)) return r;
+  }
   if (Array.isArray(element.rows)) return element.rows;
   if (typeof element.getRows === 'function') {
     const r = element.getRows();

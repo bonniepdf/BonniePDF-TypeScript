@@ -346,4 +346,24 @@ describe('document fonts in a document', () => {
     expect(embeddedFonts(await doc.generateBytesAsync())).toEqual(['Helvetica']); // the standard font, unembedded
     doc.dispose();
   });
+  it('resolves a face added after an earlier miss for the same family', () => {
+    const doc = new Document();
+    doc.fonts.add(sansRegular, { family: 'Inter', weight: 400 });
+    expect(name(doc.fonts.resolve('Inter', 700, true))).toBe('400');
+
+    doc.fonts.add(sansBoldItalic, { family: 'Inter', weight: 700, italic: true });
+
+    expect(name(doc.fonts.resolve('Inter', 700, true))).toBe('700I');
+    doc.dispose();
+  });
+
+  it('shares one parse between documents given the same bytes', () => {
+    // A service that keeps its font bytes in memory parses each font once, and the PDF
+    // writer reuses that parse for the bytes it embeds.
+    const a = new Document();
+    const b = new Document();
+    expect(a.fonts.add(sansRegular, { family: 'Inter' }).font).toBe(b.fonts.add(sansRegular, { family: 'Inter' }).font);
+    a.dispose();
+    b.dispose();
+  });
 });

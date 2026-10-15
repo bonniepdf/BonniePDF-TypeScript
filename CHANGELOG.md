@@ -9,6 +9,7 @@ each change to `core/`.
 
 ## Unreleased
 
+- `doc.fonts.add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document; a service that keeps its font bytes in memory parses each font once. Family resolution is memoised per document.
 - Faster pagination of large single tables: column widths are computed once per render instead of on every page, which copied and scanned every row each time. Output is unchanged.
 - Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
 - A top-level element that does not fit even on an empty page now reports a `render` warning (source `pagination`) in `doc.diagnostics` when it is skipped.

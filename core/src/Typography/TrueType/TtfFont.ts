@@ -89,6 +89,23 @@ export class TtfFont {
     return new TtfFont('<from bytes>', data);
   }
 
+  // A parsed font is read-only, so one parse can serve every document that uses the same bytes.
+  private static readonly byBytes = new WeakMap<Uint8Array, TtfFont>();
+
+  /**
+   * Like {@link loadFromBytes}, but parses a given array once: the result is kept for as long as
+   * the array is alive, so a font loaded once and used by every document is not re-parsed for each.
+   * @internal
+   */
+  public static loadFromBytesCached(data: Uint8Array): TtfFont {
+    let font = TtfFont.byBytes.get(data);
+    if (font === undefined) {
+      font = TtfFont.loadFromBytes(data);
+      TtfFont.byBytes.set(data, font);
+    }
+    return font;
+  }
+
   // =====================================================
   // PUBLIC PROPERTIES (from parsed tables)
   // =====================================================

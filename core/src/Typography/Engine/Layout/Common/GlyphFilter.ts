@@ -4,12 +4,13 @@ import { BigEndianData } from '../../Data/BigEndianData';
 import { checked, divide } from '../../Data/Integer';
 import { invalid, unsupported } from '../../Api/FontError';
 import { ShapingGlyph } from './ShapingGlyph';
-import { OpenTypeLayout } from './OpenTypeLayout';
+import { LayoutReadCache } from './OpenTypeLayout';
 import * as UnicodeData from '../../Unicode/Generated/UnicodeData';
 
 export class GlyphFilter {
 
   private readonly data!: BigEndianData;
+  private readonly reads = new LayoutReadCache();
 
   constructor(bytes: Uint8Array | null) {
     if (bytes != null)
@@ -19,7 +20,7 @@ export class GlyphFilter {
   class(glyph: number): number {
     if (this.data == null || this.data.u16(4) == 0)
       return 0;
-    let kind = OpenTypeLayout.class(this.data, this.data.u16(4), glyph);
+    let kind = this.reads.class(this.data, this.data.u16(4), glyph);
     if (kind > 4)
       invalid("Invalid GDEF glyph class.");
     return kind;
@@ -67,8 +68,8 @@ export class GlyphFilter {
       let sets = this.data.u16(12), delta = this.data.offset32(sets + 4 + markSet * 4);
       if (delta == 0)
         invalid("Missing GDEF mark set coverage.");
-      return OpenTypeLayout.coverage(this.data, checked(sets + delta), glyph) < 0;
+      return this.reads.coverage(this.data, checked(sets + delta), glyph) < 0;
     }
-    return (flags & 0xff00) != 0 && OpenTypeLayout.class(this.data, this.data.u16(10), glyph) != flags >> 8;
+    return (flags & 0xff00) != 0 && this.reads.class(this.data, this.data.u16(10), glyph) != flags >> 8;
   }
 }

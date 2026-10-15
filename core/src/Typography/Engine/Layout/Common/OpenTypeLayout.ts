@@ -4,6 +4,31 @@ import { BigEndianData } from '../../Data/BigEndianData';
 import { checked, divide } from '../../Data/Integer';
 import { invalid, unsupported } from '../../Api/FontError';
 
+// Per immutable layout table, bounded independently of input text diversity.
+// Only successful reads are retained; callers still charge every lookup step.
+const readCacheCapacity = 2048;
+
+export class LayoutReadCache {
+  private readonly coverages = new Map<number, number>();
+  private readonly classes = new Map<number, number>();
+  coverage(data: BigEndianData, offset: number, glyph: number): number {
+    const key = offset * 65536 + glyph;
+    let value = this.coverages.get(key);
+    if (value !== undefined) return value;
+    value = OpenTypeLayout.coverage(data, offset, glyph);
+    if (this.coverages.size < readCacheCapacity) this.coverages.set(key, value);
+    return value;
+  }
+  class(data: BigEndianData, offset: number, glyph: number): number {
+    const key = offset * 65536 + glyph;
+    let value = this.classes.get(key);
+    if (value !== undefined) return value;
+    value = OpenTypeLayout.class(data, offset, glyph);
+    if (this.classes.size < readCacheCapacity) this.classes.set(key, value);
+    return value;
+  }
+}
+
 export class OpenTypeLayout {
 
   static offset16(data: BigEndianData, origin: number, field: number): number {

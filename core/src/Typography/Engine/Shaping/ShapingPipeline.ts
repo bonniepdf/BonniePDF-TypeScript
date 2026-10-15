@@ -8,6 +8,7 @@ import { TextDirection } from '../Api/TextDirection';
 import { FontError, unsupported } from '../Api/FontError';
 import { checked } from '../Data/Integer';
 import { ShapingGlyph } from '../Layout/Common/ShapingGlyph';
+import type { GlyphAdjustment } from '../Layout/Gpos/GlyphAdjustment';
 import { CanonicalNormalizer } from '../Unicode/Normalization/CanonicalNormalizer';
 import type { SourceScalar } from '../Unicode/Normalization/SourceScalar';
 import * as Unicode from '../Unicode/Generated/UnicodeData';
@@ -85,14 +86,30 @@ export class ShapingPipeline {
       run.splice(i,1); adjustments.splice(i,1);
     }
     if (nativeRtl) { run.reverse(); adjustments.reverse(); }
-    const starts = [...new Set(run.map(g => g.cluster))].sort((a, b) => a - b), unsafe = new Set(run.filter(g => g.unsafeBefore).map(g => g.cluster));
-    const lengths = new Map(starts.map((start, i) => [start, (starts[i + 1] ?? text.length) - start]));
-    const output: GlyphInfo[] = run.map((g, i) => {
+    const emit = (g: ShapingGlyph, a: GlyphAdjustment, sourceLength: number, unsafeToBreak: boolean): GlyphInfo => {
       if (g.id === 0) unsupported('A glyph remained unmapped after substitution.');
-      const a = adjustments[i]; return { id: g.id, cluster: g.cluster, advanceX: checked(face.advanceWidth(g.id) + a.xAdvance), advanceY: a.yAdvance,
+      return { id: g.id, cluster: g.cluster, advanceX: checked(face.advanceWidth(g.id) + a.xAdvance), advanceY: a.yAdvance,
         offsetX: a.xPlacement, offsetY: a.yPlacement, componentCount: g.componentCount, isMark: a.zeroMarkAdvance, isLigature: g.ligature,
-        sourceLength: lengths.get(g.cluster)!, unsafeToBreak: unsafe.has(g.cluster), componentIndex: g.markComponent };
-    });
+        sourceLength, unsafeToBreak, componentIndex: g.markComponent };
+    };
+    let ordered = true;
+    for (let i = 1; i < run.length; i++) if (run[i].cluster < run[i - 1].cluster) { ordered = false; break; }
+    const output: GlyphInfo[] = new Array<GlyphInfo>(run.length);
+    if (ordered) {
+      // Logical LTR clusters are usually already ordered. Walk each equal-cluster
+      // group once instead of building sets and maps merely to recover source lengths.
+      for (let first = 0; first < run.length;) {
+        let end = first + 1, unsafeBefore = run[first].unsafeBefore;
+        while (end < run.length && run[end].cluster === run[first].cluster) { unsafeBefore ||= run[end].unsafeBefore; end++; }
+        const length = (end < run.length ? run[end].cluster : text.length) - run[first].cluster;
+        for (let i = first; i < end; i++) output[i] = emit(run[i], adjustments[i], length, unsafeBefore);
+        first = end;
+      }
+    } else {
+      const starts = [...new Set(run.map(g => g.cluster))].sort((a, b) => a - b), unsafe = new Set(run.filter(g => g.unsafeBefore).map(g => g.cluster));
+      const lengths = new Map(starts.map((start, i) => [start, (starts[i + 1] ?? text.length) - start]));
+      for (let i = 0; i < run.length; i++) output[i] = emit(run[i], adjustments[i], lengths.get(run[i].cluster)!, unsafe.has(run[i].cluster));
+    }
     return new ShapedRun(text, output);
   }
 }

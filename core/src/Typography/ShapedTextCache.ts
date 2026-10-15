@@ -9,17 +9,8 @@ export class ShapedTextCache {
   private glyphCount = 0;
 
   public get(font: TtfFont, text: string, features?: Readonly<Record<string, number>>): readonly GlyphInfo[] {
-    if (text.length > 512 || (TextFlow.line?.paragraph.length ?? 0) > 512)
-      return shapeEmbeddedText(font, text, features);
-    // '[]' is JSON.stringify([]), the key prefix for no feature overrides.
-    const settings = features
-      ? JSON.stringify(
-          Object.keys(features)
-            .sort()
-            .map(tag => [tag, features[tag]])
-        )
-      : '[]';
-    const key = settings + TextFlow.cacheKey + '|' + text;
+    if (!cacheable(text)) return shapeEmbeddedText(font, text, features);
+    const key = keyOf(text, features);
     const existing = this.entries.get(key);
     if (existing) {
       this.entries.delete(key);
@@ -33,6 +24,26 @@ export class ShapedTextCache {
       Object.isFrozen(shaped) && shaped.every(Object.isFrozen)
         ? shaped
         : Object.freeze(shaped.map(g => Object.freeze(g)));
+    this.add(key, glyphs);
+    return glyphs;
+  }
+
+  /**
+   * Records `glyphs` (a frozen array of frozen records) as the shaping of `text`, under the key
+   * {@link get} would use in the current text flow. The caller guarantees they are exactly what
+   * shaping would return (see ParagraphWidths.tryGetGlyphs).
+   */
+  public seed(
+    text: string,
+    features: Readonly<Record<string, number>> | undefined,
+    glyphs: readonly GlyphInfo[]
+  ): void {
+    if (!cacheable(text) || glyphs.length > 16384) return;
+    const key = keyOf(text, features);
+    if (!this.entries.has(key)) this.add(key, glyphs);
+  }
+
+  private add(key: string, glyphs: readonly GlyphInfo[]): void {
     while (this.entries.size >= 256 || this.glyphCount + glyphs.length > 16384) {
       const oldest = this.entries.keys().next().value!;
       this.glyphCount -= this.entries.get(oldest)!.length;
@@ -40,6 +51,21 @@ export class ShapedTextCache {
     }
     this.entries.set(key, glyphs);
     this.glyphCount += glyphs.length;
-    return glyphs;
   }
+}
+
+function cacheable(text: string): boolean {
+  return !(text.length > 512 || (TextFlow.line?.paragraph.length ?? 0) > 512);
+}
+
+function keyOf(text: string, features: Readonly<Record<string, number>> | undefined): string {
+  // '[]' is JSON.stringify([]), the key prefix for no feature overrides.
+  const settings = features
+    ? JSON.stringify(
+        Object.keys(features)
+          .sort()
+          .map(tag => [tag, features[tag]])
+      )
+    : '[]';
+  return settings + TextFlow.cacheKey + '|' + text;
 }

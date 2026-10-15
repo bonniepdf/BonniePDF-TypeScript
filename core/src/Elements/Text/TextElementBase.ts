@@ -6,6 +6,7 @@ import { getActiveDocumentFonts } from '../../Typography/DocumentFontMetricScope
 import { FontWeight } from '../../Typography/FontWeight';
 import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
+import { ParagraphWidths } from '../../Typography/ParagraphWidths';
 import { Color } from '../../Core/Color';
 import { TextDecoration } from './TextDecoration';
 import { DecorationStyle } from './DecorationStyle';
@@ -458,32 +459,81 @@ export abstract class TextElementBase extends ElementBase {
     if (text === '') return lines;
 
     const words = text.split(' ');
-    let currentLine = '';
+    const widths = words.length >= 3 ? this.paragraphWidthsFor(text) : null;
 
-    for (const word of words) {
-      const testLine = currentLine === '' ? word : currentLine + ' ' + word;
+    // The current line and each candidate are spans of text: words joined by the single
+    // spaces between them are exactly the text between their ends.
+    let lineStart = 0,
+      lineEnd = 0,
+      wordStart = 0;
+    for (let w = 0; w < words.length; w++) {
+      const wordEnd = wordStart + words[w].length;
+      const lineEmpty = lineStart === lineEnd;
+      const testStart = lineEmpty ? wordStart : lineStart;
 
       // Calculate exact width of the test line (handling tokens)
-      const testWidth = this.measureTextWidth(testLine);
+      const testWidth = this.measureSpan(text, testStart, wordEnd, widths);
 
       if (testWidth > maxWidth) {
         // Current line is full, add it and start new line with current word
-        if (currentLine !== '') {
-          lines.push(currentLine);
-        }
-        currentLine = word;
+        if (!lineEmpty) this.addLine(lines, text, lineStart, lineEnd, widths);
+        lineStart = wordStart;
       } else {
         // Word fits, add it to current line
-        currentLine = testLine;
+        lineStart = testStart;
       }
+      lineEnd = wordEnd;
+      wordStart = wordEnd + 1;
     }
 
     // Don't forget the last line
-    if (currentLine !== '') {
-      lines.push(currentLine);
-    }
+    if (lineStart !== lineEnd) this.addLine(lines, text, lineStart, lineEnd, widths);
 
     return lines;
+  }
+
+  /**
+   * Candidate-line widths from one shaping of `text`, or null when the element measures in a
+   * way one shaping cannot answer (spacing, page-number tokens, right-to-left text, or what
+   * {@link ParagraphWidths.tryCreate} declines).
+   * @internal
+   */
+  protected paragraphWidthsFor(text: string): ParagraphWidths | null {
+    if (this.letterSpacing !== 0 || this.wordSpacing !== 0 || this.isRightToLeft) return null;
+    if (text.includes(TextElementBase.TotalPagesToken) || text.includes(TextElementBase.CurrentPageToken)) return null;
+    const restoreDirection = TextFlow.enter(this.effectiveContentDirection);
+    try {
+      return ParagraphWidths.tryCreate(text, this.fontName, this.fontSize, this.fontFeatures);
+    } finally {
+      restoreDirection();
+    }
+  }
+
+  /**
+   * {@link measureTextWidth} of `text[start..end)`, read from `widths` when it knows the span.
+   * @internal
+   */
+  protected measureSpan(text: string, start: number, end: number, widths: ParagraphWidths | null): number {
+    return widths?.tryGetWidth(start, end) ?? this.measureTextWidth(text.substring(start, end));
+  }
+
+  /**
+   * Adds a wrapped line, handing its glyphs from the paragraph's shaping to the shaping cache so
+   * drawing the line does not shape it again. Seeded under the text flow drawing uses for
+   * left-to-right text; under any other flow the entry is simply never read.
+   * @internal
+   */
+  protected addLine(lines: string[], text: string, start: number, end: number, widths: ParagraphWidths | null): void {
+    const line = text.substring(start, end);
+    lines.push(line);
+    const glyphs = widths?.tryGetGlyphs(start, end);
+    if (!widths || !glyphs) return;
+    const restoreDirection = TextFlow.enter(this.effectiveContentDirection);
+    try {
+      widths.font.seedShaped(line, this.fontFeatures, glyphs);
+    } finally {
+      restoreDirection();
+    }
   }
 
   /**

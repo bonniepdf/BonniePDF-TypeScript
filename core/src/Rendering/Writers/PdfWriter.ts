@@ -10,21 +10,9 @@ import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
 import type { DocumentSettings } from '../../Configuration/DocumentSettings';
 import type { RegisteredLink } from '../RegisteredLink';
 import { deflateSync } from '../Compression/Deflate';
+import { encodeIso88591 } from './Iso88591';
 
 // ─── Encoding helper ─────────────────────────────────────────────────────────
-
-/**
- * Encodes a string as ISO-8859-1 (Latin-1) bytes.
- * Matches WinAnsiEncoding used by standard PDF fonts:
- * characters like £ (U+00A3) encode as 0xA3, not the two-byte UTF-8 sequence.
- */
-function encodeIso88591(s: string): Uint8Array {
-  const bytes = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) {
-    bytes[i] = s.charCodeAt(i) & 0xff;
-  }
-  return bytes;
-}
 
 // ─── BinaryOutputStream ──────────────────────────────────────────────────────
 
@@ -185,7 +173,14 @@ export class PdfWriter implements IPdfWriter {
    * describing the original data, which is what consumers expect.
    */
   private writeFlateStream(id: number, dictionary: Map<string, string>, raw: Uint8Array): void {
-    const compressed = deflateSync(raw);
+    this.writeDeflatedObject(id, dictionary, deflateSync(raw));
+  }
+
+  /**
+   * Writes a stream that is already `deflateSync` output (a page compressed during layout),
+   * exactly as {@link writeFlateStream} writes one it compresses itself.
+   */
+  public writeDeflatedObject(id: number, dictionary: Map<string, string>, compressed: Uint8Array): void {
     const toWrite = this.encryptor?.encryptData ? this.encryptor.encryptData(compressed, id) : compressed;
 
     this._offsets.set(id, this._output.bytePosition);

@@ -114,6 +114,7 @@ export class PdfDocumentSerializer {
     // 2. Initialize render context (inject pre-loaded resources when available)
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
+    ctx.sealFinishedPages = true;
     ctx.resources.diagnostics = this.diagnostics;
     ctx.resources.maxImageDpi = settings.maxImageDpi;
     ctx.resources.conformance = settings.conformance;
@@ -135,6 +136,7 @@ export class PdfDocumentSerializer {
     let dryRunPageCount = 0;
     if (PdfDocumentSerializer.requiresTwoPassLayout(this.document)) {
       const dryRunCtx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
+      dryRunCtx.discardFinishedPages = true;
       dryRunCtx.resources.conformance = settings.conformance;
       dryRunCtx.resources.embedStandardFonts = ctx.resources.embedStandardFonts;
 
@@ -206,7 +208,8 @@ export class PdfDocumentSerializer {
       const contentId = writer.getNewId();
 
       // Write the page content stream immediately (flush memory)
-      writer.writeCompressedObject(contentId, new Map(), pageOutput.contentStream);
+      if (pageOutput.compressedContent) writer.writeDeflatedObject(contentId, new Map(), pageOutput.compressedContent);
+      else writer.writeCompressedObject(contentId, new Map(), pageOutput.contentStream);
 
       // Build page dictionary - /Resources is an indirect reference
       // (see resourcesId comment above) so each page satisfies PDF/A-2b

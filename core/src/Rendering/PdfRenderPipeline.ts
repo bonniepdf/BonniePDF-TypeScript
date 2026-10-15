@@ -217,6 +217,15 @@ export class PdfRenderPipeline {
     ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
+    // With no page chrome to add, a finished body page is the whole stream, so it is
+    // compressed as soon as layout leaves it (the writer would compress the same text the
+    // same way). A dry run's pages are never written, so they are not kept at all.
+    ctx.finishedPageStorage = ctx.discardFinishedPages
+      ? 'discard'
+      : ctx.sealFinishedPages && !hasPageChrome(pages, settings)
+        ? 'compressed'
+        : 'keep';
+
     const pageDimensions = new Map<
       number,
       { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
@@ -224,6 +233,7 @@ export class PdfRenderPipeline {
 
     let currentOutputIndex = 0;
     for (const page of pages) {
+      const previousPage = ctx.currentPageIndex;
       while (ctx.pages.length <= currentOutputIndex) {
         ctx.pages.push('');
       }
@@ -235,6 +245,8 @@ export class PdfRenderPipeline {
       ctx.margin = pageMargin;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
+      // The previous input page's body is complete; the switch has flushed its last operators.
+      if (previousPage < currentOutputIndex) ctx.sealPage(previousPage);
       ctx.resetCursorToContentTop();
 
       const contentWidth = page.width - pageMargin * 2;
@@ -261,6 +273,9 @@ export class PdfRenderPipeline {
 
       currentOutputIndex = ctx.currentPageIndex + 1;
     }
+
+    // Body layout is over: a page break while chrome paints must not seal the page in hand.
+    ctx.finishedPageStorage = 'keep';
 
     const totalPages = ctx.pages.length;
     for (let i = 0; i < totalPages; i++) {
@@ -310,6 +325,12 @@ export class PdfRenderPipeline {
       }
 
       const output = new PageRenderOutput(ctx.pages[i], pageSize, ctx.pageHyperlinks.get(i) || []);
+      const sealed = ctx.takeSealedPage(i);
+      if (sealed) {
+        // Pages are sealed only when no page chrome is configured, so nothing can follow.
+        if (ctx.pages[i] !== '') throw new Error('Internal error: page chrome was painted on a compressed page.');
+        output.compressedContent = sealed;
+      }
 
       yield output;
 
@@ -584,4 +605,22 @@ export class PdfRenderPipeline {
     if (!ops) return;
     ctx.pages[pageIndex] = ops + (ctx.pages[pageIndex] ?? '');
   }
+}
+
+/**
+ * Whether any page may receive chrome (colour, background or foreground slot, header,
+ * footer or watermark) after layout: the conditions the chrome painters check.
+ */
+function hasPageChrome(pages: readonly Page[], settings: DocumentSettings): boolean {
+  if (
+    settings.pageColor ||
+    settings.pageBackground ||
+    settings.pageForeground ||
+    settings.headerTemplate ||
+    settings.footerTemplate ||
+    settings.watermark?.text
+  )
+    return true;
+  for (const page of pages) if (page.pageColor || page.pageBackground || page.pageForeground) return true;
+  return false;
 }

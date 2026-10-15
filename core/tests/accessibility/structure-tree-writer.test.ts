@@ -139,6 +139,7 @@ class FakeWriter implements IPdfWriter {
   writeRawObject(): void {}
   writeCompressedObject(): void {}
   writeBinaryObject(): void {}
+  writeDeflatedObject(): void {}
   writeCompressedBinaryObject(): void {}
   writeLinkAnnotation(id: number): number {
     return id;

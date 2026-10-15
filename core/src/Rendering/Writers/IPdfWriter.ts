@@ -32,6 +32,8 @@ export interface IPdfWriter {
   writeRawObject(id: number, body: string): void;
   writeCompressedObject(id: number, dictionary: Map<string, string>, stream: string): void;
   writeBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
+  /** Writes a FlateDecode stream that was compressed with `deflateSync` beforehand. */
+  writeDeflatedObject(id: number, dictionary: Map<string, string>, compressed: Uint8Array): void;
   writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeLinkAnnotation(id: number, link: RegisteredLink, pageIds: number[], structParentKey?: number): number;

@@ -15,6 +15,8 @@ import type { RegisteredLink } from './RegisteredLink';
 import type { RenderContext as RenderContextContract } from '../Elements/IElement';
 import { NO_CHROME, type ChromeReservation } from './ChromeReservation';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
+import { deflateSync } from './Compression/Deflate';
+import { encodeIso88591 } from './Writers/Iso88591';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
 const CONTAINER_ROLE_TAGS = new Set([
@@ -54,6 +56,35 @@ export class RenderContext implements RenderContextContract {
   /** @internal */
   public readonly resources: PdfResourceRegistry;
   public readonly pages: string[] = [];
+  /**
+   * @internal How finished body pages are held. `compressed`: compressed when layout leaves
+   * them, for documents with no page chrome. `discard`: dropped (a layout dry run). Set by
+   * the render pipeline from {@link sealFinishedPages} and {@link discardFinishedPages}.
+   */
+  finishedPageStorage: 'keep' | 'compressed' | 'discard' = 'keep';
+  /** @internal Lets the render pipeline compress finished pages. Set by the PDF serializer. */
+  sealFinishedPages = false;
+  /** @internal A layout dry run whose pages are never written. */
+  discardFinishedPages = false;
+  readonly #sealedPages = new Map<number, Uint8Array>();
+
+  /**
+   * @internal Hands a page whose body layout is complete to the finished-page store.
+   * Nothing writes to a page's body after layout leaves it.
+   */
+  sealPage(index: number): void {
+    if (this.isSvgMode || this.finishedPageStorage === 'keep') return;
+    if (this.finishedPageStorage === 'compressed')
+      this.#sealedPages.set(index, deflateSync(encodeIso88591(this.pages[index] ?? '')));
+    this.pages[index] = '';
+  }
+
+  /** @internal Removes and returns a sealed page's compressed content. */
+  takeSealedPage(index: number): Uint8Array | undefined {
+    const sealed = this.#sealedPages.get(index);
+    this.#sealedPages.delete(index);
+    return sealed;
+  }
   /** @internal */
   public readonly pageHyperlinks: Map<number, RegisteredLink[]> = new Map();
   public readonly tocEntries: Map<string, number> = new Map();
@@ -507,6 +538,7 @@ export class RenderContext implements RenderContextContract {
     for (let i = 0; i < reopenStateDepth; i++) this.canvas.restoreState();
 
     this.flushCanvasToPage(); // save current page before moving on
+    this.sealPage(this.currentPageIndex);
     this.pages.push('');
     this.currentPageIndex++;
     // The new page measures its own chrome: header/footer templates are

@@ -169,7 +169,14 @@ export class PdfRenderPipeline {
         if (status === RenderStatus.Complete) break;
         if (status === RenderStatus.WrapRequired) {
           // The element cannot fit even on a fresh page: skip it rather than loop.
-          if (++wrapAttempts > this.maxWrapAttempts) break;
+          if (++wrapAttempts > this.maxWrapAttempts) {
+            ctx.resources.diagnostics.addWarning(
+              'render',
+              `An element that does not fit on an empty page was skipped (page ${ctx.currentPageIndex + 1}).`,
+              'pagination'
+            );
+            break;
+          }
         } else {
           wrapAttempts = 0;
         }

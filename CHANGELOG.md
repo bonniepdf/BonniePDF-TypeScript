@@ -10,6 +10,8 @@ each change to `core/`.
 ## Unreleased
 
 - Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
+- A top-level element that does not fit even on an empty page now reports a `render` warning (source `pagination`) in `doc.diagnostics` when it is skipped.
+- Tagged (PDF/UA) documents: a decorative region (`SemanticGroup` with the `Artifact` role) that spans pages stays an artifact on every page. Its continuation pages were left unmarked and their text tagged as paragraphs, and its first page was left with an unclosed marked-content sequence.
 
 - Add inherited content direction through `settings.contentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
 

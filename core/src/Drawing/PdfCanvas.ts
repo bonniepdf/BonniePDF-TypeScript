@@ -702,6 +702,11 @@ export class PdfCanvas implements ICanvas {
     return this.artifactDepth > 0;
   }
 
+  /** @internal Depth of /Artifact regions currently open, which a page break carries to the next page. */
+  public get openArtifactDepth(): number {
+    return this.artifactDepth;
+  }
+
   public measureText(text: string, fontSize: number, fontFamily: string): Size {
     const width = this.measureRuns(this.resolveRuns(text, fontFamily), fontSize);
     return new Size(width, fontSize * 1.2);

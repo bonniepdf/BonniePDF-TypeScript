@@ -31,9 +31,11 @@ describe('glyph fallback on a positioned canvas', () => {
       doc.add(new TextBlock(SAMPLE, { fontName: primary, fontSize: 12 }))
     );
     const canvas = await embeddedFonts((doc, primary) => {
-      const element = new CanvasElement({ drawHeight: 40 });
-      element.drawHandler = c => c.drawText(10, 10, SAMPLE, Color.black, 12, primary, TextAlignment.Left);
-      doc.add(element);
+      doc.add(
+        new CanvasElement(c => c.drawText(10, 10, SAMPLE, Color.black, 12, primary, TextAlignment.Left), {
+          drawHeight: 40,
+        })
+      );
     });
     expect(body).toEqual(['LiberationMono', 'LiberationSans']);
     expect(canvas).toEqual(body);

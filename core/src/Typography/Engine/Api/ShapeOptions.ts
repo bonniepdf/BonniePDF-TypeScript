@@ -29,7 +29,8 @@ export class ShapeOptions {
   }
   featureValue(tag: string, cluster: number, defaultValue: number, tick?: () => void): number {
     let value = defaultValue;
-    for (const feature of this.features) { tick?.(); if (feature.tag === tag && cluster >= feature.start && cluster < feature.end) value = feature.value; }
+    // Indexed rather than for...of: this runs per glyph per lookup.
+    for (let i = 0; i < this.features.length; i++) { const feature = this.features[i]; tick?.(); if (feature.tag === tag && cluster >= feature.start && cluster < feature.end) value = feature.value; }
     return value;
   }
 }

@@ -587,11 +587,10 @@ export function collectDocumentPreloadResources(document: Document): DocumentPre
   const embeddedPaths = new Set<string>();
   const imagesToDecode: Image[] = [];
   const svgs: Svg[] = [];
-  const collect = (element: unknown): void => {
-    collectEmbeddedFonts(element, embeddedPaths);
-    collectImagesNeedingDecode(element, imagesToDecode);
-    collectSvgElements(element, svgs);
-  };
+  const resources: DocumentPreloadResources = { embeddedPaths, imagesToDecode, svgs };
+  // One walk collects all three. Each collection still fills in depth-first document
+  // order, as three separate walks would.
+  const collect = (element: unknown): void => collectPreloadResources(element, resources);
 
   for (const page of document.pages) {
     for (const element of page.getElements()) collect(element);
@@ -606,7 +605,16 @@ export function collectDocumentPreloadResources(document: Document): DocumentPre
   const watermarkFont = document.settings.watermark?.fontName;
   if (watermarkFont && PdfResourceRegistry.isEmbeddedFont(watermarkFont)) embeddedPaths.add(watermarkFont);
 
-  return { embeddedPaths, imagesToDecode, svgs };
+  return resources;
+}
+
+function collectPreloadResources(element: unknown, resources: DocumentPreloadResources): void {
+  if (!element || typeof element !== 'object') return;
+  addEmbeddedFonts(element as WalkableElement, resources.embeddedPaths);
+  if (element instanceof Image && element.needsAsyncDecode() && !resources.imagesToDecode.includes(element))
+    resources.imagesToDecode.push(element);
+  if (element instanceof Svg && !resources.svgs.includes(element)) resources.svgs.push(element);
+  forEachChild(element, collectPreloadResources, resources);
 }
 
 /**
@@ -656,14 +664,14 @@ export function collectImagesNeedingDecode(element: unknown, out: Image[]): void
     out.push(element);
   }
 
-  forEachChild(element, child => collectImagesNeedingDecode(child, out));
+  forEachChild(element, collectImagesNeedingDecode, out);
 }
 
 /** Walk the element tree and collect every `Svg` element, once each, in document order. */
 export function collectSvgElements(element: unknown, out: Svg[]): void {
   if (!element || typeof element !== 'object') return;
   if (element instanceof Svg && !out.includes(element)) out.push(element);
-  forEachChild(element, child => collectSvgElements(child, out));
+  forEachChild(element, collectSvgElements, out);
 }
 
 /**
@@ -714,39 +722,47 @@ function resolveCells(row: WalkableRow): unknown[] {
   return [];
 }
 
-function forEachChild(value: object, visit: (child: unknown) => void): void {
+// Visits each child with explicit state, so a walk allocates no closure per element, and
+// loops by index rather than for...of.
+function forEachChild<S>(value: object, visit: (child: unknown, state: S) => void, state: S): void {
   const element = value as WalkableElement;
-  if (Array.isArray(element.children)) for (const c of element.children) visit(c);
-  if (typeof element.getChildren === 'function') {
-    const c = element.getChildren();
-    if (Array.isArray(c)) for (const ch of c) visit(ch);
-  }
-  if (Array.isArray(element.content)) for (const c of element.content) visit(c);
-  if (typeof element.getElements === 'function') {
-    const e = element.getElements();
-    if (Array.isArray(e)) for (const el of e) visit(el);
-  }
-  if (Array.isArray(element.spans)) for (const s of element.spans) visit(s);
-  if (typeof element.getSpans === 'function') {
-    const s = element.getSpans();
-    if (Array.isArray(s)) for (const sp of s) visit(sp);
-  }
-  for (const row of resolveRows(element)) {
+  visitAll(element.children, visit, state);
+  if (typeof element.getChildren === 'function') visitAll(element.getChildren(), visit, state);
+  visitAll(element.content, visit, state);
+  if (typeof element.getElements === 'function') visitAll(element.getElements(), visit, state);
+  visitAll(element.spans, visit, state);
+  if (typeof element.getSpans === 'function') visitAll(element.getSpans(), visit, state);
+  const rows = resolveRows(element);
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
     if (!row || typeof row !== 'object') continue;
-    for (const cell of resolveCells(row as WalkableRow)) {
+    const cells = resolveCells(row as WalkableRow);
+    for (let c = 0; c < cells.length; c++) {
+      const cell = cells[c];
       if (!cell || typeof cell !== 'object') continue;
       const content = (cell as WalkableCell).content;
-      if (Array.isArray(content)) for (const el of content) visit(el);
-      else visit(content);
-      visit(cell);
+      if (Array.isArray(content)) visitAll(content, visit, state);
+      else visit(content, state);
+      visit(cell, state);
     }
   }
 }
 
+function visitAll<S>(items: unknown, visit: (child: unknown, state: S) => void, state: S): void {
+  if (!Array.isArray(items)) return;
+  for (let i = 0; i < items.length; i++) visit(items[i], state);
+}
+
 export function collectEmbeddedFonts(element: unknown, paths: Set<string>): void {
   if (!element || typeof element !== 'object') return;
-  const el = element as WalkableElement;
+  addEmbeddedFonts(element as WalkableElement, paths);
+  // Recurse into every child-collection shape (stacks, Container/Page, RichText spans, and
+  // Table rows → cells → cell content).
+  forEachChild(element, collectEmbeddedFonts, paths);
+}
 
+/** Adds the embedded fonts an element names itself, without visiting its children. */
+function addEmbeddedFonts(el: WalkableElement, paths: Set<string>): void {
   // ── fontName on the element itself ────────────────────────────────────────
   if (typeof el.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(el.fontName)) {
     paths.add(el.fontName);
@@ -765,10 +781,6 @@ export function collectEmbeddedFonts(element: unknown, paths: Set<string>): void
   if (el.style && typeof el.style.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(el.style.fontName)) {
     paths.add(el.style.fontName);
   }
-
-  // ── Recurse into every child-collection shape (stacks, Container/Page,
-  // RichText spans, and Table rows → cells → cell content) ─────────────────
-  forEachChild(element, child => collectEmbeddedFonts(child, paths));
 }
 
 /**

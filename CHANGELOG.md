@@ -9,6 +9,7 @@ each change to `core/`.
 
 ## Unreleased
 
+- Lower memory for long documents without page chrome (headers, footers, watermark, page colour or background): each page is compressed as soon as layout moves past it instead of being held as text until writing, and a layout dry run (for a table of contents) no longer keeps its pages. Output is unchanged.
 - Less allocation and faster layout of long documents: shaping reuses its per-glyph working records between calls, the pre-render scan for fonts, images and SVG elements walks the document once instead of three times without a closure per element, table rows without layout capture share no-op callbacks, and text emission no longer allocates a closure per run. A 100,000-line document takes about 16% less time, with about 30% less time in garbage collection. Output is unchanged.
 - Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
 - Faster text with feature overrides (`fontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.

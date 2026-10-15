@@ -22,6 +22,10 @@ class MockPdfWriter implements IPdfWriter {
     this.writtenObjects.push({ id, dict: new Map(dictionary), bytes: new Uint8Array(bytes) });
   }
 
+  writeDeflatedObject(id: number, dictionary: Map<string, string>, compressed: Uint8Array): void {
+    this.writeBinaryObject(id, dictionary, compressed);
+  }
+
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void {
     this.writeBinaryObject(id, dictionary, bytes);
   }

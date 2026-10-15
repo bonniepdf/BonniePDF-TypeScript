@@ -533,21 +533,20 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
 
     const paragraphs = this.firstLineIndent !== 0 || this.paragraphSpacing !== 0;
     let lines: string[];
-    let indents: number[];
-    let spaceBefore: number[];
+    let indents: number[] | undefined;
+    let spaceBefore: number[] | undefined;
 
     if (paragraphs) {
       ({ lines, indents, spaceBefore } = this.computeParagraphLayout(this.text, contentWidth));
     } else {
+      // No paragraph metadata: indentOf/spaceBeforeOf read a missing entry as 0.
       lines = this.computeLines(this.text, contentWidth);
-      indents = new Array(lines.length).fill(0);
-      spaceBefore = new Array(lines.length).fill(0);
     }
 
     if (this.maxLines != null && this.maxLines > 0 && lines.length > this.maxLines) {
       lines = this.clampLines(lines, contentWidth);
-      indents = indents.slice(0, lines.length);
-      spaceBefore = spaceBefore.slice(0, lines.length);
+      indents = indents?.slice(0, lines.length);
+      spaceBefore = spaceBefore?.slice(0, lines.length);
     }
 
     this._bidiLines =

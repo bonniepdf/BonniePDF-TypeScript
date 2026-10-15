@@ -40,13 +40,16 @@ export abstract class TextElementBase extends ElementBase {
 
   // â”€â”€ Font properties (backing fields + explicit-set tracking) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  private _featureStyle = new TextStyle();
+  // Created only for elements that override features: a full TextStyle on every
+  // text element dominated the retained tree of large documents.
+  private _featureStyle: TextStyle | undefined = undefined;
   /** OpenType feature overrides for embedded text, such as { kern: 0, liga: 0 }. */
   public get fontFeatures(): Readonly<Record<string, number>> | undefined {
-    return this._featureStyle.fontFeatures;
+    return this._featureStyle?.fontFeatures;
   }
   public set fontFeatures(value: Readonly<Record<string, number>> | undefined) {
-    this._featureStyle.fontFeatures = value;
+    if (value == null) this._featureStyle = undefined;
+    else (this._featureStyle ??= new TextStyle()).fontFeatures = value;
   }
   private _fontFamily?: string;
   private _fontWeight: FontWeight = FontWeight.Normal;

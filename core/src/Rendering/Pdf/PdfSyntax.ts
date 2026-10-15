@@ -106,9 +106,14 @@ export class PdfSyntax {
     // Matches the .NET reference's "0.###" format: up to 3 fractional digits with
     // trailing zeros (and a bare trailing dot) trimmed. This keeps content streams
     // compact (e.g. "11" not "11.000") and byte-aligned with the .NET output.
+    // Called for every operand, so integers (most coordinates) skip toFixed entirely.
+    if (Number.isInteger(value) && Math.abs(value) < 1e21) return value === 0 ? '0' : String(value);
     let s = value.toFixed(3);
     if (s.includes('.')) {
-      s = s.replace(/0+$/, '').replace(/\.$/, '');
+      let end = s.length;
+      while (s.charCodeAt(end - 1) === 48) end--; // '0'
+      if (s.charCodeAt(end - 1) === 46) end--; // '.'
+      s = s.slice(0, end);
     }
     return s === '-0' ? '0' : s;
   }

@@ -9,6 +9,7 @@ each change to `core/`.
 
 ## Unreleased
 
+- Lower memory and allocation for large documents, with unchanged output: text elements store a font-feature style only when features are overridden, paragraph indent/spacing metadata only when those controls are used, repeated single characters reuse their PDF character codes, and integer operands are formatted without `toFixed`. A 100,000-line document holds about 23% less live heap after generation.
 - `doc.fonts.add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document; a service that keeps its font bytes in memory parses each font once. Family resolution is memoised per document.
 - Faster pagination of large single tables: column widths are computed once per render instead of on every page, which copied and scanned every row each time. Output is unchanged.
 - Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.

@@ -1,6 +1,6 @@
 import { TextFlow, type TextFlowLine } from '../../Typography/TextFlow';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
-import { TextElementBase } from './TextElementBase';
+import { TextElementBase, hasTwoSpaces } from './TextElementBase';
 import { toTextAlignment, type TextAlignmentInput } from '../../Normalize/toEnum';
 import { IStatefulElement } from '../IElement';
 import { RenderStatus } from '../RenderStatus';
@@ -662,17 +662,17 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     if (this.preserveWhitespace || this.isRightToLeft || TextFlow.needsBidi(segment)) {
       return this.wrapPreservingWhitespace(segment, contentWidth - this.firstLineIndent, contentWidth);
     }
-    const words = segment.split(' ');
     const lines: string[] = [];
-    const widths = words.length >= 3 ? this.paragraphWidthsFor(segment) : null;
+    const widths = hasTwoSpaces(segment) ? this.paragraphWidthsFor(segment) : null;
     let widthLimit = contentWidth - this.firstLineIndent;
 
     // As in wrapSegment, the current line and each candidate are spans of the segment.
     let lineStart = 0,
       lineEnd = 0,
       wordStart = 0;
-    for (let w = 0; w < words.length; w++) {
-      const wordEnd = wordStart + words[w].length;
+    while (wordStart <= segment.length) {
+      const space = segment.indexOf(' ', wordStart);
+      const wordEnd = space < 0 ? segment.length : space;
       const lineEmpty = lineStart === lineEnd;
       const testStart = lineEmpty ? wordStart : lineStart;
       if (this.measureSpan(segment, testStart, wordEnd, widths) > widthLimit && !lineEmpty) {

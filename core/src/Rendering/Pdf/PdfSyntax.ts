@@ -32,6 +32,13 @@ export class PdfSyntax {
 
   public static escape(input: string): string {
     if (!input) return input;
+    // Most text has nothing to escape: return it as it is rather than rebuilding it.
+    let plain = true;
+    for (let i = 0; i < input.length && plain; i++) {
+      const c = input.charCodeAt(i);
+      plain = c !== 92 && c !== 40 && c !== 41 && c !== 13 && c !== 10 && c !== 9 && c !== 8 && c !== 12;
+    }
+    if (plain) return input;
 
     let result = '';
     for (const c of input) {

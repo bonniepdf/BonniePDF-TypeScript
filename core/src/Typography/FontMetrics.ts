@@ -180,16 +180,15 @@ export class FontMetrics {
     // Prefer a pre-loaded TtfFont instance registered under this exact path -
     // populated by PdfResourceRegistry after async font preloading, or
     // explicitly by `loadFontFromUrl(url)`. Falling back to a load from the path otherwise.
-    const lowerIdentifier = fontIdentifier.toLowerCase();
-    if (lowerIdentifier.endsWith('.ttf') || lowerIdentifier.endsWith('.otf')) {
+    if (hasFontFileExtension(fontIdentifier)) {
       const pathInstance = getFontInstanceAlias(fontIdentifier);
-      if (pathInstance) return { font: pathInstance, unparsed: false };
+      if (pathInstance) return parsedFont(pathInstance);
       return this.loadMeasuringTtf(fontIdentifier);
     }
 
     // B1. IS IT A REGISTERED ALIAS TO A TtfFont INSTANCE (bytes-based)?
     const fontInstance = getFontInstanceAlias(fontIdentifier);
-    if (fontInstance) return { font: fontInstance, unparsed: false };
+    if (fontInstance) return parsedFont(fontInstance);
 
     const ttfPath = getFontPathAlias(fontIdentifier);
     if (ttfPath) return this.loadMeasuringTtf(ttfPath);
@@ -361,4 +360,22 @@ export class FontMetrics {
 // Advances are integers summed left to right, so the total is exact.
 function sumAdvances(glyphs: GlyphRun): number {
   return glyphs.totalAdvanceX();
+}
+
+// One result per font for resolveShapingFont, which is asked on every measurement.
+const parsedFonts = new WeakMap<TtfFont, { readonly font: TtfFont; readonly unparsed: false }>();
+function parsedFont(font: TtfFont): { font: TtfFont; unparsed: boolean } {
+  let result = parsedFonts.get(font);
+  if (!result) parsedFonts.set(font, (result = Object.freeze({ font, unparsed: false as const })));
+  return result;
+}
+
+/** Whether `identifier` ends with `.ttf` or `.otf` in any case, without lower-casing it. */
+function hasFontFileExtension(identifier: string): boolean {
+  const n = identifier.length;
+  if (n < 4 || identifier.charCodeAt(n - 4) !== 46) return false; // '.'
+  const a = identifier.charCodeAt(n - 3) | 32,
+    b = identifier.charCodeAt(n - 2) | 32,
+    c = identifier.charCodeAt(n - 1) | 32;
+  return (a === 116 || a === 111) && b === 116 && c === 102; // t|o, t, f
 }

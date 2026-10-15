@@ -23,6 +23,7 @@ import {
 } from './PaintTransform';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 import type { TtfFont } from '../Typography/TrueType/TtfFont';
+import type { TextRunFont } from '../Rendering/PdfResourceRegistry';
 
 /** Resolves a gradient to native shading resources, or `null` to fall back to strips/discs. */
 type ShadingResolver = (request: ShadingRequest) => { shadingName: string; softMaskGs: string | null } | null;
@@ -729,7 +730,41 @@ export class PdfCanvas implements ICanvas {
 
   // -- Private: text rendering helpers ------------------------------------
 
+  /**
+   * @internal The font that draws a whole string, or null when the string needs more than one;
+   * asked before the general run resolver, so the common case allocates no runs.
+   */
+  public wholeTextFontResolver?: (fontFamily: string, text: string) => TextRunFont | null;
+
+  // Builds show-text operators, reused for every one this canvas writes.
+  readonly #text = new OperatorText();
+
+  // The one-run result resolveRuns hands out, refilled per call; each caller is done with it before the next.
+  readonly #wholeRun: PreparedTextRun[] = [
+    {
+      tracker: undefined,
+      canTrackPreparedGlyphs: undefined,
+      resourceName: '',
+      embeddedFont: null,
+      fontIdentifier: '',
+      text: '',
+      glyphs: undefined,
+    },
+  ];
+
   private resolveRuns(text: string, fontFamily: string): PreparedTextRun[] {
+    const whole = this.wholeTextFontResolver?.(fontFamily, text);
+    if (whole) {
+      const run = this.#wholeRun[0];
+      run.tracker = whole.tracker;
+      run.canTrackPreparedGlyphs = whole.canTrackPreparedGlyphs;
+      run.resourceName = whole.resourceName;
+      run.embeddedFont = whole.embeddedFont;
+      run.fontIdentifier = whole.fontIdentifier;
+      run.text = text;
+      run.glyphs = whole.embeddedFont?.shape(text, this._fontFeatures);
+      return this.#wholeRun;
+    }
     const runs = this._textRunResolver
       ? this._textRunResolver(fontFamily, text)
       : [
@@ -809,28 +844,32 @@ export class PdfCanvas implements ICanvas {
       if (colourFont) this.stream.push('3 Tr\n');
       this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
       if (allHorizontal(glyphs)) {
-        let hex = '',
-          array = '[',
-          adjusted = false;
-        const adjust = (n: number) => {
-          if (n === 0) return;
-          array += `<${hex}> ${PdfSyntax.formatDecimal(n)} `;
-          hex = '';
-          adjusted = true;
-        };
+        // The operator is built in one string from character codes: `[<hex> n <hex>] TJ` when
+        // any glyph is adjusted, otherwise `<hex> Tj` (the same characters after the `[`).
+        const text = this.#text.reset();
+        text.char(91).char(60); // [<
+        let adjusted = false;
         for (let index = 0; index < glyphs.count; index++) {
           const offsetX = glyphs.offsetX(index);
-          adjust((-offsetX * 1000) / font.unitsPerEm);
-          hex += glyphCode(codes[index]);
-          adjust(
+          const before = (-offsetX * 1000) / font.unitsPerEm;
+          if (before !== 0) {
+            text.adjustment(before);
+            adjusted = true;
+          }
+          text.hex4(codes[index]);
+          const after =
             ((font.getGlyphWidth(glyphs.id(index)) + offsetX - glyphs.advanceX(index)) * 1000) / font.unitsPerEm -
-              (isSpaceSource(run.text, glyphs.cluster(index), glyphs.sourceLength(index)) && fontSize > 0
-                ? (wordSpacing * 1000) / fontSize
-                : 0)
-          );
+            (isSpaceSource(run.text, glyphs.cluster(index), glyphs.sourceLength(index)) && fontSize > 0
+              ? (wordSpacing * 1000) / fontSize
+              : 0);
+          if (after !== 0) {
+            text.adjustment(after);
+            adjusted = true;
+          }
         }
-        if (adjusted) PdfOperators.showTextPositioned(this.stream, `${array}<${hex}>]`);
-        else PdfOperators.showText(this.stream, `<${hex}>`);
+        text.char(62); // >
+        if (adjusted) this.stream.push(text.char(93).ascii(' TJ\n').toString(0));
+        else this.stream.push(text.ascii(' Tj\n').toString(1));
         this.stream.push('EMC\n');
         if (colourFont) this.stream.push('0 Tr\n');
         continue;
@@ -1752,6 +1791,55 @@ function isEmptyRecord(record: object): boolean {
 }
 
 /** `glyphs.every(g => g.offsetY === 0)` without a closure per run. */
+// Decodes OperatorText's bytes; they are ASCII, which UTF-8 decodes as themselves.
+const asciiDecoder = new TextDecoder();
+
+/** An ASCII string built from character codes in a reused buffer, made into a string once. */
+class OperatorText {
+  #codes = new Uint8Array(256);
+  #length = 0;
+
+  reset(): this {
+    this.#length = 0;
+    return this;
+  }
+
+  char(code: number): this {
+    if (this.#length === this.#codes.length) {
+      const grown = new Uint8Array(this.#codes.length * 2);
+      grown.set(this.#codes);
+      this.#codes = grown;
+    }
+    this.#codes[this.#length++] = code;
+    return this;
+  }
+
+  ascii(value: string): this {
+    for (let i = 0; i < value.length; i++) this.char(value.charCodeAt(i));
+    return this;
+  }
+
+  /** A glyph code as four uppercase hex digits (as glyphCode). */
+  hex4(code: number): this {
+    if (!(code >= 0 && code <= 0xffff && Number.isInteger(code))) return this.ascii(glyphCode(code));
+    for (let shift = 12; shift >= 0; shift -= 4) {
+      const digit = (code >> shift) & 15;
+      this.char(digit < 10 ? 48 + digit : 55 + digit);
+    }
+    return this;
+  }
+
+  /** Closes the hex group, writes the adjustment and opens the next group: `> n <`. */
+  adjustment(value: number): this {
+    return this.char(62).char(32).ascii(PdfSyntax.formatDecimal(value)).char(32).char(60);
+  }
+
+  /** The characters from `start` on. */
+  toString(start = 0): string {
+    return asciiDecoder.decode(this.#codes.subarray(start, this.#length));
+  }
+}
+
 function allHorizontal(glyphs: GlyphRun): boolean {
   for (let i = 0; i < glyphs.count; i++) if (glyphs.offsetY(i) !== 0) return false;
   return true;

@@ -1,5 +1,5 @@
 import { type PaintTransform, mapPaintBox } from '../Drawing/PaintTransform';
-import { PdfResourceRegistry, ResolvedTextRun } from './PdfResourceRegistry';
+import { PdfResourceRegistry, ResolvedTextRun, type TextRunFont } from './PdfResourceRegistry';
 import type { ShadingRequest } from './Pdf/GradientShading';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
@@ -400,6 +400,7 @@ export class RenderContext implements RenderContextContract {
         this.resources.noteImagePlacement.bind(this.resources)
       );
       pdfCanvas.emojiRendering = () => this.emojiRendering;
+      pdfCanvas.wholeTextFontResolver = this.wholeTextFont;
       if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
       this.canvas = pdfCanvas;
     }
@@ -450,6 +451,10 @@ export class RenderContext implements RenderContextContract {
   }
 
   /** @internal */
+  // One bound function for every canvas of this context.
+  private readonly wholeTextFont = (fontIdentifier: string, text: string): TextRunFont | null =>
+    this.resources.wholeTextFont(fontIdentifier, text);
+
   public resolveTextRuns(fontIdentifier: string, text: string): ResolvedTextRun[] {
     return this.resources.resolveTextRuns(fontIdentifier, text);
   }

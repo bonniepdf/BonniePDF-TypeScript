@@ -331,10 +331,25 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   }
 
   /** Body row `index` for measuring and drawing: the stored row, or a temporary equal to it. */
-  private rowForLayout(index: number): TableRow {
+  /**
+   * With `reuse`, a compact entry is loaded into one scratch row the table keeps, valid until
+   * the next call: for a caller that is done with each row before reading the next and keeps no
+   * reference to it (a layout recorder keys its nodes by row and cell, so recording passes false).
+   */
+  private rowForLayout(index: number, reuse = false): TableRow {
     const entry = this._rows[index];
-    return entry instanceof TableRow || entry == null ? (entry as TableRow) : buildRow(entry);
+    if (entry instanceof TableRow || entry == null) return entry as TableRow;
+    if (!reuse) return buildRow(entry);
+    const count = Array.isArray(entry) ? entry.length : 1;
+    if (this.#scratch?.cells.length !== count) this.#scratch = TableRow.fromElements(...new Array<IElement>(count));
+    const cells = this.#scratch.cells;
+    if (Array.isArray(entry)) for (let i = 0; i < count; i++) cells[i].content = entry[i];
+    else cells[0].content = entry;
+    return this.#scratch;
   }
+
+  // The scratch row rowForLayout fills; its cells are never changed except for their content.
+  #scratch: TableRow | undefined;
 
   /**
    * @internal The rows that exist as objects (headers, body rows that have been materialised,
@@ -473,7 +488,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Render data rows
     let tbodyOpen = false;
     for (let i = startRow; i < this._rows.length; i++) {
-      const row = this.rowForLayout(i);
+      const row = this.rowForLayout(i, ctx.layoutRecorder === undefined);
       const rowHeight = this.measureRowHeight(row, widths);
 
       // Pagination check
@@ -530,7 +545,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   // its own border is more prominent, and so paints over the earlier one: the wider line wins, then the
   // darker, and a tie goes to the earlier cell.
 
-  private readonly _edgePlan = new Map<TableCell, { drawLeft: boolean; drawTop: boolean }>();
+  // Each cell's planned shared edges: DRAW_LEFT and DRAW_TOP bits.
+  private readonly _edgePlan = new Map<TableCell, number>();
 
   // The bottom edge of each column in the row above, on the page being drawn; undefined when there is none.
   private _bottomsAbove: { width: number; color: Color | undefined }[] | undefined = undefined;
@@ -569,47 +585,65 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
   private planRowEdges(ctx: RenderContext, row: TableRow): void {
     this._edgePlan.clear();
-    const aboveKnown = this._bottomsAbove !== undefined && this._bottomsAbovePage === ctx.currentPageIndex;
+    const above =
+      this._bottomsAbove !== undefined && this._bottomsAbovePage === ctx.currentPageIndex
+        ? this._bottomsAbove
+        : undefined;
 
-    let previous: { border: Border; colors: BorderColors } | undefined;
+    // Read each cell's edges straight from its owner (see edgesOf) rather than through a pair.
+    let previousBorder: Border | undefined;
+    let previousColors: BorderColors | undefined;
     let col = 0;
     for (const cell of row.cells) {
-      const { border, colors } = this.edgesOf(cell);
+      const own = cell.border.hasAnyBorder;
+      const border = own ? cell.border : this.border;
+      const colors = own ? cell.borderColors : this.borderColors;
       const span = Math.max(1, cell.columnSpan);
 
       const drawLeft =
-        previous === undefined ||
-        Table.outranks(border.left, colors.left, previous.border.right, previous.colors.right);
+        previousBorder === undefined ||
+        Table.outranks(border.left, colors.left, previousBorder.right, previousColors!.right);
 
       let drawTop = true;
-      if (aboveKnown) {
+      if (above) {
         // Against the most prominent bottom edge among the columns this cell covers.
-        let strongest: { width: number; color: Color | undefined } = { width: 0, color: undefined };
-        for (let j = 0; j < span && col + j < this._bottomsAbove!.length; j++) {
-          const above = this._bottomsAbove![col + j];
-          if (Table.outranks(above.width, above.color, strongest.width, strongest.color)) strongest = above;
+        let strongestWidth = 0;
+        let strongestColor: Color | undefined;
+        for (let j = 0; j < span && col + j < above.length; j++) {
+          const edge = above[col + j];
+          if (Table.outranks(edge.width, edge.color, strongestWidth, strongestColor)) {
+            strongestWidth = edge.width;
+            strongestColor = edge.color;
+          }
         }
 
-        drawTop = Table.outranks(border.top, colors.top, strongest.width, strongest.color);
+        drawTop = Table.outranks(border.top, colors.top, strongestWidth, strongestColor);
       }
 
-      this._edgePlan.set(cell, { drawLeft, drawTop });
-      previous = { border, colors };
+      this._edgePlan.set(cell, (drawLeft ? DRAW_LEFT : 0) | (drawTop ? DRAW_TOP : 0));
+      previousBorder = border;
+      previousColors = colors;
       col += span;
     }
   }
 
   private recordRowBottoms(ctx: RenderContext, row: TableRow, widths: number[]): void {
-    const bottoms: { width: number; color: Color | undefined }[] = widths.map(() => ({
-      width: 0,
-      color: undefined,
-    }));
+    // The row above's edges are read only while planning this row, so they are refilled in place.
+    let bottoms = this._bottomsAbove;
+    if (bottoms?.length !== widths.length) bottoms = widths.map(() => ({ width: 0, color: undefined }));
+    else
+      for (const edge of bottoms) {
+        edge.width = 0;
+        edge.color = undefined;
+      }
     let col = 0;
     for (const cell of row.cells) {
-      const { border, colors } = this.edgesOf(cell);
+      const colors = cell.border.hasAnyBorder ? cell.borderColors : this.borderColors;
+      const bottom = (cell.border.hasAnyBorder ? cell.border : this.border).bottom;
       const span = Math.max(1, cell.columnSpan);
       for (let j = 0; j < span && col + j < bottoms.length; j++) {
-        bottoms[col + j] = { width: Table.drawn(border.bottom, colors.bottom), color: colors.bottom };
+        bottoms[col + j].width = Table.drawn(bottom, colors.bottom);
+        bottoms[col + j].color = colors.bottom;
       }
 
       col += span;
@@ -630,7 +664,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     // Data rows
     for (let i = 0; i < this._rows.length; i++) {
-      totalHeight += this.measureRowHeight(this.rowForLayout(i), widths);
+      totalHeight += this.measureRowHeight(this.rowForLayout(i, true), widths);
     }
 
     // Footers
@@ -683,7 +717,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       if (groupTagging) tagging!.tree.begin(SemanticRole.TBody);
       try {
         for (let i = 0; i < this._rows.length; i++) {
-          const row = this.rowForLayout(i);
+          const row = this.rowForLayout(i, ctx.layoutRecorder === undefined);
           const rowHeight = this.measureRowHeight(row, widths);
 
           // Pagination check
@@ -859,14 +893,15 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     if (edges.border.hasAnyBorder) {
       // A shared edge is drawn once, by the cell that wins it (planRowEdges).
       const plan = this._edgePlan.get(cell);
-      const effectiveBorder = plan
-        ? new Border(
-            plan.drawLeft ? edges.border.left : 0,
-            plan.drawTop ? edges.border.top : 0,
-            edges.border.right,
-            edges.border.bottom
-          )
-        : edges.border;
+      const effectiveBorder =
+        plan !== undefined
+          ? new Border(
+              plan & DRAW_LEFT ? edges.border.left : 0,
+              plan & DRAW_TOP ? edges.border.top : 0,
+              edges.border.right,
+              edges.border.bottom
+            )
+          : edges.border;
       const effectiveBorderColors = edges.colors;
       // Save and restore border settings for per-cell borders
       const savedBorder = this.border;
@@ -1094,6 +1129,9 @@ function isPlainContent(args: ReadonlyArray<IElement | TableCell[] | TableRow>):
 }
 
 /** The row TableRow.fromElements builds for a compact entry. */
+const DRAW_LEFT = 1,
+  DRAW_TOP = 2;
+
 function buildRow(entry: IElement | IElement[]): TableRow {
   return Array.isArray(entry) ? TableRow.fromElements(...entry) : TableRow.fromElements(entry);
 }

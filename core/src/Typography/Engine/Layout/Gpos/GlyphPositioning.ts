@@ -14,6 +14,8 @@ import { GlyphFilter } from '../Common/GlyphFilter';
 import { OpenTypeLayout, LayoutReadCache } from '../Common/OpenTypeLayout';
 import { LookupHeaderCache } from '../Common/LookupHeaderCache';
 import { FirstGlyphSet } from '../Common/FirstGlyphSet';
+import { ContextFormat3, inputsWithin, backtrackCharge } from '../Common/ContextFormat3';
+import { CoverageMap } from '../Common/CoverageMap';
 import { GlyphAdjustment } from './GlyphAdjustment';
 import { FontAnchor } from './FontAnchor';
 import { LegacyKerning } from '../../Fonts/Tables/LegacyKerning';
@@ -27,6 +29,14 @@ export class GlyphPositioning {
   private readonly headers!: LookupHeaderCache;
   private readonly firstGlyphs = new Map<number, FirstGlyphSet | null>();
   private readonly subtableMasks = new Map<number, Uint32Array | null>();
+  private readonly contexts = new Map<number, (ContextFormat3 | null)[] | null>();
+  private readonly pairs = new Map<number, (PairSubtable | null)[] | null>();
+  // The plans of the lookup applyAt last served, kept so a run of glyphs does not look them
+  // up per glyph.
+  private selected = -1;
+  private selectedContexts: (ContextFormat3 | null)[] | null = null;
+  private selectedMasks: Uint32Array | null = null;
+  private selectedPairs: (PairSubtable | null)[] | null = null;
   private readonly lookups!: number[];
   private readonly rules!: LookupRule[];
   private readonly options!: ShapeOptions;
@@ -113,10 +123,13 @@ export class GlyphPositioning {
       this.activeRule = null;
       for (const rule of this.rules) { this.tick(); if (rule.index == index) { this.activeRule = rule; break; } }
       const first = this.firstGlyphSet(index);
-      const rejectedCharge = first === null ? -1 : this.rejectedCharge(index);
+      const rejection = first === null ? null : this.rejectedCharge(index);
+      const rejectedCharge = rejection === null ? -1 : rejection.charge, inputCharge = rejection === null ? 0 : rejection.inputCharge;
+      // The contexts a rejected glyph reaches: none when the rule turns the lookup off.
+      const charged = inputCharge !== 0 ? this.contextPlans(index) : null;
       for (let at = 0; at < glyphs.length;) {
         const rejected = first !== null && !first.contains(glyphs[at].id);
-        if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge); at++; }
+        if (rejected && rejectedCharge >= 0) { this.chargeSubtables(rejectedCharge + inputCharge * inputsWithin(charged, glyphs.length) + backtrackCharge(charged, glyphs, at)); at++; }
         else at += Math.max(1, this.applyAt(index, glyphs, adjustments, at, 0, advanceWidth, rejected));
       }
     }
@@ -125,8 +138,9 @@ export class GlyphPositioning {
     return adjustments;
   }
 
-  // A lookup's first-glyph set, or null when any subtable reads before its coverage
-  // test (contextual format 3) or fails the checks that precede it.
+  // A lookup's first-glyph set, or null when any subtable fails the checks that precede its
+  // coverage test. A format 3 context contributes its first input coverage when it has a
+  // plan (ContextFormat3); without one it makes the set null.
   private firstGlyphSet(index: number): FirstGlyphSet | null {
     let first = this.firstGlyphs.get(index);
     if (first === undefined) { first = this.buildFirstGlyphs(index); this.firstGlyphs.set(index, first); }
@@ -144,7 +158,11 @@ export class GlyphPositioning {
           if (format !== 1 || extended < 1 || extended > 8 || delta === 0) return null;
           type = extended; sub = checked(sub + delta); format = this.data.u16(sub);
         }
-        if ((type === 7 || type === 8) && format === 3) return null;
+        if ((type === 7 || type === 8) && format === 3) {
+          const plan = this.contextPlans(index)?.[i] ?? null;
+          if (plan === null || !first.addCoverage(this.data, plan.firstInputOffset)) return null;
+          continue;
+        }
         if (type === 3) {
           if (format !== 1) return null;
           this.data.check(sub + 6, this.data.u16(sub + 4) * 4);
@@ -192,19 +210,91 @@ export class GlyphPositioning {
     }
   }
 
-  // What applyAt charges for every rejected glyph of this lookup, when that cannot
-  // depend on the glyph: a constant feature rule, no glyph filtering (so the walk to
-  // the next glyph is one step) and no Arabic ignorables. Otherwise -1.
-  private rejectedCharge(index: number): number {
+  // What applyAt charges for every rejected glyph of this lookup, apart from what depends on
+  // the run, when the glyph cannot change it: a constant feature rule, no glyph filtering
+  // (so the walk to the next glyph is one step) and no Arabic ignorables. Otherwise null.
+  // Each format 3 context adds inputCharge when its input fits in the run (inputsWithin), and
+  // the tests of a backtrack longer than one glyph (backtrackCharge).
+  private rejectedCharge(index: number): { charge: number; inputCharge: number } | null {
     const header = this.headers.get(index);
-    if (this.options.script === 'arab' || (header.flags & 0xff1e) !== 0 || this.limits.maxNesting < 0) return -1;
+    if (this.options.script === 'arab' || (header.flags & 0xff1e) !== 0 || this.limits.maxNesting < 0) return null;
     let value = 1, ticks = 0;
     if (this.activeRule !== null) {
       const constant = this.activeRule.constant();
-      if (constant === null) return -1;
+      if (constant === null) return null;
       value = constant.value; ticks = constant.ticks;
     }
-    return 1 + ticks + (value !== 0 ? 1 + header.count : 0);
+    if (value === 0) return { charge: 1 + ticks, inputCharge: 0 };
+    let charge = 1 + ticks + 1 + header.count;
+    const plans = this.contextPlans(index);
+    if (plans === null) return { charge, inputCharge: 0 };
+    for (const plan of plans) if (plan !== null && plan.chained) charge += 1 + (plan.backtrack.length < 2 ? plan.backtrack.length : 0);
+    return { charge, inputCharge: 1 + ticks };
+  }
+
+  // Each subtable's format 3 plan (null where it has none), or null when it has none at all.
+  private contextPlans(index: number): (ContextFormat3 | null)[] | null {
+    let plans = this.contexts.get(index);
+    if (plans === undefined) { plans = this.buildContexts(index); this.contexts.set(index, plans); }
+    return plans;
+  }
+
+  private buildContexts(index: number): (ContextFormat3 | null)[] | null {
+    let header;
+    try { header = this.headers.get(index); } catch { return null; }
+    if (header.type !== 7 && header.type !== 8 && header.type !== 9) return null;
+    let plans: (ContextFormat3 | null)[] | null = null;
+    for (let i = 0; i < header.count; i++) {
+      try {
+        let sub = this.offset(header.offset, header.offset + 6 + i * 2), type = header.type;
+        if (type === 9) {
+          const extended = this.data.u16(sub + 2), delta = this.data.offset32(sub + 4);
+          if (this.data.u16(sub) !== 1 || extended < 1 || extended > 8 || delta === 0) continue;
+          type = extended; sub = checked(sub + delta);
+        }
+        if (type !== 7 && type !== 8) continue;
+        const plan = ContextFormat3.tryBuild(this.data, this.reads, sub, type === 8);
+        if (plan === null) continue;
+        if (plans === null) plans = new Array<ContextFormat3 | null>(header.count).fill(null);
+        plans[i] = plan;
+      } catch { /* left to subtable */ }
+    }
+    return plans;
+  }
+
+  // Charges what context charges for a glyph that the plan's first input coverage does not
+  // list: the walk back over the backtrack, each backtrack test it reaches, then the first
+  // input test when the input fits.
+  private chargeContext(plan: ContextFormat3, glyphs: ShapingGlyph[], at: number, flags: number, markSet: number): void {
+    if (plan.chained) {
+      let position = this.walk(glyphs, at, -1, flags, markSet);
+      const backtrack = plan.backtrack;
+      if (backtrack.length <= glyphs.length)
+        for (let j = 0; j < backtrack.length; j++) {
+          this.tick();
+          if (position < 0 || position >= glyphs.length || !backtrack[j].covers(glyphs[position].id)) break;
+          if (j + 1 < backtrack.length) position = this.walk(glyphs, position, -1, flags, markSet);
+        }
+    }
+    if (plan.inputCount <= glyphs.length) {
+      this.tick();
+      if (this.activeRule !== null) this.ruleValue(glyphs[at].featureCluster);
+    }
+  }
+
+  // The active rule's value; when it cannot depend on the glyph (LookupRule.constant), its
+  // operations are charged in one step instead of one at a time.
+  private ruleValue(cluster: number): number {
+    const constant = this.activeRule!.constant();
+    if (constant !== null) { this.chargeSubtables(constant.ticks); return constant.value; }
+    return this.activeRule!.value(cluster, this.charge);
+  }
+
+  private select(index: number): void {
+    this.selectedContexts = this.contextPlans(index);
+    this.selectedMasks = this.subtableMaskSet(index);
+    this.selectedPairs = this.pairPlans(index);
+    this.selected = index;
   }
 
   // Charges what the subtable loop would charge for a glyph no subtable covers.
@@ -222,14 +312,24 @@ export class GlyphPositioning {
       invalid("Invalid GPOS lookup index.");
     if (at < 0 || at >= glyphs.length)
       return 0;
-    if (depth == 0 && this.activeRule != null && this.activeRule.value(glyphs[at].featureCluster, this.charge) == 0) return 0;
+    if (depth == 0 && this.activeRule != null && this.ruleValue(glyphs[at].featureCluster) == 0) return 0;
     const header = this.headers.get(index);
     let lookup = header.offset, type = header.type, flags = header.flags, count = header.count, markSet = header.markSet;
     if (this.filter.ignored(glyphs[at].id, flags, markSet))
       return 0;
     let next = this.walk(glyphs, at, 1, flags, markSet);
-    if (rejected) { this.chargeSubtables(count); return 0; }
-    const masks = this.subtableMaskSet(index);
+    if (index !== this.selected) this.select(index);
+    const plans = this.selectedContexts;
+    if (rejected) {
+      if (plans === null) { this.chargeSubtables(count); return 0; }
+      for (let i = 0; i < count; i++) {
+        this.tick();
+        const plan = plans[i];
+        if (plan !== null) this.chargeContext(plan, glyphs, at, flags, markSet);
+      }
+      return 0;
+    }
+    const masks = this.selectedMasks, planned = this.selectedPairs;
     if (masks !== null) {
       // Only the subtables whose coverage lists this glyph can act on it; each of the others
       // would cost its loop tick and return at the coverage test, so they are charged that
@@ -240,8 +340,10 @@ export class GlyphPositioning {
         if ((mask & 1) === 0) continue;
         this.chargeSubtables(i - done);
         this.tick();
-        let consumed = this.subtable(type, this.offset(lookup, lookup + 6 + i * 2), glyphs, adjustments,
-          at, next, flags, markSet, advanceWidth, depth);
+        const pair = planned === null ? null : planned[i];
+        let consumed = pair !== null
+          ? this.pairAt(pair, glyphs, adjustments, at, next, flags, markSet, advanceWidth, depth)
+          : this.subtable(type, this.offset(lookup, lookup + 6 + i * 2), glyphs, adjustments, at, next, flags, markSet, advanceWidth, depth);
         if (consumed != 0)
           return consumed == -1 ? next + 1 - at : consumed;
         done = i + 1;
@@ -252,8 +354,16 @@ export class GlyphPositioning {
     for (let i = 0; i < count; i++)
     {
       this.tick();
-      let consumed = this.subtable(type, this.offset(lookup, lookup + 6 + i * 2), glyphs, adjustments,
-        at, next, flags, markSet, advanceWidth, depth);
+      // A format 3 context that cannot start here is charged without being read.
+      const plan = plans === null ? null : plans[i];
+      if (plan !== null && !plan.firstInput.covers(glyphs[at].id)) {
+        this.chargeContext(plan, glyphs, at, flags, markSet);
+        continue;
+      }
+      const pair = planned === null ? null : planned[i];
+      let consumed = pair !== null
+        ? this.pairAt(pair, glyphs, adjustments, at, next, flags, markSet, advanceWidth, depth)
+        : this.subtable(type, this.offset(lookup, lookup + 6 + i * 2), glyphs, adjustments, at, next, flags, markSet, advanceWidth, depth);
       if (consumed != 0)
         return consumed == -1 ? next + 1 - at : consumed;
     }
@@ -303,7 +413,7 @@ export class GlyphPositioning {
     let secondFormat = this.data.u16(sub + 6), secondSize = GlyphPositioning.valueSize(secondFormat);
     if (next >= glyphs.length)
       return 0;
-    if (this.activeRule != null && this.activeRule.value(glyphs[next].featureCluster, this.charge) == 0) return 0;
+    if (this.activeRule != null && this.ruleValue(glyphs[next].featureCluster) == 0) return 0;
     let pair: number, valueOrigin = sub;
     if (format == 1)
     {
@@ -355,6 +465,144 @@ export class GlyphPositioning {
       UnsafeRange.mark(glyphs, at, next, this.charge);
     // A null second ValueRecord permits overlapping pairs (AV, VA in AVA).
     return secondFormat == 0 ? 1 : -1;
+  }
+
+  // Each subtable's plan (null where subtable must read it), or null when the lookup is not
+  // single or pair adjustment.
+  private pairPlans(index: number): (PairSubtable | null)[] | null {
+    let plans = this.pairs.get(index);
+    if (plans === undefined) { plans = this.buildPairs(index); this.pairs.set(index, plans); }
+    return plans;
+  }
+
+  private buildPairs(index: number): (PairSubtable | null)[] | null {
+    let header;
+    try { header = this.headers.get(index); } catch { return null; }
+    if (header.type !== 1 && header.type !== 2 && header.type !== 9) return null;
+    let plans: (PairSubtable | null)[] | null = null;
+    for (let i = 0; i < header.count; i++) {
+      try {
+        const plan = this.buildPair(this.offset(header.offset, header.offset + 6 + i * 2), header.type);
+        if (plan === null) continue;
+        if (plans === null) plans = new Array<PairSubtable | null>(header.count).fill(null);
+        plans[i] = plan;
+      } catch { /* left to subtable */ }
+    }
+    return plans;
+  }
+
+  private buildPair(sub: number, type: number): PairSubtable | null {
+    let format = this.data.u16(sub);
+    if (type === 9) {
+      const extended = this.data.u16(sub + 2), delta = this.data.offset32(sub + 4);
+      if (format !== 1 || extended < 1 || extended > 8 || delta === 0) return null;
+      type = extended; sub = checked(sub + delta); format = this.data.u16(sub);
+    }
+    if ((type !== 1 && type !== 2) || (format !== 1 && format !== 2)) return null;
+    const coverage = this.reads.coverageMap(this.data, this.offset(sub, sub + 2));
+    if (coverage === null) return null;
+    const firstFormat = this.data.u16(sub + 4);
+    if ((firstFormat & ~0xff) !== 0) return null;
+    const plan = new PairSubtable(type, format, sub, coverage, firstFormat, GlyphPositioning.valueSize(firstFormat));
+    if (type === 1) {
+      if (format === 1) this.data.check(sub + 6, plan.firstSize);
+      else {
+        const count = this.data.u16(sub + 6);
+        if (coverage.count > count) return null;
+        this.data.check(sub + 8, count * plan.firstSize);
+      }
+      return plan;
+    }
+    plan.secondFormat = this.data.u16(sub + 6);
+    if ((plan.secondFormat & ~0xff) !== 0) return null;
+    plan.secondSize = GlyphPositioning.valueSize(plan.secondFormat);
+    if (format === 1) {
+      const sets = this.data.u16(sub + 8);
+      if (coverage.count > sets) return null;
+      this.data.check(sub + 10, sets * 2);
+      plan.sets = new Array<PairSet | null>(sets).fill(null);
+      return plan;
+    }
+    plan.class1 = this.offset(sub, sub + 8);
+    plan.class2 = this.offset(sub, sub + 10);
+    plan.rows = this.data.u16(sub + 12);
+    plan.columns = this.data.u16(sub + 14);
+    this.data.check(sub + 16, checked(plan.rows * plan.columns * (plan.firstSize + plan.secondSize)));
+    return plan;
+  }
+
+  // The pair set at coverage index, read once; unsupportedPairSet when reading it throws, so
+  // the caller leaves the glyph to subtable, which throws the same way.
+  private pairSetAt(plan: PairSubtable, coverage: number): PairSet {
+    let set = plan.sets![coverage];
+    if (set !== null) return set;
+    try {
+      const origin = this.offset(plan.sub, plan.sub + 10 + coverage * 2), count = this.data.u16(origin);
+      const stride = 2 + plan.firstSize + plan.secondSize;
+      this.data.check(origin + 2, count * stride);
+      const seconds = new Uint16Array(count);
+      for (let i = 0; i < count; i++) seconds[i] = this.data.u16(origin + 2 + i * stride);
+      set = { origin, records: origin + 2, seconds };
+    } catch {
+      set = unsupportedPairSet;
+    }
+    plan.sets![coverage] = set;
+    return set;
+  }
+
+  // subtable for a planned single or pair adjustment subtable.
+  private pairAt(plan: PairSubtable, glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], at: number, next: number, flags: number, markSet: number, advanceWidth: ((glyph: number) => number) | null, depth: number): number {
+    const coverage = plan.coverage.index(glyphs[at].id);
+    if (coverage < 0)
+      return 0;
+    if (plan.type === 1) {
+      this.value(plan.sub, plan.format === 1 ? plan.sub + 6 : plan.sub + 8 + coverage * plan.firstSize, plan.firstFormat, adjustments[at]);
+      return 1;
+    }
+    let pair: number, valueOrigin = plan.sub;
+    if (plan.format === 1) {
+      const set = this.pairSetAt(plan, coverage);
+      if (set === unsupportedPairSet)
+        return this.subtable(plan.type, plan.sub, glyphs, adjustments, at, next, flags, markSet, advanceWidth, depth);
+      if (next >= glyphs.length)
+        return 0;
+      if (this.activeRule != null && this.ruleValue(glyphs[next].featureCluster) == 0) return 0;
+      valueOrigin = set.origin;
+      const seconds = set.seconds, second = glyphs[next].id;
+      let low = 0, high = seconds.length - 1;
+      pair = -1;
+      while (low <= high) {
+        this.tick();
+        const mid = divide(low + high, 2), id = seconds[mid];
+        if (id === second) {
+          pair = set.records + mid * (2 + plan.firstSize + plan.secondSize) + 2;
+          break;
+        }
+        if (second < id)
+          high = mid - 1;
+        else
+          low = mid + 1;
+      }
+      if (pair < 0)
+        return 0;
+    } else {
+      if (next >= glyphs.length)
+        return 0;
+      if (this.activeRule != null && this.ruleValue(glyphs[next].featureCluster) == 0) return 0;
+      const c1 = this.reads.class(this.data, plan.class1, glyphs[at].id);
+      const c2 = this.reads.class(this.data, plan.class2, glyphs[next].id);
+      if (c1 >= plan.rows || c2 >= plan.columns)
+        invalid("Invalid GPOS pair class index.");
+      pair = plan.sub + 16 + (c1 * plan.columns + c2) * (plan.firstSize + plan.secondSize);
+    }
+    const oldFirstAdvance = adjustments[at].xAdvance, oldFirstX = adjustments[at].xPlacement, oldFirstY = adjustments[at].yPlacement;
+    const oldSecondAdvance = adjustments[next].xAdvance, oldSecondX = adjustments[next].xPlacement, oldSecondY = adjustments[next].yPlacement;
+    this.value(valueOrigin, pair, plan.firstFormat, adjustments[at]);
+    this.value(valueOrigin, pair + plan.firstSize, plan.secondFormat, adjustments[next]);
+    if (oldFirstAdvance != adjustments[at].xAdvance || oldFirstX != adjustments[at].xPlacement || oldFirstY != adjustments[at].yPlacement ||
+      oldSecondAdvance != adjustments[next].xAdvance || oldSecondX != adjustments[next].xPlacement || oldSecondY != adjustments[next].yPlacement)
+      UnsafeRange.mark(glyphs, at, next, this.charge);
+    return plan.secondFormat == 0 ? 1 : -1;
   }
 
   private attach(type: number, sub: number, glyphs: ShapingGlyph[], adjustments: GlyphAdjustment[], at: number, flags: number, markSet: number, advanceWidth: ((glyph: number) => number) | null): number {
@@ -646,7 +894,7 @@ export class GlyphPositioning {
       this.tick();
       if (position < 0 || position >= glyphs.length)
         return false;
-      if (requireFeature && (this.activeRule != null && this.activeRule.value(glyphs[position].featureCluster, this.charge) == 0)) return false;
+      if (requireFeature && (this.activeRule != null && this.ruleValue(glyphs[position].featureCluster) == 0)) return false;
       let id = glyphs[position].id, expected = this.data.u16(record + j * 2);
       let same = mode == 2 ? this.coverage(checked(sub + expected), id) >= 0 :
         (mode == 1 ? this.class(classDefinition, id) : id) == expected;
@@ -867,3 +1115,31 @@ export class GlyphPositioning {
     return result;
   }
 }
+
+// A single or pair adjustment subtable (GPOS 1, 2) read and checked once: its coverage map,
+// value formats, and the bounds every read in pairAt relies on. pairAt then does what
+// subtable does for it, with the same charges, results and exceptions. Built only when every
+// check subtable makes before a value is read holds for every glyph; any other subtable is
+// left to subtable.
+class PairSubtable {
+  secondFormat = 0;
+  secondSize = 0;
+  // Format 1 pairs: decoded pair sets, by coverage index (null until first used).
+  sets: (PairSet | null)[] | null = null;
+  // Format 2 pairs: class definitions and the class matrix.
+  class1 = 0;
+  class2 = 0;
+  rows = 0;
+  columns = 0;
+  constructor(readonly type: number, readonly format: number, readonly sub: number, readonly coverage: CoverageMap,
+    readonly firstFormat: number, readonly firstSize: number) {}
+}
+
+interface PairSet {
+  readonly origin: number;
+  readonly records: number;
+  readonly seconds: Uint16Array;
+}
+
+// A set whose reading throws.
+const unsupportedPairSet: PairSet = { origin: 0, records: 0, seconds: new Uint16Array(0) };

@@ -3,29 +3,34 @@
 import { BigEndianData } from '../../Data/BigEndianData';
 import { checked, divide } from '../../Data/Integer';
 import { invalid, unsupported } from '../../Api/FontError';
+import { CoverageMap, ClassMap } from './CoverageMap';
 
-// Per immutable layout table, bounded independently of input text diversity.
-// Only successful reads are retained; callers still charge every lookup step.
-const readCacheCapacity = 2048;
-
+// Coverage and class reads through maps built once per table (CoverageMap, ClassMap), so
+// retained memory is bounded by the font's tables, not by the text. A table no map can
+// answer exactly is read directly each time. Reads charge nothing; callers charge every
+// lookup step.
 export class LayoutReadCache {
-  private readonly coverages = new Map<number, number>();
-  private readonly classes = new Map<number, number>();
+  private readonly coverages = new Map<number, CoverageMap | null>();
+  private readonly classes = new Map<number, ClassMap | null>();
+
+  // The coverage map for the table at offset, or null when the table must be read directly.
+  coverageMap(data: BigEndianData, offset: number): CoverageMap | null {
+    let map = this.coverages.get(offset);
+    if (map === undefined) { map = CoverageMap.tryBuild(data, offset); this.coverages.set(offset, map); }
+    return map;
+  }
   coverage(data: BigEndianData, offset: number, glyph: number): number {
-    const key = offset * 65536 + glyph;
-    let value = this.coverages.get(key);
-    if (value !== undefined) return value;
-    value = OpenTypeLayout.coverage(data, offset, glyph);
-    if (this.coverages.size < readCacheCapacity) this.coverages.set(key, value);
-    return value;
+    const map = this.coverageMap(data, offset);
+    return map !== null ? map.index(glyph) : OpenTypeLayout.coverage(data, offset, glyph);
+  }
+  classMap(data: BigEndianData, offset: number): ClassMap | null {
+    let map = this.classes.get(offset);
+    if (map === undefined) { map = ClassMap.tryBuild(data, offset); this.classes.set(offset, map); }
+    return map;
   }
   class(data: BigEndianData, offset: number, glyph: number): number {
-    const key = offset * 65536 + glyph;
-    let value = this.classes.get(key);
-    if (value !== undefined) return value;
-    value = OpenTypeLayout.class(data, offset, glyph);
-    if (this.classes.size < readCacheCapacity) this.classes.set(key, value);
-    return value;
+    const map = this.classMap(data, offset);
+    return map !== null ? map.class(glyph) : OpenTypeLayout.class(data, offset, glyph);
   }
 }
 

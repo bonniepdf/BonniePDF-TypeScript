@@ -17,6 +17,7 @@ export class FontFace {
   readonly limits: ShapingLimits; readonly font: TrueTypeFont; readonly name: string;
   readonly substitution: GlyphSubstitution; readonly positioning: GlyphPositioning; readonly bitmaps: BitmapStrikes | null;
   readonly #colours: ColourLayers | null; readonly #programs = new Map<ShapeOptions, ShapingProgram>();
+  readonly #programsByValue = new Map<string, ShapingProgram>();
   #defaultProgram: ShapingProgram | null = null;
   constructor(bytes: Uint8Array, options: FaceOptions = {}) {
     this.limits = new ShapingLimits(options.limits);
@@ -32,10 +33,20 @@ export class FontFace {
   }
   program(options?: ShapeOptions): ShapingProgram {
     if (!options) return this.#defaultProgram ??= new ShapingProgram(this.substitution, this.positioning);
+    if (options.limits === null) {
+      // Callers build a fresh options instance per call (feature overrides, bidi
+      // items), so equal options share a program by value rather than identity.
+      const key = programKey(options);
+      let shared = this.#programsByValue.get(key); if (shared) return shared;
+      shared = this.#buildProgram(options, this.limits);
+      if (this.#programsByValue.size < 16) this.#programsByValue.set(key, shared); return shared;
+    }
     let program = this.#programs.get(options); if (program) return program;
-    const limits = options.limits ?? this.limits;
-    program = new ShapingProgram(new GlyphSubstitution(this.getTableData('GSUB'), this.glyphCount, this.getTableData('GDEF'), limits, options), new GlyphPositioning(this.getTableData('GPOS'), this.getTableData('GDEF'), limits, options));
+    program = this.#buildProgram(options, options.limits);
     if (this.#programs.size < 16) this.#programs.set(options, program); return program;
+  }
+  #buildProgram(options: ShapeOptions, limits: ShapingLimits): ShapingProgram {
+    return new ShapingProgram(new GlyphSubstitution(this.getTableData('GSUB'), this.glyphCount, this.getTableData('GDEF'), limits, options), new GlyphPositioning(this.getTableData('GPOS'), this.getTableData('GDEF'), limits, options));
   }
   get metrics() { return this.font.metrics; } get names() { return this.font.names; }
   get faceCount() { return this.font.faceCount; } get faceIndex() { return this.font.faceIndex; }
@@ -59,4 +70,10 @@ export class FontFace {
   bitmapGlyph(glyph: number, ppem: number) {
     requireInteger(glyph, 'glyph', 0, this.glyphCount - 1); requireInteger(ppem, 'ppem', 1, 65535); return this.bitmaps?.read(glyph, ppem) ?? null;
   }
+}
+// Script and language are four-character tags, so plain concatenation is unambiguous.
+function programKey(options: ShapeOptions): string {
+  let key = options.script + options.language + options.direction;
+  for (const feature of options.features) key += ';' + feature.tag + feature.value + ',' + feature.start + ',' + feature.end;
+  return key;
 }

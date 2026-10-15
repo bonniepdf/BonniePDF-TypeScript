@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-typescript",
   "source": {
-    "commit": "80ff84a7691334f14d4a32440fdf436322b63e00",
+    "commit": "5cff387d0b0f19ca68a17634230b167778f76f39",
     "dirty": false
   },
   "files": {
@@ -23,7 +23,7 @@
     "Fonts/Colour/ColourLayerData.ts": "4acec685eb43e43a9add4066c463128baeddbb46c4e4b8e98dea8e685e6778a1",
     "Fonts/Colour/ColourLayers.ts": "a583532a3c30a4abcefda1e34c613a18b6b9e9f946eeb1da55b563ca130dcdef",
     "Fonts/Colour/PaletteColour.ts": "82459936ebbfe5324138a8fda6678df8ee37c3bbd6e4ed9ca126525f64706238",
-    "Fonts/FontFace.ts": "b605c1686a38824c147b50ea03328da11f171d87d0359245f79718267fdda10d",
+    "Fonts/FontFace.ts": "68f96db53ff13a19697a9ba2f337e8b3c1afed2cbff8a742480663c94faca34b",
     "Fonts/Outlines/CffFont.ts": "05750893da61d0f57ecd71df60bef8ee0e170a059e2c561229e106d820ebc99e",
     "Fonts/Outlines/DecodedOutline.ts": "3ef4b14f39f02a031b5ca0b312ce74ffba2bfa883c7f25e2e2d1245f893caab5",
     "Fonts/Outlines/FontPoint.ts": "d3c001a2f79f29efc5878c0934842581f5edd12eee2569e1a7238259930ee90e",

@@ -10,6 +10,7 @@ export class GlyphUsageTracker {
   private readonly sources = new Map<number, string>();
   private readonly cidGlyphs = new Map<number, number>();
   private readonly sourceCids = new Map<string, number>();
+  private readonly singleCharacterCids = new Map<number, number>();
   private nextCid = 0;
   /** @internal Source text for each painted PDF character code. */
   public getGlyphSources(): ReadonlyMap<number, string> {
@@ -26,6 +27,21 @@ export class GlyphUsageTracker {
       const first = glyphs[i];
       let end = i + 1;
       while (end < glyphs.length && glyphs[end].cluster === first.cluster) end++;
+      if (end === i + 1 && first.sourceLength === 1 && first.cluster < text.length) {
+        // One glyph for one UTF-16 unit, the common case: reuse its code without
+        // building a source string or a string key.
+        this.usedGlyphs.add(first.id);
+        const unit = text.charCodeAt(first.cluster);
+        const key = first.id * 65536 + unit;
+        let code = this.singleCharacterCids.get(key);
+        if (code === undefined) {
+          code = this.registerSource(first.id, text[first.cluster]);
+          this.singleCharacterCids.set(key, code);
+        }
+        codes.push(code);
+        i = end;
+        continue;
+      }
       const clusterSource = text.slice(first.cluster, first.cluster + first.sourceLength);
       const chars = end === i + 1 ? null : Array.from(clusterSource);
       for (let j = i; j < end; j++) {
@@ -33,21 +49,24 @@ export class GlyphUsageTracker {
         this.usedGlyphs.add(g.id);
         const source =
           chars === null ? clusterSource : j === end - 1 ? chars.slice(j - i).join('') : (chars[j - i] ?? '');
-        const key = g.id + ':' + source;
-        let code = this.sourceCids.get(key);
-        if (code === undefined) {
-          code = this.sources.has(g.id) ? Math.max(this.nextCid, this.font.numberOfGlyphs) : g.id;
-          if (code > 65535) throw new RangeError('PDF font character-code capacity exceeded.');
-          if (code >= this.font.numberOfGlyphs) this.nextCid = code + 1;
-          this.sources.set(code, source);
-          this.sourceCids.set(key, code);
-          this.cidGlyphs.set(code, g.id);
-        }
-        codes.push(code);
+        codes.push(this.registerSource(g.id, source));
       }
       i = end;
     }
     return codes;
+  }
+  private registerSource(id: number, source: string): number {
+    const key = id + ':' + source;
+    let code = this.sourceCids.get(key);
+    if (code === undefined) {
+      code = this.sources.has(id) ? Math.max(this.nextCid, this.font.numberOfGlyphs) : id;
+      if (code > 65535) throw new RangeError('PDF font character-code capacity exceeded.');
+      if (code >= this.font.numberOfGlyphs) this.nextCid = code + 1;
+      this.sources.set(code, source);
+      this.sourceCids.set(key, code);
+      this.cidGlyphs.set(code, id);
+    }
+    return code;
   }
   private readonly font: TtfFont;
   private readonly usedCodepoints = new Set<number>();

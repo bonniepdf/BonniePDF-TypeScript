@@ -480,6 +480,14 @@ export class RenderContext implements RenderContextContract {
     // new page reopen the same roles with fresh MCIDs. All MCIDs
     // (both pages) attach to the same structure elements because the
     // StructureTreeBuilder stack is untouched.
+    //
+    // /Artifact regions are handled the same way. They are innermost (nothing
+    // inside an artifact is tagged), so they close first and reopen last; the
+    // new page's canvas would otherwise not know it is inside one, and would
+    // tag decorative content as real content.
+    const reopenArtifacts = this.canvas instanceof PdfCanvas ? this.canvas.openArtifactDepth : 0;
+    for (let i = 0; i < reopenArtifacts; i++) this.canvas.endArtifact();
+
     let reopenRoles: string[] | undefined;
     if (this.tagging && this.tagging.openMarkedContentCount > 0) {
       reopenRoles = this.tagging.snapshotOpenRolesBottomUp();
@@ -528,6 +536,7 @@ export class RenderContext implements RenderContextContract {
         }
       }
     }
+    for (let i = 0; i < reopenArtifacts; i++) this.canvas.beginArtifact();
 
     if (this.onPageCreated) {
       this.onPageCreated(this.currentPageIndex);

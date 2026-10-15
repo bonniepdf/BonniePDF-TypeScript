@@ -349,7 +349,7 @@ export class PdfResourceRegistry {
       let font: TtfFont | null = null;
       let tracker: GlyphUsageTracker | null = null;
       try {
-        font = TtfFont.loadFromBytes(bytes);
+        font = TtfFont.loadFromBytesCached(bytes);
         tracker = new GlyphUsageTracker(font);
         this.registerMetricFontInstance(key, font);
       } catch (err) {

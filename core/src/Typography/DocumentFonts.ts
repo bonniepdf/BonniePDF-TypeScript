@@ -85,6 +85,7 @@ function detectItalic(font: TtfFont): boolean {
 export class DocumentFonts {
   private readonly serial = nextDocumentSerial++;
   private readonly byIdentity = new Map<string, DocumentFontFace>();
+  private readonly resolved = new Map<string, DocumentFontFace | undefined>();
 
   /** The faces, in registration order. */
   public get faces(): readonly DocumentFontFace[] {
@@ -110,7 +111,9 @@ export class DocumentFonts {
    * ```
    */
   public add(bytes: Uint8Array, options: DocumentFontOptions = {}): DocumentFontFace {
-    const font = TtfFont.loadFromBytes(bytes);
+    // The same parse the PDF writer uses for these bytes, so measuring and writing share one
+    // font and its shaping cache, and a service that keeps its font arrays parses once.
+    const font = TtfFont.loadFromBytesCached(bytes);
     const family = (options.family ?? font.fontFamily).trim();
     if (!family) throw new Error('A document font needs a family name.');
     const weight = options.weight === undefined ? detectWeight(font) : toFontWeight(options.weight);
@@ -130,6 +133,7 @@ export class DocumentFonts {
     };
     // A Map keeps the original position when a key is set again.
     this.byIdentity.set(identity, face);
+    this.resolved.clear();
     return face;
   }
 
@@ -138,6 +142,15 @@ export class DocumentFonts {
    * family. Style is matched first, then weight by the CSS font-matching order.
    */
   public resolve(family: string, weight: number, italic: boolean): DocumentFontFace | undefined {
+    // Layout resolves the same few families for every line it measures and draws.
+    const memoKey = `${italic ? 'i' : 'n'}${weight}:${family}`;
+    if (this.resolved.has(memoKey)) return this.resolved.get(memoKey);
+    const face = this.resolveUncached(family, weight, italic);
+    this.resolved.set(memoKey, face);
+    return face;
+  }
+
+  private resolveUncached(family: string, weight: number, italic: boolean): DocumentFontFace | undefined {
     const key = familyKey(family);
     const candidates = this.faces.filter(f => familyKey(f.family) === key);
     if (candidates.length === 0) return undefined;

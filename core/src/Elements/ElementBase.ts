@@ -3,6 +3,7 @@ import { IMargin } from './IMargin';
 import { IElement, RenderContext } from './IElement';
 import { Thickness } from '../Core/Thickness';
 import { toThickness, type ThicknessInput } from '../Normalize/toThickness';
+import { SharedElementOptions } from './SharedOptions';
 
 /**
  * Base class for PDF elements that provides common functionality for margin handling,
@@ -14,14 +15,16 @@ export abstract class ElementBase implements IElement, IMargin {
    * The starting Y position when rendering begins (used for Y-position tracking)
    */
   protected startingY: number = 0;
-  private _contentDirection?: ContentDirection;
+  // Margin, capture name, direction and break permission, shared with every element that has
+  // the same values (see SharedOptions). Most elements keep the defaults.
+  private _options: SharedElementOptions = SharedElementOptions.default;
   private _inheritedContentDirection = ContentDirection.LeftToRight;
   /** Inline direction override. Undefined inherits the enclosing direction. */
   public get contentDirection(): ContentDirection | undefined {
-    return this._contentDirection;
+    return this._options.contentDirection;
   }
   public set contentDirection(value: ContentDirectionInput | undefined) {
-    this._contentDirection = value === undefined ? undefined : toContentDirection(value);
+    this._options = this._options.with('contentDirection', value === undefined ? undefined : toContentDirection(value));
   }
   /** @internal */
   public inheritContentDirection(value: ContentDirection): void {
@@ -29,14 +32,12 @@ export abstract class ElementBase implements IElement, IMargin {
   }
   /** @internal */
   public get effectiveContentDirection(): ContentDirection {
-    return this._contentDirection ?? this._inheritedContentDirection;
+    return this._options.contentDirection ?? this._inheritedContentDirection;
   }
   /** @internal */
   public get isRightToLeft(): boolean {
     return this.effectiveContentDirection === ContentDirection.RightToLeft;
   }
-
-  private _margin: Thickness = new Thickness(0);
 
   /**
    * Margin around this element.
@@ -46,10 +47,10 @@ export abstract class ElementBase implements IElement, IMargin {
    * see `the specification` §4A.3. Omitted sides are zero.
    */
   public get margin(): Thickness {
-    return this._margin;
+    return this._options.margin;
   }
   public set margin(value: ThicknessInput) {
-    this._margin = toThickness(value);
+    this._options = this._options.with('margin', toThickness(value));
   }
 
   /**
@@ -58,7 +59,12 @@ export abstract class ElementBase implements IElement, IMargin {
    * rather than split. If it doesn't fit on a fresh page either, it renders anyway.
    * Default is true.
    */
-  public breakAllowed: boolean = true;
+  public get breakAllowed(): boolean {
+    return this._options.breakAllowed;
+  }
+  public set breakAllowed(value: boolean) {
+    this._options = this._options.with('breakAllowed', value);
+  }
 
   /**
    * Gets the preferred width of this element, if any.
@@ -136,7 +142,12 @@ export abstract class ElementBase implements IElement, IMargin {
    * Optional author-supplied name/key surfaced in the layout snapshot. Unset by
    * default; a future capture API can populate it.
    */
-  public captureName?: string;
+  public get captureName(): string | undefined {
+    return this._options.captureName;
+  }
+  public set captureName(value: string | undefined) {
+    this._options = this._options.with('captureName', value);
+  }
 
   /**
    * Gets the content width after accounting for margins

@@ -197,10 +197,10 @@ describe('this feature advanced typography', () => {
       t.firstLineIndent = 24;
       // Force layout, then inspect the private indent metadata.
       const lines = t['getOrComputeLines'](400) as string[];
-      const indents = t['cachedIndents'] as number[];
+      const indentOf = (i: number) => t['indentOf'](i) as number;
       // Both paragraphs are single lines here, so both first lines are indented.
-      expect(indents[0]).toBe(24);
-      expect(indents[lines.length - 1]).toBe(24);
+      expect(indentOf(0)).toBe(24);
+      expect(indentOf(lines.length - 1)).toBe(24);
     });
 
     it('is byte-neutral to height when both controls are zero', () => {

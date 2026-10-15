@@ -1,4 +1,5 @@
 import { TextFlow } from '../../Typography/TextFlow';
+import { SharedTextOptions } from '../SharedOptions';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
@@ -41,22 +42,45 @@ export abstract class TextElementBase extends ElementBase {
 
   // â”€â”€ Font properties (backing fields + explicit-set tracking) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  // Created only for elements that override features: a full TextStyle on every
-  // text element dominated the retained tree of large documents.
-  private _featureStyle: TextStyle | undefined = undefined;
+  // The text style and text-block options, shared with every element that has the same values
+  // (see SharedOptions).
+  /** @internal */
+  protected _text: SharedTextOptions = SharedTextOptions.default;
+
   /** OpenType feature overrides for embedded text, such as { kern: 0, liga: 0 }. */
   public get fontFeatures(): Readonly<Record<string, number>> | undefined {
-    return this._featureStyle?.fontFeatures;
+    return this._text.fontFeatures;
   }
   public set fontFeatures(value: Readonly<Record<string, number>> | undefined) {
-    if (value == null) this._featureStyle = undefined;
-    else (this._featureStyle ??= new TextStyle()).fontFeatures = value;
+    // TextStyle validates the features and takes a frozen copy.
+    const features = value == null ? undefined : Object.assign(new TextStyle(), { fontFeatures: value }).fontFeatures;
+    this._text = this._text.with('fontFeatures', features);
   }
-  private _fontFamily?: string;
-  private _fontWeight: FontWeight = FontWeight.Normal;
-  private _italic = false;
+  private get _fontFamily(): string | undefined {
+    return this._text.fontFamily;
+  }
+  private set _fontFamily(value: string | undefined) {
+    this._text = this._text.with('fontFamily', value);
+  }
+  private get _fontWeight(): FontWeight {
+    return this._text.fontWeight;
+  }
+  private set _fontWeight(value: FontWeight) {
+    this._text = this._text.with('fontWeight', value);
+  }
+  private get _italic(): boolean {
+    return this._text.italic;
+  }
+  private set _italic(value: boolean) {
+    this._text = this._text.with('italic', value);
+  }
 
-  private _fontName: string = StandardFonts.Helvetica;
+  private get _fontName(): string {
+    return this._text.fontName;
+  }
+  private set _fontName(value: string) {
+    this._text = this._text.with('fontName', value);
+  }
 
   /**
    * The TTF/OTF path or PDF standard font name for rendering.
@@ -78,7 +102,12 @@ export abstract class TextElementBase extends ElementBase {
   }
 
   /** True once user code explicitly sets any font-related property. */
-  private _fontExplicit = false;
+  private get _fontExplicit(): boolean {
+    return this._text.fontExplicit;
+  }
+  private set _fontExplicit(value: boolean) {
+    this._text = this._text.with('fontExplicit', value);
+  }
 
   constructor() {
     super();
@@ -86,10 +115,30 @@ export abstract class TextElementBase extends ElementBase {
 
   // â”€â”€ Nullable backing fields for cascade-aware properties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  private _fontSize?: number;
-  private _textColor?: Color;
-  private _lineHeight?: number;
-  private _textDecoration?: TextDecoration;
+  private get _fontSize(): number | undefined {
+    return this._text.fontSize;
+  }
+  private set _fontSize(value: number | undefined) {
+    this._text = this._text.with('fontSize', value);
+  }
+  private get _textColor(): Color | undefined {
+    return this._text.textColor;
+  }
+  private set _textColor(value: Color | undefined) {
+    this._text = this._text.with('textColor', value);
+  }
+  private get _lineHeight(): number | undefined {
+    return this._text.lineHeight;
+  }
+  private set _lineHeight(value: number | undefined) {
+    this._text = this._text.with('lineHeight', value);
+  }
+  private get _textDecoration(): TextDecoration | undefined {
+    return this._text.textDecoration;
+  }
+  private set _textDecoration(value: TextDecoration | undefined) {
+    this._text = this._text.with('textDecoration', value);
+  }
 
   /**
    * Font size for text rendering. Defaults to 12 if not set.
@@ -124,7 +173,12 @@ export abstract class TextElementBase extends ElementBase {
     this._textDecoration = toTextDecoration(value);
   }
 
-  private _decorationColor?: Color;
+  private get _decorationColor(): Color | undefined {
+    return this._text.decorationColor;
+  }
+  private set _decorationColor(value: Color | undefined) {
+    this._text = this._text.with('decorationColor', value);
+  }
 
   /**
    * Colour of the decoration lines. Undefined = use {@link color}, the default.
@@ -136,7 +190,12 @@ export abstract class TextElementBase extends ElementBase {
     this._decorationColor = value === undefined ? undefined : toColor(value);
   }
 
-  private _decorationThickness?: number;
+  private get _decorationThickness(): number | undefined {
+    return this._text.decorationThickness;
+  }
+  private set _decorationThickness(value: number | undefined) {
+    this._text = this._text.with('decorationThickness', value);
+  }
 
   /**
    * Thickness of the decoration lines in points. Null = the default derived from
@@ -151,7 +210,12 @@ export abstract class TextElementBase extends ElementBase {
     this._decorationThickness = toOptionalLength(value);
   }
 
-  private _letterSpacing = 0;
+  private get _letterSpacing(): number {
+    return this._text.letterSpacing;
+  }
+  private set _letterSpacing(value: number) {
+    this._text = this._text.with('letterSpacing', value);
+  }
 
   /**
    * Letter spacing (tracking) in points, added after every glyph.
@@ -167,7 +231,12 @@ export abstract class TextElementBase extends ElementBase {
     this._letterSpacing = toLength(value);
   }
 
-  private _wordSpacing = 0;
+  private get _wordSpacing(): number {
+    return this._text.wordSpacing;
+  }
+  private set _wordSpacing(value: number) {
+    this._text = this._text.with('wordSpacing', value);
+  }
 
   /**
    * Word spacing in points, added after every space. Default 0.
@@ -181,7 +250,12 @@ export abstract class TextElementBase extends ElementBase {
     this._wordSpacing = toLength(value);
   }
 
-  private _decorationStyle: DecorationStyle = DecorationStyle.Solid;
+  private get _decorationStyle(): DecorationStyle {
+    return this._text.decorationStyle;
+  }
+  private set _decorationStyle(value: DecorationStyle) {
+    this._text = this._text.with('decorationStyle', value);
+  }
 
   /**
    * Line style for decorations (solid/wavy/dashed/dotted). Default solid.

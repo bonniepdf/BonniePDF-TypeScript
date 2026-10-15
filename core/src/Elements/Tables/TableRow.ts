@@ -1,4 +1,5 @@
 import { IElement, RenderContext } from '../IElement';
+import { SharedCellOptions } from '../SharedOptions';
 import { applyOptions } from '../../Core/applyOptions';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
 import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
@@ -48,8 +49,16 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /** The cells in this row */
   public cells!: TableCell[];
 
+  // Text colour, padding, minimum height and background, shared with every row that has the same values.
+  private _cell: SharedCellOptions = SharedCellOptions.default;
+
   /** TextBlock color for this row (applied to cells without their own text color) */
-  private _textColor?: Color;
+  private get _textColor(): Color | undefined {
+    return this._cell.color;
+  }
+  private set _textColor(value: Color | undefined) {
+    this._cell = this._cell.with('color', value);
+  }
 
   /** Row text colour. Accepts a palette token or hex. */
   public get color(): Color | undefined {
@@ -60,7 +69,12 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   }
 
   /** Custom padding for this row (applied to cells without their own padding) */
-  private _padding?: Thickness;
+  private get _padding(): Thickness | undefined {
+    return this._cell.padding;
+  }
+  private set _padding(value: Thickness | undefined) {
+    this._cell = this._cell.with('padding', value);
+  }
 
   /** Row padding. Undefined falls back to the table's `cellPadding`. */
   public get padding(): Thickness | undefined {
@@ -76,7 +90,12 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   /** Whether this is a footer row */
   public isFooter = false;
 
-  private _minHeight?: number;
+  private get _minHeight(): number | undefined {
+    return this._cell.minHeight;
+  }
+  private set _minHeight(value: number | undefined) {
+    this._cell = this._cell.with('minHeight', value);
+  }
 
   /** Minimum height for this row (optional)
    *
@@ -90,7 +109,12 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
   }
 
   /** Background color for this row (applied to cells without their own background) */
-  private _backgroundColor?: Color;
+  private get _backgroundColor(): Color | undefined {
+    return this._cell.backgroundColor;
+  }
+  private set _backgroundColor(value: Color | undefined) {
+    this._cell = this._cell.with('backgroundColor', value);
+  }
 
   /** Row fill. Accepts a palette token or hex. */
   public get backgroundColor(): Color | undefined {

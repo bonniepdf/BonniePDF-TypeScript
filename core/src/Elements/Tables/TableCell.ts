@@ -1,4 +1,5 @@
 import { BorderedElementBase } from '../Layout/BorderedElementBase';
+import { SharedCellOptions } from '../SharedOptions';
 import {
   BORDERED_ELEMENT_OPTION_KEYS,
   applyBorderedElementOptions,
@@ -46,8 +47,16 @@ export class TableCell extends BorderedElementBase implements IRoleProvider {
     applyBorderedElementOptions(this, options);
   }
 
+  // Text colour and padding, shared with every cell or row that has the same values.
+  private _cell: SharedCellOptions = SharedCellOptions.default;
+
   /** TextBlock color for this cell */
-  private _textColor?: Color;
+  private get _textColor(): Color | undefined {
+    return this._cell.color;
+  }
+  private set _textColor(value: Color | undefined) {
+    this._cell = this._cell.with('color', value);
+  }
 
   /** Cell text colour. Accepts a palette token or hex. */
   public get color(): Color | undefined {
@@ -58,7 +67,12 @@ export class TableCell extends BorderedElementBase implements IRoleProvider {
   }
 
   /** Custom padding for this cell (overrides table default if set) */
-  private _padding?: Thickness;
+  private get _padding(): Thickness | undefined {
+    return this._cell.padding;
+  }
+  private set _padding(value: Thickness | undefined) {
+    this._cell = this._cell.with('padding', value);
+  }
 
   /** Cell padding. Undefined falls back to the row, then the table's `cellPadding`. */
   public get padding(): Thickness | undefined {

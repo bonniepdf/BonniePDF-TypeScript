@@ -7,34 +7,37 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 This file is maintained by hand. Add an entry under the current version with
 each change to `core/`.
 
-## Unreleased
+## 2026.10.15
 
-- Faster shaping of embedded fonts. Contextual rules that cannot start at a glyph are charged without being matched, coverage and class tables are read through maps instead of binary searches, and kerning pairs are read from decoded arrays; glyphs, positions and shaping limits are unchanged. Shaping a short line in Lato takes about a third of the time and in Source Sans 3 about a seventh. A 100,000-line table takes 4.2 s instead of 6.0 s and 2,000 paragraphs of 60 words 2.9 s instead of 6.0 s. Output is unchanged.
-- Lower memory for documents with many elements: elements styled alike now share one set of options (text style, alignment, padding, border, margin) instead of each holding its own copy, and a single-line text block keeps its one line rather than an array of it. A changed option gives that element a different shared set, so no change reaches another element; values are kept exactly as set. A 100,000-line table holds 56 MB after generation instead of 128 MB and builds about 30% faster; a 1,000,000-line document peaks at 1.7 GB instead of 3.2 GB and takes 72 s instead of 88 s. Output is unchanged.
-- Faster kerning in fonts whose kerning is split across many subtables (Lato, Source Sans and others): each glyph is checked only against the subtables that cover it. Shaping limits and output are unchanged.
-- Much faster wrapping of paragraphs in embedded fonts: a paragraph is shaped once, and each candidate line's width is read from that shaping wherever both of its ends are safe to break (otherwise the line is measured on its own, as before). Each finished line's glyphs are handed to drawing, so lines are not shaped again. 2,000 paragraphs of 60 words take 8.7 s instead of 34 s. Line breaks and output are unchanged; a test checks the widths and glyphs against measuring each line on its own across the bundled fonts.
-- Lower memory for long documents without page chrome (headers, footers, watermark, page colour or background): each page is compressed as soon as layout moves past it instead of being held as text until writing, and a layout dry run (for a table of contents) no longer keeps its pages. Output is unchanged.
-- Less allocation and faster layout of long documents: shaping reuses its per-glyph working records between calls, the pre-render scan for fonts, images and SVG elements walks the document once instead of three times without a closure per element, table rows without layout capture share no-op callbacks, text emission no longer allocates a closure per run, measuring a string no longer allocates a reducer, text without line breaks is no longer split and copied, and the shaping cache no longer rebuilds its key prefix or copies glyph arrays. A 100,000-line document allocates about half as much and takes 11–16% less time, with about a quarter less time in garbage collection; a 1,000,000-line document takes about 21% less time. Output is unchanged.
-- Faster shaping of embedded fonts: each OpenType lookup now skips glyphs it cannot act on, while charging exactly the same work against the shaping limits. Shaping a short Latin line takes about a third less time. Output and limit behaviour are unchanged.
-- Faster text with feature overrides (`fontFeatures`) and right-to-left or mixed-direction text: shaping no longer rebuilds the font's layout program for every line. A 5,000-line document using `tnum` takes about a third less time and allocates about 84% less. Output is unchanged.
-- Lower memory and allocation for large documents, with unchanged output: text elements store a font-feature style only when features are overridden, paragraph indent/spacing metadata only when those controls are used, repeated single characters reuse their PDF character codes, and integer operands are formatted without `toFixed`. A 100,000-line document holds about 23% less live heap after generation.
-- `doc.fonts.add` reuses the parse of a byte array it has seen before, and the PDF writer shares it, so a font is no longer parsed twice per document; a service that keeps its font bytes in memory parses each font once. Family resolution is memoised per document.
-- Faster pagination of large single tables: column widths are computed once per render instead of on every page, which copied and scanned every row each time. Output is unchanged.
-- Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
+### Performance Improvements
+
+Text layout and document generation are faster and use less memory. Output is unchanged by all of these.
+
+- **Faster text shaping for embedded fonts.** Each OpenType lookup skips glyphs it cannot act on, contextual rules that cannot start at a glyph are charged without being matched, coverage and class tables are read through maps, and kerning pairs are read from decoded arrays and checked only against the subtables that cover the glyph. Shaping no longer rebuilds a font's layout program for every line with feature overrides (`fontFeatures`) or right-to-left text. Shaping a short line in Lato takes about a third of the time and in Source Sans 3 about a seventh; a 100,000-line table takes 4.2 s instead of 6.0 s, 2,000 paragraphs of 60 words 2.9 s instead of 6.0 s, and a 5,000-line document using `tnum` takes about a third less time. Glyphs, positions and shaping limits are unchanged.
+- **Much faster paragraph wrapping.** A paragraph is shaped once and each candidate line's width is read from that shaping wherever both ends are safe to break; finished lines are handed to drawing without being shaped again. 2,000 paragraphs of 60 words take 8.7 s instead of 34 s.
+- **Faster large tables.** Column widths are computed once per render instead of on every page, which previously copied and scanned every row each time.
+- **Lower memory for large documents.** Elements styled alike share one set of options, single-line text blocks keep their one line rather than an array of it, and a font-feature style, paragraph indent/spacing metadata and repeated single-character codes are stored only when needed. Pages of documents without page chrome are compressed as soon as layout moves past them, and a layout dry run no longer keeps its pages. A 100,000-line table holds 56 MB after generation instead of 128 MB and builds about 30% faster; a 1,000,000-line document peaks at 1.7 GB instead of 3.2 GB and takes 72 s instead of 88 s.
+- **Less allocation and faster layout.** Shaping reuses its per-glyph records, the pre-render scan walks the document once, table rows and text emission no longer allocate closures per element or run, and integer operands are formatted without `toFixed`. A 100,000-line document allocates about half as much and takes 11-16% less time, with about a quarter less time in garbage collection; a 1,000,000-line document takes about 21% less time. A 5,000-line document using `tnum` allocates about 84% less.
+- **Fonts are parsed once.** `doc.fonts.add` reuses the parse of a byte array it has seen before and the PDF writer shares it, so a service that keeps its font bytes in memory parses each font once.
+- **Faster image resampling.** Fully opaque RGBA images are resampled faster while preserving exact pixel values, the alpha plane and resolution settings.
+
+### Added
+
 - A top-level element that does not fit even on an empty page now reports a `render` warning (source `pagination`) in `doc.diagnostics` when it is skipped.
-- Tagged (PDF/UA) documents: a decorative region (`SemanticGroup` with the `Artifact` role) that spans pages stays an artifact on every page. Its continuation pages were left unmarked and their text tagged as paragraphs, and its first page was left with an unclosed marked-content sequence.
-
 - Add inherited content direction through `settings.contentDirection` and per-element overrides. Rows and table columns mirror visually while retaining source order; start/end alignment follows direction and left/right stays physical. Embedded Arabic and Hebrew TextBlock content uses bidi and script shaping, including wrapped paragraph context. Styled spans, font-fallback boundaries, lists and page-number tokens require further RTL integration.
-
 - Support static CFF 1 OpenType (`.otf`) fonts through existing font registration: shaping and measurement, cubic SVG outlines, and PDF embedding with source-preserving text extraction. Complete CFF programs retain original hints and subroutines; CFF subsetting, CFF2, `.otc` and WOFF are unsupported.
-
 - Add opt-in colour emoji with `emojiRendering: 'colour'`: COLRv0 vector layers and CBDT PNG artwork in PDF and SVG, preserving original Unicode sequences for extraction. `'outline'` remains the default; the existing Emojis & Unicode example stays monochrome. Use `generateBytesAsync()` for bitmap emoji.
 - Decode indexed PNG transparency, including packed 1/2/4-bit palette indices, partial alpha and omitted opaque entries.
 
-- Faster resampling of fully opaque RGBA images while preserving exact pixel values, the alpha plane and resolution settings.
+### Changed
 
 - Embedded Latin text now uses OpenType ligatures, GPOS kerning and accent positioning consistently in measurement, PDF and SVG. `fontFeatures` on text elements and TextStyle allows overrides such as `kern: 0` and `liga: 0`. Improved advances can change line and page breaks. Standard-14 text retains its existing behavior.
 - Font subsets retain substituted glyphs; cluster ToUnicode mappings and ActualText preserve ligatures and original accent spellings during extraction. SVG outlines substitutions to prevent viewer reshaping. Fallback prefers a whole combining cluster, and emergency wrapping and ellipsis preserve graphemes.
+
+### Fixed
+
+- Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
+- Tagged (PDF/UA) documents: a decorative region (`SemanticGroup` with the `Artifact` role) that spans pages stays an artifact on every page. Its continuation pages were left unmarked and their text tagged as paragraphs, and its first page was left with an unclosed marked-content sequence.
 
 ## 2026.10.0
 

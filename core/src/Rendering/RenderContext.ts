@@ -425,12 +425,15 @@ export class RenderContext implements RenderContextContract {
       this.resolveEmbeddedFont.bind(this),
       this.trackGlyphUsage.bind(this),
       this.registerAlphaGraphicsState.bind(this),
-      undefined,
+      // A positioned canvas resolves glyph fallback like the page's, so chart labels and
+      // canvas drawings get the same fallback fonts as body text (spec 16, glyph fallback).
+      this.resolveTextRuns.bind(this),
       undefined,
       this.registerShading.bind(this),
       this.resources.noteImagePlacement.bind(this.resources)
     );
     pdfCanvas.emojiRendering = () => this.emojiRendering;
+    pdfCanvas.wholeTextFontResolver = this.wholeTextFont;
     if (this.tagging) pdfCanvas.setTaggingContext(this.tagging);
     return pdfCanvas;
   }

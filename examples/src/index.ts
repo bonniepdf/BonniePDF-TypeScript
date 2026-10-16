@@ -33,6 +33,7 @@ import { generate as textDecorationsClasses } from './recipes/typography/text-de
 import { generate as customFonts } from './recipes/typography/custom-fonts';
 import { generate as customFontsClasses } from './recipes/typography/custom-fonts-classes';
 import { generate as colourEmojis } from './recipes/typography/colour-emojis';
+import { generate as internationalTypography } from './recipes/typography/international-typography';
 import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
 import { generate as emojisAndUnicodeClasses } from './recipes/typography/emojis-and-unicode-classes';
 import { generate as advancedTypography } from './recipes/typography/advanced-typography';
@@ -1555,6 +1556,29 @@ export const examples: ExampleDef[] = [
       'fonts/TwemojiMozilla-APACHE-2.0.txt',
     ],
     dotnetClass: 'ColourEmojiExample',
+    pdfUa1: true,
+  },
+  {
+    id: 'international-typography',
+    name: 'International Typography',
+    category: 'Typography',
+    description:
+      'OpenType kerning and ligatures compared on and off, Arabic and Hebrew set right to left, one table in two directions, and opt-in colour flag emoji. PDF/A-2b and PDF/UA-1.',
+    filename: 'international-typography.pdf',
+    generate: internationalTypography,
+    requiredAssets: [
+      'fonts/SourceSerif4-Regular.ttf',
+      'fonts/NotoNaskhArabic-Regular.ttf',
+      'fonts/NotoSerifHebrew-Regular.ttf',
+      'fonts/TwemojiMozilla.ttf',
+      'fonts/SourceSerif4-OFL.txt',
+      'fonts/NotoNaskhArabic-OFL.txt',
+      'fonts/NotoSerifHebrew-OFL.txt',
+      'fonts/TwemojiMozilla-LICENSE.md',
+      'fonts/TwemojiMozilla-CC-BY-4.0.txt',
+      'fonts/TwemojiMozilla-APACHE-2.0.txt',
+    ],
+    dotnetClass: 'InternationalTypographyExample',
     pdfUa1: true,
   },
   {

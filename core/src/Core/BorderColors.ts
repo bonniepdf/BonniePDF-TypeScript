@@ -12,17 +12,17 @@ export class BorderColors {
    */
   constructor(color: Color);
   /**
-   * Creates individual border colors for each side
+   * Creates individual border colors for each side. Passing all four arguments, even as `undefined`, names every
+   * side explicitly, so `new BorderColors(red, undefined, undefined, undefined)` colours only the left.
    */
   constructor(left?: Color, top?: Color, right?: Color, bottom?: Color);
-  constructor(leftOrColor?: Color, top?: Color, right?: Color, bottom?: Color) {
-    if (top === undefined && right === undefined && bottom === undefined) {
-      this.left = this.top = this.right = this.bottom = leftOrColor;
+  constructor(...sides: [Color?, Color?, Color?, Color?]) {
+    // The overloads are told apart by how many arguments were passed, never by whether they are defined: a
+    // single-side colour is written as four arguments with three of them undefined.
+    if (sides.length === 1) {
+      this.left = this.top = this.right = this.bottom = sides[0];
     } else {
-      this.left = leftOrColor;
-      this.top = top;
-      this.right = right;
-      this.bottom = bottom;
+      [this.left, this.top, this.right, this.bottom] = sides;
     }
   }
 

@@ -36,6 +36,7 @@ Text layout and document generation are faster and use less memory. Output is un
 
 ### Fixed
 
+- `BorderColors` coloured every side when given one colour and three `undefined` sides, so `BorderColors.leftOnly(colour)`, `rightOnly`, `topOnly`, `bottomOnly` and a Document Definition that names one `borderColors` side painted all four borders, unlike .NET. The constructor now tells the single-colour form from the four-side form by the number of arguments.
 - Fix silent truncation of long documents: a top-level element stopped after 500 pages, dropping the rest of its content without an error. Elements now paginate until complete, as in .NET; an element that still cannot fit after two fresh pages is skipped, also as in .NET, instead of adding blank pages until the limit.
 - Tagged (PDF/UA) documents: a decorative region (`SemanticGroup` with the `Artifact` role) that spans pages stays an artifact on every page. Its continuation pages were left unmarked and their text tagged as paragraphs, and its first page was left with an unclosed marked-content sequence.
 

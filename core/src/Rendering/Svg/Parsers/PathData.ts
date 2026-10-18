@@ -94,7 +94,7 @@ export function arcToCubics(
   // two quarter turns. Without the tolerance the two implementations disagree
   // about whether that is 2 segments or 3: identical rendering, different sink
   // calls, and therefore different PDF content streams for the same input.
-  // Found by the showcase parity check on heroicons' paper-clip.
+  // Found by the examples parity check on heroicons' paper-clip.
   const quarterTurns = Math.abs(delta) / (Math.PI / 2);
   const count = Math.max(1, Math.ceil(quarterTurns - 1e-9));
   const step = delta / count;

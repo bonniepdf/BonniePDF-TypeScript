@@ -1,6 +1,6 @@
-import { buildDocument, samplePayslip } from '../src/showcases/hr/payslip';
-import { generate as generateClasses } from '../src/showcases/hr/payslip-classes';
-import { generate as generateOptions } from '../src/showcases/hr/payslip';
+import { buildDocument, samplePayslip } from '../src/exampless/hr/payslip';
+import { generate as generateClasses } from '../src/exampless/hr/payslip-classes';
+import { generate as generateOptions } from '../src/exampless/hr/payslip';
 
 // Generate both docs
 const doc1 = generateOptions();

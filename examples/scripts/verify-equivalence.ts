@@ -219,8 +219,8 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
-    canonical: 'chart-showcase',
-    variant: 'chart-showcase-classes',
+    canonical: 'chart-examples',
+    variant: 'chart-examples-classes',
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {

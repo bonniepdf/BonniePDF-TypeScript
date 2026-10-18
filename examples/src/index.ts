@@ -1,200 +1,200 @@
 import { Document } from '@bonniepdf/core';
 // ── Recipes (technical primitives) ──────────────────────────────────────────
-import { generate as firstPdf } from './recipes/basics/first-pdf';
-import { generate as simpleDocument } from './recipes/basics/simple-document';
-import { generate as simpleDocumentClasses } from './recipes/basics/simple-document-classes';
-import { generate as pdfCompliance } from './recipes/basics/pdf-compliance';
-import { generate as pdfComplianceClasses } from './recipes/basics/pdf-compliance-classes';
-import { generate as margins } from './recipes/basics/margins';
-import { generate as marginsClasses } from './recipes/basics/margins-classes';
-import { generate as pageSettings } from './recipes/basics/page-settings';
-import { generate as pageSettingsClasses } from './recipes/basics/page-settings-classes';
-import { generate as headersFooters } from './recipes/layout/headers-footers';
-import { generate as headersFootersClasses } from './recipes/layout/headers-footers-classes';
-import { generate as horizontalStacks } from './recipes/layout/horizontal-stacks';
-import { generate as horizontalStacksClasses } from './recipes/layout/horizontal-stacks-classes';
-import { generate as multiColumnLayouts } from './recipes/layout/multi-column-layouts';
-import { generate as multiColumnLayoutsClasses } from './recipes/layout/multi-column-layouts-classes';
+import { generate as firstPdf } from './code-recipes/basics/first-pdf';
+import { generate as simpleDocument } from './code-recipes/basics/simple-document';
+import { generate as simpleDocumentClasses } from './code-recipes/basics/simple-document-classes';
+import { generate as pdfCompliance } from './code-recipes/basics/pdf-compliance';
+import { generate as pdfComplianceClasses } from './code-recipes/basics/pdf-compliance-classes';
+import { generate as margins } from './code-recipes/basics/margins';
+import { generate as marginsClasses } from './code-recipes/basics/margins-classes';
+import { generate as pageSettings } from './code-recipes/basics/page-settings';
+import { generate as pageSettingsClasses } from './code-recipes/basics/page-settings-classes';
+import { generate as headersFooters } from './code-recipes/layout/headers-footers';
+import { generate as headersFootersClasses } from './code-recipes/layout/headers-footers-classes';
+import { generate as horizontalStacks } from './code-recipes/layout/horizontal-stacks';
+import { generate as horizontalStacksClasses } from './code-recipes/layout/horizontal-stacks-classes';
+import { generate as multiColumnLayouts } from './code-recipes/layout/multi-column-layouts';
+import { generate as multiColumnLayoutsClasses } from './code-recipes/layout/multi-column-layouts-classes';
 import { generate as textBlockOverflow } from './conformance/text-block-overflow';
-import { generate as verticalStackOverflow } from './recipes/layout/vertical-stack-overflow';
-import { generate as verticalStackOverflowClasses } from './recipes/layout/vertical-stack-overflow-classes';
-import { generate as tables } from './recipes/elements/tables';
-import { generate as tablesClasses } from './recipes/elements/tables-classes';
-import { generate as textAlignment } from './recipes/typography/text-alignment';
-import { generate as textAlignmentClasses } from './recipes/typography/text-alignment-classes';
-import { generate as embeddedFontMetrics } from './recipes/typography/embedded-font-metrics';
-import { generate as embeddedFontMetricsClasses } from './recipes/typography/embedded-font-metrics-classes';
-import { generate as bookPageLayout } from './recipes/typography/book-page-layout';
-import { generate as bookPageLayoutClasses } from './recipes/typography/book-page-layout-classes';
-import { generate as richTextStyles } from './recipes/typography/rich-text-styles';
-import { generate as richTextStylesClasses } from './recipes/typography/rich-text-styles-classes';
-import { generate as textDecorations } from './recipes/typography/text-decorations';
-import { generate as textDecorationsClasses } from './recipes/typography/text-decorations-classes';
-import { generate as customFonts } from './recipes/typography/custom-fonts';
-import { generate as customFontsClasses } from './recipes/typography/custom-fonts-classes';
-import { generate as colourEmojis } from './recipes/typography/colour-emojis';
-import { generate as internationalTypography } from './recipes/typography/international-typography';
-import { generate as emojisAndUnicode } from './recipes/typography/emojis-and-unicode';
-import { generate as emojisAndUnicodeClasses } from './recipes/typography/emojis-and-unicode-classes';
-import { generate as advancedTypography } from './recipes/typography/advanced-typography';
-import { generate as advancedTypographyClasses } from './recipes/typography/advanced-typography-classes';
-import { generate as dickensNovel } from './recipes/typography/dickens-novel';
-import { generate as dickensNovelClasses } from './recipes/typography/dickens-novel-classes';
-import { generate as lists } from './recipes/elements/lists';
-import { generate as listsClasses } from './recipes/elements/lists-classes';
-import { generate as hyperlinks } from './recipes/elements/hyperlinks';
-import { generate as hyperlinksClasses } from './recipes/elements/hyperlinks-classes';
-import { generate as crossReferences } from './recipes/elements/cross-references';
-import { generate as crossReferencesClasses } from './recipes/elements/cross-references-classes';
-import { generate as shapesAndBorders } from './recipes/elements/shapes-and-borders';
-import { generate as shapesAndBordersClasses } from './recipes/elements/shapes-and-borders-classes';
-import { generate as colorPalette } from './recipes/elements/color-palette';
-import { generate as colorPaletteClasses } from './recipes/elements/color-palette-classes';
-import { generate as qrCodes } from './recipes/elements/qr-codes';
-import { generate as qrCodesClasses } from './recipes/elements/qr-codes-classes';
-import { generate as barcodes } from './recipes/elements/barcodes';
-import { generate as barcodesClasses } from './recipes/elements/barcodes-classes';
-import { generate as dataMatrix } from './recipes/elements/data-matrix';
-import { generate as dataMatrixClasses } from './recipes/elements/data-matrix-classes';
-import { generate as flagsOfTheWorld } from './recipes/elements/flags-of-the-world';
-import { generate as flagsOfTheWorldClasses } from './recipes/elements/flags-of-the-world-classes';
-import { generate as images } from './recipes/elements/images';
-import { generate as imagesClasses } from './recipes/elements/images-classes';
-import { generate as chartShowcase } from './recipes/charting/chart-showcase';
-import { generate as chartShowcaseClasses } from './recipes/charting/chart-showcase-classes';
-import { generate as barChart } from './recipes/charting/bar-chart';
-import { generate as barChartClasses } from './recipes/charting/bar-chart-classes';
-import { generate as groupedBarChart } from './recipes/charting/grouped-bar-chart';
-import { generate as groupedBarChartClasses } from './recipes/charting/grouped-bar-chart-classes';
-import { generate as lineChart } from './recipes/charting/line-chart';
-import { generate as lineChartClasses } from './recipes/charting/line-chart-classes';
-import { generate as areaChart } from './recipes/charting/area-chart';
-import { generate as areaChartClasses } from './recipes/charting/area-chart-classes';
-import { generate as lollipopChart } from './recipes/charting/lollipop-chart';
-import { generate as lollipopChartClasses } from './recipes/charting/lollipop-chart-classes';
-import { generate as dotPlotChart } from './recipes/charting/dot-plot-chart';
-import { generate as dotPlotChartClasses } from './recipes/charting/dot-plot-chart-classes';
-import { generate as pieChart } from './recipes/charting/pie-chart';
-import { generate as pieChartClasses } from './recipes/charting/pie-chart-classes';
-import { generate as multiSeriesLineChart } from './recipes/charting/multi-series-line-chart';
-import { generate as multiSeriesLineChartClasses } from './recipes/charting/multi-series-line-chart-classes';
-import { generate as watermarking } from './recipes/security/watermarking';
-import { generate as watermarkingClasses } from './recipes/security/watermarking-classes';
-import { generate as encryption } from './recipes/security/encryption';
-import { generate as encryptionClasses } from './recipes/security/encryption-classes';
-import { generate as attachedData } from './recipes/security/attached-data';
-import { generate as attachedDataClasses } from './recipes/security/attached-data-classes';
-// ── Showcases (industry / vertical-market documents) ────────────────────────
-import { generate as businessInvoice } from './showcases/invoices/business-invoice';
-import { generate as businessInvoiceClasses } from './showcases/invoices/business-invoice-classes';
-import { generate as usSalesInvoice } from './showcases/invoices/us-sales-invoice';
-import { generate as usSalesInvoiceClasses } from './showcases/invoices/us-sales-invoice-classes';
-import { generate as ukVatInvoice } from './showcases/invoices/uk-vat-invoice';
-import { generate as ukVatInvoiceClasses } from './showcases/invoices/uk-vat-invoice-classes';
-import { generate as facturXInvoice } from './showcases/invoices/factur-x-invoice';
-import { generate as facturXInvoiceClasses } from './showcases/invoices/factur-x-invoice-classes';
-import { generate as indiaGstInvoice } from './showcases/invoices/india-gst-invoice';
-import { generate as indiaGstInvoiceClasses } from './showcases/invoices/india-gst-invoice-classes';
-import { generate as productPhotoGallery } from './showcases/catalogs/product-photo-gallery';
-import { generate as productPhotoGalleryClasses } from './showcases/catalogs/product-photo-gallery-classes';
-import { generate as financialDashboard } from './showcases/reports/financial-dashboard';
-import { generate as financialDashboardClasses } from './showcases/reports/financial-dashboard-classes';
-import { generate as complianceFindingsRegister } from './showcases/reports/compliance-findings-register';
-import { generate as complianceFindingsRegisterClasses } from './showcases/reports/compliance-findings-register-classes';
-import { generate as annualReport } from './showcases/reports/annual-report';
-import { generate as annualReportClasses } from './showcases/reports/annual-report-classes';
-import { generate as annualReportGradientCover } from './showcases/reports/annual-report-gradient-cover';
-import { generate as annualReportGradientCoverClasses } from './showcases/reports/annual-report-gradient-cover-classes';
-import { generate as annualReportMaskedCover } from './showcases/reports/annual-report-masked-cover';
-import { generate as annualReportMaskedCoverClasses } from './showcases/reports/annual-report-masked-cover-classes';
-import { generate as annualReportGeometricCover } from './showcases/reports/annual-report-geometric-cover';
-import { generate as annualReportGeometricCoverClasses } from './showcases/reports/annual-report-geometric-cover-classes';
-import { generate as eventTicket } from './showcases/operations/event-ticket';
-import { generate as eventTicketClasses } from './showcases/operations/event-ticket-classes';
-import { generate as patientSummary } from './showcases/healthcare/patient-summary';
-import { generate as patientSummaryClasses } from './showcases/healthcare/patient-summary-classes';
-import { generate as outpatientAppointmentLetter } from './showcases/healthcare/outpatient-appointment-letter';
-import { generate as outpatientAppointmentLetterClasses } from './showcases/healthcare/outpatient-appointment-letter-classes';
-// ── Vertical-market gallery follow-up (registrations + new showcases) ────────
-import { generate as saasInvoice } from './showcases/invoices/saas-invoice';
-import { generate as saasInvoiceClasses } from './showcases/invoices/saas-invoice-classes';
-import { generate as shippingLabel } from './showcases/operations/shipping-label';
-import { generate as shippingLabelClasses } from './showcases/operations/shipping-label-classes';
-import { generate as horizontalBarChart } from './recipes/charting/horizontal-bar-chart';
-import { generate as horizontalBarChartClasses } from './recipes/charting/horizontal-bar-chart-classes';
-import { generate as horizontalGroupedBarChart } from './recipes/charting/horizontal-grouped-bar-chart';
-import { generate as horizontalGroupedBarChartClasses } from './recipes/charting/horizontal-grouped-bar-chart-classes';
-import { generate as horizontalLollipopChart } from './recipes/charting/horizontal-lollipop-chart';
-import { generate as horizontalLollipopChartClasses } from './recipes/charting/horizontal-lollipop-chart-classes';
-import { generate as watermarkingConfidential } from './recipes/security/watermarking-confidential';
-import { generate as watermarkingConfidentialClasses } from './recipes/security/watermarking-confidential-classes';
-import { generate as edgeReceipt } from './showcases/edge/edge-receipt';
-import { generate as edgeReceiptClasses } from './showcases/edge/edge-receipt-classes';
-import { generate as publicLibraryMembershipLetter } from './showcases/community/public-library-membership-letter';
-import { generate as publicLibraryMembershipLetterClasses } from './showcases/community/public-library-membership-letter-classes';
-import { generate as grantAwardLetter } from './showcases/community/grant-award-letter';
-import { generate as grantAwardLetterClasses } from './showcases/community/grant-award-letter-classes';
-import { generate as auditReport } from './showcases/compliance/audit-report';
-import { generate as auditReportClasses } from './showcases/compliance/audit-report-classes';
-import { generate as shelfLabel } from './showcases/retail/shelf-label';
-import { generate as shelfLabelClasses } from './showcases/retail/shelf-label-classes';
-import { generate as ukDegreeTranscript } from './showcases/education/uk-degree-transcript';
-import { generate as ukDegreeTranscriptClasses } from './showcases/education/uk-degree-transcript-classes';
-import { generate as financialStatement } from './showcases/reports/financial-statement';
-import { generate as financialStatementClasses } from './showcases/reports/financial-statement-classes';
-import { generate as labReport } from './showcases/healthcare/lab-report';
-import { generate as labReportClasses } from './showcases/healthcare/lab-report-classes';
-import { generate as payslip } from './showcases/hr/payslip';
-import { generate as payslipClasses } from './showcases/hr/payslip-classes';
-import { generate as quotation } from './showcases/sales/quotation';
-import { generate as quotationClasses } from './showcases/sales/quotation-classes';
-import { generate as employmentContract } from './showcases/hr/employment-contract';
-import { generate as employmentContractClasses } from './showcases/hr/employment-contract-classes';
-import { generate as policySchedule } from './showcases/insurance/policy-schedule';
-import { generate as utilityBill } from './showcases/utilities/utility-bill';
-import { generate as utilityBillClasses } from './showcases/utilities/utility-bill-classes';
-import { generate as courseCertificate } from './showcases/education/course-certificate';
-import { generate as courseCertificateClasses } from './showcases/education/course-certificate-classes';
-import { generate as jobSheet } from './showcases/field/job-sheet';
-import { generate as jobSheetClasses } from './showcases/field/job-sheet-classes';
-import { generate as siteInspectionReport } from './showcases/field/site-inspection-report';
-import { generate as siteInspectionReportClasses } from './showcases/field/site-inspection-report-classes';
-import { generate as permitToWork } from './showcases/field/permit-to-work';
-import { generate as permitToWorkClasses } from './showcases/field/permit-to-work-classes';
-import { generate as inventoryScheduleOfCondition } from './showcases/field/inventory-schedule-of-condition';
-import { generate as inventoryScheduleOfConditionClasses } from './showcases/field/inventory-schedule-of-condition-classes';
-import { generate as customerAccountStatement } from './showcases/invoices/customer-account-statement';
-import { generate as customerAccountStatementClasses } from './showcases/invoices/customer-account-statement-classes';
-import { generate as purchaseOrder } from './showcases/invoices/purchase-order';
-import { generate as purchaseOrderClasses } from './showcases/invoices/purchase-order-classes';
-import { generate as creditNote } from './showcases/invoices/credit-note';
-import { generate as creditNoteClasses } from './showcases/invoices/credit-note-classes';
-import { generate as deliveryNote } from './showcases/operations/delivery-note';
-import { generate as deliveryNoteClasses } from './showcases/operations/delivery-note-classes';
-import { generate as dischargeSummary } from './showcases/healthcare/discharge-summary';
-import { generate as dischargeSummaryClasses } from './showcases/healthcare/discharge-summary-classes';
-import { generate as exhibitBundleIndex } from './showcases/legal/exhibit-bundle-index';
-import { generate as exhibitBundleIndexClasses } from './showcases/legal/exhibit-bundle-index-classes';
-import { generate as propertyParticulars } from './showcases/property/property-particulars';
-import { generate as propertyParticularsClasses } from './showcases/property/property-particulars-classes';
-import { generate as serverEndpoint } from './recipes/integration/server-endpoint';
-import { generate as batchGeneration } from './recipes/integration/batch-generation';
-import { generate as billOfCosts } from './showcases/legal/bill-of-costs';
-import { generate as billOfCostsClasses } from './showcases/legal/bill-of-costs-classes';
-import { generate as remittanceAdvice } from './showcases/invoices/remittance-advice';
-import { generate as remittanceAdviceClasses } from './showcases/invoices/remittance-advice-classes';
-import { generate as dunningLetter } from './showcases/invoices/dunning-letter';
-import { generate as dunningLetterClasses } from './showcases/invoices/dunning-letter-classes';
-import { generate as timesheet } from './showcases/hr/timesheet';
-import { generate as timesheetClasses } from './showcases/hr/timesheet-classes';
+import { generate as verticalStackOverflow } from './code-recipes/layout/vertical-stack-overflow';
+import { generate as verticalStackOverflowClasses } from './code-recipes/layout/vertical-stack-overflow-classes';
+import { generate as tables } from './code-recipes/elements/tables';
+import { generate as tablesClasses } from './code-recipes/elements/tables-classes';
+import { generate as textAlignment } from './code-recipes/typography/text-alignment';
+import { generate as textAlignmentClasses } from './code-recipes/typography/text-alignment-classes';
+import { generate as embeddedFontMetrics } from './code-recipes/typography/embedded-font-metrics';
+import { generate as embeddedFontMetricsClasses } from './code-recipes/typography/embedded-font-metrics-classes';
+import { generate as bookPageLayout } from './code-recipes/typography/book-page-layout';
+import { generate as bookPageLayoutClasses } from './code-recipes/typography/book-page-layout-classes';
+import { generate as richTextStyles } from './code-recipes/typography/rich-text-styles';
+import { generate as richTextStylesClasses } from './code-recipes/typography/rich-text-styles-classes';
+import { generate as textDecorations } from './code-recipes/typography/text-decorations';
+import { generate as textDecorationsClasses } from './code-recipes/typography/text-decorations-classes';
+import { generate as customFonts } from './code-recipes/typography/custom-fonts';
+import { generate as customFontsClasses } from './code-recipes/typography/custom-fonts-classes';
+import { generate as colourEmojis } from './code-recipes/typography/colour-emojis';
+import { generate as internationalTypography } from './code-recipes/typography/international-typography';
+import { generate as emojisAndUnicode } from './code-recipes/typography/emojis-and-unicode';
+import { generate as emojisAndUnicodeClasses } from './code-recipes/typography/emojis-and-unicode-classes';
+import { generate as advancedTypography } from './code-recipes/typography/advanced-typography';
+import { generate as advancedTypographyClasses } from './code-recipes/typography/advanced-typography-classes';
+import { generate as dickensNovel } from './code-recipes/typography/dickens-novel';
+import { generate as dickensNovelClasses } from './code-recipes/typography/dickens-novel-classes';
+import { generate as lists } from './code-recipes/elements/lists';
+import { generate as listsClasses } from './code-recipes/elements/lists-classes';
+import { generate as hyperlinks } from './code-recipes/elements/hyperlinks';
+import { generate as hyperlinksClasses } from './code-recipes/elements/hyperlinks-classes';
+import { generate as crossReferences } from './code-recipes/elements/cross-references';
+import { generate as crossReferencesClasses } from './code-recipes/elements/cross-references-classes';
+import { generate as shapesAndBorders } from './code-recipes/elements/shapes-and-borders';
+import { generate as shapesAndBordersClasses } from './code-recipes/elements/shapes-and-borders-classes';
+import { generate as colorPalette } from './code-recipes/elements/color-palette';
+import { generate as colorPaletteClasses } from './code-recipes/elements/color-palette-classes';
+import { generate as qrCodes } from './code-recipes/elements/qr-codes';
+import { generate as qrCodesClasses } from './code-recipes/elements/qr-codes-classes';
+import { generate as barcodes } from './code-recipes/elements/barcodes';
+import { generate as barcodesClasses } from './code-recipes/elements/barcodes-classes';
+import { generate as dataMatrix } from './code-recipes/elements/data-matrix';
+import { generate as dataMatrixClasses } from './code-recipes/elements/data-matrix-classes';
+import { generate as flagsOfTheWorld } from './code-recipes/elements/flags-of-the-world';
+import { generate as flagsOfTheWorldClasses } from './code-recipes/elements/flags-of-the-world-classes';
+import { generate as images } from './code-recipes/elements/images';
+import { generate as imagesClasses } from './code-recipes/elements/images-classes';
+import { generate as chartShowcase } from './code-recipes/charting/chart-showcase';
+import { generate as chartShowcaseClasses } from './code-recipes/charting/chart-showcase-classes';
+import { generate as barChart } from './code-recipes/charting/bar-chart';
+import { generate as barChartClasses } from './code-recipes/charting/bar-chart-classes';
+import { generate as groupedBarChart } from './code-recipes/charting/grouped-bar-chart';
+import { generate as groupedBarChartClasses } from './code-recipes/charting/grouped-bar-chart-classes';
+import { generate as lineChart } from './code-recipes/charting/line-chart';
+import { generate as lineChartClasses } from './code-recipes/charting/line-chart-classes';
+import { generate as areaChart } from './code-recipes/charting/area-chart';
+import { generate as areaChartClasses } from './code-recipes/charting/area-chart-classes';
+import { generate as lollipopChart } from './code-recipes/charting/lollipop-chart';
+import { generate as lollipopChartClasses } from './code-recipes/charting/lollipop-chart-classes';
+import { generate as dotPlotChart } from './code-recipes/charting/dot-plot-chart';
+import { generate as dotPlotChartClasses } from './code-recipes/charting/dot-plot-chart-classes';
+import { generate as pieChart } from './code-recipes/charting/pie-chart';
+import { generate as pieChartClasses } from './code-recipes/charting/pie-chart-classes';
+import { generate as multiSeriesLineChart } from './code-recipes/charting/multi-series-line-chart';
+import { generate as multiSeriesLineChartClasses } from './code-recipes/charting/multi-series-line-chart-classes';
+import { generate as watermarking } from './code-recipes/security/watermarking';
+import { generate as watermarkingClasses } from './code-recipes/security/watermarking-classes';
+import { generate as encryption } from './code-recipes/security/encryption';
+import { generate as encryptionClasses } from './code-recipes/security/encryption-classes';
+import { generate as attachedData } from './code-recipes/security/attached-data';
+import { generate as attachedDataClasses } from './code-recipes/security/attached-data-classes';
+// ── Industry Templates (industry / vertical-market documents) ────────────────────────
+import { generate as businessInvoice } from './industry-templates/invoices/business-invoice';
+import { generate as businessInvoiceClasses } from './industry-templates/invoices/business-invoice-classes';
+import { generate as usSalesInvoice } from './industry-templates/invoices/us-sales-invoice';
+import { generate as usSalesInvoiceClasses } from './industry-templates/invoices/us-sales-invoice-classes';
+import { generate as ukVatInvoice } from './industry-templates/invoices/uk-vat-invoice';
+import { generate as ukVatInvoiceClasses } from './industry-templates/invoices/uk-vat-invoice-classes';
+import { generate as facturXInvoice } from './industry-templates/invoices/factur-x-invoice';
+import { generate as facturXInvoiceClasses } from './industry-templates/invoices/factur-x-invoice-classes';
+import { generate as indiaGstInvoice } from './industry-templates/invoices/india-gst-invoice';
+import { generate as indiaGstInvoiceClasses } from './industry-templates/invoices/india-gst-invoice-classes';
+import { generate as productPhotoGallery } from './industry-templates/catalogs/product-photo-gallery';
+import { generate as productPhotoGalleryClasses } from './industry-templates/catalogs/product-photo-gallery-classes';
+import { generate as financialDashboard } from './industry-templates/reports/financial-dashboard';
+import { generate as financialDashboardClasses } from './industry-templates/reports/financial-dashboard-classes';
+import { generate as complianceFindingsRegister } from './industry-templates/reports/compliance-findings-register';
+import { generate as complianceFindingsRegisterClasses } from './industry-templates/reports/compliance-findings-register-classes';
+import { generate as annualReport } from './industry-templates/reports/annual-report';
+import { generate as annualReportClasses } from './industry-templates/reports/annual-report-classes';
+import { generate as annualReportGradientCover } from './industry-templates/reports/annual-report-gradient-cover';
+import { generate as annualReportGradientCoverClasses } from './industry-templates/reports/annual-report-gradient-cover-classes';
+import { generate as annualReportMaskedCover } from './industry-templates/reports/annual-report-masked-cover';
+import { generate as annualReportMaskedCoverClasses } from './industry-templates/reports/annual-report-masked-cover-classes';
+import { generate as annualReportGeometricCover } from './industry-templates/reports/annual-report-geometric-cover';
+import { generate as annualReportGeometricCoverClasses } from './industry-templates/reports/annual-report-geometric-cover-classes';
+import { generate as eventTicket } from './industry-templates/operations/event-ticket';
+import { generate as eventTicketClasses } from './industry-templates/operations/event-ticket-classes';
+import { generate as patientSummary } from './industry-templates/healthcare/patient-summary';
+import { generate as patientSummaryClasses } from './industry-templates/healthcare/patient-summary-classes';
+import { generate as outpatientAppointmentLetter } from './industry-templates/healthcare/outpatient-appointment-letter';
+import { generate as outpatientAppointmentLetterClasses } from './industry-templates/healthcare/outpatient-appointment-letter-classes';
+// ── Vertical-market gallery follow-up (registrations + new exampless) ────────
+import { generate as saasInvoice } from './industry-templates/invoices/saas-invoice';
+import { generate as saasInvoiceClasses } from './industry-templates/invoices/saas-invoice-classes';
+import { generate as shippingLabel } from './industry-templates/operations/shipping-label';
+import { generate as shippingLabelClasses } from './industry-templates/operations/shipping-label-classes';
+import { generate as horizontalBarChart } from './code-recipes/charting/horizontal-bar-chart';
+import { generate as horizontalBarChartClasses } from './code-recipes/charting/horizontal-bar-chart-classes';
+import { generate as horizontalGroupedBarChart } from './code-recipes/charting/horizontal-grouped-bar-chart';
+import { generate as horizontalGroupedBarChartClasses } from './code-recipes/charting/horizontal-grouped-bar-chart-classes';
+import { generate as horizontalLollipopChart } from './code-recipes/charting/horizontal-lollipop-chart';
+import { generate as horizontalLollipopChartClasses } from './code-recipes/charting/horizontal-lollipop-chart-classes';
+import { generate as watermarkingConfidential } from './code-recipes/security/watermarking-confidential';
+import { generate as watermarkingConfidentialClasses } from './code-recipes/security/watermarking-confidential-classes';
+import { generate as edgeReceipt } from './industry-templates/edge/edge-receipt';
+import { generate as edgeReceiptClasses } from './industry-templates/edge/edge-receipt-classes';
+import { generate as publicLibraryMembershipLetter } from './industry-templates/community/public-library-membership-letter';
+import { generate as publicLibraryMembershipLetterClasses } from './industry-templates/community/public-library-membership-letter-classes';
+import { generate as grantAwardLetter } from './industry-templates/community/grant-award-letter';
+import { generate as grantAwardLetterClasses } from './industry-templates/community/grant-award-letter-classes';
+import { generate as auditReport } from './industry-templates/compliance/audit-report';
+import { generate as auditReportClasses } from './industry-templates/compliance/audit-report-classes';
+import { generate as shelfLabel } from './industry-templates/retail/shelf-label';
+import { generate as shelfLabelClasses } from './industry-templates/retail/shelf-label-classes';
+import { generate as ukDegreeTranscript } from './industry-templates/education/uk-degree-transcript';
+import { generate as ukDegreeTranscriptClasses } from './industry-templates/education/uk-degree-transcript-classes';
+import { generate as financialStatement } from './industry-templates/reports/financial-statement';
+import { generate as financialStatementClasses } from './industry-templates/reports/financial-statement-classes';
+import { generate as labReport } from './industry-templates/healthcare/lab-report';
+import { generate as labReportClasses } from './industry-templates/healthcare/lab-report-classes';
+import { generate as payslip } from './industry-templates/hr/payslip';
+import { generate as payslipClasses } from './industry-templates/hr/payslip-classes';
+import { generate as quotation } from './industry-templates/sales/quotation';
+import { generate as quotationClasses } from './industry-templates/sales/quotation-classes';
+import { generate as employmentContract } from './industry-templates/hr/employment-contract';
+import { generate as employmentContractClasses } from './industry-templates/hr/employment-contract-classes';
+import { generate as policySchedule } from './industry-templates/insurance/policy-schedule';
+import { generate as utilityBill } from './industry-templates/utilities/utility-bill';
+import { generate as utilityBillClasses } from './industry-templates/utilities/utility-bill-classes';
+import { generate as courseCertificate } from './industry-templates/education/course-certificate';
+import { generate as courseCertificateClasses } from './industry-templates/education/course-certificate-classes';
+import { generate as jobSheet } from './industry-templates/field/job-sheet';
+import { generate as jobSheetClasses } from './industry-templates/field/job-sheet-classes';
+import { generate as siteInspectionReport } from './industry-templates/field/site-inspection-report';
+import { generate as siteInspectionReportClasses } from './industry-templates/field/site-inspection-report-classes';
+import { generate as permitToWork } from './industry-templates/field/permit-to-work';
+import { generate as permitToWorkClasses } from './industry-templates/field/permit-to-work-classes';
+import { generate as inventoryScheduleOfCondition } from './industry-templates/field/inventory-schedule-of-condition';
+import { generate as inventoryScheduleOfConditionClasses } from './industry-templates/field/inventory-schedule-of-condition-classes';
+import { generate as customerAccountStatement } from './industry-templates/invoices/customer-account-statement';
+import { generate as customerAccountStatementClasses } from './industry-templates/invoices/customer-account-statement-classes';
+import { generate as purchaseOrder } from './industry-templates/invoices/purchase-order';
+import { generate as purchaseOrderClasses } from './industry-templates/invoices/purchase-order-classes';
+import { generate as creditNote } from './industry-templates/invoices/credit-note';
+import { generate as creditNoteClasses } from './industry-templates/invoices/credit-note-classes';
+import { generate as deliveryNote } from './industry-templates/operations/delivery-note';
+import { generate as deliveryNoteClasses } from './industry-templates/operations/delivery-note-classes';
+import { generate as dischargeSummary } from './industry-templates/healthcare/discharge-summary';
+import { generate as dischargeSummaryClasses } from './industry-templates/healthcare/discharge-summary-classes';
+import { generate as exhibitBundleIndex } from './industry-templates/legal/exhibit-bundle-index';
+import { generate as exhibitBundleIndexClasses } from './industry-templates/legal/exhibit-bundle-index-classes';
+import { generate as propertyParticulars } from './industry-templates/property/property-particulars';
+import { generate as propertyParticularsClasses } from './industry-templates/property/property-particulars-classes';
+import { generate as serverEndpoint } from './code-recipes/integration/server-endpoint';
+import { generate as batchGeneration } from './code-recipes/integration/batch-generation';
+import { generate as billOfCosts } from './industry-templates/legal/bill-of-costs';
+import { generate as billOfCostsClasses } from './industry-templates/legal/bill-of-costs-classes';
+import { generate as remittanceAdvice } from './industry-templates/invoices/remittance-advice';
+import { generate as remittanceAdviceClasses } from './industry-templates/invoices/remittance-advice-classes';
+import { generate as dunningLetter } from './industry-templates/invoices/dunning-letter';
+import { generate as dunningLetterClasses } from './industry-templates/invoices/dunning-letter-classes';
+import { generate as timesheet } from './industry-templates/hr/timesheet';
+import { generate as timesheetClasses } from './industry-templates/hr/timesheet-classes';
 
-export * from './recipes/svg';
+export * from './code-recipes/svg';
 
 // ── Structured taxonomy (gallery filters, capability search) ─────────────────
 // These axes are orthogonal to the free-text {@link ExampleDef.category}: an
 // invoice is `documentType: 'invoice'` but can serve any {@link Industry}.
 // They power gallery facets ("PDF/UA", "Browser-only", "Barcodes", "Multi-page
-// tables", "PDF/A-3 attachments") without each showcase re-deriving them from
+// tables", "PDF/A-3 attachments") without each examples re-deriving them from
 // its own description.
 
 /** Vertical market / buyer context a document serves. */
@@ -277,12 +277,12 @@ export interface ExampleDef {
   description: string;
   /**
    * Which layer of the gallery this belongs to (see the example-gallery revenue
-   * strategy). `'showcase'` = a finished industry/vertical
+   * strategy). `'examples'` = a finished industry/vertical
    * document for the public gallery; `'recipe'` = a technical primitive demo for
    * the docs cookbook. Defaults to `'recipe'` when omitted.
    */
-  tier?: 'showcase' | 'recipe';
-  /** Target market for market-specific showcases (e.g. 'US', 'UK', 'EU', 'India'). */
+  tier?: 'examples' | 'recipe';
+  /** Target market for market-specific templates (e.g. 'US', 'UK', 'EU', 'India'). */
   region?: string;
   filename: string;
   /**
@@ -356,7 +356,7 @@ const FLAG_ASSETS = ['mx', 'gs', 'es', 'pt', 'gr', 'nl', 'hk', 'kz', 'co', 'is',
 );
 
 /**
- * Every example, in the order consumers list them: recipes, then showcases,
+ * Every example, in the order consumers list them: recipes, then industry templates,
  * each by category name and then by example name, alphabetically. A variant
  * sits directly after the example it is a variant of. Keep new entries in
  * this order - galleries and pickers list the registry as-is rather than
@@ -1704,12 +1704,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Community
+  // Industry Templates - Community
   {
     id: 'grant-award-letter',
     name: 'Grant Award Letter',
     category: 'Community',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A fictional grant funding decision: a headline “Awarded” block with key dates, an award-breakdown table, next steps, and an alternative-formats notice.',
@@ -1730,7 +1730,7 @@ export const examples: ExampleDef[] = [
     id: 'grant-award-letter-classes',
     name: 'Grant Award Letter (Class API)',
     category: 'Community',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same accessible grant award letter as Grant Award Letter, built with the class API: construct each element and assign properties. The output is identical.',
@@ -1747,7 +1747,7 @@ export const examples: ExampleDef[] = [
     id: 'public-library-membership-letter',
     name: 'Public Library Membership',
     category: 'Community',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice.',
@@ -1768,7 +1768,7 @@ export const examples: ExampleDef[] = [
     id: 'public-library-membership-letter-classes',
     name: 'Public Library Membership (Class API)',
     category: 'Community',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same accessible public-library membership letter as Public Library Membership, built with the class API: construct each element and assign properties. The output is identical.',
@@ -1782,12 +1782,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Compliance
+  // Industry Templates - Compliance
   {
     id: 'audit-report',
     name: 'GDPR ISO 27001 Audit Report',
     category: 'Compliance',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU/UK',
     description:
       'A GDPR and ISO/IEC 27001 audit: a CONFIDENTIAL running header, KPI tiles, a control-status donut, a severity chart, and a findings register across pages.',
@@ -1808,7 +1808,7 @@ export const examples: ExampleDef[] = [
     id: 'audit-report-classes',
     name: 'GDPR ISO 27001 Audit Report (Class API)',
     category: 'Compliance',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU/UK',
     description:
       'An enterprise data-protection and security audit (EU + UK GDPR and ISO/IEC 27001:2022): running CONFIDENTIAL header/footer, KPI tiles, a control-status donut, a findings-by-severity column chart, and a findings register that flows across pages with a repeating header.',
@@ -1822,12 +1822,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Education
+  // Industry Templates - Education
   {
     id: 'course-certificate',
     name: 'Course Certificate',
     category: 'Education',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A landscape course certificate: an ornamental frame behind the wording, a vector monogram crest, centred serif type, and a verification code. Decoration stays out of reading order.',
     filename: 'course-certificate.pdf',
@@ -1847,7 +1847,7 @@ export const examples: ExampleDef[] = [
     id: 'course-certificate-classes',
     name: 'Course Certificate (Class API)',
     category: 'Education',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same certificate as Course Certificate, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'course-certificate-classes.pdf',
@@ -1863,7 +1863,7 @@ export const examples: ExampleDef[] = [
     id: 'uk-degree-transcript',
     name: 'UK Degree Transcript',
     category: 'Education',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level that flows across pages, and a QR verification link.',
@@ -1884,7 +1884,7 @@ export const examples: ExampleDef[] = [
     id: 'uk-degree-transcript-classes',
     name: 'UK Degree Transcript (Class API)',
     category: 'Education',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'An official UK university degree transcript: institution header, student details, a UK honours classification banner (2:1), a module register grouped by FHEQ level with credits and marks that flows across pages, and a QR verification link.',
@@ -1898,12 +1898,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Field
+  // Industry Templates - Field
   {
     id: 'job-sheet',
     name: 'Field Service Job Sheet',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A field-service job sheet: the reported fault, work carried out, labour and parts, defects left unfixed, and a customer signature block kept whole on one page.',
@@ -1924,7 +1924,7 @@ export const examples: ExampleDef[] = [
     id: 'job-sheet-classes',
     name: 'Job Sheet (Class API)',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same job sheet as Job sheet, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -1941,7 +1941,7 @@ export const examples: ExampleDef[] = [
     id: 'inventory-schedule-of-condition',
     name: 'Inventory and Schedule of Condition',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A tenancy check-in inventory: a room-by-room register grading condition and cleanliness, meter readings, keys issued, and declarations from both parties.',
@@ -1962,7 +1962,7 @@ export const examples: ExampleDef[] = [
     id: 'inventory-schedule-of-condition-classes',
     name: 'Inventory and Schedule of Condition (Class API)',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same inventory and schedule of condition as Inventory and schedule of condition, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -1979,7 +1979,7 @@ export const examples: ExampleDef[] = [
     id: 'permit-to-work',
     name: 'Permit to Work',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A hot works permit: the work authorised, hazards and controls, the atmospheric test, a precautions checklist, and signatures for issue, acceptance, and cancellation.',
@@ -2000,7 +2000,7 @@ export const examples: ExampleDef[] = [
     id: 'permit-to-work-classes',
     name: 'Permit to Work (Class API)',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same permit to work as Permit to work, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2017,7 +2017,7 @@ export const examples: ExampleDef[] = [
     id: 'site-inspection-report',
     name: 'Site Inspection Report',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A site inspection snagging register: each defect with location, trade, severity, owner, target date, and evidence, in a long table whose header repeats.',
@@ -2038,7 +2038,7 @@ export const examples: ExampleDef[] = [
     id: 'site-inspection-report-classes',
     name: 'Site Inspection Report (Class API)',
     category: 'Field',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same site inspection report as Site inspection report, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2052,12 +2052,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Healthcare
+  // Industry Templates - Healthcare
   {
     id: 'discharge-summary',
     name: 'Hospital Discharge Summary',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A hospital discharge summary: diagnoses, key investigations with reference ranges, a medication reconciliation flagging every change, and actions for the GP.',
@@ -2078,7 +2078,7 @@ export const examples: ExampleDef[] = [
     id: 'discharge-summary-classes',
     name: 'Discharge Summary (Class API)',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same discharge summary as Discharge summary, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2095,7 +2095,7 @@ export const examples: ExampleDef[] = [
     id: 'outpatient-appointment-letter',
     name: 'Outpatient Appointment',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A fictional outpatient appointment letter: clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data notices.',
@@ -2115,7 +2115,7 @@ export const examples: ExampleDef[] = [
     id: 'outpatient-appointment-letter-classes',
     name: 'Outpatient Appointment (Class API)',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'An accessible fictional Outpatient Appointment with clear appointment details, plain-language actions, an accessibility contact, and prominent sample-data disclaimers. Inspired by UK public-health information-design principles without copying any specific provider’s branding.',
@@ -2132,7 +2132,7 @@ export const examples: ExampleDef[] = [
     id: 'lab-report',
     name: 'Pathology Lab Report',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, generated client-side so data never leaves the browser.',
@@ -2153,7 +2153,7 @@ export const examples: ExampleDef[] = [
     id: 'lab-report-classes',
     name: 'Pathology Lab Report (Class API)',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A fictional UK/EU pathology laboratory report: patient demographics, specimen timestamps, grouped result panels (FBC, U&E) with units, reference ranges and High/Low flags, a clinical interpretation, and an authorising clinician. It is generated entirely client-side, so patient data never leaves the browser.',
@@ -2170,7 +2170,7 @@ export const examples: ExampleDef[] = [
     id: 'patient-summary',
     name: 'Patient Summary',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'An A4 patient-summary sheet built from rounded cards, each clipping a full-bleed coloured header band to its outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.',
     filename: 'patient-summary.pdf',
@@ -2189,7 +2189,7 @@ export const examples: ExampleDef[] = [
     id: 'patient-summary-classes',
     name: 'Patient Summary (Class API)',
     category: 'Healthcare',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A4 portrait healthcare patient-summary sheet built from rounded-corner cards. Each card clips a full-bleed coloured header band to its rounded outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.',
     filename: 'patient-summary-classes.pdf',
@@ -2202,12 +2202,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - HR
+  // Industry Templates - HR
   {
     id: 'employment-contract',
     name: 'Employment Contract',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A written statement of employment particulars: numbered clauses, defined terms, a running header, a schedule page, and signature and witness fields.',
@@ -2228,7 +2228,7 @@ export const examples: ExampleDef[] = [
     id: 'employment-contract-classes',
     name: 'Employment Contract (Class API)',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same statement of employment particulars as Employment Contract, built with the class API: construct each element and assign properties. The output is identical.',
@@ -2245,7 +2245,7 @@ export const examples: ExampleDef[] = [
     id: 'payslip',
     name: 'Payslip',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A payslip run: earnings, deductions, taxes, employer contributions, and year-to-date totals, with masked identifiers and AES-256 encryption, generated in the browser.',
     filename: 'payslip.pdf',
@@ -2267,7 +2267,7 @@ export const examples: ExampleDef[] = [
     id: 'payslip-classes',
     name: 'Payslip (Class API)',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same encrypted payslip as Payslip, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'payslip-classes.pdf',
@@ -2284,7 +2284,7 @@ export const examples: ExampleDef[] = [
     id: 'timesheet',
     name: 'Timesheet',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A landscape weekly timesheet: hours by project and day, billable value, utilisation against target, expenses, and approval, with totals that reconcile.',
@@ -2305,7 +2305,7 @@ export const examples: ExampleDef[] = [
     id: 'timesheet-classes',
     name: 'Timesheet (Class API)',
     category: 'HR',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same timesheet as Timesheet, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2319,12 +2319,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Insurance
+  // Industry Templates - Insurance
   {
     id: 'policy-schedule',
     name: 'Policy Schedule',
     category: 'Insurance',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'An insurance policy schedule: property details, coverage limits and deductibles, a premium breakdown, endorsements, and a QR link to a self-service portal.',
@@ -2341,12 +2341,12 @@ export const examples: ExampleDef[] = [
     dataDensity: 'medium',
   },
 
-  // Showcases - Invoices
+  // Industry Templates - Invoices
   {
     id: 'business-invoice',
     name: 'Business Invoice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A US business invoice with company branding, customer addresses, a line-items table, an early-payment discount, and bank and online payment details.',
     filename: 'business-invoice.pdf',
@@ -2366,7 +2366,7 @@ export const examples: ExampleDef[] = [
     id: 'business-invoice-classes',
     name: 'Business Invoice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same branded invoice as Business Invoice, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'business-invoice-classes.pdf',
@@ -2382,7 +2382,7 @@ export const examples: ExampleDef[] = [
     id: 'credit-note',
     name: 'Credit Note',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A credit note: which invoice lines were wrong and why, how the VAT is reversed, and whether money is refunded or offset, in the layout of the invoice it corrects.',
@@ -2402,7 +2402,7 @@ export const examples: ExampleDef[] = [
     id: 'credit-note-classes',
     name: 'Credit Note (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same credit note as Credit note, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2419,7 +2419,7 @@ export const examples: ExampleDef[] = [
     id: 'customer-account-statement',
     name: 'Customer Account Statement',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A customer statement: opening balance, every invoice, payment, and credit, a running balance calculated from the rows, ageing, and a remittance slip.',
@@ -2440,7 +2440,7 @@ export const examples: ExampleDef[] = [
     id: 'customer-account-statement-classes',
     name: 'Customer Account Statement (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same customer account statement as Customer account statement, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2457,7 +2457,7 @@ export const examples: ExampleDef[] = [
     id: 'dunning-letter',
     name: 'Dunning Letter',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A collections letter with a schedule of overdue items. Days overdue come from the due dates, and one escalation stage sets the tone and deadline.',
@@ -2477,7 +2477,7 @@ export const examples: ExampleDef[] = [
     id: 'dunning-letter-classes',
     name: 'Dunning Letter (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same dunning letter as Dunning letter, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2494,7 +2494,7 @@ export const examples: ExampleDef[] = [
     id: 'factur-x-invoice',
     name: 'EU E-Invoice (Factur-X / ZUGFeRD, EN 16931)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU',
     description:
       'An EN 16931 / Factur-X e-invoice: a PDF/A-3 invoice carrying its machine-readable CII XML, with printed totals that match it exactly. Checked in CI by veraPDF and Mustang.',
@@ -2516,7 +2516,7 @@ export const examples: ExampleDef[] = [
     id: 'factur-x-invoice-classes',
     name: 'EU E-Invoice (Factur-X / ZUGFeRD, EN 16931) (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU',
     description:
       'The same EU Factur-X e-invoice as EU E-Invoice, built with the class API: construct each element and assign properties. The output is identical.',
@@ -2534,7 +2534,7 @@ export const examples: ExampleDef[] = [
     id: 'india-gst-invoice',
     name: 'India GST E-Invoice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'India',
     description:
       'An India GST e-invoice: GSTIN for both parties, HSN/SAC codes, a CGST + SGST split, IRN and acknowledgement details, and a signed QR in INR.',
@@ -2555,7 +2555,7 @@ export const examples: ExampleDef[] = [
     id: 'india-gst-invoice-classes',
     name: 'India GST E-Invoice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'India',
     description:
       'The same India GST e-invoice as India GST E-Invoice, built with the class API: construct each element and assign properties. The output is identical.',
@@ -2572,7 +2572,7 @@ export const examples: ExampleDef[] = [
     id: 'purchase-order',
     name: 'Purchase Order',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A purchase order: a line schedule with required dates, separate order, invoice, and delivery addresses, conditions of purchase, and an authorisation block.',
@@ -2593,7 +2593,7 @@ export const examples: ExampleDef[] = [
     id: 'purchase-order-classes',
     name: 'Purchase Order (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same purchase order as Purchase order, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2610,7 +2610,7 @@ export const examples: ExampleDef[] = [
     id: 'remittance-advice',
     name: 'Remittance Advice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A remittance advice: which invoices a payment settles, which credits were applied, and a reconciliation to the amount paid, stating whether it reconciles.',
@@ -2630,7 +2630,7 @@ export const examples: ExampleDef[] = [
     id: 'remittance-advice-classes',
     name: 'Remittance Advice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same remittance advice as Remittance advice, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2647,7 +2647,7 @@ export const examples: ExampleDef[] = [
     id: 'saas-invoice',
     name: 'SaaS Invoice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'An accessible subscription invoice for a Pro plan: per-seat and storage line items, proration, a QR payment code, VAT, and totals, in a clean UK layout.',
     filename: 'saas-invoice.pdf',
@@ -2667,7 +2667,7 @@ export const examples: ExampleDef[] = [
     id: 'saas-invoice-classes',
     name: 'SaaS Invoice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same accessible subscription invoice as SaaS Invoice, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'saas-invoice-classes.pdf',
@@ -2683,7 +2683,7 @@ export const examples: ExampleDef[] = [
     id: 'uk-vat-invoice',
     name: 'UK VAT Invoice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'An HMRC-style VAT invoice: supplier VAT number, tax point, standard, reduced, and zero-rated lines, and a per-rate VAT summary (net, VAT, gross) in GBP.',
@@ -2704,7 +2704,7 @@ export const examples: ExampleDef[] = [
     id: 'uk-vat-invoice-classes',
     name: 'UK VAT Invoice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same UK VAT invoice as UK VAT Invoice, built with the class API: construct each element and assign properties. The output is identical.',
@@ -2721,7 +2721,7 @@ export const examples: ExampleDef[] = [
     id: 'us-sales-invoice',
     name: 'US Sales-Tax Invoice',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'US',
     description:
       'A US commercial invoice: a destination-based state and county sales-tax breakdown, a purchase-order reference, USD amounts, and ACH/check remittance.',
@@ -2742,7 +2742,7 @@ export const examples: ExampleDef[] = [
     id: 'us-sales-invoice-classes',
     name: 'US Sales-Tax Invoice (Class API)',
     category: 'Invoices',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'US',
     description:
       'The same US sales-tax invoice as US Sales-Tax Invoice, built with the class API: construct each element and assign properties. The output is identical.',
@@ -2756,12 +2756,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Legal
+  // Industry Templates - Legal
   {
     id: 'bill-of-costs',
     name: 'Bill of Costs',
     category: 'Legal',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A legal bill of costs: time by phase and fee-earner grade, disbursements with their VAT treatment, and a summary calculated from the time entries.',
@@ -2782,7 +2782,7 @@ export const examples: ExampleDef[] = [
     id: 'bill-of-costs-classes',
     name: 'Bill of Costs (Class API)',
     category: 'Legal',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same bill of costs as Bill of costs, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2799,7 +2799,7 @@ export const examples: ExampleDef[] = [
     id: 'exhibit-bundle-index',
     name: 'Exhibit Bundle Index',
     category: 'Legal',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The generated parts of a court bundle: a cover sheet, a hyperlinked index with page references resolved after layout, and section separators with continuous numbering.',
@@ -2820,7 +2820,7 @@ export const examples: ExampleDef[] = [
     id: 'exhibit-bundle-index-classes',
     name: 'Exhibit Bundle Index (Class API)',
     category: 'Legal',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same exhibit bundle index as Exhibit bundle index, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2834,12 +2834,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Operations
+  // Industry Templates - Operations
   {
     id: 'delivery-note',
     name: 'Delivery Note',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, a goods-received signature, and a discrepancy period.',
@@ -2860,7 +2860,7 @@ export const examples: ExampleDef[] = [
     id: 'delivery-note-classes',
     name: 'Delivery Note (Class API)',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same delivery note as Delivery note, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2877,7 +2877,7 @@ export const examples: ExampleDef[] = [
     id: 'event-ticket',
     name: 'Event Ticket',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A concert ticket in boarding-pass style: a background image, a QR entry pass, a Code 128 ticket-id barcode, and a tear-off stub on a custom page size.',
     filename: 'event-ticket.pdf',
@@ -2898,7 +2898,7 @@ export const examples: ExampleDef[] = [
     id: 'event-ticket-classes',
     name: 'Event Ticket (Class API)',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'Event ticket / boarding-pass style card with a concert background image, a QR entry pass, a Code 128 ticket-id barcode, and a perforation-style tear-off stub on a custom ticket page size.',
     filename: 'event-ticket-classes.pdf',
@@ -2915,7 +2915,7 @@ export const examples: ExampleDef[] = [
     id: 'shipping-label',
     name: 'Shipping Label',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A 4 × 6 in carrier shipping label on a custom page size: a routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.',
     filename: 'shipping-label.pdf',
@@ -2935,7 +2935,7 @@ export const examples: ExampleDef[] = [
     id: 'shipping-label-classes',
     name: 'Shipping Label (Class API)',
     category: 'Operations',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A 4 × 6 in carrier-style shipping label on a custom page size: routing band, a Code 128 tracking barcode, an ITF-14 carton barcode, and a QR tracking link.',
     filename: 'shipping-label-classes.pdf',
@@ -2948,12 +2948,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Property
+  // Industry Templates - Property
   {
     id: 'property-particulars',
     name: 'Property Particulars',
     category: 'Property',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'Estate agency particulars: guide price, key features, a metric and imperial room schedule, tenure, and an energy-rating graphic drawn from layout primitives.',
@@ -2974,7 +2974,7 @@ export const examples: ExampleDef[] = [
     id: 'property-particulars-classes',
     name: 'Property Particulars (Class API)',
     category: 'Property',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same property particulars as Property particulars, built with the class API: construct each element and assign its properties. The output is identical.',
@@ -2988,12 +2988,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Reports
+  // Industry Templates - Reports
   {
     id: 'annual-report',
     name: 'Annual Report: Classic',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'An A4 annual-report template: a full-bleed navy cover with a hero photograph, then inner pages framed by blue header and footer bands with the logo, generation time, and page numbers.',
     filename: 'annual-report.pdf',
@@ -3015,7 +3015,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-classes',
     name: 'Annual Report: Classic (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A4 portrait annual-report template: a full-bleed navy front cover with a hero photograph, then inner pages whose page-background slot paints blue header/footer bands carrying the BonniePDF mark, generation time, and page numbers around the flowing report content.',
     filename: 'annual-report-classes.pdf',
@@ -3032,7 +3032,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-geometric-cover',
     name: 'Annual Report: Geometric',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a photo cropped to a circular badge ringed in gold). Page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-geometric-cover.pdf',
@@ -3054,7 +3054,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-geometric-cover-classes',
     name: 'Annual Report: Geometric (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is a light, modern cover built from vector primitives (radial sun, translucent rotated polygons and a star via affine transforms, a photo cropped to a circular badge ringed in gold). Page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-geometric-cover-classes.pdf',
@@ -3071,7 +3071,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-gradient-cover',
     name: 'Annual Report: Gradient',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is a full-bleed cover drawn entirely on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-gradient-cover.pdf',
@@ -3092,7 +3092,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-gradient-cover-classes',
     name: 'Annual Report: Gradient (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is a full-bleed cover drawn entirely on the vector surface (indigo-to-fuchsia gradient, radial glow, diagonal accent rules, rotated brand mark, canvas-drawn type); page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-gradient-cover-classes.pdf',
@@ -3108,7 +3108,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-masked-cover',
     name: 'Annual Report: Masked',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-masked-cover.pdf',
@@ -3130,7 +3130,7 @@ export const examples: ExampleDef[] = [
     id: 'annual-report-masked-cover-classes',
     name: 'Annual Report: Masked (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A two-page annual report. Page 1 is the classic photographic cover: a full-width hero image clipped to an angled mask cutting into a green title band with a gold seam. Page 2 is the “inside the report” spread: a KPI band, a quarterly-revenue column chart, a revenue-by-segment donut, and a financial-summary table.',
     filename: 'annual-report-masked-cover-classes.pdf',
@@ -3147,7 +3147,7 @@ export const examples: ExampleDef[] = [
     id: 'compliance-findings-register',
     name: 'Compliance Findings Register',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A GRC audit findings register: 18 severity-coloured finding cards, each with a badge, heading, and remediation steps, paginating cleanly across pages.',
     filename: 'compliance-findings-register.pdf',
@@ -3167,7 +3167,7 @@ export const examples: ExampleDef[] = [
     id: 'compliance-findings-register-classes',
     name: 'Compliance Findings Register (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A GRC / audit findings register: 18 severity-coloured finding cards (badge + heading + remediation) paginating across pages.',
     filename: 'compliance-findings-register-classes.pdf',
@@ -3183,7 +3183,7 @@ export const examples: ExampleDef[] = [
     id: 'financial-dashboard',
     name: 'Financial Dashboard',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.',
     filename: 'financial-dashboard.pdf',
@@ -3203,7 +3203,7 @@ export const examples: ExampleDef[] = [
     id: 'financial-dashboard-classes',
     name: 'Financial Dashboard (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.',
     filename: 'financial-dashboard-classes.pdf',
@@ -3219,7 +3219,7 @@ export const examples: ExampleDef[] = [
     id: 'financial-statement',
     name: 'IFRS Financial Statements',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK/EU',
     description:
       'IFRS-style statutory accounts: income and financial-position statements with prior-year comparatives, note references, bracketed negatives, and total rules.',
@@ -3240,7 +3240,7 @@ export const examples: ExampleDef[] = [
     id: 'financial-statement-classes',
     name: 'IFRS Financial Statements (Class API)',
     category: 'Reports',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK/EU',
     description:
       'A UK/EU statutory financial statement in the IFRS / Companies House style: a Statement of Comprehensive Income and a Statement of Financial Position with prior-year comparatives, note references, accounting-style bracketed negatives, and subtotal/total rules. Amounts in £000.',
@@ -3254,12 +3254,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Retail
+  // Industry Templates - Retail
   {
     id: 'edge-receipt',
     name: 'Point-of-Sale Receipt',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. A few KB with no WASM, so it runs in a Cloudflare Worker.',
     filename: 'edge-receipt.pdf',
@@ -3279,7 +3279,7 @@ export const examples: ExampleDef[] = [
     id: 'edge-receipt-classes',
     name: 'Point-of-Sale Receipt (Class API)',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same 80 mm thermal-printer receipt as Point-of-Sale Receipt, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'edge-receipt-classes.pdf',
@@ -3295,7 +3295,7 @@ export const examples: ExampleDef[] = [
     id: 'product-photo-gallery',
     name: 'Product Gallery',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically, each led by an engine-drawn colour tile.',
     filename: 'product-photo-gallery.pdf',
@@ -3315,7 +3315,7 @@ export const examples: ExampleDef[] = [
     id: 'product-photo-gallery-classes',
     name: 'Product Gallery (Class API)',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically. Each card starts with a colour tile drawn by the engine, so no image files are needed.',
     filename: 'product-photo-gallery-classes.pdf',
@@ -3331,7 +3331,7 @@ export const examples: ExampleDef[] = [
     id: 'shelf-label',
     name: 'Retail Shelf Label (EU/UK)',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU/UK',
     description:
       'An EU/UK shelf-edge label on a custom 110 × 75 mm card: product details, was/now promotional pricing, the mandatory unit price, and an EAN-13 barcode.',
@@ -3352,7 +3352,7 @@ export const examples: ExampleDef[] = [
     id: 'shelf-label-classes',
     name: 'Retail Shelf Label (EU/UK) (Class API)',
     category: 'Retail',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'EU/UK',
     description:
       'The same EU/UK shelf-edge label as Retail Shelf Label, built with the class API: construct each element and assign properties. The output is identical.',
@@ -3366,12 +3366,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Sales
+  // Industry Templates - Sales
   {
     id: 'quotation',
     name: 'Quotation',
     category: 'Sales',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'A B2B sales quotation: a three-tier pricing comparison with the recommended tier highlighted, a scope of work, optional add-ons, and an acceptance block.',
     filename: 'quotation.pdf',
@@ -3391,7 +3391,7 @@ export const examples: ExampleDef[] = [
     id: 'quotation-classes',
     name: 'Quotation (Class API)',
     category: 'Sales',
-    tier: 'showcase',
+    tier: 'examples',
     description:
       'The same tiered quotation as Quotation, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'quotation-classes.pdf',
@@ -3404,12 +3404,12 @@ export const examples: ExampleDef[] = [
     variantLabel: 'Class API',
   },
 
-  // Showcases - Utilities
+  // Industry Templates - Utilities
   {
     id: 'utility-bill',
     name: 'Utility Bill',
     category: 'Utilities',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'A domestic energy bill calculated from meter readings: the amount due, a tariff breakdown, a twelve-month usage chart, and a detachable payment slip.',
@@ -3430,7 +3430,7 @@ export const examples: ExampleDef[] = [
     id: 'utility-bill-classes',
     name: 'Utility Bill (Class API)',
     category: 'Utilities',
-    tier: 'showcase',
+    tier: 'examples',
     region: 'UK',
     description:
       'The same energy bill as Utility Bill, built with the class API: construct each element and assign properties. The output is identical.',

@@ -63,7 +63,7 @@ describe('gradient paint transform', () => {
   }
 
   it('emits no extra matrix when there is no transform', () => {
-    // Every existing caller, showcase and golden depends on this: the feature is
+    // Every existing caller, examples and golden depends on this: the feature is
     // an addition only if an absent transform changes nothing.
     const without = fillWith(new LinearGradientPaint(new Point(0, 0), new Point(100, 0), stops)).content;
     const identity = fillWith(

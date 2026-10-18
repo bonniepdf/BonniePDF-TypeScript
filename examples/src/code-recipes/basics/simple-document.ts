@@ -3,7 +3,18 @@
  * A three-page tour of the core Document API: semantic headings, body text, spacers, a custom square page, and a QR code with alt text. A good first example.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
-import { Document, Heading, TextBlock, UnorderedList, QRCode, Line, PdfSize, StandardFonts } from '@bonniepdf/core';
+import {
+  Document,
+  Heading,
+  TextBlock,
+  UnorderedList,
+  QRCode,
+  Line,
+  Table,
+  TableRow,
+  PdfSize,
+  StandardFonts,
+} from '@bonniepdf/core';
 
 /**
  * The core Document API - three pages of text, structured spacing, and a custom
@@ -107,7 +118,7 @@ export function generate(): Document {
   // ── Page 2 ──
   doc.addPage();
   doc.add(
-    new Heading('Page 2', {
+    new Heading('Page 2: Summary Table', {
       tocIdentifier: 'page2',
       level: 1,
       fontName: StandardFonts.HelveticaBold,
@@ -116,7 +127,44 @@ export function generate(): Document {
       margin: { bottom: 12 },
     })
   );
-  doc.add(new TextBlock('This demonstrates multipage support with automatic page management.'));
+  doc.add(
+    new TextBlock('This demonstrates multipage support with automatic page management.', {
+      margin: { bottom: 16 },
+    })
+  );
+
+  const table = new Table({
+    columns: [160, 160, 175],
+    headerBackgroundColor: 'slate-800',
+    headerTextColor: '#ffffff',
+  });
+  table.addHeader(
+    new TextBlock('Component', { fontName: StandardFonts.HelveticaBold, fontSize: 10 }),
+    new TextBlock('Runtime', { fontName: StandardFonts.HelveticaBold, fontSize: 10 }),
+    new TextBlock('Status', { fontName: StandardFonts.HelveticaBold, fontSize: 10 })
+  );
+  table.addRow(
+    TableRow.fromElements(
+      new TextBlock('Core Engine', { fontSize: 10 }),
+      new TextBlock('.NET / TypeScript', { fontSize: 10 }),
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+    )
+  );
+  table.addRow(
+    TableRow.fromElements(
+      new TextBlock('Typography Engine', { fontSize: 10 }),
+      new TextBlock('Embedded Fonts', { fontSize: 10 }),
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+    )
+  );
+  table.addRow(
+    TableRow.fromElements(
+      new TextBlock('Vector Graphics', { fontSize: 10 }),
+      new TextBlock('SVG / QR / Barcode', { fontSize: 10 }),
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+    )
+  );
+  doc.add(table);
 
   // ── Page 3 - custom square ──
   const squareSize = new PdfSize(300, 300, 'Square Card');

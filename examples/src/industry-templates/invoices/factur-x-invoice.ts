@@ -16,6 +16,7 @@ import {
   applyFacturX,
   FacturXProfile,
   TextBlock,
+  Heading,
   TextAlignment,
   StandardFonts,
   Color,
@@ -70,6 +71,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       margin: 44,
       // applyFacturX forces PDF/A-3b; set here too so the intent is explicit.
       conformance: 'pdf/a-3b',
+      accessibility: 'pdf/ua-1',
       language: 'en',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
     },
@@ -94,7 +96,13 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   });
   const titleStack = new VerticalStack({
     children: [
-      cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: 'right' }),
+      new Heading('E-INVOICE', {
+        level: 1,
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 24,
+        color: ACCENT,
+        alignment: 'right',
+      }),
       cell('EN 16931 · Factur-X / ZUGFeRD', {
         size: 8,
         color: MUTED,

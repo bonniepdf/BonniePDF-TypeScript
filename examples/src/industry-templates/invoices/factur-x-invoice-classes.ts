@@ -7,6 +7,7 @@
 import {
   Document,
   DocumentSettings,
+  AccessibilityMode,
   PdfSize,
   PdfAConformance,
   TextAlignment,
@@ -24,6 +25,7 @@ import {
   applyFacturX,
   FacturXProfile,
   TextBlock,
+  Heading,
   StandardFonts,
   Color,
   type IElement,
@@ -81,6 +83,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PdfSize.a4, 44);
   // applyFacturX forces PDF/A-3b; set here too so the intent is explicit.
   settings.conformance = PdfAConformance.PdfA3b;
+  settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(INK);
 
@@ -102,7 +105,13 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   seller.add(lines(['Musterstrasse 1', '10115 Berlin', 'Germany'], { color: MUTED }));
   seller.add(cell('USt-IdNr. DE 123 456 789', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }));
   const titleStack = new VerticalStack();
-  titleStack.add(cell('E-INVOICE', { bold: true, size: 24, color: ACCENT, align: TextAlignment.Right }));
+  const invoiceHeading = new Heading('E-INVOICE');
+  invoiceHeading.level = 1;
+  invoiceHeading.fontName = StandardFonts.HelveticaBold;
+  invoiceHeading.fontSize = 24;
+  invoiceHeading.color = ACCENT;
+  invoiceHeading.alignment = TextAlignment.Right;
+  titleStack.add(invoiceHeading);
   titleStack.add(
     cell('EN 16931 · Factur-X / ZUGFeRD', {
       size: 8,

@@ -7,7 +7,22 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 This file is maintained by hand. Add an entry under the current version with
 each change to `core/`.
 
+Each version includes `Status: Prerelease` for private releases or
+`Status: Released` and `Date: YYYY-MM-DD` for public releases. Keep one to five
+short, plain-text bullets under `### Highlights`, followed by the full notes
+under their own headings. A prerelease date is optional; do not infer it from
+the version number.
+
 ## 2026.10.15
+
+Status: Prerelease
+
+### Highlights
+
+- Faster text layout and large-document generation
+- Lower memory use and reusable font parsing
+- Content direction and embedded Arabic and Hebrew text
+- OpenType CFF fonts and opt-in colour emoji
 
 ### Performance Improvements
 
@@ -41,6 +56,17 @@ Text layout and document generation are faster and use less memory. Output is un
 - Tagged (PDF/UA) documents: a decorative region (`SemanticGroup` with the `Artifact` role) that spans pages stays an artifact on every page. Its continuation pages were left unmarked and their text tagged as paragraphs, and its first page was left with an unclosed marked-content sequence.
 
 ## 2026.10.0
+
+Status: Prerelease
+
+### Highlights
+
+- Native rotation, flip and translation elements
+- Self-contained document examples
+- More reliable SVG previews and encrypted PDFs
+- Simplified chart options, including breaking API changes
+
+### Changes
 
 - Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing. CI also verifies authoring equivalence and standalone playground execution for every example.
 
@@ -605,5 +631,13 @@ x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
   attested on every publish.
 
 ## 2026.7.2
+
+Status: Prerelease
+
+### Highlights
+
+- Changelog baseline; earlier changes are recorded in Git history
+
+### Changes
 
 - Baseline at the introduction of the hand-maintained changelog.

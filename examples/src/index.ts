@@ -136,6 +136,7 @@ import { generate as grantAwardLetter } from './industry-templates/community/gra
 import { generate as grantAwardLetterClasses } from './industry-templates/community/grant-award-letter-classes';
 import { generate as auditReport } from './industry-templates/compliance/audit-report';
 import { generate as auditReportClasses } from './industry-templates/compliance/audit-report-classes';
+import { generate as statutoryComplianceReport } from './industry-templates/compliance/statutory-compliance-report';
 import { generate as shelfLabel } from './industry-templates/retail/shelf-label';
 import { generate as shelfLabelClasses } from './industry-templates/retail/shelf-label-classes';
 import { generate as ukDegreeTranscript } from './industry-templates/education/uk-degree-transcript';
@@ -157,6 +158,7 @@ import { generate as courseCertificate } from './industry-templates/education/co
 import { generate as courseCertificateClasses } from './industry-templates/education/course-certificate-classes';
 import { generate as jobSheet } from './industry-templates/field/job-sheet';
 import { generate as jobSheetClasses } from './industry-templates/field/job-sheet-classes';
+import { generate as reactiveWorkOrder } from './industry-templates/field/reactive-work-order';
 import { generate as siteInspectionReport } from './industry-templates/field/site-inspection-report';
 import { generate as siteInspectionReportClasses } from './industry-templates/field/site-inspection-report-classes';
 import { generate as permitToWork } from './industry-templates/field/permit-to-work';
@@ -1821,6 +1823,26 @@ export const examples: ExampleDef[] = [
     variantOf: 'audit-report',
     variantLabel: 'Class API',
   },
+  {
+    id: 'statutory-compliance-report',
+    name: 'Statutory Compliance Report',
+    category: 'Compliance',
+    tier: 'examples',
+    region: 'UK',
+    description:
+      'A two-page quarterly compliance report for a managed site: KPI tiles, an inspection-status donut, a compliance-by-category bar chart, colour-coded key findings, an inspection register, a priority action plan, and sign-off.',
+    filename: 'statutory-compliance-report.pdf',
+    generate: statutoryComplianceReport,
+    dotnetClass: 'StatutoryComplianceReportExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Facilities', 'Compliance'],
+    documentType: 'report',
+    capabilities: ['charts', 'longTables'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'high',
+  },
 
   // Industry Templates - Education
   {
@@ -1936,6 +1958,26 @@ export const examples: ExampleDef[] = [
     gallery: false,
     variantOf: 'job-sheet',
     variantLabel: 'Class API',
+  },
+  {
+    id: 'reactive-work-order',
+    name: 'Reactive Work Order',
+    category: 'Field',
+    tier: 'examples',
+    region: 'UK',
+    description:
+      'An emergency facilities work order on one page: a priority banner with SLA times, a barcode and QR code for the job number, site and job cards, work carried out, a parts table, a cost summary, and engineer and client sign-off.',
+    filename: 'reactive-work-order.pdf',
+    generate: reactiveWorkOrder,
+    dotnetClass: 'ReactiveWorkOrderExample',
+    thumbnails: false,
+    pdfUa1: true,
+    industries: ['Facilities', 'FieldService'],
+    documentType: 'worksheet',
+    capabilities: ['barcodes', 'qr'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+    runtime: ['browser', 'node', 'edge'],
+    dataDensity: 'medium',
   },
   {
     id: 'inventory-schedule-of-condition',

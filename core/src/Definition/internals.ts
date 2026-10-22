@@ -30,16 +30,29 @@ export interface ExplicitText {
 export function explicitText(element: TextElementBase): ExplicitText {
   return {
     font: element['_fontExplicit'],
-    fontSize: element['_fontSize'] !== undefined,
-    color: element['_textColor'] !== undefined,
-    lineHeight: element['_lineHeight'] !== undefined,
-    decoration: element['_textDecoration'] !== undefined,
+    fontSize: element['_fontSizeExplicit'],
+    color: element['_textColorExplicit'],
+    lineHeight: element['_lineHeightExplicit'],
+    decoration: element['_textDecorationExplicit'],
   };
 }
 
 /** True when the font was chosen by family (so `fontFamily` is the name the author gave). */
 export function fontChosenByFamily(element: TextElementBase): boolean {
-  return element['_fontFamily'] !== undefined;
+  return element['_fontFamilyExplicit'] && element['_fontFamily'] !== undefined;
+}
+
+/** True when the font was named directly (`fontName`), bypassing family resolution. */
+export function fontNamed(element: TextElementBase): boolean {
+  return element['_fontFamilyExplicit'] && element['_fontFamily'] === undefined;
+}
+
+/** True when the weight / italic was assigned, rather than supplied by the default text style. */
+export function fontWeightExplicit(element: TextElementBase): boolean {
+  return element['_fontWeightExplicit'];
+}
+export function italicExplicit(element: TextElementBase): boolean {
+  return element['_italicExplicit'];
 }
 
 /** True when the alignment was assigned; otherwise an enclosing container may supply one. */

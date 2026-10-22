@@ -99,6 +99,7 @@ export abstract class TextElementBase extends ElementBase {
     this._fontName = value;
     this._fontFamily = undefined;
     this._fontExplicit = true;
+    this._fontFamilyExplicit = true;
   }
 
   /** True once user code explicitly sets any font-related property. */
@@ -107,6 +108,27 @@ export abstract class TextElementBase extends ElementBase {
   }
   private set _fontExplicit(value: boolean) {
     this._text = this._text.with('fontExplicit', value);
+  }
+
+  // Per-property tracking: the cascade fills each of family, weight and italic independently, so an
+  // explicit weight does not stop defaultTextStyle supplying the family (and the reverse).
+  private get _fontFamilyExplicit(): boolean {
+    return this._text.fontFamilyExplicit;
+  }
+  private set _fontFamilyExplicit(value: boolean) {
+    this._text = this._text.with('fontFamilyExplicit', value);
+  }
+  private get _fontWeightExplicit(): boolean {
+    return this._text.fontWeightExplicit;
+  }
+  private set _fontWeightExplicit(value: boolean) {
+    this._text = this._text.with('fontWeightExplicit', value);
+  }
+  private get _italicExplicit(): boolean {
+    return this._text.italicExplicit;
+  }
+  private set _italicExplicit(value: boolean) {
+    this._text = this._text.with('italicExplicit', value);
   }
 
   constructor() {
@@ -133,6 +155,32 @@ export abstract class TextElementBase extends ElementBase {
   private set _lineHeight(value: number | undefined) {
     this._text = this._text.with('lineHeight', value);
   }
+  // Whether user code assigned the property. A value the default text style supplied is not explicit, so
+  // a later generation can replace it (and a definition writer does not mistake it for the author's).
+  private get _fontSizeExplicit(): boolean {
+    return this._text.fontSizeExplicit;
+  }
+  private set _fontSizeExplicit(value: boolean) {
+    this._text = this._text.with('fontSizeExplicit', value);
+  }
+  private get _textColorExplicit(): boolean {
+    return this._text.textColorExplicit;
+  }
+  private set _textColorExplicit(value: boolean) {
+    this._text = this._text.with('textColorExplicit', value);
+  }
+  private get _lineHeightExplicit(): boolean {
+    return this._text.lineHeightExplicit;
+  }
+  private set _lineHeightExplicit(value: boolean) {
+    this._text = this._text.with('lineHeightExplicit', value);
+  }
+  private get _textDecorationExplicit(): boolean {
+    return this._text.textDecorationExplicit;
+  }
+  private set _textDecorationExplicit(value: boolean) {
+    this._text = this._text.with('textDecorationExplicit', value);
+  }
   private get _textDecoration(): TextDecoration | undefined {
     return this._text.textDecoration;
   }
@@ -149,6 +197,7 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set fontSize(value: LengthInput) {
     this._fontSize = toLength(value);
+    this._fontSizeExplicit = true;
   }
 
   /**
@@ -160,6 +209,7 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set color(value: ColorInput) {
     this._textColor = toColor(value);
+    this._textColorExplicit = true;
   }
 
   /**
@@ -171,6 +221,7 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set decoration(value: TextDecorationInput) {
     this._textDecoration = toTextDecoration(value);
+    this._textDecorationExplicit = true;
   }
 
   private get _decorationColor(): Color | undefined {
@@ -280,8 +331,9 @@ export abstract class TextElementBase extends ElementBase {
 
   public set fontFamily(value: string | undefined) {
     this._fontFamily = value;
-    this._fontExplicit = true;
     if (value !== undefined) {
+      this._fontExplicit = true;
+      this._fontFamilyExplicit = true;
       this.resolveFontName();
     }
   }
@@ -298,6 +350,7 @@ export abstract class TextElementBase extends ElementBase {
   public set fontWeight(value: FontWeightInput) {
     this._fontWeight = toFontWeight(value);
     this._fontExplicit = true;
+    this._fontWeightExplicit = true;
     this.resolveFontName();
   }
 
@@ -313,6 +366,7 @@ export abstract class TextElementBase extends ElementBase {
   public set italic(value: boolean) {
     this._italic = value;
     this._fontExplicit = true;
+    this._italicExplicit = true;
     this.resolveFontName();
   }
 
@@ -329,26 +383,39 @@ export abstract class TextElementBase extends ElementBase {
    */
   public applyDefaultStyleIfNotSet(style: TextStyle): void {
     this.fontFeatures ??= style.fontFeatures;
-    // Font: only apply if user hasn't touched any font property
-    if (!this._fontExplicit) {
-      if (style.fontFamily !== undefined) {
-        this._fontFamily = style.fontFamily;
-        if (style.fontWeight !== FontWeight.Normal) this._fontWeight = style.fontWeight;
-        if (style.italic) this._italic = true;
-        this.resolveFontName();
+    // Font: family, weight and italic cascade independently, each only if the user hasn't set it.
+    // A property the style does not supply returns to its library default, so a default that was changed
+    // or removed since the last cascade does not leave its old value behind.
+    let fontChanged = false;
+    if (!this._fontFamilyExplicit && this._fontFamily !== style.fontFamily) {
+      this._fontFamily = style.fontFamily;
+      fontChanged = true;
+    }
+    // A font named directly bypasses family resolution, so weight and italic do not apply to it.
+    if (!(this._fontFamilyExplicit && this._fontFamily === undefined)) {
+      if (!this._fontWeightExplicit && this._fontWeight !== style.fontWeight) {
+        this._fontWeight = style.fontWeight;
+        fontChanged = true;
+      }
+      if (!this._italicExplicit && this._italic !== style.italic) {
+        this._italic = style.italic;
+        fontChanged = true;
       }
     }
-    if (this._fontSize === undefined && style.fontSize !== undefined) {
-      this._fontSize = style.fontSize;
+    if (fontChanged) {
+      // Without a family the name is resolved from the base font, not from an earlier cascade's result.
+      if (!this._fontFamilyExplicit && this._fontFamily === undefined) {
+        this._fontName = SharedTextOptions.default.fontName;
+      }
+      this.resolveFontName();
     }
-    if (this._textColor === undefined && style.color !== undefined) {
-      this._textColor = style.color;
-    }
-    if (this._lineHeight === undefined && style.lineHeight !== undefined) {
-      this._lineHeight = style.lineHeight;
-    }
-    if (this._textDecoration === undefined && style.decoration !== TextDecoration.None) {
-      this._textDecoration = style.decoration;
+    // Writing the backing fields leaves the explicit flags alone, so a later generation with a different
+    // default can replace what this one supplied.
+    if (!this._fontSizeExplicit) this._fontSize = style.fontSize;
+    if (!this._textColorExplicit) this._textColor = style.color;
+    if (!this._lineHeightExplicit) this._lineHeight = style.lineHeight;
+    if (!this._textDecorationExplicit) {
+      this._textDecoration = style.decoration === TextDecoration.None ? undefined : style.decoration;
     }
   }
 
@@ -404,6 +471,7 @@ export abstract class TextElementBase extends ElementBase {
   }
   public set lineHeight(value: number) {
     this._lineHeight = value;
+    this._lineHeightExplicit = true;
   }
 
   /**

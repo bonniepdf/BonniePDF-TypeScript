@@ -14,7 +14,7 @@ import { PdfWriter } from './Rendering/Writers/PdfWriter';
 import { PdfDocumentSerializer } from './Rendering/PdfDocumentSerializer';
 import { getPlatformIO } from './Platform/PlatformIO';
 import { TextElementBase } from './Elements/Text/TextElementBase';
-import type { TextStyle } from './Elements/Text/TextStyle';
+import { TextStyle } from './Elements/Text/TextStyle';
 import { IDiagnostic, DiagnosticsCollector } from './Core/Diagnostics';
 import { exportSvgPagesAsync, exportSvgDocumentAsync, SvgDocumentExport } from './Export/SvgPageExporter';
 import type { SvgRasterizer } from './Rendering/Svg/ImportSvg';
@@ -523,11 +523,20 @@ export class Document {
 
   // ─── Default style cascade ────────────────────────────────────────────────────
 
+  private _defaultStyleCascaded = false;
+
   private applyDefaultStyleToTree(): void {
     for (const page of this._pages)
       for (const element of page.getElements()) applyContentDirection(element, this.settings.contentDirection);
-    const style = this.settings.defaultTextStyle;
-    if (!style) return;
+    let style = this.settings.defaultTextStyle;
+    if (!style) {
+      // A default that was removed since the last generation: return what it supplied to the library defaults.
+      if (!this._defaultStyleCascaded) return;
+      style = new TextStyle();
+      this._defaultStyleCascaded = false;
+    } else {
+      this._defaultStyleCascaded = true;
+    }
     for (const page of this._pages) {
       for (const el of page.getElements()) {
         Document.applyStyleToElement(el, style);

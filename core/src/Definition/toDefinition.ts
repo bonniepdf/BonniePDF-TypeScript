@@ -105,6 +105,9 @@ import {
   bulletColorSet,
   explicitText,
   fontChosenByFamily,
+  fontNamed,
+  fontWeightExplicit,
+  italicExplicit,
   listItems,
   richTextSpans,
   stackWeights,
@@ -626,14 +629,16 @@ class Writer {
     if (fontChosenByFamily(el)) {
       out.fontFamily = el.fontFamily;
     } else if (
-      !weighted ||
-      FontFamilyResolver.resolve(StandardFonts.Helvetica, el.fontWeight, el.italic) !== el.fontName
+      fontNamed(el) &&
+      (!weighted || FontFamilyResolver.resolve(StandardFonts.Helvetica, el.fontWeight, el.italic) !== el.fontName)
     ) {
       // A font that was named, rather than one the weight and italic resolved from the default.
       out.fontName = el.fontName;
     }
-    if (el.fontWeight !== FontWeight.Normal) out.fontWeight = this.wire('fontWeight', el.fontWeight);
-    if (el.italic) out.italic = true;
+    // Weight and italic that the default text style supplied are not the author's, so they are not written.
+    // An explicit normal weight or false italic is written too: it is a choice that stops the cascade.
+    if (fontWeightExplicit(el)) out.fontWeight = this.wire('fontWeight', el.fontWeight);
+    if (italicExplicit(el)) out.italic = el.italic;
     return out;
   }
 

@@ -211,6 +211,13 @@ const textFields = [
   'fontWeight',
   'italic',
   'fontExplicit',
+  'fontFamilyExplicit',
+  'fontWeightExplicit',
+  'italicExplicit',
+  'fontSizeExplicit',
+  'textColorExplicit',
+  'lineHeightExplicit',
+  'textDecorationExplicit',
   'alignmentExplicit',
   'textDecoration',
   'letterSpacing',
@@ -243,6 +250,13 @@ export class SharedTextOptions extends SharedOptions<SharedTextOptions> {
   readonly italic: boolean = false;
   readonly fontName: string = StandardFonts.Helvetica;
   readonly fontExplicit: boolean = false;
+  readonly fontFamilyExplicit: boolean = false;
+  readonly fontWeightExplicit: boolean = false;
+  readonly italicExplicit: boolean = false;
+  readonly fontSizeExplicit: boolean = false;
+  readonly textColorExplicit: boolean = false;
+  readonly lineHeightExplicit: boolean = false;
+  readonly textDecorationExplicit: boolean = false;
   readonly fontSize: number | undefined = undefined;
   readonly textColor: Color | undefined = undefined;
   readonly lineHeight: number | undefined = undefined;

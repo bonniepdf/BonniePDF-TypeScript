@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { FontMetrics } from '../../src/Typography/FontMetrics';
-import { pdfToText } from '../helpers/test-base';
+import { inflateSync } from 'node:zlib';
 
 /** Standard (unembedded) fonts use WinAnsiEncoding: typographic punctuation has its own byte, not the low byte of the code point. */
 describe('standard font text encoding', () => {
@@ -10,7 +10,13 @@ describe('standard font text encoding', () => {
     const doc = new Document();
     doc.add(new TextBlock(text));
     try {
-      return pdfToText(doc.generateBytes());
+      const bytes = doc.generateBytes();
+      const raw = Buffer.from(bytes).toString('latin1');
+      const start = raw.indexOf('stream\n') + 'stream\n'.length;
+      const end = raw.indexOf('endstream', start);
+      expect(start).toBeGreaterThan('stream\n'.length - 1);
+      expect(end).toBeGreaterThan(start);
+      return inflateSync(bytes.subarray(start, end)).toString('latin1');
     } finally {
       doc.dispose();
     }

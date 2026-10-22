@@ -1,3 +1,4 @@
+import { toElement } from './Normalize/toElement';
 import { throwIfAborted } from './Core/throwIfAborted';
 import { applyContentDirection } from './Elements/ContentDirectionResolver';
 import { DocumentSettings, type DocumentSettingsOptions } from './Configuration/DocumentSettings';
@@ -249,11 +250,11 @@ export class Document {
    * doc.add(new TextBlock('Prepared by Operations'));
    * ```
    */
-  public add(element: IElement): void {
+  public add(element: IElement | string | readonly string[]): void {
     if (this._disposed) throw new Error('Document has been disposed.');
-    if (!element) throw new Error('element cannot be null.');
+    const normalised = toElement(element);
     if (this._pages.length === 0) this.addPage();
-    this._pages[this._pages.length - 1].add(element);
+    this._pages[this._pages.length - 1].add(normalised);
   }
 
   /**

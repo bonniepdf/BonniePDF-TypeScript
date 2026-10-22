@@ -82,7 +82,8 @@ export class Heading extends TextBlock implements IStatefulElement {
   /** Convenience: the text as a positional payload, plus options. */
   constructor(text: string, options?: HeadingOptions);
   constructor(textOrOptions?: string | HeadingOptions, options?: HeadingOptions) {
-    super(typeof textOrOptions === 'string' ? textOrOptions : undefined);
+    super();
+    if (typeof textOrOptions === 'string') this.text = textOrOptions;
     applyOptions(this, typeof textOrOptions === 'string' ? options : textOrOptions);
   }
 

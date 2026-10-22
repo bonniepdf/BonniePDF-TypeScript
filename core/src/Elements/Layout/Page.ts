@@ -1,3 +1,4 @@
+import { toElement } from '../../Normalize/toElement';
 import { applyOptions } from '../../Core/applyOptions';
 import { IElement } from '../IElement';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
@@ -140,9 +141,8 @@ export class Page {
    * Adds an element to this page
    * @param element - The element to add
    */
-  public add(element: IElement): void {
-    if (!element) throw new Error('Element cannot be null');
-    this.elements.push(element);
+  public add(element: IElement | string | readonly string[]): void {
+    this.elements.push(toElement(element));
   }
 
   /**

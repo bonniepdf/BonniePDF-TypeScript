@@ -1,3 +1,4 @@
+import { textContent } from '../../Normalize/textContent';
 import { TextFlow, type TextFlowLine } from '../../Typography/TextFlow';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { TextElementBase, hasTwoSpaces } from './TextElementBase';
@@ -218,7 +219,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   }
 
   /** Creates a text block, optionally with its text. */
-  constructor(text?: string);
+  constructor(text?: string | readonly string[]);
   /**
    * Creates a text block configured in one expression.
    *
@@ -228,17 +229,18 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    */
   constructor(options: TextBlockOptions);
   /** Convenience: the text as a positional payload, plus options. */
-  constructor(text: string, options?: TextBlockOptions);
-  constructor(textOrOptions?: string | TextBlockOptions, options?: TextBlockOptions) {
+  constructor(text: string | readonly string[], options?: TextBlockOptions);
+  constructor(textOrOptions?: string | readonly string[] | TextBlockOptions, options?: TextBlockOptions) {
     super();
-    // Resolve the two accepted shapes into one text + one options bag. A string
-    // first argument is the payload; anything else is the options bag itself
+    // Resolve text or lines into one paragraph; a bare object is the options bag
+    // and may set the text property itself
     // (`09a §3.4`: an options object is the only bare-object argument form).
-    const isPositional = typeof textOrOptions === 'string';
+    if (arguments.length > 0 && textOrOptions == null) throw new TypeError('Text content cannot be null.');
+    const isPositional = typeof textOrOptions === 'string' || Array.isArray(textOrOptions);
     if (isPositional) {
-      this.text = textOrOptions;
+      this.text = textContent(textOrOptions as string | readonly string[]);
     }
-    applyOptions(this, isPositional ? options : textOrOptions);
+    applyOptions(this, isPositional ? options : (textOrOptions as TextBlockOptions | undefined));
   }
 
   /**

@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "svg-engine-typescript",
   "source": {
-    "commit": "7a03218fb4fc0694f0a4c7b03ee9e372a95b58ea",
+    "commit": "2947c3caab9a4b80a48882940eb6a2124e4a5f59",
     "dirty": false
   },
   "files": {
@@ -23,7 +23,7 @@
     "Parsers/Color.ts": "ed24ba731d6f180d927b593421da35d1783779c9d001aa9d70bd34f6094eba95",
     "Parsers/Length.ts": "663afa178d4ad1a5043feba8a72570c9c93178cca39da5f31b0e754f5fa7e75f",
     "Parsers/NamedColors.ts": "da41aae0642c2237fbaf0b45f21243a1c159345fb703839b6c8a717249b1551d",
-    "Parsers/PathData.ts": "8a488a84823aa8e79d6a164769b4dbaf2da37f86e2f9ba3ce9e2992b80a289b8",
+    "Parsers/PathData.ts": "3b8f1340359a54d957a310ba1a8f4dd7791fabf54375b7fd7865768341ace5da",
     "Parsers/Tokens.ts": "6edd85ac764416266306893dc9dd563733d5d9096e42e4add7e018aa14350f3f",
     "Parsers/Transform.ts": "030c0c9b219c3cf3b61bead5768f7a596e960089d7f3176232af5156a8637c18",
     "Parsers/ViewBox.ts": "9e3a4bd19b38a32656b3a887550b77a22f741f9dc45f76d5a3b08136354c1e41",

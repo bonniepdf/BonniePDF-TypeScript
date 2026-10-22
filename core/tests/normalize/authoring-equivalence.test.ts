@@ -29,7 +29,7 @@ function renderSvg(doc: Document): string {
   return (doc.pages as Page[]).map(p => toSvg(p)).join('\n');
 }
 
-/** Mirrors the opening of `examples/src/recipes/basics/simple-document.ts`. */
+/** Mirrors the opening of `examples/src/code-recipes/getting-started/simple-document.ts`. */
 function legacyStyle(): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;

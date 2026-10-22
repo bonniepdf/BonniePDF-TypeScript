@@ -33,9 +33,9 @@ BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, f
     </td>
   </tr>
   <tr>
-    <td align="center"><strong>Annual reports</strong><br />Gradient shadings, vector composition and cover typography<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/annual-report.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/reports/annual-report-gradient-cover">Live example</a></td>
-    <td align="center"><strong>Executive dashboards</strong><br />KPIs, charts and data-rich tables<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/financial-dashboard.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/reports/financial-dashboard">Live example</a></td>
-    <td align="center"><strong>Business documents</strong><br />Automatic layout, flow and pagination<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/business-invoice.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/invoices/business-invoice">Live example</a></td>
+    <td align="center"><strong>Annual reports</strong><br />Gradient shadings, vector composition and cover typography<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/annual-report.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/finance-reporting/annual-report-gradient-cover">Live example</a></td>
+    <td align="center"><strong>Executive dashboards</strong><br />KPIs, charts and data-rich tables<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/financial-dashboard.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/finance-reporting/financial-dashboard">Live example</a></td>
+    <td align="center"><strong>Business documents</strong><br />Automatic layout, flow and pagination<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/business-invoice.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/invoices/business-invoice">Live example</a></td>
   </tr>
   <tr>
     <td width="33%" align="center">
@@ -55,9 +55,9 @@ BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, f
     </td>
   </tr>
   <tr>
-    <td align="center"><strong>Shipping labels</strong><br />Barcodes, QR codes and precision page sizing<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/shipping-label.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/operations/shipping-label">Live example</a></td>
-    <td align="center"><strong>Clinical reports</strong><br />Structured clinical data and accessible tables<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/pathology-lab-report.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/healthcare/lab-report">Live example</a></td>
-    <td align="center"><strong>Public-service letters</strong><br />Multi-page typography and branded layouts<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/public-library-membership.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/community/public-library-membership-letter">Live example</a></td>
+    <td align="center"><strong>Shipping labels</strong><br />Barcodes, QR codes and precision page sizing<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/shipping-label.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/sales-supply-chain/shipping-label">Live example</a></td>
+    <td align="center"><strong>Clinical reports</strong><br />Structured clinical data and accessible tables<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/pathology-lab-report.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/healthcare/lab-report">Live example</a></td>
+    <td align="center"><strong>Public-service letters</strong><br />Multi-page typography and branded layouts<br /><a href="https://github.com/bonniepdf/BonniePDF-TypeScript/blob/master/docs/pdf/public-library-membership.pdf">View PDF</a> · <a href="https://www.bonniepdf.dev/examples/industry-templates/education-public-sector/public-library-membership-letter">Live example</a></td>
   </tr>
 </table>
 

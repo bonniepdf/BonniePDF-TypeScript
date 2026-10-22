@@ -1,5 +1,5 @@
 // Shared Node runtime setup for the scripts that render the example catalogue
-// (generate-tagged-pdfs.ts, generate-showcase-assets.ts).
+// (generate-tagged-pdfs.ts, generate-examples-assets.ts).
 //
 // The examples are written for the browser: they reference fonts by asset URL
 // and expect a platform layer for file and deflate access. Both scripts need

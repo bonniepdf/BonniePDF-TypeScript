@@ -4,7 +4,7 @@ Each catalogue example is one TypeScript file. It imports only `@bonniepdf/core`
 and includes its own sample data, formatting functions, and drawing helpers.
 The public `generate()` function builds the document; local helpers follow it.
 
-Start with `src/recipes/basics/first-pdf.ts`, then explore the recipes for an
+Start with `src/code-recipes/getting-started/first-pdf.ts`, then explore the recipes for an
 individual feature. The exampless combine those features into complete documents.
 Files ending in `-classes.ts` demonstrate the underlying class API and produce
 the same document as their corresponding options-based example.

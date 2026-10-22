@@ -90,6 +90,8 @@ jobs:
 
       - name: Verify hand-written fixtures are present
         run: |
+          test -s generated-pdfs/pdfa1b_baseline.pdf
+          test -s generated-pdfs/pdfa1a_baseline.pdf
           test -s generated-pdfs/pdfa3a_baseline.pdf
           test -s generated-pdfs/pdfa4_baseline.pdf
           test -s generated-pdfs/factur-x_invoice.pdf

@@ -23,3 +23,7 @@ core/tests/typography/fixtures/SourceSans3-CFF-LICENSE.md
 core/tests/typography/fixtures/SourceSerif4-CFF-LICENSE.md
 core/tests/typography/fixtures/emoji.json
 core/tests/typography/fixtures/rtl.json
+
+# Third-party licence notices bundled with the example fonts are copied verbatim.
+examples/assets/fonts/*LICENSE*
+examples/assets/fonts/*OFL*

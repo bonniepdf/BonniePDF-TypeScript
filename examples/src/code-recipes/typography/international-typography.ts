@@ -183,7 +183,7 @@ function specimen(
     margin: { bottom: 10 },
     child: new VerticalStack({
       children: [
-        new TextBlock(label, { fontName, fontSize: 8.5, color: 'slate-500', margin: { bottom: 4 } }),
+        new TextBlock(label, { fontName, fontSize: 8.5, color: 'slate-600', margin: { bottom: 4 } }),
         new TextBlock('AVATAR To Wave', { fontName, fontSize: 40, color: 'slate-800', fontFeatures }),
         new TextBlock('office affluent flagship', { fontName, fontSize: 27, color: 'slate-800', fontFeatures }),
       ],

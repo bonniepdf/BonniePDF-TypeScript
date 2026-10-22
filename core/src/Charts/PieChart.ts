@@ -327,7 +327,7 @@ export class PieChart extends ChartBase {
     dataPoints: ChartDataPoint[],
     colors: Color[],
     layout: PieLayout,
-    total: number
+    _total: number
   ): void {
     for (let i = 0; i < dataPoints.length; i++) {
       const dataPoint = dataPoints[i];

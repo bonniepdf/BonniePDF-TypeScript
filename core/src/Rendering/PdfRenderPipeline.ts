@@ -135,7 +135,7 @@ export class PdfRenderPipeline {
       const stateful = element;
 
       // Check if this element disallows breaking across pages
-      if ((element as any).breakAllowed === false) {
+      if ((element as { breakAllowed?: boolean }).breakAllowed === false) {
         const elementHeight = element.measureHeight(contentWidth);
         const wouldOverflow = ctx.currentY + elementHeight > ctx.maxY;
         const notAtTop = ctx.currentY > ctx.contentTop;

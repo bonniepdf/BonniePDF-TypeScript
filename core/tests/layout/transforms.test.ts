@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { contentStreams } from '../helpers/test-base';
 import { describe, it, expect } from 'vitest';
-import { Rotate } from '../../src/Elements/Layout/Rotate';
 import { Container } from '../../src/Elements/Layout/Container';
 import { PageBreak } from '../../src/Elements/Layout/PageBreak';
 import { PdfSize } from '../../src/Configuration/PdfSize';

@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
-import { Document } from '../../src/Document';
 import { fromDefinition, validateDefinition, DefinitionError, DEFINITION_VERSIONS } from '../../src/definition';
 import { pdfToText } from '../helpers/test-base';
 import { DEFINITION_FIXTURES } from './fixtures.generated';

@@ -14,11 +14,14 @@ export class BigEndianReader {
   }
 
   public readUInt32(): number {
+    // `>>> 0` reinterprets the signed result of the bitwise operators as unsigned, so values of 2^31
+    // and above are not returned negative.
     const value =
-      (this.data[this.position] << 24) |
-      (this.data[this.position + 1] << 16) |
-      (this.data[this.position + 2] << 8) |
-      this.data[this.position + 3];
+      ((this.data[this.position] << 24) |
+        (this.data[this.position + 1] << 16) |
+        (this.data[this.position + 2] << 8) |
+        this.data[this.position + 3]) >>>
+      0;
     this.position += 4;
     return value;
   }

@@ -66,7 +66,8 @@ import { DotPlotChart } from '../Charts/DotPlotChart';
 import { LollipopChart } from '../Charts/LollipopChart';
 import { PieChart } from '../Charts/PieChart';
 import { ELEMENT_DESCRIPTION } from './ElementDescription';
-import type { KeySpec, ShapeSpec } from './ElementDescriptionTypes';
+import { keysOf } from './keysOf';
+import type { ShapeSpec } from './ElementDescriptionTypes';
 import type { DefinitionIssue, DocumentDefinition, ValidateOptions } from './DefinitionTypes';
 import { validateDefinition } from './validateDefinition';
 import type { SvgRasterizer } from '../Rendering/Svg/ImportSvg';
@@ -130,12 +131,6 @@ const UNIT_BY_TOKEN: Record<string, Unit> = { pt: Unit.Point, in: Unit.Inch, cm:
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
-
-function keysOf(spec: ShapeSpec): Record<string, KeySpec> {
-  const merged: Record<string, KeySpec> = {};
-  for (const use of spec.uses ?? []) Object.assign(merged, D.mixins[use]);
-  return Object.assign(merged, spec.keys);
-}
 
 // ── value conversion ────────────────────────────────────────────────────────
 

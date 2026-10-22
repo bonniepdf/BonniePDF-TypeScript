@@ -153,19 +153,6 @@ export class AreaChart extends CartesianChartBase {
   }
 
   /**
-   * Draws the connecting line on top of the area fill for a series.
-   */
-  private drawConnectingLine(canvas: ICanvas, coordinates: Point[], color: Color, lineWidth: number): void {
-    if (coordinates.length < 2) return;
-
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const p1 = coordinates[i];
-      const p2 = coordinates[i + 1];
-      canvas.drawLine(p1.x, p1.y, p2.x, p2.y, color, lineWidth);
-    }
-  }
-
-  /**
    * Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
    * Returns the chart's AreaColor property for backward compatibility.
    */

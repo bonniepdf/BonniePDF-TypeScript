@@ -1,5 +1,6 @@
 import { isChartNumberFormat } from '../Charts/ChartNumberFormat';
 import { ELEMENT_DESCRIPTION } from './ElementDescription';
+import { keysOf } from './keysOf';
 import {
   DEFAULT_DEFINITION_LIMITS,
   DEFINITION_VERSIONS,
@@ -40,19 +41,6 @@ interface Ref {
   value: unknown;
   path: string;
   id?: string;
-}
-
-/** Merges the keys of a shape or element with the mixins it uses. */
-const keyCache = new Map<ShapeSpec, Record<string, KeySpec>>();
-function keysOf(spec: ShapeSpec): Record<string, KeySpec> {
-  let merged = keyCache.get(spec);
-  if (!merged) {
-    merged = {};
-    for (const use of spec.uses ?? []) Object.assign(merged, D.mixins[use]);
-    Object.assign(merged, spec.keys);
-    keyCache.set(spec, merged);
-  }
-  return merged;
 }
 
 /** Bytes of a base64 string once decoded, without decoding it. */

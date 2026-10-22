@@ -21,15 +21,23 @@ Status: Prerelease
 
 - `defaultTextStyle` now fills font family, weight and italic independently
 - A changed `defaultTextStyle` now applies on regeneration, as it does in .NET
+- A font used for two purposes is embedded once, and `generateBytes` and `generateBytesAsync` embed the same fonts
 
 ### Fixed
 
+- **A font is embedded once, however many roles it plays.** A document font is also a glyph-fallback candidate for the document's other fonts, and was embedded a second time under its fallback key. It is now embedded once and renders the same: the emojis-and-unicode example 106,894 to 99,554 bytes, colour-emojis 53,668 to 50,894, international-typography 64,486 to 61,663.
+- **`generateBytes()` and `generateBytesAsync()` now embed the same font subsets.** A text run was matched to its font registration by font instance, taking the first match, and the two paths register a shared font in a different order, so the same document embedded different subsets depending on the API (the emojis-and-unicode example was 134,583 bytes through `generateBytes()` and 109,126 through `generateBytesAsync()`). Each run now resolves the registration its own identifier names, and both paths produce the same output.
+- **Unsigned 32-bit values are read as unsigned.** The big-endian reader returned the signed result of its bitwise operators, so values of 2^31 and above came back negative.
 - **Changing or removing `defaultTextStyle` now takes back what it supplied.** A value the default had supplied (font family, weight, italic, size, colour, line height, decoration) used to stay on the element when a later generation's default no longer set it, or when `defaultTextStyle` was removed. Those values now return to the library defaults, and anything the element's author set is untouched.
 - **Assigning `fontFamily = undefined` no longer marks the font as explicitly set**, matching .NET, so the default text style can still supply it.
 - **A changed `defaultTextStyle` now applies when the document is generated again.** Size, colour, line height and decoration that the default supplied were stored as if the author had set them, so changing `doc.settings.defaultTextStyle` and calling `generateBytes()` again left the first values in place, while .NET applied the new ones. They are now tracked as set only when assigned, so the new default replaces them and values you assigned are never replaced. Definition export likewise no longer writes cascaded size, colour, line height or decoration as the author's.
 - **A document's default font family no longer disappears when an element sets its own weight or italic.** Assigning `fontWeight`, `italic` or `fontFamily` on a text element used to mark the whole font as chosen, so `defaultTextStyle` supplied none of it: with a default family of `Times`, a text block with `fontWeight = FontWeight.Bold` rendered in Helvetica-Bold rather than Times-Bold. Family, weight and italic are now tracked separately, and the default fills whichever of them the element has not set. An explicit `FontWeight.Normal` or `italic = false` is a choice and is kept.
 - **A default weight or italic given without a family now applies.** A `defaultTextStyle` with only `withWeight` or `withItalic` was ignored; it now reaches elements that have not set those properties. A font named directly through `fontName` is not given a default weight or italic, because a named font bypasses family resolution.
 - **Definition export no longer writes defaults as the author's choices.** `toDefinition` writes `fontFamily`, `fontWeight` and `italic` only for values the element's author set, and writes an explicit normal weight or `false` italic rather than dropping it, so a round trip keeps the cascade intact.
+
+### Changed
+
+- **Less duplicated code across charts, encryption, the definition reader and writer, and fonts.** The grouped bar chart no longer repeats the base chart's x-axis labels, `drawConnectingLine` moved into `CartesianChartBase`, the encryption code shares one byte-concatenation helper, the definition reader, writer and validator share one cached key lookup, placeholders use the shared Adler-32, the ToUnicode CMap header is built once, and both font-registration paths use one `addEmbeddedFont`. Behaviour, output and public API are unchanged: the PDF (synchronous and asynchronous) and SVG output of the whole example catalogue is byte-identical before and after, apart from the random salts and IVs of AES-256 documents.
 
 ## 2026.10.15
 

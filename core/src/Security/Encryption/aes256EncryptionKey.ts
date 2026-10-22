@@ -1,10 +1,7 @@
 import { AesCipher } from './aesCipher';
+import { asBuffer, concatBytes } from './bytes';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { PermissionEncoder } from '../Permissions/PermissionEncoder';
-
-function asBuffer(data: Uint8Array): ArrayBuffer {
-  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
-}
 
 /**
  * Derives the keys and validation values required by PDF AES-256 encryption
@@ -133,12 +130,12 @@ export class Aes256EncryptionKey {
  * encryption mixed in. Runs at least 64 rounds.
  */
 async function algorithm2B(password: Uint8Array, salt: Uint8Array, userKey: Uint8Array): Promise<Uint8Array> {
-  let K = new Uint8Array(await crypto.subtle.digest('SHA-256', asBuffer(concat(password, salt, userKey))));
+  let K = new Uint8Array(await crypto.subtle.digest('SHA-256', asBuffer(concatBytes(password, salt, userKey))));
 
   let round = 0;
   while (true) {
     // K1 = (password + K + userKey) repeated 64 times
-    const sequence = concat(password, K, userKey);
+    const sequence = concatBytes(password, K, userKey);
     const K1 = new Uint8Array(sequence.length * 64);
     for (let i = 0; i < 64; i++) K1.set(sequence, i * sequence.length);
 
@@ -163,17 +160,4 @@ async function algorithm2B(password: Uint8Array, salt: Uint8Array, userKey: Uint
   }
 
   return K.slice(0, 32);
-}
-
-function concat(...arrays: Uint8Array[]): Uint8Array {
-  const total = arrays.reduce((n, a) => n + (a?.length ?? 0), 0);
-  const result = new Uint8Array(total);
-  let offset = 0;
-  for (const a of arrays) {
-    if (a?.length) {
-      result.set(a, offset);
-      offset += a.length;
-    }
-  }
-  return result;
 }

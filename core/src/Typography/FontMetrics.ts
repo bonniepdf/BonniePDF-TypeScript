@@ -1,5 +1,6 @@
 import type { GlyphRun } from './Engine/Api/GlyphRun';
 import { FontManager } from './FontManager';
+import { winAnsiByte } from './WinAnsi';
 import { primaryCovers, shapeTextRuns } from './TextRunShaper';
 import { getActiveDocumentFonts } from './DocumentFontMetricScope';
 import { TtfFont } from './TrueType/TtfFont';
@@ -56,6 +57,69 @@ export class FontMetrics {
   //
   // Each table is indexed by (codePoint - 32) over ASCII 32–126 (95 entries),
   // in the 1000-unit em used by PDF standard fonts.
+
+  // Codes 0x80-0xFF (WinAnsiEncoding). Derived from the metric-compatible Liberation faces, which agree with
+  // the tables above on every ASCII character; ISO 32000-1 Annex D does not tabulate these codes.
+
+  // Helvetica: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly HelveticaHighWidths = [
+    556, 0, 222, 556, 333, 1000, 556, 556, 333, 1000, 667, 333, 1000, 0, 611, 0, 0, 222, 222, 333, 333, 350, 556, 1000,
+    333, 1000, 500, 333, 944, 0, 500, 667, 278, 333, 556, 556, 556, 556, 260, 556, 333, 737, 370, 556, 584, 333, 737,
+    552, 400, 549, 333, 333, 333, 576, 537, 333, 333, 333, 365, 556, 834, 834, 834, 611, 667, 667, 667, 667, 667, 667,
+    1000, 722, 667, 667, 667, 667, 278, 278, 278, 278, 722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722,
+    667, 667, 611, 556, 556, 556, 556, 556, 556, 889, 500, 556, 556, 556, 556, 278, 278, 278, 278, 556, 556, 556, 556,
+    556, 556, 556, 549, 611, 556, 556, 556, 556, 500, 556, 500,
+  ];
+
+  // HelveticaBold: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly HelveticaBoldHighWidths = [
+    556, 0, 278, 556, 500, 1000, 556, 556, 333, 1000, 667, 333, 1000, 0, 611, 0, 0, 278, 278, 500, 500, 350, 556, 1000,
+    333, 1000, 556, 333, 944, 0, 500, 667, 278, 333, 556, 556, 556, 556, 280, 556, 333, 737, 370, 556, 584, 333, 737,
+    552, 400, 549, 333, 333, 333, 576, 556, 333, 333, 333, 365, 556, 834, 834, 834, 611, 722, 722, 722, 722, 722, 722,
+    1000, 722, 667, 667, 667, 667, 278, 278, 278, 278, 722, 722, 778, 778, 778, 778, 778, 584, 778, 722, 722, 722, 722,
+    667, 667, 611, 556, 556, 556, 556, 556, 556, 889, 556, 556, 556, 556, 556, 278, 278, 278, 278, 611, 611, 611, 611,
+    611, 611, 611, 549, 611, 611, 611, 611, 611, 556, 611, 556,
+  ];
+
+  // Times: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly TimesHighWidths = [
+    500, 0, 333, 500, 444, 1000, 500, 500, 333, 1000, 556, 333, 889, 0, 611, 0, 0, 333, 333, 444, 444, 350, 500, 1000,
+    333, 980, 389, 333, 722, 0, 444, 722, 250, 333, 500, 500, 500, 500, 200, 500, 333, 760, 276, 500, 564, 333, 760,
+    500, 400, 549, 300, 300, 333, 576, 453, 333, 333, 300, 310, 500, 750, 750, 750, 444, 722, 722, 722, 722, 722, 722,
+    889, 667, 611, 611, 611, 611, 333, 333, 333, 333, 722, 722, 722, 722, 722, 722, 722, 564, 722, 722, 722, 722, 722,
+    722, 556, 500, 444, 444, 444, 444, 444, 444, 667, 444, 444, 444, 444, 444, 278, 278, 278, 278, 500, 500, 500, 500,
+    500, 500, 500, 549, 500, 500, 500, 500, 500, 500, 500, 500,
+  ];
+
+  // TimesBold: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly TimesBoldHighWidths = [
+    500, 0, 333, 500, 500, 1000, 500, 500, 333, 1000, 556, 333, 1000, 0, 667, 0, 0, 333, 333, 500, 500, 350, 500, 1000,
+    333, 1000, 389, 333, 722, 0, 444, 722, 250, 333, 500, 500, 500, 500, 220, 500, 333, 747, 300, 500, 570, 333, 747,
+    500, 400, 549, 300, 300, 333, 576, 540, 333, 333, 300, 330, 500, 750, 750, 750, 500, 722, 722, 722, 722, 722, 722,
+    1000, 722, 667, 667, 667, 667, 389, 389, 389, 389, 722, 722, 778, 778, 778, 778, 778, 570, 778, 722, 722, 722, 722,
+    722, 611, 556, 500, 500, 500, 500, 500, 500, 722, 444, 444, 444, 444, 444, 278, 278, 278, 278, 500, 556, 500, 500,
+    500, 500, 500, 549, 500, 556, 556, 556, 556, 500, 556, 500,
+  ];
+
+  // TimesItalic: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly TimesItalicHighWidths = [
+    500, 0, 333, 500, 556, 889, 500, 500, 333, 1000, 500, 333, 944, 0, 556, 0, 0, 333, 333, 556, 556, 350, 500, 889,
+    333, 980, 389, 333, 667, 0, 389, 556, 250, 389, 500, 500, 500, 500, 275, 500, 333, 760, 276, 500, 675, 333, 760,
+    500, 400, 549, 300, 300, 333, 576, 523, 250, 333, 300, 310, 500, 750, 750, 750, 500, 611, 611, 611, 611, 611, 611,
+    889, 667, 611, 611, 611, 611, 333, 333, 333, 333, 722, 667, 722, 722, 722, 722, 722, 675, 722, 722, 722, 722, 722,
+    556, 611, 500, 500, 500, 500, 500, 500, 500, 667, 444, 444, 444, 444, 444, 278, 278, 278, 278, 500, 500, 500, 500,
+    500, 500, 500, 549, 500, 500, 500, 500, 500, 444, 500, 444,
+  ];
+
+  // TimesBoldItalic: codes 0x80-0x9F then 0xA0-0xFF. 0 marks an undefined code.
+  private static readonly TimesBoldItalicHighWidths = [
+    500, 0, 333, 500, 500, 1000, 500, 500, 333, 1000, 556, 333, 944, 0, 611, 0, 0, 333, 333, 500, 500, 350, 500, 1000,
+    333, 1000, 389, 333, 722, 0, 389, 611, 250, 389, 500, 500, 500, 500, 220, 500, 333, 747, 266, 500, 606, 333, 747,
+    500, 400, 549, 300, 300, 333, 576, 500, 250, 333, 300, 300, 500, 750, 750, 750, 500, 667, 667, 667, 667, 667, 667,
+    944, 667, 667, 667, 667, 667, 389, 389, 389, 389, 722, 722, 722, 722, 722, 722, 722, 570, 722, 722, 722, 722, 722,
+    611, 611, 500, 500, 500, 500, 500, 500, 500, 722, 444, 444, 444, 444, 444, 278, 278, 278, 278, 500, 556, 500, 500,
+    500, 500, 500, 549, 500, 556, 556, 556, 556, 444, 500, 444,
+  ];
 
   // Helvetica
   private static readonly HelveticaWidths = [
@@ -314,6 +378,27 @@ export class FontMetrics {
     };
   }
 
+  private static getStandardFontHighTable(fontName: string): readonly number[] | null {
+    switch (fontName) {
+      case 'Helvetica':
+      case 'Helvetica-Oblique':
+        return this.HelveticaHighWidths;
+      case 'Helvetica-Bold':
+      case 'Helvetica-BoldOblique':
+        return this.HelveticaBoldHighWidths;
+      case 'Times-Roman':
+        return this.TimesHighWidths;
+      case 'Times-Bold':
+        return this.TimesBoldHighWidths;
+      case 'Times-Italic':
+        return this.TimesItalicHighWidths;
+      case 'Times-BoldItalic':
+        return this.TimesBoldItalicHighWidths;
+      default:
+        return null;
+    }
+  }
+
   private static getStandardFontTable(fontName: string): readonly number[] | null {
     switch (fontName) {
       case 'Helvetica':
@@ -342,14 +427,23 @@ export class FontMetrics {
   private static getStandardFontWidth(text: string, fontName: string, fontSize: number): number {
     // Courier variants: all use a fixed 600-unit advance (monospace)
     if (fontName.includes('Courier')) {
-      return text.length * (fontSize * 0.6);
+      let count = 0;
+      for (const _ of text) count++;
+      return count * (fontSize * 0.6);
     }
 
     const table = this.getStandardFontTable(fontName);
+    const highTable = this.getStandardFontHighTable(fontName);
     let totalWidth = 0;
     for (const c of text) {
-      const index = c.charCodeAt(0) - 32;
-      const w = table && index >= 0 && index < table.length ? table[index] : 500;
+      // The text fonts show a character through its WinAnsi byte, so measure that byte.
+      const code = highTable ? winAnsiByte(c.codePointAt(0)!) : c.charCodeAt(0);
+      const w =
+        (code >= 128 && highTable
+          ? highTable[code - 128]
+          : table && code >= 32 && code - 32 < table.length
+            ? table[code - 32]
+            : 0) || 500;
       totalWidth += w;
     }
     return (totalWidth / 1000) * fontSize;

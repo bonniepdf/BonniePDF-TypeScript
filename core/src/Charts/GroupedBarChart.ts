@@ -75,7 +75,13 @@ export class GroupedBarChart extends CartesianChartBase {
         const barWidth = p.x - CartesianChartBase.LEFT_PADDING;
         const slot = this.barSlot(i, seriesIndex, seriesCount, categoryCount, topAreaY, chartAreaHeight);
 
-        canvas.fillRect(CartesianChartBase.LEFT_PADDING, slot.start, barWidth, slot.thickness, series.color);
+        canvas.fillRect(
+          CartesianChartBase.LEFT_PADDING,
+          slot.start,
+          barWidth,
+          slot.thickness,
+          this.resolveSeriesColor(series)
+        );
       }
     } else {
       for (let i = 0; i < coordinates.length; i++) {
@@ -90,7 +96,7 @@ export class GroupedBarChart extends CartesianChartBase {
           chartAreaWidth
         );
 
-        canvas.fillRect(slot.start, p.y, slot.thickness, barHeight, series.color);
+        canvas.fillRect(slot.start, p.y, slot.thickness, barHeight, this.resolveSeriesColor(series));
       }
     }
   }
@@ -156,7 +162,7 @@ export class GroupedBarChart extends CartesianChartBase {
             point.x + offset,
             slot.start + slot.thickness / 2 - this.labelFontSize / 2,
             text,
-            series.color,
+            this.resolveSeriesColor(series),
             this.labelFontSize,
             this.fontFamily,
             TextAlignment.Left
@@ -174,7 +180,7 @@ export class GroupedBarChart extends CartesianChartBase {
             slot.start + slot.thickness / 2,
             point.y - offset - this.labelFontSize,
             text,
-            series.color,
+            this.resolveSeriesColor(series),
             this.labelFontSize,
             this.fontFamily,
             TextAlignment.Center

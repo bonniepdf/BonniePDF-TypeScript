@@ -140,14 +140,24 @@ export class ChartSeries {
   /**
    * Color to use for this series (lines, bars, markers, etc.)
    */
-  private _color: Color = Color.fromHex('#4f46e5');
+  private _color: Color | undefined;
 
-  /** Series colour. Accepts a palette token or hex. */
+  /**
+   * Series colour. Accepts a palette token or hex. A series the author gave no colour reads as `#4f46e5`
+   * and is drawn in its chart's own colour (`barColor`, `lineColor`, `areaColor`, `dotColor`, `lollipopColor`).
+   */
   public get color(): Color {
-    return this._color;
+    return this._color ?? ChartSeries.DEFAULT_COLOR;
   }
   public set color(value: ColorInput) {
     this._color = toColor(value);
+  }
+
+  private static readonly DEFAULT_COLOR = Color.fromHex('#4f46e5');
+
+  /** @internal Whether the author gave this series a colour; an unset series takes its chart's colour. */
+  public get hasColor(): boolean {
+    return this._color !== undefined;
   }
 
   /**

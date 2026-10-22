@@ -117,8 +117,8 @@ export class AreaChart extends CartesianChartBase {
           ? this.lineWidth
           : this.defaultLineWidth;
 
-    this.drawAreaFill(canvas, coordinates, baselineY, series.color, fillOpacity);
-    this.drawConnectingLine(canvas, coordinates, series.color, lineWidth);
+    this.drawAreaFill(canvas, coordinates, baselineY, this.resolveSeriesColor(series), fillOpacity);
+    this.drawConnectingLine(canvas, coordinates, this.resolveSeriesColor(series), lineWidth);
   }
 
   /**

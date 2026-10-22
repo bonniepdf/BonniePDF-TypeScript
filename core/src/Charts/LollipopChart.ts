@@ -82,8 +82,8 @@ export class LollipopChart extends CartesianChartBase {
     const headRadius =
       series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultHeadRadius;
 
-    this.drawLollipopStems(canvas, coordinates, baselineY, series.color, stemWidth);
-    this.drawLollipopHeads(canvas, coordinates, series.color, headRadius);
+    this.drawLollipopStems(canvas, coordinates, baselineY, this.resolveSeriesColor(series), stemWidth);
+    this.drawLollipopHeads(canvas, coordinates, this.resolveSeriesColor(series), headRadius);
   }
 
   /**

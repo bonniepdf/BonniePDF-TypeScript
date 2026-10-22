@@ -268,7 +268,7 @@ export abstract class CartesianChartBase extends ChartBase {
     for (const series of data.series) {
       const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
 
-      const labelColor = series.color;
+      const labelColor = this.resolveSeriesColor(series);
       const offset = this.getLabelVerticalOffset(series);
 
       for (let i = 0; i < series.dataPoints.length; i++) {
@@ -320,7 +320,7 @@ export abstract class CartesianChartBase extends ChartBase {
       const series = data.series[i];
       const x = legendStartX + i * legendItemWidth;
 
-      canvas.fillRect(x, legendY, colorBoxSize, colorBoxSize, series.color);
+      canvas.fillRect(x, legendY, colorBoxSize, colorBoxSize, this.resolveSeriesColor(series));
 
       canvas.drawText(
         x + colorBoxSize + 5,
@@ -618,10 +618,18 @@ export abstract class CartesianChartBase extends ChartBase {
   }
 
   /**
-   * Gets the default color for the first series.
+   * Gets the default color for a series the author gave no colour.
    */
   protected getDefaultSeriesColor(): Color {
     return Color.fromHex('#4f46e5');
+  }
+
+  /**
+   * The colour a series is drawn in: its own when the author set one, otherwise the chart's own colour
+   * (`barColor`, `lineColor`, `areaColor`, `dotColor`, `lollipopColor`).
+   */
+  protected resolveSeriesColor(series: ChartSeries): Color {
+    return series.hasColor ? series.color : this.getDefaultSeriesColor();
   }
 
   /**

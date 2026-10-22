@@ -75,7 +75,7 @@ export class DotPlotChart extends CartesianChartBase {
       series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultDotRadius;
 
     // Draw data point circles
-    this.drawDataPoints(canvas, coordinates, series.color, dotRadius);
+    this.drawDataPoints(canvas, coordinates, this.resolveSeriesColor(series), dotRadius);
   }
 
   /**

@@ -851,7 +851,7 @@ export class PdfCanvas implements ICanvas {
       }
       PdfOperators.setFont(this.stream, run.resourceName, fontSize);
       if (!font || !glyphs || !codes) {
-        PdfOperators.showText(this.stream, `(${PdfSyntax.escape(run.text)})`);
+        PdfOperators.showText(this.stream, `(${PdfSyntax.escapeWinAnsi(run.text)})`);
         continue;
       }
       const colourFont = font.hasColour && this.emojiRendering() === 'colour';

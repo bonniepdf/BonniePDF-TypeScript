@@ -13,6 +13,9 @@ import {
   TextBlock,
   Heading,
   QRCode,
+  Table,
+  TableRow,
+  Color,
   Line,
   TextStyle,
   TextAlignment,
@@ -124,7 +127,7 @@ export function generate(): Document {
 
   // ── Page 2 ──
   doc.addPage();
-  const page2 = new Heading('Page 2');
+  const page2 = new Heading('Page 2: Summary Table');
   page2.tocIdentifier = 'page2';
   page2.level = 1;
   page2.fontName = HEADING;
@@ -132,7 +135,36 @@ export function generate(): Document {
   page2.color = ColorPalette.slate[800];
   page2.margin = new Thickness(0, 0, 0, 12);
   doc.add(page2);
-  doc.add(new TextBlock('This demonstrates multipage support with automatic page management.'));
+  const intro = new TextBlock('This demonstrates multipage support with automatic page management.');
+  intro.margin = new Thickness(0, 0, 0, 16);
+  doc.add(intro);
+
+  const header = (text: string): TextBlock => {
+    const cell = new TextBlock(text);
+    cell.fontName = HEADING;
+    cell.fontSize = 10;
+    return cell;
+  };
+  const body = (text: string, color?: Color): TextBlock => {
+    const cell = new TextBlock(text);
+    cell.fontSize = 10;
+    if (color) cell.color = color;
+    return cell;
+  };
+
+  const table = new Table(160, 160, 175);
+  table.headerBackgroundColor = ColorPalette.slate[800];
+  table.headerTextColor = Color.white;
+  table.addHeader(header('Component'), header('Runtime'), header('Status'));
+  const ready = ColorPalette.emerald[700];
+  table.addRow(TableRow.fromElements(body('Core Engine'), body('.NET / TypeScript'), body('Production Ready', ready)));
+  table.addRow(
+    TableRow.fromElements(body('Typography Engine'), body('Embedded Fonts'), body('Production Ready', ready))
+  );
+  table.addRow(
+    TableRow.fromElements(body('Vector Graphics'), body('SVG / QR / Barcode'), body('Production Ready', ready))
+  );
+  doc.add(table);
 
   // ── Page 3 - custom square ──
   const squareSize = new PdfSize(300, 300, 'Square Card');

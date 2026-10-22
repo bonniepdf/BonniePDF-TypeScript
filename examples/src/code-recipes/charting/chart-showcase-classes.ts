@@ -69,12 +69,12 @@ const CHART_BG = '#fafafa';
 // ── Entry point ──────────────────────────────────────────────────────────────
 
 /**
- * The **class / construct-then-mutate** companion to `chart-examples.ts`.
+ * The **class / construct-then-mutate** companion to `chart-showcase.ts`.
  *
  * Same eight-page tour of every chart type, authored the long way: `new` each
  * chart model and assign properties. This is the escape hatch the options-object
  * front door sits on top of. Renders **byte-for-byte identically** to the
- * options-style `chart-examples.ts` (an equivalence test binds the two).
+ * options-style `chart-showcase.ts` (an equivalence test binds the two).
  */
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);

@@ -288,7 +288,7 @@ function costSummary(): VerticalStack {
 function signBlock(title: string, nameLine: string): VerticalStack {
   return new VerticalStack({
     children: [
-      eyebrow(title),
+      eyebrow(title, 4),
       text(nameLine),
       new Container({ height: 30, border: { bottom: 0.75, color: '#8a99a3' } }),
       text('Signature  |  Date and time', { size: 7.5, color: MUTED, margin: { top: 2 } }),
@@ -316,8 +316,8 @@ function text(value: string, o: TextOpts = {}): TextBlock {
   });
 }
 
-function eyebrow(value: string): TextBlock {
-  return text(value, { font: BOLD, size: 8, color: TEAL, margin: { bottom: 5 } });
+function eyebrow(value: string, marginBottom = 5): TextBlock {
+  return text(value, { font: BOLD, size: 8, color: TEAL, margin: { bottom: marginBottom } });
 }
 
 function sectionHeading(value: string): Heading {

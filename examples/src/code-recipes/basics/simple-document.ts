@@ -147,21 +147,21 @@ export function generate(): Document {
     TableRow.fromElements(
       new TextBlock('Core Engine', { fontSize: 10 }),
       new TextBlock('.NET / TypeScript', { fontSize: 10 }),
-      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-700' })
     )
   );
   table.addRow(
     TableRow.fromElements(
       new TextBlock('Typography Engine', { fontSize: 10 }),
       new TextBlock('Embedded Fonts', { fontSize: 10 }),
-      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-700' })
     )
   );
   table.addRow(
     TableRow.fromElements(
       new TextBlock('Vector Graphics', { fontSize: 10 }),
       new TextBlock('SVG / QR / Barcode', { fontSize: 10 }),
-      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-600' })
+      new TextBlock('Production Ready', { fontSize: 10, color: 'emerald-700' })
     )
   );
   doc.add(table);

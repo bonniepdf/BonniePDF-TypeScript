@@ -339,7 +339,6 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       }
 
       const wordWidth = word.width;
-      const spaceWidth = word.leadingSpaceWidth;
       const candidateWidth = this.widthWithWord(currentLine, word);
 
       if (candidateWidth > maxWidth && currentWidth > 0) {

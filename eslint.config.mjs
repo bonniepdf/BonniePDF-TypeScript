@@ -32,7 +32,15 @@ const NODE_BUILTINS = [
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/*.d.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/*.d.ts',
+      // Vendored: maintained upstream and copied in by tooling (see .prettierignore and VENDORED.json).
+      'core/src/Rendering/Svg/**',
+      'core/src/Typography/Engine/**',
+    ],
   },
 
   // ── Core library source ────────────────────────────────────────────────────

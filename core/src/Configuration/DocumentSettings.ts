@@ -29,7 +29,6 @@ import {
 } from '../Normalize/toEnum';
 import { PageLabel, type PageLabelOptions } from './PageLabel';
 import { FacturXMetadata } from '../EInvoice/FacturXMetadata';
-import type { IElement } from '../Elements/IElement';
 import { toLength, type LengthInput } from '../Normalize/toLength';
 import type { PageTemplate } from './PageTemplate';
 

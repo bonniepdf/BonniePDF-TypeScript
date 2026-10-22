@@ -100,7 +100,7 @@ This repo is a nested pnpm workspace (`core`, `examples`) orchestrated by **turb
 # from this repo
 pnpm build          # turbo run build   (tsup + emitDeclarationOnly)
 pnpm typecheck
-pnpm lint           # eslint core/src core/tests  (currently fails - see below)
+pnpm lint           # eslint core/src core/tests  (vendored folders are ignored)
 pnpm generate-tagged
 
 # from core/
@@ -112,7 +112,7 @@ pnpm test:pdf-validation   # builds, then validates PDF/A-4 samples
 
 `pnpm --filter @bonniepdf/examples verify-equivalence` asserts each `*-classes.ts` companion renders byte-for-byte identically to its options-object sibling. `pnpm --filter @bonniepdf/examples verify-examples` builds every example as PDF and SVG and fails if any throws, so an API change that breaks an example shows up before a reader finds it.
 
-**`pnpm lint` does not currently run.** typescript-eslint refuses to load against the TypeScript 7 native compiler this repo builds with, and throws before linting anything ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)). The `eslint --fix` step has been removed from the lint-staged pre-commit config for the same reason - it blocked every commit touching `core/src` instead of catching defects. Restore both once upstream supports the TypeScript version pinned in `core/package.json`; the reasoning is repeated in `.husky/pre-commit`.
+**Lint runs against the TypeScript 6 API.** typescript-eslint does not support the TypeScript 7 native compiler the library builds with ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)), so the repo root pins `typescript` 6.0.3 as a devDependency for the lint toolchain only; `core/` and `examples/` keep their own TypeScript 7. Do not remove it or raise it to 7 until typescript-eslint supports the version in `core/package.json`. The vendored folders (`core/src/Rendering/Svg/`, `core/src/Typography/Engine/`) are ignored, as they are by prettier. `eslint --fix` runs on staged `core/{src,tests}` files in the pre-commit hook.
 
 ## Tests
 

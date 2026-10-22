@@ -460,11 +460,11 @@ export class RenderContext implements RenderContextContract {
     this.resources.trackGlyphUsage(fontIdentifier, text);
   }
 
-  /** @internal */
   // One bound function for every canvas of this context.
   private readonly wholeTextFont = (fontIdentifier: string, text: string): TextRunFont | null =>
     this.resources.wholeTextFont(fontIdentifier, text);
 
+  /** @internal */
   public resolveTextRuns(fontIdentifier: string, text: string): ResolvedTextRun[] {
     return this.resources.resolveTextRuns(fontIdentifier, text);
   }

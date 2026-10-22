@@ -47,6 +47,8 @@ export function encryptPdfStrings(fragment: string, encrypt: (bytes: Uint8Array)
     } else if (c === '<' && fragment[i] !== '<') {
       const end = fragment.indexOf('>', i);
       if (end < 0) throw new Error('Unterminated PDF hex string');
+      // NUL is PDF whitespace, so the control character is intended.
+      // eslint-disable-next-line no-control-regex
       let hex = fragment.slice(i, end).replace(/[\x00\t\n\f\r ]/g, '');
       if (!/^[0-9a-f]*$/i.test(hex)) throw new Error('Invalid PDF hex string');
       if (hex.length % 2) hex += '0';

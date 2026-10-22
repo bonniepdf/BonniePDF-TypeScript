@@ -25,6 +25,7 @@ Status: Prerelease
 
 ### Fixed
 
+- **`RenderContext.resolveTextRuns` is internal again.** Its `@internal` tag had slipped onto a private field, so the method appeared in the published declarations. It is removed from them, as the other engine-only members of `RenderContext` are.
 - **A font is embedded once, however many roles it plays.** A document font is also a glyph-fallback candidate for the document's other fonts, and was embedded a second time under its fallback key. It is now embedded once and renders the same: the emojis-and-unicode example 106,894 to 99,554 bytes, colour-emojis 53,668 to 50,894, international-typography 64,486 to 61,663.
 - **`generateBytes()` and `generateBytesAsync()` now embed the same font subsets.** A text run was matched to its font registration by font instance, taking the first match, and the two paths register a shared font in a different order, so the same document embedded different subsets depending on the API (the emojis-and-unicode example was 134,583 bytes through `generateBytes()` and 109,126 through `generateBytesAsync()`). Each run now resolves the registration its own identifier names, and both paths produce the same output.
 - **Unsigned 32-bit values are read as unsigned.** The big-endian reader returned the signed result of its bitwise operators, so values of 2^31 and above came back negative.

@@ -5,7 +5,6 @@ import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
 import { getActiveDocumentFonts } from '../../Typography/DocumentFontMetricScope';
 import { FontWeight } from '../../Typography/FontWeight';
-import { StandardFonts } from '../../Typography/StandardFonts';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { ParagraphWidths } from '../../Typography/ParagraphWidths';
 import { Color } from '../../Core/Color';

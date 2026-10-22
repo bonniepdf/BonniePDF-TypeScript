@@ -1,13 +1,1 @@
-# The `core/{src,tests}/**/*.ts` -> `eslint --fix` step is deliberately absent
-# from the lint-staged config in package.json.
-#
-# This repo builds with the TypeScript 7 native compiler. typescript-eslint
-# refuses to load against TS 7.0 and throws before linting a single file, so the
-# step could not pass on any commit touching core sources - it blocked all work
-# on the library rather than catching anything. `pnpm lint` fails for the same
-# reason and is expected to until upstream support lands.
-#
-# Restore the step (and this hook to a bare `pnpm lint-staged`) once
-# typescript-eslint supports the TypeScript version in core/package.json:
-# https://github.com/typescript-eslint/typescript-eslint/issues/10940
 pnpm lint-staged

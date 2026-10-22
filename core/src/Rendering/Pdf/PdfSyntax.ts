@@ -1,7 +1,30 @@
+import { winAnsiByte } from '../../Typography/WinAnsi';
 import type { TtfFont } from '../../Typography/TrueType/TtfFont';
+
+/** Encodes a string as the single-byte codes of a standard font's WinAnsiEncoding, one character per byte value. */
+function toWinAnsi(input: string): string {
+  let plain = true;
+  for (let i = 0; i < input.length && plain; i++) plain = input.charCodeAt(i) <= 0xff;
+  if (plain) return input;
+  let result = '';
+  for (const c of input) {
+    const cp = c.codePointAt(0)!;
+    result += String.fromCharCode(winAnsiByte(cp));
+  }
+  return result;
+}
 
 /** Encodes primitive values, strings, dates, and text for PDF serialization. */
 export class PdfSyntax {
+  /**
+   * Escapes text for a string operand shown in a standard (unembedded) font. Those fonts use
+   * WinAnsiEncoding, so characters such as ’ “ ” – — … € map to their Windows-1252 byte; any other
+   * character beyond Latin-1 becomes `?` instead of its low byte.
+   */
+  public static escapeWinAnsi(input: string): string {
+    return this.escape(toWinAnsi(input));
+  }
+
   public static encodeMetadataString(input: string): string {
     if (!input) return '()';
 

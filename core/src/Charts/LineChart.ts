@@ -95,11 +95,11 @@ export class LineChart extends CartesianChartBase {
         : this.defaultMarkerRadius;
 
     // Draw the connecting line
-    this.drawConnectingLine(canvas, coordinates, series.color, lineWidth);
+    this.drawConnectingLine(canvas, coordinates, this.resolveSeriesColor(series), lineWidth);
 
     // Draw data point markers if enabled
     if (showMarkers) {
-      this.drawDataPointMarkers(canvas, coordinates, series.color, markerRadius);
+      this.drawDataPointMarkers(canvas, coordinates, this.resolveSeriesColor(series), markerRadius);
     }
   }
 

@@ -79,11 +79,11 @@ export class BarChart extends CartesianChartBase {
     if (this.orientation === ChartOrientation.Horizontal) {
       const totalBarSpace = chartAreaHeight / dataPointCount;
       const barThickness = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      this.drawBars(canvas, coordinates, barThickness, baselineY, series.color);
+      this.drawBars(canvas, coordinates, barThickness, baselineY, this.resolveSeriesColor(series));
     } else {
       const totalBarSpace = chartAreaWidth / dataPointCount;
       const barWidth = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      this.drawBars(canvas, coordinates, barWidth, baselineY, series.color);
+      this.drawBars(canvas, coordinates, barWidth, baselineY, this.resolveSeriesColor(series));
     }
   }
 

@@ -372,7 +372,7 @@ export class PdfRenderPipeline {
       embeddedFont && embeddedFont.hasKerning ? PdfSyntax.toKernedGlyphArray(wm.text, embeddedFont) : null;
     const textOperand =
       kernedOperand ??
-      (embeddedFont ? PdfSyntax.toGlyphIdHexString(wm.text, embeddedFont) : `(${PdfSyntax.escape(wm.text)})`);
+      (embeddedFont ? PdfSyntax.toGlyphIdHexString(wm.text, embeddedFont) : `(${PdfSyntax.escapeWinAnsi(wm.text)})`);
 
     const wmOps: string[] = [];
     PdfOperators.saveState(wmOps);

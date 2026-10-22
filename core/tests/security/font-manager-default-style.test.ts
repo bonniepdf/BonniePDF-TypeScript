@@ -5,6 +5,8 @@ import { FontManager } from '../../src/Typography/FontManager';
 import { TextStyle } from '../../src/Elements/Text/TextStyle';
 import { Color } from '../../src/Core/Color';
 import { ColorPalette } from '../../src/Core/ColorPalette';
+import { TextDecoration } from '../../src/Elements/Text/TextDecoration';
+import { FontWeight } from '../../src/Typography/FontWeight';
 import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { pdfToText } from '../helpers/test-base';
@@ -145,6 +147,163 @@ describe('DefaultTextStyle cascade', () => {
     doc.add(tb);
     doc.generateBytes();
     expect(tb.color).toEqual(Color.fromHex('#FF0000'));
+    doc.dispose();
+  });
+
+  it('keeps the default family when only the weight is set explicitly', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withFamily('Times');
+    const tb = new TextBlock('Hello');
+    tb.fontWeight = FontWeight.Bold; // weight only; family should still cascade
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Times-Bold');
+    doc.dispose();
+  });
+
+  it('keeps the default family when only italic is set explicitly', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withFamily('Times');
+    const tb = new TextBlock('Hello');
+    tb.italic = true;
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Times-Italic');
+    doc.dispose();
+  });
+
+  it('does not override an explicitly set family', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withFamily('Times');
+    const tb = new TextBlock('Hello');
+    tb.fontFamily = 'Courier';
+    tb.fontWeight = FontWeight.Bold;
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Courier-Bold');
+    doc.dispose();
+  });
+
+  it('does not override an explicitly set weight with the default weight', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withFamily('Times').withWeight(FontWeight.Bold);
+    const tb = new TextBlock('Hello');
+    tb.fontWeight = FontWeight.Normal;
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Times-Roman');
+    doc.dispose();
+  });
+
+  it('applies a default weight given without a family', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withWeight(FontWeight.Bold);
+    const tb = new TextBlock('Hello');
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Helvetica-Bold');
+    doc.dispose();
+  });
+
+  it('does not apply default weight or italic to a font named directly', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withWeight(FontWeight.Bold).withItalic();
+    const tb = new TextBlock('Hello');
+    tb.fontName = 'Courier';
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Courier');
+    doc.dispose();
+  });
+
+  it('applies a default decoration and does not override an explicit one', () => {
+    const doc = new Document();
+    const style = new TextStyle();
+    style.decoration = TextDecoration.Underline;
+    doc.settings.defaultTextStyle = style;
+    const plain = new TextBlock('Plain');
+    const explicit = new TextBlock('Explicit');
+    explicit.decoration = TextDecoration.None;
+    doc.add(plain);
+    doc.add(explicit);
+    doc.generateBytes();
+    expect(plain.decoration).toBe(TextDecoration.Underline);
+    expect(explicit.decoration).toBe(TextDecoration.None);
+    doc.dispose();
+  });
+
+  it('re-applies a changed default on a later generation, but never over explicit values', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withSize(11).withColor(ColorPalette.slate[600]).withLineHeight(1.5);
+    const cascaded = new TextBlock('Cascaded');
+    const explicit = new TextBlock('Explicit');
+    explicit.fontSize = 24;
+    explicit.color = Color.fromHex('#FF0000');
+    explicit.lineHeight = 2;
+    doc.add(cascaded);
+    doc.add(explicit);
+    doc.generateBytes();
+    expect(cascaded.fontSize).toBe(11);
+
+    doc.settings.defaultTextStyle = new TextStyle().withSize(14).withColor(ColorPalette.slate[900]).withLineHeight(1.3);
+    doc.generateBytes();
+    expect(cascaded.fontSize).toBe(14);
+    expect(cascaded.color).toEqual(ColorPalette.slate[900]);
+    expect(cascaded.lineHeight).toBe(1.3);
+    expect(explicit.fontSize).toBe(24);
+    expect(explicit.color).toEqual(Color.fromHex('#FF0000'));
+    expect(explicit.lineHeight).toBe(2);
+    doc.dispose();
+  });
+
+  it('returns cascaded values to the library defaults when the default is removed', () => {
+    const doc = new Document();
+    const style = new TextStyle()
+      .withFamily('Times')
+      .withWeight(FontWeight.Bold)
+      .withSize(20)
+      .withColor(ColorPalette.slate[600])
+      .withLineHeight(1.5);
+    style.decoration = TextDecoration.Underline;
+    doc.settings.defaultTextStyle = style;
+    const tb = new TextBlock('Hello');
+    doc.add(tb);
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Times-Bold');
+    expect(tb.fontSize).toBe(20);
+
+    doc.settings.defaultTextStyle = undefined;
+    doc.generateBytes();
+    expect(tb.fontName).toBe('Helvetica');
+    expect(tb.fontSize).toBe(12);
+    expect(tb.color).toEqual(Color.black);
+    expect(tb.lineHeight).toBe(1.2);
+    expect(tb.decoration).toBe(TextDecoration.None);
+    doc.dispose();
+  });
+
+  it('drops a property from a changed default, and keeps explicit values when the default is removed', () => {
+    const doc = new Document();
+    doc.settings.defaultTextStyle = new TextStyle().withFamily('Times').withSize(20);
+    const cascaded = new TextBlock('Cascaded');
+    const explicit = new TextBlock('Explicit');
+    explicit.fontSize = 30;
+    explicit.fontWeight = FontWeight.Bold;
+    doc.add(cascaded);
+    doc.add(explicit);
+    doc.generateBytes();
+    expect(explicit.fontName).toBe('Times-Bold');
+
+    doc.settings.defaultTextStyle = new TextStyle().withSize(14); // no family any more
+    doc.generateBytes();
+    expect(cascaded.fontName).toBe('Helvetica');
+    expect(cascaded.fontSize).toBe(14);
+    expect(explicit.fontName).toBe('Helvetica-Bold');
+
+    doc.settings.defaultTextStyle = undefined;
+    doc.generateBytes();
+    expect(explicit.fontSize).toBe(30);
+    expect(explicit.fontName).toBe('Helvetica-Bold');
     doc.dispose();
   });
 

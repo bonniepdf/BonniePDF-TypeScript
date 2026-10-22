@@ -13,6 +13,24 @@ short, plain-text bullets under `### Highlights`, followed by the full notes
 under their own headings. A prerelease date is optional; do not infer it from
 the version number.
 
+## 2026.10.22
+
+Status: Prerelease
+
+### Highlights
+
+- `defaultTextStyle` now fills font family, weight and italic independently
+- A changed `defaultTextStyle` now applies on regeneration, as it does in .NET
+
+### Fixed
+
+- **Changing or removing `defaultTextStyle` now takes back what it supplied.** A value the default had supplied (font family, weight, italic, size, colour, line height, decoration) used to stay on the element when a later generation's default no longer set it, or when `defaultTextStyle` was removed. Those values now return to the library defaults, and anything the element's author set is untouched.
+- **Assigning `fontFamily = undefined` no longer marks the font as explicitly set**, matching .NET, so the default text style can still supply it.
+- **A changed `defaultTextStyle` now applies when the document is generated again.** Size, colour, line height and decoration that the default supplied were stored as if the author had set them, so changing `doc.settings.defaultTextStyle` and calling `generateBytes()` again left the first values in place, while .NET applied the new ones. They are now tracked as set only when assigned, so the new default replaces them and values you assigned are never replaced. Definition export likewise no longer writes cascaded size, colour, line height or decoration as the author's.
+- **A document's default font family no longer disappears when an element sets its own weight or italic.** Assigning `fontWeight`, `italic` or `fontFamily` on a text element used to mark the whole font as chosen, so `defaultTextStyle` supplied none of it: with a default family of `Times`, a text block with `fontWeight = FontWeight.Bold` rendered in Helvetica-Bold rather than Times-Bold. Family, weight and italic are now tracked separately, and the default fills whichever of them the element has not set. An explicit `FontWeight.Normal` or `italic = false` is a choice and is kept.
+- **A default weight or italic given without a family now applies.** A `defaultTextStyle` with only `withWeight` or `withItalic` was ignored; it now reaches elements that have not set those properties. A font named directly through `fontName` is not given a default weight or italic, because a named font bypasses family resolution.
+- **Definition export no longer writes defaults as the author's choices.** `toDefinition` writes `fontFamily`, `fontWeight` and `italic` only for values the element's author set, and writes an explicit normal weight or `false` italic rather than dropping it, so a round trip keeps the cascade intact.
+
 ## 2026.10.15
 
 Status: Prerelease

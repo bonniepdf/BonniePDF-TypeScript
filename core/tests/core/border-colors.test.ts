@@ -51,7 +51,7 @@ describe('BorderColors', () => {
     });
 
     try {
-      const container = document.pages[0]!.elements[0] as unknown as { borderColors: BorderColors };
+      const container = document.pages[0]!.getElements()[0] as unknown as { borderColors: BorderColors };
 
       expect(sides(container.borderColors)).toEqual([true, false, false, false]);
     } finally {

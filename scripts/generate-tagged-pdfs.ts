@@ -8,7 +8,7 @@
 // generated and validated, so new examples are picked up automatically.
 //
 // Font resolution and the glyph-fallback chain live in ./example-runtime.ts,
-// shared with generate-showcase-assets.ts; generation goes through the async
+// shared with generate-examples-assets.ts; generation goes through the async
 // path so those fonts are preloaded before serialisation.
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';

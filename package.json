@@ -15,7 +15,7 @@
     "prepare": "husky",
     "generate-tagged": "tsx scripts/generate-tagged-pdfs.ts",
     "check:preflight": "tsx scripts/check-preflight.ts",
-    "generate-showcase": "tsx scripts/generate-showcase-assets.ts"
+    "generate-examples": "tsx scripts/generate-examples-assets.ts"
   },
   "lint-staged": {
     "core/{src,tests}/**/*.ts": "eslint --fix",

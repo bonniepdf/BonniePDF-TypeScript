@@ -4,6 +4,7 @@ import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { VerticalStack } from '../../src/Elements/Layout/VerticalStack';
 import { HorizontalStack } from '../../src/Elements/Layout/HorizontalStack';
 import { Table } from '../../src/Elements/Tables/Table';
+import { TableCell } from '../../src/Elements/Tables/TableCell';
 import { TableRow } from '../../src/Elements/Tables/TableRow';
 import { toSvg } from '../../src/Export/SvgElementExport';
 import { pdfToText } from '../helpers/test-base';
@@ -282,6 +283,33 @@ describe('Text shorthand', () => {
     doc.add('Hello');
     expect(bytesOf(doc)).toContain('/BaseFont /Times-Roman');
     doc.dispose();
+  });
+
+  it('cell arrays mix strings and styled cells', () => {
+    same(
+      d => {
+        const table = new Table({ columns: [1, 1] });
+        const cell = new TableCell({ content: new TextBlock('A'), padding: 9 });
+        table.addRow([cell, 'B']);
+        expect(table.rows[0].cells[0]).toBe(cell);
+        d.add(table);
+      },
+      d => {
+        const table = new Table({ columns: [1, 1] });
+        table.addRow([
+          new TableCell({ content: new TextBlock('A'), padding: 9 }),
+          new TableCell({ content: new TextBlock('B') }),
+        ]);
+        d.add(table);
+      }
+    );
+  });
+
+  it('a null cell is rejected before adding the row', () => {
+    const table = new Table(1, 1);
+    expect(() => table.addRow('A', null as never)).toThrow(TypeError);
+    expect(() => table.addRow(['A', null as never])).toThrow(TypeError);
+    expect(table.rows).toHaveLength(0);
   });
 
   it('existing element calls are unchanged', () => {

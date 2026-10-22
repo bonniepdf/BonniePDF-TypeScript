@@ -143,6 +143,8 @@ await writeFile('quarterly-report.pdf', bytes);
 
 A `Document` starts with its first page ready to use. Add elements in reading order; call `addPage()` to start another page, or let flowing elements paginate themselves.
 
+You can pass text directly to document, page and stack `add` methods: `doc.add('Hello')` creates a `TextBlock`, and `doc.add(['Line one', 'Line two'])` creates one paragraph with a hard line break. Table adders accept strings as separate cells, including strings mixed with elements; use `new TextBlock(['Line one', 'Line two'])` for a multi-line cell.
+
 ## Capabilities
 
 Native [rotation](https://www.bonniepdf.dev/docs/typescript/rotation) supports constrained quarter turns that swap layout dimensions and free angles around the child's centre. Use `rotate({ angle, mode, contentWidth, child })`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.

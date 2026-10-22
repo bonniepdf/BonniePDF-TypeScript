@@ -271,10 +271,11 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * table.addHeader(new TextBlock('Item'), new TextBlock('Qty'), new TextBlock('Price'));
    * ```
    */
-  public addHeader(...elements: IElement[]): void;
-  public addHeader(cells: TableCell[]): void;
+  public addHeader(...elements: Array<IElement | string>): void;
+  public addHeader(cells: Array<TableCell | string>): void;
   public addHeader(row: TableRow): void;
-  public addHeader(...args: Array<IElement | TableCell[] | TableRow>): void {
+  public addHeader(...input: Array<IElement | string | Array<TableCell | string> | TableRow>): void {
+    const args = this.normaliseRowArgs(input);
     const row = this.createRowFromArgs(args);
     row.isHeader = true;
     // Propagate to cells so each cell's PDF/UA role resolves to TH.
@@ -290,10 +291,11 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * table.addFooter(new TextBlock('Total'), new TextBlock('4'), new TextBlock('£48.00'));
    * ```
    */
-  public addFooter(...elements: IElement[]): void;
-  public addFooter(cells: TableCell[]): void;
+  public addFooter(...elements: Array<IElement | string>): void;
+  public addFooter(cells: Array<TableCell | string>): void;
   public addFooter(row: TableRow): void;
-  public addFooter(...args: Array<IElement | TableCell[] | TableRow>): void {
+  public addFooter(...input: Array<IElement | string | Array<TableCell | string> | TableRow>): void {
+    const args = this.normaliseRowArgs(input);
     const row = this.createRowFromArgs(args);
     row.isFooter = true;
     this.footers.push(row);
@@ -307,10 +309,11 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * table.addRow(new TextBlock('Widget'), new TextBlock('4'), new TextBlock('£12.00'));
    * ```
    */
-  public addRow(...elements: IElement[]): void;
-  public addRow(cells: TableCell[]): void;
+  public addRow(...elements: Array<IElement | string>): void;
+  public addRow(cells: Array<TableCell | string>): void;
   public addRow(row: TableRow): void;
-  public addRow(...args: Array<IElement | TableCell[] | TableRow>): void {
+  public addRow(...input: Array<IElement | string | Array<TableCell | string> | TableRow>): void {
+    const args = this.normaliseRowArgs(input);
     if (!this.#rowsExposed && isPlainContent(args)) {
       const contents = args as IElement[];
       // A single null content stays in an array, so it is not mistaken for a null row.
@@ -362,6 +365,21 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       ...this._rows.filter((entry): entry is TableRow => entry instanceof TableRow),
       ...this.footers,
     ];
+  }
+
+  private normaliseRowArgs(
+    input: Array<IElement | string | Array<TableCell | string> | TableRow>
+  ): Array<IElement | TableCell[] | TableRow> {
+    return input.map(value => {
+      if (value == null) throw new TypeError('Cell content cannot be null.');
+      if (typeof value === 'string') return new TextBlock(value);
+      if (Array.isArray(value))
+        return value.map(cell => {
+          if (cell == null) throw new TypeError('Cell content cannot be null.');
+          return typeof cell === 'string' ? new TableCell({ content: new TextBlock(cell) }) : cell;
+        });
+      return value;
+    });
   }
 
   private createRowFromArgs(args: Array<IElement | TableCell[] | TableRow>): TableRow {

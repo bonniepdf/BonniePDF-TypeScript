@@ -1,3 +1,4 @@
+import { toElement } from '../../Normalize/toElement';
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
@@ -147,13 +148,13 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * Adds a child element to this stack with auto width
    */
-  public add(child: IElement): void;
+  public add(child: IElement | string | readonly string[]): void;
   /**
    * Adds a child element to this stack with a specific weight (only used when WidthDistribution is Weighted)
    */
-  public add(child: IElement, weight: number | null): void;
-  public add(child: IElement, weight?: number | null): void {
-    this._children.push(child);
+  public add(child: IElement | string | readonly string[], weight: number | null): void;
+  public add(child: IElement | string | readonly string[], weight?: number | null): void {
+    this._children.push(toElement(child));
     this.widths.push(weight ?? null);
   }
 

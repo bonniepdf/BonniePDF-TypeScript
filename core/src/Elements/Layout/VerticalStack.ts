@@ -1,3 +1,4 @@
+import { toElement } from '../../Normalize/toElement';
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
@@ -76,8 +77,8 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   }
 
   /** Adds a child element to this stack. */
-  public add(child: IElement): void {
-    this._children.push(child);
+  public add(child: IElement | string | readonly string[]): void {
+    this._children.push(toElement(child));
   }
 
   /**

@@ -1,3 +1,20 @@
+/** The CMap program preamble shared by populated and empty ToUnicode maps. */
+const CMAP_HEADER: readonly string[] = [
+  '/CIDInit /ProcSet findresource begin',
+  '12 dict begin',
+  'begincmap',
+  '/CIDSystemInfo <<',
+  '  /Registry (Adobe)',
+  '  /Ordering (UCS)',
+  '  /Supplement 0',
+  '>> def',
+  '/CMapName /Adobe-Identity-UCS def',
+  '/CMapType 2 def',
+  '1 begincodespacerange',
+  '<0000> <FFFF>',
+  'endcodespacerange',
+];
+
 /**
  * Generates a ToUnicode CMap for text extraction support in PDFs.
  * Maps glyph IDs to Unicode code points, enabling copy/paste functionality.
@@ -45,22 +62,7 @@ export class ToUnicodeCMapBuilder {
       return this.buildEmptyCMap();
     }
 
-    const lines: string[] = [];
-
-    // CMap header
-    lines.push('/CIDInit /ProcSet findresource begin');
-    lines.push('12 dict begin');
-    lines.push('begincmap');
-    lines.push('/CIDSystemInfo <<');
-    lines.push('  /Registry (Adobe)');
-    lines.push('  /Ordering (UCS)');
-    lines.push('  /Supplement 0');
-    lines.push('>> def');
-    lines.push('/CMapName /Adobe-Identity-UCS def');
-    lines.push('/CMapType 2 def');
-    lines.push('1 begincodespacerange');
-    lines.push('<0000> <FFFF>');
-    lines.push('endcodespacerange');
+    const lines: string[] = [...CMAP_HEADER];
 
     // Sort mappings by glyph ID for consistent output
     const sorted = this.mappings
@@ -101,21 +103,7 @@ export class ToUnicodeCMapBuilder {
   }
 
   private buildEmptyCMap(): string {
-    const lines: string[] = [];
-
-    lines.push('/CIDInit /ProcSet findresource begin');
-    lines.push('12 dict begin');
-    lines.push('begincmap');
-    lines.push('/CIDSystemInfo <<');
-    lines.push('  /Registry (Adobe)');
-    lines.push('  /Ordering (UCS)');
-    lines.push('  /Supplement 0');
-    lines.push('>> def');
-    lines.push('/CMapName /Adobe-Identity-UCS def');
-    lines.push('/CMapType 2 def');
-    lines.push('1 begincodespacerange');
-    lines.push('<0000> <FFFF>');
-    lines.push('endcodespacerange');
+    const lines: string[] = [...CMAP_HEADER];
     lines.push('endcmap');
     lines.push('CMapName currentdict /CMap defineresource pop');
     lines.push('end');

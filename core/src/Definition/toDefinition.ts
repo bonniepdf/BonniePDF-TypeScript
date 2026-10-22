@@ -95,6 +95,7 @@ import { AxisOptions } from '../Charts/Models/AxisOptions';
 import { ChartSeries, ChartSeriesStyle } from '../Charts/Models/ChartSeries';
 import { ChartDataPoint } from '../Charts/Models/ChartDataPoint';
 import { ELEMENT_DESCRIPTION } from './ElementDescription';
+import { keysOf } from './keysOf';
 import type { KeySpec, ShapeSpec } from './ElementDescriptionTypes';
 import type { DefinitionIssue, DocumentDefinition } from './DefinitionTypes';
 import { DEFINITION_VERSIONS } from './DefinitionTypes';
@@ -384,12 +385,6 @@ const hex2 = (n: number): string => n.toString(16).padStart(2, '0');
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
 const escapeKey = (k: string): string => k.replace(/~/g, '~0').replace(/\//g, '~1');
-
-function keysOf(spec: ShapeSpec): Record<string, KeySpec> {
-  const merged: Record<string, KeySpec> = {};
-  for (const use of spec.uses ?? []) Object.assign(merged, D.mixins[use]);
-  return Object.assign(merged, spec.keys);
-}
 
 interface ResourceEntry {
   name: string;

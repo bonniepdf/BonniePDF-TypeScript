@@ -199,6 +199,37 @@ export class PdfResourceRegistry {
     return this.embeddedFonts.get(filePath) || null;
   }
 
+  /**
+   * Records the font (or its failed load) under `key`. A parsed font is embedded once however many keys name it - a
+   * document font is also a glyph-fallback candidate for the document's other fonts, so its bytes are registered
+   * again under a fallback key - so a font that is already registered is shared: the new key takes over its resource
+   * name and its glyph tracker instead of making a second copy.
+   */
+  private addEmbeddedFont(key: string, font: TtfFont | null, tracker: GlyphUsageTracker | null): void {
+    if (font) {
+      for (const registered of this.embeddedFonts.values()) {
+        if (registered.font !== font) continue;
+        this.embeddedFonts.set(key, registered);
+        this.fontNameMap.set(key, registered.resourceName);
+        return;
+      }
+    }
+
+    this.fontCounter++;
+    const resourceName = `/F${this.fontCounter}`;
+    const subsetPrefix = this.generateSubsetPrefix();
+
+    const info = new EmbeddedFontInfo();
+    info.font = font;
+    info.tracker = tracker;
+    info.subsetPrefix = subsetPrefix;
+    info.resourceName = resourceName;
+    info.type0ObjectId = 0;
+
+    this.embeddedFonts.set(key, info);
+    this.fontNameMap.set(key, resourceName);
+  }
+
   private registerEmbeddedFont(filePath: string): string {
     if (!this.embeddedFonts.has(filePath)) {
       // Attempt to load the font synchronously right now so the GlyphUsageTracker
@@ -227,19 +258,7 @@ export class PdfResourceRegistry {
         }
       }
 
-      this.fontCounter++;
-      const resourceName = `/F${this.fontCounter}`;
-      const subsetPrefix = this.generateSubsetPrefix();
-
-      const info = new EmbeddedFontInfo();
-      info.font = font;
-      info.tracker = tracker;
-      info.subsetPrefix = subsetPrefix;
-      info.resourceName = resourceName;
-      info.type0ObjectId = 0;
-
-      this.embeddedFonts.set(filePath, info);
-      this.fontNameMap.set(filePath, resourceName);
+      this.addEmbeddedFont(filePath, font, tracker);
     }
 
     return this.fontNameMap.get(filePath)!;
@@ -368,18 +387,7 @@ export class PdfResourceRegistry {
         this.diagnostics.addWarning('font', `Could not parse font bytes: ${(err as Error).message}`, key, err);
       }
 
-      this.fontCounter++;
-      const resourceName = `/F${this.fontCounter}`;
-      const subsetPrefix = this.generateSubsetPrefix();
-
-      const info = new EmbeddedFontInfo();
-      info.font = font;
-      info.tracker = tracker;
-      info.subsetPrefix = subsetPrefix;
-      info.resourceName = resourceName;
-      info.type0ObjectId = 0;
-      this.embeddedFonts.set(key, info);
-      this.fontNameMap.set(key, resourceName);
+      this.addEmbeddedFont(key, font, tracker);
     }
 
     return this.fontNameMap.get(key)!;
@@ -400,24 +408,24 @@ export class PdfResourceRegistry {
   }
 
   public resolveEmbeddedFont(fontIdentifier: string): TtfFont | null {
-    if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
-      const fontInfo = this.getEmbeddedFont(fontIdentifier);
-      return fontInfo?.font ?? null;
-    }
+    return this.resolveEmbeddedFontInfo(fontIdentifier)?.font ?? null;
+  }
+
+  /**
+   * The registration of the embedded font that `fontIdentifier` names. One parsed font can be registered
+   * under more than one identifier (a document font is also a fallback candidate for the document's other
+   * fonts), and each registration has its own resource name and glyph tracker, so a run is always tracked
+   * against the registration its own identifier names, never one found by font.
+   */
+  private resolveEmbeddedFontInfo(fontIdentifier: string): EmbeddedFontInfo | undefined {
+    if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) return this.getEmbeddedFont(fontIdentifier) ?? undefined;
 
     // Check for virtual (bytes-based) font
     const virtualKey = `virtual:${fontIdentifier}`;
-    if (this.embeddedFonts.has(virtualKey)) {
-      return this.embeddedFonts.get(virtualKey)!.font;
-    }
+    if (this.embeddedFonts.has(virtualKey)) return this.embeddedFonts.get(virtualKey);
 
-    if (this.fontAliasMap.has(fontIdentifier)) {
-      const ttfPath = this.fontAliasMap.get(fontIdentifier)!;
-      const fontInfo = this.getEmbeddedFont(ttfPath);
-      return fontInfo?.font ?? null;
-    }
-
-    return null;
+    const ttfPath = this.fontAliasMap.get(fontIdentifier);
+    return ttfPath === undefined ? undefined : (this.getEmbeddedFont(ttfPath) ?? undefined);
   }
 
   public trackGlyphUsage(fontIdentifier: string, text: string): void {
@@ -453,12 +461,6 @@ export class PdfResourceRegistry {
    * When the primary font covers the whole string (or is a non-embedded
    * Type1 font) the result is a single run identical to the legacy path.
    */
-  // The first registration of font, in insertion order, without copying the registrations.
-  private embeddedFontInfoFor(font: TtfFont | null): EmbeddedFontInfo | undefined {
-    for (const info of this.embeddedFonts.values()) if (info.font === font) return info;
-    return undefined;
-  }
-
   readonly #wholeTextFonts = new Map<string, TextRunFont>();
 
   /**
@@ -467,12 +469,11 @@ export class PdfResourceRegistry {
    */
   public wholeTextFont(primaryFontIdentifier: string, text: string): TextRunFont | null {
     const resourceName = this.registerFont(primaryFontIdentifier);
-    const resolved = this.resolveEmbeddedFont(primaryFontIdentifier);
-    const primaryFont = resolved instanceof TtfFont ? resolved : null;
+    const primaryInfo = this.resolveEmbeddedFontInfo(primaryFontIdentifier);
+    const primaryFont = primaryInfo?.font instanceof TtfFont ? primaryInfo.font : null;
     let tracker: GlyphUsageTracker | null | undefined;
     let canTrackPreparedGlyphs: boolean | undefined;
     if (primaryFont) {
-      const primaryInfo = this.embeddedFontInfoFor(primaryFont);
       if (!primaryCovers(text, primaryFont)) return null;
       tracker = primaryInfo?.tracker;
       canTrackPreparedGlyphs = primaryInfo?.resourceName === resourceName;
@@ -499,7 +500,8 @@ export class PdfResourceRegistry {
 
   public resolveTextRuns(primaryFontIdentifier: string, text: string): ResolvedTextRun[] {
     const resourceName = this.registerFont(primaryFontIdentifier);
-    const primaryFont = this.resolveEmbeddedFont(primaryFontIdentifier);
+    const primaryInfo = this.resolveEmbeddedFontInfo(primaryFontIdentifier);
+    const primaryFont = primaryInfo?.font;
 
     // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
     // preserve the literal-string emission path unchanged.
@@ -507,7 +509,6 @@ export class PdfResourceRegistry {
       return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
     }
 
-    const primaryInfo = this.embeddedFontInfoFor(primaryFont);
     if (primaryCovers(text, primaryFont))
       return [
         {
@@ -560,8 +561,8 @@ export class PdfResourceRegistry {
       const fb = fallbackByIndex[run.fontIndex]!;
       const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
       const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
-      const fbFont = this.resolveEmbeddedFont(fbIdentifier);
-      const fbInfo = this.embeddedFontInfoFor(fbFont);
+      const fbInfo = this.resolveEmbeddedFontInfo(fbIdentifier);
+      const fbFont = fbInfo?.font;
       return {
         resourceName: fbResource,
         embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
@@ -811,6 +812,7 @@ export class PdfResourceRegistry {
     imageWriter.conformance = this._conformance;
 
     // 1. Write fonts
+    const writtenFonts = new Set<EmbeddedFontInfo>();
     for (const [fontIdentifier, _resourceName] of this.fontNameMap) {
       // Skip aliased entries (they're written under their canonical TTF path)
       if (this.fontAliasMap.has(fontIdentifier)) continue;
@@ -821,6 +823,13 @@ export class PdfResourceRegistry {
       if (PdfResourceRegistry.isEmbeddedFont(fontIdentifier)) {
         const fontInfo = this.embeddedFonts.get(fontIdentifier);
         if (fontInfo && fontInfo.font) {
+          // A font registered under several keys is written once and shared.
+          if (writtenFonts.has(fontInfo)) {
+            this.fontIdMap.set(fontIdentifier, fontInfo.type0ObjectId);
+            continue;
+          }
+          writtenFonts.add(fontInfo);
+
           // Font was successfully loaded - write as a proper Type0 embedded font.
           const type0Id = writer.getNewId();
           fontInfo.type0ObjectId = type0Id;
@@ -885,12 +894,18 @@ export class PdfResourceRegistry {
 
     // 4. Build font resource string
     const fontRefs: string[] = [];
+    const listedResources = new Set<string>();
     for (const [fontIdentifier, resourceName] of this.fontNameMap) {
       if (this.fontAliasMap.has(fontIdentifier)) continue;
       // Skip logical names that have a virtual (bytes-based) entry
       if (!fontIdentifier.startsWith('virtual:') && this.embeddedFonts.has(`virtual:${fontIdentifier}`)) continue;
+      // Keys that share one registration share its resource name, which is listed once.
+      if (listedResources.has(resourceName)) continue;
       const objectId = this.fontIdMap.get(fontIdentifier);
-      if (objectId) fontRefs.push(`${resourceName} ${objectId} 0 R`);
+      if (objectId) {
+        listedResources.add(resourceName);
+        fontRefs.push(`${resourceName} ${objectId} 0 R`);
+      }
     }
     const fontResources = `<< /Font << ${fontRefs.join(' ')} >> >>`;
 

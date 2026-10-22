@@ -115,18 +115,6 @@ export class LineChart extends CartesianChartBase {
   }
 
   /**
-   * Draws the connecting line between all data points for a series.
-   */
-  private drawConnectingLine(canvas: ICanvas, coordinates: Point[], color: Color, lineWidth: number): void {
-    if (coordinates.length < 2) return;
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const p1 = coordinates[i];
-      const p2 = coordinates[i + 1];
-      canvas.drawLine(p1.x, p1.y, p2.x, p2.y, color, lineWidth);
-    }
-  }
-
-  /**
    * Draws circular markers at each data point for a series.
    */
   private drawDataPointMarkers(canvas: ICanvas, coordinates: Point[], color: Color, radius: number): void {

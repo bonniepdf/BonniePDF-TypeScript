@@ -82,7 +82,7 @@ describe('prepared text painting', () => {
     });
   }
 
-  it('keeps separate trackers when one face has multiple PDF resources', () => {
+  it('tracks the glyphs of each registration of a shared face against its own tracker', () => {
     const font = TtfFont.loadFromBytes(bytes);
     const resources = new PdfResourceRegistry();
     for (const [name, resourceName] of [
@@ -97,14 +97,35 @@ describe('prepared text painting', () => {
       resources.embeddedFonts.set(name, info);
       resources.fontNameMap.set(name, resourceName);
     }
-    const runs = ['virtual:first', 'virtual:second'].map(name => resources.resolveTextRuns(name, 'ffi')[0]);
-    expect(runs.filter(run => run.canTrackPreparedGlyphs)).toHaveLength(1);
-    const second = runs.find(run => !run.canTrackPreparedGlyphs)!;
+    // A run is resolved to the registration its own identifier names, whichever order the registrations
+    // were made in, so each one tracks prepared glyphs against its own tracker.
+    for (const name of ['virtual:second', 'virtual:first']) {
+      const run = resources.resolveTextRuns(name, 'ffi')[0];
+      expect(run.canTrackPreparedGlyphs).toBe(true);
+      expect(run.tracker).toBe(resources.embeddedFonts.get(name)!.tracker);
+      expect(run.resourceName).toBe(resources.embeddedFonts.get(name)!.resourceName);
+    }
+    const whole = resources.wholeTextFont('virtual:second', 'ffi')!;
+    expect(whole.canTrackPreparedGlyphs).toBe(true);
+    expect(whole.tracker).toBe(resources.embeddedFonts.get('virtual:second')!.tracker);
+  });
+
+  it('keeps the tracking callback for a run that cannot track prepared glyphs', () => {
+    const font = TtfFont.loadFromBytes(bytes);
+    const resources = new PdfResourceRegistry();
+    const info = new EmbeddedFontInfo();
+    info.font = font;
+    info.tracker = new GlyphUsageTracker(font);
+    info.resourceName = '/F1';
+    info.subsetPrefix = 'ABCDEF';
+    resources.embeddedFonts.set('virtual:only', info);
+    resources.fontNameMap.set('virtual:only', '/F1');
+    const separate = { ...resources.resolveTextRuns('virtual:only', 'ffi')[0], canTrackPreparedGlyphs: false };
     const callback = vi.fn((name: string, text: string) => resources.trackGlyphUsage(name, text));
-    const canvas = new PdfCanvas(800, 0, 0, undefined, undefined, undefined, callback, undefined, () => [second]);
-    canvas.drawText(0, 0, 'ffi', Color.black, 12, 'virtual:second', TextAlignment.Left);
+    const canvas = new PdfCanvas(800, 0, 0, undefined, undefined, undefined, callback, undefined, () => [separate]);
+    canvas.drawText(0, 0, 'ffi', Color.black, 12, 'virtual:only', TextAlignment.Left);
     expect(callback).toHaveBeenCalledTimes(1);
-    expect(resources.embeddedFonts.get('virtual:second')!.tracker!.getUsedGlyphIds().size).toBeGreaterThan(1);
+    expect(resources.embeddedFonts.get('virtual:only')!.tracker!.getUsedGlyphIds().size).toBeGreaterThan(1);
   });
 
   it('reuses one SVG shape between alignment and painting, without mutating resolver runs', () => {

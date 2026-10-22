@@ -1,5 +1,21 @@
 import { TtfFont } from './TtfFont';
 
+// Composite glyph component flags (OpenType 'glyf' table).
+const ARG_1_AND_2_ARE_WORDS = 0x0001;
+const MORE_COMPONENTS = 0x0020;
+const WE_HAVE_A_SCALE = 0x0008;
+const WE_HAVE_AN_X_AND_Y_SCALE = 0x0040;
+const WE_HAVE_A_TWO_BY_TWO = 0x0080;
+
+/** The bytes of a composite glyph component record that follow its flags and glyph index: the arguments, then the optional transformation. */
+function componentTailLength(flags: number): number {
+  let length = (flags & ARG_1_AND_2_ARE_WORDS) !== 0 ? 4 : 2;
+  if ((flags & WE_HAVE_A_SCALE) !== 0) length += 2;
+  else if ((flags & WE_HAVE_AN_X_AND_Y_SCALE) !== 0) length += 4;
+  else if ((flags & WE_HAVE_A_TWO_BY_TWO) !== 0) length += 8;
+  return length;
+}
+
 /**
  * Creates a subset TrueType font containing only the glyphs that are actually used.
  * This significantly reduces embedded font size in PDFs.
@@ -236,12 +252,6 @@ export class TtfSubsetter {
     // component record. (remapCompositeGlyph uses the same offset 10.)
     let offset = glyfInfo.offset + glyphOffset + 10;
 
-    const ARG_1_AND_2_ARE_WORDS = 0x0001;
-    const MORE_COMPONENTS = 0x0020;
-    const WE_HAVE_A_SCALE = 0x0008;
-    const WE_HAVE_AN_X_AND_Y_SCALE = 0x0040;
-    const WE_HAVE_A_TWO_BY_TWO = 0x0080;
-
     let flags: number;
     do {
       flags = view.getUint16(offset);
@@ -251,21 +261,8 @@ export class TtfSubsetter {
       offset += 2;
       components.push(componentGid);
 
-      // Skip arguments
-      if ((flags & ARG_1_AND_2_ARE_WORDS) !== 0) {
-        offset += 4; // 2 shorts
-      } else {
-        offset += 2; // 2 bytes
-      }
-
-      // Skip transformation
-      if ((flags & WE_HAVE_A_SCALE) !== 0) {
-        offset += 2;
-      } else if ((flags & WE_HAVE_AN_X_AND_Y_SCALE) !== 0) {
-        offset += 4;
-      } else if ((flags & WE_HAVE_A_TWO_BY_TWO) !== 0) {
-        offset += 8;
-      }
+      // Skip the arguments and the optional transformation
+      offset += componentTailLength(flags);
     } while ((flags & MORE_COMPONENTS) !== 0);
 
     return components;
@@ -681,12 +678,6 @@ export class TtfSubsetter {
   private remapCompositeGlyph(glyphData: Uint8Array): Uint8Array {
     const result = new Uint8Array(glyphData);
 
-    const ARG_1_AND_2_ARE_WORDS = 0x0001;
-    const MORE_COMPONENTS = 0x0020;
-    const WE_HAVE_A_SCALE = 0x0008;
-    const WE_HAVE_AN_X_AND_Y_SCALE = 0x0040;
-    const WE_HAVE_A_TWO_BY_TWO = 0x0080;
-
     let offset = 10; // Skip header (numberOfContours + bbox)
 
     let flags: number;
@@ -703,21 +694,8 @@ export class TtfSubsetter {
 
       offset += 4; // flags + glyphIndex
 
-      // Skip arguments
-      if ((flags & ARG_1_AND_2_ARE_WORDS) !== 0) {
-        offset += 4;
-      } else {
-        offset += 2;
-      }
-
-      // Skip transformation
-      if ((flags & WE_HAVE_A_SCALE) !== 0) {
-        offset += 2;
-      } else if ((flags & WE_HAVE_AN_X_AND_Y_SCALE) !== 0) {
-        offset += 4;
-      } else if ((flags & WE_HAVE_A_TWO_BY_TWO) !== 0) {
-        offset += 8;
-      }
+      // Skip the arguments and the optional transformation
+      offset += componentTailLength(flags);
     } while ((flags & MORE_COMPONENTS) !== 0);
 
     return result;

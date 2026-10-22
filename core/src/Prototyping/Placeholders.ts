@@ -1,5 +1,6 @@
 import { Color } from '../Core/Color';
 import { ColorPalette } from '../Core/ColorPalette';
+import { adler32 } from '../Rendering/Compression/Deflate';
 
 const FIRST_NAMES = [
   'Alice',
@@ -539,14 +540,4 @@ function deflateRawSimple(data: Uint8Array): Uint8Array {
   const adler = adler32(data);
   writeU32(result, offset, adler);
   return result;
-}
-
-function adler32(data: Uint8Array): number {
-  let a = 1,
-    b = 0;
-  for (let i = 0; i < data.length; i++) {
-    a = (a + data[i]) % 65521;
-    b = (b + a) % 65521;
-  }
-  return ((b << 16) | a) >>> 0;
 }

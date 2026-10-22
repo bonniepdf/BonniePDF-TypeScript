@@ -1,5 +1,6 @@
 import { Md5Hash } from './md5';
 import { RC4Cipher } from './rc4Cipher';
+import { concatBytes } from './bytes';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { PermissionEncoder } from '../Permissions/PermissionEncoder';
 
@@ -167,9 +168,9 @@ export class PdfEncryptionKey {
     if (this.revision >= 4 && !encryptMetadata) {
       // Add 0xFFFFFFFF if not encrypting metadata
       const noEncryptFlag = new Uint8Array([0xff, 0xff, 0xff, 0xff]);
-      toHash = PdfEncryptionKey.concatenate(userPadded, oEntry, permBytes, documentId, noEncryptFlag);
+      toHash = concatBytes(userPadded, oEntry, permBytes, documentId, noEncryptFlag);
     } else {
-      toHash = PdfEncryptionKey.concatenate(userPadded, oEntry, permBytes, documentId);
+      toHash = concatBytes(userPadded, oEntry, permBytes, documentId);
     }
 
     // Step c: Hash the concatenated data
@@ -200,7 +201,7 @@ export class PdfEncryptionKey {
     } else {
       // Algorithm 3.5: More complex for revision 3+
       // Step a: Create hash of padding + document ID
-      const toHash = PdfEncryptionKey.concatenate(PdfEncryptionKey.PADDING_BYTES, documentId);
+      const toHash = concatBytes(PdfEncryptionKey.PADDING_BYTES, documentId);
       const hash = Md5Hash.compute(toHash);
 
       // Step b: Encrypt with RC4
@@ -246,24 +247,6 @@ export class PdfEncryptionKey {
     const hash = Md5Hash.compute(data);
     const keyLen = Math.min(this.keyLength + 5, 16);
     return hash.slice(0, keyLen);
-  }
-
-  /**
-   * Concatenates multiple byte arrays.
-   */
-  private static concatenate(...arrays: Uint8Array[]): Uint8Array {
-    const totalLength = arrays.reduce((sum, arr) => sum + (arr?.length || 0), 0);
-    const result = new Uint8Array(totalLength);
-
-    let offset = 0;
-    for (const arr of arrays) {
-      if (arr && arr.length > 0) {
-        result.set(arr, offset);
-        offset += arr.length;
-      }
-    }
-
-    return result;
   }
 
   /**

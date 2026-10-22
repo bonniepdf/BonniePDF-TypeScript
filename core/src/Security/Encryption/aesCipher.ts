@@ -4,21 +4,7 @@
  * All methods are async because SubtleCrypto is strictly Promise-based.
  */
 
-/** Extracts an `ArrayBuffer` slice exactly matching the Uint8Array's view. */
-function asBuffer(data: Uint8Array): ArrayBuffer {
-  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
-}
-
-function concatBytes(...arrays: Uint8Array[]): Uint8Array {
-  const total = arrays.reduce((t, a) => t + a.length, 0);
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const a of arrays) {
-    out.set(a, offset);
-    offset += a.length;
-  }
-  return out;
-}
+import { asBuffer, concatBytes } from './bytes';
 
 /** Encrypts PDF data with AES through the runtime Web Crypto implementation. */
 export class AesCipher {

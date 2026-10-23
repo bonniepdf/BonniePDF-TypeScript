@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "svg-engine-typescript",
   "source": {
-    "commit": "2947c3caab9a4b80a48882940eb6a2124e4a5f59",
+    "commit": "43c1e595c2a6478a8dfb82a63133f7d4faf20772",
     "dirty": false
   },
   "files": {
@@ -31,7 +31,7 @@
     "Sink/Image.ts": "814c618ffbdfeec6e3a78cc72fa458d18b384fd708f1aab4039508480cc3f28a",
     "Sink/Paint.ts": "684e2e4f5329920431a0abc6cb91f0f4fbd56a89e5712f3fd17e1cc61a7cdd8c",
     "Sink/StrokeStyle.ts": "ffefe8c122cec28afebfdc2062cf6efdb44496e2feec2df46d88edcb683e4984",
-    "Sink/VectorSink.ts": "539f2710064e699e6c3dee0831f5cda2631f615ebe6b05ddd9c09394db3292c7",
+    "Sink/VectorSink.ts": "61a611d67d3e9a185101d7a0fd482813d3911d2cd28abc9654b4b9c267b7ced7",
     "Xml/SvgXmlReader.ts": "9e88269e5b0d8a5c0a7667b786ff38f0cab613a38a056f1cfdd54b71efd64ad1"
   }
 }

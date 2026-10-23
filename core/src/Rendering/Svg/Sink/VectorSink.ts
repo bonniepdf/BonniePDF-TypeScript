@@ -8,7 +8,7 @@ import type { FillRule, StrokeStyle } from './StrokeStyle';
  * The one seam between this package and whatever draws its output.
  *
  * Copied from BonniePDF's shipped `ICanvas` (`core/src/Drawing/ICanvas.ts`),
- * specifically the path / paint / transform / clip surface that this feature landed.
+ * specifically the path / paint / transform / clip surface of the vector drawing canvas.
  * It is a *copy*, not an import: this package never depends on
  * `@bonniepdf/core`. Keeping the copy faithful is what makes fold-in a
  * mechanical adapter rather than a redesign — read AGENTS.md before changing
@@ -30,7 +30,7 @@ import type { FillRule, StrokeStyle } from './StrokeStyle';
  */
 export interface VectorSink {
   // -- Graphics state ----------------------------------------------
-  // (These two predate this feature; `<g>` nesting needs them.)
+  // (These two predate the vector drawing canvas; `<g>` nesting needs them.)
 
   saveState(): void;
   restoreState(): void;

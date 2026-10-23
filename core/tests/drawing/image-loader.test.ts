@@ -364,7 +364,9 @@ function createJpegWithIccProfile(chunks: Uint8Array[], seqOrder?: number[], ann
   return new Uint8Array(out);
 }
 
-const PNG_FILE = '../BonniePDF.NET/BonniePDF.Tests/image.png';
+// A real-world PNG from the .NET test suite, when that repository is checked out
+// beside this one; the tests that need it are skipped otherwise.
+const PNG_FILE = join(__dirname, '../../../../BonniePDF-NET/BonniePDF.Tests/image.png');
 const hasPngFile = existsSync(PNG_FILE);
 
 describe('ImageLoader', () => {
@@ -499,10 +501,11 @@ describe('ImageLoader', () => {
       expect(() => ImageLoader.loadPng(new Uint8Array(0))).toThrow();
     });
 
-    (hasPngFile ? it : it.skip)('loadPng from test file', () => {
+    // A real-world PNG uses Huffman-compressed blocks, which only the async loader decodes.
+    (hasPngFile ? it : it.skip)('loadPngAsync decodes a real-world PNG file', async () => {
       const buf = readFileSync(PNG_FILE);
       const data = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-      const info = ImageLoader.loadPng(data);
+      const info = await ImageLoader.loadPngAsync(data);
       expect(info.format).toBe(ImageFormat.Png);
       expect(info.width).toBeGreaterThan(0);
       expect(info.height).toBeGreaterThan(0);

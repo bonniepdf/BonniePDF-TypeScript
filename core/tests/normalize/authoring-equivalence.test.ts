@@ -16,7 +16,7 @@ import { toSvg } from '../../src/Export/SvgElementExport';
 import type { Page } from '../../src/Elements/Layout/Page';
 
 /**
- * The `09a §3.1` authoring-equivalence property, in miniature: the same logical
+ * The authoring-equivalence property, in miniature: the same logical
  * document authored in the legacy construct-then-mutate style and in the new
  * options style must render identically.
  *

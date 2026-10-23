@@ -64,13 +64,13 @@ export type BarcodeOptions = ElementOptions &
 
 /** Renders a supported one-dimensional barcode as vector graphics. */
 export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvider {
-  /** The value to encode. Content rules depend on {@link symbology}. */
   /** Creates a barcode, optionally configured in one expression. */
   constructor(options?: BarcodeOptions) {
     super();
     applyOptions(this, options);
   }
 
+  /** The value to encode. Content rules depend on {@link symbology}. */
   public value = '';
 
   /** The barcode symbology. Defaults to Code 128. */
@@ -94,7 +94,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
   /** Height of the bars in points (excludes the text label). Default 60.
    *
-   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }`.
    */
   public get height(): number {
     return this._height;
@@ -107,7 +107,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
   /** Width of the narrowest bar (one module) in points. Default 1.5.
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get moduleWidth(): number {
     return this._moduleWidth;
@@ -126,7 +126,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
   /** Font size of the human-readable text label, in points. Default 9.
    *
-   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }`.
    */
   public get textLabelFontSize(): number {
     return this._textLabelFontSize;

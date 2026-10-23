@@ -13,11 +13,11 @@ import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * this feature through Stage 2 accessibility hardening (TS mirror).
+ * Stage 2 accessibility hardening (TS mirror).
  * Semantic groups, artifact tagging for headers/footers/watermarks,
  * /Tabs /S reading-order hint, and annotation /StructParent + /OBJR.
  */
-describe('Stage 2 accessibility hardening (this feature)', () => {
+describe('Stage 2 accessibility hardening', () => {
   let doc: Document;
 
   afterEach(() => {

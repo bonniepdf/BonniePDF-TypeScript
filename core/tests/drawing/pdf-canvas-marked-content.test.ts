@@ -5,7 +5,7 @@ import { StructureTreeBuilder } from '../../src/Rendering/Tagging/StructureTreeB
 import { TaggingContext } from '../../src/Rendering/Tagging/TaggingContext';
 
 /**
- * marked-content emission tests for PdfCanvas. Drives the
+ * Marked-content emission tests for PdfCanvas. Drives the
  * canvas directly with a TaggingContext and asserts the emitted PDF
  * operators wrap content in BDC/EMC. Mirrors the .NET
  * PdfCanvasMarkedContentTests.

@@ -11,7 +11,7 @@ import { pdfToText } from '../helpers/test-base';
 import { embeddedFontFamily } from '../../src/Drawing/SvgCanvas';
 
 /**
- * Document fonts - shared conformance fixture `fonts/document-font-resolution` (spec 16).
+ * Document fonts - shared conformance fixture `fonts/document-font-resolution`.
  * A document owns its faces: several families, several weights and styles each, resolved by
  * style then CSS weight matching, ahead of the global registries and invisible to any other
  * document.

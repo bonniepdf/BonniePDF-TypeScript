@@ -18,6 +18,7 @@
 
 /** An exact decimal: `digits` scaled by `10^-scale`. */
 export interface ChartDecimal {
+  /** `true` when the value is negative. */
   readonly negative: boolean;
   /** Decimal digits of the magnitude, no leading zeros (except a lone `0`). */
   readonly digits: string;

@@ -151,7 +151,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   constructor(...args: number[] | [TableOptions]) {
     super();
 
-    // Dispatch (`09a §5`): the rest-param weight form is all-numbers; the sole
+    // Dispatch: the rest-param weight form is all-numbers; the sole
     // non-array object argument is the options bag. Everything else is weights.
     const first = args[0];
     const isOptions = args.length === 1 && typeof first === 'object' && first !== null && !Array.isArray(first);
@@ -174,7 +174,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   /**
    * Default padding for all cells
    *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }`.
    */
   public get cellPadding(): number {
     return this._cellPadding;

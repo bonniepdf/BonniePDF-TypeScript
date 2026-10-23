@@ -4,7 +4,7 @@ import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 
 /**
  * Round-trip tests for the new accessibility-related properties on
- * DocumentSettings. this feature of the this feature (PDF/UA) plan - only verifies the
+ * DocumentSettings. Only verifies the
  * public surface; no writer behaviour yet.
  */
 describe('DocumentSettings - accessibility', () => {

@@ -61,7 +61,7 @@ function renderPageStream(pages: Page[], settings: DocumentSettings, index = 0):
   return outputs[index].contentStream;
 }
 
-describe('this feature page slots (DocumentSettings)', () => {
+describe('page slots (DocumentSettings)', () => {
   // Regression: a CanvasElement (or ChartElement/GroupedBarChartElement,
   // which draw the same way) used as a pageBackground slot painted OVER the
   // page's body content in PDF output instead of behind it - the artwork
@@ -213,7 +213,7 @@ describe('this feature page slots (DocumentSettings)', () => {
   });
 });
 
-describe('this feature Layers primitive', () => {
+describe('Layers primitive', () => {
   function renderLayers(el: { render(ctx: RenderContext, width: number): void }): string {
     const ctx = new RenderContext(PdfSize.a4, 50);
     el.render(ctx, 400);

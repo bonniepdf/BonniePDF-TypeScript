@@ -37,7 +37,7 @@ export class Watermark {
   /**
    * Font size in points for the watermark text (default: 72).
    *
-   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`.
    */
   public get fontSize(): number {
     return this._fontSize;

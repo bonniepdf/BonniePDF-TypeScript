@@ -22,6 +22,7 @@ export interface DocumentFontFace {
   readonly family: string;
   /** Weight, 1-1000. */
   readonly weight: number;
+  /** `true` for an italic face. */
   readonly italic: boolean;
   /**
    * A font name that selects this face wherever an element takes one (`fontName`, a
@@ -80,7 +81,6 @@ function detectItalic(font: TtfFont): boolean {
  *
  * A collection of faces, any number of families with any number of weights and styles
  * each. Nothing added here is visible to another document, and nothing global changes.
- * See spec 16 for the resolution rules.
  */
 export class DocumentFonts {
   private readonly serial = nextDocumentSerial++;

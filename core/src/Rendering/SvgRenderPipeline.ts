@@ -67,8 +67,7 @@ export class SvgRenderPipeline {
       throw new Error('SvgRenderPipeline requires a RenderContext created with isSvgMode = true');
     }
 
-    // Header/footer consume body content height (spec: Layout & Pagination
-    // §5.1), so the SVG preview paginates exactly where the PDF does.
+    // Header/footer consume body content height, so the SVG preview paginates exactly where the PDF does.
     ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
 
@@ -190,7 +189,7 @@ export class SvgRenderPipeline {
       const resolvedPageColor = dim.pageColor ?? settings.pageColor;
       if (resolvedPageColor) output.pageColor = resolvedPageColor;
       // A background *element* can paint anything, so a page carrying one has an
-      // unmodellable backdrop for contrast purposes (spec/07 §9.4).
+      // unmodellable backdrop for contrast purposes.
       if (dim.pageBackground ?? settings.pageBackground) output.pageBackdropUnknown = true;
       outputs.push(output);
     }

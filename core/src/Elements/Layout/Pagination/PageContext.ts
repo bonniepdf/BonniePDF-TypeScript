@@ -5,7 +5,7 @@ import type { RenderContext } from '../../IElement';
  *
  * Deliberately small and stateless: a predicate that can only see these three
  * values is a pure function of where the element landed, which is what keeps
- * layout deterministic (spec "Layout & Pagination" §10) and keeps the two
+ * layout deterministic and keeps the two
  * implementations in step.
  */
 export interface PageContext {

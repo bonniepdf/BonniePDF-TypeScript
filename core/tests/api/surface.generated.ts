@@ -1,5 +1,5 @@
-// GENERATED from spec/api/surface.json (spec 06). Do not edit.
-// Regenerate with `node schema/sync.mjs` in the specification repository.
+// Generated file: do not edit by hand. It lists the internal names of the public-surface specification
+// that the surface test checks; the project's schema sync script produces it.
 export const INTERNAL_NAMES: readonly string[] = [
   "applyBorderedElementOptions",
   "applyDocumentSettingsOptions",

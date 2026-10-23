@@ -3,13 +3,15 @@ import { Units } from '../Core/Units';
 
 /** A length written as a value plus an explicit {@link Unit}. */
 export interface LengthObject {
+  /** The numeric value, in `unit`. */
   value: number;
+  /** The unit `value` is measured in. */
   unit: Unit;
 }
 
 /**
  * A length written as a unit-suffixed token: `<number><unit>`, where the unit is
- * one of `pt` `in` `cm` `mm` (`the specification` §4A.3).
+ * one of `pt` `in` `cm` `mm`.
  *
  * The template-literal type keeps the four units closed - `'10km'` is a compile
  * error, not a silent zero - while leaving the numeric part open.
@@ -18,7 +20,7 @@ export type LengthToken = `${number}${'pt' | 'in' | 'cm' | 'mm'}`;
 
 /**
  * Every form a single measurement may be written as in a public authoring
- * position (`the specification` §4A.3, §4A.6):
+ * position:
  *
  * - `72` - points, the canonical unit
  * - `'1in'` · `'10mm'` · `'2.5cm'` · `'72pt'` - a unit-suffixed token

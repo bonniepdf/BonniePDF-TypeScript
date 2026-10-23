@@ -238,9 +238,13 @@ export function paintOf(element: object, type: string): NodePaint | undefined {
 export interface LayoutRect {
   /** 0-based page index, aligned with {@link LayoutSnapshot.pages} and SVG page order. */
   page: number;
+  /** Left edge, in points. */
   x: number;
+  /** Top edge, in points from the top of the page. */
   y: number;
+  /** Width, in points. */
   width: number;
+  /** Height, in points. */
   height: number;
 }
 
@@ -260,6 +264,7 @@ export interface LayoutNode {
   a11y?: NodeAccessibility;
   /** Intrinsic colour/typography facts, when the element paints any. */
   paint?: NodePaint;
+  /** The nodes laid out inside this one, in render order. */
   children: LayoutNode[];
 }
 
@@ -287,7 +292,9 @@ export interface SnapshotMeta {
  * rules must not guess at.
  */
 export interface SnapshotPage {
+  /** Page width, in points. */
   width: number;
+  /** Page height, in points. */
   height: number;
   /** Resolved page fill, `"#rrggbb"`, when one is set. */
   color?: string;
@@ -295,7 +302,11 @@ export interface SnapshotPage {
   backdropUnknown?: boolean;
 }
 
+/**
+ * A record of where every element was placed: the page sizes and a tree of nodes with their rectangles. It is what the previewer and the accessibility checks read.
+ */
 export interface LayoutSnapshot {
+  /** Version of the snapshot format. */
   version: number;
   /** Page sizes in points, index-aligned with the rendered pages. */
   pages: SnapshotPage[];

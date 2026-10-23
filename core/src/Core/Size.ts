@@ -3,7 +3,9 @@
  */
 /** Represents a two-dimensional width and height. */
 export class Size {
+  /** Width, in points. */
   public readonly width: number;
+  /** Height, in points. */
   public readonly height: number;
 
   constructor(width: number, height: number) {

@@ -60,11 +60,13 @@ export type ContainerOptions = BorderedElementOptions &
     padding?: ThicknessInput;
     /** Child placement. Accepts `'start' | 'center' | 'end' | 'stretch'`. */
     horizontalAlignment?: HorizontalAlignmentInput;
+    /** Child placement. Accepts `'top' | 'middle' | 'bottom' | 'stretch'`. */
     verticalAlignment?: VerticalAlignmentInput;
   };
 
 /** Wraps one child with optional sizing, alignment, padding, borders, background, and layers. */
 export class Container extends BorderedElementBase implements IContentContainer, IStatefulElement {
+  /** The element placed inside the container. */
   public child?: IElement;
 
   /** Creates an empty container. */
@@ -94,7 +96,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
    * Padding inside the container, inside the border.
    *
    * Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }` on write
-   * (`the specification` §4A.3); omitted sides are zero.
+   *; omitted sides are zero.
    */
   public get padding(): Thickness {
     return this._padding;
@@ -107,7 +109,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
   /**
    * Optional fixed width for the container (null = use available width).
    *
-   * Accepts a length: `240`, `'8cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: `240`, `'8cm'`, or `{ value, unit }`.
    */
   public get width(): number | undefined {
     return this._width;
@@ -121,7 +123,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
   /**
    * Optional fixed height for the container (null = auto-size based on content).
    *
-   * Accepts a length: `120`, `'1in'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: `120`, `'1in'`, or `{ value, unit }`.
    */
   public get height(): number | undefined {
     return this._height;
@@ -592,7 +594,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
   /**
    * The ambient horizontal text alignment a given HorizontalAlignment establishes for descendant text
-   * (spec 01 "Document Model" §3.2). Start/Center/End map to Left/Center/Right; Stretch and unset
+   *. Start/Center/End map to Left/Center/Right; Stretch and unset
    * (undefined) return undefined, leaving whatever ambient an enclosing container established untouched.
    */
   private ambientTextAlignmentFor(alignment: HorizontalAlignment | undefined): TextAlignment | undefined {

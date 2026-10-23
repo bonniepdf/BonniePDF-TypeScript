@@ -15,7 +15,7 @@ import { pdfToText } from '../helpers/test-base';
 import { PdfSize } from '../../src/Configuration/PdfSize';
 
 /**
- * table structure tagging. Mirrors the .NET TableTaggingTests:
+ * Table structure tagging. Mirrors the .NET TableTaggingTests:
  * a tagged Table produces /Table > /TR > [/TH | /TD] in the structure
  * tree, and ColumnSpan surfaces as /A << /O /Table /ColSpan n >> on
  * the cell's StructElem.

@@ -1,17 +1,21 @@
 import { Thickness } from '../Core/Thickness';
 import { toLength, type LengthInput } from './toLength';
 
-/** Per-side spacing. Omitted sides are **zero**, not inherited (§4A.3). */
+/** Per-side spacing. Omitted sides are **zero**, not inherited. */
 export interface ThicknessObject {
+  /** Top spacing. Omitted sides are zero. */
   top?: LengthInput;
+  /** Right spacing. Omitted sides are zero. */
   right?: LengthInput;
+  /** Bottom spacing. Omitted sides are zero. */
   bottom?: LengthInput;
+  /** Left spacing. Omitted sides are zero. */
   left?: LengthInput;
 }
 
 /**
  * Every form spacing (`margin`, `padding`) may be written as in a public
- * authoring position (`the specification` §4A.3):
+ * authoring position:
  *
  * - `12` - uniform
  * - `[h, v]` - horizontal, vertical

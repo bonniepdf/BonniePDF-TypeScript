@@ -3,9 +3,13 @@
  * All values are in points (1/72 inch).
  */
 export class Border {
+  /** Border width on the left side, in points. */
   public readonly left: number;
+  /** Border width on the top side, in points. */
   public readonly top: number;
+  /** Border width on the right side, in points. */
   public readonly right: number;
+  /** Border width on the bottom side, in points. */
   public readonly bottom: number;
 
   /**

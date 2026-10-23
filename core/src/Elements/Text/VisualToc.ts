@@ -44,16 +44,16 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     return SemanticRole.TOC;
   }
 
-  /**
-   * Gets or sets the ordered list of TOC identifiers to render.
-   * Each identifier must match the Heading.TocIdentifier of a rendered heading.
-   */
   /** Creates a visual table of contents, optionally configured in one expression. */
   constructor(options?: VisualTocOptions) {
     super();
     applyOptions(this, options);
   }
 
+  /**
+   * Gets or sets the ordered list of TOC identifiers to render.
+   * Each identifier must match the Heading.TocIdentifier of a rendered heading.
+   */
   public headingIdentifiers: string[] = [];
 
   /**
@@ -66,7 +66,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
   /**
    * Gets or sets the font size (in points) used to render TOC entry text.
    *
-   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }`.
    */
   public get fontSize(): number {
     return this._fontSize;

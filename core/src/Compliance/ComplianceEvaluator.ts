@@ -42,6 +42,7 @@ export enum ComplianceSeverity {
 export interface ComplianceFinding {
   /** Stable rule identifier, e.g. `"figure-missing-alt"`. */
   code: string;
+  /** How serious the finding is; see {@link ComplianceSeverity}. */
   severity: ComplianceSeverity;
   /** The standard the rule derives from. Currently always `"PDF/UA-1"`. */
   standard: string;
@@ -86,8 +87,11 @@ export interface ComplianceReport {
   findings: ComplianceFinding[];
   /** True when there are no {@link ComplianceSeverity.Error} findings. */
   passed: boolean;
+  /** Number of error-severity findings. */
   errorCount: number;
+  /** Number of warning-severity findings. */
   warningCount: number;
+  /** Number of informational findings. */
   infoCount: number;
 }
 
@@ -319,8 +323,7 @@ function checkTableHeaders(table: LayoutNode, out: ComplianceFinding[]): void {
 }
 
 /**
- * Resolves the colour painted behind a text node, walking ancestors nearest-first
- * per `spec/08` §4.3.1.
+ * Resolves the colour painted behind a text node, walking ancestors nearest-first.
  *
  * The important property of this function is that it is willing to say "I don't
  * know". A confident wrong verdict is worse than no verdict: it trains authors to

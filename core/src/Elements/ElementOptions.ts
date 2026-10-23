@@ -6,7 +6,7 @@ import type { ThicknessInput } from '../Normalize/toThickness';
  * Every settable {@link ElementBase} property, as a runtime list.
  *
  * Paired with the option type below so a test can assert the bag covers the
- * class's whole settable surface - `09a §9` risk 1: a property on the class but
+ * class's whole settable surface: a property on the class but
  * not in its options is a knob TypeScript callers can reach and C# callers
  * cannot, which is a parity defect rather than a spelling difference.
  */
@@ -22,8 +22,7 @@ type ElementWidenedKey = 'margin' | 'contentDirection';
  *
  * Derived from {@link ElementBase} rather than hand-written, so a new property
  * on the class carries its JSDoc into autocomplete with no second declaration to
- * keep in step. Concrete element options intersect this (see
- * `09a §3.1`); the base itself is abstract and takes no constructor.
+ * keep in step. Concrete element options intersect this; the base itself is abstract and takes no constructor.
  */
 export type ElementOptions = Partial<Omit<Pick<ElementBase, ElementOptionKey>, ElementWidenedKey>> & {
   /**

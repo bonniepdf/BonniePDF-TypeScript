@@ -16,16 +16,24 @@
  * `gradientTransform` and PDF's pattern `/Matrix` both use.
  */
 export interface PaintTransform {
+  /** Horizontal scale. */
   readonly a: number;
+  /** Vertical skew. */
   readonly b: number;
+  /** Horizontal skew. */
   readonly c: number;
+  /** Vertical scale. */
   readonly d: number;
+  /** Horizontal translation. */
   readonly e: number;
+  /** Vertical translation. */
   readonly f: number;
 }
 
+/** The transform that changes nothing. */
 export const IDENTITY_PAINT_TRANSFORM: PaintTransform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
 
+/** Returns `true` for the identity transform, and for `undefined`. */
 export function isIdentityPaintTransform(transform: PaintTransform | undefined): boolean {
   if (!transform) return true;
   const { a, b, c, d, e, f } = transform;

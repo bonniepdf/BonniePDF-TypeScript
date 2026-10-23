@@ -44,6 +44,7 @@ function ramp(
  * ```
  */
 export const ColorPalette = {
+  /** The Tailwind v4 `slate` ramp, shades 50 to 950: for example `ColorPalette.slate[500]`. */
   slate: ramp([
     'f8fafc',
     'f1f5f9',
@@ -57,6 +58,7 @@ export const ColorPalette = {
     '0f172b',
     '020618',
   ]),
+  /** The Tailwind v4 `gray` ramp, shades 50 to 950: for example `ColorPalette.gray[500]`. */
   gray: ramp([
     'f9fafb',
     'f3f4f6',
@@ -70,6 +72,7 @@ export const ColorPalette = {
     '101828',
     '030712',
   ]),
+  /** The Tailwind v4 `zinc` ramp, shades 50 to 950: for example `ColorPalette.zinc[500]`. */
   zinc: ramp([
     'fafafa',
     'f4f4f5',
@@ -83,6 +86,7 @@ export const ColorPalette = {
     '18181b',
     '09090b',
   ]),
+  /** The Tailwind v4 `neutral` ramp, shades 50 to 950: for example `ColorPalette.neutral[500]`. */
   neutral: ramp([
     'fafafa',
     'f5f5f5',
@@ -96,6 +100,7 @@ export const ColorPalette = {
     '171717',
     '0a0a0a',
   ]),
+  /** The Tailwind v4 `stone` ramp, shades 50 to 950: for example `ColorPalette.stone[500]`. */
   stone: ramp([
     'fafaf9',
     'f5f5f4',
@@ -109,6 +114,7 @@ export const ColorPalette = {
     '1c1917',
     '0c0a09',
   ]),
+  /** The Tailwind v4 `red` ramp, shades 50 to 950: for example `ColorPalette.red[500]`. */
   red: ramp([
     'fef2f2',
     'ffe2e2',
@@ -122,6 +128,7 @@ export const ColorPalette = {
     '82181a',
     '460809',
   ]),
+  /** The Tailwind v4 `orange` ramp, shades 50 to 950: for example `ColorPalette.orange[500]`. */
   orange: ramp([
     'fff7ed',
     'ffedd4',
@@ -135,6 +142,7 @@ export const ColorPalette = {
     '7e2a0c',
     '441306',
   ]),
+  /** The Tailwind v4 `amber` ramp, shades 50 to 950: for example `ColorPalette.amber[500]`. */
   amber: ramp([
     'fffbeb',
     'fef3c6',
@@ -148,6 +156,7 @@ export const ColorPalette = {
     '7b3306',
     '461901',
   ]),
+  /** The Tailwind v4 `yellow` ramp, shades 50 to 950: for example `ColorPalette.yellow[500]`. */
   yellow: ramp([
     'fefce8',
     'fef9c2',
@@ -161,6 +170,7 @@ export const ColorPalette = {
     '733e0a',
     '432004',
   ]),
+  /** The Tailwind v4 `lime` ramp, shades 50 to 950: for example `ColorPalette.lime[500]`. */
   lime: ramp([
     'f7fee7',
     'ecfcca',
@@ -174,6 +184,7 @@ export const ColorPalette = {
     '35530e',
     '192e03',
   ]),
+  /** The Tailwind v4 `green` ramp, shades 50 to 950: for example `ColorPalette.green[500]`. */
   green: ramp([
     'f0fdf4',
     'dcfce7',
@@ -187,6 +198,7 @@ export const ColorPalette = {
     '0d542b',
     '032e15',
   ]),
+  /** The Tailwind v4 `emerald` ramp, shades 50 to 950: for example `ColorPalette.emerald[500]`. */
   emerald: ramp([
     'ecfdf5',
     'd0fae5',
@@ -200,6 +212,7 @@ export const ColorPalette = {
     '004f3b',
     '002c22',
   ]),
+  /** The Tailwind v4 `teal` ramp, shades 50 to 950: for example `ColorPalette.teal[500]`. */
   teal: ramp([
     'f0fdfa',
     'cbfbf1',
@@ -213,6 +226,7 @@ export const ColorPalette = {
     '0b4f4a',
     '022f2e',
   ]),
+  /** The Tailwind v4 `cyan` ramp, shades 50 to 950: for example `ColorPalette.cyan[500]`. */
   cyan: ramp([
     'ecfeff',
     'cefafe',
@@ -226,6 +240,7 @@ export const ColorPalette = {
     '104e64',
     '053345',
   ]),
+  /** The Tailwind v4 `sky` ramp, shades 50 to 950: for example `ColorPalette.sky[500]`. */
   sky: ramp([
     'f0f9ff',
     'dff2fe',
@@ -239,6 +254,7 @@ export const ColorPalette = {
     '024a70',
     '052f4a',
   ]),
+  /** The Tailwind v4 `blue` ramp, shades 50 to 950: for example `ColorPalette.blue[500]`. */
   blue: ramp([
     'eff6ff',
     'dbeafe',
@@ -252,6 +268,7 @@ export const ColorPalette = {
     '1c398e',
     '162456',
   ]),
+  /** The Tailwind v4 `indigo` ramp, shades 50 to 950: for example `ColorPalette.indigo[500]`. */
   indigo: ramp([
     'eef2ff',
     'e0e7ff',
@@ -265,6 +282,7 @@ export const ColorPalette = {
     '312c85',
     '1e1a4d',
   ]),
+  /** The Tailwind v4 `violet` ramp, shades 50 to 950: for example `ColorPalette.violet[500]`. */
   violet: ramp([
     'f5f3ff',
     'ede9fe',
@@ -278,6 +296,7 @@ export const ColorPalette = {
     '4d179a',
     '2f0d68',
   ]),
+  /** The Tailwind v4 `purple` ramp, shades 50 to 950: for example `ColorPalette.purple[500]`. */
   purple: ramp([
     'faf5ff',
     'f3e8ff',
@@ -291,6 +310,7 @@ export const ColorPalette = {
     '59168b',
     '3c0366',
   ]),
+  /** The Tailwind v4 `fuchsia` ramp, shades 50 to 950: for example `ColorPalette.fuchsia[500]`. */
   fuchsia: ramp([
     'fdf4ff',
     'fae8ff',
@@ -304,6 +324,7 @@ export const ColorPalette = {
     '721378',
     '4b004f',
   ]),
+  /** The Tailwind v4 `pink` ramp, shades 50 to 950: for example `ColorPalette.pink[500]`. */
   pink: ramp([
     'fdf2f8',
     'fce7f3',
@@ -317,6 +338,7 @@ export const ColorPalette = {
     '861043',
     '510424',
   ]),
+  /** The Tailwind v4 `rose` ramp, shades 50 to 950: for example `ColorPalette.rose[500]`. */
   rose: ramp([
     'fff1f2',
     'ffe4e6',

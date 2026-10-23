@@ -99,7 +99,7 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
 
   /** Minimum height for this row (optional)
    *
-   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`.
    */
   public get minHeight(): number | undefined {
     return this._minHeight;

@@ -108,7 +108,7 @@ export abstract class CartesianChartBase extends ChartBase {
   /**
    * Font size for value labels above data points
    *
-   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'9pt'`, or `{ value, unit }`.
    */
   public get labelFontSize(): number {
     return this._labelFontSize;

@@ -8,7 +8,7 @@ import { TaggingContext } from '../../src/Rendering/Tagging/TaggingContext';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * page-break-aware tagging tests. Mirrors the .NET
+ * Page-break-aware tagging tests. Mirrors the .NET
  * PageBreakTaggingTests.
  */
 describe('Page-break-aware tagging', () => {

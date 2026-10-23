@@ -88,8 +88,11 @@ export interface FallbackFont {
  * binds the bytes to the exact document font reference (commonly a browser URL)
  * so export does not need to fetch that resource a second time. */
 export interface FontRegistrationOptions {
+  /** Family name to register the font under. Read from the font file when omitted. */
   family?: string;
+  /** Style name, such as `Bold` or `Italic`. Read from the font file when omitted. */
   subfamily?: string;
+  /** Explicit identifier for the font, used instead of one built from family and style. */
   identifier?: string;
 }
 

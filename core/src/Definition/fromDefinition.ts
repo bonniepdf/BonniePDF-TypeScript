@@ -79,7 +79,9 @@ const D = ELEMENT_DESCRIPTION;
 export interface DefinitionResourceRequest {
   /** The name in the definition's `resources`. */
   name: string;
+  /** The kind of resource requested: `'image'`, `'font'`, `'svg'` or `'attachment'`. */
   kind: string;
+  /** The media type the definition declares for the resource. */
   mediaType: string;
 }
 
@@ -87,22 +89,25 @@ export interface DefinitionResourceRequest {
 export interface DefinitionReadOptions extends ValidateOptions {
   /**
    * Supplies the bytes for a resource that has a `ref`. The reader never opens a path or fetches a URL
-   * on its own: `ref` is an opaque name the host resolves (spec 15 §9). Return `undefined` when the
+   * on its own: `ref` is an opaque name the host resolves. Return `undefined` when the
    * host has nothing under that name.
    */
   resources?: (
     ref: string,
     request: DefinitionResourceRequest
   ) => Uint8Array | undefined | Promise<Uint8Array | undefined>;
-  /** Passwords for `settings.encryption`. They are never part of a definition (spec 15 §11.3). */
+  /** Passwords for `settings.encryption`. They are never part of a definition. */
   passwords?: { owner?: string; user?: string };
-  /** An SVG rasterizer to register on the document (spec 03, `Svg`). Supplied by the host, never stored. */
+  /** An SVG rasterizer to register on the document. Supplied by the host, never stored. */
   rasterizer?: SvgRasterizer;
 }
 
 /** Thrown when a definition cannot be turned into a document. Carries every problem found. */
 export class DefinitionError extends BonniePdfError {
-  constructor(public readonly issues: readonly DefinitionIssue[]) {
+  constructor(
+    /** Every problem found in the definition. */
+    public readonly issues: readonly DefinitionIssue[]
+  ) {
     super(
       `The definition has ${issues.length} problem${issues.length === 1 ? '' : 's'}: ` +
         issues
@@ -314,7 +319,7 @@ async function loadResources(definition: DocumentDefinition, options: Definition
 class Builder {
   constructor(private readonly loaded: Loaded) {}
 
-  /** Builds an element, and marks it with its `id` (spec 07 source identifiers). */
+  /** Builds an element, and marks it with its `id`. */
   element(node: Obj): IElement {
     const element = this.build(node);
     if (typeof node.id === 'string') markDebugSource(element, node.id);
@@ -546,7 +551,7 @@ function settingsOptions(settings: Obj, options: DefinitionReadOptions): Obj {
 }
 
 /**
- * Builds a document from a definition (spec 15). Validates first, and throws a {@link DefinitionError}
+ * Builds a document from a definition. Validates first, and throws a {@link DefinitionError}
  * listing every problem if there are any; nothing is constructed from an invalid definition.
  */
 export async function documentFromDefinition(input: unknown, options: DefinitionReadOptions = {}): Promise<Document> {
@@ -604,7 +609,7 @@ export async function documentFromDefinition(input: unknown, options: Definition
   }
   if (options.rasterizer) doc.registerSvgRasterizer(options.rasterizer);
 
-  // Fonts belong to this document (spec 16).
+  // Fonts belong to this document.
   for (const [name, resource] of Object.entries((definition.resources ?? {}) as Record<string, Obj>)) {
     if (resource.kind !== 'font') continue;
     doc.fonts.add(loaded.bytes.get(name)!, {

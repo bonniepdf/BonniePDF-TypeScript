@@ -31,9 +31,6 @@ export class DotPlotChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DOT_RADIUS_VALUE = 10;
 
-  /**
-   * Default dot radius for all series (can be overridden per series via Style).
-   */
   /** Creates a DotPlotChart, optionally configured in one expression. */
   constructor(options?: DotPlotChartOptions) {
     super();
@@ -42,6 +39,9 @@ export class DotPlotChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Default dot radius for all series (can be overridden per series via Style).
+   */
   defaultDotRadius: number = DotPlotChart.DEFAULT_DOT_RADIUS_VALUE;
 
   /**

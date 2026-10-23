@@ -5,6 +5,9 @@ import { RenderContext, RenderStatus } from './IElement';
 export abstract class StatefulElementBase extends ElementBase {
   protected hasPendingContent: boolean = false;
 
+  /**
+   * Renders as much of the element as fits on the current page and reports whether it is complete or needs another page.
+   */
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
     this.startingY = ctx.currentY;
     const originalX = ctx.currentX;
@@ -32,6 +35,7 @@ export abstract class StatefulElementBase extends ElementBase {
     return status;
   }
 
+  /** Clears the continuation state so the element can be rendered again from the start. */
   public resetState(): void {
     this.hasPendingContent = false;
   }

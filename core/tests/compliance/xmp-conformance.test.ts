@@ -4,8 +4,8 @@ import { XmpConformanceBlock } from '../../src/Metadata/XmpConformanceBlock';
 import { XmpMetadataWriter } from '../../src/Metadata/XmpMetadataWriter';
 
 /**
- * this feature acceptance tests for the additive XMP conformance hook. Covers
- * the same matrix as the .NET this feature tests in
+ * Acceptance tests for the additive XMP conformance hook. Covers
+ * the same matrix as the .NET tests in
  * BonniePDF.Tests/XmpMetadataTests.cs.
  */
 describe('XmpMetadataWriter - conformance blocks', () => {
@@ -26,7 +26,7 @@ describe('XmpMetadataWriter - conformance blocks', () => {
     expect(xml).toContain('<pdfaid:conformance>B</pdfaid:conformance>');
   });
 
-  it('no blocks => empty XMP body (preserves pre-T-14 behaviour)', () => {
+  it('no blocks => empty XMP body (preserves the behaviour from before the hook)', () => {
     const metadata = new DocumentMetadata('Plain');
     const xml = XmpMetadataWriter.generateXmpXml(metadata);
 

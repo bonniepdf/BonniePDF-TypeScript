@@ -11,7 +11,7 @@ import { pdfToText } from '../helpers/test-base';
 import type { Page } from '../../src/Elements/Layout/Page';
 
 /**
- * Text shorthand (spec 03 "Text shorthand", fixture layout/text-shorthand): text content
+ * Text shorthand: text content
  * (a string, or several lines as one paragraph) wherever an element can be added, and strings
  * as table cells. Every case builds the shorthand and the explicit form and requires the same
  * result. Compared by page SVG (layout) and by PDF bytes with the random file identifier and

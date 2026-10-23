@@ -8,7 +8,7 @@ import {
 import { ChartDataPoint } from '../../src/Charts/Models/ChartDataPoint';
 
 /**
- * Chart number formatting - shared conformance fixture `charts/number-format` (spec 15 §19).
+ * Chart number formatting - shared conformance fixture `charts/number-format`.
  * The same culture-invariant grammar, on the value's decimal digits, in both implementations.
  *
  * Mirrors the .NET ChartNumberFormatTests.

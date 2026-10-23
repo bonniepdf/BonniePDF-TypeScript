@@ -14,7 +14,7 @@ import { pdfToText } from '../helpers/test-base';
  * Embedded fonts with kern pairs must paint with the `TJ` operator whose
  * array interleaves glyph hex runs with advance adjustments in thousandths
  * of an em, so the PDF ink matches the kerned widths the layout engine
- * reserves (and the kerned this feature SVG export). Unkerned strings and
+ * reserves (and the kerned SVG export). Unkerned strings and
  * standard-14 fonts keep the plain `Tj` path, byte-identical to before.
  *
  * Liberation Serif reference values (2048 UPEM):
@@ -24,7 +24,7 @@ import { pdfToText } from '../helpers/test-base';
 
 const SERIF = fileURLToPath(new URL('../../assets/fonts/LiberationSerif-Regular.ttf', import.meta.url));
 
-describe('this feature PdfSyntax.toKernedGlyphArray', () => {
+describe('PdfSyntax.toKernedGlyphArray', () => {
   const font = TtfFont.loadFromBytes(new Uint8Array(readFileSync(SERIF)));
 
   it('interleaves the negated, em-scaled kern between a kerning pair', () => {
@@ -46,7 +46,7 @@ describe('this feature PdfSyntax.toKernedGlyphArray', () => {
   });
 });
 
-describe('this feature kerned PDF output', () => {
+describe('kerned PDF output', () => {
   let doc: Document;
 
   beforeEach(() => {

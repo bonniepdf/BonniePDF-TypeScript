@@ -1,12 +1,11 @@
-// GENERATED from spec/fixtures/document-definition (spec 15 §15). Do not edit.
-// Regenerate with `node schema/sync.mjs` in the specification repository.
+// Generated file: do not edit by hand. It is produced from the shared Document Definition description
+// by the project's schema sync script.
 export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable' | 'settings-rules', Record<string, any>> = {
   "valid": {
     "content-direction": {
       "_fixture": {
         "id": "document-definition/valid/content-direction",
-        "description": "Direction overrides and physical/logical alignment survive a definition round trip.",
-        "spec": "22"
+        "description": "Direction overrides and physical/logical alignment survive a definition round trip."
       },
       "_expect": {
         "pages": 1,
@@ -46,8 +45,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "defaults-equivalence": {
       "_fixture": {
         "id": "document-definition/valid/defaults-equivalence",
-        "description": "Two spacers, one stating Spacer's defaults and one omitting them; a stack stating VerticalStack's default spacing. Both cores read them to the same document, and the canonical write omits every value equal to its spec default (15 §3.3).",
-        "spec": "15 §3.3, §14; 03 §1"
+        "description": "Two spacers, one stating Spacer's defaults and one omitting them; a stack stating VerticalStack's default spacing. Both cores read them to the same document, and the canonical write omits every value equal to its spec default."
       },
       "_expect": {
         "canonical": {
@@ -105,8 +103,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "emoji-rendering": {
       "_fixture": {
         "id": "document-definition/valid/emoji-rendering",
-        "description": "Colour artwork is opt-in; settings survive a definition round trip.",
-        "spec": "20"
+        "description": "Colour artwork is opt-in; settings survive a definition round trip."
       },
       "_expect": {
         "pages": 1,
@@ -134,8 +131,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "font-features": {
       "_fixture": {
         "id": "document-definition/valid/font-features",
-        "description": "OpenType features survive text-element and nested TextStyle round trips.",
-        "spec": "19"
+        "description": "OpenType features survive text-element and nested TextStyle round trips."
       },
       "_expect": {
         "pages": 1,
@@ -174,8 +170,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "minimal": {
       "_fixture": {
         "id": "document-definition/valid/minimal",
-        "description": "The smallest legal definition: version stamps and one page with one paragraph. Everything else takes its default on read. Pins that settings, metadata and resources are optional and that `pages[0]` is the document's auto-created first page.",
-        "spec": "15 §2, §7"
+        "description": "The smallest legal definition: version stamps and one page with one paragraph. Everything else takes its default on read. Pins that settings, metadata and resources are optional and that `pages[0]` is the document's auto-created first page."
       },
       "_expect": {
         "pages": 1,
@@ -215,9 +210,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "page-chrome": {
       "_fixture": {
         "id": "document-definition/valid/page-chrome",
-        "description": "Declarative page chrome. The footer has a default plus an even-page override; the header has only a first-page element. For page n the element is the first present of firstPage (n = 1), odd/even, default (15 §5.1). Three pages of content force pages 2 and 3 to exist.",
-        "spec": "15 §5.1; 01 §4",
-        "requires": "prerequisite P1 (pageTemplate factory, 01 §4.0): built in both cores"
+        "description": "Declarative page chrome. The footer has a default plus an even-page override; the header has only a first-page element. For page n the element is the first present of firstPage (n = 1), odd/even, default. Three pages of content force pages 2 and 3 to exist."
       },
       "_expect": {
         "pages": 3,
@@ -343,8 +336,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "preserve-whitespace": {
       "_fixture": {
         "id": "document-definition/valid/preserve-whitespace",
-        "description": "A TextBlock with preserveWhitespace true, and one stating the default false. Both cores read both; the canonical write keeps the key only where it differs from its spec default (15 §3.3).",
-        "spec": "15 §3.3, §7; 03 TextBlock 'Preserved whitespace'"
+        "description": "A TextBlock with preserveWhitespace true, and one stating the default false. Both cores read both; the canonical write keeps the key only where it differs from its spec default."
       },
       "_expect": {
         "pages": 1,
@@ -392,8 +384,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "removed-chart-options": {
       "_fixture": {
         "id": "document-definition/valid/removed-chart-options",
-        "description": "Removed chart options warn as unknown keys in ordinary reads and fail strict validation; effective defaults remain supported.",
-        "spec": "15 §8.9, §12.4"
+        "description": "Removed chart options warn as unknown keys in ordinary reads and fail strict validation; effective defaults remain supported."
       },
       "_expect": {
         "pages": 1
@@ -515,8 +506,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "report-table-chart": {
       "_fixture": {
         "id": "document-definition/valid/report-table-chart",
-        "description": "A one-page report. Pins: palette tokens and hex colours; length tokens ('2cm') normalising to points on write; all four spacing forms; table sugar (columns/header/rows/footer, a string cell, a TableCell object with columnSpan); a LineChart with data, axis and series style; node ids; PDF/A-2a with PDF/UA-1.",
-        "spec": "15 §3, §8.6, §8.9, §4.1"
+        "description": "A one-page report. Pins: palette tokens and hex colours; length tokens ('2cm') normalising to points on write; all four spacing forms; table sugar (columns/header/rows/footer, a string cell, a TableCell object with columnSpan); a LineChart with data, axis and series style; node ids; PDF/A-2a with PDF/UA-1."
       },
       "_expect": {
         "pages": 1,
@@ -809,8 +799,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "rich-text-and-lists": {
       "_fixture": {
         "id": "document-definition/valid/rich-text-and-lists",
-        "description": "RichText spans with per-span TextStyle (which uses `color`, as a text element does: 15 §8.2), a structural line break as opposed to a raw \\n inside a span, and a list holding two string items and a nested list of the same type (a list's items are strings or nested lists of the same type: 15 §8.5).",
-        "spec": "15 §8.4, §8.5; 03 RichText"
+        "description": "RichText spans with per-span TextStyle (which uses `color`, as a text element does), a structural line break as opposed to a raw \\n inside a span, and a list holding two string items and a nested list of the same type (a list's items are strings or nested lists of the same type)."
       },
       "_expect": {
         "pages": 1,
@@ -919,8 +908,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "rotation-geometry": {
       "_fixture": {
         "id": "document-definition/valid/rotation-geometry",
-        "description": "Shared four-corner bounds for cardinal and cancelling nested turns.",
-        "spec": "17"
+        "description": "Shared four-corner bounds for cardinal and cancelling nested turns."
       },
       "_expect": {
         "pages": 1,
@@ -1008,8 +996,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "rotation": {
       "_fixture": {
         "id": "document-definition/valid/rotation",
-        "description": "Native rotations, quarter turns and nested free rotations.",
-        "spec": "17"
+        "description": "Native rotations, quarter turns and nested free rotations."
       },
       "_expect": {
         "pages": 1,
@@ -1077,8 +1064,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "transforms": {
       "_fixture": {
         "id": "document-definition/valid/transforms",
-        "description": "Native mirror and translate with composed cardinal rotation.",
-        "spec": "18"
+        "description": "Native mirror and translate with composed cardinal rotation."
       },
       "_expect": {
         "contentStreamSha256": "b5323607e876e52e29201a88a218b007e2da7167796be22ca1aee6c09a5216d0",
@@ -1238,8 +1224,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "bad-values": {
       "_fixture": {
         "id": "document-definition/invalid/bad-values",
-        "description": "Every value error is returned in one pass, each located. An unknown token, a malformed colour (which the code API would silently turn black), a malformed length, a null, and a wrong JSON type. Nothing is constructed.",
-        "spec": "15 §3.2, §3.3, §12.1"
+        "description": "Every value error is returned in one pass, each located. An unknown token, a malformed colour (which the code API would silently turn black), a malformed length, a null, and a wrong JSON type. Nothing is constructed."
       },
       "_expectErrors": [
         {
@@ -1289,8 +1274,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "chart-conflict": {
       "_fixture": {
         "id": "document-definition/invalid/chart-conflict",
-        "description": "A chart's own title, xAxis and yAxis and the copies inside `data` may both be given, but must agree: the reader would otherwise have to choose, and a stored file would say something the PDF does not show. Equal values (compared as JSON, key order ignored) are fine.",
-        "spec": "15 §8.9"
+        "description": "A chart's own title, xAxis and yAxis and the copies inside `data` may both be given, but must agree: the reader would otherwise have to choose, and a stored file would say something the PDF does not show. Equal values (compared as JSON, key order ignored) are fine."
       },
       "_expectErrors": [
         {
@@ -1346,8 +1330,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "emoji-rendering": {
       "_fixture": {
         "id": "document-definition/invalid/emoji-rendering",
-        "description": "Unknown emoji rendering modes are rejected.",
-        "spec": "20"
+        "description": "Unknown emoji rendering modes are rejected."
       },
       "_expectErrors": [
         {
@@ -1369,8 +1352,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "font-features": {
       "_fixture": {
         "id": "document-definition/invalid/font-features",
-        "description": "Reject invalid feature tags and values before constructing a document.",
-        "spec": "19"
+        "description": "Reject invalid feature tags and values before constructing a document."
       },
       "_expectErrors": [
         {
@@ -1408,8 +1390,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "list-items": {
       "_fixture": {
         "id": "document-definition/invalid/list-items",
-        "description": "A list item must be a string or a nested list of the same type. An element is invalid-type, and a nested list of the other kind is invalid-value.",
-        "spec": "15 §8.5"
+        "description": "A list item must be a string or a nested list of the same type. An element is invalid-type, and a nested list of the other kind is invalid-value."
       },
       "_expectErrors": [
         {
@@ -1449,8 +1430,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "missing-version": {
       "_fixture": {
         "id": "document-definition/invalid/missing-version",
-        "description": "No version stamps. A writer that omitted them did not decide, so the reader does not assume 1.0 (15 §12.2).",
-        "spec": "15 §12.2"
+        "description": "No version stamps. A writer that omitted them did not decide, so the reader does not assume 1.0."
       },
       "_expectErrors": [
         {
@@ -1468,7 +1448,6 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
       "_fixture": {
         "id": "document-definition/invalid/newer-minor",
         "description": "A reader supporting 1.0 meets a 1.3 document using a property and an element type it does not know. It refuses by default, one newer-minor error per unrecognised item at its path (a reader cannot know which minor version introduced what it does not recognise, so no `since`); with bestEffort it would read the rest, ignore the unrecognised key and leave out the unrecognised element, and return three warnings: the two items and the version itself. The key `hyphenate` and type `Callout` are invented for this fixture and are not, and will not become, real names.",
-        "spec": "15 §12.2; 14 §7.2",
         "readerSupports": "1.0"
       },
       "_expectErrors": [
@@ -1509,8 +1488,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pie-multiple-series": {
       "_fixture": {
         "id": "document-definition/invalid/pie-multiple-series",
-        "description": "A pie chart uses series[0] only. The code API silently ignores the rest; a validator must not, or a stored file says something the PDF does not show.",
-        "spec": "15 §8.9"
+        "description": "A pie chart uses series[0] only. The code API silently ignores the rest; a validator must not, or a stored file says something the PDF does not show."
       },
       "_expectErrors": [
         {
@@ -1556,8 +1534,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "rotation": {
       "_fixture": {
         "id": "document-definition/invalid/rotation",
-        "description": "Constrained angles must be quarter turns; content width must be positive.",
-        "spec": "17"
+        "description": "Constrained angles must be quarter turns; content width must be positive."
       },
       "_expectErrors": [
         {
@@ -1609,8 +1586,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "secret-in-definition": {
       "_fixture": {
         "id": "document-definition/invalid/secret-in-definition",
-        "description": "A password in a definition is refused, not used: a file people commit, paste and email must never be where a password lives. The error is the same whether the key is spelled with a value or empty.",
-        "spec": "15 §11.3"
+        "description": "A password in a definition is refused, not used: a file people commit, paste and email must never be where a password lives. The error is the same whether the key is spelled with a value or empty."
       },
       "_expectErrors": [
         {
@@ -1641,8 +1617,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "structure": {
       "_fixture": {
         "id": "document-definition/invalid/structure",
-        "description": "Structural errors: a required key missing (TextBlock.text), a required choice over-specified (Hyperlink uri and targetPageIndex), keys that cannot coexist (fontName and fontFamily), a duplicate id, and references to nothing (a resource, an anchor, a page beyond the last, a heading identifier no Heading carries).",
-        "spec": "15 §4.1, §8.4, §8.8, §12.4"
+        "description": "Structural errors: a required key missing (TextBlock.text), a required choice over-specified (Hyperlink uri and targetPageIndex), keys that cannot coexist (fontName and fontFamily), a duplicate id, and references to nothing (a resource, an anchor, a page beyond the last, a heading identifier no Heading carries)."
       },
       "_expectErrors": [
         {
@@ -1733,8 +1708,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "transforms": {
       "_fixture": {
         "id": "document-definition/invalid/transforms",
-        "description": "Reject invalid axes, offsets and nonpositive content widths.",
-        "spec": "18"
+        "description": "Reject invalid axes, offsets and nonpositive content widths."
       },
       "_expectErrors": [
         {
@@ -1782,8 +1756,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "unknown-type": {
       "_fixture": {
         "id": "document-definition/invalid/unknown-type",
-        "description": "The vocabulary is closed: a type outside the catalogue fails before anything renders, and the error is located by path.",
-        "spec": "15 §4, §12.4"
+        "description": "The vocabulary is closed: a type outside the catalogue fails before anything renders, and the error is located by path."
       },
       "_expectErrors": [
         {
@@ -1807,8 +1780,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "unsupported-version": {
       "_fixture": {
         "id": "document-definition/invalid/unsupported-version",
-        "description": "A newer major version is refused, naming the version found and the range supported; never a parse error or a partial result.",
-        "spec": "15 §12.2; 14 §7.1 rule 6"
+        "description": "A newer major version is refused, naming the version found and the range supported; never a parse error or a partial result."
       },
       "_expectErrors": [
         {
@@ -1829,8 +1801,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "function-template": {
       "_fixture": {
         "id": "document-definition/unrepresentable/function-template",
-        "description": "A DOCUMENT (not a definition) whose footerTemplate is a function and which holds a CanvasElement. toDefinition is strict by default: it fails, listing both nodes with locations, and writes nothing. With onUnrepresentable 'drop' it returns a definition of the rest plus one `dropped` note each; that result is not a faithful copy and the round-trip guarantee does not apply. Each core builds the document from `recipe` in its own idiom.",
-        "spec": "15 §11"
+        "description": "A DOCUMENT (not a definition) whose footerTemplate is a function and which holds a CanvasElement. toDefinition is strict by default: it fails, listing both nodes with locations, and writes nothing. With onUnrepresentable 'drop' it returns a definition of the rest plus one `dropped` note each; that result is not a faithful copy and the round-trip guarantee does not apply. Each core builds the document from `recipe` in its own idiom."
       },
       "recipe": {
         "settings": {
@@ -1900,8 +1871,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "aes256-on-default-version": {
       "_fixture": {
         "id": "document-definition/settings-rules/aes256-on-default-version",
-        "description": "AES-256 needs PDF 1.7 or later; the default is 1.4.",
-        "spec": "15 §5.2"
+        "description": "AES-256 needs PDF 1.7 or later; the default is 1.4."
       },
       "_expect": {
         "valid": false,
@@ -1928,8 +1898,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "aes256-on-pdf17": {
       "_fixture": {
         "id": "document-definition/settings-rules/aes256-on-pdf17",
-        "description": "AES-256 on PDF 1.7.",
-        "spec": "15 §5.2"
+        "description": "AES-256 on PDF 1.7."
       },
       "_expect": {
         "valid": true,
@@ -1957,8 +1926,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "aes256-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/aes256-on-pdf20",
-        "description": "AES-256 is allowed on PDF 2.0 as well as 1.7.",
-        "spec": "15 §5.2"
+        "description": "AES-256 is allowed on PDF 2.0 as well as 1.7."
       },
       "_expect": {
         "valid": true,
@@ -1986,8 +1954,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "bookmarks-on-default-version": {
       "_fixture": {
         "id": "document-definition/settings-rules/bookmarks-on-default-version",
-        "description": "Bookmarks need PDF 1.7 or later.",
-        "spec": "15 §5.2"
+        "description": "Bookmarks need PDF 1.7 or later."
       },
       "_expect": {
         "valid": false,
@@ -2017,8 +1984,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "bookmarks-on-pdf17": {
       "_fixture": {
         "id": "document-definition/settings-rules/bookmarks-on-pdf17",
-        "description": "Bookmarks on PDF 1.7.",
-        "spec": "15 §5.2"
+        "description": "Bookmarks on PDF 1.7."
       },
       "_expect": {
         "valid": true,
@@ -2049,8 +2015,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "bookmarks-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/bookmarks-on-pdf20",
-        "description": "Bookmarks are allowed on PDF 2.0.",
-        "spec": "15 §5.2"
+        "description": "Bookmarks are allowed on PDF 2.0."
       },
       "_expect": {
         "valid": true,
@@ -2081,8 +2046,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa-a-level-with-tagging": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa-a-level-with-tagging",
-        "description": "An \"a\" level with PDF/UA-1 is valid and lands on PDF 1.7.",
-        "spec": "15 §5.2"
+        "description": "An \"a\" level with PDF/UA-1 is valid and lands on PDF 1.7."
       },
       "_expect": {
         "valid": true,
@@ -2108,8 +2072,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa-a-level-without-tagging": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa-a-level-without-tagging",
-        "description": "An \"a\" level of PDF/A needs tagged output.",
-        "spec": "15 §5.2"
+        "description": "An \"a\" level of PDF/A needs tagged output."
       },
       "_expect": {
         "valid": false,
@@ -2134,8 +2097,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa-with-encryption": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa-with-encryption",
-        "description": "PDF/A cannot be combined with encryption.",
-        "spec": "15 §5.2"
+        "description": "PDF/A cannot be combined with encryption."
       },
       "_expect": {
         "valid": false,
@@ -2163,8 +2125,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa2b-sets-pdf17": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa2b-sets-pdf17",
-        "description": "PDF/A-2b sets the PDF version to 1.7, even from 2.0.",
-        "spec": "15 §5.2"
+        "description": "PDF/A-2b sets the PDF version to 1.7, even from 2.0."
       },
       "_expect": {
         "valid": true,
@@ -2190,8 +2151,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa2b-with-ua1-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa2b-with-ua1-on-pdf20",
-        "description": "PDF/A-2b lowers the version to 1.7 before PDF/UA-1 is checked, so the pair is valid.",
-        "spec": "15 §5.2"
+        "description": "PDF/A-2b lowers the version to 1.7 before PDF/UA-1 is checked, so the pair is valid."
       },
       "_expect": {
         "valid": true,
@@ -2218,8 +2178,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa4-raises-version": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa4-raises-version",
-        "description": "PDF/A-4 raises the PDF version to 2.0.",
-        "spec": "15 §5.2"
+        "description": "PDF/A-4 raises the PDF version to 2.0."
       },
       "_expect": {
         "valid": true,
@@ -2244,8 +2203,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "pdfa4-with-ua1": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa4-with-ua1",
-        "description": "PDF/A-4 is PDF 2.0, so it cannot be combined with PDF/UA-1.",
-        "spec": "15 §5.2"
+        "description": "PDF/A-4 is PDF 2.0, so it cannot be combined with PDF/UA-1."
       },
       "_expect": {
         "valid": false,
@@ -2271,8 +2229,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "ua1-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/ua1-on-pdf20",
-        "description": "PDF/UA-1 cannot be combined with an explicit PDF 2.0.",
-        "spec": "15 §5.2"
+        "description": "PDF/UA-1 cannot be combined with an explicit PDF 2.0."
       },
       "_expect": {
         "valid": false,
@@ -2298,8 +2255,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "ua1-raises-version": {
       "_fixture": {
         "id": "document-definition/settings-rules/ua1-raises-version",
-        "description": "PDF/UA-1 raises the default PDF version to 1.7.",
-        "spec": "15 §5.2"
+        "description": "PDF/UA-1 raises the default PDF version to 1.7."
       },
       "_expect": {
         "valid": true,

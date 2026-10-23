@@ -35,7 +35,7 @@ export class Circle extends ElementBase {
 
   private _diameter: number = 8;
 
-  /** diameter. Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3). */
+  /** diameter. Accepts a length: a number of points, `'4mm'`, or `{ value, unit }`. */
   public get diameter(): number {
     return this._diameter;
   }

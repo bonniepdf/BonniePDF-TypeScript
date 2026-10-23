@@ -35,7 +35,7 @@ export const IMAGE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...IMAGE_OWN_OPTION_KE
  * Options for {@link Image}.
  *
  * `filePath` and `imageData` are mutually exclusive sources; supply one.
- * `filePath` is Node-only (`05 §4`); `imageData` is universal.
+ * `filePath` is Node-only; `imageData` is universal.
  */
 export type ImageOptions = ElementOptions &
   Partial<Omit<Pick<Image, (typeof IMAGE_OWN_OPTION_KEYS)[number]>, 'fitMode' | 'width' | 'height'>> & {
@@ -92,7 +92,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   /**
    * Desired display width in points (null = auto).
    *
-   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }`.
    */
   public get width(): number | undefined {
     return this._width;
@@ -106,7 +106,7 @@ export class Image extends ElementBase implements IRoleProvider, IAltTextProvide
   /**
    * Desired display height in points (null = auto-scale).
    *
-   * Accepts a length: a number of points, `'6cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'6cm'`, or `{ value, unit }`.
    */
   public get height(): number | undefined {
     return this._height;

@@ -8,7 +8,7 @@ import type { IStatefulElement } from '../../src/Elements/IElement';
 import type { RenderContext } from '../../src/Rendering/RenderContext';
 import { contentStreams } from '../helpers/test-base';
 
-// Spec fixture layout/top-level-flow (02 §6.1, 04 §3.3). Mirrored by the .NET TopLevelFlowTests.
+// Spec fixture layout/top-level-flow. Mirrored by the .NET TopLevelFlowTests.
 
 /** Returns the scripted status for each renderStateful call. */
 class ScriptedElement implements IStatefulElement {

@@ -3,12 +3,15 @@ import type { PageSizeToken } from './Tokens';
 
 /** An explicit page size in points. */
 export interface PageSizeObject {
+  /** Page width, in points. */
   width: number;
+  /** Page height, in points. */
   height: number;
+  /** Optional display name for the size. */
   name?: string;
 }
 
-/** Every form a page size may be written as (`the specification` §4A.3). */
+/** Every form a page size may be written as. */
 export type PageSizeInput = PdfSize | PageSizeToken | PageSizeObject;
 
 /**

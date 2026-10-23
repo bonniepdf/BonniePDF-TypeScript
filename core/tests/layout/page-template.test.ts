@@ -10,7 +10,7 @@ import { pdfToText } from '../helpers/test-base';
 
 /**
  * Element-based page templates - shared conformance fixture
- * `layout/page-template-resolution` (spec 01 §4.0). For page n the template
+ * `layout/page-template-resolution`. For page n the template
  * returns the first present of firstPage (n = 1), odd/even, default.
  *
  * Mirrors the .NET PageTemplateTests.

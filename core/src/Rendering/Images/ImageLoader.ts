@@ -20,6 +20,9 @@ export class ImageLoader {
     return this.loadFromBytes(readFileSync.call(platformIO, filePath));
   }
 
+  /**
+   * Parses a JPEG or PNG image from bytes, detecting the format from its signature. Throws for any other format. PNG data must use stored deflate blocks only; use {@link loadFromBytesAsync} for ordinary PNG files.
+   */
   public static loadFromBytes(data: Uint8Array): ImageInfo {
     if (!data || data.length < 8) {
       throw new Error('Image data is empty or too small');
@@ -57,6 +60,7 @@ export class ImageLoader {
     throw new Error('Unknown image format. Supported formats: JPEG, PNG');
   }
 
+  /** Parses a JPEG image from bytes. */
   public static loadJpeg(data: Uint8Array): ImageInfo {
     if (!data || data.length === 0) {
       throw new Error('Image data is empty');
@@ -64,6 +68,9 @@ export class ImageLoader {
     return this.parseJpeg(data);
   }
 
+  /**
+   * Parses a PNG image from bytes. Supports stored deflate blocks only; use {@link loadPngAsync} for ordinary PNG files.
+   */
   public static loadPng(data: Uint8Array): ImageInfo {
     if (!data || data.length === 0) {
       throw new Error('Image data is empty');

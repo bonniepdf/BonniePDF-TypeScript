@@ -193,11 +193,17 @@ const ACCENT_COLORS = [
   ColorPalette.slate[600],
 ];
 
+/** One line of a placeholder invoice. */
 export interface InvoiceLineItem {
+  /** The service name. */
   service: string;
+  /** A short description of the work. */
   description: string;
+  /** The number of units. */
   quantity: number;
+  /** The price of one unit. */
   unitPrice: number;
+  /** The line total: quantity times unit price. */
   total: number;
 }
 
@@ -389,45 +395,79 @@ class PlaceholderSource {
 
 let globalSource = new PlaceholderSource(42);
 
+/**
+ * Deterministic placeholder content for prototyping layouts before real data exists. The static generators share one source seeded with 42; use `withSeed` for an independent, repeatable sequence.
+ */
 export const Placeholders = {
+  /** A single lorem-ipsum word. */
   word: () => globalSource.word(),
+  /** A two-word capitalised label. */
   label: () => globalSource.label(),
+  /** One lorem-ipsum sentence. */
   sentence: () => globalSource.sentence(),
+  /** A paragraph of lorem-ipsum text. */
   paragraph: () => globalSource.paragraph(),
+  /** Several paragraphs of lorem-ipsum text, separated by blank lines (3 by default). */
   paragraphs: (count?: number) => globalSource.paragraphs(count),
 
+  /** A full name. */
   name: () => globalSource.name(),
+  /** A given name. */
   firstName: () => globalSource.firstName(),
+  /** A family name. */
   lastName: () => globalSource.lastName(),
+  /** An email address. */
   email: () => globalSource.email(),
+  /** A phone number. */
   phoneNumber: () => globalSource.phoneNumber(),
+  /** A company name. */
   companyName: () => globalSource.companyName(),
+  /** A department name. */
   department: () => globalSource.department(),
+  /** A job title. */
   role: () => globalSource.role(),
+  /** A place name. */
   location: () => globalSource.location(),
 
+  /** A whole number between `min` and `max` inclusive (0 to 1000 by default). */
   integer: (min?: number, max?: number) => globalSource.integer(min, max),
+  /** A number between `min` and `max`, rounded to `decimals` places (0 to 1000 with 2 places by default). */
   decimal: (min?: number, max?: number, decimals?: number) => globalSource.decimal(min, max, decimals),
+  /** A whole-number percentage such as `42%` (0 to 100 by default). */
   percent: (min?: number, max?: number) => globalSource.percent(min, max),
+  /** A currency amount such as `$1,234.50`, between `min` and `max` (1 to 10,000, with `$`, by default). */
   currency: (min?: number, max?: number, symbol?: string) => globalSource.currency(min, max, symbol),
 
+  /** A date as `MM/DD/YYYY`. */
   shortDate: () => globalSource.shortDate(),
+  /** A date written out in full. */
   longDate: () => globalSource.longDate(),
+  /** A month name. */
   monthLabel: () => globalSource.monthLabel(),
 
+  /** A light colour that suits a background fill. */
   backgroundColor: () => globalSource.backgroundColor(),
+  /** An accent colour. */
   color: () => globalSource.color(),
 
+  /** Invoice line items, ready for a table (5 by default). */
   invoiceLines: (count?: number) => globalSource.invoiceLines(count),
+  /**
+   * Rows of table cells (name, department, location, percentage), as arrays of text (5 rows of 4 columns by default).
+   */
   tableRows: (rows?: number, columns?: number) => globalSource.tableRows(rows, columns),
+  /** A series of whole numbers for a chart, one per month (12 between 50 and 300 by default). */
   monthlyValues: (count?: number, min?: number, max?: number) => globalSource.monthlyValues(count, min, max),
 
+  /** A PNG placeholder image of the requested size, as bytes. */
   image: (opts: { width: number; height: number }) => globalSource.image(opts),
 
+  /** Returns an independent source that always produces the same sequence for the same seed. */
   withSeed(seed: number): PlaceholderSource {
     return new PlaceholderSource(seed);
   },
 
+  /** Rewinds the shared source to its starting seed (42). */
   reset(): void {
     globalSource = new PlaceholderSource(42);
   },

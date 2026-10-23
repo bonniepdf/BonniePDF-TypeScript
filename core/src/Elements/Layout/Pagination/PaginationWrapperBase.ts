@@ -21,7 +21,7 @@ export type PaginationDecision =
 
 /**
  * Shared behaviour for the single-child pagination primitives
- * (spec "Layout & Pagination" §7).
+ *.
  *
  * Each primitive is a thin decorator: it decides *whether* and *where* its
  * child renders, and never draws anything itself. The two hooks subclasses
@@ -45,7 +45,7 @@ export abstract class PaginationWrapperBase extends ElementBase implements ICont
    */
   protected _pending: boolean = false;
 
-  /** @inheritdoc */
+  /** The wrapped child as a one-item list, or an empty list when there is none. */
   public getChildren(): readonly IElement[] {
     return this.child ? [this.child] : [];
   }
@@ -66,6 +66,9 @@ export abstract class PaginationWrapperBase extends ElementBase implements ICont
     return status;
   }
 
+  /**
+   * Decides whether the child renders on the current page, then renders it and maps its status to the status this wrapper reports.
+   */
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
     if (!this._pending) {
       const decision = this.decide(ctx, this.getContentWidth(width));
@@ -172,6 +175,7 @@ export abstract class PaginationWrapperBase extends ElementBase implements ICont
     if (child && isStateful(child) && typeof child.resetState === 'function') child.resetState();
   }
 
+  /** Clears the continuation state of this wrapper and of its child. */
   public resetState(): void {
     this._pending = false;
     this.resetChildState();

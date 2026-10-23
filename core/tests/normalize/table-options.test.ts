@@ -31,7 +31,7 @@ function settableSurface(instance: object, internal: readonly string[] = []): st
 
 const cell = (t: string) => TableCell.from(new TextBlock(t));
 
-describe('Table dispatch — the rest-param conflict (09a §5)', () => {
+describe('Table dispatch — the rest-param conflict', () => {
   it('keeps the rest-param weight form', () => {
     const t = new Table(1, 2, 1);
     // Column weights are private; assert via layout behaviour instead.

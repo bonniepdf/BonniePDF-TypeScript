@@ -103,11 +103,17 @@ export class Color {
   }
 
   // Basic Colors
+  /** Opaque black (`#000000`). */
   static readonly black = new Color(0, 0, 0);
+  /** Opaque white (`#ffffff`). */
   static readonly white = new Color(255, 255, 255);
+  /** Opaque pure red (`#ff0000`). */
   static readonly red = new Color(255, 0, 0);
+  /** Opaque pure blue (`#0000ff`). */
   static readonly blue = new Color(0, 0, 255);
+  /** Light grey (`#e5e5e5`). */
   static readonly lightGray = new Color(229, 229, 229);
+  /** Dark grey (`#4d4d4d`). */
   static readonly darkGray = new Color(77, 77, 77);
 
   // Tailwind v4 palette tokens (slate50, red500, …) now live on `ColorPalette`, addressed
@@ -174,6 +180,7 @@ export class Color {
     return `#${r}${g}${b}`;
   }
 
+  /** Returns `true` when `other` has the same red, green, blue and alpha values. */
   equals(other: Color): boolean {
     return this.r === other.r && this.g === other.g && this.b === other.b && this.a === other.a;
   }

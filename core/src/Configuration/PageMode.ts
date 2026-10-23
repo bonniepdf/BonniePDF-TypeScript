@@ -26,4 +26,7 @@ export class PageModeEnum {
   static readonly UseAttachments = 'UseAttachments' as const;
 }
 
+/**
+ * How a PDF viewer initially presents the document: one of the {@link PageModeEnum} values, such as `'UseOutlines'` or `'FullScreen'`.
+ */
 export type PageMode = (typeof PageModeEnum)[keyof typeof PageModeEnum];

@@ -100,7 +100,7 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   /**
    * Width of the chart canvas in points
    *
-   * Accepts a length: a number of points, `'20cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'20cm'`, or `{ value, unit }`.
    */
   public get width(): number {
     return this._width;
@@ -114,7 +114,7 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   /**
    * Height of the chart canvas in points
    *
-   * Accepts a length: a number of points, `'12cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'12cm'`, or `{ value, unit }`.
    */
   public get height(): number {
     return this._height;

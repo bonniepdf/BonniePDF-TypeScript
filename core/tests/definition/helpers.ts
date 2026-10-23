@@ -65,7 +65,7 @@ export function stateDiff(
   const keys = new Set([...Object.getOwnPropertyNames(a), ...Object.getOwnPropertyNames(b)]);
   for (const key of keys) {
     if (VOLATILE.has(key)) continue;
-    // A document's font faces are named after the document (spec 16 §4); their identity is family, weight, italic and bytes.
+    // A document's font faces are named after the document; their identity is family, weight, italic and bytes.
     if (path.startsWith('$.fonts.') && (key === 'fontName' || key === 'font')) continue;
     const d = stateDiff(
       (a as Record<string, unknown>)[key],

@@ -13,7 +13,7 @@ import { pdfToText } from '../helpers/test-base';
 
 /**
  * A Container whose horizontalAlignment is Start/Center/End establishes that as the ambient horizontal
- * text alignment for descendant text that sets none of its own (spec 01 "Document Model" §3.2). This is
+ * text alignment for descendant text that sets none of its own. This is
  * what makes the common idiom - a centred container wrapping a Text - centre a paragraph
  * that wraps, not only a single line short enough for block positioning to already have handled.
  * Mirrors BonniePDF.Tests/Layout/AmbientTextAlignmentTests.cs.

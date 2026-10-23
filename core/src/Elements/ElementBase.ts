@@ -43,8 +43,8 @@ export abstract class ElementBase implements IElement, IMargin {
    * Margin around this element.
    *
    * Reads as the canonical {@link Thickness}; accepts any of the forgiving
-   * spacing forms on write (`12`, `[h, v]`, `[l, t, r, b]`, `{ bottom: 12 }`) -
-   * see `the specification` §4A.3. Omitted sides are zero.
+   * spacing forms on write (`12`, `[h, v]`, `[l, t, r, b]`, `{ bottom: 12 }`).
+   * Omitted sides are zero.
    */
   public get margin(): Thickness {
     return this._options.margin;

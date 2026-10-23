@@ -57,13 +57,13 @@ export type QRCodeOptions = ElementOptions &
 
 /** Renders text or binary data as a vector QR Code symbol. */
 export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvider {
-  /** The data/text to encode in the QR Code. */
   /** Creates a QR code, optionally configured in one expression. */
   constructor(options?: QRCodeOptions) {
     super();
     applyOptions(this, options);
   }
 
+  /** The data/text to encode in the QR Code. */
   public data = '';
 
   /**
@@ -88,7 +88,7 @@ export class QRCode extends ElementBase implements IRoleProvider, IAltTextProvid
 
   /** The display size of the QR code (QR codes are always square).
    *
-   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }`.
    */
   public get size(): number {
     return this._size;

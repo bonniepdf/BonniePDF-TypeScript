@@ -33,7 +33,7 @@ export abstract class ListElementBase extends TextElementBase {
 
   /** Indentation for nested lists (in points)
    *
-   * Accepts a length: a number of points, `'7mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'7mm'`, or `{ value, unit }`.
    */
   public get indent(): number {
     return this._indent;
@@ -46,7 +46,7 @@ export abstract class ListElementBase extends TextElementBase {
 
   /** Spacing between list items (in points)
    *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }`.
    */
   public get itemSpacing(): number {
     return this._itemSpacing;
@@ -60,7 +60,7 @@ export abstract class ListElementBase extends TextElementBase {
     return [];
   }
 
-  /** @inheritdoc */
+  /** The nested lists inside this list; same as {@link getNestedLists}. */
   public getChildren(): readonly ListElementBase[] {
     return this.getNestedLists();
   }

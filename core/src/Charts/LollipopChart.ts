@@ -32,9 +32,6 @@ export class LollipopChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_HEAD_RADIUS_VALUE = 8;
 
-  /**
-   * Default stem width for all series (can be overridden per series via Style).
-   */
   /** Creates a LollipopChart, optionally configured in one expression. */
   constructor(options?: LollipopChartOptions) {
     super();
@@ -43,6 +40,9 @@ export class LollipopChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Default stem width for all series (can be overridden per series via Style).
+   */
   defaultStemWidth: number = 2;
 
   /**

@@ -26,7 +26,9 @@ export type PageOptions = Partial<Omit<Pick<Page, (typeof PAGE_OPTION_KEYS)[numb
 /** Contains the body, header, footer, and background elements for one document page. */
 export class Page {
   private readonly elements: IElement[] = [];
+  /** The page size, in points. */
   public readonly size: PdfSize;
+  /** The page margin on every side, in points. */
   public readonly margin: number;
 
   /**

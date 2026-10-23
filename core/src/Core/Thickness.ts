@@ -1,8 +1,12 @@
 /** Stores the top, right, bottom, and left values of padding or a margin. */
 export class Thickness {
+  /** Thickness on the left side, in points. */
   public readonly left: number;
+  /** Thickness on the top side, in points. */
   public readonly top: number;
+  /** Thickness on the right side, in points. */
   public readonly right: number;
+  /** Thickness on the bottom side, in points. */
   public readonly bottom: number;
 
   /**

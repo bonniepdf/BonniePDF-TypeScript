@@ -36,9 +36,6 @@ export class LineChart extends CartesianChartBase {
   private static readonly DEFAULT_LINE_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DATA_POINT_RADIUS = 5;
 
-  /**
-   * Default line width for all series (can be overridden per series via Style).
-   */
   /** Creates a LineChart, optionally configured in one expression. */
   constructor(options?: LineChartOptions) {
     super();
@@ -47,6 +44,9 @@ export class LineChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Default line width for all series (can be overridden per series via Style).
+   */
   defaultLineWidth: number = 2;
 
   /**

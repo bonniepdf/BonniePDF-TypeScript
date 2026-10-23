@@ -5,7 +5,7 @@ export * from './Core/Point';
 export * from './Core/Color';
 export * from './Core/ColorPalette';
 
-// Forgiving-input normalisation + the token grammar (spec 06 §4, §4A).
+// Forgiving-input normalisation + the token grammar.
 export * from './Normalize';
 export * from './Core/Diagnostics';
 export * from './Core/BonniePdfError';
@@ -100,17 +100,17 @@ export { Rotate, rotate, type RotateOptions, type RotationMode } from './Element
 export { type ContainerOptions, Container } from './Elements/Layout/Container';
 export { type HorizontalStackOptions, HorizontalStack } from './Elements/Layout/HorizontalStack';
 export { type LayersOptions, Layers } from './Elements/Layout/Layers';
-// Options types for the element hierarchy (spec 09a Phase 2.B).
+// Options types for the element hierarchy.
 export { type ElementOptions } from './Elements/ElementOptions';
 export { type BorderedElementOptions } from './Elements/Layout/BorderedElementOptions';
 export { type TextElementOptions } from './Elements/Text/TextElementOptions';
-// Layout option types (spec 09a Phase 2.E) are exported from their own modules
+// Layout option types are exported from their own modules
 // alongside the classes, so no extra barrel lines are needed here.
 export * from './Elements/Layout/LayersDescriptor';
 export * from './Elements/Layout/SemanticGroup';
 export { type VerticalStackOptions, VerticalStack } from './Elements/Layout/VerticalStack';
 
-// Pagination control primitives (spec "Layout & Pagination" §7). Single-child
+// Pagination control primitives. Single-child
 // wrappers that decide whether and where their child renders; one type per
 // file, mirroring the .NET Elements/Layout/Pagination namespace.
 export { type PageContext } from './Elements/Layout/Pagination/PageContext';

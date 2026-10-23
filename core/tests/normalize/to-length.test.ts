@@ -7,7 +7,7 @@ import { Unit } from '../../src/Core/Unit';
  * The length grammar - shared conformance fixture `layout/length-grammar`.
  * Every public authoring position that takes a measurement accepts a number of
  * points, a unit-suffixed token, or `{ value, unit }`, and normalises to points
- * on write (`the specification` §4A.3, §4A.6).
+ * on write.
  *
  * Mirrors the .NET LengthGrammarTests.
  */

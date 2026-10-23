@@ -13,7 +13,7 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * cross-language equivalence (TS mirror). The .NET and TS
+ * Cross-language equivalence (TS mirror). The .NET and TS
  * implementations must produce structurally-equivalent PDF/UA
  * output. This test extracts a "canonical fingerprint" from a
  * generated PDF - a sorted map of `role → count` for every

@@ -5,8 +5,11 @@ import { PageOrientation } from '../Core/PageOrientation';
  * Includes standard page sizes (A4, Letter, etc.) and helper methods for orientation and unit conversion.
  */
 export class PdfSize {
+  /** Page width in points (1/72 inch). */
   public readonly width: number;
+  /** Page height in points (1/72 inch). */
   public readonly height: number;
+  /** Optional display name of the size, such as `'A4'`. */
   public readonly name?: string;
 
   /**
@@ -49,88 +52,88 @@ export class PdfSize {
     );
   }
 
-  /// ISO A-Series
+  // ISO A-Series
 
-  /// ISO A0 size (841 x 1189 mm).
+  /** ISO A0 size (841 x 1189 mm). */
   static get a0(): PdfSize {
     return PdfSize.fromMM(841, 1189, 'A0');
   }
-  /// ISO A1 size (594 x 841 mm).
+  /** ISO A1 size (594 x 841 mm). */
   static get a1(): PdfSize {
     return PdfSize.fromMM(594, 841, 'A1');
   }
-  /// ISO A2 size (420 x 594 mm).
+  /** ISO A2 size (420 x 594 mm). */
   static get a2(): PdfSize {
     return PdfSize.fromMM(420, 594, 'A2');
   }
-  /// ISO A3 size (297 x 420 mm).
+  /** ISO A3 size (297 x 420 mm). */
   static get a3(): PdfSize {
     return PdfSize.fromMM(297, 420, 'A3');
   }
-  /// ISO A4 size (210 x 297 mm).
+  /** ISO A4 size (210 x 297 mm). */
   static get a4(): PdfSize {
     return PdfSize.fromMM(210, 297, 'A4');
   }
-  /// ISO A5 size (148 x 210 mm).
+  /** ISO A5 size (148 x 210 mm). */
   static get a5(): PdfSize {
     return PdfSize.fromMM(148, 210, 'A5');
   }
 
-  /// ISO B-Series (Common for Books/Posters)
+  // ISO B-Series (Common for Books/Posters)
 
-  /// ISO B0 size (1000 x 1414 mm).
+  /** ISO B0 size (1000 x 1414 mm). */
   static get b0(): PdfSize {
     return PdfSize.fromMM(1000, 1414, 'B0');
   }
-  /// ISO B1 size (707 x 1000 mm).
+  /** ISO B1 size (707 x 1000 mm). */
   static get b1(): PdfSize {
     return PdfSize.fromMM(707, 1000, 'B1');
   }
-  /// ISO B2 size (500 x 707 mm).
+  /** ISO B2 size (500 x 707 mm). */
   static get b2(): PdfSize {
     return PdfSize.fromMM(500, 707, 'B2');
   }
-  /// ISO B3 size (353 x 500 mm).
+  /** ISO B3 size (353 x 500 mm). */
   static get b3(): PdfSize {
     return PdfSize.fromMM(353, 500, 'B3');
   }
-  /// ISO B4 size (250 x 353 mm).
+  /** ISO B4 size (250 x 353 mm). */
   static get b4(): PdfSize {
     return PdfSize.fromMM(250, 353, 'B4');
   }
-  /// ISO B5 size (176 x 250 mm).
+  /** ISO B5 size (176 x 250 mm). */
   static get b5(): PdfSize {
     return PdfSize.fromMM(176, 250, 'B5');
   }
 
-  /// North American Standards
+  // North American Standards
 
-  /// Letter size (8.5 x 11 inches).
+  /** Letter size (8.5 x 11 inches). */
   static get letter(): PdfSize {
     return PdfSize.fromInches(8.5, 11, 'Letter');
   }
-  /// Legal size (8.5 x 14 inches).
+  /** Legal size (8.5 x 14 inches). */
   static get legal(): PdfSize {
     return PdfSize.fromInches(8.5, 14, 'Legal');
   }
-  /// Tabloid size (11 x 17 inches).
+  /** Tabloid size (11 x 17 inches). */
   static get tabloid(): PdfSize {
     return PdfSize.fromInches(11, 17, 'Tabloid');
   }
-  /// Ledger size (17 x 11 inches).
+  /** Ledger size (17 x 11 inches). */
   static get ledger(): PdfSize {
     return PdfSize.fromInches(17, 11, 'Ledger');
   }
-  /// Statement size (5.5 x 8.5 inches).
+  /** Statement size (5.5 x 8.5 inches). */
   static get statement(): PdfSize {
     return PdfSize.fromInches(5.5, 8.5, 'Statement');
   }
-  /// Executive size (7.25 x 10.5 inches).
+  /** Executive size (7.25 x 10.5 inches). */
   static get executive(): PdfSize {
     return PdfSize.fromInches(7.25, 10.5, 'Executive');
   }
 
-  /// Orientation Logic (Idempotent)
+  // Orientation Logic (Idempotent)
 
   /**
    * Returns a new PdfSize in portrait orientation (Height >= Width).

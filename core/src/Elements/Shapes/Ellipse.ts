@@ -33,7 +33,7 @@ export class Ellipse extends ElementBase {
 
   private _width: number = 16;
 
-  /** width. Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3). */
+  /** width. Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`. */
   public get width(): number {
     return this._width;
   }
@@ -42,7 +42,7 @@ export class Ellipse extends ElementBase {
   }
   private _height: number = 8;
 
-  /** height. Accepts a length: a number of points, `'5mm'`, or `{ value, unit }` (§4A.3). */
+  /** height. Accepts a length: a number of points, `'5mm'`, or `{ value, unit }`. */
   public get height(): number {
     return this._height;
   }

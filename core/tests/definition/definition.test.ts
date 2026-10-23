@@ -7,7 +7,7 @@ import { pdfToText } from '../helpers/test-base';
 import { DEFINITION_FIXTURES } from './fixtures.generated';
 
 /**
- * The Document Definition reader (spec 15). The fixtures are the shared conformance fixtures
+ * The Document Definition reader. The fixtures are the shared conformance fixtures
  * `document-definition/{valid,invalid}`, generated into this suite from the specification; the .NET
  * suite runs the same files. Every fixture must produce exactly the errors it lists.
  *

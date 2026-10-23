@@ -23,8 +23,7 @@ export interface RenderContext {
   cellStretchHeight: number;
   /**
    * The horizontal text alignment a Container establishes for descendant text (TextBlock/Heading/RichText)
-   * that sets none of its own, cascading through nesting the way CSS text-align is inherited (spec 01
-   * "Document Model" §3.2). `undefined` means no ambient is in effect: unset text stays at its own default.
+   * that sets none of its own, cascading through nesting the way CSS text-align is inherited. `undefined` means no ambient is in effect: unset text stays at its own default.
    */
   ambientHorizontalTextAlignment: unknown;
   /**

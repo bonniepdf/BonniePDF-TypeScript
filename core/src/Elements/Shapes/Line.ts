@@ -38,7 +38,7 @@ export class Line extends ElementBase {
 
   private _thickness: number = 1;
 
-  /** thickness. Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3). */
+  /** thickness. Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }`. */
   public get thickness(): number {
     return this._thickness;
   }
@@ -67,7 +67,7 @@ export class Line extends ElementBase {
    * For Horizontal lines, if null (default), it takes the full available width.
    * For Vertical lines, this determines the height. If null, defaults to 100.
    *
-   * Accepts a length: a number of points, `'5cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'5cm'`, or `{ value, unit }`.
    */
   public get length(): number | undefined {
     return this._length;

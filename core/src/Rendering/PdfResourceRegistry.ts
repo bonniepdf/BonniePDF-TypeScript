@@ -54,15 +54,26 @@ export interface TextRunFont {
   readonly fontIdentifier: string;
 }
 
+/**
+ * The kind of PDF/A resource problem: a standard font left unembedded, transparency that was flattened, or a PNG soft mask that was flattened.
+ */
 export type PdfAResourceIssueCode =
   'non-embedded-standard-font' | 'alpha-graphics-state-flattened' | 'png-soft-mask-flattened';
 
+/**
+ * Whether a PDF/A resource problem is `'blocking'` (the conformance claim cannot be made) or `'mitigated'` (handled, with a possible loss of fidelity).
+ */
 export type PdfAResourceIssueSeverity = 'blocking' | 'mitigated';
 
+/** A PDF/A problem found among the resources a document uses. */
 export interface PdfAResourceIssue {
+  /** Which problem was found. */
   code: PdfAResourceIssueCode;
+  /** Whether the problem blocks the claim or has been mitigated. */
   severity: PdfAResourceIssueSeverity;
+  /** Human-readable description. */
   message: string;
+  /** The resource the problem is about, when there is one. */
   resource?: string;
 }
 
@@ -525,7 +536,7 @@ export class PdfResourceRegistry {
     // candidates (index 0 is the primary and has no FallbackFont entry).
     const candidates: ShaperFont[] = [{ fontIdentifier: primaryFontIdentifier, font: primaryFont }];
     const fallbackByIndex: (FallbackFont | undefined)[] = [undefined];
-    // The document's own faces come first, then the global registrations (spec 16 §4).
+    // The document's own faces come first, then the global registrations.
     const documentFallbacks = getActiveDocumentFonts()?.fallbackFonts() ?? [];
     for (const fb of [...documentFallbacks, ...FontManager.getFallbackFonts()]) {
       if (fb.font === primaryFont) continue;

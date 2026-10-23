@@ -1,9 +1,9 @@
-// GENERATED from the Document Definition element description (spec 15 §13). Do not edit.
-// Regenerate with `node schema/sync.mjs` in the specification repository.
+// Generated file: do not edit by hand. It is produced from the shared Document Definition description
+// by the project's schema sync script.
 import type { ElementDescription } from './ElementDescriptionTypes';
 
 export const ELEMENT_DESCRIPTION: ElementDescription = {
-  "$comment": "Generated input for the Document Definition readers and writers (spec 15 Â§13). Edit this file, then run sync.mjs. Do not hand-edit the copies in the cores.",
+  "$comment": "Generated input for the Document Definition readers and writers. Edit this file, then run sync.mjs. Do not hand-edit the copies in the cores.",
   "format": "bonniepdf-document-definition-elements",
   "descriptionVersion": 1,
   "definition": {
@@ -2270,7 +2270,7 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
     }
   },
   "settingsRules": {
-    "$comment": "Cross-key rules of `settings`, evaluated in this order against the settings as written (spec 15 Â§5.2). `error` rules produce `incompatible-settings` when every `when` holds and any `require` does not; `sets` rules record what the generator raises the PDF version to, so later rules see the raised value. Conditions: `in` / `notIn` list tokens; `present` tests that a key is given (a non-empty list for bookmarks). Dotted keys reach into objects. Defaults apply to absent keys.",
+    "$comment": "Cross-key rules of `settings`, evaluated in this order against the settings as written. `error` rules produce `incompatible-settings` when every `when` holds and any `require` does not; `sets` rules record what the generator raises the PDF version to, so later rules see the raised value. Conditions: `in` / `notIn` list tokens; `present` tests that a key is given (a non-empty list for bookmarks). Dotted keys reach into objects. Defaults apply to absent keys.",
     "defaults": {
       "pdfVersion": "pdf-1.4",
       "conformance": "none",

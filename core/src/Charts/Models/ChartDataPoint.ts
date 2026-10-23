@@ -16,7 +16,9 @@ export class ChartDataPoint {
     applyOptions(this, options);
   }
 
+  /** Category label for the point, shown on the axis or in the legend. */
   label: string = '';
+  /** Numeric value of the point. */
   value: number = 0;
 
   /**

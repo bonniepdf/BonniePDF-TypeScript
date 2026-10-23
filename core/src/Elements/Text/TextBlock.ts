@@ -66,6 +66,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   // State tracking for multipage rendering
   private lastLineRendered = -1;
 
+  /** The text to render. A hard `\n` starts a new paragraph. */
   public text!: string;
 
   /**
@@ -96,7 +97,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   /**
    * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify' | 'start' | 'end'`. When not set
    * explicitly, an enclosing Container whose horizontalAlignment is Start/Center/End supplies an ambient
-   * default instead of the plain Left below (spec 01 "Document Model" §3.2); see `effectiveAlignment`.
+   * default instead of the plain Left below; see `effectiveAlignment`.
    */
   public get alignment(): TextAlignment {
     return this._alignment;
@@ -174,7 +175,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * Paragraph layout: horizontal indent (points) applied to the first line
    * of each paragraph (a paragraph = text between hard `\n` breaks). Default 0.
    *
-   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`.
    */
   public get firstLineIndent(): number {
     return this._firstLineIndent;
@@ -209,7 +210,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
    * Paragraph layout: extra vertical space (points) inserted before each
    * paragraph after the first. Default 0.
    *
-   * Accepts a length: a number of points, `'3mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'3mm'`, or `{ value, unit }`.
    */
   public get paragraphSpacing(): number {
     return this._paragraphSpacing;
@@ -234,7 +235,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     super();
     // Resolve text or lines into one paragraph; a bare object is the options bag
     // and may set the text property itself
-    // (`09a §3.4`: an options object is the only bare-object argument form).
+    //.
     if (arguments.length > 0 && textOrOptions == null) throw new TypeError('Text content cannot be null.');
     const isPositional = typeof textOrOptions === 'string' || Array.isArray(textOrOptions);
     if (isPositional) {

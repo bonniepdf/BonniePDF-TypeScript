@@ -7,5 +7,6 @@ import { IElement } from './IElement';
  * `elementRequiresTwoPassLayout`) without needing to know every concrete type.
  */
 export interface IContentContainer {
+  /** The wrapped element, if any. */
   child?: IElement;
 }

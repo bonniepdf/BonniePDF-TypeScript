@@ -31,9 +31,6 @@ export class GroupedBarChart extends CartesianChartBase {
   /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
   override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';
 
-  /**
-   * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
-   */
   /** Creates a GroupedBarChart, optionally configured in one expression. */
   constructor(options?: GroupedBarChartOptions) {
     super();
@@ -42,6 +39,9 @@ export class GroupedBarChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
+   */
   barWidthRatio: number = 0.6;
 
   /**

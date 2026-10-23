@@ -15,12 +15,12 @@ import { Color } from '../../src/Core/Color';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * this feature advanced typography controls (phase 1a): overline + decoration
+ * Advanced typography controls (phase 1a): overline + decoration
  * colour/thickness, and super/subscript baseline shift. These are vertical /
  * visual-only controls that do not change glyph advances, so measurement and
  * pagination are unaffected (guarded below).
  */
-describe('this feature advanced typography', () => {
+describe('advanced typography', () => {
   let doc: Document | undefined;
 
   afterEach(() => {

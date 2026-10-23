@@ -1,3 +1,4 @@
+/** The colour model of a decoded image. */
 export enum ImageColorSpace {
   DeviceRGB = 'DeviceRGB',
   DeviceCMYK = 'DeviceCMYK',
@@ -5,6 +6,7 @@ export enum ImageColorSpace {
   Indexed = 'Indexed',
 }
 
+/** The file format an image was loaded from. */
 export enum ImageFormat {
   Jpeg = 'Jpeg',
   Png = 'Png',
@@ -14,17 +16,27 @@ export enum ImageFormat {
 export class ImageInfo {
   /** @internal Decodes graphics discovered during layout before resource serialization. */
   public prepareDeferred?: () => Promise<void>;
+  /** The image data as written to the PDF stream: the JPEG file itself, or the decoded pixels of a PNG. */
   public data: Uint8Array = new Uint8Array();
+  /** The image file exactly as it was supplied. */
   public originalData: Uint8Array = new Uint8Array();
   /** Pixel dimensions as stored in the bitstream - the values that go into the PDF XObject's /Width and /Height. */
   public width: number = 0;
+  /** Pixel height as stored in the bitstream. */
   public height: number = 0;
+  /** The format the image was loaded from. */
   public format: ImageFormat = ImageFormat.Png;
+  /** The colour model of the pixel data. */
   public colorSpace: ImageColorSpace = ImageColorSpace.DeviceRGB;
+  /** Bits used for each colour component, normally 8. */
   public bitsPerComponent: number = 8;
+  /** Number of colour components per pixel (1, 3 or 4). */
   public components: number = 3;
+  /** `true` when the image has transparency. */
   public hasAlpha: boolean = false;
+  /** The transparency channel, one value per pixel, when {@link hasAlpha} is set. */
   public alphaData: Uint8Array = new Uint8Array();
+  /** The colour table, for indexed-colour images. */
   public palette: Uint8Array = new Uint8Array();
 
   /**

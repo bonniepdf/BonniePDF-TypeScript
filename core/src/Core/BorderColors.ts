@@ -2,9 +2,13 @@ import { Color } from './Color';
 
 /** Stores the colors of an element’s four borders. */
 export class BorderColors {
+  /** Colour of the left border, or `undefined` when none is set for that side. */
   public readonly left?: Color;
+  /** Colour of the top border, or `undefined` when none is set for that side. */
   public readonly top?: Color;
+  /** Colour of the right border, or `undefined` when none is set for that side. */
   public readonly right?: Color;
+  /** Colour of the bottom border, or `undefined` when none is set for that side. */
   public readonly bottom?: Color;
 
   /**

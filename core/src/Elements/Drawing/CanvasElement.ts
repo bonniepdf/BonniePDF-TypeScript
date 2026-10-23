@@ -9,6 +9,9 @@ import { applyOptions } from '../../Core/applyOptions';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { toLength, type LengthInput } from '../../Normalize/toLength';
 
+/**
+ * The function that draws a {@link CanvasElement}: it receives the canvas and the size of the area reserved for the element, in points.
+ */
 export type CanvasDrawHandler = (canvas: ICanvas, size: Size) => void;
 
 /** Settable properties declared by {@link CanvasElement} itself. */
@@ -38,7 +41,7 @@ export class CanvasElement extends ElementBase implements IRoleProvider, IAltTex
    * content width; a positive value fixes the width and is clamped to the space
    * available.
    *
-   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }`.
    */
   public get drawWidth(): number {
     return this._drawWidth;
@@ -50,7 +53,7 @@ export class CanvasElement extends ElementBase implements IRoleProvider, IAltTex
 
   /** Height of the drawing box in points. Always explicit — a canvas cannot measure itself.
    *
-   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'8cm'`, or `{ value, unit }`.
    */
   public get drawHeight(): number {
     return this._drawHeight;

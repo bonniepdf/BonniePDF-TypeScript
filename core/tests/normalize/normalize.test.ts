@@ -26,7 +26,7 @@ import {
   toFontWeight,
 } from '../../src/Normalize';
 
-describe('toColor (spec 06 §4A.2)', () => {
+describe('toColor', () => {
   it('passes a Color through unchanged', () => {
     const c = new Color(1, 2, 3);
     expect(toColor(c)).toBe(c);
@@ -95,7 +95,7 @@ describe('toColor (spec 06 §4A.2)', () => {
   });
 });
 
-describe('toThickness (spec 06 §4A.3)', () => {
+describe('toThickness', () => {
   it('passes a Thickness through unchanged', () => {
     const t = new Thickness(1, 2, 3, 4);
     expect(toThickness(t)).toBe(t);
@@ -120,7 +120,7 @@ describe('toThickness (spec 06 §4A.3)', () => {
   });
 });
 
-describe('toBorder (spec 06 §4A.3)', () => {
+describe('toBorder', () => {
   it('passes a Border through with no colours', () => {
     const b = new Border(2);
     expect(toBorder(b)).toEqual({ border: b });
@@ -143,7 +143,7 @@ describe('toBorder (spec 06 §4A.3)', () => {
   });
 });
 
-describe('toPageSize (spec 06 §4A.3)', () => {
+describe('toPageSize', () => {
   it('passes a PdfSize through unchanged', () => {
     expect(toPageSize(PdfSize.a4)).toEqual(PdfSize.a4);
   });
@@ -188,7 +188,7 @@ describe('toPageSize (spec 06 §4A.3)', () => {
   });
 });
 
-describe('enum tokens (spec 06 §4A.4)', () => {
+describe('enum tokens', () => {
   it('passes enum members through unchanged', () => {
     expect(toTextAlignment(TextAlignment.Justify)).toBe(TextAlignment.Justify);
     expect(toPdfAConformance(PdfAConformance.PdfA2a)).toBe(PdfAConformance.PdfA2a);
@@ -214,7 +214,7 @@ describe('enum tokens (spec 06 §4A.4)', () => {
   });
 });
 
-describe('toTextDecoration (bit flags, spec 06 §4A.4)', () => {
+describe('toTextDecoration (bit flags)', () => {
   it('accepts a single token', () => {
     expect(toTextDecoration('underline')).toBe(TextDecoration.Underline);
     expect(toTextDecoration('none')).toBe(TextDecoration.None);

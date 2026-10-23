@@ -4,7 +4,7 @@ import type { ColorToken, HexColor, PaletteFamily } from './Tokens';
 
 /**
  * Every form a colour may be written as in a public authoring position
- * (`the specification` §4A.2).
+ *.
  *
  * The hex arm is deliberately `` `#${string}` `` rather than `string`: a bare
  * `string` would absorb {@link ColorToken}, and a typo like `'slate-80'` would
@@ -15,7 +15,7 @@ export type ColorInput = Color | ColorToken | HexColor;
 /**
  * Resolves a {@link ColorInput} to the canonical {@link Color}.
  *
- * Palette tokens resolve *through* `ColorPalette` (§4), which stays the single
+ * Palette tokens resolve *through* `ColorPalette`, which stays the single
  * source of truth for token hex values - this function holds no colour table of
  * its own. An out-of-grammar hex string yields black, matching
  * {@link Color.fromHex}; palette typos cannot reach here from typed callers

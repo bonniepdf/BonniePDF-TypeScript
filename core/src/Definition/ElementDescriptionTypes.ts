@@ -60,16 +60,29 @@ export interface SettingsRules {
   rules: SettingsRule[];
 }
 
+/**
+ * Bounds enforced while reading an untrusted document definition. A violation is reported as a `limit-exceeded` issue before anything is built.
+ */
 export interface Limits {
+  /** Maximum size of the input, in bytes (default 16 MiB). */
   inputBytes: number;
+  /** Maximum JSON nesting depth (default 64). */
   jsonDepth: number;
+  /** Maximum element nesting depth (default 32). */
   elementDepth: number;
+  /** Maximum number of elements in the whole document (default 50,000). */
   elementNodes: number;
+  /** Maximum number of pages (default 5,000). */
   pages: number;
+  /** Maximum length of any string value (default 1 MiB). */
   stringLength: number;
+  /** Maximum length of any array (default 100,000). */
   arrayLength: number;
+  /** Maximum decoded size of a single resource (default 32 MiB). */
   resourceBytes: number;
+  /** Maximum decoded size of all resources together (default 128 MiB). */
   resourceBytesTotal: number;
+  /** Maximum number of chart data points in the whole document (default 100,000). */
   chartDataPoints: number;
 }
 

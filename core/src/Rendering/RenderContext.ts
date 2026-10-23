@@ -55,6 +55,7 @@ export class RenderContext implements RenderContextContract {
   public elementTransform?: PaintTransform;
   /** @internal */
   public readonly resources: PdfResourceRegistry;
+  /** The content stream of each page rendered so far. */
   public readonly pages: string[] = [];
   /**
    * @internal How finished body pages are held. `compressed`: compressed when layout leaves
@@ -87,9 +88,12 @@ export class RenderContext implements RenderContextContract {
   }
   /** @internal */
   public readonly pageHyperlinks: Map<number, RegisteredLink[]> = new Map();
+  /** Page numbers of the headings registered for the table of contents, keyed by heading identifier. */
   public readonly tocEntries: Map<string, number> = new Map();
 
+  /** The canvas that elements currently draw onto. */
   public canvas!: ICanvas;
+  /** `true` when rendering to SVG rather than PDF. */
   public readonly isSvgMode: boolean;
 
   /**
@@ -116,11 +120,17 @@ export class RenderContext implements RenderContextContract {
    */
   private readonly svgIdAllocator = new SvgIdAllocator();
   public currentPageIndex: number = 0;
+  /** Horizontal position of the layout cursor, in points. */
   public currentX: number = 0;
+  /** Vertical position of the layout cursor, in points from the top of the page. */
   public currentY: number = 0;
+  /** The size of the page being rendered. */
   public pageSize: PdfSize;
+  /** The page margin, in points. */
   public margin: number;
+  /** `true` while the last page is being rendered. */
   public isLastPage: boolean = false;
+  /** Called with the page index each time a new page is started. */
   public onPageCreated?: (pageNumber: number) => void;
 
   /**
@@ -156,8 +166,7 @@ export class RenderContext implements RenderContextContract {
 
   /**
    * The horizontal text alignment a Container establishes for descendant text (TextBlock/Heading/RichText)
-   * that sets none of its own, cascading through nesting the way CSS text-align is inherited (spec 01
-   * "Document Model" §3.2). `undefined` means no ambient is in effect: unset text stays at its own default
+   * that sets none of its own, cascading through nesting the way CSS text-align is inherited. `undefined` means no ambient is in effect: unset text stays at its own default
    * (Left). Scoped to the container's subtree by the container itself, which restores the value it found
    * on the way in.
    */
@@ -245,6 +254,7 @@ export class RenderContext implements RenderContextContract {
     return canvas;
   }
 
+  /** `true` when PDF/A output is being produced. */
   public get pdfAEnabled(): boolean {
     return this.resources.pdfAEnabled;
   }
@@ -253,6 +263,7 @@ export class RenderContext implements RenderContextContract {
     this.resources.pdfAEnabled = value;
   }
 
+  /** The content stream of the current page. */
   public get currentStream(): string {
     return this.pages[this.currentPageIndex];
   }
@@ -324,6 +335,7 @@ export class RenderContext implements RenderContextContract {
     return this.pageSize.height - Math.max(this.margin, this.chrome.footer);
   }
 
+  /** The bottom of the area available for body content on this page, in points from the top. */
   public get maxY(): number {
     return this.contentBottom;
   }
@@ -406,6 +418,9 @@ export class RenderContext implements RenderContextContract {
     }
   }
 
+  /**
+   * Creates a canvas whose origin is `(x, y)` on the current page. Content drawn on it is placed with {@link flushExternalCanvas}.
+   */
   public getCanvas(x: number, y: number): ICanvas {
     if (this.isSvgMode) {
       // Positioned child canvas. The child records its origin so
@@ -426,7 +441,7 @@ export class RenderContext implements RenderContextContract {
       this.trackGlyphUsage.bind(this),
       this.registerAlphaGraphicsState.bind(this),
       // A positioned canvas resolves glyph fallback like the page's, so chart labels and
-      // canvas drawings get the same fallback fonts as body text (spec 16, glyph fallback).
+      // canvas drawings get the same fallback fonts as body text.
       this.resolveTextRuns.bind(this),
       this.reportUntaggedImage.bind(this),
       this.registerShading.bind(this),
@@ -485,10 +500,12 @@ export class RenderContext implements RenderContextContract {
     );
   }
 
+  /** Registers a font for use on the page and returns its resource name. */
   public registerFont(fontIdentifier: string): string {
     return this.resources.registerFont(fontIdentifier);
   }
 
+  /** Registers a graphics state with the given opacity (0 to 1) and returns its resource name. */
   public registerAlphaGraphicsState(alpha: number): string {
     return this.resources.registerAlphaGraphicsState(alpha);
   }
@@ -498,6 +515,7 @@ export class RenderContext implements RenderContextContract {
     return this.resources.registerShading(request);
   }
 
+  /** Returns `true` when the font identifier refers to an embedded font file rather than a standard font. */
   public static isEmbeddedFont(fontIdentifier: string): boolean {
     return PdfResourceRegistry.isEmbeddedFont(fontIdentifier);
   }
@@ -507,6 +525,7 @@ export class RenderContext implements RenderContextContract {
     return this.resources.getEmbeddedFont(filePath);
   }
 
+  /** Finishes the current page and starts the next, carrying tagging and artifact regions across the break. */
   public newPage(): void {
     if (this.atomicLayoutBounds) throw new Error('Transformed content cannot create a page.');
     // Header and footer chrome is painted at a fixed position in the margin band, which lies outside
@@ -590,6 +609,7 @@ export class RenderContext implements RenderContextContract {
     }
   }
 
+  /** Creates a canvas whose origin is the top-left corner of the page. */
   public getFixedCanvas(): ICanvas {
     return this.getCanvas(0, 0);
   }
@@ -648,10 +668,12 @@ export class RenderContext implements RenderContextContract {
     }
   }
 
+  /** Replaces the canvas elements draw onto. */
   public setCanvas(canvas: ICanvas): void {
     this.canvas = canvas;
   }
 
+  /** Makes the page at `index` current, saving the page being left. Throws when the index is out of range. */
   public switchToPage(index: number): void {
     if (index < 0 || index >= this.pages.length) {
       throw new Error(`Page index ${index} out of range`);
@@ -671,14 +693,17 @@ export class RenderContext implements RenderContextContract {
     this.updateCanvas();
   }
 
+  /** Allocates a new image identifier. */
   public getNewImageId(): number {
     return this.resources.getNewImageId();
   }
 
+  /** Registers an image for embedding and returns its identifier. Identical images share one identifier. */
   public registerImage(info: ImageInfo): number {
     return this.resources.registerImage(info);
   }
 
+  /** Returns the resource name used to draw the image with the given identifier. */
   public getImageResourceName(imageId: number): string {
     return this.resources.getImageResourceName(imageId);
   }
@@ -708,6 +733,7 @@ export class RenderContext implements RenderContextContract {
     this.pageHyperlinks.get(this.currentPageIndex)!.push(hyperlink);
   }
 
+  /** Registers a reusable form for text drawn in the given font, size and colour, and returns its resource name. */
   public registerDeferredXObject(fontFamily: string, fontSize: number, color: Color): string {
     return this.resources.registerDeferredXObject(fontFamily, fontSize, color);
   }

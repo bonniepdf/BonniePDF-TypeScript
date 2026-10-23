@@ -231,7 +231,7 @@ export class DocumentSettings {
   /**
    * The margin size in points for all pages (default: 50).
    *
-   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2cm'`, or `{ value, unit }`.
    */
   public get margin(): number {
     return this._margin;
@@ -343,7 +343,7 @@ export class DocumentSettings {
 
   /**
    * PDF/A conformance claim. Accepts `'none'`, `'pdf/a-2b'`, `'pdf/a-2a'`,
-   * `'pdf/a-4'`, … (`the specification` §4A.4).
+   * `'pdf/a-4'`, ….
    */
   public get conformance(): PdfAConformance {
     return this._conformance;

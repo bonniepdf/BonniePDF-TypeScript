@@ -33,8 +33,7 @@ export class PdfRenderPipeline {
     const orientedPageSize = settings.getOrientedPageSize();
     const ctx = new RenderContext(orientedPageSize, settings.margin);
     ctx.emojiRendering = settings.emojiRendering;
-    // Header/footer consume body content height (spec: Layout & Pagination
-    // §5.1). Installed before any layout so the very first page's cursor and
+    // Header/footer consume body content height. Installed before any layout so the very first page's cursor and
     // break threshold already account for the chrome.
     ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
@@ -211,8 +210,7 @@ export class PdfRenderPipeline {
       throw new Error('Pages and context cannot be null');
     }
 
-    // Header/footer consume body content height (spec: Layout & Pagination
-    // §5.1). The context is supplied by the caller here, so the reservation is
+    // Header/footer consume body content height. The context is supplied by the caller here, so the reservation is
     // installed at the top of the run rather than at construction.
     ctx.emojiRendering = settings.emojiRendering;
     ctx.setChromeReservation(chromeReservationFor(settings, ctx));
@@ -459,7 +457,7 @@ export class PdfRenderPipeline {
           const footerHeight = footerElement.measureHeight(contentWidth);
           // Centred in the bottom margin band while it fits there, flush to the
           // bottom page edge once it outgrows it - continuous at footerHeight ==
-          // margin, and it never runs off the page (spec: Layout & Pagination §5.1).
+          // margin, and it never runs off the page.
           const bandTop = ctx.pageSize.height - Math.max(ctx.margin, footerHeight);
           ctx.currentX = startX;
           ctx.currentY = bandTop + Math.max(0, (ctx.margin - footerHeight) / 2);

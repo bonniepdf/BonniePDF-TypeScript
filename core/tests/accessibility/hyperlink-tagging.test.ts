@@ -8,7 +8,7 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * hyperlink tagging. Mirror of the .NET HyperlinkTaggingTests.
+ * Hyperlink tagging. Mirror of the .NET HyperlinkTaggingTests.
  * Standalone Hyperlink elements produce a /Link structure element, and
  * the link annotation carries /Contents (link text) per PDF/UA rule
  * 7-18. Annotation reachability via /OBJR + /StructParent is deferred

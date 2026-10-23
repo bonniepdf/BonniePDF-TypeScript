@@ -37,7 +37,9 @@ const f32 = Math.fround;
 
 /** The box an {@link Svg}'s generator is asked to fill, in points. */
 export interface SvgSize {
+  /** Width of the box, in points. */
   readonly width: number;
+  /** Height of the box, in points. */
   readonly height: number;
 }
 

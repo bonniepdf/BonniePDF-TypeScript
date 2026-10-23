@@ -24,9 +24,6 @@ export type ChartDataOptions = Partial<Pick<ChartData, 'title'>> & {
 
 /** Contains the categories and series rendered by a chart. */
 export class ChartData {
-  /**
-   * Chart title displayed at the top
-   */
   /** Creates chart data, optionally configured in one expression. */
   constructor(options?: ChartDataOptions) {
     const { series, yAxis, xAxis, ...rest } = options ?? {};
@@ -38,6 +35,9 @@ export class ChartData {
     if (xAxis !== undefined) this.xAxis = xAxis instanceof AxisOptions ? xAxis : new AxisOptions(xAxis);
   }
 
+  /**
+   * Chart title displayed at the top
+   */
   title: string = '';
 
   /**

@@ -83,7 +83,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * Uniform gap between adjacent columns.
    *
-   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }`.
    */
   public get spacing(): number {
     return this._spacing;
@@ -124,7 +124,7 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   /**
    * Optional fixed height for the stack. If null, height is determined by the tallest child.
    *
-   * Accepts a length: a number of points, `'1in'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1in'`, or `{ value, unit }`.
    */
   public get height(): number | undefined {
     return this._height;

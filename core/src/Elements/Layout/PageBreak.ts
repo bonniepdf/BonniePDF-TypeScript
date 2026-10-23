@@ -22,6 +22,7 @@ export class PageBreak extends ElementBase {
     applyOptions(this, options);
   }
 
+  /** Asks for a new page unless the cursor is already at the top of one, then reports completion. */
   public renderStateful(ctx: RenderContext, _width: number): RenderStatus {
     if (ctx.atomicLayoutBounds) throw new Error('Transformed content cannot create a page.');
     if (!this.triggered) {
@@ -33,6 +34,7 @@ export class PageBreak extends ElementBase {
     return RenderStatus.Complete;
   }
 
+  /** Rearms the break so it can trigger again on the next render. */
   public resetState(): void {
     this.triggered = false;
   }

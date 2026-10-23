@@ -75,7 +75,7 @@ export class Hyperlink implements IElement, IRoleProvider {
   /**
    * Gets or sets the font size for the link text.
    *
-   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`.
    */
   public get fontSize(): number {
     return this._fontSize;

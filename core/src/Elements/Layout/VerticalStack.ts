@@ -55,7 +55,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
   /**
    * Uniform gap between adjacent children.
    *
-   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'4mm'`, or `{ value, unit }`.
    */
   public get spacing(): number {
     return this._spacing;

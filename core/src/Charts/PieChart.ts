@@ -74,10 +74,6 @@ export class PieChart extends ChartBase {
     '#06b6d4',
   ];
 
-  /**
-   * Custom colors to use for the pie slices.
-   * If null, uses the default color palette.
-   */
   /** Creates a pie chart, optionally configured in one expression. */
   constructor(options?: PieChartOptions) {
     super();
@@ -86,6 +82,10 @@ export class PieChart extends ChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Custom colors to use for the pie slices.
+   * If null, uses the default color palette.
+   */
   colors: string[] | undefined;
 
   /**

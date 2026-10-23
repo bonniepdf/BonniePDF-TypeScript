@@ -23,7 +23,7 @@ export class Spacer extends ElementBase {
   /**
    * Vertical space this spacer reserves in the flow.
    *
-   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'1cm'`, or `{ value, unit }`.
    */
   public get height(): number {
     return this._height;

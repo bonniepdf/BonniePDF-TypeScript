@@ -18,7 +18,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 /**
- * this feature (TS mirror) - 10-fixture hardening pass. Throws representative
+ * Ten-fixture hardening pass. Throws representative
  * edge-case documents at the tagging machinery to surface bugs the
  * focused stage-1 closeout tests don't hit: encryption + tagging,
  * PDF/A + PDF/UA combination, empty docs, internal hyperlinks, every
@@ -31,9 +31,9 @@ import { join } from 'path';
  * Known stage-2 gaps that VeraPDF will still flag (documented in the
  * fixtures rather than silently passing):
  *  - Header/footer template content is rendered but not tagged as
- *    /Artifact (this feature fixes this).
+ *    /Artifact (since fixed).
  *  - Hyperlink annotations don't carry /StructParent (full annotation
- *    reachability - deferred from this feature).
+ *    reachability - deferred).
  */
 describe('Hardening fixtures', () => {
   let doc: Document;
@@ -77,12 +77,12 @@ describe('Hardening fixtures', () => {
 
   // ── 2. PDF/A + PDF/UA combined ──────────────────────────────────
 
-  it('fixture 02 - PDF/A and PDF/UA-1 claims are suppressed when standard fonts are not embedded (this feature contract)', () => {
+  it('fixture 02 - PDF/A and PDF/UA-1 claims are suppressed when standard fonts are not embedded', () => {
     // PDF/A-1b §6.3.4 and PDF/UA-1 §7.21.4.1 both forbid non-embedded
     // fonts. With no Liberation faces registered (tests import from src/,
     // skipping the Node entry point's registration), Helvetica cannot be
     // embedded, so the serializer withholds both claims rather than
-    // emitting invalid ones. The tagging itself is kept (spec 04 §8.2).
+    // emitting invalid ones. The tagging itself is kept.
     const pdf = generate(d => {
       d.settings.version = PdfVersion.Pdf17;
       d.settings.pdfAEnabled = true;
@@ -226,8 +226,8 @@ describe('Hardening fixtures', () => {
 
   // ── 8. Header/footer templates (known stage-2 gap) ──────────────
 
-  it('fixture 08 - header/footer templates emit /Artifact BMC (this feature fixed)', () => {
-    // this feature fixed this: header/footer template content is now tagged as
+  it('fixture 08 - header/footer templates emit /Artifact BMC', () => {
+    // Fixed this: header/footer template content is now tagged as
     // /Artifact so screen readers skip it.
     const pdf = generateTagged(d => {
       d.settings.headerTemplate = pageNum => {
@@ -255,7 +255,7 @@ describe('Hardening fixtures', () => {
     expect(pdf).toContain('/S /H1');
     // Document structure exists.
     expect(pdf).toContain('/S /Document');
-    // this feature fixed: header/footer are now emitted as /Artifact regions.
+    // Fixed: header/footer are now emitted as /Artifact regions.
     expect(pdf).toContain('/Artifact BMC');
   });
 
@@ -321,9 +321,9 @@ describe('Hardening fixtures', () => {
     expect(pdf).toContain('/Alt (Chart for FY \\(2026\\) \\\\ revenue "projection")');
   });
 
-  // ── 11. this feature Stage 2 - real PDF/A when fonts are registered ────────
+  // ── real PDF/A when fonts are registered ────────
 
-  describe('fixture 11 - this feature stage 2: real PDF/A with registered Liberation Sans', () => {
+  describe('fixture 11 - stage 2: real PDF/A with registered Liberation Sans', () => {
     const fontsDir = join(__dirname, '../../assets/fonts');
 
     beforeEach(() => {

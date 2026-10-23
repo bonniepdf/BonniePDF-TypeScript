@@ -88,7 +88,7 @@ export abstract class TextElementBase extends ElementBase {
    */
   public get fontName(): string {
     // While a document with its own fonts is being generated, a family is resolved
-    // against them (spec 16 Â§4). Otherwise the name resolved when the family was set stands.
+    // against them. Otherwise the name resolved when the family was set stands.
     if (this._fontFamily !== undefined && getActiveDocumentFonts()) {
       return FontFamilyResolver.resolve(this._fontFamily, this._fontWeight, this._italic);
     }
@@ -251,7 +251,7 @@ export abstract class TextElementBase extends ElementBase {
    * Thickness of the decoration lines in points. Null = the default derived from
    * font size (`max(0.5, fontSize / 18)`).
    *
-   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (Â§4A.3).
+   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }`.
    */
   public get decorationThickness(): number | undefined {
     return this._decorationThickness;
@@ -272,7 +272,7 @@ export abstract class TextElementBase extends ElementBase {
    * Default 0. Changes advances, so it is reflected in measurement and both
    * PDF and SVG output.
    *
-   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (Â§4A.3).
+   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }`.
    */
   public get letterSpacing(): number {
     return this._letterSpacing;
@@ -291,7 +291,7 @@ export abstract class TextElementBase extends ElementBase {
   /**
    * Word spacing in points, added after every space. Default 0.
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (Â§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get wordSpacing(): number {
     return this._wordSpacing;
@@ -518,7 +518,7 @@ export abstract class TextElementBase extends ElementBase {
   }
 
   /**
-   * Wraps a single break-free segment, keeping every space (spec 03 "Preserved whitespace").
+   * Wraps a single break-free segment, keeping every space.
    *
    * Works by Unicode code point and never splits a surrogate pair. A line is the longest prefix that
    * fits: `firstWidth` for a segment's first line, `width` for the rest. It breaks at the last space

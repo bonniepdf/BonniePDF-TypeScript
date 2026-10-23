@@ -11,6 +11,7 @@ const K = 0.5522847498;
  * afterwards.
  */
 export class Shapes {
+  /** Appends a circle centred on `(cx, cy)` to the canvas path. */
   static circle(canvas: ICanvas, cx: number, cy: number, radius: number): void {
     const kr = K * radius;
     canvas.moveTo(cx + radius, cy);
@@ -21,6 +22,7 @@ export class Shapes {
     canvas.closePath();
   }
 
+  /** Appends a diamond (a square turned 45°) centred on `(cx, cy)` whose points are `size` apart. */
   static diamond(canvas: ICanvas, cx: number, cy: number, size: number): void {
     const half = size / 2;
     canvas.moveTo(cx, cy - half);
@@ -30,6 +32,9 @@ export class Shapes {
     canvas.closePath();
   }
 
+  /**
+   * Appends a regular polygon with the given number of sides (at least 3), inscribed in a circle of `radius` about `(cx, cy)`, with one vertex pointing up.
+   */
   static regularPolygon(canvas: ICanvas, cx: number, cy: number, radius: number, sides: number): void {
     if (sides < 3) sides = 3;
     const angleStep = (2 * Math.PI) / sides;
@@ -44,6 +49,9 @@ export class Shapes {
     canvas.closePath();
   }
 
+  /**
+   * Appends a star with the given number of points (at least 3), alternating between the outer and inner radius, centred on `(cx, cy)`.
+   */
   static star(canvas: ICanvas, cx: number, cy: number, outerRadius: number, innerRadius: number, points: number): void {
     if (points < 3) points = 3;
     const totalVertices = points * 2;
@@ -60,6 +68,7 @@ export class Shapes {
     canvas.closePath();
   }
 
+  /** Appends a rectangle with rounded corners to the canvas path. The radius is limited to half the shorter side. */
   static roundedRect(canvas: ICanvas, x: number, y: number, width: number, height: number, cornerRadius: number): void {
     const r = Math.min(cornerRadius, width / 2, height / 2);
     const k = r * K;

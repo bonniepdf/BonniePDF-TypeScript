@@ -14,7 +14,7 @@ import { DEFINITION_FIXTURES } from './fixtures.generated';
 import { PNG, maskedPdf, stateDiff } from './helpers';
 
 /**
- * The Document Definition writer (spec 15 §11, §14). Three kinds of check:
+ * The Document Definition writer. Three kinds of check:
  *
  * - every valid fixture reads, writes, and reads back to a document with identical state and identical PDF bytes;
  * - every key of every element, with every token it accepts, survives read → write → read (generated from the

@@ -7,7 +7,7 @@ import { PdfVersion } from '../../src/Configuration/PdfVersion';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * implicit tagging tests. Asserts that existing elements
+ * Implicit tagging tests. Asserts that existing elements
  * (Heading, TextBlock) automatically emit structure elements and
  * marked-content sequences when the document opts into
  * AccessibilityMode.PdfUa1. Mirrors the .NET ImplicitTaggingTests.

@@ -15,7 +15,7 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * stage-0 closeout. Mirrors the .NET TaggedSimpleDocumentTests:
+ * Stage-0 closeout. Mirrors the .NET TaggedSimpleDocumentTests:
  * builds the tagged simple-document fixture inline and asserts the
  * byte-level shape VeraPDF profile `ua1` verifies (catalog refs, XMP
  * conformance claim, structure tree shape, per-page BDC/EMC balance).
@@ -41,7 +41,7 @@ describe('Tagged simple-document (stage-0 closeout)', () => {
     d.metadata = new DocumentMetadata();
     d.metadata.title = 'Simple Document - Tagged (PDF/UA-1)';
     d.metadata.author = 'BonniePDF';
-    d.metadata.subject = 'this feature stage-0 closeout fixture.';
+    d.metadata.subject = 'Stage-0 closeout fixture.';
     d.metadata.keywords = 'pdf, pdf/ua, accessibility';
 
     d.settings = new DocumentSettings();

@@ -46,7 +46,7 @@ export class ChartSeriesStyle {
   /**
    * Line thickness for this series.
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get lineWidth(): number {
     return this._lineWidth;
@@ -65,7 +65,7 @@ export class ChartSeriesStyle {
   /**
    * Marker radius for Line, Lollipop, and DotPlot charts (default: 5f).
    *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }`.
    */
   public get markerRadius(): number {
     return this._markerRadius;
@@ -84,7 +84,7 @@ export class ChartSeriesStyle {
   /**
    * Stem width for Lollipop charts (default: 2f).
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get stemWidth(): number {
     return this._stemWidth;
@@ -119,10 +119,6 @@ export type ChartSeriesOptions = Partial<
 
 /** Contains the name, values, and optional style for one chart series. */
 export class ChartSeries {
-  /**
-   * Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")
-   * Used in legends and tooltips.
-   */
   /** Creates a series, optionally configured in one expression. */
   constructor(options?: ChartSeriesOptions) {
     const { dataPoints, style, ...rest } = options ?? {};
@@ -135,6 +131,10 @@ export class ChartSeries {
     }
   }
 
+  /**
+   * Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")
+   * Used in legends and tooltips.
+   */
   name: string = '';
 
   /**

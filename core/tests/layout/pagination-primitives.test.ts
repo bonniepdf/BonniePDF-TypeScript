@@ -30,7 +30,7 @@ import type { LayoutNode } from '../../src/Rendering/LayoutRecorder';
 
 /**
  * Pagination control primitives - shared conformance fixture
- * `layout/pagination-primitives` (spec "Layout & Pagination" §7).
+ * `layout/pagination-primitives`.
  *
  * Every case is expressed with `Container` heights rather than text, so the
  * numbers are font-independent and the .NET suite asserts exactly the same

@@ -4,19 +4,25 @@ import { toColor, type ColorInput } from './toColor';
 
 /**
  * A border written as widths plus an optional colour. Omitted sides are **zero**
- * (§4A.3); an omitted `color` leaves the element's existing border colours
+ *; an omitted `color` leaves the element's existing border colours
  * alone.
  */
 export interface BorderObject {
+  /** Width applied to every side; the per-side values override it. */
   width?: number;
+  /** Top border width, in points. */
   top?: number;
+  /** Right border width, in points. */
   right?: number;
+  /** Bottom border width, in points. */
   bottom?: number;
+  /** Left border width, in points. */
   left?: number;
+  /** Border colour, applied to every side. */
   color?: ColorInput;
 }
 
-/** Every form a border may be written as (`the specification` §4A.3). */
+/** Every form a border may be written as. */
 export type BorderInput = Border | number | BorderObject;
 
 /**
@@ -25,7 +31,9 @@ export type BorderInput = Border | number | BorderObject;
  * to both; `colors` is `undefined` when the input carried no colour.
  */
 export interface ResolvedBorder {
+  /** The border widths. */
   border: Border;
+  /** The border colours, or `undefined` when the input carried no colour. */
   colors?: BorderColors;
 }
 

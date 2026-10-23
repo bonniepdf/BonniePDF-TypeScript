@@ -31,7 +31,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
    * Border widths for each side of the element.
    *
    * Reads as the canonical {@link Border}; accepts a uniform width or a
-   * per-side object on write (`the specification` §4A.3). Colour is set
+   * per-side object on write. Colour is set
    * through {@link borderColors} - this setter never writes it.
    */
   public get border(): Border {
@@ -72,7 +72,7 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
   /**
    * Corner radius for rounded rectangles. 0 = sharp corners (default).
    *
-   * Accepts a length: `6`, `'2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: `6`, `'2mm'`, or `{ value, unit }`.
    */
   public get cornerRadius(): number {
     return this._cornerRadius;

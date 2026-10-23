@@ -13,7 +13,7 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * stage-1 closeout (TS mirror of this feature). Three representative
+ * Stage-1 closeout (TS mirror of the .NET tests). Three representative
  * tagged documents exercising the stage-1 surface area:
  *   - business-invoice: heading + body + table with header row + link
  *   - multi-page-flow: long table that overflows multiple pages

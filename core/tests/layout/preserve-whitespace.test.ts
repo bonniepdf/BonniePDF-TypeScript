@@ -6,8 +6,8 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * TextBlock.preserveWhitespace - shared conformance fixture layout/preserve-whitespace (spec 03
- * "Preserved whitespace"). Courier at 10pt is 6pt per code point, so a width of 60pt holds exactly
+ * TextBlock.preserveWhitespace - shared conformance fixture layout/preserve-whitespace.
+ * Courier at 10pt is 6pt per code point, so a width of 60pt holds exactly
  * ten code points on a line whatever the platform. The .NET suite asserts the same cases.
  */
 const CP = 6;

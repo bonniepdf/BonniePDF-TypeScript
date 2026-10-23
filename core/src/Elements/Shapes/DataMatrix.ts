@@ -54,13 +54,13 @@ export type DataMatrixOptions = ElementOptions &
 
 /** Renders text or binary data as a vector Data Matrix ECC200 symbol. */
 export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextProvider {
-  /** The data/text to encode. Any Unicode string is accepted. */
   /** Creates a Data Matrix symbol, optionally configured in one expression. */
   constructor(options?: DataMatrixOptions) {
     super();
     applyOptions(this, options);
   }
 
+  /** The data/text to encode. Any Unicode string is accepted. */
   public data = '';
 
   /**
@@ -84,7 +84,7 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
    * square symbols the height equals the width; for rectangular symbols the
    * height is derived from the symbol's aspect ratio.
    *
-   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'3cm'`, or `{ value, unit }`.
    */
   public get size(): number {
     return this._size;

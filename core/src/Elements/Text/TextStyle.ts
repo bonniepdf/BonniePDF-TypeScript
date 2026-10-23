@@ -23,7 +23,7 @@ import { toOptionalLength, type LengthInput } from '../../Normalize/toLength';
  * Every settable {@link TextStyle} property, as a runtime list.
  *
  * Exists so a test can assert the options bag covers the class's whole settable
- * surface - `09a §9` risk 1 ("silent capability gaps"): a property that exists
+ * surface (a "silent capability gap"): a property that exists
  * on the class but not in its options is a knob TypeScript callers can reach and
  * C# callers cannot, which is a parity defect rather than a spelling difference.
  */
@@ -51,8 +51,7 @@ type TextStyleOptionKey = (typeof TEXT_STYLE_OPTION_KEYS)[number];
 /**
  * Keys whose accepted *input* is wider than the stored type, because the
  * property is an asymmetric accessor (reads canonical, writes forgiving).
- * `Pick` yields the getter type, so these are overridden explicitly - the
- * pattern `09a §3.1` prescribes.
+ * `Pick` yields the getter type, so these are overridden explicitly.
  */
 type TextStyleWidenedKey =
   | 'fontWeight'
@@ -169,7 +168,7 @@ export class TextStyle {
 
   /** Font size in points. Null = inherit from parent.
    *
-   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'12pt'`, or `{ value, unit }`.
    */
   public get fontSize(): number | undefined {
     return this._fontSize;
@@ -238,7 +237,7 @@ export class TextStyle {
    * Thickness of the decoration lines in points. Null = the default derived from
    * font size (`max(0.5, fontSize / 18)`).
    *
-   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5pt'`, or `{ value, unit }`.
    */
   public get decorationThickness(): number | undefined {
     return this._decorationThickness;
@@ -281,7 +280,7 @@ export class TextStyle {
    * Explicit baseline shift in points (positive = up). Overrides the magnitude
    * implied by {@link baselineAlignment}. Null = derive from the alignment.
    *
-   * Accepts a length: a number of points, `'2pt'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'2pt'`, or `{ value, unit }`.
    */
   public get baselineShift(): number | undefined {
     return this._baselineShift;
@@ -296,7 +295,7 @@ export class TextStyle {
    * Extra spacing in points added after every glyph (tracking). Null = 0.
    * Changes advances, so it flows through measurement, PDF (`Tc`), and SVG.
    *
-   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.2mm'`, or `{ value, unit }`.
    */
   public get letterSpacing(): number | undefined {
     return this._letterSpacing;
@@ -311,7 +310,7 @@ export class TextStyle {
    * Extra spacing in points added after every space (word spacing). Null = 0.
    * Changes advances, so it flows through measurement, PDF, and SVG.
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get wordSpacing(): number | undefined {
     return this._wordSpacing;

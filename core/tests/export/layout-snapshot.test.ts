@@ -26,7 +26,7 @@ function collect(node: LayoutNode): LayoutNode[] {
   return out;
 }
 
-describe('Layout snapshot capture (this feature / structure view)', () => {
+describe('Layout snapshot capture', () => {
   it.each([
     ['Barcode', '#ffffff'],
     ['QRCode', '#ffffff'],

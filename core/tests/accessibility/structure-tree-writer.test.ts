@@ -10,7 +10,7 @@ interface EmittedObject {
 }
 
 /**
- * this feature acceptance tests for StructureTreeWriter. Drives the writer
+ * Acceptance tests for StructureTreeWriter. Drives the writer
  * with a fake IPdfWriter that records every object emitted, so the
  * tests can assert the PDF object graph shape without spinning up a
  * full Document.

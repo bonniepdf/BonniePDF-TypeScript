@@ -5,7 +5,7 @@ import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * this feature integration smoke tests. Builds a Document, opts into PDF/UA-1,
+ * Integration smoke tests. Builds a Document, opts into PDF/UA-1,
  * generates bytes, and inspects the raw output for the catalog entries
  * that the writer should now emit.
  *
@@ -49,7 +49,7 @@ describe('TaggedDocument', () => {
   });
 
   it('PDF/A only still emits MarkInfo for back-compat', () => {
-    // Pre-G-1 behaviour: pdfAEnabled adds /MarkInfo. Make sure this
+    // Behaviour from before PDF/UA tagging: pdfAEnabled adds /MarkInfo. Make sure this
     // path is unchanged when tagging is off.
     doc = new Document();
     asPdfA(doc.settings);

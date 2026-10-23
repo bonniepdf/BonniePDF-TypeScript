@@ -68,7 +68,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
   /**
    * Paragraph alignment. Accepts `'left' | 'center' | 'right' | 'middle' | 'justify'`. When not set
    * explicitly, an enclosing Container whose horizontalAlignment is Start/Center/End supplies an ambient
-   * default instead of the plain Left below (spec 01 "Document Model" §3.2); see `effectiveAlignment`.
+   * default instead of the plain Left below; see `effectiveAlignment`.
    */
   public get alignment(): TextAlignment {
     return this._alignment;

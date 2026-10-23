@@ -223,7 +223,7 @@ class Validator {
   }
 
   /**
-   * The cross-key rules of `settings` (spec 15 §5.2), from the description. A combination the document would
+   * The cross-key rules of `settings`, from the description. A combination the document would
    * refuse at generation is refused here, so a definition that reads always generates.
    */
   private checkSettingsRules(root: Record<string, unknown>): void {

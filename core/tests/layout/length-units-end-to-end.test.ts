@@ -14,7 +14,7 @@ import { StandardFonts } from '../../src/Typography/StandardFonts';
 /**
  * Units reach real layout, not just the normaliser: a unit-qualified value
  * produces exactly the same geometry as the equivalent number of points, in
- * every kind of authoring position (`the specification` §4A.6).
+ * every kind of authoring position.
  *
  * Mirrors the .NET LengthUnitsEndToEndTests.
  */

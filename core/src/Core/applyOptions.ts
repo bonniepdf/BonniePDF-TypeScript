@@ -1,7 +1,7 @@
 /**
  * Applies an options bag to an instance by keyed assignment.
  *
- * Contract (`09a §3.2`):
+ * Contract:
  *
  * - **Keyed assignment is mandatory.** Many public properties are `get`/`set`
  *   pairs backed by other state - `TextElementBase.fontName`, every widened

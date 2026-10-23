@@ -28,7 +28,7 @@ import { DocumentFonts } from './Typography/DocumentFonts';
 /**
  * Options for creating a {@link Document}.
  *
- * The `settings` / `metadata` split is deliberate and binding (`09 §2.1`): it
+ * The `settings` / `metadata` split is deliberate and binding: it
  * mirrors the document model and the C# surface (`doc.Settings.X` /
  * `doc.Metadata.X`), so an option path here and a property path there are the
  * same path. Flattening `title`/`conformance`/… to the top level would invent a
@@ -76,7 +76,11 @@ export class Document {
   private _disposed = false;
   private readonly _diagnostics: DiagnosticsCollector = new DiagnosticsCollector();
 
+  /**
+   * Document settings: version, conformance, accessibility, security and similar choices that apply to the whole file.
+   */
   public settings: DocumentSettings;
+  /** Document metadata: title, author, subject, keywords and similar descriptive fields. */
   public metadata: DocumentMetadata;
 
   /**
@@ -157,7 +161,7 @@ export class Document {
       this.settings = arg;
       this.metadata = metadata ?? new DocumentMetadata();
     } else {
-      // `DocumentOptions` is the only bare-object form (`09a §3.4` rule 1), so
+      // `DocumentOptions` is the only bare-object form, so
       // anything reaching here is that bag; each half may be an instance or a
       // literal.
       const settings = arg?.settings;
@@ -620,6 +624,7 @@ export class Document {
 
   // ─── Disposal ────────────────────────────────────────────────────────────────
 
+  /** Releases the pages held by the document. Calling it again has no effect; adding to a disposed document throws. */
   public dispose(): void {
     if (this._disposed) return;
     this._pages.length = 0;

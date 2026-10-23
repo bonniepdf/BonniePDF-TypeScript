@@ -40,10 +40,7 @@ export type AreaChartOptions = CartesianChartOptions &
 export class AreaChart extends CartesianChartBase {
   private static readonly DEFAULT_AREA_COLOR_HEX = '#4f46e5';
 
-  /**
-   * Default fill opacity for all series (can be overridden per series via Style).
-   */
-  /** Creates a AreaChart, optionally configured in one expression. */
+  /** Creates an AreaChart, optionally configured in one expression. */
   constructor(options?: AreaChartOptions) {
     super();
     const { data, ...rest } = options ?? {};
@@ -51,6 +48,9 @@ export class AreaChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /**
+   * Default fill opacity for all series (can be overridden per series via Style).
+   */
   defaultFillOpacity: number = 0.3;
 
   /**
@@ -81,7 +81,7 @@ export class AreaChart extends CartesianChartBase {
   /**
    * Width of the line stroke (backward compatibility for single-series charts).
    *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }` (§4A.3).
+   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
    */
   public get lineWidth(): number {
     return this._lineWidth;

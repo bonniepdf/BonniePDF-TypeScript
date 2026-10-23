@@ -6,7 +6,7 @@ import { StructureTreeException } from '../../src/Rendering/Tagging/StructureTre
 import type { IStructureVisitor } from '../../src/Rendering/Tagging/IStructureVisitor';
 
 /**
- * this feature acceptance tests for the in-memory structure-tree model.
+ * Acceptance tests for the in-memory structure-tree model.
  * Covers builder invariants, MCID attachment, optional metadata,
  * visitor traversal, and the human-readable tree dump used by later
  * golden tests.

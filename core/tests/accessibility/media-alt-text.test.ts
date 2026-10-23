@@ -10,7 +10,7 @@ import { isAltTextProvider } from '../../src/Rendering/Tagging/IAltTextProvider'
 import { pdfToText } from '../helpers/test-base';
 
 /**
- * alt-text on media + implicit Figure / Artifact tagging.
+ * Alt-text on media + implicit Figure / Artifact tagging.
  * Mirrors the .NET MediaAltTextTests: Image is tested at the property
  * level (no real-image fixture needed), QRCode is tested end-to-end.
  */

@@ -125,15 +125,18 @@ const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/;
 
 /** What the host is told about a resource so it can decide whether it can name it. */
 export interface DefinitionResourceDescriptor {
+  /** The kind of resource the bytes are. */
   kind: 'image' | 'font' | 'svg' | 'attachment';
+  /** The media type of the bytes, such as `image/png`. */
   mediaType: string;
+  /** The resource content. */
   bytes: Uint8Array;
 }
 
 /** Options for writing a document as a definition. */
 export interface DefinitionWriteOptions {
   /**
-   * What to do with a construct a definition cannot express (spec 15 §11.2). `'error'` (the default)
+   * What to do with a construct a definition cannot express. `'error'` (the default)
    * throws a {@link DefinitionError} listing all of them and writes nothing; `'drop'` leaves each out
    * and reports a `dropped` note, after which the result is not a faithful copy.
    */
@@ -143,7 +146,7 @@ export interface DefinitionWriteOptions {
   /**
    * Names a resource the host can supply again when the definition is read. Return a name and the
    * definition carries `ref` and a `sha256` instead of the bytes; return `undefined` to embed them. The
-   * writer never invents a name (spec 15 §9).
+   * writer never invents a name.
    */
   resourceRef?: (resource: DefinitionResourceDescriptor) => string | undefined | Promise<string | undefined>;
   /** Write a palette token (`slate-800`) where a colour equals a palette entry exactly, instead of hex. */
@@ -154,8 +157,9 @@ export interface DefinitionWriteOptions {
 
 /** A definition and what the writer had to say about it. */
 export interface DefinitionWriteResult {
+  /** The definition that was written. */
   definition: DocumentDefinition;
-  /** `secret-omitted` and `dropped` notes (spec 15 §11.4). */
+  /** `secret-omitted` and `dropped` notes. */
   notes: DefinitionIssue[];
 }
 
@@ -212,7 +216,7 @@ const TYPE_BY_CLASS = new Map<Ctor, string>([
   [PieChart, 'PieChart'],
 ]);
 
-/** A fresh element of each type, for its defaults (`spec 15 §3.3`: a value equal to the default is left out). */
+/** A fresh element of each type, for its defaults. */
 const BLANK: Record<string, () => unknown> = {
   Flip: () => new Flip(),
   Translate: () => new Translate(),
@@ -1164,12 +1168,12 @@ const CASCADE_KEYS: Record<string, 'fontSize' | 'color' | 'lineHeight' | 'decora
 };
 
 /**
- * Writes a document as a Document Definition (spec 15 §11, §14): plain data that
+ * Writes a document as a Document Definition: plain data that
  * {@link documentFromDefinition} turns back into a document that renders identically.
  *
  * Values equal to their defaults are left out, lengths are points, colours are hex and every
  * enumeration is its token, so the result is the canonical form. Constructs a definition cannot express
- * (spec 15 §11.2) are reported: by default nothing is written and a {@link DefinitionError} lists them all;
+ * are reported: by default nothing is written and a {@link DefinitionError} lists them all;
  * with `onUnrepresentable: 'drop'` they are left out and reported as notes.
  */
 export async function documentToDefinition(

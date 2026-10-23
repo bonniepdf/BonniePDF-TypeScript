@@ -61,7 +61,7 @@ describe('font subsets of a document with shared faces', () => {
     }
   });
 
-  // Spec 16 §4, fixtures/fonts/document-font-single-embedding.json: a face is embedded once however many roles it
+  // Shared fixture fonts/document-font-single-embedding: a face is embedded once however many roles it
   // plays. Liberation Mono is "mono"; Liberation Sans is "sans" and holds U+2641, which mono lacks.
   const cases: Record<string, [face: 'mono' | 'sans', text: string][]> = {
     'document-font-is-also-the-fallback': [

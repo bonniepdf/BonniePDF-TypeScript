@@ -19,14 +19,14 @@ export type AxisOptionsOptions = Partial<Pick<AxisOptions, (typeof AXIS_OPTIONS_
 
 /** Configures the labels, range, interval, and appearance of a chart axis. */
 export class AxisOptions {
-  /**
-   * Prefix for value labels (e.g., "£", "$")
-   */
   /** Creates axis options, optionally configured in one expression. */
   constructor(options?: AxisOptionsOptions) {
     applyOptions(this, options);
   }
 
+  /**
+   * Prefix for value labels (e.g., "£", "$")
+   */
   prefix: string = '';
 
   /**

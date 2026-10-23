@@ -7,7 +7,7 @@ import { ELEMENT_DESCRIPTION } from '../../src/Definition/ElementDescription';
 import { DEFINITION_FIXTURES } from './fixtures.generated';
 
 /**
- * The cross-key rules of `settings` (spec 15 §5.2): the shared fixtures `document-definition/settings-rules`.
+ * The cross-key rules of `settings`: the shared fixtures `document-definition/settings-rules`.
  * A combination the validator refuses must be one generation refuses, and one it accepts must generate and
  * land on the PDF version the fixture names, so the rules in the description cannot drift from behaviour.
  *
@@ -43,7 +43,7 @@ async function documentFrom(settings: Record<string, any>): Promise<Document> {
   return doc;
 }
 
-describe('settings rules (spec 15 §5.2)', () => {
+describe('settings rules', () => {
   it('has fixtures for every rule', () => {
     const named = new Set(fixtures.flatMap(([, f]) => (f._expect.rule ? [f._expect.rule] : [])));
     for (const rule of ELEMENT_DESCRIPTION.settingsRules.rules.filter(r => r.outcome === 'error')) {

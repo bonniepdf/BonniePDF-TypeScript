@@ -41,6 +41,7 @@ Status: Prerelease
 
 ### Changed
 
+- Licence: the bundled Community License 1.0 lets organisations below US $1,000,000 revenue ship `@bonniepdf/core` inside their own applications, including in client-side browser code, and caps liability at US $100; the Commercial License Agreement 1.0 states the same for browser delivery. The cross-language suite now compares content streams with the parity rule: operators exactly, numbers within 0.001.
 - **Less duplicated code across charts, encryption, the definition reader and writer, and fonts.** The grouped bar chart no longer repeats the base chart's x-axis labels, `drawConnectingLine` moved into `CartesianChartBase`, the encryption code shares one byte-concatenation helper, the definition reader, writer and validator share one cached key lookup, placeholders use the shared Adler-32, the ToUnicode CMap header is built once, and both font-registration paths use one `addEmbeddedFont`. Behaviour, output and public API are unchanged: the PDF (synchronous and asynchronous) and SVG output of the whole example catalogue is byte-identical before and after, apart from the random salts and IVs of AES-256 documents.
 
 ## 2026.10.15

@@ -51,6 +51,19 @@ export class PdfDocumentSerializer {
     private diagnostics: DiagnosticsCollector = new DiagnosticsCollector()
   ) {}
 
+  private readonly reportedFamilies = new Set<string>();
+
+  /** Reports a font family that resolved to nothing, once per family for this generation. */
+  private readonly reportUnknownFamily = (family: string): void => {
+    if (this.reportedFamilies.has(family)) return;
+    this.reportedFamilies.add(family);
+    this.diagnostics.addWarning(
+      'font',
+      `Font family '${family}' is not a document font, a registered family or a standard font; its text was drawn in Helvetica.`,
+      family
+    );
+  };
+
   /**
    * Serializes the document synchronously to the provided writer.
    * Mirrors PdfDocumentSerializer.Serialize() in the .NET source.
@@ -69,7 +82,8 @@ export class PdfDocumentSerializer {
       settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
       getRegistryFontInstances(preloadedResources),
       getRegistryFontPaths(preloadedResources),
-      this.document.fonts
+      this.document.fonts,
+      this.reportUnknownFamily
     );
     try {
       for (const _ of this.serializeWithinFontScope(writer, preloadedResources))
@@ -117,6 +131,7 @@ export class PdfDocumentSerializer {
     ctx.sealFinishedPages = true;
     ctx.resources.diagnostics = this.diagnostics;
     ctx.resources.maxImageDpi = settings.maxImageDpi;
+    ctx.resources.missingGlyphs = settings.missingGlyphs;
     ctx.resources.conformance = settings.conformance;
     // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
     // independently of any PDF/A claim - substitute embedded Liberation for
@@ -138,6 +153,7 @@ export class PdfDocumentSerializer {
       const dryRunCtx = new RenderContext(orientedPageSize, settings.margin, false, preloadedResources);
       dryRunCtx.discardFinishedPages = true;
       dryRunCtx.resources.conformance = settings.conformance;
+      dryRunCtx.resources.missingGlyphs = settings.missingGlyphs;
       dryRunCtx.resources.embedStandardFonts = ctx.resources.embedStandardFonts;
 
       // Drive the streaming generator to completion; we only care about the
@@ -491,24 +507,29 @@ export class PdfDocumentSerializer {
 
     const settings = this.document.settings;
 
-    // ── Phase 1: Scan element tree for embedded font paths ───────────────────
-    const { embeddedPaths, imagesToDecode, svgs } = collectDocumentPreloadResources(this.document);
-
-    // ── Phase 2: Pre-register and async-preload all discovered fonts ─────────
+    // ── Phases 1 and 2: Scan for, pre-register and async-preload the fonts ───
     const preRegistry = new PdfResourceRegistry();
     preRegistry.diagnostics = this.diagnostics;
     preRegistry.conformance = settings.conformance;
+    preRegistry.missingGlyphs = settings.missingGlyphs;
     const registrationScope = beginDocumentFontMetricScope(
       settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
       undefined,
       undefined,
-      this.document.fonts
+      this.document.fonts,
+      this.reportUnknownFamily
     );
+    // ── Phase 1: Scan element tree for embedded font paths ───────────────────
+    // Inside the scope, so a font family resolves as it will when the document renders: to the document's own
+    // fonts and the fonts registered by now.
+    let preload: ReturnType<typeof collectDocumentPreloadResources>;
     try {
-      for (const path of embeddedPaths) preRegistry.registerFont(path);
+      preload = collectDocumentPreloadResources(this.document);
+      for (const path of preload.embeddedPaths) preRegistry.registerFont(path);
     } finally {
       registrationScope.dispose();
     }
+    const { embeddedPaths, imagesToDecode, svgs } = preload;
     await preRegistry.preloadAllFontsAsync();
     throwIfAborted(signal);
 
@@ -555,7 +576,8 @@ export class PdfDocumentSerializer {
           settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
           getRegistryFontInstances(resources),
           getRegistryFontPaths(resources),
-          this.document.fonts
+          this.document.fonts,
+          this.reportUnknownFamily
         );
         let step: IteratorResult<ImageInfo[], void>;
         try {

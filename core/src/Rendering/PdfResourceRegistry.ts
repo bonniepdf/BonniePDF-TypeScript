@@ -12,6 +12,7 @@ import { PdfSyntax } from './Pdf/PdfSyntax';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { FontManager, FallbackFont } from '../Typography/FontManager';
+import { REGISTERED_FONT_PREFIX } from '../Typography/RegisteredFontName';
 import {
   getActiveDocumentFonts,
   getDocumentFontBytes,
@@ -21,10 +22,19 @@ import {
 import { DiagnosticsCollector } from '../Core/Diagnostics';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { primaryCovers, shapeTextRuns, ShaperFont } from '../Typography/TextRunShaper';
+import { isRenderableCodePoint } from '../Typography/TextEncoding';
+import {
+  isStandardTextFace,
+  splitStandardText,
+  standardFaceCoversAll,
+  standardFallbackChain,
+} from '../Typography/StandardFontCoverage';
+import { MissingGlyphs } from '../Configuration/MissingGlyphs';
+import { MissingGlyphException, formatCodePoint } from '../Core/MissingGlyphException';
 import { ShadingRequest, buildColorShadingDict, buildAlphaShadingDict } from './Pdf/GradientShading';
 
 /** Identifier prefix for glyph-fallback fonts registered on demand. */
-const FALLBACK_PREFIX = 'virtual:fallback:';
+export const FALLBACK_PREFIX = REGISTERED_FONT_PREFIX;
 
 /**
  * A maximal substring of a draw call that renders with one font, after
@@ -124,6 +134,9 @@ export class PdfResourceRegistry {
    */
   public diagnostics: DiagnosticsCollector = new DiagnosticsCollector();
 
+  /** What happens to a code point no font can draw; wired from the document's settings. */
+  public missingGlyphs: MissingGlyphs | 'drop' | 'throw' = MissingGlyphs.Drop;
+
   public fontAliasMap: Map<string, string> = new Map();
   public fontNameMap: Map<string, string> = new Map();
   public fontIdMap: Map<string, number> = new Map();
@@ -153,7 +166,10 @@ export class PdfResourceRegistry {
       // Browser callers frequently preload URL fonts through FontManager. Reuse
       // those exact bytes instead of fetching the same URL again; this also lets
       // Node build-time preview generation resolve browser-rooted font URLs.
-      const registeredBytes = getDocumentFontBytes(fontIdentifier) ?? FontManager.getBytesForIdentifier(fontIdentifier);
+      const registeredBytes =
+        getDocumentFontBytes(fontIdentifier) ??
+        FontManager.getBytesForIdentifier(fontIdentifier) ??
+        FontManager.getRegisteredFont(fontIdentifier)?.bytes;
       if (registeredBytes) return this.registerEmbeddedFontFromBytes(registeredBytes, fontIdentifier);
       return this.registerEmbeddedFont(fontIdentifier);
     }
@@ -488,6 +504,8 @@ export class PdfResourceRegistry {
       if (!primaryCovers(text, primaryFont)) return null;
       tracker = primaryInfo?.tracker;
       canTrackPreparedGlyphs = primaryInfo?.resourceName === resourceName;
+    } else if (isStandardTextFace(primaryFontIdentifier) && !standardFaceCoversAll(text)) {
+      return null;
     }
     const kept = this.#wholeTextFonts.get(primaryFontIdentifier);
     if (
@@ -514,10 +532,12 @@ export class PdfResourceRegistry {
     const primaryInfo = this.resolveEmbeddedFontInfo(primaryFontIdentifier);
     const primaryFont = primaryInfo?.font;
 
-    // Non-embedded standard Type1 fonts can't be shaped (no cmap/glyph IDs);
-    // preserve the literal-string emission path unchanged.
+    // A non-embedded standard font is written as WinAnsi bytes. Text it shows whole keeps that literal-string
+    // path unchanged; a standard text face falls back for the rest.
     if (!(primaryFont instanceof TtfFont)) {
-      return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
+      if (!isStandardTextFace(primaryFontIdentifier) || standardFaceCoversAll(text))
+        return [{ resourceName, embeddedFont: null, fontIdentifier: primaryFontIdentifier, text }];
+      return this.resolveStandardTextRuns(primaryFontIdentifier, resourceName, text);
     }
 
     if (primaryCovers(text, primaryFont))
@@ -546,17 +566,7 @@ export class PdfResourceRegistry {
 
     const { runs, unsupported } = shapeTextRuns(text, candidates);
 
-    if (unsupported.length > 0) {
-      const sample = Array.from(new Set(unsupported))
-        .slice(0, 8)
-        .map(cp => `U+${cp.toString(16).toUpperCase().padStart(4, '0')}`)
-        .join(', ');
-      this.diagnostics.addWarning(
-        'font',
-        `Dropped ${unsupported.length} code point(s) with no glyph in the selected or fallback fonts (${sample}).`,
-        primaryFontIdentifier
-      );
-    }
+    this.reportMissing(unsupported, primaryFontIdentifier);
 
     return runs.map(run => {
       if (run.fontIndex === 0) {
@@ -569,20 +579,72 @@ export class PdfResourceRegistry {
           canTrackPreparedGlyphs: primaryInfo?.resourceName === resourceName,
         };
       }
-      const fb = fallbackByIndex[run.fontIndex]!;
-      const fbIdentifier = candidates[run.fontIndex].fontIdentifier;
-      const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
-      const fbInfo = this.resolveEmbeddedFontInfo(fbIdentifier);
-      const fbFont = fbInfo?.font;
-      return {
-        resourceName: fbResource,
-        embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
-        tracker: fbInfo?.tracker,
-        canTrackPreparedGlyphs: fbInfo?.resourceName === fbResource,
-        fontIdentifier: fbIdentifier,
-        text: run.text,
-      };
+      return this.fallbackRun(fallbackByIndex[run.fontIndex]!, candidates[run.fontIndex].fontIdentifier, run.text);
     });
+  }
+
+  /**
+   * The runs of a standard text face's text that it does not show whole: covered clusters stay in the face, as
+   * WinAnsi bytes, and the rest go through its fallback chain, its Liberation substitute first.
+   */
+  private resolveStandardTextRuns(fontName: string, resourceName: string, text: string): ResolvedTextRun[] {
+    const chain = standardFallbackChain(fontName);
+    const candidates: ShaperFont[] = chain.map(fb => ({
+      fontIdentifier: `${FALLBACK_PREFIX}${fb.key}`,
+      font: fb.font,
+    }));
+    const result: ResolvedTextRun[] = [];
+    const unsupported: number[] = [];
+    for (const segment of splitStandardText(text)) {
+      if (segment.covered) {
+        result.push({ resourceName, embeddedFont: null, fontIdentifier: fontName, text: segment.text });
+        continue;
+      }
+      if (candidates.length === 0) {
+        // Nothing to fall back to: every renderable code point of the piece is missing.
+        for (const ch of segment.text)
+          if (isRenderableCodePoint(ch.codePointAt(0)!)) unsupported.push(ch.codePointAt(0)!);
+        continue;
+      }
+      const shaped = shapeTextRuns(segment.text, candidates);
+      unsupported.push(...shaped.unsupported);
+      for (const run of shaped.runs)
+        result.push(this.fallbackRun(chain[run.fontIndex], candidates[run.fontIndex].fontIdentifier, run.text));
+    }
+    this.reportMissing(unsupported, fontName);
+    return result;
+  }
+
+  /** A run in a fallback face, registering the face for embedding on demand. */
+  private fallbackRun(fb: FallbackFont, fbIdentifier: string, text: string): ResolvedTextRun {
+    const fbResource = this.registerEmbeddedFontFromBytes(fb.bytes, fbIdentifier);
+    const fbInfo = this.resolveEmbeddedFontInfo(fbIdentifier);
+    const fbFont = fbInfo?.font;
+    return {
+      resourceName: fbResource,
+      embeddedFont: fbFont instanceof TtfFont ? fbFont : null,
+      tracker: fbInfo?.tracker,
+      canTrackPreparedGlyphs: fbInfo?.resourceName === fbResource,
+      fontIdentifier: fbIdentifier,
+      text,
+    };
+  }
+
+  /**
+   * Code points no font could draw: a `font` warning, or a {@link MissingGlyphException} when the document asks
+   * for one.
+   */
+  private reportMissing(unsupported: readonly number[], fontName: string): void {
+    if (unsupported.length === 0) return;
+    const named = Array.from(new Set(unsupported)).slice(0, 8);
+    if (this.missingGlyphs === MissingGlyphs.Throw) throw new MissingGlyphException(named, fontName);
+    this.diagnostics.addWarning(
+      'font',
+      `Dropped ${unsupported.length} code point(s) with no glyph in the selected or fallback fonts (${named
+        .map(formatCodePoint)
+        .join(', ')}).`,
+      fontName
+    );
   }
 
   public getNewImageId(): number {

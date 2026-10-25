@@ -7,6 +7,7 @@ interface DocumentFontMetricScope {
   pathAliases: Map<string, string>;
   instanceAliases: Map<string, TtfFont>;
   documentFonts?: DocumentFonts;
+  reportUnknownFamily?: (family: string) => void;
 }
 
 const globalPathAliases = new Map<string, string>();
@@ -21,13 +22,15 @@ export function beginDocumentFontMetricScope(
   embedStandardFonts: boolean,
   instanceAliases?: ReadonlyMap<string, TtfFont>,
   pathAliases?: ReadonlyMap<string, string>,
-  documentFonts?: DocumentFonts
+  documentFonts?: DocumentFonts,
+  reportUnknownFamily?: (family: string) => void
 ): { dispose(): void } {
   const previous = currentScope;
   const scope: DocumentFontMetricScope = {
     embedStandardFonts,
     pathAliases: new Map(globalPathAliases),
     instanceAliases: new Map(globalInstanceAliases),
+    reportUnknownFamily,
   };
   for (const [name, path] of pathAliases ?? []) scope.pathAliases.set(name, path);
   for (const [name, font] of instanceAliases ?? []) scope.instanceAliases.set(name, font);
@@ -101,6 +104,16 @@ export function getFontPathAlias(logicalName: string): string | undefined {
 
 export function getFontInstanceAlias(logicalName: string): TtfFont | undefined {
   return (currentScope?.instanceAliases ?? globalInstanceAliases).get(logicalName);
+}
+
+/** Whether a document is being laid out or rendered, so a font family is resolved now rather than when it was set. */
+export function isGeneratingDocument(): boolean {
+  return currentScope !== undefined;
+}
+
+/** Reports, to the render pass in progress, a font family that resolved to nothing and was drawn in Helvetica. */
+export function reportUnknownFontFamily(family: string): void {
+  currentScope?.reportUnknownFamily?.(family);
 }
 
 /** The document fonts of the render pass in progress, if that document has any. */

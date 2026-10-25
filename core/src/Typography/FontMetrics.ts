@@ -1,6 +1,12 @@
 import type { GlyphRun } from './Engine/Api/GlyphRun';
 import { FontManager } from './FontManager';
 import { winAnsiByte } from './WinAnsi';
+import {
+  isStandardTextFace,
+  splitStandardText,
+  standardFaceCoversAll,
+  standardFallbackChain,
+} from './StandardFontCoverage';
 import { primaryCovers, shapeTextRuns } from './TextRunShaper';
 import { getActiveDocumentFonts } from './DocumentFontMetricScope';
 import { TtfFont } from './TrueType/TtfFont';
@@ -230,7 +236,35 @@ export class FontMetrics {
     if (resolved.unparsed) return text.length * (fontSize * 0.5);
 
     // C. IS IT A STANDARD FONT? (approximate hardcoded tables)
+    if (isStandardTextFace(fontIdentifier) && !standardFaceCoversAll(text))
+      return this.getStandardFallbackWidth(text, fontIdentifier, fontSize, features);
     return this.getStandardFontWidth(text, fontIdentifier, fontSize);
+  }
+
+  /**
+   * A standard text face's text that falls back in part, measured as it is painted: the clusters the face shows
+   * from its width tables, the rest from the shaped advances of the fallback faces that draw them.
+   */
+  private static getStandardFallbackWidth(
+    text: string,
+    fontName: string,
+    fontSize: number,
+    features?: Readonly<Record<string, number>>
+  ): number {
+    const candidates = standardFallbackChain(fontName).map(f => ({ fontIdentifier: f.key, font: f.font }));
+    let covered = '';
+    let fallback = 0;
+    for (const segment of splitStandardText(text)) {
+      if (segment.covered) {
+        covered += segment.text;
+        continue;
+      }
+      for (const run of shapeTextRuns(segment.text, candidates).runs) {
+        const face = candidates[run.fontIndex].font;
+        fallback += (sumAdvances(face.shape(run.text, features)) * fontSize) / face.unitsPerEm;
+      }
+    }
+    return this.getStandardFontWidth(covered, fontName, fontSize) + fallback;
   }
 
   /**
@@ -256,6 +290,10 @@ export class FontMetrics {
 
     const ttfPath = getFontPathAlias(fontIdentifier);
     if (ttfPath) return this.loadMeasuringTtf(ttfPath);
+
+    // A family registered through FontManager resolves to a name for that registration.
+    const registered = FontManager.getRegisteredFont(fontIdentifier);
+    if (registered) return parsedFont(registered.font);
 
     // PDF/A and PDF/UA embed registered substitutes for the standard 12 Latin
     // Type-1 fonts. Resolve the exact face before layout makes its first
@@ -321,6 +359,7 @@ export class FontMetrics {
     const face =
       getFontInstanceAlias(identifier) ??
       this.TtfInstanceCache.get(identifier) ??
+      FontManager.getRegisteredFont(identifier)?.font ??
       (shouldUseEmbeddedStandardMetrics() ? resolveStandardFontMetric(identifier) : null);
     if (face) return face;
     identifier = getFontPathAlias(identifier) ?? identifier;
@@ -334,7 +373,11 @@ export class FontMetrics {
   /** @internal Number of painted glyphs, after substitutions and fallback. */
   public static getGlyphCount(text: string, identifier: string, features?: Readonly<Record<string, number>>): number {
     const font = this.metricFace(identifier);
-    if (!font) return Array.from(text).filter(c => c.codePointAt(0)! >= 32).length;
+    if (!font) {
+      if (isStandardTextFace(identifier) && !standardFaceCoversAll(text))
+        return this.getStandardFallbackGlyphCount(text, identifier, features);
+      return Array.from(text).filter(c => c.codePointAt(0)! >= 32).length;
+    }
     if (primaryCovers(text, font)) return font.shape(text, features).count;
     const candidates = [
       { fontIdentifier: 'primary', font },
@@ -347,6 +390,24 @@ export class FontMetrics {
       0
     );
   }
+  private static getStandardFallbackGlyphCount(
+    text: string,
+    fontName: string,
+    features?: Readonly<Record<string, number>>
+  ): number {
+    const candidates = standardFallbackChain(fontName).map(f => ({ fontIdentifier: f.key, font: f.font }));
+    let count = 0;
+    for (const segment of splitStandardText(text)) {
+      if (segment.covered) {
+        count += Array.from(segment.text).filter(c => c.codePointAt(0)! >= 32).length;
+        continue;
+      }
+      for (const run of shapeTextRuns(segment.text, candidates).runs)
+        count += candidates[run.fontIndex].font.shape(run.text, features).count;
+    }
+    return count;
+  }
+
   /** @internal Emergency wrapping prefers safe shaped cluster boundaries. */
   public static isSafeTextBreak(
     text: string,

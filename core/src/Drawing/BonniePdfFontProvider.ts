@@ -42,6 +42,7 @@ export class BonniePdfFontProvider implements FontProvider {
         getDocumentFontBytes(resolved) ??
         FontManager.getBytesForStandardFont(resolved) ??
         FontManager.getBytesForIdentifier(resolved) ??
+        FontManager.getRegisteredFont(resolved)?.bytes ??
         readFile(resolved)
       );
     }

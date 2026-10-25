@@ -1,6 +1,7 @@
 import { ContentDirection, toContentDirection, type ContentDirectionInput } from './ContentDirection';
 import { applyOptions } from '../Core/applyOptions';
 import { EmojiRendering } from './EmojiRendering';
+import { MissingGlyphs } from './MissingGlyphs';
 import { PdfSize } from './PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
 import { Color } from '../Core/Color';
@@ -38,6 +39,7 @@ import type { PageTemplate } from './PageTemplate';
 /** Every settable {@link DocumentSettings} property. */
 export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'emojiRendering',
+  'missingGlyphs',
   'contentDirection',
   'pageSize',
   'pageColor',
@@ -150,6 +152,20 @@ export class DocumentSettings {
   public set emojiRendering(value: EmojiRendering | 'outline' | 'colour') {
     if (value !== 'outline' && value !== 'colour') throw new RangeError('Invalid emoji rendering mode');
     this._emojiRendering = value as EmojiRendering;
+  }
+
+  private _missingGlyphs: MissingGlyphs = MissingGlyphs.Drop;
+  /**
+   * What happens to a character no registered font can draw: `'drop'` (the default) leaves it out and records a
+   * `font` warning; `'throw'` stops generation with a `MissingGlyphException`. A character that falls back to
+   * another font is not missing.
+   */
+  public get missingGlyphs(): MissingGlyphs | 'drop' | 'throw' {
+    return this._missingGlyphs;
+  }
+  public set missingGlyphs(value: MissingGlyphs | 'drop' | 'throw') {
+    if (value !== 'drop' && value !== 'throw') throw new RangeError('Invalid missing-glyph mode');
+    this._missingGlyphs = value as MissingGlyphs;
   }
   /**
    * Template function for generating page headers.

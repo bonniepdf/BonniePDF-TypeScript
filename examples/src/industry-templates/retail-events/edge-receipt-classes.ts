@@ -111,9 +111,9 @@ export function generate(): Document {
   doc.add(rule());
 
   // ── Order meta ──────────────────────────────────────────────────────────
-  doc.add(kv('Order', `#${ORDER_NO}`));
-  doc.add(kv('Date', stamp));
-  doc.add(kv('Served', 'Register 3 - Alex'));
+  doc.add(kv('Order', `#${ORDER_NO}`, { weights: [1, 2] }));
+  doc.add(kv('Date', stamp, { weights: [1, 2] }));
+  doc.add(kv('Served', 'Register 3 - Alex', { weights: [1, 2] }));
 
   doc.add(rule());
 
@@ -170,7 +170,7 @@ export function generate(): Document {
 
   // ── Footer ──────────────────────────────────────────────────────────────
   doc.add(center('Thank you! Returns within 30 days', 8, INK));
-  doc.add(center('with your receipt.', 8, MUTE));
+  doc.add(center('with your receipt.', 8, INK));
   doc.add(center('Generated with BonniePDF', 7, MUTE, 8));
 
   return doc;
@@ -202,13 +202,18 @@ function center(text: string, size = 8, color: Color = MUTE, marginTop = 0): Tex
 }
 
 /** A "label ............ value" row: label grows left, value hugs the right edge. */
-function kv(label: string, value: string, opts: { bold?: boolean; size?: number } = {}): HorizontalStack {
+function kv(
+  label: string,
+  value: string,
+  opts: { bold?: boolean; size?: number; weights?: [number, number] } = {}
+): HorizontalStack {
   const size = opts.size ?? 9;
+  const [leftWeight, rightWeight] = opts.weights ?? [3, 2];
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
   row.margin = new Thickness(0, 1.5, 0, 1.5);
-  row.add(cell(label, size, opts.bold, TextAlignment.Left), 3);
-  row.add(cell(value, size, opts.bold, TextAlignment.Right), 2);
+  row.add(cell(label, size, opts.bold, TextAlignment.Left), leftWeight);
+  row.add(cell(value, size, opts.bold, TextAlignment.Right), rightWeight);
   return row;
 }
 

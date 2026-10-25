@@ -363,6 +363,18 @@ const FLAG_ASSETS = ['mx', 'gs', 'es', 'pt', 'gr', 'nl', 'hk', 'kz', 'co', 'is',
   code => `flags/4x3/${code}.svg`
 );
 
+/** The product photographs the Product Gallery examples embed, as asset paths (relative to examples/assets/). */
+const PRODUCT_GALLERY_ASSETS = [
+  'terracotta-planter',
+  'linen-throw',
+  'brass-reading-lamp',
+  'ceramic-pour-over',
+  'wool-floor-cushion',
+  'smoked-glass-carafe',
+  'oak-wall-shelf',
+  'rattan-pendant-shade',
+].map(slug => `images/products/${slug}.jpg`);
+
 /**
  * Every example, in the order consumers list them: recipes, then industry templates.
  * Within a tier the categories follow a deliberate teaching order (see the
@@ -2424,9 +2436,10 @@ export const examples: ExampleDef[] = [
     category: 'Retail & Events',
     tier: 'examples',
     description:
-      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically, each led by an engine-drawn colour tile.',
+      'A retail catalogue: products two per row as cards with studio photography, name, SKU, price, and description, paginating automatically. Each photograph is clipped to a rounded frame and carries alt text.',
     filename: 'product-photo-gallery.pdf',
     generate: productPhotoGallery,
+    requiredAssets: PRODUCT_GALLERY_ASSETS,
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,
@@ -2444,9 +2457,10 @@ export const examples: ExampleDef[] = [
     category: 'Retail & Events',
     tier: 'examples',
     description:
-      'A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically. Each card starts with a colour tile drawn by the engine, so no image files are needed.',
+      'The same retail catalogue as Product Gallery, built with the class API: construct each element and assign properties. Each card starts with a clipped studio photograph and carries alt text.',
     filename: 'product-photo-gallery-classes.pdf',
     generate: productPhotoGalleryClasses,
+    requiredAssets: PRODUCT_GALLERY_ASSETS,
     dotnetClass: 'ProductPhotoGalleryExample',
     thumbnails: false,
     pdfUa1: true,

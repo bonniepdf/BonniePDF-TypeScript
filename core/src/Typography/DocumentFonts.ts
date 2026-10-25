@@ -1,3 +1,4 @@
+import { matchFace, subfamilyItalic, subfamilyWeight } from './FaceMatching';
 import { TtfFont } from './TrueType/TtfFont';
 import { toFontWeight, type FontWeightInput } from '../Normalize/toEnum';
 import type { FallbackFont } from './FontManager';
@@ -39,24 +40,6 @@ export interface DocumentFontFace {
   readonly font: TtfFont;
 }
 
-const SUBFAMILY_WEIGHTS: ReadonlyArray<readonly [string, number]> = [
-  ['thin', 100],
-  ['extralight', 200],
-  ['ultralight', 200],
-  ['light', 300],
-  ['regular', 400],
-  ['book', 400],
-  ['normal', 400],
-  ['medium', 500],
-  ['semibold', 600],
-  ['demibold', 600],
-  ['extrabold', 800],
-  ['ultrabold', 800],
-  ['bold', 700],
-  ['black', 900],
-  ['heavy', 900],
-];
-
 let nextDocumentSerial = 1;
 
 function familyKey(family: string): string {
@@ -65,15 +48,11 @@ function familyKey(family: string): string {
 
 function detectWeight(font: TtfFont): number {
   if (font.weightClass !== undefined) return font.weightClass;
-  const words = font.fontSubfamily.toLowerCase().replace(/[\s_-]/g, '');
-  for (const [name, weight] of SUBFAMILY_WEIGHTS) if (words.includes(name)) return weight;
-  return 400;
+  return subfamilyWeight(font.fontSubfamily);
 }
 
 function detectItalic(font: TtfFont): boolean {
-  if (font.selectionItalic) return true;
-  const subfamily = font.fontSubfamily.toLowerCase();
-  return subfamily.includes('italic') || subfamily.includes('oblique');
+  return font.selectionItalic || subfamilyItalic(font.fontSubfamily);
 }
 
 /**
@@ -153,21 +132,7 @@ export class DocumentFonts {
   private resolveUncached(family: string, weight: number, italic: boolean): DocumentFontFace | undefined {
     const key = familyKey(family);
     const candidates = this.faces.filter(f => familyKey(f.family) === key);
-    if (candidates.length === 0) return undefined;
-
-    const styled = candidates.filter(f => f.italic === italic);
-    const pool = styled.length > 0 ? styled : candidates;
-
-    const exact = pool.find(f => f.weight === weight);
-    if (exact) return exact;
-
-    const heavier = pool.filter(f => f.weight > weight).sort((a, b) => a.weight - b.weight);
-    const lighter = pool.filter(f => f.weight < weight).sort((a, b) => b.weight - a.weight);
-    if (weight >= 400 && weight <= 500) {
-      return heavier.find(f => f.weight <= 500) ?? lighter[0] ?? heavier[0];
-    }
-    if (weight < 400) return lighter[0] ?? heavier[0];
-    return heavier[0] ?? lighter[0];
+    return matchFace(candidates, weight, italic);
   }
 
   /**

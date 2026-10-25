@@ -159,6 +159,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       ],
       "via": "options"
     },
+    "MissingGlyphs": {
+      "tokens": [
+        "drop",
+        "throw"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2080,6 +2087,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "emojiRendering": {
           "kind": "enum:EmojiRendering"
+        },
+        "missingGlyphs": {
+          "kind": "enum:MissingGlyphs"
         },
         "language": {
           "kind": "string"

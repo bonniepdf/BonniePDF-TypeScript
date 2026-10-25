@@ -1,10 +1,12 @@
 import { type PaintTransform, mapPaintBox } from '../Drawing/PaintTransform';
-import { PdfResourceRegistry, ResolvedTextRun, type TextRunFont } from './PdfResourceRegistry';
+import { FALLBACK_PREFIX, PdfResourceRegistry, ResolvedTextRun, type TextRunFont } from './PdfResourceRegistry';
 import type { ShadingRequest } from './Pdf/GradientShading';
 import { PdfSize } from '../Configuration/PdfSize';
 import { ICanvas } from '../Drawing/ICanvas';
 import { PdfCanvas } from '../Drawing/PdfCanvas';
-import { SvgCanvas, SvgCanvasOptions, SvgIdAllocator } from '../Drawing/SvgCanvas';
+import { SvgCanvas, SvgCanvasOptions, SvgIdAllocator, type SvgTextRun } from '../Drawing/SvgCanvas';
+import { FontManager } from '../Typography/FontManager';
+import { isStandardTextFace, standardFaceCoversAll } from '../Typography/StandardFontCoverage';
 import { Color } from '../Core/Color';
 import { ImageInfo } from './Images/ImageInfo';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
@@ -242,16 +244,33 @@ export class RenderContext implements RenderContextContract {
         // Both render paths share one run resolver, so the SVG preview cannot
         // drift from the PDF in which font draws which code point — and the
         // preview inherits the same `font` diagnostics for dropped glyphs.
-        resolveRuns: (family, text) =>
-          this.resolveTextRuns(family, text)
-            .filter((run): run is ResolvedTextRun & { embeddedFont: TtfFont } => run.embeddedFont !== null)
-            .map(run => ({ fontFamily: run.fontIdentifier, font: run.embeddedFont, text: run.text })),
+        resolveRuns: (family, text) => this.resolveSvgRuns(family, text),
       },
       this.svgOptions,
       this.svgIdAllocator
     );
     canvas.emojiRendering = () => this.emojiRendering;
     return canvas;
+  }
+
+  /**
+   * The runs an SVG draw paints as positioned glyphs. A draw a non-embedded standard font shows whole has none:
+   * the viewer draws it. A standard text face's draw that needs fallback is painted as glyphs throughout, its own
+   * pieces in the face's metric-compatible Liberation substitute, so the viewer never draws a character the PDF
+   * dropped. Without the substitute the viewer draws it all.
+   */
+  private resolveSvgRuns(family: string, text: string): SvgTextRun[] {
+    const runs = this.resolveTextRuns(family, text);
+    if (runs.every(run => run.embeddedFont !== null))
+      return runs.map(run => ({ fontFamily: run.fontIdentifier, font: run.embeddedFont!, text: run.text }));
+    if (!isStandardTextFace(family) || standardFaceCoversAll(text)) return [];
+    const substitute = FontManager.getStandardSubstitute(family);
+    if (!substitute) return [];
+    return runs.map(run =>
+      run.embeddedFont
+        ? { fontFamily: run.fontIdentifier, font: run.embeddedFont, text: run.text }
+        : { fontFamily: `${FALLBACK_PREFIX}${substitute.key}`, font: substitute.font, text: run.text }
+    );
   }
 
   /** `true` when PDF/A output is being produced. */

@@ -91,12 +91,10 @@ export async function exportSvgDocumentAsync(
     throw new Error('Document must have at least one page');
   }
 
-  // ── Phase 1: discover embedded fonts (pages + header/footer templates) ──────
-  const { embeddedPaths, imagesToDecode, svgs } = collectDocumentPreloadResources(document);
-
   // ── Phase 2: preload font bytes ─────────────────────────────────────────────
   const registry = new PdfResourceRegistry();
   registry.conformance = settings.conformance;
+  registry.missingGlyphs = settings.missingGlyphs;
   // PDF/UA requires standard fonts to be embedded independently of PDF/A.
   // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
   registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
@@ -108,11 +106,16 @@ export async function exportSvgDocumentAsync(
     undefined,
     document.fonts
   );
+  // Discover embedded fonts (pages + header/footer templates) inside the scope, so a font family resolves as it
+  // will when the document renders.
+  let preload: ReturnType<typeof collectDocumentPreloadResources>;
   try {
-    for (const path of embeddedPaths) registry.registerFont(path);
+    preload = collectDocumentPreloadResources(document);
+    for (const path of preload.embeddedPaths) registry.registerFont(path);
   } finally {
     registrationScope.dispose();
   }
+  const { imagesToDecode, svgs } = preload;
   await registry.preloadAllFontsAsync();
   throwIfAborted(opts.signal);
 

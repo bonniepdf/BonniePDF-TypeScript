@@ -207,6 +207,34 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "missing-glyphs": {
+      "_fixture": {
+        "id": "document-definition/valid/missing-glyphs",
+        "description": "missingGlyphs is a settings key; it survives a definition round trip."
+      },
+      "_expect": {
+        "pages": 1,
+        "text": [
+          "Hello"
+        ],
+        "roundTrip": true
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "missingGlyphs": "throw"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
     "page-chrome": {
       "_fixture": {
         "id": "document-definition/valid/page-chrome",
@@ -1424,6 +1452,28 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
               ]
             }
           ]
+        }
+      ]
+    },
+    "missing-glyphs": {
+      "_fixture": {
+        "id": "document-definition/invalid/missing-glyphs",
+        "description": "Unknown missingGlyphs modes are rejected."
+      },
+      "_expectErrors": [
+        {
+          "path": "/settings/missingGlyphs",
+          "code": "invalid-value"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "missingGlyphs": "replace"
+      },
+      "pages": [
+        {
+          "content": []
         }
       ]
     },

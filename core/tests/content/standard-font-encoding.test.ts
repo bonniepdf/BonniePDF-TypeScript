@@ -31,9 +31,14 @@ describe('standard font text encoding', () => {
     expect(contentOf('£5 café')).toContain('(\xa35 caf\xe9)');
   });
 
-  it('writes a character outside WinAnsi as ?, never as a low byte', () => {
+  it('never writes a character outside WinAnsi as ? or as a low byte', () => {
+    // No font is registered, so nothing covers these characters: they are dropped with a warning. With fonts
+    // registered they fall back instead (standard-font-fallback.test.ts).
     const pdf = contentOf('a日b\u{1f600}c');
-    expect(pdf).toContain('(a?b?c)');
+    expect(pdf).toContain('(a)');
+    expect(pdf).toContain('(b)');
+    expect(pdf).toContain('(c)');
+    expect(pdf).not.toContain('?');
   });
 });
 
@@ -49,16 +54,16 @@ describe('standard font widths beyond ASCII', () => {
     expect(width('é', 'Times-Bold')).toBe(444);
   });
 
-  it('measures a character that is written as ? as the width of ?', () => {
-    expect(width('日', 'Helvetica')).toBe(width('?', 'Helvetica'));
-    expect(width('\u{1f600}', 'Times-Roman')).toBe(width('?', 'Times-Roman'));
+  it('measures a character no font can draw as nothing, since it is dropped', () => {
+    expect(width('日', 'Helvetica')).toBe(0);
+    expect(width('a\u{1f600}', 'Times-Roman')).toBe(width('a', 'Times-Roman'));
   });
 
   it('leaves ASCII measurement unchanged', () => {
     expect(width('Hello', 'Helvetica-Bold')).toBe(722 + 556 + 278 + 278 + 611);
   });
 
-  it('measures Courier by character, not by UTF-16 unit', () => {
-    expect(width('a\u{1f600}', 'Courier')).toBe(1200);
+  it('measures Courier by character', () => {
+    expect(width('aé€', 'Courier')).toBe(1800);
   });
 });

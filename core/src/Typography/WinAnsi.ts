@@ -37,3 +37,11 @@ const WIN_ANSI_HIGH: ReadonlyMap<number, number> = new Map([
 export function winAnsiByte(codePoint: number): number {
   return codePoint <= 0xff ? codePoint : (WIN_ANSI_HIGH.get(codePoint) ?? 0x3f);
 }
+
+/**
+ * Whether a standard text font can show `codePoint`: every code point up to U+00FF, and the characters
+ * Windows-1252 places at 0x80-0x9F. A character it cannot show falls back to another face.
+ */
+export function winAnsiCovers(codePoint: number): boolean {
+  return codePoint <= 0xff || WIN_ANSI_HIGH.has(codePoint);
+}

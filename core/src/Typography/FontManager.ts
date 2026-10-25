@@ -1,5 +1,7 @@
 import { TtfFont } from './TrueType/TtfFont';
 import { getPlatformIO } from '../Platform/PlatformIO';
+import { matchFace, subfamilyItalic, subfamilyWeight } from './FaceMatching';
+import { REGISTERED_FONT_PREFIX } from './RegisteredFontName';
 
 /**
  * Standard PDF font identifier → Liberation family+weight lookup.
@@ -104,6 +106,9 @@ export class FontManager {
   /** Exact document font identifier (URL/path) -> already loaded bytes. */
   private static readonly identifierRegistry = new Map<string, Uint8Array>();
 
+  /** Family resolutions, keyed by style, weight and family; cleared whenever a registration changes. */
+  private static readonly familyMemo = new Map<string, string | null>();
+
   /** Parsed-font cache for the fallback chain, keyed like {@link registry}. */
   private static readonly fallbackCache = new Map<string, TtfFont | null>();
 
@@ -123,6 +128,7 @@ export class FontManager {
     const key = `${family}:${weight}`;
     this.registry.set(key, { kind: 'bytes', bytes });
     this.fallbackCache.delete(key);
+    this.familyMemo.clear();
     if (opts?.identifier) this.identifierRegistry.set(opts.identifier, bytes);
   }
 
@@ -145,6 +151,7 @@ export class FontManager {
     const key = `${family}:${weight}`;
     this.registry.set(key, { kind: 'file', path });
     this.fallbackCache.delete(key);
+    this.familyMemo.clear();
   }
 
   /**
@@ -154,6 +161,7 @@ export class FontManager {
   public static registerFontFilePath(key: string, filePath: string): void {
     this.registry.set(key, { kind: 'file', path: filePath });
     this.fallbackCache.delete(key);
+    this.familyMemo.clear();
   }
 
   /**
@@ -168,6 +176,61 @@ export class FontManager {
     const mapping = STANDARD_FONT_MAP[standardFontName];
     if (!mapping) return null;
     return this.getBytesForFamily(mapping.family, mapping.weight);
+  }
+
+  /**
+   * The font name of the registered face that a family resolves to, or `undefined` when no font is registered in
+   * that family. A registration's weight and style come from the subfamily it was registered under (`'Bold Italic'`
+   * is weight 700, italic); the face is then chosen as for a document's fonts, style first and weight in the CSS
+   * font-matching order. The family is matched ignoring case and surrounding white space.
+   * @internal
+   */
+  public static resolveFamily(family: string, weight: number, italic: boolean): string | undefined {
+    const wanted = family.trim().toLowerCase();
+    const memoKey = `${italic ? 'i' : 'n'}${weight}:${wanted}`;
+    const memo = this.familyMemo.get(memoKey);
+    if (memo !== undefined) return memo ?? undefined;
+    const faces: { key: string; weight: number; italic: boolean }[] = [];
+    for (const key of [...this.registry.keys()].sort()) {
+      const separator = key.lastIndexOf(':');
+      if (key.slice(0, separator) !== wanted) continue;
+      const subfamily = key.slice(separator + 1);
+      faces.push({ key, weight: subfamilyWeight(subfamily), italic: subfamilyItalic(subfamily) });
+    }
+    const face = matchFace(faces, weight, italic);
+    const resolved = face ? `${REGISTERED_FONT_PREFIX}${face.key}` : null;
+    this.familyMemo.set(memoKey, resolved);
+    return resolved ?? undefined;
+  }
+
+  /**
+   * The registered font a font name made by {@link resolveFamily} (or a glyph-fallback run) names, parsed, or
+   * `null` when the name is not one of those or the registration is gone.
+   * @internal
+   */
+  public static getRegisteredFont(fontName: string): FallbackFont | null {
+    if (!fontName.startsWith(REGISTERED_FONT_PREFIX)) return null;
+    const key = fontName.slice(REGISTERED_FONT_PREFIX.length);
+    const bytes = this.getBytesForKey(key);
+    if (!bytes) return null;
+    const font = this.getParsedFont(key, bytes);
+    return font ? { key, bytes, font } : null;
+  }
+
+  /**
+   * The registered Liberation substitute for a standard text face (Helvetica to Liberation Sans, Times to
+   * Liberation Serif, Courier to Liberation Mono, in the same weight and style), parsed, as a fallback font;
+   * or `null` when it is not registered. The instance is the one {@link getFallbackFonts} returns for it.
+   * @internal
+   */
+  public static getStandardSubstitute(standardFontName: string): FallbackFont | null {
+    const mapping = STANDARD_FONT_MAP[standardFontName];
+    if (!mapping) return null;
+    const key = `${mapping.family}:${normalizeWeight(mapping.weight)}`;
+    const bytes = this.getBytesForKey(key);
+    if (!bytes) return null;
+    const font = this.getParsedFont(key, bytes);
+    return font ? { key, bytes, font } : null;
   }
 
   /**
@@ -243,6 +306,7 @@ export class FontManager {
     this.registry.clear();
     this.identifierRegistry.clear();
     this.fallbackCache.clear();
+    this.familyMemo.clear();
   }
 
   /**

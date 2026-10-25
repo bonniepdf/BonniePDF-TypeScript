@@ -3,7 +3,7 @@ import { SharedTextOptions } from '../SharedOptions';
 import { Graphemes } from '../../Typography/Engine/Unicode/Segmentation/Graphemes';
 import { ElementBase } from '../ElementBase';
 import { FontFamilyResolver } from '../../Typography/FontFamilyResolver';
-import { getActiveDocumentFonts } from '../../Typography/DocumentFontMetricScope';
+import { isGeneratingDocument } from '../../Typography/DocumentFontMetricScope';
 import { FontWeight } from '../../Typography/FontWeight';
 import { FontMetrics } from '../../Typography/FontMetrics';
 import { ParagraphWidths } from '../../Typography/ParagraphWidths';
@@ -87,9 +87,10 @@ export abstract class TextElementBase extends ElementBase {
    * defaultTextStyle cascade will not override it.
    */
   public get fontName(): string {
-    // While a document with its own fonts is being generated, a family is resolved
-    // against them. Otherwise the name resolved when the family was set stands.
-    if (this._fontFamily !== undefined && getActiveDocumentFonts()) {
+    // A family is resolved when the document is generated, against the document's fonts and the fonts registered
+    // by then, so the order of registering a font and setting the family does not matter. Outside generation the
+    // name resolved when the family was set stands.
+    if (this._fontFamily !== undefined && isGeneratingDocument()) {
       return FontFamilyResolver.resolve(this._fontFamily, this._fontWeight, this._italic);
     }
     return this._fontName;

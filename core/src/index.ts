@@ -38,6 +38,8 @@ export { type DocumentMetadataOptions, DocumentMetadata } from './Configuration/
 export { type DocumentSettingsOptions, DocumentSettings } from './Configuration/DocumentSettings';
 export { ContentDirection, type ContentDirectionInput } from './Configuration/ContentDirection';
 export { EmojiRendering } from './Configuration/EmojiRendering';
+export { MissingGlyphs } from './Configuration/MissingGlyphs';
+export { MissingGlyphException } from './Core/MissingGlyphException';
 export { pageTemplate, type PageTemplate, type PageTemplateElements } from './Configuration/PageTemplate';
 export {
   formatChartNumber,

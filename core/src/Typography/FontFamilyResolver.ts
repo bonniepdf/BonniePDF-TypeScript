@@ -1,6 +1,7 @@
 import { StandardFonts } from './StandardFonts';
 import { FontWeight } from './FontWeight';
-import { getActiveDocumentFonts } from './DocumentFontMetricScope';
+import { getActiveDocumentFonts, reportUnknownFontFamily } from './DocumentFontMetricScope';
+import { FontManager } from './FontManager';
 import { isDocumentFontName } from './DocumentFontName';
 
 /**
@@ -132,6 +133,11 @@ export class FontFamilyResolver {
       return customFamily.getVariant(isBold, italic);
     }
 
+    // A family registered through FontManager. Global registrations come before the standard families and their
+    // aliases, so a registered "Arial" is that font, not Helvetica.
+    const registered = FontManager.resolveFamily(family, weight, italic);
+    if (registered) return registered;
+
     // Resolve alias to canonical family name
     const canonicalFamily = FontFamilyResolver.resolveAlias(family);
 
@@ -142,7 +148,8 @@ export class FontFamilyResolver {
       return fontName;
     }
 
-    // Fallback: return Helvetica variant
+    // Fallback: return Helvetica variant. The family resolved to nothing; a document being generated reports it.
+    reportUnknownFontFamily(family);
     const fallbackKey = `Helvetica,${isBold},${italic}`;
     return FontFamilyResolver.standardFonts.get(fallbackKey) ?? StandardFonts.Helvetica;
   }

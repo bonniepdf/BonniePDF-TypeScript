@@ -238,6 +238,8 @@ Issues and pull requests are welcome in the [BonniePDF-TypeScript repository](ht
 
 Monochrome outlines remain the default. To use a registered colour font, set `doc.settings.emojiRendering = 'colour'`. COLRv0 artwork renders as vector fills and CBDT/CBLC PNG artwork as embedded images in PDF and SVG. Register the font bytes with the document; no system emoji font is selected automatically. Original ZWJ, variation-selector, skin-tone and flag sequences remain selectable and extractable. A bitmap-only font requires colour mode because it has no monochrome outlines.
 
+The standard PDF fonts (Helvetica, Times, Courier) cost nothing to use and cover roughly Latin-1. A character outside that set, such as `Ł`, `Ж` or `Ω`, is drawn in the matching Liberation face (registered automatically in Node; register it yourself in a browser), then in your document's or registered fonts. A character no font covers is left out with a `font` warning; set `doc.settings.missingGlyphs = 'throw'` to make that an error instead.
+
 Use `await doc.generateBytesAsync()` for bitmap emoji so PNG artwork can be decoded before PDF resources are written.
 
 ## Content direction

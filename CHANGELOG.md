@@ -23,8 +23,18 @@ Status: Prerelease
 - A changed `defaultTextStyle` now applies on regeneration, as it does in .NET
 - A font used for two purposes is embedded once, and `generateBytes` and `generateBytesAsync` embed the same fonts
 - A chart's own colour (`barColor`, `lineColor` and the others) now applies to series that set none
+- Text in Helvetica, Times or Courier no longer prints `?` for characters such as `Ł`, `Ж` or `Ω`: they are drawn in the matching Liberation face
+
+### Added
+
+- **`settings.missingGlyphs`.** `'drop'` (the default) leaves out a character no registered font can draw and records a `font` warning, as before. `'throw'` stops generation with a `MissingGlyphException` naming the characters (`codePoints`) and the font (`fontName`), for tests and pipelines that must not ship a document with a missing character. `MissingGlyphs.Drop` and `MissingGlyphs.Throw` name the same values. The definition key is `missingGlyphs` (`drop`, `throw`).
+- **A font family that resolves to nothing is reported.** Text whose `fontFamily` is not a document font, a registered family or a standard family is still drawn in Helvetica, and generation now records one `font` warning per family naming it.
 
 ### Fixed
+
+- **Standard-font text outside WinAnsi falls back instead of printing `?`.** Text in an unembedded standard font (Helvetica, Times, Courier) can only show roughly Latin-1, so `Łódź` printed as `?ód?` with no warning, while the same text in a PDF/A or PDF/UA document, whose standard fonts are embedded Liberation, printed correctly. A character the standard font cannot show is now drawn in its Liberation substitute (Helvetica to Liberation Sans, Times to Liberation Serif, Courier to Liberation Mono, same weight and style), which covers Latin Extended, Greek and Cyrillic, and only that face's glyphs are embedded. When the substitute lacks it, the document's own fonts and then the registered fonts are tried; a character none of them has is dropped with a warning. Text the standard font shows whole produces the same bytes as before. Layout measures the fallback glyphs, and SVG export draws them. A letter and its combining accent are never split between fonts. In Node the Liberation fonts are registered automatically; in a browser, register them as for PDF/A, or the character falls through to your own fonts.
+- **The list bullet `◦` in a standard font** printed as `æ`; it is now the Liberation glyph, the same as in .NET.
+- **A family registered with `FontManager.registerFont` now resolves.** Naming that family in `fontFamily` drew Helvetica: only document fonts and `FontFamilyResolver.registerFamily` families were looked up. It now draws the registered font, choosing among its registrations by the weight and style their subfamilies name (`'Bold'`, `'Bold Italic'`, `'SemiBold'`) as for document fonts. A registered family comes before the standard families and their aliases, so a font registered as `Arial` is drawn as itself; a document's own family still comes first. The family is resolved when the document is generated, so registering the font after creating the element works too, and the bundled `Liberation Sans`, `Liberation Serif` and `Liberation Mono` can be named directly. A registered font used both by name and as a fallback is embedded once.
 
 - **Typographic punctuation in a standard font.** Text shown in an unembedded standard font (Helvetica, Times, Courier) wrote each character's low byte, so a curly apostrophe (U+2019) printed as a control code and `“ ” – — … €` came out wrong. These now use their Windows-1252 byte, which is what the fonts' WinAnsiEncoding reads; a character with no WinAnsi code is written as `?`. Embedded fonts were never affected. The widths of those characters are now measured too: every standard-font character beyond ASCII was assumed to be 500 units wide, so a line with `£`, `é` or `—` wrapped slightly differently from what a viewer drew.
 - **A chart's own colour now reaches its series.** `barColor`, `lineColor`, `areaColor`, `dotColor` and `lollipopColor` were never applied: bars, lines, areas, dots and lollipops were drawn in the series colour, which is `#4f46e5` unless the series sets one, so a chart given a colour drew in indigo anyway (the utility-bill example asked for amber and drew indigo). A series with no colour of its own now takes the chart's colour, and a colour set on the series still wins. A chart with neither set is unchanged.
@@ -101,7 +111,7 @@ Status: Prerelease
 
 ### Changes
 
-- Publishing now requires successful cross-engine gallery validation of the source commit. Configure `PARITY_WORKFLOW_REPOSITORY` and `PARITY_WORKFLOW_TOKEN` before publishing. CI also verifies authoring equivalence and standalone playground execution for every example.
+- Releases now require successful cross-engine gallery validation of the source commit. CI also verifies authoring equivalence and standalone playground execution for every example.
 
 - Fixed stable SVG identifiers and preloading for document-owned fonts, QR mask scoring against independent matrix vectors, encryption of PDF text strings, XMP metadata handling in synchronous and asynchronous writers, and AES-256 permissions. Accessible encrypted documents now pass independent validation.
 
@@ -658,19 +668,4 @@ x cap / 72)` pixels per axis, never enlarged. The reduction is an exact area
   PDF/A-3, and PDF/A-4; dropped with an `attachment` diagnostic under PDF/A-1 and
   PDF/A-2. `applyFacturX(doc, xml, opts)` binds caller-supplied EN 16931 CII XML,
   forcing PDF/A-3 and writing the `fx:` XMP conformance block.
-  _(migrated from the final Changesets entry.)_
-- Release pipeline: retired Changesets in favour of tag-triggered publishing
-  with npm OIDC trusted publishing (no long-lived `NPM_TOKEN`). Provenance is
-  attested on every publish.
 
-## 2026.7.2
-
-Status: Prerelease
-
-### Highlights
-
-- Changelog baseline; earlier changes are recorded in Git history
-
-### Changes
-
-- Baseline at the introduction of the hand-maintained changelog.

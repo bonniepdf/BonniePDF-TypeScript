@@ -1,7 +1,8 @@
 /**
  * Product Gallery (Class API).
- * A retail catalogue: products two per row as cards with name, SKU, price, and description, paginating automatically. Each card starts with a colour tile drawn by the engine, so no image files are needed.
- * Build with generate(); export with await doc.generateBytesAsync().
+ * The same retail catalogue as Product Gallery, built with the class API: construct each element and assign properties. Each card starts with a clipped studio photograph and carries alt text.
+ * Build with generate(assets); export with await doc.generateBytesAsync().
+ * The host supplies image, font, or attachment bytes through the assets map.
  */
 import {
   Document,
@@ -16,6 +17,8 @@ import {
   HorizontalStack,
   Container,
   Heading,
+  Image,
+  ImageFitMode,
   Color,
   ColorPalette,
   Border,
@@ -32,48 +35,56 @@ const PRODUCTS: Product[] = [
     name: 'Terracotta Planter',
     sku: 'HG-1042',
     price: '£28.00',
+    imageSlug: 'terracotta-planter',
     blurb: 'Hand-thrown stoneware planter with a matte terracotta glaze.',
   },
   {
     name: 'Linen Throw',
     sku: 'HG-2277',
     price: '£54.00',
+    imageSlug: 'linen-throw',
     blurb: 'Stonewashed pure-linen throw in oatmeal, finished with a hand-knotted fringe.',
   },
   {
     name: 'Brass Reading Lamp',
     sku: 'LT-0391',
     price: '£120.00',
+    imageSlug: 'brass-reading-lamp',
     blurb: 'Adjustable desk lamp in brushed brass with a weighted base and warm-dim LED.',
   },
   {
     name: 'Ceramic Pour-Over',
     sku: 'KT-5108',
     price: '£36.00',
+    imageSlug: 'ceramic-pour-over',
     blurb: 'Single-cup pour-over dripper in speckled clay, sized for a standard 02 filter.',
   },
   {
     name: 'Wool Floor Cushion',
     sku: 'HG-3315',
     price: '£95.00',
+    imageSlug: 'wool-floor-cushion',
     blurb: 'Chunky hand-woven wool floor cushion with a removable, washable cover.',
   },
   {
     name: 'Smoked-Glass Carafe',
     sku: 'KT-4420',
     price: '£42.00',
+    imageSlug: 'smoked-glass-carafe',
     blurb: 'Mouth-blown smoked-glass carafe and tumbler set for the bedside or table.',
   },
   {
     name: 'Oak Wall Shelf',
     sku: 'FN-0876',
     price: '£68.00',
+    imageSlug: 'oak-wall-shelf',
     blurb: 'Solid white-oak floating shelf with concealed brackets and an oiled finish.',
   },
   {
     name: 'Rattan Pendant Shade',
     sku: 'LT-1653',
     price: '£82.00',
+    imageSlug: 'rattan-pendant-shade',
     blurb: 'Open-weave rattan pendant shade that casts a soft, patterned light.',
   },
 ];
@@ -82,20 +93,7 @@ const ACCENT = ColorPalette.emerald[700];
 const CARD_HEIGHT_IMAGE = 128;
 const CARD_IMAGE_RADIUS = 6;
 
-// One tint per card, cycled by position, so the catalogue reads as a deliberate
-// colour-blocked design rather than a set of missing images.
-const TILE_HUES = [
-  ColorPalette.emerald,
-  ColorPalette.amber,
-  ColorPalette.rose,
-  ColorPalette.sky,
-  ColorPalette.violet,
-  ColorPalette.teal,
-  ColorPalette.orange,
-  ColorPalette.indigo,
-];
-
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -143,9 +141,9 @@ export function generate(): Document {
     const row = new HorizontalStack();
     row.spacing = 16;
     row.widthDistribution = WidthDistribution.Equal;
-    row.add(productCard(PRODUCTS[i], i));
+    row.add(productCard(PRODUCTS[i], assets));
     if (i + 1 < PRODUCTS.length) {
-      row.add(productCard(PRODUCTS[i + 1], i + 1));
+      row.add(productCard(PRODUCTS[i + 1], assets));
     }
     gallery.add(row);
   }
@@ -161,12 +159,8 @@ export function generate(): Document {
  *
  * A retail product gallery / look-book - the kind of branded catalogue an
  * e-commerce or marketplace platform generates. Products are laid out
- * two-per-row as cards with a name, SKU, price and blurb, in an accessible
- * PDF/A-2a + PDF/UA-1 document that paginates automatically.
- *
- * Each card leads with a deterministic colour-blocked tile - a per-product tint
- * with the product's initial - drawn natively by the engine, so the catalogue
- * is self-contained and needs no bundled photography.
+ * two-per-row as cards with studio photography, name, SKU, price and blurb,
+ * in an accessible PDF/A-2a + PDF/UA-1 document that paginates automatically.
  *
  * It renders **byte-for-byte identically** to the options-style
  * `product-photo-gallery.ts` (an equivalence test binds the two). Reach for
@@ -176,34 +170,37 @@ interface Product {
   name: string;
   sku: string;
   price: string;
+  imageSlug: string;
   blurb: string;
 }
 
-function productMedia(product: Product, index: number): Container {
-  const hue = TILE_HUES[index % TILE_HUES.length];
-
-  const monogram = new TextBlock(product.name.charAt(0).toUpperCase());
-  monogram.fontName = StandardFonts.HelveticaBold;
-  monogram.fontSize = 40;
-  // amber[600] is the one shade in this cycle that falls short of 3:1 on its own
-  // [100] tint (2.87:1); every other hue already clears it at [600].
-  monogram.color = hue === ColorPalette.amber ? ColorPalette.amber[700] : hue[600];
-  monogram.alignment = TextAlignment.Center;
-  monogram.margin = new Thickness(0, 40, 0, 0);
-
-  const tile = new Container();
-  tile.height = CARD_HEIGHT_IMAGE;
-  tile.backgroundColor = hue[100];
-  tile.cornerRadius = CARD_IMAGE_RADIUS;
-  tile.child = monogram;
-  return tile;
+function imageBytes(product: Product, assets: ReadonlyMap<string, Uint8Array>): Uint8Array {
+  const path = `images/products/${product.imageSlug}.jpg`;
+  const bytes = assets.get(path);
+  if (bytes === undefined || bytes.length === 0) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }
 
-function productCard(product: Product, index: number): Container {
+function productMedia(product: Product, assets: ReadonlyMap<string, Uint8Array>): Container {
+  const img = new Image();
+  img.imageData = imageBytes(product, assets);
+  img.height = CARD_HEIGHT_IMAGE;
+  img.fitMode = ImageFitMode.Cover;
+  img.altText = `${product.name}: ${product.blurb}`;
+
+  const frame = new Container();
+  frame.height = CARD_HEIGHT_IMAGE;
+  frame.cornerRadius = CARD_IMAGE_RADIUS;
+  frame.clipContent = true;
+  frame.child = img;
+  return frame;
+}
+
+function productCard(product: Product, assets: ReadonlyMap<string, Uint8Array>): Container {
   const body = new VerticalStack();
   body.spacing = 4;
 
-  body.add(productMedia(product, index));
+  body.add(productMedia(product, assets));
 
   const name = new Heading(product.name);
   name.tocIdentifier = product.sku.toLowerCase();

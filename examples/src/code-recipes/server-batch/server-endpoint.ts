@@ -180,10 +180,10 @@ export function generate(): Document {
     ])
   );
   doc.add(
-    panel('Set the length; stream when the document is large', [
+    panel('Set the length; bound concurrent generation', [
       cell(
         'generateBytesAsync resolves a byte array, so the content length is known before the first byte goes out. ' +
-          'For documents large enough to matter, write to a stream rather than buffering the whole response.',
+          'This path buffers the completed PDF. Bound concurrent generation and dispose each document before accepting more work.',
         { size: 9, mb: 0 }
       ),
     ])

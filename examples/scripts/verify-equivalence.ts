@@ -43,11 +43,6 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
-    canonical: 'page-settings',
-    variant: 'page-settings-classes',
-    why: 'class/mutation companion must desugar to the options-object form',
-  },
-  {
     canonical: 'headers-footers',
     variant: 'headers-footers-classes',
     why: 'class/mutation companion must desugar to the options-object form',

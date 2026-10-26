@@ -152,6 +152,23 @@ describe('Placeholders', () => {
       expect(img[2]).toBe(78);
       expect(img[3]).toBe(71);
     });
+
+    it('returns valid avatar PNG bytes with default and custom sizes', () => {
+      const defaultAvatar = Placeholders.avatar();
+      expect(defaultAvatar).toBeInstanceOf(Uint8Array);
+      expect(defaultAvatar[0]).toBe(137);
+      expect(defaultAvatar[1]).toBe(80);
+      expect(defaultAvatar[2]).toBe(78);
+      expect(defaultAvatar[3]).toBe(71);
+
+      const customAvatar = Placeholders.avatar(32);
+      expect(customAvatar).toBeInstanceOf(Uint8Array);
+      expect(customAvatar.length).toBeGreaterThan(0);
+
+      const objectParamAvatar = Placeholders.avatar({ size: 64 });
+      expect(objectParamAvatar).toBeInstanceOf(Uint8Array);
+      expect(objectParamAvatar.length).toBeGreaterThan(0);
+    });
   });
 
   // The seeded RNG is a 32-bit integer LCG that MUST produce an identical
@@ -159,6 +176,17 @@ describe('Placeholders', () => {
   // asserts the same golden values). If either side drifts — e.g. TS falls back
   // to a float64 multiply that overflows Number.MAX_SAFE_INTEGER — these break.
   describe('cross-language parity (32-bit LCG)', () => {
+    it('employees(3) with seed 42 matches the canonical sequence', () => {
+      const emps = Placeholders.withSeed(42).employees(3);
+      expect(emps.map(e => [e.id, e.name, e.role, e.department])).toEqual([
+        [1, 'Brian Martinez', 'Support Lead', 'Marketing'],
+        [2, 'Gina Mitchell', 'Project Manager', 'Engineering'],
+        [3, 'Pete Stewart', 'IP Counsel', 'Marketing'],
+      ]);
+      expect(emps[0].avatar).toBeInstanceOf(Uint8Array);
+      expect(emps[0].avatar.length).toBeGreaterThan(0);
+    });
+
     it('invoiceLines(5) with seed 42 matches the canonical sequence', () => {
       const items = Placeholders.withSeed(42).invoiceLines(5);
       expect(items.map(i => [i.service, i.quantity, i.unitPrice, i.total])).toEqual([

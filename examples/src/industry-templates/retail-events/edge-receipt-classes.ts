@@ -12,13 +12,13 @@
 // Cloudflare Worker hands back on the response.
 //
 // The whole document is a narrow 80 mm thermal-printer page rendered in Courier
-// (a standard-14 font, so nothing to download), a QR code and a Code 128 order
-// barcode drawn as native vector shapes, and an itemised total. It weighs a few
-// KB and builds in microseconds.
+// (embedded when PDF/A or PDF/UA is requested), a QR code and a Code 128 order
+// barcode drawn as native vector shapes, and an itemised total. Provide the required font assets in the host before generation.
 //
-// Deploying it to a Cloudflare Worker is this small:
+// The async host pattern (configure your platform, licence and fonts at startup):
 //
-//   import { generate } from '@bonniepdf/examples/edge-receipt';
+//   // Install @bonniepdf/core and declare your applicable licence tier.
+//   import { generate } from './edge-receipt'; // copy this builder into your app
 //   export default {
 //     async fetch(): Promise<Response> {
 //       const bytes = await generate().generateBytesAsync();

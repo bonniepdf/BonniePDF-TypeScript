@@ -109,7 +109,53 @@ const LAST_NAMES = [
 ];
 
 const DEPARTMENTS = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Design', 'Operations'];
-const ROLES = ['Manager', 'Lead', 'Senior', 'Junior', 'Intern', 'Director', 'VP'];
+const ROLES = [
+  'Senior Developer',
+  'Brand Manager',
+  'HR Specialist',
+  'Financial Analyst',
+  'QA Lead',
+  'Account Executive',
+  'Project Manager',
+  'Research Scientist',
+  'Support Lead',
+  'DevOps Engineer',
+  'Compliance Officer',
+  'Systems Administrator',
+  'Frontend Developer',
+  'Budget Analyst',
+  'Content Strategist',
+  'Sales Manager',
+  'Backend Developer',
+  'Supply Chain Lead',
+  'Data Scientist',
+  'CX Analyst',
+  'Recruiter',
+  'Controller',
+  'Platform Architect',
+  'IP Counsel',
+  'Security Engineer',
+  'Digital Strategist',
+  'Business Developer',
+  'Logistics Manager',
+  'UX Researcher',
+  'Mobile Developer',
+  'Events Manager',
+  'Cloud Architect',
+  'Treasury Analyst',
+  'AI Researcher',
+  'Contract Specialist',
+  'Sales Engineer',
+  'Process Analyst',
+  'Network Engineer',
+  'Escalations Lead',
+  'Site Reliability Engineer',
+  'L&D Manager',
+  'Risk Analyst',
+  'SEO Specialist',
+  'Data Engineer',
+  'Fleet Coordinator',
+];
 const LOCATIONS = ['New York', 'London', 'Berlin', 'Tokyo', 'Sydney', 'Toronto', 'Paris'];
 
 const COMPANY_NAMES = [
@@ -193,6 +239,17 @@ const ACCENT_COLORS = [
   ColorPalette.slate[600],
 ];
 
+const AVATAR_PALETTES: [number, number, number][] = [
+  [59, 130, 246], // Blue
+  [16, 185, 129], // Emerald
+  [139, 92, 246], // Purple
+  [245, 158, 11], // Amber
+  [239, 68, 68], // Red
+  [20, 184, 166], // Teal
+  [236, 72, 153], // Pink
+  [99, 102, 241], // Indigo
+];
+
 /** One line of a placeholder invoice. */
 export interface InvoiceLineItem {
   /** The service name. */
@@ -205,6 +262,20 @@ export interface InvoiceLineItem {
   unitPrice: number;
   /** The line total: quantity times unit price. */
   total: number;
+}
+
+/** One employee record for prototyping directory and team layouts. */
+export interface EmployeeItem {
+  /** The 1-based index or employee id. */
+  id: number;
+  /** The full name. */
+  name: string;
+  /** The job title. */
+  role: string;
+  /** The department name. */
+  department: string;
+  /** A circular avatar placeholder PNG, as bytes. */
+  avatar: Uint8Array;
 }
 
 /** Generates deterministic sample values for document prototypes. */
@@ -367,6 +438,25 @@ class PlaceholderSource {
     return items;
   }
 
+  /**
+   * Generates employee records for directory tables and team prototypes.
+   *
+   * @param count The number of employee items to generate (10 by default).
+   */
+  employees(count = 10): EmployeeItem[] {
+    const list: EmployeeItem[] = [];
+    for (let i = 1; i <= count; i++) {
+      list.push({
+        id: i,
+        name: this.name(),
+        role: this.role(),
+        department: this.department(),
+        avatar: this.avatar(48),
+      });
+    }
+    return list;
+  }
+
   tableRows(rows = 5, columns = 4): string[][] {
     const result: string[][] = [];
     for (let r = 0; r < rows; r++) {
@@ -390,6 +480,18 @@ class PlaceholderSource {
 
   image(opts: { width: number; height: number }): Uint8Array {
     return buildPlaceholderPng(opts.width, opts.height, this.next(360));
+  }
+
+  /**
+   * Generates a circular avatar placeholder PNG with a silhouette of a person
+   * and a deterministic background color from a friendly palette.
+   *
+   * @param size The width and height of the square PNG in pixels (48 by default).
+   */
+  avatar(size = 48): Uint8Array {
+    const clampedSize = Math.max(8, Math.min(Math.round(size), 512));
+    const paletteIdx = this.next(AVATAR_PALETTES.length);
+    return buildPlaceholderAvatarPng(clampedSize, paletteIdx);
   }
 }
 
@@ -452,6 +554,8 @@ export const Placeholders = {
 
   /** Invoice line items, ready for a table (5 by default). */
   invoiceLines: (count?: number) => globalSource.invoiceLines(count),
+  /** Several employee records for directory tables and team prototypes (10 by default). */
+  employees: (count?: number) => globalSource.employees(count),
   /**
    * Rows of table cells (name, department, location, percentage), as arrays of text (5 rows of 4 columns by default).
    */
@@ -461,6 +565,11 @@ export const Placeholders = {
 
   /** A PNG placeholder image of the requested size, as bytes. */
   image: (opts: { width: number; height: number }) => globalSource.image(opts),
+  /** A PNG placeholder avatar icon of the requested square size (48 by default), as bytes. */
+  avatar: (optsOrSize?: { size?: number } | number) => {
+    const size = typeof optsOrSize === 'number' ? optsOrSize : optsOrSize?.size ?? 48;
+    return globalSource.avatar(size);
+  },
 
   /** Returns an independent source that always produces the same sequence for the same seed. */
   withSeed(seed: number): PlaceholderSource {
@@ -579,5 +688,111 @@ function deflateRawSimple(data: Uint8Array): Uint8Array {
 
   const adler = adler32(data);
   writeU32(result, offset, adler);
+  return result;
+}
+
+function buildPlaceholderAvatarPng(size: number, paletteIdx: number): Uint8Array {
+  const [bgR, bgG, bgB] = AVATAR_PALETTES[paletteIdx % AVATAR_PALETTES.length];
+  const raw = new Uint8Array(size * (1 + size * 4));
+
+  const cx = (size - 1) / 2;
+  const cy = (size - 1) / 2;
+  const outerR = size / 2;
+
+  // Head circle: center (cx, 0.38 * size), radius 0.20 * size
+  const headCy = 0.38 * size;
+  const headR = 0.20 * size;
+
+  // Body/shoulders circle: center (cx, 1.05 * size), radius 0.55 * size
+  const bodyCy = 1.05 * size;
+  const bodyR = 0.55 * size;
+
+  for (let y = 0; y < size; y++) {
+    const rowStart = y * (1 + size * 4);
+    raw[rowStart] = 0; // filter: none
+    const dy = y - cy;
+    const dyHead = y - headCy;
+    const dyBody = y - bodyCy;
+
+    for (let x = 0; x < size; x++) {
+      const dx = x - cx;
+      const distOuter = Math.sqrt(dx * dx + dy * dy);
+
+      // Outer circle anti-aliasing
+      const deltaOuter = outerR - distOuter;
+      let alphaOuter = 0;
+      if (deltaOuter >= 0.5) {
+        alphaOuter = 1;
+      } else if (deltaOuter > -0.5) {
+        alphaOuter = deltaOuter + 0.5;
+      }
+
+      const off = rowStart + 1 + x * 4;
+
+      if (alphaOuter <= 0) {
+        // Transparent pixel outside avatar circle
+        raw[off] = 0;
+        raw[off + 1] = 0;
+        raw[off + 2] = 0;
+        raw[off + 3] = 0;
+        continue;
+      }
+
+      const distHead = Math.sqrt(dx * dx + dyHead * dyHead);
+      const distBody = Math.sqrt(dx * dx + dyBody * dyBody);
+
+      const dHead = headR - distHead;
+      const dBody = bodyR - distBody;
+      const dSil = Math.max(dHead, dBody);
+
+      // Silhouette blend factor: 1 inside silhouette, 0 on background
+      let wSil = 0;
+      if (dSil >= 0.5) {
+        wSil = 1;
+      } else if (dSil > -0.5) {
+        wSil = dSil + 0.5;
+      }
+
+      // Blend silhouette (255, 255, 255) over background
+      const r = Math.round(bgR * (1 - wSil) + 255 * wSil);
+      const g = Math.round(bgG * (1 - wSil) + 255 * wSil);
+      const b = Math.round(bgB * (1 - wSil) + 255 * wSil);
+      const a = Math.round(255 * alphaOuter);
+
+      raw[off] = r;
+      raw[off + 1] = g;
+      raw[off + 2] = b;
+      raw[off + 3] = a;
+    }
+  }
+
+  const deflated = deflateRawSimple(raw);
+  const chunks: Uint8Array[] = [];
+
+  // PNG signature
+  chunks.push(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]));
+
+  // IHDR: 13 bytes (color type 6: RGBA)
+  const ihdr = new Uint8Array(13);
+  writeU32(ihdr, 0, size);
+  writeU32(ihdr, 4, size);
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 6; // color type RGBA
+  chunks.push(pngChunk('IHDR', ihdr));
+
+  // IDAT
+  chunks.push(pngChunk('IDAT', deflated));
+
+  // IEND
+  chunks.push(pngChunk('IEND', new Uint8Array(0)));
+
+  let total = 0;
+  for (const c of chunks) total += c.length;
+  const result = new Uint8Array(total);
+  let offset = 0;
+  for (const c of chunks) {
+    result.set(c, offset);
+    offset += c.length;
+  }
   return result;
 }

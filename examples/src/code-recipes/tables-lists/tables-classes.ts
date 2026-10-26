@@ -22,55 +22,10 @@ import {
   PdfAConformance,
   VerticalStack,
   pageTemplate,
+  Image,
+  ImageFitMode,
+  Placeholders,
 } from '@bonniepdf/core';
-
-const EMPLOYEES: [string, string, string][] = [
-  ['Alice Chen', 'Engineering', 'Senior Developer'],
-  ['Bob Martinez', 'Marketing', 'Brand Manager'],
-  ['Carol Johnson', 'Human Resources', 'HR Specialist'],
-  ['David Kim', 'Finance', 'Financial Analyst'],
-  ['Eva Patel', 'Engineering', 'QA Lead'],
-  ['Frank Wilson', 'Sales', 'Account Executive'],
-  ['Grace Taylor', 'Operations', 'Project Manager'],
-  ['Henry Brown', 'R&D', 'Research Scientist'],
-  ['Isabel Garcia', 'Customer Support', 'Support Lead'],
-  ['James Lee', 'Engineering', 'DevOps Engineer'],
-  ['Karen White', 'Legal', 'Compliance Officer'],
-  ['Liam Moore', 'IT', 'Systems Administrator'],
-  ['Mia Anderson', 'Engineering', 'Frontend Developer'],
-  ['Noah Thomas', 'Finance', 'Budget Analyst'],
-  ['Olivia Jackson', 'Marketing', 'Content Strategist'],
-  ['Peter Harris', 'Sales', 'Sales Manager'],
-  ['Quinn Robinson', 'Engineering', 'Backend Developer'],
-  ['Rachel Clark', 'Operations', 'Supply Chain Lead'],
-  ['Samuel Lewis', 'R&D', 'Data Scientist'],
-  ['Tara Walker', 'Customer Support', 'CX Analyst'],
-  ['Uma Hall', 'Human Resources', 'Recruiter'],
-  ['Victor Allen', 'Finance', 'Controller'],
-  ['Wendy Young', 'Engineering', 'Platform Architect'],
-  ['Xavier King', 'Legal', 'IP Counsel'],
-  ['Yara Wright', 'IT', 'Security Engineer'],
-  ['Zack Scott', 'Marketing', 'Digital Strategist'],
-  ['Amy Green', 'Sales', 'Business Developer'],
-  ['Brian Adams', 'Operations', 'Logistics Manager'],
-  ['Chloe Baker', 'R&D', 'UX Researcher'],
-  ['Dylan Carter', 'Engineering', 'Mobile Developer'],
-  ['Eleanor Price', 'Marketing', 'Events Manager'],
-  ['Felix Nguyen', 'Engineering', 'Cloud Architect'],
-  ['Georgia Moss', 'Finance', 'Treasury Analyst'],
-  ['Hugo Reyes', 'R&D', 'AI Researcher'],
-  ['Iris Chambers', 'Legal', 'Contract Specialist'],
-  ['Jordan Holt', 'Sales', 'Sales Engineer'],
-  ['Kira Okafor', 'Operations', 'Process Analyst'],
-  ['Leo Novak', 'IT', 'Network Engineer'],
-  ['Maya Singh', 'Customer Support', 'Escalations Lead'],
-  ['Nate Callahan', 'Engineering', 'Site Reliability Engineer'],
-  ['Ophelia Dunn', 'Human Resources', 'L&D Manager'],
-  ['Patrick Stern', 'Finance', 'Risk Analyst'],
-  ['Rosa Tanaka', 'Marketing', 'SEO Specialist'],
-  ['Stefan Mehta', 'Engineering', 'Data Engineer'],
-  ['Talia Burns', 'Operations', 'Fleet Coordinator'],
-];
 
 const OVERVIEW_SECTIONS: [string, string][] = [
   [
@@ -108,7 +63,7 @@ const OVERVIEW_SECTIONS: [string, string][] = [
  * (an equivalence test binds the two). Reach for the options form first; this
  * variant exists to show what it desugars to.
  */
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -144,40 +99,53 @@ export function generate(): Document {
   doc.add(h1Dir);
 
   const tableIntro = new TextBlock(
-    'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.'
+    'The table below lists team members by name, role, and department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.'
   );
   tableIntro.margin = new Thickness(0, 0, 0, 10);
   doc.add(tableIntro);
 
-  const table = new Table(100, 160, 140);
+  const table = new Table(34, 130, 130, 120);
   table.repeatHeadersOnNewPage = true;
   table.headerBackgroundColor = ColorPalette.blue[600];
   table.headerTextColor = Color.white;
 
-  const deptHeader = new TextBlock('Department');
-  deptHeader.fontName = StandardFonts.HelveticaBold;
-  deptHeader.fontSize = 10;
+  const photoHeader = new TextBlock('Photo');
+  photoHeader.fontName = StandardFonts.HelveticaBold;
+  photoHeader.fontSize = 10;
   const nameHeader = new TextBlock('Name');
   nameHeader.fontName = StandardFonts.HelveticaBold;
   nameHeader.fontSize = 10;
   const roleHeader = new TextBlock('Role');
   roleHeader.fontName = StandardFonts.HelveticaBold;
   roleHeader.fontSize = 10;
-  table.addHeader(deptHeader, nameHeader, roleHeader);
+  const deptHeader = new TextBlock('Department');
+  deptHeader.fontName = StandardFonts.HelveticaBold;
+  deptHeader.fontSize = 10;
+  table.addHeader(photoHeader, nameHeader, roleHeader, deptHeader);
+
+  const employees = Placeholders.withSeed(42).employees(45);
 
   let rowIndex = 0;
-  for (const [name, dept, role] of EMPLOYEES) {
+  for (const emp of employees) {
+    const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
+    const photo = new Image();
+    photo.imageData = photoBytes;
+    photo.width = 24;
+    photo.height = 24;
+    photo.fitMode = ImageFitMode.Cover;
+    photo.altText = `Photo of ${emp.name}`;
+
     const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
-    const deptCell = new TextBlock(dept);
-    deptCell.fontSize = 10;
-    deptCell.color = ColorPalette.slate[600];
-    const nameCell = new TextBlock(name);
+    const nameCell = new TextBlock(emp.name);
     nameCell.fontSize = 10;
     nameCell.color = ColorPalette.slate[800];
-    const roleCell = new TextBlock(role);
+    const roleCell = new TextBlock(emp.role);
     roleCell.fontSize = 10;
     roleCell.color = ColorPalette.slate[600];
-    table.addRow(TableRow.fromElements(deptCell, nameCell, roleCell).withBackground(bg));
+    const deptCell = new TextBlock(emp.department);
+    deptCell.fontSize = 10;
+    deptCell.color = ColorPalette.slate[600];
+    table.addRow(TableRow.fromElements(photo, nameCell, roleCell, deptCell).withBackground(bg));
   }
 
   doc.add(table);

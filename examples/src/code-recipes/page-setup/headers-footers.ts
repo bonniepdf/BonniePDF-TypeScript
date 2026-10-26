@@ -1,131 +1,44 @@
-/**
- * Headers & Footers.
- * Running header and footer templates on every page. The templates are marked decorative, so screen readers skip them, while the numbered body sections are fully structured.
- * Build with generate(); export with await doc.generateBytesAsync().
- */
-import { Document, Heading, TextBlock, TextElementBase, StandardFonts, pageTemplate } from '@bonniepdf/core';
-
-/**
- * Page header/footer templates in an accessible, archival document
- * (PDF/A-2a + PDF/UA-1), authored through the options-object front door.
- *
- * Header and footer content is marked decorative - visible on every page, but
- * skipped by screen readers - while the numbered body sections use semantic
- * `Heading` and `TextBlock` elements. The
- * running header/footer are `headerTemplate` / `footerTemplate` functions on
- * `settings` (`pageNumber => element`), given inline; `TotalPagesToken` resolves
- * to the final page count after layout.
- */
-const SECTIONS: [string, string][] = [
-  [
-    'Introduction',
-    'This document demonstrates the header and footer template system in BonniePDF. Headers and footers are automatically rendered on each page after all content has been laid out. They are marked as decorative elements and are skipped by screen readers.',
-  ],
-  [
-    'Header Templates',
-    'The header template function receives the page number and returns an IElement that is rendered at the top of each page. This allows for dynamic content such as section titles, document names, or logos. The element is positioned in the header region defined by the document margin.',
-  ],
-  [
-    'Footer Templates',
-    'Similarly, the footer template function creates elements for the bottom of each page. Common uses include page numbers, copyright notices, and document revision dates. You may return null to suppress the footer on a specific page.',
-  ],
-  [
-    'Dynamic Content',
-    'Templates can contain any valid IElement, including HorizontalStack for multi-column layouts, TextBlocks for simple text, or even Images for logos and branding. The total page count is available through the TotalPagesToken sentinel.',
-  ],
-  [
-    'Page Numbering',
-    'The page number passed to templates is 1-based, making it easy to display "Page 1 of N" style pagination. The total page count is resolved after layout completes, ensuring accuracy even when content reflows during finalisation.',
-  ],
-  [
-    'Rendering Order',
-    'Templates are rendered after all page content is finalised, ensuring accurate page counts and proper positioning regardless of how content flows across pages. This means you can safely reference the total page count in both header and footer templates.',
-  ],
-  [
-    'Conditional Templates',
-    'You can conditionally render headers or footers by returning null from the template function. For example, you might omit the header on the first page to give more room for a title section, or hide the footer on a table of contents page.',
-  ],
-  [
-    'Accessibility',
-    'Header and footer templates are automatically marked as decorative elements. This means assistive technologies skip over them when reading the document, preventing repeated announcement of decorative running headers on every page turn.',
-  ],
-];
+/** Declarative first-page, odd/even headers and automatic page numbers. */
+import { Document, Heading, TextBlock, PageBreak, pageTemplate } from '@bonniepdf/core';
 
 export function generate(): Document {
   const doc = new Document({
+    metadata: { title: 'Headers and footers' },
     settings: {
+      language: 'en-GB',
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
-      language: 'en-GB',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
+      margin: 50,
       headerTemplate: pageTemplate({
-        default: new TextBlock(`BonniePDF - Headers & Footers - Page ${TextElementBase.CurrentPageToken}`, {
-          fontName: StandardFonts.Helvetica,
-          fontSize: 9,
-          color: 'slate-500',
-          alignment: 'center',
-        }),
+        firstPage: label('NORTHFIELD · FIRST PAGE'),
+        odd: label('NORTHFIELD · ODD PAGE'),
+        even: label('NORTHFIELD · EVEN PAGE'),
       }),
-      footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
-          fontName: StandardFonts.Helvetica,
-          fontSize: 9,
-          color: 'slate-400',
-          alignment: 'center',
-        }),
-      }),
-    },
-    metadata: {
-      title: 'Headers and Footers Demo',
-      author: 'BonniePDF',
-      subject: 'Demonstrates page headers and footers in an accessible PDF/A-2a + PDF/UA-1 document.',
-      keywords: 'pdf, accessibility, headers, footers, page numbers, BonniePDF',
+      footerTemplate: pageTemplate({ default: label('Page {{CurrentPage}} of {{TotalPages}}') }),
     },
   });
-
-  doc.add(
-    new Heading('Chapter 1: Headers & Footers', {
-      tocIdentifier: 'intro',
-      level: 1,
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 22,
-      color: 'slate-800',
-      margin: { bottom: 14 },
-    })
-  );
-
-  doc.add(
-    new TextBlock(
-      'Headers and footers are rendered as decorative elements - they are visible on every page but are skipped by screen readers. The numbered sections below describe how the template system works.',
-      { margin: { bottom: 12 } }
-    )
-  );
-
-  SECTIONS.forEach(([title, body], index) => {
-    const number = `1.${index + 1}`;
-    doc.add(
-      new Heading(`${number} ${title}`, {
-        tocIdentifier: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        level: 2,
-        fontName: StandardFonts.HelveticaBold,
-        fontSize: 14,
-        color: 'indigo-600',
-        margin: { top: 14, bottom: 6 },
-      })
-    );
-
-    doc.add(new TextBlock(body, { margin: { bottom: 8 } }));
-
-    // Second paragraph to push content onto additional pages
-    doc.add(
-      new TextBlock(
-        `This section is part of the Headers & Footers demonstration. Each page carries the same ` +
-          `running header and footer so you can observe them across multiple pages. The content here ` +
-          `intentionally repeats to ensure the document spans several pages.`,
-        { margin: { bottom: 8 } }
-      )
-    );
+  const sections = [
+    [
+      'First-page branding',
+      'The firstPage element overrides the odd-page header on page one. Use it for a cover-specific brand or document title.',
+    ],
+    [
+      'Even-page header',
+      'The even element applies to page two. The footer uses the current-page and total-pages tokens, resolved after layout.',
+    ],
+    [
+      'Odd-page header',
+      'The odd element applies to page three. With no matching firstPage or parity element, default is used; without a default, the slot is empty.',
+    ],
+  ];
+  sections.forEach(([title, body], i) => {
+    if (i) doc.add(new PageBreak());
+    doc.add(new Heading(title, { level: i ? 2 : 1, fontSize: 24, margin: { bottom: 16 } }));
+    doc.add(new TextBlock(body, { fontSize: 12 }));
   });
-
   return doc;
+}
+
+function label(text: string): TextBlock {
+  return new TextBlock(text, { fontSize: 9, alignment: 'center' });
 }

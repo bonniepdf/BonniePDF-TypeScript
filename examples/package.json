@@ -11,6 +11,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "verify-practical": "tsx scripts/verify-practical-examples.ts",
+    "verify-practical:parity": "tsx scripts/verify-practical-parity.ts",
     "typecheck": "tsc --noEmit",
     "generate-svgs": "tsx scripts/generate-svgs.ts",
     "verify-equivalence": "tsx scripts/verify-equivalence.ts",

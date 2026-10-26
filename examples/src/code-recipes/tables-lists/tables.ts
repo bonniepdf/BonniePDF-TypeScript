@@ -6,6 +6,8 @@
 import {
   Document,
   Heading,
+  Image,
+  Placeholders,
   TextBlock,
   TextElementBase,
   Table,
@@ -14,54 +16,6 @@ import {
   VerticalStack,
   pageTemplate,
 } from '@bonniepdf/core';
-
-const EMPLOYEES: [string, string, string][] = [
-  ['Alice Chen', 'Engineering', 'Senior Developer'],
-  ['Bob Martinez', 'Marketing', 'Brand Manager'],
-  ['Carol Johnson', 'Human Resources', 'HR Specialist'],
-  ['David Kim', 'Finance', 'Financial Analyst'],
-  ['Eva Patel', 'Engineering', 'QA Lead'],
-  ['Frank Wilson', 'Sales', 'Account Executive'],
-  ['Grace Taylor', 'Operations', 'Project Manager'],
-  ['Henry Brown', 'R&D', 'Research Scientist'],
-  ['Isabel Garcia', 'Customer Support', 'Support Lead'],
-  ['James Lee', 'Engineering', 'DevOps Engineer'],
-  ['Karen White', 'Legal', 'Compliance Officer'],
-  ['Liam Moore', 'IT', 'Systems Administrator'],
-  ['Mia Anderson', 'Engineering', 'Frontend Developer'],
-  ['Noah Thomas', 'Finance', 'Budget Analyst'],
-  ['Olivia Jackson', 'Marketing', 'Content Strategist'],
-  ['Peter Harris', 'Sales', 'Sales Manager'],
-  ['Quinn Robinson', 'Engineering', 'Backend Developer'],
-  ['Rachel Clark', 'Operations', 'Supply Chain Lead'],
-  ['Samuel Lewis', 'R&D', 'Data Scientist'],
-  ['Tara Walker', 'Customer Support', 'CX Analyst'],
-  ['Uma Hall', 'Human Resources', 'Recruiter'],
-  ['Victor Allen', 'Finance', 'Controller'],
-  ['Wendy Young', 'Engineering', 'Platform Architect'],
-  ['Xavier King', 'Legal', 'IP Counsel'],
-  ['Yara Wright', 'IT', 'Security Engineer'],
-  ['Zack Scott', 'Marketing', 'Digital Strategist'],
-  ['Amy Green', 'Sales', 'Business Developer'],
-  ['Brian Adams', 'Operations', 'Logistics Manager'],
-  ['Chloe Baker', 'R&D', 'UX Researcher'],
-  ['Dylan Carter', 'Engineering', 'Mobile Developer'],
-  ['Eleanor Price', 'Marketing', 'Events Manager'],
-  ['Felix Nguyen', 'Engineering', 'Cloud Architect'],
-  ['Georgia Moss', 'Finance', 'Treasury Analyst'],
-  ['Hugo Reyes', 'R&D', 'AI Researcher'],
-  ['Iris Chambers', 'Legal', 'Contract Specialist'],
-  ['Jordan Holt', 'Sales', 'Sales Engineer'],
-  ['Kira Okafor', 'Operations', 'Process Analyst'],
-  ['Leo Novak', 'IT', 'Network Engineer'],
-  ['Maya Singh', 'Customer Support', 'Escalations Lead'],
-  ['Nate Callahan', 'Engineering', 'Site Reliability Engineer'],
-  ['Ophelia Dunn', 'Human Resources', 'L&D Manager'],
-  ['Patrick Stern', 'Finance', 'Risk Analyst'],
-  ['Rosa Tanaka', 'Marketing', 'SEO Specialist'],
-  ['Stefan Mehta', 'Engineering', 'Data Engineer'],
-  ['Talia Burns', 'Operations', 'Fleet Coordinator'],
-];
 
 const OVERVIEW_SECTIONS: [string, string][] = [
   [
@@ -95,7 +49,7 @@ const OVERVIEW_SECTIONS: [string, string][] = [
  * alternates. Header cells and data cells are tagged for screen readers
  * automatically. Colours are palette tokens (`'slate-600'`) or hex (`'#ffffff'`).
  */
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -133,13 +87,13 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'The table below lists team members by department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.',
+      'The table below lists team members by name, role, and department. Column headers repeat on every page for easy reference. Each cell is automatically tagged for screen readers.',
       { margin: { bottom: 10 } }
     )
   );
 
   const table = new Table({
-    columns: [100, 160, 140],
+    columns: [34, 130, 130, 120],
     repeatHeadersOnNewPage: true,
     headerBackgroundColor: 'blue-600',
     headerTextColor: '#ffffff',
@@ -147,15 +101,27 @@ export function generate(): Document {
 
   const headerCell = (text: string): TextBlock =>
     new TextBlock(text, { fontName: StandardFonts.HelveticaBold, fontSize: 10 });
-  table.addHeader(headerCell('Department'), headerCell('Name'), headerCell('Role'));
+  table.addHeader(headerCell('Photo'), headerCell('Name'), headerCell('Role'), headerCell('Department'));
+
+  const employees = Placeholders.withSeed(42).employees(45);
 
   let rowIndex = 0;
-  for (const [name, dept, role] of EMPLOYEES) {
+  for (const emp of employees) {
+    const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
+    const photo = new Image({
+      imageData: photoBytes,
+      width: 24,
+      height: 24,
+      fitMode: 'cover',
+      altText: `Photo of ${emp.name}`,
+    });
+
     const bg = rowIndex++ % 2 === 0 ? '#ffffff' : 'slate-50';
     const row = TableRow.fromElements(
-      new TextBlock(dept, { fontSize: 10, color: 'slate-600' }),
-      new TextBlock(name, { fontSize: 10, color: 'slate-800' }),
-      new TextBlock(role, { fontSize: 10, color: 'slate-600' })
+      photo,
+      new TextBlock(emp.name, { fontSize: 10, color: 'slate-800' }),
+      new TextBlock(emp.role, { fontSize: 10, color: 'slate-600' }),
+      new TextBlock(emp.department, { fontSize: 10, color: 'slate-600' })
     );
     row.backgroundColor = bg;
     table.addRow(row);

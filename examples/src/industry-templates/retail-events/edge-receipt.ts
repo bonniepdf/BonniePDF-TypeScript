@@ -1,6 +1,6 @@
 /**
  * Point-of-Sale Receipt.
- * A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. A few KB with no WASM, so it runs in a Cloudflare Worker.
+ * A point-of-sale receipt on an 80 mm thermal page, in Courier with a vector QR link and a Code 128 barcode. Generated locally with explicit fonts when archival or accessible output is requested.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // ── Browser / Cloudflare Worker receipt ──────────────────────────────────────
@@ -12,13 +12,13 @@
 // Cloudflare Worker hands back on the response.
 //
 // The whole document is a narrow 80 mm thermal-printer page rendered in Courier
-// (a standard-14 font, so nothing to download), a QR code and a Code 128 order
-// barcode drawn as native vector shapes, and an itemised total. It weighs a few
-// KB and builds in microseconds. Authored through the options-object front door.
+// (embedded when PDF/A or PDF/UA is requested), a QR code and a Code 128 order
+// barcode drawn as native vector shapes, and an itemised total. Provide the required font assets in the host before generation. Authored through the options-object front door.
 //
-// Deploying it to a Cloudflare Worker is this small:
+// The async host pattern (configure your platform, licence and fonts at startup):
 //
-//   import { generate } from '@bonniepdf/examples/edge-receipt';
+//   // Install @bonniepdf/core and declare your applicable licence tier.
+//   import { generate } from './edge-receipt'; // copy this builder into your app
 //   export default {
 //     async fetch(): Promise<Response> {
 //       const bytes = await generate().generateBytesAsync();

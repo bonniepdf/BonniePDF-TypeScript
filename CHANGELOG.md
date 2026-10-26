@@ -4,6 +4,14 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
+## Unreleased
+
+### Examples
+
+- Add focused page-break, practical-table, browser-download, font-fallback and diagnostics recipes with runnable browser, HTTP and async batch companions.
+- Add large-order invoice, long-basket receipt and multilingual customer-letter examples.
+- Refresh headers, image assets and receipt host instructions; remove the paper-size gallery.
+
 ## 2026.10.22
 
 Status: Prerelease

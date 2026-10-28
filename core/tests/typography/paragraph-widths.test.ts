@@ -57,6 +57,22 @@ const vocabulary = [
   'x',
   '#42',
   '100%',
+  // Ordinary prose outside ASCII: curly quotes, dashes, accents, symbols.
+  '\u201cquoted\u201d',
+  '\u2018single\u2019',
+  'Lorry\u2019s',
+  'caf\u00e9',
+  'na\u00efve',
+  '\u2014',
+  'T\u2014',
+  'well\u2026',
+  '\u00a312',
+  '\u20ac5',
+  'Brand\u2122',
+  '\u2022',
+  '\u00ab\u00bb',
+  'Y\u2019',
+  'V\u201d',
 ];
 
 const assets = fileURLToPath(new URL('../../assets/fonts/', import.meta.url));
@@ -138,7 +154,10 @@ describe('paragraph widths', () => {
 
   it('declines what one shaping cannot answer', () => {
     const font = fontPaths()[0];
-    expect(ParagraphWidths.tryCreate('café au lait', font, 11)).toBeNull(); // outside printable ASCII
+    expect(ParagraphWidths.tryCreate('cafe\u0301 au lait', font, 11)).toBeNull(); // a combining mark
+    expect(ParagraphWidths.tryCreate('soft\u00adhyphen here', font, 11)).toBeNull(); // default-ignorable
+    expect(ParagraphWidths.tryCreate('\u03a9 is omega', font, 11)).toBeNull(); // outside the Latin set
+    expect(ParagraphWidths.tryCreate('caf\u00e9 \u201cau\u201d lait\u2014', font, 11)).not.toBeNull(); // prose punctuation
     expect(ParagraphWidths.tryCreate('tab\there', font, 11)).toBeNull(); // control character
     expect(ParagraphWidths.tryCreate('plain text here', 'Helvetica', 11)).toBeNull(); // standard font: width table
     expect(ParagraphWidths.tryCreate('plain text here', font, 11)).not.toBeNull();

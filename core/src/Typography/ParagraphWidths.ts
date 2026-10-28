@@ -35,8 +35,9 @@ export class ParagraphWidths {
 
   /**
    * Shapes `text` once, or returns null when its widths cannot come from one shaping: text
-   * outside printable ASCII (it takes other shaping paths), a font measured by width table, a
-   * font that does not cover the text, or a paragraph the shaper rejects.
+   * outside printable ASCII and {@link isStableLatin} (it takes other shaping paths), a font
+   * measured by width table, a font that does not cover the text, or a paragraph the shaper
+   * rejects.
    */
   static tryCreate(
     text: string,
@@ -47,7 +48,7 @@ export class ParagraphWidths {
     if (text.length < 2) return null;
     for (let i = 0; i < text.length; i++) {
       const c = text.charCodeAt(i);
-      if (c < 0x20 || c > 0x7e) return null;
+      if ((c < 0x20 || c > 0x7e) && !isStableLatin(c)) return null;
     }
     const font = FontMetrics.resolveShapingFont(fontIdentifier).font;
     if (!font || !primaryCovers(text, font)) return null;
@@ -129,4 +130,28 @@ export class ParagraphWidths {
     }
     return this.window && end - start <= this.window.text.length ? this.window : null;
   }
+}
+
+/**
+ * Non-ASCII characters ordinary prose uses that shape exactly like ASCII does: Latin-1 letters and
+ * symbols (not the soft hyphen, which is default-ignorable) and common typographic punctuation. Each
+ * is its own cluster, already in canonical form and never default-ignorable, so a paragraph of these
+ * and printable ASCII takes one Latin shaping path, and so does every span of it.
+ * @internal
+ */
+export function isStableLatin(c: number): boolean {
+  return (
+    (c >= 0xa0 && c <= 0xff && c !== 0xad) ||
+    c === 0x2013 || // en dash
+    c === 0x2014 || // em dash
+    (c >= 0x2018 && c <= 0x201a) || // single quotes
+    (c >= 0x201c && c <= 0x201e) || // double quotes
+    c === 0x2022 || // bullet
+    c === 0x2026 || // ellipsis
+    c === 0x2030 || // per mille
+    c === 0x2039 ||
+    c === 0x203a || // single angle quotes
+    c === 0x20ac || // euro
+    c === 0x2122 // trade mark
+  );
 }

@@ -1,0 +1,68 @@
+{
+  "fonts": {
+    "liberation-serif": "705903ae1382f0150f115d6f10a30f5b2f3d6ade649c474afe6366c39174fb65",
+    "noto-sans": "b85c38ecea8a7cfb39c24e395a4007474fa5a4fc864f6ee33309eb4948d232d5"
+  },
+  "buckets": {
+    "liberation-serif": {
+      "ascii-pairs": {
+        "count": 9025,
+        "sha256": "12e5596c64962ea00472b1648ea5e8dcf01642fa34e266b2041882688b2fe8e6"
+      },
+      "latin1-pairs": {
+        "count": 36672,
+        "sha256": "2b52d441acd3af1df5607205701229964d9b97563f8fc29cd2a4296e255b8797"
+      },
+      "punctuation-pairs": {
+        "count": 6180,
+        "sha256": "e9d8064f717c797e6a8d02c33114e417d9cca31b200452907c58953a164ce1e6"
+      },
+      "sentences": {
+        "count": 6,
+        "sha256": "b374c52ee75565f5ce46aee8f586d352c74a925a1b2693ad751ff95537ba9bf8"
+      },
+      "generic": {
+        "count": 44,
+        "sha256": "a7099c3bc3c0cc498cc4ff9a791f114e3ad586d11c0ad014a89b48118f8c5e25"
+      },
+      "random-simple": {
+        "count": 4000,
+        "sha256": "f4c208606243ee92046fc52b68ae7855b4243a293f61e31e96aadbee2f80d5e5"
+      },
+      "random-prose": {
+        "count": 3000,
+        "sha256": "20a474b534ec6067c432e184395b47f9cf0e206b576eee991f4d6286ec6e1f2c"
+      }
+    },
+    "noto-sans": {
+      "ascii-pairs": {
+        "count": 9025,
+        "sha256": "6a7e8128120f6dda54eb807334118f3fdeb9d32d28ee22bae0951a856a1526a9"
+      },
+      "latin1-pairs": {
+        "count": 36672,
+        "sha256": "742e6ce2653a73b99e48a774dc01c79c510126924ca89dacb0204ffb5774d84c"
+      },
+      "punctuation-pairs": {
+        "count": 6180,
+        "sha256": "a4b2a2934e24ecbe6fbc1adfc1ccc96ca3cc0050ad5ee7c60f3f8bf99fed9e2a"
+      },
+      "sentences": {
+        "count": 6,
+        "sha256": "70bfdba99ef8154610b0e718c6f9fb9f7484c48ebd2f14ad886dd03e12f00c94"
+      },
+      "generic": {
+        "count": 44,
+        "sha256": "de9f8921ca3338fcb755a615344ddb7780cbfd87d2fcddd7a833670416ea200a"
+      },
+      "random-simple": {
+        "count": 4000,
+        "sha256": "e4d14cebaa155314a224edd550cee178f0f7ff791e9f246c641d6f5be2ce4751"
+      },
+      "random-prose": {
+        "count": 3000,
+        "sha256": "d8e9af5d1b7f04dc3353188928cc6734cf52866ad20ee0d521e7d08ca3e308eb"
+      }
+    }
+  }
+}

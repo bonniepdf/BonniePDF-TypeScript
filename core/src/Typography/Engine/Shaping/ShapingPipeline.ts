@@ -21,6 +21,22 @@ export interface TextSegmentation {
   arabic?: { reorder(face: FontFace, input: SourceScalar[]): SourceScalar[]; join(run: ShapingGlyph[]): void };
   hebrew?: { combiningClass(cp: number): number; compose(face: FontFace, input: SourceScalar[]): SourceScalar[] };
 }
+/** Non-ASCII characters prose uses that are their own cluster, already in canonical (NFC) form and never
+ * default-ignorable: Latin-1 letters and symbols (not the soft hyphen) and common typographic punctuation. */
+function stableLatin(c: number): boolean {
+  return (c >= 0xa0 && c <= 0xff && c !== 0xad) || c === 0x2013 || c === 0x2014 || (c >= 0x2018 && c <= 0x201a) ||
+    (c >= 0x201c && c <= 0x201e) || c === 0x2022 || c === 0x2026 || c === 0x2030 || c === 0x2039 || c === 0x203a ||
+    c === 0x20ac || c === 0x2122;
+}
+/** Printable ASCII, plus stable Latin the face maps directly; anything else takes the generic path. */
+function isSimpleLatin(face: FontFace, text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (c >= 0x20 && c <= 0x7e) continue;
+    if (!stableLatin(c) || face.mapGlyph(c) === 0) return false;
+  }
+  return true;
+}
 export class ShapingPipeline {
   static shape(face: FontFace, text: string, options: ShapeOptions | undefined, segmentation: TextSegmentation, itemized = false): ShapedRun {
     if (!face) throw new FontError('ArgumentNullException', 'face'); if (text == null) throw new FontError('ArgumentNullException', 'text');
@@ -31,13 +47,14 @@ export class ShapingPipeline {
     if (arabic && !segmentation.arabic) unsupported('Arabic requires the full Shaper.');
     if (hebrew && !segmentation.hebrew) unsupported('Hebrew requires the full Shaper.');
     const run = face.beginRun();
-    // ASCII needs neither normalization nor multi-scalar segmentation. Low
-    // operation/glyph limits still take the generic path, preserving its errors.
-    const ascii = settings.script === 'latn' && settings.direction === TextDirection.LeftToRight &&
-      text.length <= limits.maxGlyphs && text.length * 3 <= limits.maxOperations && /^[\x20-\x7e]*$/.test(text);
-    if (ascii) {
+    // ASCII, and the stable Latin characters prose uses, need neither normalization nor
+    // multi-scalar segmentation. Low operation/glyph limits still take the generic path,
+    // preserving its errors.
+    const simple = settings.script === 'latn' && settings.direction === TextDirection.LeftToRight &&
+      text.length <= limits.maxGlyphs && text.length * 3 <= limits.maxOperations && isSimpleLatin(face, text);
+    if (simple) {
       for (let i = 0; i < text.length; i++) {
-        const cp = text.charCodeAt(i), id = face.asciiGlyph(cp);
+        const cp = text.charCodeAt(i), id = cp <= 0x7e ? face.asciiGlyph(cp) : face.mapGlyph(cp);
         if (!id) unsupported('Font has no glyph for U+' + cp.toString(16).toUpperCase().padStart(4, '0') + '.');
         run.push(face.rentGlyph(id, cp, i));
       }

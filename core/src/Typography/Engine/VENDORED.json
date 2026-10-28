@@ -2,7 +2,7 @@
   "notice": "Files in this folder are vendored: maintained upstream and copied here by tooling. Do not edit them here. Each hash is the SHA-256 of the file with a leading BOM removed and line endings normalised to LF.",
   "mapping": "text-engine-typescript",
   "source": {
-    "commit": "0a2fa99fc4148990dcce6b90c6ba1ae91894156e",
+    "commit": "f4e34d43f12ef7f4e0c701eeaf23b579a7e046e8",
     "dirty": false
   },
   "files": {
@@ -62,7 +62,7 @@
     "Shaping/Shaper.ts": "b8166fe2a755367d4c581ffc59f821be24225f08ccef951f0d029e79fe4c427c",
     "Shaping/Shapers/ArabicShaper.ts": "e65d007d0dc76a4b38d820a315bb980fb8cb02d915c70bebb622aed316505a27",
     "Shaping/Shapers/HebrewShaper.ts": "e30eb58de9dd19b57c989fcb0fa17ca866d7497d0f16f26ec20158213e2d794d",
-    "Shaping/ShapingPipeline.ts": "320ca4ebe35e43624db15a391ec6e98c4ae3e595fee04b149b9324bcd58e757b",
+    "Shaping/ShapingPipeline.ts": "af7592978cb22440727d7173d8738174bfddd665a88a25ff6d1b4c897cf430ff",
     "Shaping/ShapingProgram.ts": "b5164481bddf68538ccb5a784263e3cecb3acb351d2a2a637226a62dea1e33bc",
     "Shaping/SpaceFallback.ts": "cac238b743433eef2016251dffc46ed4625ded883beec918e8391b6dc86479f7",
     "Shaping/TextItemizer.ts": "534c284fbc85ecf78286a14e72f09a2d06d7905446bc25ae0203b22b2a53490f",

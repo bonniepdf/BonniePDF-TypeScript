@@ -101,9 +101,7 @@ class BitWriter {
 
   /** Writes a Huffman code, whose bits travel most-significant first. */
   public writeHuffman(code: number, length: number): void {
-    let reversed = 0;
-    for (let i = 0; i < length; i++) reversed |= ((code >>> i) & 1) << (length - 1 - i);
-    this.writeBits(reversed, length);
+    this.writeBits(reverseBits(code, length), length);
   }
 
   /** Pads to the next byte boundary — required before a stored block's header. */
@@ -125,6 +123,20 @@ class BitWriter {
     this.alignToByte();
     return this.bytes.slice(0, this.length);
   }
+}
+
+/** `code`'s low `length` bits in reverse order: a Huffman code as DEFLATE's LSB-first stream carries it. */
+function reverseBits(code: number, length: number): number {
+  let reversed = 0;
+  for (let i = 0; i < length; i++) reversed |= ((code >>> i) & 1) << (length - 1 - i);
+  return reversed;
+}
+
+/** Each code of a table reversed for the bit stream, so writing a symbol is one {@link BitWriter.writeBits}. */
+function reversedCodes(codes: Uint16Array, lengths: Uint8Array): Uint16Array {
+  const out = new Uint16Array(codes.length);
+  for (let i = 0; i < codes.length; i++) out[i] = reverseBits(codes[i]!, lengths[i]!);
+  return out;
 }
 
 // ── LZ77 ─────────────────────────────────────────────────────────────────────
@@ -167,33 +179,46 @@ function lz77(data: Uint8Array): Tokens {
   const prev = scratchPrev;
   prev.fill(-1, 0, data.length);
 
-  const hashAt = (pos: number): number =>
-    ((data[pos]! << 10) ^ (data[pos + 1]! << 5) ^ data[pos + 2]!) & (HASH_SIZE - 1);
+  const length = data.length;
+  // The hash of the three bytes at a position: (b0 << 10) ^ (b1 << 5) ^ b2, masked to the table.
+  const hashMask = HASH_SIZE - 1;
 
   // The distance of the match findMatch last returned.
   let matchDistance = 0;
 
-  /** Length of the best match for `pos` (its distance in matchDistance), or 0 when there is none worth taking. */
+  /**
+   * Length of the best match for `pos` (its distance in matchDistance), or 0 when there is none
+   * worth taking. The best is the longest; among equally long ones, the nearest, the first the
+   * chain reaches.
+   */
   const findMatch = (pos: number): number => {
     matchDistance = 0;
-    if (pos + MIN_MATCH > data.length) return 0;
+    if (pos + MIN_MATCH > length) return 0;
 
     let bestLength = 0;
-    let candidate = head[hashAt(pos)]!;
+    let candidate = head[((data[pos]! << 10) ^ (data[pos + 1]! << 5) ^ data[pos + 2]!) & hashMask]!;
     let chain = 0;
     const limit = Math.max(0, pos - WINDOW_SIZE);
-    const maxLength = Math.min(MAX_MATCH, data.length - pos);
+    const maxLength = Math.min(MAX_MATCH, length - pos);
+    const first = data[pos]!;
+    const second = data[pos + 1]!;
 
     while (candidate >= limit && chain < MAX_CHAIN) {
-      // Cheap rejection: a candidate can only beat the incumbent if the byte
-      // one past the current best already matches.
-      if (data[candidate + bestLength] === data[pos + bestLength]) {
-        let length = 0;
-        while (length < maxLength && data[candidate + length] === data[pos + length]) length++;
-        if (length > bestLength) {
-          bestLength = length;
+      // Cheap rejections, each necessary for the candidate to beat the incumbent: the byte one
+      // past the current best, the last byte of it, and the first two bytes must all match.
+      // They skip hash collisions and short matches without changing which match wins.
+      if (
+        data[candidate + bestLength] === data[pos + bestLength] &&
+        data[candidate] === first &&
+        data[candidate + 1] === second &&
+        (bestLength < 2 || data[candidate + bestLength - 1] === data[pos + bestLength - 1])
+      ) {
+        let run = 2;
+        while (run < maxLength && data[candidate + run] === data[pos + run]) run++;
+        if (run > bestLength) {
+          bestLength = run;
           matchDistance = pos - candidate;
-          if (length === maxLength) break; // cannot do better
+          if (run === maxLength) break; // cannot do better
         }
       }
       candidate = prev[candidate]!;
@@ -203,31 +228,33 @@ function lz77(data: Uint8Array): Tokens {
     return bestLength;
   };
 
-  /** Adds `pos` to its hash chain so later positions can match against it. */
-  const insert = (pos: number): void => {
-    if (pos + MIN_MATCH > data.length) return;
-    const h = hashAt(pos);
-    prev[pos] = head[h]!;
-    head[h] = pos;
+  /** Adds positions `from` to `to` (exclusive) to their hash chains, so later positions can match against them. */
+  const insertRange = (from: number, to: number): void => {
+    const last = Math.min(to, length - MIN_MATCH + 1);
+    for (let pos = from; pos < last; pos++) {
+      const h = ((data[pos]! << 10) ^ (data[pos + 1]! << 5) ^ data[pos + 2]!) & hashMask;
+      prev[pos] = head[h]!;
+      head[h] = pos;
+    }
   };
 
   let pos = 0;
-  while (pos < data.length) {
+  while (pos < length) {
     let useLength = findMatch(pos);
     let useDistance = matchDistance;
-    insert(pos);
+    insertRange(pos, pos + 1);
 
     // Lazy matching: a match starting one byte later may be longer, in which
     // case emitting this byte as a literal and taking that match costs less.
     // Skipped once a match is already long enough to be worth taking outright.
-    if (useLength >= MIN_MATCH && useLength < GOOD_MATCH && pos + 1 < data.length) {
+    if (useLength >= MIN_MATCH && useLength < GOOD_MATCH && pos + 1 < length) {
       const nextLength = findMatch(pos + 1);
       if (nextLength > useLength) {
         literals[count] = data[pos]!;
         distances[count] = 0;
         count++;
         pos++;
-        insert(pos);
+        insertRange(pos, pos + 1);
         useLength = nextLength;
         useDistance = matchDistance;
       }
@@ -239,7 +266,7 @@ function lz77(data: Uint8Array): Tokens {
       count++;
       // Register the positions the match covers so later matches find them;
       // without this, compression degrades badly on repetitive input.
-      for (let i = 1; i < useLength; i++) insert(pos + i);
+      insertRange(pos + 1, pos + useLength);
       pos += useLength;
     } else {
       literals[count] = data[pos]!;
@@ -254,18 +281,28 @@ function lz77(data: Uint8Array): Tokens {
 
 // ── Huffman ──────────────────────────────────────────────────────────────────
 
+/** Length code index within LENGTH_BASE for each match length 0-258 (entries below 3 are unused). */
+const LENGTH_INDEX = new Uint8Array(MAX_MATCH + 1);
+for (let length = 0, i = 0; length <= MAX_MATCH; length++) {
+  while (i + 1 < LENGTH_BASE.length && LENGTH_BASE[i + 1]! <= length) i++;
+  LENGTH_INDEX[length] = i;
+}
+
+/** Distance code for each back-reference distance 0-32768 (entry 0 is unused). */
+const DISTANCE_INDEX = new Uint8Array(WINDOW_SIZE + 1);
+for (let distance = 0, i = 0; distance <= WINDOW_SIZE; distance++) {
+  while (i + 1 < DIST_BASE.length && DIST_BASE[i + 1]! <= distance) i++;
+  DISTANCE_INDEX[distance] = i;
+}
+
 /** Maps a match length (3-258) to its length code index within LENGTH_BASE. */
 function lengthIndex(length: number): number {
-  let i = LENGTH_BASE.length - 1;
-  while (i > 0 && LENGTH_BASE[i]! > length) i--;
-  return i;
+  return LENGTH_INDEX[length]!;
 }
 
 /** Maps a back-reference distance (1-32768) to its distance code. */
 function distanceIndex(distance: number): number {
-  let i = DIST_BASE.length - 1;
-  while (i > 0 && DIST_BASE[i]! > distance) i--;
-  return i;
+  return DISTANCE_INDEX[distance]!;
 }
 
 /**
@@ -508,23 +545,25 @@ function writeTokens(
   distLengths: Uint8Array,
   distCodes: Uint16Array
 ): void {
+  const lit = reversedCodes(litCodes, litLengths);
+  const dist = reversedCodes(distCodes, distLengths);
   for (let i = 0; i < tokens.count; i++) {
     const distance = tokens.distances[i]!;
     if (distance === 0) {
       const s = tokens.literals[i]!;
-      writer.writeHuffman(litCodes[s]!, litLengths[s]!);
+      writer.writeBits(lit[s]!, litLengths[s]!);
     } else {
       const length = tokens.literals[i]!;
-      const li = lengthIndex(length);
-      writer.writeHuffman(litCodes[257 + li]!, litLengths[257 + li]!);
+      const li = LENGTH_INDEX[length]!;
+      writer.writeBits(lit[257 + li]!, litLengths[257 + li]!);
       if (LENGTH_EXTRA[li]! > 0) writer.writeBits(length - LENGTH_BASE[li]!, LENGTH_EXTRA[li]!);
 
-      const di = distanceIndex(distance);
-      writer.writeHuffman(distCodes[di]!, distLengths[di]!);
+      const di = DISTANCE_INDEX[distance]!;
+      writer.writeBits(dist[di]!, distLengths[di]!);
       if (DIST_EXTRA[di]! > 0) writer.writeBits(distance - DIST_BASE[di]!, DIST_EXTRA[di]!);
     }
   }
-  writer.writeHuffman(litCodes[256]!, litLengths[256]!);
+  writer.writeBits(lit[256]!, litLengths[256]!);
 }
 
 /** Raw DEFLATE (no zlib wrapper), one block, in whichever form is smallest. */

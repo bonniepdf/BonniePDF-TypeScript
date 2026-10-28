@@ -4,7 +4,22 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
-## Unreleased
+## 2026.10.28
+
+Status: Prerelease
+
+### Highlights
+
+- Faster paragraph wrapping for everyday prose with curly quotes, dashes, and accented letters
+- Up to 25% faster DEFLATE stream compression with byte-identical output
+- Multi-fold layout speedups on long documents formatted with embedded fonts
+- New runnable recipes for page breaks, practical tables, downloads, font fallback, and batch generation
+- New industry invoice, long-basket receipt, and customer letter examples
+
+### Performance Improvements
+
+- **Faster wrapping for everyday prose:** Paragraphs containing curly quotes, dashes, accented letters or symbols such as `€` and `™` now wrap from a single shaping pass, as plain ASCII already did. Long documents in embedded fonts, which PDF/A and PDF/UA always use, generate several times faster; a full novel under PDF/A-2a and PDF/UA-1 drops from about 16 s to about 2.4 s. Output is byte-for-byte unchanged.
+- **Faster compression:** Stream compression is about a quarter faster and produces exactly the same bytes.
 
 ### Examples
 

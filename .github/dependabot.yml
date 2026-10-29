@@ -16,6 +16,10 @@ updates:
     ignore:
       # Keep @bonniepdf/* updates manual (published from this repo)
       - dependency-name: "@bonniepdf/*"
+      # The repo root pins TypeScript 6 for typescript-eslint, which rejects TypeScript 7.
+      # Raise it by hand once typescript-eslint supports the version the packages build with.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

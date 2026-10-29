@@ -17,7 +17,7 @@ import type { RegisteredLink } from './RegisteredLink';
 import type { RenderContext as RenderContextContract } from '../Elements/IElement';
 import { NO_CHROME, type ChromeReservation } from './ChromeReservation';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
-import { deflateSync } from './Compression/Deflate';
+import { compressContent } from './Writers/ContentCompression';
 import { encodeIso88591 } from './Writers/Iso88591';
 
 /** Container roles that use BMC (no MCID) in the content stream. */
@@ -78,7 +78,7 @@ export class RenderContext implements RenderContextContract {
   sealPage(index: number): void {
     if (this.isSvgMode || this.finishedPageStorage === 'keep') return;
     if (this.finishedPageStorage === 'compressed')
-      this.#sealedPages.set(index, deflateSync(encodeIso88591(this.pages[index] ?? '')));
+      this.#sealedPages.set(index, compressContent(encodeIso88591(this.pages[index] ?? '')));
     this.pages[index] = '';
   }
 

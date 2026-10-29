@@ -1,6 +1,6 @@
-import { Color } from '../../Core/Color';
-import { Point } from '../../Core/Point';
-import type { PaintTransform } from '../PaintTransform';
+import { Color } from '../Core/Color';
+import { Point } from '../Core/Point';
+import type { PaintTransform } from './PaintTransform';
 
 /** How an area is filled: a {@link SolidPaint}, a {@link LinearGradientPaint} or a {@link RadialGradientPaint}. */
 export type Paint = SolidPaint | LinearGradientPaint | RadialGradientPaint;

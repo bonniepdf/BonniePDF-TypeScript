@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { ImageWriter } from '../../src/Rendering/Images/ImageWriter';
-import { ImageInfo, ImageFormat, ImageColorSpace } from '../../src/Rendering/Images/ImageInfo';
+import { ImageInfo } from '../../src/Rendering/Images/ImageInfo';
+import { ImageFormat } from '../../src/Rendering/Images/ImageFormat';
+import { ImageColorSpace } from '../../src/Rendering/Images/ImageColorSpace';
 import { IPdfWriter } from '../../src/Rendering/Writers/IPdfWriter';
 import { createMinimalJpeg } from '../helpers/test-base';
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';

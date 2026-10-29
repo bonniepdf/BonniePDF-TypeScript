@@ -1,5 +1,5 @@
 import { CatalogOptions } from './CatalogOptions';
-import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
+import type { PdfEncryptor } from '../../Security/Encryption/PdfEncryptor';
 import type { DocumentSettings } from '../../Configuration/DocumentSettings';
 import type { RegisteredLink } from '../RegisteredLink';
 

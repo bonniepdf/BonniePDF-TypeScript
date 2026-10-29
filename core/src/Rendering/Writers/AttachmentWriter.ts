@@ -1,7 +1,7 @@
 import * as PdfKeys from '../Pdf/PdfKeys';
 import { IPdfWriter } from './IPdfWriter';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
-import { Md5Hash } from '../../Security/Encryption/md5';
+import { Md5Hash } from '../../Security/Encryption/Md5Hash';
 import { FileAttachment } from '../../Attachments/FileAttachment';
 import { AttachmentRelationship } from '../../Attachments/AttachmentRelationship';
 

@@ -1,4 +1,4 @@
-import { Paint } from './Paint/Paint';
+import { Paint } from './Paint';
 import { Color } from '../Core/Color';
 
 /** How overlapping sub-paths are filled: `'nonzero'` or `'evenodd'`. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Color } from '../../src/Core/Color';
 import { Point } from '../../src/Core/Point';
-import { LinearGradientPaint, SolidPaint } from '../../src/Drawing/Paint/Paint';
+import { LinearGradientPaint, SolidPaint } from '../../src/Drawing/Paint';
 import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
 
 /**

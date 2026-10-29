@@ -8,12 +8,8 @@ import { GroupedBarChart, GROUPED_BAR_CHART_OPTION_KEYS } from '../../src/Charts
 import { PieChart, PIE_CHART_OPTION_KEYS } from '../../src/Charts/PieChart';
 import { AxisOptions, AXIS_OPTIONS_OPTION_KEYS } from '../../src/Charts/Models/AxisOptions';
 import { ChartData, CHART_DATA_OPTION_KEYS } from '../../src/Charts/Models/ChartData';
-import {
-  ChartSeries,
-  ChartSeriesStyle,
-  CHART_SERIES_OPTION_KEYS,
-  CHART_SERIES_STYLE_OPTION_KEYS,
-} from '../../src/Charts/Models/ChartSeries';
+import { ChartSeries, CHART_SERIES_OPTION_KEYS } from '../../src/Charts/Models/ChartSeries';
+import { ChartSeriesStyle, CHART_SERIES_STYLE_OPTION_KEYS } from '../../src/Charts/Models/ChartSeriesStyle';
 import { ChartDataPoint, CHART_DATA_POINT_OPTION_KEYS } from '../../src/Charts/Models/ChartDataPoint';
 import { ChartElement, CHART_ELEMENT_OPTION_KEYS } from '../../src/Charts/ChartElement';
 import { GroupedBarChartElement, GROUPED_BAR_CHART_ELEMENT_OPTION_KEYS } from '../../src/Charts/GroupedBarChartElement';

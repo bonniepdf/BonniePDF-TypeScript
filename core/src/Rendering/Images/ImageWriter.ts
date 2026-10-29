@@ -1,6 +1,8 @@
 import * as PdfKeys from '../Pdf/PdfKeys';
 import { IPdfWriter } from '../Writers/IPdfWriter';
-import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
+import { ImageInfo } from './ImageInfo';
+import { ImageFormat } from './ImageFormat';
+import { ImageColorSpace } from './ImageColorSpace';
 import { PdfAConformance } from '../../Configuration/PdfAConformance';
 
 function _toHex(bytes: Uint8Array): string {

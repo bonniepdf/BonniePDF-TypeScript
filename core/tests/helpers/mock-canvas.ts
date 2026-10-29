@@ -3,7 +3,7 @@ import { Color } from '../../src/Core/Color';
 import { Size } from '../../src/Core/Size';
 import { Point } from '../../src/Core/Point';
 import { TextAlignment } from '../../src/Elements/Text/TextAlignment';
-import type { Paint } from '../../src/Drawing/Paint/Paint';
+import type { Paint } from '../../src/Drawing/Paint';
 import type { FillRule, StrokeStyle } from '../../src/Drawing/StrokeStyle';
 
 export class MockCanvas implements ICanvas {

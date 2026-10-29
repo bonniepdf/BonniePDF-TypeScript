@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ImageFormat, ImageInfo } from '../../src/Rendering/Images/ImageInfo';
+import { ImageFormat } from '../../src/Rendering/Images/ImageFormat';
+import { ImageInfo } from '../../src/Rendering/Images/ImageInfo';
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { PdfResourceRegistry } from '../../src/Rendering/PdfResourceRegistry';
 import { IPdfWriter } from '../../src/Rendering/Writers/IPdfWriter';

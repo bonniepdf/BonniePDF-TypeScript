@@ -2,7 +2,7 @@ import { Color } from '../Core/Color';
 import { Point } from '../Core/Point';
 import { Size } from '../Core/Size';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
-import type { Paint } from './Paint/Paint';
+import type { Paint } from './Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
 

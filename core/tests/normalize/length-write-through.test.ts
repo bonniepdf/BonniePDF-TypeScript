@@ -24,7 +24,8 @@ import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { Hyperlink } from '../../src/Core/Hyperlink';
 import { LineChart } from '../../src/Charts/LineChart';
 import { AreaChart } from '../../src/Charts/AreaChart';
-import { ChartSeries, ChartSeriesStyle } from '../../src/Charts/Models/ChartSeries';
+import { ChartSeries } from '../../src/Charts/Models/ChartSeries';
+import { ChartSeriesStyle } from '../../src/Charts/Models/ChartSeriesStyle';
 
 /**
  * Every options key documented as taking a length must reach a property that

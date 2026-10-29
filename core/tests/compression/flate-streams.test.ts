@@ -5,7 +5,7 @@ import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { EncryptionSettings } from '../../src/Security/Models/EncryptionSettings';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { EncryptionAlgorithm } from '../../src/Security/Models/EncryptionAlgorithm';
-import { PdfEncryptor } from '../../src/Security/Encryption/pdfEncryptor';
+import { PdfEncryptor } from '../../src/Security/Encryption/PdfEncryptor';
 
 /**
  * End-to-end checks that written streams really carry `/FlateDecode` and that a

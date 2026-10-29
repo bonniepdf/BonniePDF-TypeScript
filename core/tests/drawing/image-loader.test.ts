@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { ImageLoader } from '../../src/Rendering/Images/ImageLoader';
-import { ImageFormat, ImageColorSpace } from '../../src/Rendering/Images/ImageInfo';
+import { ImageFormat } from '../../src/Rendering/Images/ImageFormat';
+import { ImageColorSpace } from '../../src/Rendering/Images/ImageColorSpace';
 import { createMinimalJpeg } from '../helpers/test-base';
 import { existsSync, readFileSync, mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';

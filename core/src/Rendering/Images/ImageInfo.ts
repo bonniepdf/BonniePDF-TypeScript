@@ -1,16 +1,5 @@
-/** The colour model of a decoded image. */
-export enum ImageColorSpace {
-  DeviceRGB = 'DeviceRGB',
-  DeviceCMYK = 'DeviceCMYK',
-  DeviceGray = 'DeviceGray',
-  Indexed = 'Indexed',
-}
-
-/** The file format an image was loaded from. */
-export enum ImageFormat {
-  Jpeg = 'Jpeg',
-  Png = 'Png',
-}
+import { ImageColorSpace } from './ImageColorSpace';
+import { ImageFormat } from './ImageFormat';
 
 /** Contains decoded image metadata and the byte streams needed for PDF embedding. */
 export class ImageInfo {

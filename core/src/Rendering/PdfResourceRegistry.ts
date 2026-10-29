@@ -1,5 +1,6 @@
 import * as PdfKeys from './Pdf/PdfKeys';
-import { ImageInfo, ImageFormat } from './Images/ImageInfo';
+import { ImageInfo } from './Images/ImageInfo';
+import { ImageFormat } from './Images/ImageFormat';
 import { EmbeddedFontInfo } from '../Typography/EmbeddedFontInfo';
 import { Color } from '../Core/Color';
 import { DeferredXObjectInfo } from './RenderContext';

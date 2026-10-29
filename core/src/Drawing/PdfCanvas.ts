@@ -11,7 +11,7 @@ import { PdfOperators } from '../Rendering/Pdf/PdfOperators';
 import { PdfDrawing } from '../Rendering/Pdf/PdfDrawing';
 import { PdfSyntax } from '../Rendering/Pdf/PdfSyntax';
 import type { TaggingContext } from '../Rendering/Tagging/TaggingContext';
-import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint/Paint';
+import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint, GradientStop } from './Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 import type { ShadingRequest, ShadingStop } from '../Rendering/Pdf/GradientShading';
 import {

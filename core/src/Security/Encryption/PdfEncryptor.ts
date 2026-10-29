@@ -1,9 +1,9 @@
 import * as PdfKeys from '../../Rendering/Pdf/PdfKeys';
-import { PdfEncryptionKey } from './pdfEncryptionKey';
-import { Aes256EncryptionKey } from './aes256EncryptionKey';
-import { AesCipher } from './aesCipher';
-import { SyncAesCipher } from './syncAesCipher';
-import { RC4Cipher } from './rc4Cipher';
+import { PdfEncryptionKey } from './PdfEncryptionKey';
+import { Aes256EncryptionKey } from './Aes256EncryptionKey';
+import { AesCipher } from './AesCipher';
+import { SyncAesCipher } from './SyncAesCipher';
+import { RC4Cipher } from './RC4Cipher';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { EncryptionAlgorithm } from '../Models/EncryptionAlgorithm';
 

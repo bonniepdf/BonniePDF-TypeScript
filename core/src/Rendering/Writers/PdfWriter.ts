@@ -6,7 +6,7 @@ import { ZoomLevel } from '../../Configuration/ZoomLevel';
 import { PageModeEnum } from '../../Configuration/PageMode';
 import { IPdfWriter, ViewerPreferencesSettings } from './IPdfWriter';
 import { CatalogOptions } from './CatalogOptions';
-import type { PdfEncryptor } from '../../Security/Encryption/pdfEncryptor';
+import type { PdfEncryptor } from '../../Security/Encryption/PdfEncryptor';
 import type { DocumentSettings } from '../../Configuration/DocumentSettings';
 import type { RegisteredLink } from '../RegisteredLink';
 import { compressContent } from './ContentCompression';

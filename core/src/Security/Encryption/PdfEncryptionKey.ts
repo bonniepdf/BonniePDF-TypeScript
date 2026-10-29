@@ -1,5 +1,5 @@
-import { Md5Hash } from './md5';
-import { RC4Cipher } from './rc4Cipher';
+import { Md5Hash } from './Md5Hash';
+import { RC4Cipher } from './RC4Cipher';
 import { concatBytes } from './bytes';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { PermissionEncoder } from '../Permissions/PermissionEncoder';

@@ -8,7 +8,7 @@ import type { Paint as SinkPaint, PaintTransform as SinkPaintTransform } from '.
 import type { FillRule, StrokeStyle as SinkStrokeStyle } from '../Rendering/Svg/Sink/StrokeStyle';
 import type { VectorSink } from '../Rendering/Svg/Sink/VectorSink';
 import type { ICanvas } from './ICanvas';
-import { LinearGradientPaint, RadialGradientPaint, SolidPaint, type GradientStop, type Paint } from './Paint/Paint';
+import { LinearGradientPaint, RadialGradientPaint, SolidPaint, type GradientStop, type Paint } from './Paint';
 import type { PaintTransform } from './PaintTransform';
 import type { StrokeStyle } from './StrokeStyle';
 

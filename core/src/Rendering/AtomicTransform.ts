@@ -1,7 +1,7 @@
 import { PdfCanvas } from '../Drawing/PdfCanvas';
 import { type PaintTransform, isIdentityPaintTransform } from '../Drawing/PaintTransform';
 import { type IElement, type IStatefulElement, type RenderContext, RenderStatus } from '../Elements/IElement';
-import { composeElementTransform } from './ElementTransform';
+import { composeElementTransform } from './ElementTransforms';
 import { beginChildTag, endChildTag } from './Tagging/ChildTagging';
 import { captureTypeOf, captureNameOf } from './LayoutRecorder';
 

@@ -1,4 +1,6 @@
-import { ImageColorSpace, ImageFormat, ImageInfo } from './ImageInfo';
+import { ImageColorSpace } from './ImageColorSpace';
+import { ImageFormat } from './ImageFormat';
+import { ImageInfo } from './ImageInfo';
 
 /** Milli-points per inch: 72 pt x 1000. */
 const MILLI_POINTS_PER_INCH = 72000;

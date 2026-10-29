@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
 import { SvgCanvas } from '../../src/Drawing/SvgCanvas';
-import { LinearGradientPaint, RadialGradientPaint } from '../../src/Drawing/Paint/Paint';
+import { LinearGradientPaint, RadialGradientPaint } from '../../src/Drawing/Paint';
 import { Color } from '../../src/Core/Color';
 import { Point } from '../../src/Core/Point';
 import type { PaintTransform } from '../../src/Drawing/PaintTransform';

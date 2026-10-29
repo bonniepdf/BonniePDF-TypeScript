@@ -1,10 +1,6 @@
 export { type ChartDataPointOptions, ChartDataPoint } from './Charts/Models/ChartDataPoint';
-export {
-  type ChartSeriesStyleOptions,
-  ChartSeriesStyle,
-  type ChartSeriesOptions,
-  ChartSeries,
-} from './Charts/Models/ChartSeries';
+export { type ChartSeriesStyleOptions, ChartSeriesStyle } from './Charts/Models/ChartSeriesStyle';
+export { type ChartSeriesOptions, ChartSeries } from './Charts/Models/ChartSeries';
 export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
 export { type AxisOptionsOptions, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';

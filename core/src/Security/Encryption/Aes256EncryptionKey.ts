@@ -1,4 +1,4 @@
-import { AesCipher } from './aesCipher';
+import { AesCipher } from './AesCipher';
 import { asBuffer, concatBytes } from './bytes';
 import { EncryptionSettings } from '../Models/EncryptionSettings';
 import { PermissionEncoder } from '../Permissions/PermissionEncoder';

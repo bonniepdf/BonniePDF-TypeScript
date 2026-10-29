@@ -12,9 +12,9 @@ import { Size } from '../Core/Size';
 import { FontMetrics } from '../Typography/FontMetrics';
 import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { shapeTextRuns } from '../Typography/TextRunShaper';
-import { ImageFormat } from '../Rendering/Images/ImageInfo';
+import { ImageFormat } from '../Rendering/Images/ImageFormat';
 import type { ImageInfo } from '../Rendering/Images/ImageInfo';
-import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint/Paint';
+import { Paint, SolidPaint, LinearGradientPaint, RadialGradientPaint, toPaint } from './Paint';
 import type { FillRule, StrokeStyle } from './StrokeStyle';
 import { getTextSpacingWidth } from '../Typography/TextSpacing';
 

@@ -1,4 +1,6 @@
-import { ImageInfo, ImageFormat, ImageColorSpace } from './ImageInfo';
+import { ImageInfo } from './ImageInfo';
+import { ImageFormat } from './ImageFormat';
+import { ImageColorSpace } from './ImageColorSpace';
 import { getPlatformIO } from '../../Platform/PlatformIO';
 
 /** Parses JPEG and PNG metadata from bytes or a platform-supported file path. */

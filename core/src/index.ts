@@ -121,15 +121,9 @@ export { type EnsureSpaceOptions, EnsureSpace } from './Elements/Layout/Paginati
 export { type PreventPageBreakOptions, PreventPageBreak } from './Elements/Layout/Pagination/PreventPageBreak';
 export { type ShowEntireOptions, ShowEntire } from './Elements/Layout/Pagination/ShowEntire';
 export { type StopPagingOptions, StopPaging } from './Elements/Layout/Pagination/StopPaging';
-export {
-  type PagePredicate,
-  type ShowIfOptions,
-  ShowIf,
-  type ShowOnceOptions,
-  ShowOnce,
-  type SkipOnceOptions,
-  SkipOnce,
-} from './Elements/Layout/Pagination/ShowIf';
+export { type PagePredicate, type ShowIfOptions, ShowIf } from './Elements/Layout/Pagination/ShowIf';
+export { type ShowOnceOptions, ShowOnce } from './Elements/Layout/Pagination/ShowOnce';
+export { type SkipOnceOptions, SkipOnce } from './Elements/Layout/Pagination/SkipOnce';
 export { type UnconstrainedOptions, Unconstrained } from './Elements/Layout/Pagination/Unconstrained';
 
 export { type ImageOptions, Image } from './Elements/Media/Image';
@@ -169,6 +163,7 @@ export { OrderedList } from './Elements/Lists/OrderedList';
 export { type UnorderedListOptions, UnorderedList } from './Elements/Lists/UnorderedList';
 
 export * from './Elements/Shapes/QrEcc';
+export * from './Elements/Shapes/QrErrorCorrection';
 
 export { type CircleOptions, Circle } from './Elements/Shapes/Circle';
 export { type EllipseOptions, Ellipse } from './Elements/Shapes/Ellipse';
@@ -180,12 +175,8 @@ export { type BarcodeOptions, Barcode } from './Elements/Shapes/Barcode';
 export { DataMatrixContentException } from './Elements/Shapes/DataMatrixEncoder';
 export { type DataMatrixOptions, DataMatrix } from './Elements/Shapes/DataMatrix';
 export { type ChartDataPointOptions, ChartDataPoint } from './Charts/Models/ChartDataPoint';
-export {
-  type ChartSeriesStyleOptions,
-  ChartSeriesStyle,
-  type ChartSeriesOptions,
-  ChartSeries,
-} from './Charts/Models/ChartSeries';
+export { type ChartSeriesStyleOptions, ChartSeriesStyle } from './Charts/Models/ChartSeriesStyle';
+export { type ChartSeriesOptions, ChartSeries } from './Charts/Models/ChartSeries';
 export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
 export { type AxisOptionsOptions, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';
@@ -215,13 +206,7 @@ export * from './Drawing/ICanvas';
 export { embeddedFontFamily } from './Drawing/SvgCanvas';
 
 // Vector drawing surface
-export {
-  type Paint,
-  type GradientStop,
-  SolidPaint,
-  LinearGradientPaint,
-  RadialGradientPaint,
-} from './Drawing/Paint/Paint';
+export { type Paint, type GradientStop, SolidPaint, LinearGradientPaint, RadialGradientPaint } from './Drawing/Paint';
 export * from './Drawing/StrokeStyle';
 export * from './Drawing/Shapes';
 export { type CanvasDrawHandler, type CanvasElementOptions, CanvasElement } from './Elements/Drawing/CanvasElement';
@@ -256,7 +241,8 @@ export * from './Security/EncryptionPresets';
 export * from './Export/SvgElementExport';
 
 export { RenderContext } from './Rendering/RenderContext';
-export { PageDimensions, PdfRenderResult } from './Rendering/PageDimensions';
+export { PageDimensions } from './Rendering/PageDimensions';
+export { PdfRenderResult } from './Rendering/PdfRenderResult';
 
 export {
   type PdfAResourceIssueCode,
@@ -264,6 +250,8 @@ export {
   type PdfAResourceIssue,
 } from './Rendering/PdfResourceRegistry';
 
+export * from './Rendering/Images/ImageColorSpace';
+export * from './Rendering/Images/ImageFormat';
 export * from './Rendering/Images/ImageInfo';
 
 export * from './Rendering/Images/ImageLoader';

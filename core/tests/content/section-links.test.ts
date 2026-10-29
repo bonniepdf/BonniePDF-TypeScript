@@ -6,7 +6,7 @@ import { PageNumberOf } from '../../src/Elements/Text/PageNumberOf';
 import { Heading } from '../../src/Elements/Text/Heading';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { PageBreak } from '../../src/Elements/Layout/PageBreak';
-import { documentRequiresTwoPassLayout } from '../../src/Rendering/PdfDocumentSerializer';
+import { documentRequiresTwoPassLayout } from '../../src/Rendering/TocLayout';
 import { pdfToText } from '../helpers/test-base';
 
 /**

@@ -130,6 +130,8 @@ function buckets(): Record<string, string[]> {
     for (let i = 0; i < n; i++) {
       let w = words[Math.floor(next() * words.length)];
       if (next() < 0.1) w = '“' + w + '”';
+      // Each next() is a fresh draw, so this is not the same test as the one above.
+      // eslint-disable-next-line no-dupe-else-if
       else if (next() < 0.1) w = w + '’s';
       else if (next() < 0.05) w = w.replace('e', 'é');
       line += (i ? (next() < 0.06 ? ' — ' : ' ') : '') + w;

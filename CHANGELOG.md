@@ -4,6 +4,12 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
+## Unreleased
+
+### Document Engine & API
+
+- **Source layout matches the .NET implementation:** Internal source files are now named and split one type per file to match the .NET library: `ShowOnce`, `SkipOnce`, `ChartSeriesStyle`, `PageRenderOutput`, `PdfRenderResult`, `ImageFormat`, `ImageColorSpace` and `QrErrorCorrection` have their own modules, the encryption modules are named after their classes, and page-content compression goes through one `ContentCompression` helper. Public exports and output are unchanged.
+
 ## 2026.10.28
 
 Status: Prerelease

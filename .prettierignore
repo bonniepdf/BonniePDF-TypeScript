@@ -14,6 +14,16 @@ core/src/Definition/ElementDescription.ts
 core/tests/definition/fixtures.generated.ts
 core/tests/api/surface.generated.ts
 
+# Chart drawing sources are maintained upstream and verified against core/chart-sources.json byte
+# for byte (after line endings) before every build, so never reformatted here. The hand-written
+# host files beside them are formatted as usual.
+core/src/Charts/**
+!core/src/Charts/ChartElement.ts
+!core/src/Charts/ChartTagging.ts
+!core/src/Charts/GroupedBarChartElement.ts
+core/chart-sources.json
+core/tests/content/fixtures/chart-extraction.json
+
 # Independent shaping fixture copied verbatim from the shared specification.
 core/tests/typography/fixtures/harfbuzz.json
 

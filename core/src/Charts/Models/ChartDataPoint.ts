@@ -1,5 +1,6 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { formatChartNumber } from '../ChartNumberFormat';
-import { applyOptions } from '../../Core/applyOptions';
+import { applyOptions } from '../ChartHost';
 /**
  * Represents a single data point in a chart
  */

@@ -1,12 +1,9 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
-import { applyOptions } from '../Core/applyOptions';
-import { toColor, type ColorInput } from '../Normalize/toColor';
+import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } from './ChartHost';
 import { ChartSeries } from './Models/ChartSeries';
 import { CartesianChartBase } from './CartesianChartBase';
-import { Color } from '../Core/Color';
-import { Point } from '../Core/Point';
-import { ICanvas } from '../Drawing/ICanvas';
 
 /**
  * Line chart that renders connected data points with straight lines.

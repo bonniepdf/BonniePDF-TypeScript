@@ -1,9 +1,4 @@
-import { ICanvas } from '../Drawing/ICanvas';
-import { toColor, type ColorInput } from '../Normalize/toColor';
-import { ChartData, type ChartDataOptions } from './Models/ChartData';
-import { Color } from '../Core/Color';
-import { TextAlignment } from '../Elements/Text/TextAlignment';
-import { StandardFonts } from '../Typography/StandardFonts';
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ElementBase } from '../Elements/ElementBase';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../Elements/ElementOptions';
 import { RenderContext } from '../Rendering/RenderContext';
@@ -11,7 +6,9 @@ import { IRoleProvider } from '../Rendering/Tagging/IRoleProvider';
 import { IAltTextProvider } from '../Rendering/Tagging/IAltTextProvider';
 import { SemanticRole } from '../Rendering/Tagging/SemanticRole';
 import { renderTaggedChart } from './ChartTagging';
-import { toLength, type LengthInput } from '../Normalize/toLength';
+import { type ICanvas, toColor, type ColorInput, type Color, toLength, type LengthInput } from './ChartHost';
+import { CHART_THEMES, type ChartTheme } from './ChartTheme';
+import { ChartData, type ChartDataOptions } from './Models/ChartData';
 
 /**
  * Base class for all charts that provides common functionality for drawing charts
@@ -21,6 +18,7 @@ import { toLength, type LengthInput } from '../Normalize/toLength';
 /** Settable properties declared by {@link ChartBase} itself. */
 export const CHART_BASE_OPTION_KEYS = [
   ...ELEMENT_OPTION_KEYS,
+  'theme',
   'data',
   'title',
   'width',
@@ -33,30 +31,41 @@ export const CHART_BASE_OPTION_KEYS = [
 ] as const;
 
 /** Options common to every chart. */
-export type ChartBaseOptions = ElementOptions &
-  Partial<
-    Omit<
-      Pick<ChartBase, Exclude<(typeof CHART_BASE_OPTION_KEYS)[number], (typeof ELEMENT_OPTION_KEYS)[number]>>,
-      'backgroundColor' | 'data' | 'width' | 'height'
-    >
-  > & {
-    /** Chart width. Accepts a length: `800`, `'20cm'`, or `{ value, unit }`. */
-    width?: LengthInput;
-    /** Chart height. Accepts a length: `450`, `'12cm'`, or `{ value, unit }`. */
-    height?: LengthInput;
-    /** Chart content; accepts a ChartData instance or a nested options literal. */
-    data?: ChartData | ChartDataOptions;
-    /** Background fill. Accepts a palette token or hex. */
-    backgroundColor?: import('../Core/Color').Color | ColorInput;
-  };
+export type ChartBaseOptions = ElementOptions & Partial<
+  Omit<Pick<ChartBase, Exclude<(typeof CHART_BASE_OPTION_KEYS)[number], (typeof ELEMENT_OPTION_KEYS)[number]>>, 'backgroundColor' | 'data' | 'width' | 'height'>
+> & {
+  /** Chart width. Accepts a length: `800`, `'20cm'`, or `{ value, unit }`. */
+  width?: LengthInput;
+  /** Chart height. Accepts a length: `450`, `'12cm'`, or `{ value, unit }`. */
+  height?: LengthInput;
+  /** Chart content; accepts a ChartData instance or a nested options literal. */
+  data?: ChartData | ChartDataOptions;
+  /** Background fill. Accepts a palette token or hex. */
+  backgroundColor?: Color | ColorInput;
+};
 
 /** Provides sizing, styling, accessibility, and canvas helpers shared by all charts. */
 export abstract class ChartBase extends ElementBase implements IRoleProvider, IAltTextProvider {
-  // Title styling constants (matching SVG chart implementation)
-  private static readonly TITLE_FONT_SIZE = 20;
-  private static readonly TITLE_Y = 35;
-  private static readonly TITLE_FONT_FAMILY = StandardFonts.Helvetica;
-  private static readonly TITLE_COLOR = Color.fromHex('#333333');
+  private _theme: 'legacy' | 'modern' = 'legacy';
+  /** Appearance preset. Legacy preserves existing output; modern is opt-in. */
+  get theme(): 'legacy' | 'modern' {
+    return this._theme;
+  }
+  set theme(value: 'legacy' | 'modern') {
+    if (value !== 'legacy' && value !== 'modern') throw new RangeError('Invalid chart theme.');
+    this._theme = value;
+  }
+  /**
+   * The values and behaviours behind {@link theme}.
+   * @internal
+   */
+  get appearance(): ChartTheme {
+    return CHART_THEMES[this._theme];
+  }
+  /** @internal */
+  get usesStyledGeometry(): boolean {
+    return this.appearance.styledGeometry;
+  }
 
   private _data: ChartData = new ChartData();
 
@@ -177,20 +186,20 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   }
 
   /**
-   * Draws the chart title centered at the top.
+   * Draws the chart title in the theme's title style.
    * @param canvas The canvas to draw to
    * @param title The title text
    */
   protected drawTitle(canvas: ICanvas, title: string): void {
-    const centerX = this.width / 2;
+    const t = this.appearance;
     canvas.drawText(
-      centerX,
-      ChartBase.TITLE_Y,
+      t.titleX ?? this.width / 2,
+      t.titleY,
       title,
-      ChartBase.TITLE_COLOR,
-      ChartBase.TITLE_FONT_SIZE,
-      ChartBase.TITLE_FONT_FAMILY,
-      TextAlignment.Center
+      t.titleColor,
+      t.titleFontSize,
+      t.titleFontFamily,
+      t.titleAlignment
     );
   }
 

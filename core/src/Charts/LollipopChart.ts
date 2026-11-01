@@ -1,13 +1,10 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
-import { applyOptions } from '../Core/applyOptions';
-import { toColor, type ColorInput } from '../Normalize/toColor';
+import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } from './ChartHost';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
-import { Color } from '../Core/Color';
-import { Point } from '../Core/Point';
-import { ICanvas } from '../Drawing/ICanvas';
 
 /**
  * Lollipop chart that renders vertical lines (stems) with circular markers (heads).
@@ -69,11 +66,11 @@ export class LollipopChart extends CartesianChartBase {
    */
   protected override drawSeriesElements(
     canvas: ICanvas,
-    _data: ChartData,
+    data: ChartData,
     series: ChartSeries,
     coordinates: Point[],
-    _chartAreaWidth: number,
-    _chartAreaHeight: number,
+    chartAreaWidth: number,
+    chartAreaHeight: number,
     baselineY: number,
     _topY: number
   ): void {
@@ -82,7 +79,8 @@ export class LollipopChart extends CartesianChartBase {
     const headRadius =
       series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultHeadRadius;
 
-    this.drawLollipopStems(canvas, coordinates, baselineY, this.resolveSeriesColor(series), stemWidth);
+    const origin = this.valueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
+    this.drawLollipopStems(canvas, coordinates, origin, this.resolveSeriesColor(series), stemWidth);
     this.drawLollipopHeads(canvas, coordinates, this.resolveSeriesColor(series), headRadius);
   }
 
@@ -96,22 +94,21 @@ export class LollipopChart extends CartesianChartBase {
   }
 
   /**
-   * Draws lollipop stems from the axis baseline to each data point.
-   * In vertical mode: vertical lines from baselineY up to p.Y.
-   * In horizontal mode: horizontal lines from LeftPadding right to p.X.
+   * Draws lollipop stems from the value origin to each data point: vertical lines in vertical
+   * mode and horizontal lines in horizontal mode.
    */
   private drawLollipopStems(
     canvas: ICanvas,
     coordinates: Point[],
-    baselineY: number,
+    origin: number,
     color: Color,
     stemWidth: number
   ): void {
     for (const p of coordinates) {
       if (this.orientation === ChartOrientation.Horizontal) {
-        canvas.drawLine(CartesianChartBase.LEFT_PADDING, p.y, p.x, p.y, color, stemWidth);
+        canvas.drawLine(origin, p.y, p.x, p.y, color, stemWidth);
       } else {
-        canvas.drawLine(p.x, baselineY, p.x, p.y, color, stemWidth);
+        canvas.drawLine(p.x, origin, p.x, p.y, color, stemWidth);
       }
     }
   }

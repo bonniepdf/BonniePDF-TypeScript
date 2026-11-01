@@ -1287,7 +1287,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase',
     category: 'Comparison Charts',
     description:
-      'Eight landscape pages covering every chart type, from bar and line to pie and lollipop charts, each chart carrying alt text for screen readers.',
+      'Eight landscape pages with the modern chart theme, rounded gradient bars, coordinated comparison colours and a product-mix doughnut. Every chart includes alt text.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
@@ -2660,7 +2660,7 @@ export const examples: ExampleDef[] = [
     category: 'Finance & Reporting',
     tier: 'examples',
     description:
-      'A single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.',
+      'A landscape annual review with four KPIs, rounded gradient revenue bars, a revenue-mix doughnut and a product table, in a navy, blue and teal palette.',
     filename: 'financial-dashboard.pdf',
     generate: financialDashboard,
     dotnetClass: 'FinancialDashboardExample',
@@ -2680,7 +2680,7 @@ export const examples: ExampleDef[] = [
     category: 'Finance & Reporting',
     tier: 'examples',
     description:
-      'Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.',
+      'A landscape annual review with four KPIs, rounded gradient revenue bars, a revenue-mix doughnut and a product table, in a navy, blue and teal palette.',
     filename: 'financial-dashboard-classes.pdf',
     generate: financialDashboardClasses,
     dotnetClass: 'FinancialDashboardExample',

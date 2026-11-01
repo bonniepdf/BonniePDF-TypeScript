@@ -500,6 +500,20 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "rightToLeft"
       ],
       "via": "options"
+    },
+    "ChartTheme": {
+      "via": "options",
+      "tokens": [
+        "legacy",
+        "modern"
+      ]
+    },
+    "ChartGradientScope": {
+      "via": "options",
+      "tokens": [
+        "bar",
+        "plot"
+      ]
     }
   },
   "mixins": {
@@ -646,6 +660,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       },
       "isDecorative": {
         "kind": "boolean"
+      },
+      "theme": {
+        "kind": "enum:ChartTheme"
       }
     },
     "Cartesian": {
@@ -1042,6 +1059,30 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "lineBreak": {
           "kind": "boolean"
+        }
+      }
+    },
+    "ChartLinearGradient": {
+      "keys": {
+        "startColor": {
+          "kind": "color"
+        },
+        "endColor": {
+          "kind": "color"
+        },
+        "scope": {
+          "kind": "enum:ChartGradientScope"
+        }
+      }
+    },
+    "ChartBarStyle": {
+      "keys": {
+        "cornerRadius": {
+          "kind": "number",
+          "min": 0
+        },
+        "gradient": {
+          "kind": "object:ChartLinearGradient"
         }
       }
     }
@@ -1764,6 +1805,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           "kind": "number",
           "min": 0,
           "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
         }
       },
       "rules": [
@@ -1786,6 +1830,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           "kind": "number",
           "min": 0,
           "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
         }
       },
       "rules": [

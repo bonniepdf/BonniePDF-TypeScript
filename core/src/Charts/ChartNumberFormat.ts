@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 /**
  * Number formatting for chart text: data-point labels, the pie total and the axis ticks.
  *

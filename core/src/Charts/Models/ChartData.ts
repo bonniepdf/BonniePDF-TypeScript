@@ -1,6 +1,7 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ChartSeries, type ChartSeriesOptions } from './ChartSeries';
 import { AxisOptions, type AxisOptionsOptions } from './AxisOptions';
-import { applyOptions } from '../../Core/applyOptions';
+import { applyOptions } from '../ChartHost';
 
 /**
  * Data model for chart visualization.
@@ -29,7 +30,7 @@ export class ChartData {
     const { series, yAxis, xAxis, ...rest } = options ?? {};
     applyOptions(this, rest);
     if (series !== undefined) {
-      this.series = series.map(sr => (sr instanceof ChartSeries ? sr : new ChartSeries(sr)));
+      this.series = series.map((sr) => (sr instanceof ChartSeries ? sr : new ChartSeries(sr)));
     }
     if (yAxis !== undefined) this.yAxis = yAxis instanceof AxisOptions ? yAxis : new AxisOptions(yAxis);
     if (xAxis !== undefined) this.xAxis = xAxis instanceof AxisOptions ? xAxis : new AxisOptions(xAxis);

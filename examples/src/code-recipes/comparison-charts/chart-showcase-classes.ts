@@ -1,28 +1,14 @@
 /**
  * Chart Examples (Class API).
- * The same eight-page all-chart-types examples as Chart Examples, built with the class API: construct each chart model and assign properties. The output is identical.
+ * Eight landscape pages covering every chart type, from bar and line to pie and lollipop charts, each chart carrying alt text for screen readers.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
   Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
-  AccessibilityMode,
-  PageOrientation,
   TextBlock,
-  TextStyle,
-  TextElementBase,
-  TextAlignment,
   HorizontalStack,
-  Color,
-  ColorPalette,
-  Thickness,
-  StandardFonts,
-  WidthDistribution,
+  TextElementBase,
   ChartData,
-  ChartSeries,
-  ChartDataPoint,
   BarChart,
   LineChart,
   AreaChart,
@@ -30,515 +16,308 @@ import {
   DotPlotChart,
   GroupedBarChart,
   PieChart,
-  PdfAConformance,
+  StandardFonts,
   pageTemplate,
+  DocumentSettings,
+  DocumentMetadata,
+  PdfSize,
+  PageOrientation,
+  PdfAConformance,
+  AccessibilityMode,
+  TextStyle,
+  ColorPalette,
 } from '@bonniepdf/core';
-
-// ── Color palette ────────────────────────────────────────────────────────────
-const C_INDIGO = '#4f46e5';
+// Coordinated accents for readable comparisons.
+const C_BLUE = '#2563eb';
 const C_VIOLET = '#7c3aed';
-const C_PURPLE = '#a855f7';
-const C_FUCHSIA = '#d946ef';
-const C_PINK = '#ec4899';
-const C_ROSE = '#f43f5e';
-const C_ORANGE = '#f97316';
-const C_YELLOW = '#eab308';
-const C_LIME = '#84cc16';
-const C_GREEN = '#22c55e';
-const C_TEAL = '#14b8a6';
-const C_CYAN = '#06b6d4';
-const ALL_COLORS = [
-  C_INDIGO,
-  C_VIOLET,
-  C_PURPLE,
-  C_FUCHSIA,
-  C_PINK,
-  C_ROSE,
-  C_ORANGE,
-  C_YELLOW,
-  C_LIME,
-  C_GREEN,
-  C_TEAL,
-  C_CYAN,
-];
-
+const C_TEAL = '#0d9488';
+const ALL_COLORS = ['#2563eb', '#0d9488', '#7c3aed', '#d97706'];
 // ── Shared data ──────────────────────────────────────────────────────────────
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHART_BG = '#fafafa';
-
+const CHART_BG = '#ffffff';
+/** Twelve monthly data points from a values array. */
+const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' }));
 // ── Entry point ──────────────────────────────────────────────────────────────
-
-/**
- * The **class / construct-then-mutate** companion to `chart-showcase.ts`.
- *
- * Same eight-page tour of every chart type, authored the long way: `new` each
- * chart model and assign properties. This is the escape hatch the options-object
- * front door sits on top of. Renders **byte-for-byte identically** to the
- * options-style `chart-showcase.ts` (an equivalence test binds the two).
- */
 export function generate(): Document {
+  const year = new Date().getFullYear();
+  function pageFooter() {
+    const stack = new HorizontalStack({ widthDistribution: 'weighted' });
+    const textBlock1 = new TextBlock('BonniePDF Charting Examples');
+    textBlock1.fontName = StandardFonts.Helvetica;
+    textBlock1.fontSize = 10;
+    textBlock1.color = 'slate-500';
+    stack.add(textBlock1);
+    const textBlock2 = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
+    textBlock2.fontName = StandardFonts.Helvetica;
+    textBlock2.fontSize = 10;
+    textBlock2.color = 'slate-500';
+    textBlock2.alignment = 'right';
+    stack.add(textBlock2, 1);
+    return stack;
+  }
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
-
-  function pageFooter() {
-    const stack = new HorizontalStack();
-    stack.widthDistribution = WidthDistribution.Weighted;
-
-    const left = new TextBlock('BonniePDF Charting Examples');
-    left.fontName = StandardFonts.Helvetica;
-    left.fontSize = 10;
-    left.color = ColorPalette.slate[500];
-    stack.add(left);
-
-    const right = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
-    right.fontName = StandardFonts.Helvetica;
-    right.fontSize = 10;
-    right.color = ColorPalette.slate[500];
-    right.alignment = TextAlignment.Right;
-    stack.add(right, 1);
-
-    return stack;
-  }
-
   settings.footerTemplate = pageTemplate({ default: pageFooter() });
-
   const metadata = new DocumentMetadata();
   metadata.title = 'Charting Examples';
   metadata.author = 'BonniePDF';
   metadata.subject = 'Charting Examples demonstrating all chart types';
-
   const doc = new Document(settings, metadata);
-
-  {
-    const title = new TextBlock('Bar Chart: Monthly Sales Report');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Vertical bars with grid lines and value labels');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_INDIGO);
-    series.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = 'Monthly Sales';
-    data.series = [series];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 15000;
-    data.yAxis.stepCount = 5;
-
-    const chart = new BarChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.barColor = Color.fromHex(C_INDIGO);
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';
-    doc.add(chart);
-  }
-
+  // ── Bar chart ──
+  pageHeader(
+    doc,
+    'Bar Chart: Monthly Sales Report',
+    'Rounded gradient bars, clear value labels and a modern chart theme'
+  );
+  const barChart3 = new BarChart();
+  barChart3.theme = 'modern';
+  barChart3.barStyle = { cornerRadius: 6, gradient: { startColor: '#60a5fa', endColor: C_BLUE, scope: 'bar' } };
+  barChart3.data = new ChartData({
+    title: 'Monthly Sales',
+    series: [
+      {
+        color: C_BLUE,
+        dataPoints: months([4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800]),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
+  });
+  barChart3.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';
+  barChart3.height = 400;
+  barChart3.stretchToFit = true;
+  barChart3.barColor = C_BLUE;
+  barChart3.fontFamily = StandardFonts.Helvetica;
+  barChart3.labelFontSize = 9;
+  barChart3.backgroundColor = CHART_BG;
+  doc.add(barChart3);
   doc.addPage();
-
-  {
-    const title = new TextBlock('Grouped Bar Chart: Quarterly Revenue');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Comparison of three product lines across all months');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const electronics = new ChartSeries();
-    electronics.color = Color.fromHex(C_INDIGO);
-    electronics.name = 'Electronics';
-    electronics.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const clothing = new ChartSeries();
-    clothing.color = Color.fromHex(C_ROSE);
-    clothing.name = 'Clothing';
-    clothing.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const home = new ChartSeries();
-    home.color = Color.fromHex(C_GREEN);
-    home.name = 'Home & Garden';
-    home.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 15000;
-    data.yAxis.stepCount = 5;
-    data.series = [electronics, clothing, home];
-
-    const chart = new GroupedBarChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.showValueLabels = true;
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText =
-      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.';
-    doc.add(chart);
-  }
-
+  // ── Grouped bar chart ──
+  pageHeader(doc, 'Grouped Bar Chart: Monthly Revenue', 'Comparison of three product lines across all months');
+  const groupedBarChart4 = new GroupedBarChart();
+  groupedBarChart4.theme = 'modern';
+  groupedBarChart4.barStyle = { cornerRadius: 3 };
+  groupedBarChart4.data = new ChartData({
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
+    series: [
+      {
+        name: 'Electronics',
+        color: C_BLUE,
+        dataPoints: months([4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800]),
+      },
+      {
+        name: 'Clothing',
+        color: C_TEAL,
+        dataPoints: months([3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200]),
+      },
+      {
+        name: 'Home & Garden',
+        color: C_VIOLET,
+        dataPoints: months([2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800]),
+      },
+    ],
+  });
+  groupedBarChart4.altText =
+    'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.';
+  groupedBarChart4.height = 400;
+  groupedBarChart4.stretchToFit = true;
+  groupedBarChart4.showValueLabels = true;
+  groupedBarChart4.fontFamily = StandardFonts.Helvetica;
+  groupedBarChart4.backgroundColor = CHART_BG;
+  doc.add(groupedBarChart4);
   doc.addPage();
-
-  {
-    const title = new TextBlock('Line Chart: Monthly Revenue Trends');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Connected data points with markers and value labels');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_VIOLET);
-    series.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = 'Monthly Revenue';
-    data.series = [series];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 15000;
-    data.yAxis.stepCount = 5;
-    data.yAxis.legend = 'Revenue';
-    data.xAxis.legend = 'Month';
-
-    const chart = new LineChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.lineColor = Color.fromHex(C_VIOLET);
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.showValueLabels = true;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.';
-    doc.add(chart);
-  }
-
+  // ── Line chart ──
+  pageHeader(doc, 'Line Chart: Monthly Revenue Trends', 'Connected data points with markers and value labels');
+  const lineChart5 = new LineChart();
+  lineChart5.theme = 'modern';
+  lineChart5.data = new ChartData({
+    title: 'Monthly Revenue',
+    series: [
+      {
+        color: C_VIOLET,
+        dataPoints: months([4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800]),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
+    xAxis: { legend: 'Month' },
+  });
+  lineChart5.altText = 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.';
+  lineChart5.height = 400;
+  lineChart5.stretchToFit = true;
+  lineChart5.lineColor = C_VIOLET;
+  lineChart5.fontFamily = StandardFonts.Helvetica;
+  lineChart5.labelFontSize = 9;
+  lineChart5.showValueLabels = true;
+  lineChart5.backgroundColor = CHART_BG;
+  doc.add(lineChart5);
   doc.addPage();
-
-  {
-    const title = new TextBlock('Area Chart: Monthly Sales Performance');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Filled area under the line with configurable opacity');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_PURPLE);
-    series.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = 'Monthly Sales';
-    data.series = [series];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 15000;
-    data.yAxis.stepCount = 5;
-    data.yAxis.legend = 'Sales';
-    data.xAxis.legend = 'Month';
-
-    const chart = new AreaChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.areaColor = Color.fromHex(C_PURPLE);
-    chart.fillOpacity = 0.3;
-    chart.lineWidth = 2.5;
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.showValueLabels = true;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.';
-    doc.add(chart);
-  }
-
+  // ── Area chart ──
+  pageHeader(doc, 'Area Chart: Monthly Sales Performance', 'Filled area under the line with configurable opacity');
+  const areaChart6 = new AreaChart();
+  areaChart6.theme = 'modern';
+  areaChart6.data = new ChartData({
+    title: 'Monthly Sales',
+    series: [
+      {
+        color: C_TEAL,
+        dataPoints: months([4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800]),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Sales' },
+    xAxis: { legend: 'Month' },
+  });
+  areaChart6.altText =
+    'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.';
+  areaChart6.height = 400;
+  areaChart6.stretchToFit = true;
+  areaChart6.areaColor = C_TEAL;
+  areaChart6.fillOpacity = 0.3;
+  areaChart6.lineWidth = 2.5;
+  areaChart6.fontFamily = StandardFonts.Helvetica;
+  areaChart6.labelFontSize = 9;
+  areaChart6.showValueLabels = true;
+  areaChart6.backgroundColor = CHART_BG;
+  doc.add(areaChart6);
   doc.addPage();
-
-  {
-    const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Stems with circular heads - clear and minimal bar alternative');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_PINK);
-    series.dataPoints = ['Q1', 'Q2', 'Q3', 'Q4'].map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [4500, 6200, 8500, 11500][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = 'Quarterly Revenue';
-    data.series = [series];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 15000;
-    data.yAxis.stepCount = 5;
-    data.yAxis.legend = 'Revenue';
-    data.xAxis.legend = 'Quarter';
-
-    const chart = new LollipopChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.lollipopColor = Color.fromHex(C_PINK);
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.showValueLabels = true;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.';
-    doc.add(chart);
-  }
-
+  // ── Lollipop chart ──
+  pageHeader(doc, 'Lollipop Chart: Quarterly Metrics', 'Stems with circular heads - clear and minimal bar alternative');
+  const lollipopChart7 = new LollipopChart();
+  lollipopChart7.theme = 'modern';
+  lollipopChart7.data = new ChartData({
+    title: 'Quarterly Revenue',
+    series: [
+      {
+        color: C_VIOLET,
+        dataPoints: ['Q1', 'Q2', 'Q3', 'Q4'].map((label, i) => ({
+          label,
+          value: [4500, 6200, 8500, 11500][i],
+          labelFormat: 'N0',
+        })),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
+    xAxis: { legend: 'Quarter' },
+  });
+  lollipopChart7.altText = 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.';
+  lollipopChart7.height = 400;
+  lollipopChart7.stretchToFit = true;
+  lollipopChart7.lollipopColor = C_VIOLET;
+  lollipopChart7.fontFamily = StandardFonts.Helvetica;
+  lollipopChart7.labelFontSize = 9;
+  lollipopChart7.showValueLabels = true;
+  lollipopChart7.backgroundColor = CHART_BG;
+  doc.add(lollipopChart7);
   doc.addPage();
-
-  {
-    const title = new TextBlock('Dot Plot Chart: Product Performance');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Circular markers positioned along a value axis');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_TEAL);
-    series.dataPoints = ['Prod A', 'Prod B', 'Prod C', 'Prod D', 'Prod E', 'Prod F', 'Prod G', 'Prod H'].map(
-      (label, i) => {
-        const p = new ChartDataPoint();
-        p.label = label;
-        p.value = [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500][i];
-        p.labelFormat = 'N0';
-        return p;
-      }
-    );
-
-    const data = new ChartData();
-    data.title = 'Product Sales';
-    data.series = [series];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 12000;
-    data.yAxis.stepCount = 5;
-    data.yAxis.legend = 'Sales';
-    data.xAxis.legend = 'Product';
-
-    const chart = new DotPlotChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.dotColor = Color.fromHex(C_TEAL);
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.showValueLabels = true;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';
-    doc.add(chart);
-  }
-
+  // ── Dot plot chart ──
+  pageHeader(doc, 'Dot Plot Chart: Product Performance', 'Circular markers positioned along a value axis');
+  const dotPlotChart8 = new DotPlotChart();
+  dotPlotChart8.theme = 'modern';
+  dotPlotChart8.data = new ChartData({
+    title: 'Product Sales',
+    series: [
+      {
+        color: C_TEAL,
+        dataPoints: ['Prod A', 'Prod B', 'Prod C', 'Prod D', 'Prod E', 'Prod F', 'Prod G', 'Prod H'].map(
+          (label, i) => ({ label, value: [4500, 6200, 5800, 7200, 8500, 9100, 8200, 9500][i], labelFormat: 'N0' })
+        ),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 12000, stepCount: 5, legend: 'Sales' },
+    xAxis: { legend: 'Product' },
+  });
+  dotPlotChart8.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';
+  dotPlotChart8.height = 400;
+  dotPlotChart8.stretchToFit = true;
+  dotPlotChart8.dotColor = C_TEAL;
+  dotPlotChart8.fontFamily = StandardFonts.Helvetica;
+  dotPlotChart8.labelFontSize = 9;
+  dotPlotChart8.showValueLabels = true;
+  dotPlotChart8.backgroundColor = CHART_BG;
+  doc.add(dotPlotChart8);
   doc.addPage();
-
-  {
-    const year = new Date().getFullYear();
-
-    const title = new TextBlock(`Pie Chart: Monthly Sales ${year}`);
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock('Donut chart with legend and total value in the centre');
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const series = new ChartSeries();
-    series.color = Color.fromHex(C_INDIGO);
-    series.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [7234, 4891, 8456, 3127, 9542, 6789, 5234, 8901, 2456, 7890, 6123, 9876][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = `Monthly Sales ${year}`;
-    data.series = [series];
-
-    const chart = new PieChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.isDonut = true;
-    chart.totalLabel = 'Total';
-    chart.showLegend = true;
-    chart.colors = ALL_COLORS;
-    chart.backgroundColor = Color.white;
-
-    chart.data = data;
-    chart.altText = `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`;
-    doc.add(chart);
-  }
-
+  // ── Pie / donut chart ──
+  pageHeader(
+    doc,
+    `Doughnut Chart: Revenue Mix ${year}`,
+    'Four product lines, a coordinated palette and a clear revenue breakdown'
+  );
+  const pieChart9 = new PieChart();
+  pieChart9.theme = 'modern';
+  pieChart9.data = new ChartData({
+    title: `Product Revenue ${year}`,
+    series: [
+      {
+        color: C_BLUE,
+        dataPoints: ['Enterprise', 'Professional', 'Starter', 'Services'].map((label, i) => ({
+          label,
+          value: [910000, 650000, 446000, 222000][i],
+          labelFormat: 'N0',
+        })),
+      },
+    ],
+  });
+  pieChart9.altText = `Doughnut chart showing ${year} product revenue: Enterprise £910,000, Professional £650,000, Starter £446,000 and Services £222,000.`;
+  pieChart9.height = 400;
+  pieChart9.stretchToFit = true;
+  pieChart9.isDonut = true;
+  pieChart9.totalLabel = 'Total revenue (GBP)';
+  pieChart9.totalValueFormat = 'N0';
+  pieChart9.showLegend = true;
+  pieChart9.colors = ALL_COLORS;
+  pieChart9.backgroundColor = '#ffffff';
+  doc.add(pieChart9);
   doc.addPage();
-
-  {
-    const year = new Date().getFullYear();
-
-    const title = new TextBlock('Multi-Series Line Chart: Year-over-Year Comparison');
-    title.fontSize = 24;
-    title.color = ColorPalette.slate[800];
-    title.alignment = TextAlignment.Center;
-    title.margin = new Thickness(0, 0, 0, 10);
-    doc.add(title);
-
-    const subtitle = new TextBlock(`Comparing ${year - 1} and ${year} revenue with multiple series`);
-    subtitle.fontSize = 14;
-    subtitle.color = ColorPalette.slate[600];
-    subtitle.alignment = TextAlignment.Center;
-    subtitle.margin = new Thickness(0, 0, 0, 20);
-    doc.add(subtitle);
-
-    const prevYear = new ChartSeries();
-    prevYear.color = Color.fromHex(C_INDIGO);
-    prevYear.name = String(year - 1);
-    prevYear.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const thisYear = new ChartSeries();
-    thisYear.color = Color.fromHex(C_VIOLET);
-    thisYear.name = String(year);
-    thisYear.dataPoints = MONTH_LABELS.map((label, i) => {
-      const p = new ChartDataPoint();
-      p.label = label;
-      p.value = [75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000][i];
-      p.labelFormat = 'N0';
-      return p;
-    });
-
-    const data = new ChartData();
-    data.title = 'Year-over-Year Revenue Comparison';
-    data.series = [prevYear, thisYear];
-    data.yAxis.prefix = '£';
-    data.yAxis.maxValue = 150000;
-    data.yAxis.stepCount = 5;
-    data.yAxis.legend = 'Revenue';
-    data.xAxis.legend = 'Month';
-
-    const chart = new LineChart();
-    chart.height = 400;
-    chart.stretchToFit = true;
-    chart.fontFamily = StandardFonts.Helvetica;
-    chart.labelFontSize = 9;
-    chart.showValueLabels = true;
-    chart.backgroundColor = Color.fromHex(CHART_BG);
-
-    chart.data = data;
-    chart.altText = `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`;
-    doc.add(chart);
-  }
-
+  // ── Multi-series line chart ──
+  pageHeader(
+    doc,
+    'Multi-Series Line Chart: Year-over-Year Comparison',
+    `Comparing ${year - 1} and ${year} revenue with multiple series`
+  );
+  const lineChart10 = new LineChart();
+  lineChart10.theme = 'modern';
+  lineChart10.data = new ChartData({
+    title: 'Year-over-Year Revenue Comparison',
+    series: [
+      {
+        name: String(year - 1),
+        color: C_BLUE,
+        dataPoints: months([65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000]),
+      },
+      {
+        name: String(year),
+        color: C_VIOLET,
+        dataPoints: months([75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000]),
+      },
+    ],
+    yAxis: { prefix: '£', maxValue: 150000, stepCount: 5, legend: 'Revenue' },
+    xAxis: { legend: 'Month' },
+  });
+  lineChart10.altText = `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`;
+  lineChart10.height = 400;
+  lineChart10.stretchToFit = true;
+  lineChart10.fontFamily = StandardFonts.Helvetica;
+  lineChart10.labelFontSize = 9;
+  lineChart10.showValueLabels = true;
+  lineChart10.backgroundColor = CHART_BG;
+  doc.add(lineChart10);
   return doc;
+}
+// Local helpers and sample types used by this document.
+/** Adds a left-aligned title and subtitle above a chart page. */
+function pageHeader(doc: Document, title: string, subtitle: string): void {
+  const textBlock11 = new TextBlock(title);
+  textBlock11.fontName = StandardFonts.HelveticaBold;
+  textBlock11.fontSize = 22;
+  textBlock11.color = '#0f172a';
+  textBlock11.alignment = 'left';
+  textBlock11.margin = { bottom: 10 };
+  doc.add(textBlock11);
+  const textBlock12 = new TextBlock(subtitle);
+  textBlock12.fontSize = 11;
+  textBlock12.color = 'slate-600';
+  textBlock12.alignment = 'left';
+  textBlock12.margin = { bottom: 20 };
+  doc.add(textBlock12);
 }

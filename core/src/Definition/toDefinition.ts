@@ -1,3 +1,4 @@
+import { ChartBarStyle, ChartLinearGradient } from '../Charts/ChartBarStyle';
 import type { Document } from '../Document';
 import { getPageTemplateElements, PAGE_TEMPLATE_ELEMENT_KEYS, type PageTemplate } from '../Configuration/PageTemplate';
 import { DocumentSettings } from '../Configuration/DocumentSettings';
@@ -280,6 +281,8 @@ function blankOf(type: string): Obj {
 
 /** Fresh instances of the nested value classes, for their defaults. */
 const SHAPE_BLANK: Record<string, () => unknown> = {
+  ChartBarStyle: () => new ChartBarStyle(),
+  ChartLinearGradient: () => new ChartLinearGradient(),
   TextStyle: () => new TextStyle(),
   BorderColors: () => new BorderColors(),
   Axis: () => new AxisOptions(),

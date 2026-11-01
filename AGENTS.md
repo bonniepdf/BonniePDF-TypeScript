@@ -57,6 +57,8 @@ These are not TS quirks; they are correctness requirements of the format and the
 
 ### Build / runtime
 
+- Chart drawing files under `core/src/Charts/` with a generated header are maintained upstream. `core/chart-sources.json` pins their source inputs and file hashes; builds verify those hashes with `core/scripts/verify-chart-sources.mjs`. Change the authoritative source and regenerate both language bindings. Layout/tagging bindings preserve chart APIs and document output, and the generated files add no runtime dependency.
+
 - **Use static `import * as fs from 'fs'` in Node-only modules.** `tsup` compiles dynamic `require()` to a shim that throws _"Dynamic require of 'fs' is not supported"_ under Node ESM; a try/catch swallows it and the call silently no-ops. The browser bundle must not import `fs` at all.
 
 ### PDF/A + PDF/UA-1 compliance (the most accident-prone area)

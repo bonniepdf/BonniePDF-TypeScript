@@ -1,5 +1,5 @@
-import { applyOptions } from '../../Core/applyOptions';
-import { toLength, type LengthInput } from '../../Normalize/toLength';
+// Generated chart source. Do not edit here; the source manifest records its provenance.
+import { applyOptions, toLength, type LengthInput } from '../ChartHost';
 
 /**
  * Series-specific styling options for fine-grained control over appearance.

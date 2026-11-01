@@ -567,7 +567,7 @@ export const Placeholders = {
   image: (opts: { width: number; height: number }) => globalSource.image(opts),
   /** A PNG placeholder avatar icon of the requested square size (48 by default), as bytes. */
   avatar: (optsOrSize?: { size?: number } | number) => {
-    const size = typeof optsOrSize === 'number' ? optsOrSize : optsOrSize?.size ?? 48;
+    const size = typeof optsOrSize === 'number' ? optsOrSize : (optsOrSize?.size ?? 48);
     return globalSource.avatar(size);
   },
 
@@ -701,7 +701,7 @@ function buildPlaceholderAvatarPng(size: number, paletteIdx: number): Uint8Array
 
   // Head circle: center (cx, 0.38 * size), radius 0.20 * size
   const headCy = 0.38 * size;
-  const headR = 0.20 * size;
+  const headR = 0.2 * size;
 
   // Body/shoulders circle: center (cx, 1.05 * size), radius 0.55 * size
   const bodyCy = 1.05 * size;

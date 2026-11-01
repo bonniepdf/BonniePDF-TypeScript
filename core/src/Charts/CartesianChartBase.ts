@@ -1,16 +1,15 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
+import { drawPlacedLabel, type ChartLabelBox } from './Graphics/ChartLabels';
 import { formatChartNumber } from './ChartNumberFormat';
-import { ICanvas } from '../Drawing/ICanvas';
+import { type ICanvas, Color, Point, TextAlignment, StandardFonts, toLength, type LengthInput } from './ChartHost';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
 import { AxisOptions, type AxisOptionsOptions } from './Models/AxisOptions';
 import { ChartOrientation } from './ChartOrientation';
 import { ChartBase } from './ChartBase';
-import { Color } from '../Core/Color';
-import { Point } from '../Core/Point';
-import { TextAlignment } from '../Elements/Text/TextAlignment';
-import { StandardFonts } from '../Typography/StandardFonts';
-import { toLength, type LengthInput } from '../Normalize/toLength';
+import { CHART_THEMES, themedSeriesColor } from './ChartTheme';
+import { checkValueRange, isBelowOrigin, originFraction, valueFraction } from './Graphics/ChartValueScale';
 
 /**
  * Base class for Cartesian charts (charts with X and Y axes).
@@ -49,6 +48,30 @@ export type CartesianChartOptions = ChartBaseOptions &
 
 /** Provides shared axis, scale, grid, and label behavior for Cartesian charts. */
 export abstract class CartesianChartBase extends ChartBase {
+  private _labelBoxes: ChartLabelBox[] = [];
+  private _renderData?: ChartData;
+  protected drawPlacedLabel(
+    canvas: ICanvas,
+    x: number,
+    y: number,
+    text: string,
+    color: Color,
+    size: number,
+    family: string,
+    align: TextAlignment
+  ): void {
+    if (this.appearance.measuredLabels)
+      drawPlacedLabel(canvas, this._labelBoxes, this.width, this.height, x, y, text, color, size, family, align);
+    else canvas.drawText(x, y, text, color, size, family, align);
+  }
+
+  private get axisColor(): Color {
+    return this.appearance.axisColor;
+  }
+  private get gridLineColor(): Color {
+    return this.appearance.gridLineColor;
+  }
+
   // Layout constants (relative to chart height)
   protected static readonly TITLE_AREA_HEIGHT = 60;
   protected static readonly BOTTOM_PADDING = 70;
@@ -73,9 +96,9 @@ export abstract class CartesianChartBase extends ChartBase {
   protected static readonly AXIS_LABEL_FONT_SIZE = 10;
   protected static readonly LEGEND_FONT_SIZE = 11;
 
-  // Styling constants
-  protected static readonly AXIS_COLOR = Color.fromHex('#666666');
-  protected static readonly GRID_LINE_COLOR = Color.fromHex('#e0e0e0');
+  // Legacy styling constants; the active theme supplies the colours actually drawn.
+  protected static readonly AXIS_COLOR = CHART_THEMES.legacy.axisColor;
+  protected static readonly GRID_LINE_COLOR = CHART_THEMES.legacy.gridLineColor;
 
   /** Category-axis presentation owned by this chart. */
   public get xAxis(): AxisOptions {
@@ -134,7 +157,12 @@ export abstract class CartesianChartBase extends ChartBase {
    * This ensures consistent drawing order across all Cartesian chart types.
    */
   protected override drawContent(canvas: ICanvas, data: ChartData): void {
+    const previousData=this._renderData;
+    try {
+    this._labelBoxes = [];
+    this._renderData = data;
     if (data.series.length === 0) return;
+    checkValueRange(data.yAxis.minValue, data.yAxis.maxValue);
 
     const layout = this.calculateLayout(data);
 
@@ -175,12 +203,29 @@ export abstract class CartesianChartBase extends ChartBase {
     }
 
     // 8. Draw axis lines LAST (on top of everything to prevent overlap)
-    CartesianChartBase.drawAxisLines(canvas, layout.chartAreaWidth, layout.baselineY, layout.topY);
+    if (this.appearance.axisFrame)
+      CartesianChartBase.drawAxisLines(canvas, layout.chartAreaWidth, layout.baselineY, layout.topY);
+    else {
+      const baseline =
+        this.orientation === ChartOrientation.Horizontal
+          ? layout.baselineY
+          : this.valueOrigin(data, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY);
+      canvas.drawLine(
+        CartesianChartBase.LEFT_PADDING,
+        baseline,
+        CartesianChartBase.LEFT_PADDING + layout.chartAreaWidth,
+        baseline,
+        this.axisColor,
+        this.appearance.axisLineWidth
+      );
+    }
 
     // 9. Draw legend for multi-series charts
     if (this.showLegend && data.series.length > 1) {
       this.drawLegend(canvas, data, layout.chartAreaWidth);
     }
+
+    } finally {this._renderData=previousData;this._labelBoxes=[];}
   }
 
   /**
@@ -220,7 +265,7 @@ export abstract class CartesianChartBase extends ChartBase {
 
       for (let i = 0; i < dataPointCount; i++) {
         const y = topY + i * totalSpace + totalSpace / 2;
-        const normalizedValue = series.dataPoints[i].value / data.yAxis.maxValue;
+        const normalizedValue = valueFraction(series.dataPoints[i].value, data.yAxis.minValue, data.yAxis.maxValue);
         const x = CartesianChartBase.LEFT_PADDING + normalizedValue * chartAreaWidth;
         coordinates.push(new Point(x, y));
       }
@@ -229,13 +274,25 @@ export abstract class CartesianChartBase extends ChartBase {
 
       for (let i = 0; i < dataPointCount; i++) {
         const x = CartesianChartBase.LEFT_PADDING + i * totalSpace + totalSpace / 2;
-        const normalizedValue = series.dataPoints[i].value / data.yAxis.maxValue;
+        const normalizedValue = valueFraction(series.dataPoints[i].value, data.yAxis.minValue, data.yAxis.maxValue);
         const y = baselineY - normalizedValue * chartAreaHeight;
         coordinates.push(new Point(x, y));
       }
     }
 
     return coordinates;
+  }
+
+  /**
+   * Where bars, area fills and stems start: value zero limited to the axis range. A y coordinate in
+   * vertical mode and an x coordinate in horizontal mode.
+   * @internal
+   */
+  protected valueOrigin(data: ChartData, chartAreaWidth: number, chartAreaHeight: number, baselineY: number): number {
+    const fraction = originFraction(data.yAxis.minValue, data.yAxis.maxValue);
+    return this.orientation === ChartOrientation.Horizontal
+      ? CartesianChartBase.LEFT_PADDING + fraction * chartAreaWidth
+      : baselineY - fraction * chartAreaHeight;
   }
 
   /**
@@ -253,7 +310,8 @@ export abstract class CartesianChartBase extends ChartBase {
   ): void;
 
   /**
-   * Draws value labels next to data points for all series.
+   * Draws value labels beyond each point, away from the value origin: above or right of a value at
+   * or above it, below or left of a value below it.
    */
   protected drawValueLabels(
     canvas: ICanvas,
@@ -274,21 +332,24 @@ export abstract class CartesianChartBase extends ChartBase {
       for (let i = 0; i < series.dataPoints.length; i++) {
         const point = coordinates[i];
         const text = series.dataPoints[i].formattedValue;
+        const below = isBelowOrigin(series.dataPoints[i].value, data.yAxis.minValue, data.yAxis.maxValue);
 
         if (this.orientation === ChartOrientation.Horizontal) {
-          canvas.drawText(
-            point.x + offset,
+          this.drawPlacedLabel(
+            canvas,
+            below ? point.x - offset : point.x + offset,
             point.y - this.labelFontSize / 2,
             text,
             labelColor,
             this.labelFontSize,
             this.fontFamily,
-            TextAlignment.Left
+            below ? TextAlignment.Right : TextAlignment.Left
           );
         } else {
-          canvas.drawText(
+          this.drawPlacedLabel(
+            canvas,
             point.x,
-            point.y - offset - this.labelFontSize,
+            below ? point.y + offset : point.y - offset - this.labelFontSize,
             text,
             labelColor,
             this.labelFontSize,
@@ -310,7 +371,26 @@ export abstract class CartesianChartBase extends ChartBase {
   /**
    * Draws the legend showing all series names and colors.
    */
+  protected drawLegendSwatch(canvas: ICanvas, x: number, y: number, size: number, series: ChartSeries): void {
+    canvas.fillRect(x, y, size, size, this.resolveSeriesColor(series));
+  }
   protected drawLegend(canvas: ICanvas, data: ChartData, _chartAreaWidth: number): void {
+    if (this.appearance.flowLegend) {
+      let x = CartesianChartBase.LEFT_PADDING,
+        y = this.height - 42;
+      for (const series of data.series) {
+        const w = canvas.measureText(series.name, 11, this.fontFamily).width + 32;
+        if (x + w > this.width - 16 && x > CartesianChartBase.LEFT_PADDING) {
+          x = CartesianChartBase.LEFT_PADDING;
+          y += 18;
+        }
+        if (y + 12 > this.height - 4) break;
+        this.drawLegendSwatch(canvas, x, y, 12, series);
+        canvas.drawText(x + 18, y, series.name, this.axisColor, 11, this.fontFamily, TextAlignment.Left);
+        x += w;
+      }
+      return;
+    }
     const legendY = this.height - 40;
     const legendStartX = CartesianChartBase.LEFT_PADDING;
     const legendItemWidth = 150;
@@ -320,13 +400,13 @@ export abstract class CartesianChartBase extends ChartBase {
       const series = data.series[i];
       const x = legendStartX + i * legendItemWidth;
 
-      canvas.fillRect(x, legendY, colorBoxSize, colorBoxSize, this.resolveSeriesColor(series));
+      this.drawLegendSwatch(canvas, x, legendY, colorBoxSize, series);
 
       canvas.drawText(
         x + colorBoxSize + 5,
         legendY + colorBoxSize / 2 - CartesianChartBase.LEGEND_FONT_SIZE / 2,
         series.name,
-        CartesianChartBase.AXIS_COLOR,
+        this.axisColor,
         CartesianChartBase.LEGEND_FONT_SIZE,
         this.fontFamily,
         TextAlignment.Left
@@ -352,7 +432,7 @@ export abstract class CartesianChartBase extends ChartBase {
       const stepWidth = chartAreaWidth / stepCount;
       for (let i = 1; i <= stepCount; i++) {
         const x = CartesianChartBase.LEFT_PADDING + i * stepWidth;
-        canvas.drawLine(x, topY, x, baselineY, CartesianChartBase.GRID_LINE_COLOR, CartesianChartBase.GRID_LINE_WIDTH);
+        canvas.drawLine(x, topY, x, baselineY, this.gridLineColor, CartesianChartBase.GRID_LINE_WIDTH);
       }
     } else {
       const stepHeight = chartAreaHeight / stepCount;
@@ -360,7 +440,7 @@ export abstract class CartesianChartBase extends ChartBase {
         const y = baselineY - i * stepHeight;
         const x1 = CartesianChartBase.LEFT_PADDING;
         const x2 = CartesianChartBase.LEFT_PADDING + chartAreaWidth;
-        canvas.drawLine(x1, y, x2, y, CartesianChartBase.GRID_LINE_COLOR, CartesianChartBase.GRID_LINE_WIDTH);
+        canvas.drawLine(x1, y, x2, y, this.gridLineColor, CartesianChartBase.GRID_LINE_WIDTH);
       }
     }
   }
@@ -427,7 +507,7 @@ export abstract class CartesianChartBase extends ChartBase {
           x,
           baselineY + 8,
           label,
-          CartesianChartBase.AXIS_COLOR,
+          this.axisColor,
           CartesianChartBase.AXIS_LABEL_FONT_SIZE,
           this.fontFamily,
           TextAlignment.Center
@@ -444,7 +524,7 @@ export abstract class CartesianChartBase extends ChartBase {
           CartesianChartBase.LEFT_PADDING - 8,
           y - CartesianChartBase.AXIS_LABEL_FONT_SIZE / 2,
           label,
-          CartesianChartBase.AXIS_COLOR,
+          this.axisColor,
           CartesianChartBase.AXIS_LABEL_FONT_SIZE,
           this.fontFamily,
           TextAlignment.Right
@@ -471,7 +551,7 @@ export abstract class CartesianChartBase extends ChartBase {
         x,
         y,
         yAxis.legend,
-        CartesianChartBase.AXIS_COLOR,
+        this.axisColor,
         CartesianChartBase.LEGEND_FONT_SIZE,
         this.fontFamily,
         TextAlignment.Center
@@ -484,7 +564,7 @@ export abstract class CartesianChartBase extends ChartBase {
         x,
         y,
         yAxis.legend,
-        CartesianChartBase.AXIS_COLOR,
+        this.axisColor,
         CartesianChartBase.LEGEND_FONT_SIZE,
         this.fontFamily,
         90
@@ -496,7 +576,7 @@ export abstract class CartesianChartBase extends ChartBase {
         x,
         y,
         yAxis.legend,
-        CartesianChartBase.AXIS_COLOR,
+        this.axisColor,
         CartesianChartBase.LEGEND_FONT_SIZE,
         this.fontFamily,
         TextAlignment.Left
@@ -522,15 +602,7 @@ export abstract class CartesianChartBase extends ChartBase {
         chartAreaHeight / 2 +
         textWidth / 2 -
         CartesianChartBase.LEGEND_FONT_SIZE;
-      canvas.drawTextRotated(
-        x,
-        y,
-        legend,
-        CartesianChartBase.AXIS_COLOR,
-        CartesianChartBase.LEGEND_FONT_SIZE,
-        this.fontFamily,
-        90
-      );
+      canvas.drawTextRotated(x, y, legend, this.axisColor, CartesianChartBase.LEGEND_FONT_SIZE, this.fontFamily, 90);
     } else {
       const x = CartesianChartBase.LEFT_PADDING + chartAreaWidth / 2;
       // Center the legend in the space below the x-axis tick labels (within the
@@ -543,7 +615,7 @@ export abstract class CartesianChartBase extends ChartBase {
         x,
         y,
         legend,
-        CartesianChartBase.AXIS_COLOR,
+        this.axisColor,
         CartesianChartBase.LEGEND_FONT_SIZE,
         this.fontFamily,
         TextAlignment.Center
@@ -573,11 +645,12 @@ export abstract class CartesianChartBase extends ChartBase {
       for (let i = 0; i < dataPointCount; i++) {
         const y = topY + i * totalSpace + totalSpace / 2;
         const label = firstSeries.dataPoints[i].label;
-        canvas.drawText(
+        this.drawPlacedLabel(
+          canvas,
           CartesianChartBase.LEFT_PADDING - 8,
           y - CartesianChartBase.AXIS_LABEL_FONT_SIZE / 2,
           label,
-          CartesianChartBase.AXIS_COLOR,
+          this.axisColor,
           CartesianChartBase.AXIS_LABEL_FONT_SIZE,
           this.fontFamily,
           TextAlignment.Right
@@ -590,11 +663,12 @@ export abstract class CartesianChartBase extends ChartBase {
       for (let i = 0; i < dataPointCount; i++) {
         const x = CartesianChartBase.LEFT_PADDING + i * totalSpace + totalSpace / 2;
         const label = firstSeries.dataPoints[i].label;
-        canvas.drawText(
+        this.drawPlacedLabel(
+          canvas,
           x,
           labelY,
           label,
-          CartesianChartBase.AXIS_COLOR,
+          this.axisColor,
           CartesianChartBase.AXIS_LABEL_FONT_SIZE,
           this.fontFamily,
           TextAlignment.Center
@@ -629,7 +703,9 @@ export abstract class CartesianChartBase extends ChartBase {
    * (`barColor`, `lineColor`, `areaColor`, `dotColor`, `lollipopColor`).
    */
   protected resolveSeriesColor(series: ChartSeries): Color {
-    return series.hasColor ? series.color : this.getDefaultSeriesColor();
+    if (series.hasColor) return series.color;
+    const color = this.getDefaultSeriesColor();
+    return themedSeriesColor(this.appearance, color, (this._renderData ?? this.data).series.indexOf(series));
   }
 
   /**

@@ -1,6 +1,7 @@
 // Regenerates the examples assets the root README displays: a first-page SVG
 // preview and the full PDF behind it, for each document in README_TILES below.
 // Run with: pnpm generate-examples  (tsx scripts/generate-examples-assets.ts)
+// Pass asset names to refresh selected tiles: pnpm generate-examples financial-dashboard
 //
 // These assets used to be produced by hand, which meant nothing failed when
 // they went missing. Keep them reproducible: change an example, re-run
@@ -62,8 +63,13 @@ function inlineFonts(svg: string, fontFaceCss: string): string {
 
 async function main(): Promise<void> {
   let failures = 0;
+  const requested = process.argv.slice(2);
+  for (const name of requested) {
+    if (!README_TILES.some(([asset]) => asset === name)) throw new Error(`Unknown README asset: ${name}`);
+  }
 
   for (const [asset, exampleId] of README_TILES) {
+    if (requested.length && !requested.includes(asset)) continue;
     const def = examples.find(e => e.id === exampleId);
     if (!def) {
       console.error(`  x ${asset}: no example with id '${exampleId}' in the registry`);

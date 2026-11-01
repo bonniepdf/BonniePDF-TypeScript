@@ -8,6 +8,14 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ### Document Engine & API
 
+- Added opt-in `theme: 'modern'`, measured label spacing and `barStyle` rounded value ends/opaque linear gradients on bar and grouped-bar charts. SVG and native PDF share resolved vector geometry; modern SVG text uses PDF baselines. Styles round-trip through document definitions. Legacy output is unchanged.
+
+- **Charts honour `minValue`:** Cartesian charts now place values linearly between `yAxis.minValue` and `yAxis.maxValue`, so marks line up with the axis tick labels; before, a non-zero `minValue` moved the tick labels but not the data. Bars, grouped bars, area fills and lollipop stems start at zero limited to the axis range: a zero line inside the plot when the range crosses zero, the top edge when every value is negative. The modern theme draws its baseline at that zero line in vertical charts. Drawing a chart with series now throws a `RangeError` when `maxValue` is not greater than `minValue` or either is not finite, where it used to produce non-finite geometry. Charts with `minValue: 0` are unchanged.
+
+- **Chart value labels stay outside their marks:** A value below the axis origin (zero, limited to the axis range) is now labelled below its point, or to the left of it and right-aligned in horizontal charts, with the same gap as a label above. It used to be labelled on the far side of its own bar, stem or fill, where it was hidden by the mark. Applies to every cartesian chart in both themes; labels for values at or above the origin are unchanged. The modern theme still omits a moved label that would collide with another.
+
+- Chart drawing sources are shared with the standalone BonnieCharts engine and compiled into this package. Existing chart APIs, document layout, accessibility and output are preserved; no runtime dependency is added.
+
 - **Source layout matches the .NET implementation:** Internal source files are now named and split one type per file to match the .NET library: `ShowOnce`, `SkipOnce`, `ChartSeriesStyle`, `PageRenderOutput`, `PdfRenderResult`, `ImageFormat`, `ImageColorSpace` and `QrErrorCorrection` have their own modules, the encryption modules are named after their classes, and page-content compression goes through one `ContentCompression` helper. Public exports and output are unchanged.
 
 ## 2026.10.28

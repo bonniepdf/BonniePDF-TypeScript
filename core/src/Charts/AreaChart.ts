@@ -1,14 +1,10 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
-import { applyOptions } from '../Core/applyOptions';
-import { toColor, type ColorInput } from '../Normalize/toColor';
+import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas, toLength, type LengthInput } from './ChartHost';
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
-import { Color } from '../Core/Color';
-import { Point } from '../Core/Point';
-import { ICanvas } from '../Drawing/ICanvas';
-import { toLength, type LengthInput } from '../Normalize/toLength';
 
 /**
  * Area chart that renders a filled polygon with a line overlay.
@@ -92,7 +88,7 @@ export class AreaChart extends CartesianChartBase {
 
   /**
    * Draws the area chart elements for a single series (area fill and connecting line).
-   * In horizontal mode the area fill extends leftward from the line to the value-axis baseline.
+   * The fill spans from the line to the value origin, in either orientation.
    */
   protected override drawSeriesElements(
     canvas: ICanvas,
@@ -117,7 +113,8 @@ export class AreaChart extends CartesianChartBase {
           ? this.lineWidth
           : this.defaultLineWidth;
 
-    this.drawAreaFill(canvas, coordinates, baselineY, this.resolveSeriesColor(series), fillOpacity);
+    const origin = this.valueOrigin(_data, chartAreaWidth, chartAreaHeight, baselineY);
+    this.drawAreaFill(canvas, coordinates, origin, this.resolveSeriesColor(series), fillOpacity);
     this.drawConnectingLine(canvas, coordinates, this.resolveSeriesColor(series), lineWidth);
   }
 
@@ -129,9 +126,15 @@ export class AreaChart extends CartesianChartBase {
   }
 
   /**
-   * Draws the area fill as a single closed polygon spanning from the axis baseline to the line.
+   * Draws the area fill as a single closed polygon spanning from the value origin to the line.
    */
-  private drawAreaFill(canvas: ICanvas, coordinates: Point[], baselineY: number, color: Color, opacity: number): void {
+  private drawAreaFill(
+    canvas: ICanvas,
+    coordinates: Point[],
+    origin: number,
+    color: Color,
+    opacity: number
+  ): void {
     if (coordinates.length < 2) return;
 
     const fillColor = color.withAlpha(opacity);
@@ -141,14 +144,14 @@ export class AreaChart extends CartesianChartBase {
     if (this.orientation === ChartOrientation.Horizontal) {
       canvas.fillPath(
         [
-          new Point(CartesianChartBase.LEFT_PADDING, first.y),
+          new Point(origin, first.y),
           ...coordinates,
-          new Point(CartesianChartBase.LEFT_PADDING, last.y),
+          new Point(origin, last.y),
         ],
         fillColor
       );
     } else {
-      canvas.fillPath([new Point(first.x, baselineY), ...coordinates, new Point(last.x, baselineY)], fillColor);
+      canvas.fillPath([new Point(first.x, origin), ...coordinates, new Point(last.x, origin)], fillColor);
     }
   }
 

@@ -262,3 +262,10 @@ export { configurePlatform, type IPlatformIO } from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
 
 export * from './Prototyping/Placeholders';
+
+export {
+  ChartBarStyle,
+  ChartLinearGradient,
+  type ChartBarStyleOptions,
+  type ChartLinearGradientOptions,
+} from './Charts/ChartBarStyle';

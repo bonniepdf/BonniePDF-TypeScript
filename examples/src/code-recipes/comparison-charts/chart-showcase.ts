@@ -20,37 +20,15 @@ import {
   pageTemplate,
 } from '@bonniepdf/core';
 
-// ── Color palette ────────────────────────────────────────────────────────────
-const C_INDIGO = '#4f46e5';
+// Coordinated accents for readable comparisons.
+const C_BLUE = '#2563eb';
 const C_VIOLET = '#7c3aed';
-const C_PURPLE = '#a855f7';
-const C_FUCHSIA = '#d946ef';
-const C_PINK = '#ec4899';
-const C_ROSE = '#f43f5e';
-const C_ORANGE = '#f97316';
-const C_YELLOW = '#eab308';
-const C_LIME = '#84cc16';
-const C_GREEN = '#22c55e';
-const C_TEAL = '#14b8a6';
-const C_CYAN = '#06b6d4';
-const ALL_COLORS = [
-  C_INDIGO,
-  C_VIOLET,
-  C_PURPLE,
-  C_FUCHSIA,
-  C_PINK,
-  C_ROSE,
-  C_ORANGE,
-  C_YELLOW,
-  C_LIME,
-  C_GREEN,
-  C_TEAL,
-  C_CYAN,
-];
+const C_TEAL = '#0d9488';
+const ALL_COLORS = ['#2563eb', '#0d9488', '#7c3aed', '#d97706'];
 
 // ── Shared data ──────────────────────────────────────────────────────────────
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHART_BG = '#fafafa';
+const CHART_BG = '#ffffff';
 
 /** Twelve monthly data points from a values array. */
 const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' }));
@@ -99,14 +77,20 @@ export function generate(): Document {
   });
 
   // ── Bar chart ──
-  pageHeader(doc, 'Bar Chart: Monthly Sales Report', 'Vertical bars with grid lines and value labels');
+  pageHeader(
+    doc,
+    'Bar Chart: Monthly Sales Report',
+    'Rounded gradient bars, clear value labels and a modern chart theme'
+  );
   doc.add(
     new BarChart({
+      theme: 'modern',
+      barStyle: { cornerRadius: 6, gradient: { startColor: '#60a5fa', endColor: C_BLUE, scope: 'bar' } },
       data: new ChartData({
         title: 'Monthly Sales',
         series: [
           {
-            color: C_INDIGO,
+            color: C_BLUE,
             dataPoints: months([4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800]),
           },
         ],
@@ -115,7 +99,7 @@ export function generate(): Document {
       altText: 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.',
       height: 400,
       stretchToFit: true,
-      barColor: C_INDIGO,
+      barColor: C_BLUE,
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       backgroundColor: CHART_BG,
@@ -125,25 +109,27 @@ export function generate(): Document {
   doc.addPage();
 
   // ── Grouped bar chart ──
-  pageHeader(doc, 'Grouped Bar Chart: Quarterly Revenue', 'Comparison of three product lines across all months');
+  pageHeader(doc, 'Grouped Bar Chart: Monthly Revenue', 'Comparison of three product lines across all months');
   doc.add(
     new GroupedBarChart({
+      theme: 'modern',
+      barStyle: { cornerRadius: 3 },
       data: new ChartData({
         yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
         series: [
           {
             name: 'Electronics',
-            color: C_INDIGO,
+            color: C_BLUE,
             dataPoints: months([4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800]),
           },
           {
             name: 'Clothing',
-            color: C_ROSE,
+            color: C_TEAL,
             dataPoints: months([3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200]),
           },
           {
             name: 'Home & Garden',
-            color: C_GREEN,
+            color: C_VIOLET,
             dataPoints: months([2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800]),
           },
         ],
@@ -163,6 +149,7 @@ export function generate(): Document {
   pageHeader(doc, 'Line Chart: Monthly Revenue Trends', 'Connected data points with markers and value labels');
   doc.add(
     new LineChart({
+      theme: 'modern',
       data: new ChartData({
         title: 'Monthly Revenue',
         series: [
@@ -191,11 +178,12 @@ export function generate(): Document {
   pageHeader(doc, 'Area Chart: Monthly Sales Performance', 'Filled area under the line with configurable opacity');
   doc.add(
     new AreaChart({
+      theme: 'modern',
       data: new ChartData({
         title: 'Monthly Sales',
         series: [
           {
-            color: C_PURPLE,
+            color: C_TEAL,
             dataPoints: months([4500, 6200, 5800, 7200, 8500, 9100, 8200, 7800, 9500, 10200, 11500, 12800]),
           },
         ],
@@ -205,7 +193,7 @@ export function generate(): Document {
       altText: 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.',
       height: 400,
       stretchToFit: true,
-      areaColor: C_PURPLE,
+      areaColor: C_TEAL,
       fillOpacity: 0.3,
       lineWidth: 2.5,
       fontFamily: StandardFonts.Helvetica,
@@ -221,11 +209,12 @@ export function generate(): Document {
   pageHeader(doc, 'Lollipop Chart: Quarterly Metrics', 'Stems with circular heads - clear and minimal bar alternative');
   doc.add(
     new LollipopChart({
+      theme: 'modern',
       data: new ChartData({
         title: 'Quarterly Revenue',
         series: [
           {
-            color: C_PINK,
+            color: C_VIOLET,
             dataPoints: ['Q1', 'Q2', 'Q3', 'Q4'].map((label, i) => ({
               label,
               value: [4500, 6200, 8500, 11500][i],
@@ -239,7 +228,7 @@ export function generate(): Document {
       altText: 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.',
       height: 400,
       stretchToFit: true,
-      lollipopColor: C_PINK,
+      lollipopColor: C_VIOLET,
       fontFamily: StandardFonts.Helvetica,
       labelFontSize: 9,
       showValueLabels: true,
@@ -253,6 +242,7 @@ export function generate(): Document {
   pageHeader(doc, 'Dot Plot Chart: Product Performance', 'Circular markers positioned along a value axis');
   doc.add(
     new DotPlotChart({
+      theme: 'modern',
       data: new ChartData({
         title: 'Product Sales',
         series: [
@@ -280,23 +270,33 @@ export function generate(): Document {
   doc.addPage();
 
   // ── Pie / donut chart ──
-  pageHeader(doc, `Pie Chart: Monthly Sales ${year}`, 'Donut chart with legend and total value in the centre');
+  pageHeader(
+    doc,
+    `Doughnut Chart: Revenue Mix ${year}`,
+    'Four product lines, a coordinated palette and a clear revenue breakdown'
+  );
   doc.add(
     new PieChart({
+      theme: 'modern',
       data: new ChartData({
-        title: `Monthly Sales ${year}`,
+        title: `Product Revenue ${year}`,
         series: [
           {
-            color: C_INDIGO,
-            dataPoints: months([7234, 4891, 8456, 3127, 9542, 6789, 5234, 8901, 2456, 7890, 6123, 9876]),
+            color: C_BLUE,
+            dataPoints: ['Enterprise', 'Professional', 'Starter', 'Services'].map((label, i) => ({
+              label,
+              value: [910000, 650000, 446000, 222000][i],
+              labelFormat: 'N0',
+            })),
           },
         ],
       }),
-      altText: `Donut chart showing ${year} monthly sales share with a legend and total value in the centre.`,
+      altText: `Doughnut chart showing ${year} product revenue: Enterprise £910,000, Professional £650,000, Starter £446,000 and Services £222,000.`,
       height: 400,
       stretchToFit: true,
       isDonut: true,
-      totalLabel: 'Total',
+      totalLabel: 'Total revenue (GBP)',
+      totalValueFormat: 'N0',
       showLegend: true,
       colors: ALL_COLORS,
       backgroundColor: '#ffffff',
@@ -313,12 +313,13 @@ export function generate(): Document {
   );
   doc.add(
     new LineChart({
+      theme: 'modern',
       data: new ChartData({
         title: 'Year-over-Year Revenue Comparison',
         series: [
           {
             name: String(year - 1),
-            color: C_INDIGO,
+            color: C_BLUE,
             dataPoints: months([65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000]),
           },
           {
@@ -345,8 +346,16 @@ export function generate(): Document {
 
 // Local helpers and sample types used by this document.
 
-/** Adds a centred title + subtitle above a chart page. */
+/** Adds a left-aligned title and subtitle above a chart page. */
 function pageHeader(doc: Document, title: string, subtitle: string): void {
-  doc.add(new TextBlock(title, { fontSize: 24, color: 'slate-800', alignment: 'center', margin: { bottom: 10 } }));
-  doc.add(new TextBlock(subtitle, { fontSize: 14, color: 'slate-600', alignment: 'center', margin: { bottom: 20 } }));
+  doc.add(
+    new TextBlock(title, {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 22,
+      color: '#0f172a',
+      alignment: 'left',
+      margin: { bottom: 10 },
+    })
+  );
+  doc.add(new TextBlock(subtitle, { fontSize: 11, color: 'slate-600', alignment: 'left', margin: { bottom: 20 } }));
 }

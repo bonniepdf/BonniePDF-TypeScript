@@ -1,14 +1,10 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 import { formatChartNumber, sumChartNumbers } from './ChartNumberFormat';
 import { ChartData } from './Models/ChartData';
-import { applyOptions } from '../Core/applyOptions';
+import { applyOptions, Color, Point, type ICanvas, TextAlignment, StandardFonts } from './ChartHost';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartDataPoint } from './Models/ChartDataPoint';
 import { ChartBase } from './ChartBase';
-import { Color } from '../Core/Color';
-import { Point } from '../Core/Point';
-import { ICanvas } from '../Drawing/ICanvas';
-import { TextAlignment } from '../Elements/Text/TextAlignment';
-import { StandardFonts } from '../Typography/StandardFonts';
 
 /**
  * Pie chart that renders pie slices with a legend on the right side.
@@ -355,7 +351,7 @@ export class PieChart extends ChartBase {
     if (this.showTotal) {
       // The exact sum of the values as written, so 0.1 + 0.2 is 0.3 in every implementation.
       const totalText = `${this.totalLabel}: ${formatChartNumber(
-        sumChartNumbers(dataPoints.map(dp => dp.value)),
+        sumChartNumbers(dataPoints.map((dp) => dp.value)),
         this.totalValueFormat
       )}`;
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;

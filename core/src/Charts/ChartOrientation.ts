@@ -1,3 +1,4 @@
+// Generated chart source. Do not edit here; the source manifest records its provenance.
 /**
  * Controls the orientation of a Cartesian chart.
  */

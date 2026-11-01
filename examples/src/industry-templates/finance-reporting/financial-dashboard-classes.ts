@@ -1,358 +1,266 @@
 /**
  * Financial Dashboard (Class API).
- * Single-page A4 quarterly report with a full-bleed header, four KPI metrics, a 12-month bar chart, and a top-products table, in a warm earth-tone palette.
+ * A landscape annual review with four KPIs, gradient revenue bars, a layered donut and a product revenue table.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
-// The **class / construct-then-mutate** companion to `financial-dashboard.ts`.
-// Same single-page quarterly dashboard, authored the long way: `new` each
-// element and assign properties. It renders **byte-for-byte identically** to
-// the options-style original (an equivalence test binds the two). Reach for
-// the options form first; this variant exists to show what it desugars to.
-
 import {
   Document,
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  AccessibilityMode,
   PageOrientation,
-  TextBlock,
+  PdfAConformance,
+  AccessibilityMode,
   TextStyle,
-  TextAlignment,
+  BorderColors,
+  Color,
+  TextBlock,
   VerticalStack,
   Container,
   Table,
   Grid,
-  Color,
-  ColorPalette,
-  Thickness,
-  Border,
-  BorderColors,
+  Layers,
   StandardFonts,
-  ChartData,
-  ChartSeries,
-  ChartDataPoint,
   BarChart,
-  PdfAConformance,
+  PieChart,
+  type ColorInput,
+  type TextAlignmentInput,
+  type IElement,
 } from '@bonniepdf/core';
-
-// ── Brand colours - drawn from the BonniePDF logo palette ────────────────────
-const ESPRESSO = Color.fromHex('#442714');
-const TERRA = Color.fromHex('#956b51');
-const BROWN = Color.fromHex('#805e48');
-const SAND = Color.fromHex('#d2c8b7');
-const CREAM = Color.fromHex('#f4f1ef');
-const HEADER_MUTE = Color.fromHex('#b99a88');
-const ROW_ALT = Color.fromHex('#e8e0d8');
-const DELTA_POS = Color.fromHex('#2d7a3a');
-const DELTA_NEG = Color.fromHex('#b94040');
-
-// ── Main ──────────────────────────────────────────────────────────────────────
+const NAVY = '#0f172a';
+const BLUE = '#2563eb';
+const TEAL = '#0d9488';
+const VIOLET = '#7c3aed';
+const AMBER = '#d97706';
+const MUTED = '#475569';
+const LIGHT = '#cbd5e1';
+const BORDER = '#e2e8f0';
+const PAPER = '#f1f5f9';
+const WHITE = '#ffffff';
+const POSITIVE = '#047857';
 export function generate(): Document {
-  // Landscape, zero margin - layout elements carry their own padding
+  const year = new Date().getFullYear() - 1;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
+  const products = [
+    { name: 'Enterprise', revenue: 910, margin: 71, color: BLUE },
+    { name: 'Professional', revenue: 650, margin: 64, color: TEAL },
+    { name: 'Starter', revenue: 446, margin: 58, color: VIOLET },
+    { name: 'Services', revenue: 222, margin: 82, color: AMBER },
+  ] as const;
+  const total = revenue.reduce((sum, value) => sum + value, 0);
+  const grossProfit = products.reduce((sum, p) => sum + (p.revenue * p.margin) / 100, 0);
+  const totalLabel = '£' + (total / 1000).toFixed(2) + 'M';
+  const secondHalfGrowth =
+    (revenue.slice(6).reduce((a, b) => a + b, 0) / revenue.slice(0, 6).reduce((a, b) => a + b, 0) - 1) * 100;
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Landscape, 0);
+  settings.pageColor = PAPER;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(ColorPalette.slate[600]);
-  settings.pageColor = CREAM;
-
-  const today = new Date();
-  const currentQuarter = Math.floor(today.getMonth() / 3) + 1;
-  const quarter = currentQuarter === 1 ? 4 : currentQuarter - 1;
-  const year = currentQuarter === 1 ? today.getFullYear() - 1 : today.getFullYear();
-  const quarterLabel = `Q${quarter} ${year}`;
-  const title = `${quarterLabel} Financial Report`;
-  const generated = `Generated ${new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(today)}`;
-
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9).withColor(Color.fromHex(MUTED));
   const metadata = new DocumentMetadata();
-  metadata.title = title;
-  metadata.author = 'Sample Company';
-  metadata.subject = `${quarterLabel} financial dashboard - KPIs, monthly revenue chart, and product breakdown`;
-
+  metadata.title = 'Northstar - FY ' + year + ' Financial Dashboard';
+  metadata.author = 'Northstar';
+  metadata.subject = 'Annual performance review with revenue trends and product mix. Illustrative data.';
   const doc = new Document(settings, metadata);
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // 1.  Header bar
-  // ════════════════════════════════════════════════════════════════════════════
-
-  const companyStack = new VerticalStack();
-  const companyText = new TextBlock('Sample Company');
-  companyText.fontName = StandardFonts.HelveticaBold;
-  companyText.fontSize = 14;
-  companyText.color = CREAM;
-  companyStack.add(companyText);
-  const confidentialInternalUseOnlyText = new TextBlock('Confidential - Internal Use Only');
-  confidentialInternalUseOnlyText.fontName = StandardFonts.Helvetica;
-  confidentialInternalUseOnlyText.fontSize = 8;
-  confidentialInternalUseOnlyText.color = HEADER_MUTE;
-  confidentialInternalUseOnlyText.margin = new Thickness(0, 5, 0, 0);
-  companyStack.add(confidentialInternalUseOnlyText);
-
-  const reportTitle = new TextBlock(title);
-  reportTitle.fontName = StandardFonts.HelveticaBold;
-  reportTitle.fontSize = 13;
-  reportTitle.color = CREAM;
-  reportTitle.alignment = TextAlignment.Right;
-
-  const reportDate = new TextBlock(generated);
-  reportDate.fontName = StandardFonts.Helvetica;
-  reportDate.fontSize = 8;
-  reportDate.color = HEADER_MUTE;
-  reportDate.alignment = TextAlignment.Right;
-  reportDate.margin = new Thickness(0, 5, 0, 0);
-
-  const reportStack = new VerticalStack();
-  reportStack.add(reportTitle);
-  reportStack.add(reportDate);
-
-  const headerLayout = new Grid(1, 1);
-  headerLayout.border = Border.none;
-  headerLayout.cellPadding = 0;
-
-  headerLayout.addRow(companyStack, reportStack);
-
-  const header = new Container();
-  header.backgroundColor = ESPRESSO;
-  header.padding = new Thickness(24, 20, 24, 20);
-  header.child = headerLayout;
-
-  doc.add(header);
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // 2.  KPI strip - four equal-width metric cards
-  // ════════════════════════════════════════════════════════════════════════════
-
-  const totalRevenueStack = new VerticalStack();
-  const totalRevenueValueText = new TextBlock('£2.41M');
-  totalRevenueValueText.fontName = StandardFonts.HelveticaBold;
-  totalRevenueValueText.fontSize = 18;
-  totalRevenueValueText.color = ESPRESSO;
-  totalRevenueStack.add(totalRevenueValueText);
-  const totalRevenueText = new TextBlock('TOTAL REVENUE');
-  totalRevenueText.fontName = StandardFonts.Helvetica;
-  totalRevenueText.fontSize = 7;
-  totalRevenueText.color = BROWN;
-  totalRevenueText.margin = new Thickness(0, 4, 0, 0);
-  totalRevenueStack.add(totalRevenueText);
-  const totalRevenueDeltaText = new TextBlock('↑ 18.3% YoY');
-  totalRevenueDeltaText.fontName = StandardFonts.HelveticaBold;
-  totalRevenueDeltaText.fontSize = 7;
-  totalRevenueDeltaText.color = DELTA_POS;
-  totalRevenueDeltaText.margin = new Thickness(0, 4, 0, 0);
-  totalRevenueStack.add(totalRevenueDeltaText);
-  const totalRevenueCell = new Container();
-  totalRevenueCell.child = totalRevenueStack;
-  totalRevenueCell.padding = new Thickness(20, 16, 20, 16);
-
-  const grossProfitStack = new VerticalStack();
-  const grossProfitValueText = new TextBlock('£640K');
-  grossProfitValueText.fontName = StandardFonts.HelveticaBold;
-  grossProfitValueText.fontSize = 18;
-  grossProfitValueText.color = ESPRESSO;
-  grossProfitStack.add(grossProfitValueText);
-  const grossProfitText = new TextBlock('GROSS PROFIT');
-  grossProfitText.fontName = StandardFonts.Helvetica;
-  grossProfitText.fontSize = 7;
-  grossProfitText.color = BROWN;
-  grossProfitText.margin = new Thickness(0, 4, 0, 0);
-  grossProfitStack.add(grossProfitText);
-  const grossProfitDeltaText = new TextBlock('↑ 11.7% YoY');
-  grossProfitDeltaText.fontName = StandardFonts.HelveticaBold;
-  grossProfitDeltaText.fontSize = 7;
-  grossProfitDeltaText.color = DELTA_POS;
-  grossProfitDeltaText.margin = new Thickness(0, 4, 0, 0);
-  grossProfitStack.add(grossProfitDeltaText);
-  const grossProfitCell = new Container();
-  grossProfitCell.child = grossProfitStack;
-  grossProfitCell.padding = new Thickness(20, 16, 20, 16);
-  grossProfitCell.border = Border.leftOnly(0.75);
-  grossProfitCell.borderColors = BorderColors.leftOnly(SAND);
-
-  const newCustomersStack = new VerticalStack();
-  const newCustomersValueText = new TextBlock('3,814');
-  newCustomersValueText.fontName = StandardFonts.HelveticaBold;
-  newCustomersValueText.fontSize = 18;
-  newCustomersValueText.color = ESPRESSO;
-  newCustomersStack.add(newCustomersValueText);
-  const newCustomersText = new TextBlock('NEW CUSTOMERS');
-  newCustomersText.fontName = StandardFonts.Helvetica;
-  newCustomersText.fontSize = 7;
-  newCustomersText.color = BROWN;
-  newCustomersText.margin = new Thickness(0, 4, 0, 0);
-  newCustomersStack.add(newCustomersText);
-  const newCustomersDeltaText = new TextBlock('↑ 24.1% YoY');
-  newCustomersDeltaText.fontName = StandardFonts.HelveticaBold;
-  newCustomersDeltaText.fontSize = 7;
-  newCustomersDeltaText.color = DELTA_POS;
-  newCustomersDeltaText.margin = new Thickness(0, 4, 0, 0);
-  newCustomersStack.add(newCustomersDeltaText);
-  const newCustomersCell = new Container();
-  newCustomersCell.child = newCustomersStack;
-  newCustomersCell.padding = new Thickness(20, 16, 20, 16);
-  newCustomersCell.border = Border.leftOnly(0.75);
-  newCustomersCell.borderColors = BorderColors.leftOnly(SAND);
-
-  const satisfactionStack = new VerticalStack();
-  const satisfactionValueText = new TextBlock('94.2%');
-  satisfactionValueText.fontName = StandardFonts.HelveticaBold;
-  satisfactionValueText.fontSize = 18;
-  satisfactionValueText.color = ESPRESSO;
-  satisfactionStack.add(satisfactionValueText);
-  const satisfactionText = new TextBlock('SATISFACTION');
-  satisfactionText.fontName = StandardFonts.Helvetica;
-  satisfactionText.fontSize = 7;
-  satisfactionText.color = BROWN;
-  satisfactionText.margin = new Thickness(0, 4, 0, 0);
-  satisfactionStack.add(satisfactionText);
-  const satisfactionDeltaText = new TextBlock('↓ 0.8%');
-  satisfactionDeltaText.fontName = StandardFonts.HelveticaBold;
-  satisfactionDeltaText.fontSize = 7;
-  satisfactionDeltaText.color = DELTA_NEG;
-  satisfactionDeltaText.margin = new Thickness(0, 4, 0, 0);
-  satisfactionStack.add(satisfactionDeltaText);
-  const satisfactionCell = new Container();
-  satisfactionCell.child = satisfactionStack;
-  satisfactionCell.padding = new Thickness(20, 16, 20, 16);
-  satisfactionCell.border = Border.leftOnly(0.75);
-  satisfactionCell.borderColors = BorderColors.leftOnly(SAND);
-
-  const kpiTable = new Grid(1, 1, 1, 1);
-  kpiTable.border = Border.none;
-  kpiTable.cellPadding = 0;
-  kpiTable.addRow(totalRevenueCell, grossProfitCell, newCustomersCell, satisfactionCell);
-
-  doc.add(kpiTable);
-
-  const kpiRule = new Container();
-  kpiRule.backgroundColor = SAND;
-  kpiRule.height = 0.75;
-  doc.add(kpiRule);
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // 3.  Monthly revenue bar chart
-  // ════════════════════════════════════════════════════════════════════════════
-
-  const chartTitleCell = new Container();
-  chartTitleCell.padding = new Thickness(24, 14, 24, 6);
-  const monthlyRevenueTitleText = new TextBlock('MONTHLY REVENUE  (£000s)');
-  monthlyRevenueTitleText.fontName = StandardFonts.HelveticaBold;
-  monthlyRevenueTitleText.fontSize = 7;
-  monthlyRevenueTitleText.color = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
-  chartTitleCell.child = monthlyRevenueTitleText;
-  doc.add(chartTitleCell);
-
-  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
-
-  const series = new ChartSeries();
-  series.color = TERRA;
-  series.dataPoints = MONTHS.map((label, i) => {
-    const p = new ChartDataPoint();
-    p.label = label;
-    p.value = revenue[i];
-    return p;
-  });
-
-  const chartData = new ChartData();
-  chartData.series = [series];
-  chartData.yAxis.prefix = '£';
-  chartData.yAxis.maxValue = 250;
-  chartData.yAxis.stepCount = 5;
-
-  const barChart = new BarChart({
-    data: chartData,
-    altText: 'Bar chart of monthly revenue in thousands, ranging from 125 in January to 233 in December.',
-  });
-  barChart.height = 200;
-  barChart.stretchToFit = true;
-  barChart.barColor = TERRA;
-  barChart.fontFamily = StandardFonts.Helvetica;
-  barChart.labelFontSize = 8;
-  doc.add(barChart);
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // 4.  Top products table
-  // ════════════════════════════════════════════════════════════════════════════
-
-  const productRule = new Container();
-  productRule.backgroundColor = SAND;
-  productRule.height = 0.75;
-  doc.add(productRule);
-
-  const tableTitleCell = new Container();
-  tableTitleCell.padding = new Thickness(24, 14, 24, 6);
-  const topProductsText = new TextBlock('TOP PRODUCTS');
-  topProductsText.fontName = StandardFonts.HelveticaBold;
-  topProductsText.fontSize = 7;
-  topProductsText.color = BROWN; // TERRA fails at 4.15:1 on cream (needs 4.5:1)
-  tableTitleCell.child = topProductsText;
-  doc.add(tableTitleCell);
-
-  const productTable = new Table(2.2, 1, 1.4, 0.8);
-  productTable.border = new Border(0.5);
-  productTable.borderColors = new BorderColors(SAND);
-  productTable.cellPadding = 8;
-  productTable.headerBackgroundColor = ROW_ALT;
-  productTable.headerTextColor = ESPRESSO;
-
-  const productText = new TextBlock('Product');
-  productText.fontName = StandardFonts.HelveticaBold;
-  productText.fontSize = 8;
-  productText.color = ESPRESSO;
-  productText.alignment = TextAlignment.Left;
-  const unitsText = new TextBlock('Units');
-  unitsText.fontName = StandardFonts.HelveticaBold;
-  unitsText.fontSize = 8;
-  unitsText.color = ESPRESSO;
-  unitsText.alignment = TextAlignment.Right;
-  const revenueText = new TextBlock('Revenue');
-  revenueText.fontName = StandardFonts.HelveticaBold;
-  revenueText.fontSize = 8;
-  revenueText.color = ESPRESSO;
-  revenueText.alignment = TextAlignment.Right;
-  const marginText = new TextBlock('Margin');
-  marginText.fontName = StandardFonts.HelveticaBold;
-  marginText.fontSize = 8;
-  marginText.color = ESPRESSO;
-  marginText.alignment = TextAlignment.Right;
-  productTable.addHeader(productText, unitsText, revenueText, marginText);
-
-  const products = [
-    { name: 'Enterprise Plan', units: '142', revenue: '£890,400', margin: '71%' },
-    { name: 'Pro Plan', units: '1,204', revenue: '£722,400', margin: '64%' },
-    { name: 'Starter Plan', units: '2,468', revenue: '£493,600', margin: '58%' },
-    { name: 'Add-ons', units: '-', revenue: '£304,000', margin: '82%' },
-  ];
-
-  for (const p of products) {
-    const pNameText = new TextBlock(p.name);
-    pNameText.fontName = StandardFonts.Helvetica;
-    pNameText.fontSize = 8;
-    pNameText.color = ESPRESSO;
-    pNameText.alignment = TextAlignment.Left;
-    const pUnitsText = new TextBlock(p.units);
-    pUnitsText.fontName = StandardFonts.Helvetica;
-    pUnitsText.fontSize = 8;
-    pUnitsText.color = BROWN;
-    pUnitsText.alignment = TextAlignment.Right;
-    const pRevenueText = new TextBlock(p.revenue);
-    pRevenueText.fontName = StandardFonts.HelveticaBold;
-    pRevenueText.fontSize = 8;
-    pRevenueText.color = ESPRESSO;
-    pRevenueText.alignment = TextAlignment.Right;
-    const pMarginText = new TextBlock(p.margin);
-    pMarginText.fontName = StandardFonts.Helvetica;
-    pMarginText.fontSize = 8;
-    pMarginText.color = BROWN;
-    pMarginText.alignment = TextAlignment.Right;
-    productTable.addRow(pNameText, pUnitsText, pRevenueText, pMarginText);
-  }
-
-  const tableCell = new Container();
-  tableCell.padding = new Thickness(24, 0, 24, 20);
-  tableCell.child = productTable;
-  doc.add(tableCell);
-
+  const header = grid([2, 1], 0);
+  header.addRow(
+    stack([
+      text('NORTHSTAR  /  FINANCE', 9, '#67e8f9', true),
+      text('Performance at a glance', 25, WHITE, true, 'left', 7),
+      text('Annual revenue review  |  An expanding business, a stronger revenue mix', 9, LIGHT, false, 'left', 6),
+    ]),
+    stack([
+      text('FY ' + year, 20, WHITE, true, 'right'),
+      text('REVENUE  +18.3% YoY', 9, '#67e8f9', true, 'right', 8),
+      text('Board & investor overview', 8, LIGHT, false, 'right', 6),
+    ])
+  );
+  const container1 = new Container();
+  container1.backgroundColor = NAVY;
+  container1.padding = [28, 13];
+  container1.child = header;
+  doc.add(container1);
+  const container2 = new Container();
+  container2.height = 3;
+  container2.backgroundColor = BLUE;
+  doc.add(container2);
+  const metrics = grid([1, 1, 1, 1], 4);
+  metrics.addRow(
+    kpi(totalLabel, 'TOTAL REVENUE', '+18.3% vs prior year', BLUE),
+    kpi('£' + (grossProfit / 1000).toFixed(2) + 'M', 'GROSS PROFIT', '+£272K vs prior year', TEAL),
+    kpi(((grossProfit / total) * 100).toFixed(1) + '%', 'GROSS MARGIN', '+2.1 percentage points', VIOLET),
+    kpi('3,814', 'ACTIVE CUSTOMERS', '+24.1% vs prior year', BLUE)
+  );
+  const barChart3 = new BarChart();
+  barChart3.theme = 'modern';
+  barChart3.height = 164;
+  barChart3.stretchToFit = true;
+  barChart3.showValueLabels = false;
+  barChart3.fontFamily = StandardFonts.Helvetica;
+  barChart3.labelFontSize = 8;
+  barChart3.barStyle = { cornerRadius: 4, gradient: { startColor: '#60a5fa', endColor: BLUE, scope: 'bar' } };
+  barChart3.data = {
+    series: [{ name: 'Revenue', color: BLUE, dataPoints: months.map((label, i) => ({ label, value: revenue[i] })) }],
+    yAxis: { prefix: '£', maxValue: 300, stepCount: 6 },
+  };
+  barChart3.altText =
+    'Monthly revenue in thousands of pounds: 125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233. Annual total £2,228,000.';
+  const bars = barChart3;
+  const pieChart4 = new PieChart();
+  pieChart4.theme = 'modern';
+  pieChart4.height = 132;
+  pieChart4.stretchToFit = true;
+  pieChart4.isDonut = true;
+  pieChart4.showLegend = false;
+  pieChart4.showTotal = false;
+  pieChart4.colors = products.map(p => p.color);
+  pieChart4.data = { series: [{ dataPoints: products.map(p => ({ label: p.name, value: p.revenue })) }] };
+  pieChart4.altText =
+    'Revenue mix: Enterprise £910,000; Professional £650,000; Starter £446,000; Services £222,000. Total £2,228,000.';
+  const donut = pieChart4;
+  const container5 = new Container();
+  container5.width = 64;
+  container5.height = 64;
+  container5.cornerRadius = 32;
+  container5.backgroundColor = WHITE;
+  container5.verticalAlignment = 'middle';
+  container5.child = stack([
+    text(totalLabel, 12, NAVY, true, 'center'),
+    text('TOTAL REVENUE', 5.5, MUTED, true, 'center', 4),
+  ]);
+  const container6 = new Container();
+  container6.height = 132;
+  container6.horizontalAlignment = 'center';
+  container6.verticalAlignment = 'middle';
+  container6.child = container5;
+  const layers7 = new Layers();
+  layers7.primaryLayer = donut;
+  layers7.addForeground(container6);
+  // A white circular foreground and centred labels demonstrate native vector layering.
+  const donutLayers = layers7;
+  const legend = grid([1, 1], 1);
+  const legendItems = products.map(p => legendItem(p.name, Math.round((p.revenue / total) * 100) + '%', p.color));
+  legend.addRow(legendItems[0], legendItems[1]);
+  legend.addRow(legendItems[2], legendItems[3]);
+  const charts = grid([1.9, 1], 4);
+  charts.addRow(
+    panel('Revenue momentum', 'Monthly revenue (£000)  |  H2 +' + secondHalfGrowth.toFixed(1) + '% vs H1', [bars]),
+    panel('Revenue mix', 'A diversified product portfolio', [donutLayers, legend])
+  );
+  const table8 = new Table(...[2.4, 1.3, 1, 1]);
+  table8.border = 0.5;
+  table8.borderColors = new BorderColors(Color.fromHex(BORDER));
+  table8.cellPadding = 5;
+  table8.headerBackgroundColor = '#eff6ff';
+  table8.headerTextColor = NAVY;
+  const table = table8;
+  table.addHeader(
+    text('PRODUCT', 7, MUTED, true),
+    text('REVENUE', 7, MUTED, true, 'right'),
+    text('SHARE', 7, MUTED, true, 'right'),
+    text('MARGIN', 7, MUTED, true, 'right')
+  );
+  for (const p of products)
+    table.addRow(
+      text(p.name, 8, NAVY, true),
+      text('£' + (p.revenue * 1000).toLocaleString('en-GB'), 8, NAVY, true, 'right'),
+      text(Math.round((p.revenue / total) * 100) + '%', 8, MUTED, false, 'right'),
+      text(p.margin + '%', 8, POSITIVE, true, 'right')
+    );
+  const container9 = new Container();
+  container9.margin = { top: 7 };
+  container9.child = table;
+  const bottom = panel('Revenue by product', '', [container9]);
+  const container10 = new Container();
+  container10.padding = [4, 4];
+  container10.child = bottom;
+  const body = stack([metrics, charts, container10]);
+  const container11 = new Container();
+  container11.padding = [24, 8, 24, 0];
+  container11.child = body;
+  doc.add(container11);
+  const footer = grid([2, 1], 0);
+  footer.addRow(
+    text('NORTHSTAR  /  FY ' + year + '  /  Illustrative data in GBP', 7, MUTED),
+    text('CONFIDENTIAL  /  01', 7, MUTED, true, 'right')
+  );
+  const container12 = new Container();
+  container12.padding = [28, 9];
+  container12.child = footer;
+  doc.add(container12);
   return doc;
+}
+function text(
+  value: string,
+  size: number,
+  color: ColorInput,
+  bold = false,
+  align: TextAlignmentInput = 'left',
+  top = 0
+): TextBlock {
+  const textBlock13 = new TextBlock(value);
+  textBlock13.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  textBlock13.fontSize = size;
+  textBlock13.color = color;
+  textBlock13.alignment = align;
+  textBlock13.margin = { top };
+  return textBlock13;
+}
+function stack(children: IElement[]): VerticalStack {
+  const verticalStack14 = new VerticalStack();
+  for (const child of children) {
+    verticalStack14.add(child);
+  }
+  return verticalStack14;
+}
+function grid(columns: number[], padding: number): Grid {
+  const grid15 = new Grid(...columns);
+  grid15.border = 0;
+  grid15.cellPadding = padding;
+  return grid15;
+}
+function kpi(value: string, label: string, delta: string, accent: ColorInput): Container {
+  const container16 = new Container();
+  container16.backgroundColor = accent;
+  container16.height = 3;
+  const container17 = new Container();
+  container17.padding = [14, 8];
+  container17.child = stack([
+    text(label, 7, MUTED, true),
+    text(value, 22, NAVY, true, 'left', 4),
+    text(delta, 7, POSITIVE, true, 'left', 3),
+  ]);
+  const container18 = new Container();
+  container18.backgroundColor = WHITE;
+  container18.cornerRadius = 7;
+  container18.child = stack([container16, container17]);
+  return container18;
+}
+function panel(title: string, subtitle: string, children: IElement[]): Container {
+  const container19 = new Container();
+  container19.backgroundColor = WHITE;
+  container19.cornerRadius = 7;
+  container19.padding = 12;
+  container19.child = stack([
+    text(title, 12, NAVY, true),
+    ...(subtitle ? [text(subtitle, 7.5, MUTED, false, 'left', 4)] : []),
+    ...children,
+  ]);
+  return container19;
+}
+function legendItem(name: string, share: string, color: ColorInput): Container {
+  const row = grid([9, 100], 0);
+  const container20 = new Container();
+  container20.width = 5;
+  container20.height = 5;
+  container20.margin = { top: 2 };
+  container20.cornerRadius = 2.5;
+  container20.backgroundColor = color;
+  row.addRow(container20, text(name + '  ' + share, 7, MUTED));
+  const container21 = new Container();
+  container21.padding = [0, 3];
+  container21.child = row;
+  return container21;
 }

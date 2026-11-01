@@ -1,7 +1,6 @@
-import { Color } from '../../Core/Color';
-import { toColor, type ColorInput } from '../../Normalize/toColor';
+// Generated chart source. Do not edit here; the source manifest records its provenance.
+import { Color, toColor, type ColorInput, applyOptions } from '../ChartHost';
 import { ChartDataPoint, type ChartDataPointOptions } from './ChartDataPoint';
-import { applyOptions } from '../../Core/applyOptions';
 import { ChartSeriesStyle, type ChartSeriesStyleOptions } from './ChartSeriesStyle';
 
 /**
@@ -34,7 +33,7 @@ export class ChartSeries {
     const { dataPoints, style, ...rest } = options ?? {};
     applyOptions(this, rest);
     if (dataPoints !== undefined) {
-      this.dataPoints = dataPoints.map(p => (p instanceof ChartDataPoint ? p : new ChartDataPoint(p)));
+      this.dataPoints = dataPoints.map((p) => (p instanceof ChartDataPoint ? p : new ChartDataPoint(p)));
     }
     if (style !== undefined) {
       this.style = style instanceof ChartSeriesStyle ? style : new ChartSeriesStyle(style);

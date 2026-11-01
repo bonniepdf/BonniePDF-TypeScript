@@ -54,7 +54,11 @@ export function chartToSvg(chart: ChartBase, data: ChartData = chart.data): stri
     chart.width,
     chart.height,
     undefined,
-    chart.svgShapeRendering ? { shapeRendering: chart.svgShapeRendering } : undefined
+    chart.usesStyledGeometry
+      ? { shapeRendering: 'auto', pdfBaseline: chart.appearance.pdfTextBaseline }
+      : chart.svgShapeRendering
+        ? { shapeRendering: chart.svgShapeRendering }
+        : undefined
   );
 
   // Draw the chart

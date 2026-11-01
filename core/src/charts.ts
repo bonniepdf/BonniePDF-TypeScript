@@ -15,3 +15,10 @@ export { type LollipopChartOptions, LollipopChart } from './Charts/LollipopChart
 export { type GroupedBarChartOptions, GroupedBarChart } from './Charts/GroupedBarChart';
 export { type GroupedBarChartElementOptions, GroupedBarChartElement } from './Charts/GroupedBarChartElement';
 export { type PieChartOptions, PieChart } from './Charts/PieChart';
+
+export {
+  ChartBarStyle,
+  ChartLinearGradient,
+  type ChartBarStyleOptions,
+  type ChartLinearGradientOptions,
+} from './Charts/ChartBarStyle';

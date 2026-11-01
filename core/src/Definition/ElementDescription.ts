@@ -1956,6 +1956,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "showTotal": {
           "kind": "boolean"
+        },
+        "sliceGradient": {
+          "kind": "boolean"
         }
       },
       "rules": [

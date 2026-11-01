@@ -5,6 +5,9 @@ import { applyOptions, Color, Point, type ICanvas, TextAlignment, StandardFonts 
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartDataPoint } from './Models/ChartDataPoint';
 import { ChartBase } from './ChartBase';
+import type { ChartPathPlan } from './Graphics/ChartPathPlan';
+import { tintColor } from './Graphics/ChartTint';
+import { fillChartPath } from './Graphics/ChartVector';
 
 /**
  * Pie chart that renders pie slices with a legend on the right side.
@@ -21,6 +24,7 @@ export const PIE_CHART_OWN_OPTION_KEYS = [
   'totalValueFormat',
   'showLegend',
   'showTotal',
+  'sliceGradient',
 ] as const;
 
 /** The full option surface, base included. */
@@ -113,6 +117,17 @@ export class PieChart extends ChartBase {
    * Default is true.
    */
   showTotal: boolean = true;
+
+  /**
+   * Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
+   * own colour at the rim. Slice colours must be opaque. Default is false.
+   */
+  sliceGradient: boolean = false;
+
+  /** @internal */
+  override get usesStyledGeometry(): boolean {
+    return super.usesStyledGeometry || this.sliceGradient;
+  }
 
   /**
    * Draws the pie chart content.
@@ -253,8 +268,33 @@ export class PieChart extends ChartBase {
       const path = this.isDonut
         ? this.createAnnularSectorPath(startAngle, endAngle, layout)
         : this.createPieSlicePath(startAngle, endAngle, layout);
-      canvas.fillPath(path, color);
+      if (this.sliceGradient) fillChartPath(canvas, this.gradientSlice(path, startAngle, endAngle, color, layout));
+      else canvas.fillPath(path, color);
     }
+  }
+
+  /**
+   * A slice outline painted along its bisector, from its tint at the inner edge (the centre, or the
+   * donut hole) to its own colour at the rim.
+   */
+  private gradientSlice(path: Point[], startAngle: number, endAngle: number, color: Color, layout: PieLayout): ChartPathPlan {
+    const middle = (((startAngle + endAngle) / 2) * Math.PI) / 180;
+    const inner = this.isDonut ? layout.donutHoleRadius : 0;
+    return {
+      commands: [
+        ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+        { op: 'Z' as const, values: [] },
+      ],
+      color,
+      gradient: {
+        startX: layout.centerX + inner * Math.cos(middle),
+        startY: layout.centerY + inner * Math.sin(middle),
+        endX: layout.centerX + layout.radius * Math.cos(middle),
+        endY: layout.centerY + layout.radius * Math.sin(middle),
+        startColor: tintColor(color),
+        endColor: color,
+      },
+    };
   }
 
   /**

@@ -238,7 +238,7 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
     "modern-charts": {
       "_fixture": {
         "id": "document-definition/valid/modern-charts",
-        "description": "Modern theme, rounded bars and native opaque gradients survive definition round trips."
+        "description": "Modern theme, rounded bars, native opaque gradients and pie slice gradients survive definition round trips."
       },
       "_expect": {
         "pages": 1,
@@ -283,6 +283,40 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
                 "yAxis": {
                   "maxValue": 50
                 }
+              }
+            },
+            {
+              "type": "PieChart",
+              "width": 300,
+              "height": 180,
+              "altText": "Revenue mix",
+              "isDonut": true,
+              "sliceGradient": true,
+              "colors": [
+                "#2563eb",
+                "#0d9488",
+                "#7c3aed"
+              ],
+              "data": {
+                "series": [
+                  {
+                    "name": "Mix",
+                    "dataPoints": [
+                      {
+                        "label": "A",
+                        "value": 5
+                      },
+                      {
+                        "label": "B",
+                        "value": 3
+                      },
+                      {
+                        "label": "C",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ]
               }
             }
           ]

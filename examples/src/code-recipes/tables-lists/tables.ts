@@ -6,6 +6,8 @@
 import {
   Document,
   Heading,
+  Container,
+  HorizontalStack,
   Image,
   Placeholders,
   TextBlock,
@@ -14,6 +16,7 @@ import {
   TableRow,
   StandardFonts,
   VerticalStack,
+  type ColorInput,
   pageTemplate,
 } from '@bonniepdf/core';
 
@@ -93,10 +96,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   );
 
   const table = new Table({
-    columns: [34, 130, 130, 120],
+    columns: [46, 130, 130, 120],
     repeatHeadersOnNewPage: true,
-    headerBackgroundColor: 'blue-600',
-    headerTextColor: '#ffffff',
+    headerBackgroundColor: 'slate-100',
+    headerTextColor: 'slate-800',
+    border: { width: 0.5, color: 'slate-200' },
   });
 
   const headerCell = (text: string): TextBlock =>
@@ -108,20 +112,27 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   let rowIndex = 0;
   for (const emp of employees) {
     const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
-    const photo = new Image({
-      imageData: photoBytes,
-      width: 24,
-      height: 24,
-      fitMode: 'cover',
-      altText: `Photo of ${emp.name}`,
+    // The photo is cropped round by a clipping container the size of the photo.
+    const photo = new Container({
+      width: 34,
+      height: 34,
+      cornerRadius: 17,
+      clipContent: true,
+      child: new Image({
+        imageData: photoBytes,
+        width: 34,
+        height: 34,
+        fitMode: 'cover',
+        altText: `Photo of ${emp.name}`,
+      }),
     });
 
     const bg = rowIndex++ % 2 === 0 ? '#ffffff' : 'slate-50';
     const row = TableRow.fromElements(
       photo,
-      new TextBlock(emp.name, { fontSize: 10, color: 'slate-800' }),
-      new TextBlock(emp.role, { fontSize: 10, color: 'slate-600' }),
-      new TextBlock(emp.department, { fontSize: 10, color: 'slate-600' })
+      new TextBlock(emp.name, { fontSize: 10, color: 'slate-800', margin: { top: 10 } }),
+      new TextBlock(emp.role, { fontSize: 10, color: 'slate-600', margin: { top: 10 } }),
+      departmentPill(emp.department)
     );
     row.backgroundColor = bg;
     table.addRow(row);
@@ -161,4 +172,35 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   }
 
   return doc;
+}
+
+/** Each department's hue, so a department reads at a glance down the column. */
+const DEPARTMENT_HUES: Record<string, string> = {
+  Engineering: 'indigo',
+  Marketing: 'rose',
+  Sales: 'amber',
+  HR: 'emerald',
+  Finance: 'sky',
+  Design: 'violet',
+  Operations: 'teal',
+};
+
+/**
+ * A department as a small tinted pill: a light fill with dark text of the same hue. The auto-width
+ * stack sizes the pill to its text instead of letting it fill the cell.
+ */
+function departmentPill(department: string): HorizontalStack {
+  const hue = DEPARTMENT_HUES[department] ?? 'slate';
+  return new HorizontalStack({
+    widthDistribution: 'auto',
+    margin: { top: 9 },
+    children: [
+      new Container({
+        backgroundColor: `${hue}-100` as ColorInput,
+        cornerRadius: 8,
+        padding: [8, 3],
+        child: new TextBlock(department, { fontSize: 9, color: `${hue}-800` as ColorInput }),
+      }),
+    ],
+  });
 }

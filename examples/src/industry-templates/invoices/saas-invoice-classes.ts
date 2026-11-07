@@ -14,7 +14,9 @@ import {
   TextBlock,
   TextAlignment,
   Heading,
+  HorizontalStack,
   VerticalStack,
+  WidthDistribution,
   Container,
   Table,
   Grid,
@@ -30,8 +32,8 @@ import {
 
 // ── Palette ──────────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[900];
-const BODY = ColorPalette.slate[600];
-const MUTE = ColorPalette.slate[500];
+const BODY = ColorPalette.slate[700];
+const MUTE = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 const BRAND = ColorPalette.indigo[600];
 const PANEL = ColorPalette.slate[50];
@@ -82,7 +84,25 @@ export function generate(): Document {
 
   doc.add(rule(14));
 
-  doc.add(new Heading('Invoice'));
+  // ── Title with a payment-status pill ───────────────────────────────────────
+  const title = new Heading('Invoice');
+  title.fontName = StandardFonts.HelveticaBold;
+  title.fontSize = 26;
+  title.color = INK;
+
+  const pill = new Container();
+  pill.backgroundColor = ColorPalette.amber[100];
+  pill.cornerRadius = 10;
+  pill.padding = new Thickness(8, 5, 8, 5);
+  pill.margin = new Thickness(0, 6, 0, 0);
+  pill.child = tb('PAYMENT DUE', 8, ColorPalette.amber[900], { bold: true, align: TextAlignment.Center });
+
+  const titleRow = new HorizontalStack();
+  titleRow.widthDistribution = WidthDistribution.Weighted;
+  titleRow.margin = new Thickness(0, 0, 0, 4);
+  titleRow.add(title, 4);
+  titleRow.add(pill, 1);
+  doc.add(titleRow);
 
   // ── Bill-to / from ─────────────────────────────────────────────────────────
   const billTo = new VerticalStack();
@@ -102,6 +122,23 @@ export function generate(): Document {
   addr.addRow(billTo, from);
   doc.add(addr);
 
+  // ── Subscription summary strip ─────────────────────────────────────────────
+  const summary = new Grid(1, 1.4, 1);
+  summary.border = Border.none;
+  summary.cellPadding = 0;
+  summary.addRow(
+    fact('PLAN', 'Pro, billed monthly'),
+    fact('BILLING PERIOD', '18 Jun \u2013 17 Jul 2026'),
+    fact('CUSTOMER ID', 'CUS-20418')
+  );
+  const strip = new Container();
+  strip.backgroundColor = PANEL;
+  strip.cornerRadius = 6;
+  strip.padding = new Thickness(14, 10, 14, 10);
+  strip.margin = new Thickness(0, 0, 0, 16);
+  strip.child = summary;
+  doc.add(strip);
+
   // ── Line items (tagged table) ──────────────────────────────────────────────
   const items = new Table(3, 0.8, 1, 1);
   items.cellPadding = 8;
@@ -109,14 +146,15 @@ export function generate(): Document {
   items.headerBackgroundColor = PANEL;
   items.headerTextColor = INK;
   items.addHeader(
-    cell('Description', 9, INK, TextAlignment.Left, true),
-    cell('Qty', 9, INK, TextAlignment.Center, true),
-    cell('Unit', 9, INK, TextAlignment.Right, true),
-    cell('Amount', 9, INK, TextAlignment.Right, true)
+    cell('Description', 10, INK, TextAlignment.Left, true),
+    cell('Qty', 10, INK, TextAlignment.Center, true),
+    cell('Unit', 10, INK, TextAlignment.Right, true),
+    cell('Amount', 10, INK, TextAlignment.Right, true)
   );
 
   const lines: [string, number, number][] = [
     ['Pro plan - 25 seats (monthly)', 25, 18.0],
+    ['Proration - 5 seats added 4 Jun (14 of 30 days)', 5, 8.4],
     ['Additional storage - 2 TB', 2, 40.0],
     ['Premium support add-on', 1, 199.0],
     ['Egress overage - June', 1, 36.5],
@@ -127,10 +165,10 @@ export function generate(): Document {
     const amount = qty * unit;
     subtotal += amount;
     items.addRow(
-      cell(desc, 9, BODY, TextAlignment.Left),
-      cell(String(qty), 9, BODY, TextAlignment.Center),
-      cell(money(unit), 9, BODY, TextAlignment.Right),
-      cell(money(amount), 9, INK, TextAlignment.Right)
+      cell(desc, 10, BODY, TextAlignment.Left),
+      cell(String(qty), 10, BODY, TextAlignment.Center),
+      cell(money(unit), 10, BODY, TextAlignment.Right),
+      cell(money(amount), 10, INK, TextAlignment.Right)
     );
   }
   doc.add(items);
@@ -145,8 +183,8 @@ export function generate(): Document {
   totals.margin = new Thickness(0, 4, 0, 0);
   const totalRow = (label: string, value: string, bold = false): void => {
     totals.addRow(
-      cell(label, bold ? 11 : 9, bold ? INK : BODY, TextAlignment.Right, bold),
-      cell(value, bold ? 11 : 9, bold ? INK : BODY, TextAlignment.Right, bold)
+      cell(label, bold ? 15 : 10, bold ? INK : BODY, TextAlignment.Right, bold),
+      cell(value, bold ? 15 : 10, bold ? INK : BODY, TextAlignment.Right, bold)
     );
   };
   totalRow('Subtotal', money(subtotal));
@@ -157,14 +195,18 @@ export function generate(): Document {
   // ── Payment panel with QR ──────────────────────────────────────────────────
   const payHeading = new Heading('How to pay');
   payHeading.level = 2;
+  payHeading.fontName = StandardFonts.HelveticaBold;
+  payHeading.fontSize = 13;
+  payHeading.color = INK;
+  payHeading.margin = new Thickness(0, 14, 0, 2);
   doc.add(payHeading);
 
   const payInfo = new VerticalStack();
   payInfo.add(tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }));
-  payInfo.add(tb('Account name  Sample Company Ltd', 9, BODY, { mb: 2 }));
-  payInfo.add(tb('Sort code  04-00-72    Account  19483055', 9, BODY, { mb: 2 }));
-  payInfo.add(tb('Reference  INV-2026-0042', 9, BODY, { mb: 2 }));
-  payInfo.add(tb('Amount  ' + money(total), 9, INK, { bold: true }));
+  payInfo.add(tb('Account name  Sample Company Ltd', 10, BODY, { mb: 2 }));
+  payInfo.add(tb('Sort code  04-00-72    Account  19483055', 10, BODY, { mb: 2 }));
+  payInfo.add(tb('Reference  INV-2026-0042', 10, BODY, { mb: 2 }));
+  payInfo.add(tb('Amount  ' + money(total), 10, INK, { bold: true }));
 
   const qr = new QRCode();
   qr.data = 'https://pay.example.com/inv/INV-2026-0042';
@@ -189,7 +231,11 @@ export function generate(): Document {
   panel.child = payTable;
   doc.add(panel);
 
-  doc.add(tb('Thank you for your business. Payment is due within 14 days.', 8.5, MUTE, { mb: 0 }));
+  const thanks = new TextBlock('Thank you for your business. Payment is due within 14 days.');
+  thanks.fontSize = 9;
+  thanks.color = MUTE;
+  thanks.margin = new Thickness(0, 10, 0, 0);
+  doc.add(thanks);
 
   return doc;
 }
@@ -209,6 +255,15 @@ function tb(
   if (opts.align !== undefined) t.alignment = opts.align;
   if (opts.mb) t.margin = new Thickness(0, 0, 0, opts.mb);
   return t;
+}
+
+/** A small caps label over its value, for the subscription strip. */
+function fact(label: string, value: string): VerticalStack {
+  const stack = new VerticalStack();
+  stack.spacing = 3;
+  stack.add(tb(label, 8, MUTE, { bold: true }));
+  stack.add(tb(value, 10, INK, { bold: true }));
+  return stack;
 }
 
 function cell(content: string, size: number, color: Color, align: TextAlignment, bold = false): TextBlock {

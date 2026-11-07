@@ -1,36 +1,40 @@
 /**
  * Embedded-Font Metrics.
- * Why embedded TrueType makes alignment edges exact: BonniePDF measures from the font’s own advance widths, not approximate standard-14 tables. Set in Liberation Sans.
+ * Alignment measured from the embedded font’s own advance widths: four framed samples whose rules mark the measure, so every left, centre, right and justified edge can be seen landing on them. Set in Liberation Sans.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 /**
- * Embedded-Font Metrics — why an embedded font makes alignment edges exact.
+ * Embedded-Font Metrics — alignment you can check by eye.
  *
- * The standard-14 Type1 fonts (Helvetica, Times, …) are measured from approximate
- * AFM width tables. An embedded TrueType font instead carries its own `hmtx`
- * advance widths, so BonniePDF measures and places every glyph from the real
- * metrics. That precision is what makes right, centre, and justified edges land
- * exactly on the margin — the same alignment operations, but measured from the
- * font's own glyph widths rather than an approximation.
+ * An embedded TrueType font carries its own `hmtx` advance widths, and the same
+ * font program draws the text, so the widths BonniePDF measures are the widths
+ * every viewer shows. (A non-embedded standard font is measured from its
+ * published widths but drawn with whatever font the viewer substitutes.)
  *
- * This example renders the four alignments entirely in embedded Liberation Sans,
- * served from `/fonts/liberation/` (copied from `core/assets/fonts/` at build
- * time) and embedded as a compact glyph subset, and is authored through the
- * options-object front door: a font path is just a `fontName` / `fontFamily`
- * string, alignment is a `'left' | 'center' | 'right' | 'justify'` token.
- * PDF/A-2a + PDF/UA-1.
+ * Each sample sits in a frame whose left and right rules mark the measure the
+ * text was set to, with no padding between them, so the edges each alignment
+ * promises land on the rules. The font is Liberation Sans, served from
+ * `/fonts/liberation/` (copied from `core/assets/fonts/` at build time) and
+ * embedded as a subset. PDF/A-2a + PDF/UA-1.
  */
-import { Document, Heading, TextBlock, type TextAlignmentInput } from '@bonniepdf/core';
+import {
+  Container,
+  Document,
+  Heading,
+  HorizontalStack,
+  TextBlock,
+  VerticalStack,
+  type TextAlignmentInput,
+} from '@bonniepdf/core';
 
 // Liberation Sans — Regular for body text, Bold for headings.
 const SANS = '/fonts/liberation/LiberationSans-Regular.ttf';
 const SANS_BOLD = '/fonts/liberation/LiberationSans-Bold.ttf';
 
 const SAMPLE_TEXT =
-  'The quick brown fox jumps over the lazy dog. This sentence demonstrates how text alignment ' +
-  'affects the visual appearance of a paragraph. When text is justified, the word spacing is ' +
-  'adjusted so that both the left and right edges align perfectly with the margins, creating a ' +
-  'clean, professional look commonly seen in books and formal documents.';
+  'The quick brown fox jumps over the lazy dog. Every line here is measured from the advance ' +
+  'widths stored in the embedded font, the same font that draws it, so the edge this alignment ' +
+  'promises lands on the rule beside it in any viewer.';
 
 const BOOK_PARAS = [
   'In the beginning, there was only the vast emptiness of space, stretching infinitely in all directions. ' +
@@ -76,44 +80,81 @@ export function generate(): Document {
 
   doc.add(
     new TextBlock(
-      'The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries ' +
-        'its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and ' +
-        'justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.',
-      { margin: { bottom: 14 } }
+      'An embedded font carries its own advance widths, and the same font program draws the text, so the widths ' +
+        'measured during layout are the widths every reader sees. Each frame below marks the measure with a rule on ' +
+        'each side; the edges each alignment promises land on them.',
+      { lineHeight: 1.45, margin: { bottom: 18 } }
     )
   );
 
-  alignedSample(doc, 'Left Aligned (Default)', 's-left', 'left');
-  alignedSample(doc, 'Centre Aligned', 's-centre', 'center');
-  alignedSample(doc, 'Right Aligned', 's-right', 'right');
-  alignedSample(doc, 'Justified', 's-justify', 'justify');
+  doc.add(
+    new HorizontalStack({
+      spacing: 24,
+      widthDistribution: 'equal',
+      margin: { bottom: 18 },
+      children: [
+        framedSample('Left', 'left edge on the rule', 'left'),
+        framedSample('Centre', 'centred between the rules', 'center'),
+      ],
+    })
+  );
+  doc.add(
+    new HorizontalStack({
+      spacing: 24,
+      widthDistribution: 'equal',
+      margin: { bottom: 24 },
+      children: [
+        framedSample('Right', 'right edge on the rule', 'right'),
+        framedSample('Justified', 'both edges on the rules', 'justify'),
+      ],
+    })
+  );
 
-  // ── Book-style justified paragraphs ─────────────────────────────────────────
-  section(doc, 'Book-Style Justified Paragraphs', 'book');
-  for (const text of BOOK_PARAS) {
-    doc.add(new TextBlock(text, { fontName: SANS, alignment: 'justify', margin: { bottom: 8 } }));
-  }
+  // ── Book-style justified paragraphs, framed the same way ──────────────────
+  doc.add(
+    new Heading('Book-style justified paragraphs', {
+      tocIdentifier: 'book',
+      level: 2,
+      fontName: SANS_BOLD,
+      fontSize: 13,
+      color: 'slate-900',
+      margin: { bottom: 8 },
+    })
+  );
+  doc.add(
+    frame(
+      new VerticalStack({
+        spacing: 8,
+        children: BOOK_PARAS.map(
+          text => new TextBlock(text, { fontName: SANS, alignment: 'justify', lineHeight: 1.4 })
+        ),
+      })
+    )
+  );
 
   return doc;
 }
 
 // Local helpers and sample types used by this document.
 
-function section(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput = 'left'): void {
-  doc.add(
-    new Heading(title, {
-      tocIdentifier: tocId,
-      level: 2,
-      fontName: SANS_BOLD,
-      fontSize: 13,
-      color: 'indigo-600',
-      margin: { bottom: 6 },
-      alignment,
-    })
-  );
+/** A frame whose left and right rules mark the measure, with no padding between rule and text. */
+function frame(child: TextBlock | VerticalStack): Container {
+  return new Container({
+    border: { left: 0.75, right: 0.75, color: 'teal-500' },
+    backgroundColor: 'slate-50',
+    padding: { top: 8, bottom: 8 },
+    child,
+  });
 }
 
-function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignmentInput): void {
-  section(doc, title, tocId, alignment);
-  doc.add(new TextBlock(SAMPLE_TEXT, { alignment, margin: { bottom: 14 } }));
+/** One alignment: a heading, a caption saying what to look for, and the framed sample. */
+function framedSample(title: string, caption: string, alignment: TextAlignmentInput): VerticalStack {
+  return new VerticalStack({
+    spacing: 4,
+    children: [
+      new Heading(title, { level: 2, fontName: SANS_BOLD, fontSize: 12, color: 'slate-900' }),
+      new TextBlock(caption, { fontSize: 9, color: 'teal-700' }),
+      frame(new TextBlock(SAMPLE_TEXT, { alignment, fontSize: 10.5, lineHeight: 1.4 })),
+    ],
+  });
 }

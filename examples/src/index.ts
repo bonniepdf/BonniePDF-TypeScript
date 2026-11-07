@@ -775,7 +775,7 @@ export const examples: ExampleDef[] = [
     name: 'Embedded-Font Metrics',
     category: 'Fonts',
     description:
-      'Why embedded TrueType makes alignment edges exact: BonniePDF measures from the font’s own advance widths, not approximate standard-14 tables. Set in Liberation Sans.',
+      'Alignment measured from the embedded font’s own advance widths: four framed samples whose rules mark the measure, so every left, centre, right and justified edge can be seen landing on them. Set in Liberation Sans.',
     filename: 'embedded-font-metrics.pdf',
     generate: embeddedFontMetrics,
     thumbnails: false,
@@ -788,7 +788,7 @@ export const examples: ExampleDef[] = [
     name: 'Embedded-Font Metrics (Class API)',
     category: 'Fonts',
     description:
-      'The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, built with the class API: construct each element and assign properties. The output is identical.',
+      'The same framed alignment samples as Embedded-Font Metrics, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'embedded-font-metrics-classes.pdf',
     generate: embeddedFontMetricsClasses,
     thumbnails: false,

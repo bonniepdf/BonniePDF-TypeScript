@@ -24,6 +24,7 @@ import {
   Image,
   ImageFitMode,
   Spacer,
+  Table,
   Color,
   ColorPalette,
   Thickness,
@@ -61,6 +62,23 @@ const MARGIN = 72;
 const HERO_IMAGE = 'images/sean-pollock-PhYq704ffdA-unsplash.jpg';
 
 const COMPANY = 'Sample Company';
+
+/** The year's headline figures against the year before: line, this year, last year, change. */
+const FINANCIALS: [string, string, string, string][] = [
+  ['Revenue', '2,412', '2,044', '+18%'],
+  ['Gross profit', '1,566', '1,287', '+22%'],
+  ['Operating income', '516', '412', '+25%'],
+  ['Net income', '401', '322', '+25%'],
+  ['Earnings per share', '£1.86', '£1.49', '+25%'],
+];
+
+/** Revenue by business segment: name, £ millions, share of the total. */
+const SEGMENTS: [string, string, string][] = [
+  ['Platform', '1,250', '52%'],
+  ['Services', '669', '28%'],
+  ['Hardware', '288', '12%'],
+  ['Licensing', '205', '8%'],
+];
 const YEAR = 2025;
 const REPORT_TITLE = `Annual Report ${YEAR}`;
 
@@ -154,12 +172,9 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(performanceHeading);
   doc.add(kpiRow());
 
-  // ════════════════════════════════════════════════════════════════════════
-  //  Page 3 - operational review (flows naturally, repeating the bands)
-  // ════════════════════════════════════════════════════════════════════════
-  doc.addPage();
+  // ── Operational review: flows on from the highlights, repeating the bands on any further page ──
   const operationalHeading = sectionHeading('Operational Review');
-  operationalHeading.margin = new Thickness(0, 10, 0, 12);
+  operationalHeading.margin = new Thickness(0, 20, 0, 12);
   doc.add(operationalHeading);
   doc.add(
     body(
@@ -186,6 +201,20 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         `are grateful for your continued partnership.`
     )
   );
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  Page 3 - the numbers: the year against the last, and revenue by segment
+  // ════════════════════════════════════════════════════════════════════════
+  doc.addPage();
+  const financialHeading = sectionHeading('Financial Summary');
+  financialHeading.margin = new Thickness(0, 10, 0, 12);
+  doc.add(financialHeading);
+  doc.add(body(`Audited results for the year ended 31 December ${YEAR}, in £ millions, against the year before.`));
+  doc.add(financialSummary());
+  const segmentHeading = sectionHeading('Revenue by Segment');
+  segmentHeading.margin = new Thickness(0, 24, 0, 12);
+  doc.add(segmentHeading);
+  doc.add(segmentTable());
 
   return doc;
 }
@@ -413,4 +442,63 @@ function kpiCard(value: string, label: string, accent: Color): Container {
   card.padding = new Thickness(18, 16, 18, 16);
   card.child = stack;
   return card;
+}
+
+// ── Financial summary tables ────────────────────────────────────────────────
+
+/** A table cell in the report's body type. */
+function cell(text: string, color: Color, bold = false, alignment: TextAlignment = TextAlignment.Left): TextBlock {
+  const t = new TextBlock(text);
+  t.fontName = bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+  t.fontSize = 10;
+  t.color = color;
+  t.alignment = alignment;
+  return t;
+}
+
+/** A table in the report's style: a brand-blue header row and hairline borders. */
+function reportTable(...columns: number[]): Table {
+  const table = new Table(...columns);
+  table.cellPadding = 7;
+  table.border = new Border(0.5);
+  table.borderColors = new BorderColors(ColorPalette.slate[200]);
+  table.headerBackgroundColor = PRIMARY;
+  table.headerTextColor = Color.white;
+  return table;
+}
+
+/** This year against last, with the change in the brand's positive green. */
+function financialSummary(): Table {
+  const table = reportTable(2.2, 1, 1, 0.9);
+  table.addHeader(
+    cell('£ millions', Color.white, true),
+    cell(`FY${String(YEAR).slice(2)}`, Color.white, true, TextAlignment.Right),
+    cell(`FY${String(YEAR - 1).slice(2)}`, Color.white, true, TextAlignment.Right),
+    cell('Change', Color.white, true, TextAlignment.Right)
+  );
+  for (const [line, current, previous, change] of FINANCIALS)
+    table.addRow(
+      cell(line, INK),
+      cell(current, INK, true, TextAlignment.Right),
+      cell(previous, ColorPalette.slate[500], false, TextAlignment.Right),
+      cell(change, ColorPalette.emerald[700], true, TextAlignment.Right)
+    );
+  return table;
+}
+
+/** Each segment's revenue and its share of the total, which add up to the headline revenue. */
+function segmentTable(): Table {
+  const table = reportTable(2.2, 1, 1);
+  table.addHeader(
+    cell('Segment', Color.white, true),
+    cell('£ millions', Color.white, true, TextAlignment.Right),
+    cell('Share', Color.white, true, TextAlignment.Right)
+  );
+  for (const [segment, revenue, share] of SEGMENTS)
+    table.addRow(
+      cell(segment, INK),
+      cell(revenue, INK, true, TextAlignment.Right),
+      cell(share, ColorPalette.slate[500], false, TextAlignment.Right)
+    );
+  return table;
 }

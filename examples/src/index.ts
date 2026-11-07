@@ -2505,7 +2505,7 @@ export const examples: ExampleDef[] = [
     category: 'Finance & Reporting',
     tier: 'examples',
     description:
-      'An A4 annual-report template: a full-bleed navy cover with a hero photograph, then inner pages framed by blue header and footer bands with the logo, generation time, and page numbers.',
+      'An A4 annual-report template: a full-bleed navy cover with a hero photograph, a letter and operational review, and a financial summary page, framed by blue header and footer bands with the logo, generation time, and page numbers.',
     filename: 'annual-report.pdf',
     generate: annualReport,
     requiredAssets: ['images/sean-pollock-PhYq704ffdA-unsplash.jpg'],

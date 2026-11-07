@@ -16,6 +16,7 @@ import {
   pageTemplate,
   TextBlock,
   Heading,
+  Svg,
   type IElement,
 } from '@bonniepdf/core';
 
@@ -42,10 +43,10 @@ const RULE = ColorPalette.slate[200];
 // at the potential. That makes it a live piece of the document: change the
 // rating in the data and the graphic follows, no asset pipeline in between.
 //
-// Photography is what a real brochure leads with. It is deliberately absent
-// here: an example carrying placeholder images reads as unfinished, and the
-// layout leaves the plate positions and their captions for real photographs to
-// drop into.
+// The floor plans are drawn the same way: an SVG generated from the room data
+// below, so a changed room size redraws the plan. Photography is what a real
+// brochure leads with; it is deliberately absent here, because an example
+// carrying placeholder images reads as unfinished.
 //
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample property, agency, and figures
 // throughout. Nothing here is a valuation or property advice.
@@ -141,6 +142,26 @@ const ROOMS: Room[] = [
     imperial: '45\'11" × 27\'11"',
     note: 'South facing, lawn with paved terrace',
   },
+];
+
+/** [label, x, y, width, depth] in metres, front of the house at the top. Not to scale in the legal sense. */
+type PlanRoom = [label: string, x: number, y: number, width: number, depth: number];
+
+const GROUND_FLOOR: PlanRoom[] = [
+  ['Front reception', 0, 0, 4.05, 3.7],
+  ['Hall', 4.05, 0, 2.35, 4.2],
+  ['Rear reception', 0, 3.7, 4.1, 3.55],
+  ['WC', 4.1, 4.2, 2.3, 1.2],
+  ['Store', 4.1, 5.4, 2.3, 1.85],
+  ['Kitchen and dining', 0, 7.25, 6.4, 3.3],
+];
+
+const FIRST_FLOOR: PlanRoom[] = [
+  ['Principal bedroom', 0, 0, 4.05, 3.65],
+  ['Landing', 4.05, 0, 2.35, 2.4],
+  ['Bathroom', 4.05, 2.4, 2.35, 2.1],
+  ['Bedroom two', 0, 3.65, 4.05, 3.6],
+  ['Bedroom three', 4.05, 4.5, 2.35, 2.75],
 ];
 
 /**
@@ -305,6 +326,42 @@ export function generate(): Document {
   }
   doc.add(table);
 
+  // ── Floor plans, drawn as SVG from the room data ───────────────────────────
+
+  doc.add(h2('Floor plans'));
+  doc.add(
+    weightedRow(
+      [
+        new VerticalStack({
+          spacing: 4,
+          children: [
+            cell('Ground floor', { bold: true, size: 9.5, color: HEADING }),
+            new Svg({
+              svgData: floorPlan(GROUND_FLOOR),
+              width: 200,
+              altText:
+                'Ground floor plan: front reception and hall at the front, rear reception, WC and store behind, and the kitchen and dining room across the back.',
+            }),
+          ],
+        }),
+        new VerticalStack({
+          spacing: 4,
+          children: [
+            cell('First floor', { bold: true, size: 9.5, color: HEADING }),
+            new Svg({
+              svgData: floorPlan(FIRST_FLOOR),
+              width: 200,
+              altText:
+                'First floor plan: principal bedroom and landing at the front, bathroom off the landing, and bedrooms two and three at the back.',
+            }),
+          ],
+        }),
+      ],
+      { spacing: 24, mb: 4 }
+    )
+  );
+  doc.add(cell('Floor plans are for illustration only and are not to scale.', { size: 8.5, color: MUTED, mb: 4 }));
+
   // ── Energy rating ──────────────────────────────────────────────────────────
 
   doc.add(h2('Energy performance'));
@@ -361,6 +418,43 @@ export function generate(): Document {
 }
 
 // Local helpers and sample types used by this document.
+
+/** A coordinate in the plan's SVG units, rounded to a tenth so both languages write the same digits. */
+function n(value: number): string {
+  return String(Math.round(value * 10) / 10);
+}
+
+/**
+ * An SVG floor plan: one outlined rectangle per room, labelled with its name and size,
+ * inside a heavier outer wall. 24 SVG units to the metre.
+ */
+function floorPlan(rooms: PlanRoom[]): string {
+  const scale = 24;
+  const pad = 4;
+  const width = Math.max(...rooms.map(([, x, , w]) => x + w));
+  const depth = Math.max(...rooms.map(([, , y, , d]) => y + d));
+  const parts = rooms.map(([label, x, y, w, d]) => {
+    const cx = pad + (x + w / 2) * scale;
+    const cy = pad + (y + d / 2) * scale;
+    const size = w >= 3 ? `${w.toFixed(2)} × ${d.toFixed(2)} m` : '';
+    return (
+      `<rect x="${n(pad + x * scale)}" y="${n(pad + y * scale)}" width="${n(w * scale)}" height="${n(d * scale)}" fill="#ffffff" stroke="#64748b" stroke-width="1"/>` +
+      `<text x="${n(cx)}" y="${n(size ? cy - 1 : cy + 2.5)}" font-family="Helvetica" font-size="${w >= 3 ? 7.5 : 6.5}" font-weight="bold" fill="#1e293b" text-anchor="middle">${label}</text>` +
+      (size
+        ? `<text x="${n(cx)}" y="${n(cy + 8)}" font-family="Helvetica" font-size="6.5" fill="#475569" text-anchor="middle">${size}</text>`
+        : '')
+    );
+  });
+  const outerW = width * scale;
+  const outerD = depth * scale;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n(outerW + 2 * pad)} ${n(outerD + 2 * pad)}">` +
+    `<rect x="${pad}" y="${pad}" width="${n(outerW)}" height="${n(outerD)}" fill="#f8fafc"/>` +
+    parts.join('') +
+    `<rect x="${pad}" y="${pad}" width="${n(outerW)}" height="${n(outerD)}" fill="none" stroke="#1e293b" stroke-width="3"/>` +
+    `</svg>`
+  );
+}
 
 interface Room {
   name: string;

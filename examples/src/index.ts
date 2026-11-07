@@ -2386,7 +2386,7 @@ export const examples: ExampleDef[] = [
     tier: 'examples',
     region: 'UK',
     description:
-      'Estate agency particulars: guide price, key features, a metric and imperial room schedule, tenure, and an energy-rating graphic drawn from layout primitives.',
+      'Estate agency particulars: guide price, key features, a metric and imperial room schedule, floor plans drawn as SVG from the room data, tenure, and an energy-rating graphic drawn from layout primitives.',
     filename: 'property-particulars.pdf',
     generate: propertyParticulars,
     dotnetClass: 'PropertyParticularsExample',

@@ -28,6 +28,51 @@ import {
   Placeholders,
 } from '@bonniepdf/core';
 
+/** A community newsletter's three front-page stories: headline and paragraphs. */
+const ARTICLE: [string, string[]][] = [
+  [
+    'Community garden opens',
+    [
+      'The community garden on Mill Lane opened its gates on Saturday after two years of planning. Forty raised beds, a greenhouse and a tool store now stand on what was an empty car park behind the station.',
+      'Every bed has been taken for the first season, and a waiting list is open at the library desk. Volunteers meet on Wednesday evenings and Sunday mornings; no experience is needed and tools are provided.',
+    ],
+  ],
+  [
+    'Library open later',
+    [
+      'The central library will stay open until 8pm on Tuesdays and Thursdays from next month. The change follows a survey in which most respondents asked for evening access to study space.',
+      'The reading room has new tables with power at every seat, and study rooms can now be booked online up to a week ahead. Membership remains free for everyone who lives, works or studies in the town.',
+    ],
+  ],
+  [
+    'High Street works',
+    [
+      'Work to resurface the High Street begins on 12 January and is expected to last six weeks. The road will close between 8pm and 6am, and the number 4 bus will divert along Station Road at night.',
+      'Shops stay open throughout, and pavements will remain clear during trading hours. Updates will be posted on the noticeboard outside the town hall every Friday until the work is complete.',
+    ],
+  ],
+];
+
+/** The editor's note and the listings, set either side of the divider. */
+const EDITOR = [
+  'This is the last issue of the year, and the busiest. Thank you to everyone who sent in news, photographs and corrections; the newsletter is only as good as the town that writes it.',
+  'Next year we move to a monthly issue, delivered to every household on the first Saturday of the month. If you would like to help with deliveries in your street, leave your name at the library desk.',
+];
+const WHATS_ON = [
+  "The winter market returns to the square on the second weekend of December, with forty stalls, a choir on Saturday evening and the lighting of the tree at five o'clock on Sunday.",
+  'The repair café meets in the church hall on the first Sunday of each month. Bring a broken lamp, a torn coat or a bicycle that will not change gear, and leave with it working again.',
+];
+
+/** Six paragraphs of one feature, used to compare column splits. */
+const MARKET_HALL = [
+  "The market hall on Church Street was built in 1868 to give the weekly cattle market a roof. Its iron columns were cast in the town's own foundry, and the clock above the entrance was paid for by public subscription.",
+  'For a century the hall was the busiest building in the town. Farmers sold livestock on Tuesdays, and on Saturdays the floor filled with stalls selling cheese, cloth, ironmongery and seasonal produce.',
+  'The cattle market moved to the edge of town in 1972, and the hall stood half used for many years. A leaking roof and a failed heating system closed it to the public in 2015.',
+  'Restoration began in 2023 with a grant from the heritage fund and the work of a local building trust. The roof was relaid with the original slate, and the columns were stripped and repainted in their first colour.',
+  'The hall reopened in the spring with twenty permanent stalls, a café and a space for exhibitions. The clock, silent for nine years, strikes the hour again.',
+  'Guided tours run on the first Saturday of each month and take about an hour. They are free, but places are limited, so book at the library desk or at the café in the hall.',
+];
+
 /**
  * The **class / construct-then-mutate** companion to `multi-column-layouts.ts`.
  *
@@ -43,26 +88,16 @@ import {
  */
 export function generate(): Document {
   // Same seeded source and same call order as the options variant, so the
-  // filler text and images match byte-for-byte.
+  // placeholder images match byte-for-byte.
   const source = Placeholders.withSeed(42);
 
-  const articleColumns = ['Front Page', 'The Brief', 'Dispatches'].map(heading => ({
+  const articleColumns = ARTICLE.map(([heading, paragraphs]) => ({
     heading,
-    paragraphs: [source.paragraph(), source.paragraph()],
+    paragraphs,
     imageData: source.image({ width: 153, height: 64 }),
   }));
-  const dividerParagraphs = {
-    left: [source.paragraph(), source.paragraph()],
-    right: [source.paragraph(), source.paragraph()],
-  };
-  const balanceParagraphs = [
-    source.paragraph(),
-    source.paragraph(),
-    source.paragraph(),
-    source.paragraph(),
-    source.paragraph(),
-    source.paragraph(),
-  ];
+  const dividerParagraphs = { left: EDITOR, right: WHATS_ON };
+  const balanceParagraphs = MARKET_HALL;
 
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
@@ -112,7 +147,7 @@ export function generate(): Document {
   doc.add(h2Article);
 
   const articleDesc = new TextBlock(
-    'Three equal columns, each a VerticalStack holding its own heading, image and justified paragraphs. ' +
+    'Three equal columns, each a VerticalStack holding its own heading, image and paragraphs. ' +
       'The number of stack children is the number of columns; the stack\u2019s spacing (18pt here) is the gutter.'
   );
   articleDesc.margin = new Thickness(0, 0, 0, 10);
@@ -141,7 +176,7 @@ export function generate(): Document {
 
     for (const text of column.paragraphs) {
       const paragraph = new TextBlock(text);
-      paragraph.alignment = TextAlignment.Justify;
+      paragraph.alignment = TextAlignment.Left;
       col.add(paragraph);
     }
 
@@ -151,16 +186,11 @@ export function generate(): Document {
 
   // ── Columns with a divider ────────────────────────────────────────────────
 
-  doc.add(new PageBreak());
-
   const h2Divider = sectionHeading('Columns with a Divider', 's-divider', 0);
   doc.add(h2Divider);
 
   const dividerDesc = new TextBlock(
-    'A vertical rule between two weighted text columns. The rule is a fixed-width Container added ' +
-      'without a weight, so it keeps its own 2pt while the remaining width is split evenly between the ' +
-      'text columns. The row carries an explicit height and the rule matches it, so the rule spans the ' +
-      'whole block regardless of how the paragraphs inside fall.'
+    'A vertical rule between two weighted text columns: an unweighted 2pt Container keeps its width while the columns share the rest, and the row and the rule share one explicit height.'
   );
   dividerDesc.margin = new Thickness(0, 0, 0, 10);
   doc.add(dividerDesc);
@@ -168,12 +198,12 @@ export function generate(): Document {
   const divided = new HorizontalStack();
   divided.spacing = 20;
   divided.widthDistribution = WidthDistribution.Weighted;
-  divided.height = 223;
+  divided.height = 144;
   divided.add(columnOf(dividerParagraphs.left), 1);
 
   const rule = new Container();
   rule.width = 2;
-  rule.height = 223;
+  rule.height = 144;
   rule.backgroundColor = ColorPalette.slate[400];
   divided.add(rule);
 
@@ -242,13 +272,13 @@ function subCaption(text: string, topMargin: number): TextBlock {
   return caption;
 }
 
-/** A column of justified paragraphs with a uniform gap between them. */
+/** A column of paragraphs with a uniform gap between them. */
 function columnOf(paragraphs: string[]): VerticalStack {
   const column = new VerticalStack();
   column.spacing = 12;
   for (const text of paragraphs) {
     const paragraph = new TextBlock(text);
-    paragraph.alignment = TextAlignment.Justify;
+    paragraph.alignment = TextAlignment.Left;
     column.add(paragraph);
   }
   return column;

@@ -82,7 +82,7 @@ export function generate(): Document {
   comparison.add(
     comparisonColumn(
       'Padding on the outer box',
-      'The blue band is 16pt of padding: space the container reserves inside its own border.',
+      'The tinted band is 16pt of padding: space the container reserves inside its own border.',
       // Outer box owns the space via padding; the inner content sits on a
       // contrasting fill so the padding band is actually visible.
       paddingDemo()
@@ -91,7 +91,7 @@ export function generate(): Document {
   comparison.add(
     comparisonColumn(
       'Margin on the inner box',
-      'The blue band is 16pt of margin: space the inner element holds outside itself.',
+      'The tinted band is 16pt of margin: space the inner element holds outside itself.',
       // Outer box has no padding; the inner element pushes itself away from the
       // border with its own margin, producing the same gutter a different way.
       marginDemo()
@@ -122,14 +122,14 @@ export function generate(): Document {
 
   const placeholderLabel = new TextBlock('Image 100x60');
   placeholderLabel.fontSize = 10;
-  placeholderLabel.color = ColorPalette.amber[900];
+  placeholderLabel.color = ColorPalette.indigo[900];
   placeholderLabel.alignment = TextAlignment.Center;
 
   const placeholder = new Container();
   placeholder.margin = new Thickness(20);
   placeholder.width = 100; // Fixed size so the label's stated dimensions are honest.
   placeholder.height = 60;
-  placeholder.backgroundColor = ColorPalette.amber[400];
+  placeholder.backgroundColor = ColorPalette.indigo[200];
   placeholder.padding = new Thickness(6);
   placeholder.child = placeholderLabel;
   doc.add(placeholder);
@@ -174,9 +174,9 @@ export function generate(): Document {
   stack.margin = new Thickness(20, 6, 20, 6);
 
   for (const [bg, fg, text, topMargin] of [
-    [ColorPalette.green[100], ColorPalette.green[800], 'Item 1 in stack', false],
-    [ColorPalette.purple[100], ColorPalette.purple[800], 'Item 2 in stack (with top margin)', true],
-    [ColorPalette.red[100], ColorPalette.red[800], 'Item 3 in stack (with top margin)', true],
+    [ColorPalette.indigo[50], ColorPalette.indigo[900], 'Item 1 in stack', false],
+    [ColorPalette.indigo[100], ColorPalette.indigo[900], 'Item 2 in stack (with top margin)', true],
+    [ColorPalette.indigo[200], ColorPalette.indigo[900], 'Item 3 in stack (with top margin)', true],
   ] as [Color, Color, string, boolean][]) {
     const t = new TextBlock(text);
     t.fontSize = 10;
@@ -253,26 +253,26 @@ function contentChip(): Container {
   return chip;
 }
 
-/** Space created by the OUTER box's padding (the blue band is padding). */
+/** Space created by the OUTER box's padding (the tinted band is padding). */
 function paddingDemo(): Container {
   const box = new Container();
-  box.backgroundColor = ColorPalette.blue[200];
+  box.backgroundColor = ColorPalette.indigo[100];
   box.border = new Border(1);
-  box.borderColors = new BorderColors(ColorPalette.blue[500]);
+  box.borderColors = new BorderColors(ColorPalette.indigo[400]);
   box.padding = new Thickness(16); // The gutter you see IS this padding.
   box.child = contentChip();
   return box;
 }
 
-/** Space created by the INNER element's margin (the blue band is margin). */
+/** Space created by the INNER element's margin (the tinted band is margin). */
 function marginDemo(): Container {
   const inner = contentChip();
   inner.margin = new Thickness(16); // The gutter you see IS this margin.
 
   const box = new Container();
-  box.backgroundColor = ColorPalette.blue[200];
+  box.backgroundColor = ColorPalette.indigo[100];
   box.border = new Border(1);
-  box.borderColors = new BorderColors(ColorPalette.blue[500]);
+  box.borderColors = new BorderColors(ColorPalette.indigo[400]);
   box.padding = new Thickness(0); // No padding: the inner element spaces itself.
   box.child = inner;
   return box;

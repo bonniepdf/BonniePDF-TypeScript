@@ -543,7 +543,7 @@ export const examples: ExampleDef[] = [
     name: 'Multi-Column Layouts',
     category: 'Layout & Flow',
     description:
-      'Newspaper-style columns built from stacks: a three-column article with images, two text columns sharing a divider, and balanced versus ragged column heights.',
+      'Newspaper-style columns built from stacks: a three-story community newsletter with images, two text columns sharing a divider, and balanced versus ragged column heights.',
     filename: 'multi-column-layouts.pdf',
     generate: multiColumnLayouts,
     thumbnails: false,

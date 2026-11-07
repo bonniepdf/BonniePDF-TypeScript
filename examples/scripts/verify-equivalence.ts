@@ -58,6 +58,11 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
+    canonical: 'multi-column-layouts',
+    variant: 'multi-column-layouts-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
     canonical: 'text-alignment',
     variant: 'text-alignment-classes',
     why: 'class/mutation companion must desugar to the options-object form',

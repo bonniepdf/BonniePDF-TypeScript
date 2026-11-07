@@ -24,14 +24,16 @@ export class FontWriter {
   // ─── Type1 (standard, non-embedded) ─────────────────────────────────────────
 
   public writeType1Font(id: number, fontName: string): void {
-    this.writer.writeObject(
-      id,
-      new Map([
-        [PdfKeys.Common.Type, '/Font'],
-        [PdfKeys.Common.Subtype, '/Type1'],
-        [PdfKeys.Font.BaseFont, `/${fontName}`],
-      ])
-    );
+    const dict = new Map([
+      [PdfKeys.Common.Type, '/Font'],
+      [PdfKeys.Common.Subtype, '/Type1'],
+      [PdfKeys.Font.BaseFont, `/${fontName}`],
+    ]);
+    // Text is written as WinAnsi bytes. Without this entry a viewer reads them with the
+    // font's built-in StandardEncoding, which drops ’ “ ” – € and shows é as Ø.
+    // Symbol and ZapfDingbats keep their own built-in encodings (spec 03, standard fonts).
+    if (fontName !== 'Symbol' && fontName !== 'ZapfDingbats') dict.set(PdfKeys.Font.Encoding, '/WinAnsiEncoding');
+    this.writer.writeObject(id, dict);
   }
 
   // ─── Embedded TrueType (Type0 composite) ─────────────────────────────────────

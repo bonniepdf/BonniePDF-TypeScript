@@ -24,7 +24,7 @@ const INK = ColorPalette.slate[900];
 const BODY = ColorPalette.slate[700];
 const MUTE = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
-const BRAND = ColorPalette.indigo[600];
+const BRAND = ColorPalette.violet[600];
 const PANEL = ColorPalette.slate[50];
 
 /**

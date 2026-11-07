@@ -35,7 +35,7 @@ import {
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
-const PRIMARY = ColorPalette.indigo[700];
+const PRIMARY = ColorPalette.slate[700];
 const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
@@ -176,7 +176,7 @@ export function generate(): Document {
   const kpis = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { top: 6, bottom: 20 } });
   kpis.add(kpi('82%', 'Overall conformance', PRIMARY), 1);
   kpis.add(kpi('71 / 93', 'Controls implemented', PRIMARY), 1);
-  // 700, not 600: 600 falls to 2.86:1 against the indigo-50 tile panel, below
+  // 700, not 600: 600 falls to 2.86:1 against the slate-50 tile panel, below
   // the 3:1 large-text threshold this 20pt bold value gets.
   kpis.add(kpi('12', 'Open findings', ColorPalette.amber[700]), 1);
   kpis.add(kpi('2', 'Critical', ColorPalette.rose[600]), 1);
@@ -367,7 +367,7 @@ function metaItem(label: string, value: string): VerticalStack {
 
 function kpi(value: string, label: string, accent: ColorInput): Container {
   return new Container({
-    backgroundColor: ColorPalette.indigo[50],
+    backgroundColor: ColorPalette.slate[50],
     cornerRadius: 8,
     padding: [14, 12],
     child: new VerticalStack({

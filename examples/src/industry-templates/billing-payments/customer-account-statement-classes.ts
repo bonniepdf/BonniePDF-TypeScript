@@ -36,7 +36,7 @@ const INK = ColorPalette.slate[700];
 /** 600, not 400: 400 never clears 4.5:1 as body text on white. */
 const MUTED = ColorPalette.slate[600];
 
-const reportAccent = ColorPalette.indigo[700];
+const reportAccent = ColorPalette.blue[800];
 
 const RULE = ColorPalette.slate[200];
 
@@ -55,7 +55,7 @@ const RULE = ColorPalette.slate[200];
 // the options-object form (an equivalence test binds the two). Reach for the
 // options form first; this variant exists to show what it desugars to.
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.blue[800];
 const OVERDUE = ColorPalette.rose[700];
 const CREDIT = ColorPalette.emerald[700];
 
@@ -374,7 +374,7 @@ export function generate(): Document {
   closingBody.add(totalLine('Balance now due', money(closing, '£', 'en-GB'), { bold: true, size: 11, color: ACCENT }));
 
   const closingBox = new Container();
-  closingBox.backgroundColor = ColorPalette.indigo[50];
+  closingBox.backgroundColor = ColorPalette.blue[50];
   closingBox.cornerRadius = 6;
   closingBox.padding = new Thickness(12);
   closingBox.child = closingBody;

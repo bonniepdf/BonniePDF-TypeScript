@@ -134,7 +134,7 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
           fontName: StandardFonts.HelveticaBold,
           fontSize: 20,
           letterSpacing: 0.5,
-          color: 'indigo-700',
+          color: 'violet-800',
         }),
         text('Facilities and maintenance supplies', 9, 'slate-500'),
       ],
@@ -239,15 +239,15 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
   );
 
   const due = new Container({
-    backgroundColor: 'indigo-50',
+    backgroundColor: 'violet-50',
     cornerRadius: 6,
     padding: [10, 8],
     margin: { top: 6 },
     child: new HorizontalStack({
       widthDistribution: 'equal',
       children: [
-        text('Total due', 13, 'indigo-900', { bold: true }),
-        text(`£${money(totals.grossPence)}`, 13, 'indigo-900', { bold: true, align: 'right' }),
+        text('Total due', 13, 'violet-900', { bold: true }),
+        text(`£${money(totals.grossPence)}`, 13, 'violet-900', { bold: true, align: 'right' }),
       ],
     }),
   });

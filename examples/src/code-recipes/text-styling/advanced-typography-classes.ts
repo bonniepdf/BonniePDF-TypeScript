@@ -12,7 +12,13 @@ import {
   TextStyle,
   TextDecoration,
   Heading,
-  Color,
+  Container,
+  HorizontalStack,
+  VerticalStack,
+  WidthDistribution,
+  Border,
+  BorderColors,
+  type IElement,
   ColorPalette,
   Thickness,
   StandardFonts,
@@ -56,14 +62,14 @@ export function generate(): Document {
   title.margin = new Thickness(0, 0, 0, 14);
   doc.add(title);
 
-  // ── Superscript / subscript ──
-  doc.add(sectionLabel('Superscript & subscript'));
+  // Each feature is one row of the specimen sheet: what it is on the left, examples on the right.
 
+  // ── Superscript / subscript ──
   // Distinct per-span styles - never one shared object mutated between spans.
   const base = new TextStyle().withSize(13).withColor(ColorPalette.slate[800]);
   const sub = new TextStyle().withSize(9).withColor(ColorPalette.slate[800]).subscript();
   const sup = new TextStyle().withSize(9).withColor(ColorPalette.slate[800]).superscript();
-  const supBlue = new TextStyle().withSize(9).withColor(ColorPalette.blue[600]).superscript();
+  const supNote = new TextStyle().withSize(9).withColor(ColorPalette.indigo[600]).superscript();
 
   const chemistry = new RichText();
   chemistry
@@ -74,15 +80,13 @@ export function generate(): Document {
     .span('SO', base)
     .span('4', sub)
     .span('.', base);
-  doc.add(chemistry);
 
   const physics = new RichText();
   physics
     .span('Mass-energy equivalence: E = mc', base)
     .span('2', sup)
     .span('. See the appendix.', base)
-    .span('1', supBlue);
-  doc.add(physics);
+    .span('1', supNote);
 
   const ordinals = new RichText();
   ordinals
@@ -93,70 +97,72 @@ export function generate(): Document {
     .span(', 3', base)
     .span('rd', sup)
     .span('.', base);
-  ordinals.margin = new Thickness(0, 0, 0, 16);
-  doc.add(ordinals);
+  doc.add(
+    specimen('Superscript & subscript', 'Formulae, powers, footnote marks and ordinals.', chemistry, physics, ordinals)
+  );
 
   // ── Decoration styling ──
-  doc.add(sectionLabel('Decoration styling'));
-
   // Block-level overline with a custom colour + thickness.
   const overlined = new TextBlock('Overlined section marker');
   overlined.fontName = StandardFonts.HelveticaBold;
   overlined.fontSize = 13;
   overlined.color = ColorPalette.slate[800];
   overlined.decoration = TextDecoration.Overline;
-  overlined.decorationColor = ColorPalette.blue[500];
+  overlined.decorationColor = ColorPalette.indigo[500];
   overlined.decorationThickness = 1.5;
-  overlined.margin = new Thickness(0, 0, 0, 8);
-  doc.add(overlined);
-
-  // Inline decorations with independent colour/thickness per span.
-  doc.add(inlineDecorations());
 
   // A wavy (spell-check) underline on a single span.
   const spell = new RichText();
   spell.span('Spell-check style: ', new TextStyle().withSize(13).withColor(ColorPalette.slate[800]));
   spell.span(
     'mispeled',
-    new TextStyle().withSize(13).withColor(ColorPalette.slate[800]).wavyUnderline().withDecorationColor(Color.red)
+    new TextStyle()
+      .withSize(13)
+      .withColor(ColorPalette.slate[800])
+      .wavyUnderline()
+      .withDecorationColor(ColorPalette.rose[600])
   );
   spell.span(' word.', new TextStyle().withSize(13).withColor(ColorPalette.slate[800]));
-  spell.margin = new Thickness(0, 6, 0, 16);
-  doc.add(spell);
+  doc.add(
+    specimen(
+      'Decoration styling',
+      'Overline, underline and strikethrough, each with its own colour and weight.',
+      overlined,
+      inlineDecorations(),
+      spell
+    )
+  );
 
   // ── Letter & word spacing ──
-  doc.add(sectionLabel('Letter & word spacing'));
-
   const tracked = new TextBlock('WIDE TRACKING FOR EMPHASIS');
   tracked.fontName = StandardFonts.HelveticaBold;
   tracked.fontSize = 12;
   tracked.color = ColorPalette.slate[800];
   tracked.letterSpacing = 3;
-  tracked.margin = new Thickness(0, 0, 0, 4);
-  doc.add(tracked);
 
   const airy = new TextBlock('Airy   word   spacing   opens   the   line.');
   airy.fontSize = 12;
   airy.color = ColorPalette.slate[700];
   airy.wordSpacing = 4;
-  airy.margin = new Thickness(0, 0, 0, 16);
-  doc.add(airy);
+  doc.add(
+    specimen(
+      'Letter & word spacing',
+      'Tracking for labels and headings; wider word spacing for an open line.',
+      tracked,
+      airy
+    )
+  );
 
   // ── Line clamp ──
-  doc.add(sectionLabel('Line clamp'));
-
   const clamped = new TextBlock(
     'This description is clamped to two lines: however much copy the product team writes, the card stays a fixed height and the overflow is replaced with an ellipsis so the layout never breaks.'
   );
   clamped.fontSize = 12;
   clamped.color = ColorPalette.slate[700];
   clamped.maxLines = 2;
-  clamped.margin = new Thickness(0, 0, 0, 16);
-  doc.add(clamped);
+  doc.add(specimen('Line clamp', 'Fixed-height cards: the overflow ends in an ellipsis.', clamped));
 
   // ── Paragraph controls ──
-  doc.add(sectionLabel('Paragraph indent & spacing'));
-
   const prose = new TextBlock(
     'The first line of each paragraph is indented and a little air is inserted between paragraphs, the way a printed book sets body copy.\n' +
       'This second paragraph shows the inter-paragraph spacing and the matching first-line indent, all resolved during layout without manual spacers.'
@@ -165,22 +171,44 @@ export function generate(): Document {
   prose.color = ColorPalette.slate[700];
   prose.firstLineIndent = 24;
   prose.paragraphSpacing = 8;
-  doc.add(prose);
+  doc.add(specimen('Paragraph indent & spacing', 'Book-style first-line indents and space between paragraphs.', prose));
 
   return doc;
 }
 
 // Local helpers and sample types used by this document.
 
-/** A level-2 section label with the shared style used across this example. */
-function sectionLabel(text: string): Heading {
-  const h = new Heading(text);
-  h.level = 2;
-  h.fontName = StandardFonts.HelveticaBold;
-  h.fontSize = 14;
-  h.color = ColorPalette.slate[700];
-  h.margin = new Thickness(0, 0, 0, 6);
-  return h;
+/** One row of the specimen sheet: the feature's name and a note on the left, its examples on the right. */
+function specimen(label: string, note: string, ...examples: IElement[]): Container {
+  const heading = new Heading(label);
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 11;
+  heading.color = ColorPalette.indigo[700];
+  const caption = new TextBlock(note);
+  caption.fontSize = 9;
+  caption.color = ColorPalette.slate[500];
+  const left = new VerticalStack();
+  left.spacing = 4;
+  left.add(heading);
+  left.add(caption);
+
+  const right = new VerticalStack();
+  right.spacing = 6;
+  for (const example of examples) right.add(example);
+
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Weighted;
+  row.spacing = 20;
+  row.add(left, 1);
+  row.add(right, 2.6);
+
+  const container = new Container();
+  container.border = Border.topOnly(0.75);
+  container.borderColors = BorderColors.topOnly(ColorPalette.slate[200]);
+  container.padding = new Thickness(0, 14, 0, 14);
+  container.child = row;
+  return container;
 }
 
 /** A line mixing coloured underline, strikethrough, and overline spans. */
@@ -192,7 +220,7 @@ function inlineDecorations(): RichText {
     .withSize(size)
     .withColor(ColorPalette.slate[800])
     .underline()
-    .withDecorationColor(Color.red)
+    .withDecorationColor(ColorPalette.rose[600])
     .withDecorationThickness(1.5);
   const strike = new TextStyle()
     .withSize(size)
@@ -202,7 +230,7 @@ function inlineDecorations(): RichText {
   const over = new TextStyle().withSize(size).withColor(ColorPalette.slate[800]).overline();
 
   rt.span('A ', new TextStyle().withSize(size).withColor(ColorPalette.slate[800]));
-  rt.span('red underline', underline);
+  rt.span('rose underline', underline);
   rt.span(', a ', new TextStyle().withSize(size).withColor(ColorPalette.slate[800]));
   rt.span('struck-through price', strike);
   rt.span(', and an ', new TextStyle().withSize(size).withColor(ColorPalette.slate[800]));

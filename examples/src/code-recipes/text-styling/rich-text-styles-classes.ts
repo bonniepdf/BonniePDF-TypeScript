@@ -41,7 +41,7 @@ export function generate(): Document {
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
-  settings.margin = 60;
+  settings.margin = 40;
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Rich Text Styles';
@@ -102,15 +102,15 @@ export function generate(): Document {
   rt2.margin = new Thickness(0, 0, 0, 10);
   rt2
     .span('Text can be ')
-    .span('red', new TextStyle().withColor(Color.red))
+    .span('rose', new TextStyle().withColor(ColorPalette.rose[700]))
     .span(', ')
-    .span('blue', new TextStyle().withColor(ColorPalette.blue[600]))
+    .span('indigo', new TextStyle().withColor(ColorPalette.indigo[700]))
     .span(', ')
-    .span('green', new TextStyle().withColor(ColorPalette.green[600]))
+    .span('emerald', new TextStyle().withColor(ColorPalette.emerald[700]))
     .span(', or ')
-    .span('any colour', new TextStyle().withColor(ColorPalette.purple[600]))
+    .span('any palette shade', new TextStyle().withColor(ColorPalette.amber[700]))
     .span(' you choose. Colour combines freely with weight: ')
-    .span('bold indigo', new TextStyle().bold().withColor(ColorPalette.indigo[600]))
+    .span('bold indigo', new TextStyle().bold().withColor(ColorPalette.indigo[700]))
     .span(' is a common choice for strong inline emphasis.');
   doc.add(rt2);
 
@@ -140,16 +140,16 @@ export function generate(): Document {
   rt4.margin = new Thickness(0, 0, 0, 10);
   rt4
     .span('Background colours create a ')
-    .span('highlighter pen effect', new TextStyle().withBackground(Color.fromHex('#fef08a')))
+    .span('highlighter pen effect', new TextStyle().withBackground(ColorPalette.amber[100]))
     .span(' across any span. Combine with colour for ')
     .span(
       'bold red alert text',
-      new TextStyle().bold().withColor(Color.fromHex('#991b1b')).withBackground(Color.fromHex('#fecaca'))
+      new TextStyle().bold().withColor(ColorPalette.rose[800]).withBackground(ColorPalette.rose[100])
     )
     .span(' or a ')
     .span(
       'green success note',
-      new TextStyle().withColor(Color.fromHex('#166534')).withBackground(Color.fromHex('#bbf7d0'))
+      new TextStyle().withColor(ColorPalette.emerald[800]).withBackground(ColorPalette.emerald[100])
     )
     .span(' without breaking the paragraph flow.');
   doc.add(rt4);
@@ -237,7 +237,7 @@ export function generate(): Document {
   rt7.alignment = TextAlignment.Justify;
   rt7.margin = new Thickness(0, 0, 0, 10);
   rt7
-    .span('IMPORTANT: ', new TextStyle().bold().withColor(Color.red))
+    .span('IMPORTANT: ', new TextStyle().bold().withColor(ColorPalette.rose[700]))
     .span('By using this software, you agree to the ')
     .span('Terms of Service', new TextStyle().bold().underline())
     .span(' and ')
@@ -245,7 +245,11 @@ export function generate(): Document {
     .span('. All data is processed in accordance with ')
     .span('GDPR', new TextStyle().bold())
     .span(' regulations. For questions, contact ')
-    .span('support@example.com', new TextStyle().withColor(ColorPalette.blue[600]))
+    .link(
+      'support@example.com',
+      'mailto:support@example.com',
+      new TextStyle().withColor(ColorPalette.indigo[700]).underline()
+    )
     .span('.');
   doc.add(rt7);
 

@@ -20,7 +20,7 @@ import { Document, Heading, TextBlock, RichText, TextStyle, Line, StandardFonts 
 export function generate(): Document {
   const doc = new Document({
     settings: {
-      margin: 60,
+      margin: 40,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
@@ -84,15 +84,15 @@ export function generate(): Document {
   doc.add(
     new RichText({ margin: { bottom: 10 } })
       .span('Text can be ')
-      .span('red', new TextStyle({ color: '#ff0000' }))
+      .span('rose', new TextStyle({ color: 'rose-700' }))
       .span(', ')
-      .span('blue', new TextStyle({ color: 'blue-600' }))
+      .span('indigo', new TextStyle({ color: 'indigo-700' }))
       .span(', ')
-      .span('green', new TextStyle({ color: 'green-600' }))
+      .span('emerald', new TextStyle({ color: 'emerald-700' }))
       .span(', or ')
-      .span('any colour', new TextStyle({ color: 'purple-600' }))
+      .span('any palette shade', new TextStyle({ color: 'amber-700' }))
       .span(' you choose. Colour combines freely with weight: ')
-      .span('bold indigo', new TextStyle({ fontWeight: 'bold', color: 'indigo-600' }))
+      .span('bold indigo', new TextStyle({ fontWeight: 'bold', color: 'indigo-700' }))
       .span(' is a common choice for strong inline emphasis.')
   );
 
@@ -120,11 +120,14 @@ export function generate(): Document {
   doc.add(
     new RichText({ margin: { bottom: 10 } })
       .span('Background colours create a ')
-      .span('highlighter pen effect', new TextStyle({ backgroundColor: '#fef08a' }))
+      .span('highlighter pen effect', new TextStyle({ backgroundColor: 'amber-100' }))
       .span(' across any span. Combine with colour for ')
-      .span('bold red alert text', new TextStyle({ fontWeight: 'bold', color: '#991b1b', backgroundColor: '#fecaca' }))
+      .span(
+        'bold red alert text',
+        new TextStyle({ fontWeight: 'bold', color: 'rose-800', backgroundColor: 'rose-100' })
+      )
       .span(' or a ')
-      .span('green success note', new TextStyle({ color: '#166534', backgroundColor: '#bbf7d0' }))
+      .span('green success note', new TextStyle({ color: 'emerald-800', backgroundColor: 'emerald-100' }))
       .span(' without breaking the paragraph flow.')
   );
 
@@ -187,7 +190,7 @@ export function generate(): Document {
 
   doc.add(
     new RichText({ defaultStyle: disclaimerBase, alignment: 'justify', margin: { bottom: 10 } })
-      .span('IMPORTANT: ', new TextStyle({ fontWeight: 'bold', color: '#ff0000' }))
+      .span('IMPORTANT: ', new TextStyle({ fontWeight: 'bold', color: 'rose-700' }))
       .span('By using this software, you agree to the ')
       .span('Terms of Service', new TextStyle({ fontWeight: 'bold', decoration: 'underline' }))
       .span(' and ')
@@ -195,7 +198,11 @@ export function generate(): Document {
       .span('. All data is processed in accordance with ')
       .span('GDPR', new TextStyle({ fontWeight: 'bold' }))
       .span(' regulations. For questions, contact ')
-      .span('support@example.com', new TextStyle({ color: 'blue-600' }))
+      .link(
+        'support@example.com',
+        'mailto:support@example.com',
+        new TextStyle({ color: 'indigo-700', decoration: 'underline' })
+      )
       .span('.')
   );
 

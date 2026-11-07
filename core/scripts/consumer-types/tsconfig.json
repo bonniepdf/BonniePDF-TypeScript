@@ -1,20 +1,23 @@
 {
-  // Typechecks a consumer of the built package, the way an application that
-  // uses `moduleResolution: "nodenext"` sees it. The package refers to itself
-  // by name, so this resolves through `exports` to dist/, exactly as an
-  // installed copy would. Run after `pnpm build`: `pnpm check:consumer-types`.
+  // Typechecks consumers of the built package, the way applications on
+  // Node's own module resolution see it: an ES module (esm.ts) and a CommonJS
+  // module (cjs.cts). `node16` is the strict setting: unlike `nodenext` on
+  // TypeScript 5.8 and later, it does not let CommonJS require an ES module, so
+  // it catches `require` conditions that point at ES module declarations.
+  // The package refers to itself by name, so this resolves through `exports`
+  // to dist/, exactly as an installed copy would. Run after `pnpm build`: `pnpm check:consumer-types`.
   //
   // It exists because the declarations once shipped extensionless relative
-  // imports. Bundler resolution accepts them; Node16/NodeNext does not, and a
-  // consumer then saw no exports at all.
+  // imports, which Node16/NodeNext consumers could not follow, and once had no
+  // CommonJS declarations, so CommonJS consumers on node16 got TS1479.
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "node16",
+    "moduleResolution": "node16",
     "target": "es2022",
     "strict": true,
     "noEmit": true,
     "skipLibCheck": false,
     "types": ["node"]
   },
-  "files": ["esm.ts"]
+  "files": ["esm.ts", "cjs.cts"]
 }

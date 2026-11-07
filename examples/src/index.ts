@@ -1219,7 +1219,7 @@ export const examples: ExampleDef[] = [
     name: 'Cross-References',
     category: 'Links & References',
     description:
-      'Section anchors, SectionLink internal jumps, and PageNumberOf “see page N” references, all resolved automatically by two-pass layout.',
+      'A short staff handbook: a linked contents page with live page numbers, chapters that flow across pages, “see page N” references and back-links, all resolved automatically.',
     filename: 'cross-references.pdf',
     generate: crossReferences,
     thumbnails: false,
@@ -1232,7 +1232,7 @@ export const examples: ExampleDef[] = [
     name: 'Cross-References (Class API)',
     category: 'Links & References',
     description:
-      'The same cross-reference field guide as Cross-References, built with the class API: construct each element and assign properties. The output is identical.',
+      'The same staff handbook as Cross-References, built with the class API: construct each element and assign properties. The output is identical.',
     filename: 'cross-references-classes.pdf',
     generate: crossReferencesClasses,
     thumbnails: false,
@@ -1247,7 +1247,7 @@ export const examples: ExampleDef[] = [
     name: 'Hyperlinks',
     category: 'Links & References',
     description:
-      'External hyperlinks to real websites with custom font, size, and colour styling, plus links spaced with vertical margins. Every link is tagged for screen readers.',
+      'A resources page: web links with descriptions, a button-style link, and email and phone links, all in one link colour. Every link is tagged for screen readers.',
     filename: 'hyperlinks.pdf',
     generate: hyperlinks,
     thumbnails: false,
@@ -1587,7 +1587,7 @@ export const examples: ExampleDef[] = [
     name: 'Pie Chart',
     category: 'Share & Ranking Charts',
     description:
-      'A donut chart of monthly sales share, with a colour legend and the total value in the centre, plus alt text describing the breakdown for screen readers.',
+      'A donut chart of revenue by sales channel, with each channel’s share in the legend, the formatted total beneath it, a summary table alongside, and alt text for screen readers.',
     filename: 'pie-chart.pdf',
     generate: pieChart,
     dotnetClass: 'PieChartExample',

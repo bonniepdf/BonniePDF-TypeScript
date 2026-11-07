@@ -1,42 +1,64 @@
 /**
  * Hyperlinks (Class API).
- * The same hyperlink tour as Hyperlinks, built with the class API: construct each link and assign properties. The output is identical.
+ * The same resources page as Hyperlinks, built with the class API: construct each link and assign properties. The output is identical.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  AccessibilityMode,
+  Border,
+  BorderColors,
+  Color,
+  ColorPalette,
+  Container,
   Document,
-  DocumentSettings,
   DocumentMetadata,
-  ZoomLevel,
+  DocumentSettings,
+  Heading,
+  HorizontalAlignment,
+  HorizontalStack,
+  Hyperlink,
+  PdfAConformance,
+  StandardFonts,
   TextBlock,
   TextStyle,
-  Heading,
-  Hyperlink,
-  ColorPalette,
   Thickness,
-  StandardFonts,
-  PdfAConformance,
-  AccessibilityMode,
+  VerticalStack,
+  WidthDistribution,
+  ZoomLevel,
 } from '@bonniepdf/core';
+
+/** One colour for every link, so readers learn what is clickable. */
+const LINK = ColorPalette.blue[700];
+
+const RESOURCES = [
+  [
+    'Getting started guide',
+    'https://www.bonniepdf.dev/docs',
+    'Install the library and build a first document in a few minutes.',
+  ],
+  ['PDF Association', 'https://pdfa.org', 'The industry body behind the PDF/A and PDF/UA standards.'],
+  ['veraPDF', 'https://verapdf.org', 'The open-source validator for PDF/A and PDF/UA conformance.'],
+  [
+    'W3C Web Accessibility Initiative',
+    'https://www.w3.org/WAI/',
+    'Guidance on writing link text that makes sense out of context.',
+  ],
+] as const;
 
 /**
  * The **class / construct-then-mutate** companion to `hyperlinks.ts`.
  *
- * Same hyperlink tour - basic, styled (colour/size/weight), and margined links -
- * authored the long way: `new Hyperlink(text, uri)` then assign properties,
- * using `ZoomLevel`, `TextStyle`, `Thickness`, `Color` and `ColorPalette`
- * directly. This is the escape hatch the options-object front door sits on.
- *
- * It renders **byte-for-byte identically** to the options-style
- * `hyperlinks.ts` (an equivalence test binds the two). Reach for the options
- * form first; this variant exists to show what it desugars to.
+ * Same resources page, authored the long way: `new Hyperlink(text, uri)` then
+ * assign properties, using `Thickness`, `Border`, `ColorPalette` and the enums
+ * directly. It renders **byte-for-byte identically** to the options-style
+ * `hyperlinks.ts` (an equivalence test binds the two).
  */
 export function generate(): Document {
   const settings = new DocumentSettings();
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';
-  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(12).withColor(ColorPalette.slate[600]);
+  settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
   settings.defaultZoom = ZoomLevel.FitPage;
   settings.displayDocTitle = true;
 
@@ -47,90 +69,132 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
 
-  // ── Title ──
-  // A real Heading (H1), not a big TextBlock: PDF/UA preflight requires the
-  // outline to start at H1, and headings give AT users document structure.
-  const title = new Heading('Hyperlink Support Demo');
+  const title = new Heading('Useful resources');
   title.fontName = StandardFonts.HelveticaBold;
-  title.fontSize = 24;
-  title.color = ColorPalette.slate[800];
-  title.margin = new Thickness(0, 0, 0, 12);
+  title.fontSize = 26;
+  title.color = ColorPalette.slate[900];
+  title.margin = new Thickness(0, 0, 0, 6);
   doc.add(title);
 
-  // ── Basic links ──
-  const basicLabel = new Heading('Basic Links');
-  basicLabel.level = 2;
-  basicLabel.fontName = StandardFonts.HelveticaBold;
-  basicLabel.fontSize = 14;
-  basicLabel.color = ColorPalette.slate[600];
-  basicLabel.margin = new Thickness(0, 0, 0, 8);
-  doc.add(basicLabel);
+  const intro = new TextBlock(
+    'Every blue line on this page is a link. Each one names where it goes, so it makes sense read on its own.'
+  );
+  intro.margin = new Thickness(0, 0, 0, 24);
+  doc.add(intro);
 
-  for (const [text, uri, mb] of [
-    ['Visit GitHub', 'https://github.com', 8],
-    ['Visit Microsoft', 'https://microsoft.com', 8],
-    ['Search on Google', 'https://google.com', 16],
-  ] as [string, string, number][]) {
-    // TS constructor: Hyperlink(text, uri) - note .NET swaps the order
-    const link = new Hyperlink(text, uri);
-    link.margin = new Thickness(0, 0, 0, mb);
-    doc.add(link);
+  // ── Web links, each with a one-line description ──
+  doc.add(sectionHeading('Read more'));
+  for (const [title, uri, description] of RESOURCES) {
+    // TS constructor: Hyperlink(text, uri) - .NET takes (uri, text).
+    const link = new Hyperlink(title, uri);
+    link.fontName = StandardFonts.HelveticaBold;
+    link.fontSize = 12;
+    link.color = LINK;
+
+    const summary = new TextBlock(description);
+    summary.fontSize = 10;
+    const address = new TextBlock(uri);
+    address.fontSize = 9;
+    address.color = ColorPalette.slate[500];
+
+    const stack = new VerticalStack();
+    stack.spacing = 3;
+    stack.add(link);
+    stack.add(summary);
+    stack.add(address);
+
+    const row = new Container();
+    row.border = new Border(0, 0, 0, 1);
+    row.borderColors = new BorderColors(ColorPalette.slate[200]);
+    row.padding = new Thickness(0, 10, 0, 10);
+    row.child = stack;
+    doc.add(row);
   }
 
-  // ── Styled links ──
-  const styledLabel = new Heading('Styled Links');
-  styledLabel.level = 2;
-  styledLabel.fontName = StandardFonts.HelveticaBold;
-  styledLabel.fontSize = 14;
-  styledLabel.color = ColorPalette.slate[600];
-  styledLabel.margin = new Thickness(0, 0, 0, 8);
-  doc.add(styledLabel);
+  // ── A button-style link: a Hyperlink inside a filled, rounded container ──
+  doc.add(sectionHeading('Start a trial', 28));
+  const ctaNote = new TextBlock('A call to action reads as a button when the link sits in a filled shape.');
+  ctaNote.margin = new Thickness(0, 0, 0, 10);
+  doc.add(ctaNote);
 
-  // Default blue
-  const defaultLink = new Hyperlink('Default Blue Link', 'https://github.com');
-  defaultLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(defaultLink);
+  const cta = new Hyperlink('Download the trial', 'https://www.bonniepdf.dev/pricing');
+  cta.fontName = StandardFonts.HelveticaBold;
+  cta.fontSize = 12;
+  cta.color = Color.white;
 
-  // Green
-  const greenLink = new Hyperlink('Green Link', 'https://microsoft.com');
-  greenLink.color = ColorPalette.green[700];
-  greenLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(greenLink);
+  const button = new Container();
+  button.width = 200;
+  button.backgroundColor = LINK;
+  button.cornerRadius = 6;
+  button.padding = new Thickness(18, 10, 18, 10);
+  button.horizontalAlignment = HorizontalAlignment.Center;
+  button.child = cta;
+  doc.add(button);
 
-  // Large purple
-  const purpleLink = new Hyperlink('Large Purple Link', 'https://google.com');
-  purpleLink.fontSize = 16;
-  purpleLink.color = ColorPalette.purple[600];
-  purpleLink.margin = new Thickness(0, 0, 0, 8);
-  doc.add(purpleLink);
-
-  // Bold red
-  const redLink = new Hyperlink('Bold Red Link', 'https://stackoverflow.com');
-  redLink.fontName = StandardFonts.HelveticaBold;
-  redLink.fontSize = 14;
-  redLink.color = ColorPalette.red[700];
-  redLink.margin = new Thickness(0, 0, 0, 16);
-  doc.add(redLink);
-
-  // ── Links with margins ──
-  const marginLabel = new Heading('Links with Margins');
-  marginLabel.level = 2;
-  marginLabel.fontName = StandardFonts.HelveticaBold;
-  marginLabel.fontSize = 14;
-  marginLabel.color = ColorPalette.slate[600];
-  doc.add(marginLabel);
-
-  const before = new TextBlock('Text before link.');
-  before.fontSize = 10;
-  doc.add(before);
-
-  const marginLink = new Hyperlink('Link with 20pt vertical margins', 'https://github.com');
-  marginLink.margin = new Thickness(0, 20, 0, 20);
-  doc.add(marginLink);
-
-  const after = new TextBlock('Text after link.');
-  after.fontSize = 10;
-  doc.add(after);
+  // ── Email and phone links ──
+  doc.add(sectionHeading('Get in touch', 28));
+  const contacts = new HorizontalStack();
+  contacts.spacing = 16;
+  contacts.widthDistribution = WidthDistribution.Equal;
+  contacts.add(
+    contactCard(
+      'Email',
+      'support@example.com',
+      'mailto:support@example.com',
+      'Opens your mail app with the address filled in.'
+    )
+  );
+  contacts.add(
+    contactCard(
+      'Phone',
+      '0117 496 0000',
+      'tel:+441174960000',
+      'Rings the number on a phone; desktop viewers ask first.'
+    )
+  );
+  doc.add(contacts);
 
   return doc;
+}
+
+// Local helpers used by this document.
+
+/** A level-2 heading with the shared style used across this example. */
+function sectionHeading(text: string, marginTop = 0): Heading {
+  const heading = new Heading(text);
+  heading.level = 2;
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 15;
+  heading.color = ColorPalette.slate[900];
+  heading.margin = new Thickness(0, marginTop, 0, 4);
+  return heading;
+}
+
+/** A tinted card holding one contact link. */
+function contactCard(label: string, text: string, uri: string, note: string): Container {
+  const eyebrow = new TextBlock(label.toUpperCase());
+  eyebrow.fontName = StandardFonts.HelveticaBold;
+  eyebrow.fontSize = 8;
+  eyebrow.letterSpacing = 1.2;
+  eyebrow.color = ColorPalette.slate[600];
+
+  const link = new Hyperlink(text, uri);
+  link.fontSize = 13;
+  link.color = LINK;
+
+  const detail = new TextBlock(note);
+  detail.fontSize = 9;
+
+  const stack = new VerticalStack();
+  stack.spacing = 4;
+  stack.add(eyebrow);
+  stack.add(link);
+  stack.add(detail);
+
+  const card = new Container();
+  card.backgroundColor = ColorPalette.slate[100];
+  card.cornerRadius = 8;
+  card.padding = new Thickness(14);
+  card.child = stack;
+  return card;
 }

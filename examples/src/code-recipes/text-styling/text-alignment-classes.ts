@@ -27,12 +27,6 @@ import {
  * All text is set in standard-14 Times Roman. For a demonstration of why an
  * embedded font makes right/centre/justified edges exact, see embedded-font-metrics.
  */
-const SAMPLE_TEXT =
-  'The quick brown fox jumps over the lazy dog. This sentence demonstrates how text alignment ' +
-  'affects the visual appearance of a paragraph. When text is justified, the word spacing is ' +
-  'adjusted so that both the left and right edges align perfectly with the margins, creating a ' +
-  'clean, professional look commonly seen in books and formal documents.';
-
 const BOOK_PARAS = [
   'In the beginning, there was only the vast emptiness of space, stretching infinitely in all directions. ' +
     'Then, from the primordial void, matter began to coalesce under the inexorable pull of gravity, forming ' +
@@ -86,16 +80,39 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'The four standard alignments are shown below. Each paragraph carries the same text and the ' +
-      'same tagging — alignment is a purely visual property.'
+    'Each alignment suits a different job, so each sample below is the kind of text it is set for. Alignment is a purely visual property: every paragraph is tagged the same way.'
   );
   intro.margin = new Thickness(0, 0, 0, 14);
   doc.add(intro);
 
-  alignedSample(doc, 'Left Aligned (Default)', 's-left', TextAlignment.Left);
-  alignedSample(doc, 'Centre Aligned', 's-centre', TextAlignment.Center);
-  alignedSample(doc, 'Right Aligned', 's-right', TextAlignment.Right);
-  alignedSample(doc, 'Justified', 's-justify', TextAlignment.Justify);
+  alignedSample(
+    doc,
+    'Left Aligned — letters and body text',
+    's-left',
+    TextAlignment.Left,
+    'Dear Ms Patel, thank you for your letter of 28 October. Left-aligned text keeps an even space between words and a ragged right edge, which makes it the easiest setting to read for letters, emails and most body copy.'
+  );
+  alignedSample(
+    doc,
+    'Centre Aligned — invitations and titles',
+    's-centre',
+    TextAlignment.Center,
+    "You are warmly invited to the opening of the new reading room\nSaturday 14 November at eleven o'clock\nSample Town Library, Market Square"
+  );
+  alignedSample(
+    doc,
+    'Right Aligned — addresses and dates',
+    's-right',
+    TextAlignment.Right,
+    'Sample Supplies Ltd\n12 Exmouth Market\nLondon EC1R 4QE\n5 November 2026'
+  );
+  alignedSample(
+    doc,
+    'Justified — books and columns',
+    's-justify',
+    TextAlignment.Justify,
+    'Justified text stretches the spaces between words so that both edges of a column line up, the setting used in most printed books and newspapers. It works best in long lines: in a narrow column the stretched spaces can open into visible gaps.'
+  );
 
   // ── Book-style justified paragraphs ─────────────────────────────────────────
   section(doc, 'Book-Style Justified Paragraphs', 'book');
@@ -124,9 +141,9 @@ function section(doc: Document, title: string, tocId: string, alignment: TextAli
   doc.add(h);
 }
 
-function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment): void {
+function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment, text: string): void {
   section(doc, title, tocId, alignment);
-  const p = new TextBlock(SAMPLE_TEXT);
+  const p = new TextBlock(text);
   p.alignment = alignment;
   p.margin = new Thickness(0, 0, 0, 14);
   doc.add(p);

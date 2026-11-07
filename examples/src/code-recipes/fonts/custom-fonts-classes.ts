@@ -26,11 +26,45 @@ import {
   TextBlock,
   TextStyle,
   Heading,
+  Container,
+  HorizontalStack,
+  VerticalStack,
+  WidthDistribution,
   ColorPalette,
   Thickness,
   StandardFonts,
   PdfAConformance,
 } from '@bonniepdf/core';
+
+/** Which registered face a group of characters is set in. */
+type FontRole = 'text' | 'math' | 'symbols';
+
+/** The coverage groups, in two columns: title, contents id, face, and the lines that show them. */
+const LEFT_GROUPS: [string, string, FontRole, string[]][] = [
+  [
+    'Unicode Symbols',
+    's-symbols',
+    'text',
+    ['• Bullet  © Copyright  ® Registered  ™ Trademark', '– En-dash  — Em-dash  ± Plus-minus  × Multiply  ÷ Divide'],
+  ],
+  ['Currency Symbols', 's-currency', 'text', ['€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin']],
+  ['Greek Letters', 's-greek', 'text', ['α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega']],
+];
+const RIGHT_GROUPS: [string, string, FontRole, string[]][] = [
+  ['Arrows (via NotoSansMath)', 's-arrows', 'math', ['← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪']],
+  [
+    'Mathematical Operators (via NotoSansMath)',
+    's-math',
+    'math',
+    ['≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity', '∑ Sum  ∏ Product  √ Root  ∫ Integral'],
+  ],
+  [
+    'Dingbats (via NotoSansSymbols2)',
+    's-dingbats',
+    'symbols',
+    ['✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club'],
+  ],
+];
 
 /**
  * The **class / construct-then-mutate** companion to `custom-fonts.ts`.
@@ -89,79 +123,64 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
 
-  // ── 1. Unicode Symbols ────────────────────────────────────────────────────────
+  // ── The embedded face, large ──────────────────────────────────────────────────
 
-  section(doc, 'Unicode Symbols', 's-symbols');
-
-  for (const text of [
-    '• Bullet (U+2022)  © Copyright (U+00A9)  ® Registered (U+00AE)  ™ Trademark (U+2122)',
-    '– En-dash (U+2013)  — Em-dash (U+2014)',
-    '± Plus-minus  × Multiply  ÷ Divide',
-  ]) {
-    const b = new TextBlock(text);
-    b.fontName = FONT;
-    b.margin = new Thickness(0, 0, 0, 4);
-    doc.add(b);
+  const specimen = new VerticalStack();
+  specimen.spacing = 4;
+  for (const [text, size, color] of [
+    ['Aa', 64, ColorPalette.indigo[900]],
+    ['Quick zephyrs blow, vexing daft Jim — £12, €15.', 20, ColorPalette.slate[900]],
+    ['Ελληνικά  ·  Кириллица  ·  Tiếng Việt  ·  Ærøskøbing', 14, ColorPalette.slate[700]],
+  ] as const) {
+    const line = new TextBlock(text);
+    line.fontName = FONT;
+    line.fontSize = size;
+    line.color = color;
+    specimen.add(line);
   }
+  const note = new TextBlock('Noto Sans Regular, embedded as a subset of only the glyphs on this page.');
+  note.fontName = FONT;
+  note.fontSize = 9;
+  note.color = ColorPalette.slate[600];
+  note.margin = new Thickness(0, 6, 0, 0);
+  specimen.add(note);
+  const panel = new Container();
+  panel.backgroundColor = ColorPalette.indigo[50];
+  panel.cornerRadius = 8;
+  panel.padding = new Thickness(22, 16, 22, 16);
+  panel.margin = new Thickness(0, 0, 0, 14);
+  panel.child = specimen;
+  doc.add(panel);
 
-  // ── 2. Currency Symbols ───────────────────────────────────────────────────────
+  // ── Coverage, in two columns ──────────────────────────────────────────────────
 
-  section(doc, 'Currency Symbols', 's-currency');
-
-  const cur = new TextBlock('€ Euro  £ Pound  ¥ Yen  ₹ Rupee  ₿ Bitcoin');
-  cur.fontName = FONT;
-  cur.margin = new Thickness(0, 0, 0, 4);
-  doc.add(cur);
-
-  // ── 3. Arrows (NotoSansMath) ──────────────────────────────────────────────────
-
-  section(doc, 'Arrows (via NotoSansMath)', 's-arrows');
-
-  const arrows = new TextBlock('← ↑ → ↓  ↔ ↕  ⇐ ⇒ ⇔  ↩ ↪');
-  arrows.fontName = MATH_FONT;
-  arrows.margin = new Thickness(0, 0, 0, 4);
-  doc.add(arrows);
-
-  // ── 4. Mathematical Operators (NotoSansMath) ──────────────────────────────────
-
-  section(doc, 'Mathematical Operators (via NotoSansMath)', 's-math');
-
-  for (const text of [
-    '≠ Not equal  ≤ Less-equal  ≥ Greater-equal  ∞ Infinity',
-    '∑ Sum  ∏ Product  √ Root  ∫ Integral',
-  ]) {
-    const b = new TextBlock(text);
-    b.fontName = MATH_FONT;
-    b.margin = new Thickness(0, 0, 0, 4);
-    doc.add(b);
+  const faces: Record<FontRole, string> = { text: FONT, math: MATH_FONT, symbols: SYMBOLS_FONT };
+  const columns = new HorizontalStack();
+  columns.spacing = 24;
+  columns.widthDistribution = WidthDistribution.Equal;
+  for (const groups of [LEFT_GROUPS, RIGHT_GROUPS]) {
+    const column = new VerticalStack();
+    for (const [title, tocId, role, lines] of groups) {
+      column.add(sectionHeading(title, tocId));
+      for (const text of lines) {
+        const line = new TextBlock(text);
+        line.fontName = faces[role];
+        line.margin = new Thickness(0, 0, 0, 4);
+        column.add(line);
+      }
+    }
+    columns.add(column);
   }
+  doc.add(columns);
 
-  // ── 5. Dingbats (NotoSansSymbols2) ───────────────────────────────────────────
+  // ── Standard vs Embedded ──────────────────────────────────────────────────────
 
-  section(doc, 'Dingbats (via NotoSansSymbols2)', 's-dingbats');
+  doc.add(sectionHeading('Standard vs Embedded', 's-comparison'));
 
-  const dingbats = new TextBlock('✓ Check  ✗ Cross  ★ Star  ♠ Spade  ♥ Heart  ♦ Diamond  ♣ Club');
-  dingbats.fontName = SYMBOLS_FONT;
-  dingbats.margin = new Thickness(0, 0, 0, 4);
-  doc.add(dingbats);
-
-  // ── 6. Greek Letters ──────────────────────────────────────────────────────────
-
-  section(doc, 'Greek Letters', 's-greek');
-
-  const greek = new TextBlock('α Alpha  β Beta  γ Gamma  δ Delta  π Pi  Ω Omega');
-  greek.fontName = FONT;
-  greek.margin = new Thickness(0, 0, 0, 4);
-  doc.add(greek);
-
-  // ── 7. Standard vs Embedded ───────────────────────────────────────────────────
-
-  section(doc, 'Standard vs Embedded', 's-comparison');
-
-  const std = new TextBlock('Standard Helvetica (Type 1) — limited to the WinAnsi charset.');
-  std.fontName = StandardFonts.Helvetica;
-  std.margin = new Thickness(0, 0, 0, 4);
-  doc.add(std);
+  const standard = new TextBlock('Standard Helvetica (Type 1) — limited to the WinAnsi charset.');
+  standard.fontName = StandardFonts.Helvetica;
+  standard.margin = new Thickness(0, 0, 0, 4);
+  doc.add(standard);
 
   const embedded = new TextBlock(
     'Embedded NotoSans (TrueType) — full Unicode range, subsetting keeps file size compact.'
@@ -169,15 +188,15 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   embedded.fontName = FONT;
   doc.add(embedded);
 
-  function section(doc: Document, title: string, tocId: string): void {
-    const h = new Heading(title);
-    h.tocIdentifier = tocId;
-    h.level = 2;
-    h.fontName = FONT;
-    h.fontSize = 13;
-    h.color = ColorPalette.indigo[600];
-    h.margin = new Thickness(0, 12, 0, 6);
-    doc.add(h);
+  function sectionHeading(title: string, tocId: string): Heading {
+    const heading = new Heading(title);
+    heading.tocIdentifier = tocId;
+    heading.level = 2;
+    heading.fontName = FONT;
+    heading.fontSize = 13;
+    heading.color = ColorPalette.indigo[600];
+    heading.margin = new Thickness(0, 12, 0, 6);
+    return heading;
   }
 
   return doc;

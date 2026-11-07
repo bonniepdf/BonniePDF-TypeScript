@@ -1,6 +1,6 @@
 /**
  * Report with Embedded Data.
- * A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them. Built with the general-purpose attachment API.
+ * A PDF/A-3 report that carries its source CSV inside the file: the figures as a table and a chart, and a note naming the attached file, so a reader can check the numbers without re-keying them. Built with the general-purpose attachment API.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // ── Report with Embedded Data (PDF/A-3 with an embedded CSV) ─────────
@@ -14,7 +14,11 @@
 // by veraPDF as PDF/A-3b. Parity peer of the .NET AttachedDataExample.
 
 import {
+  BarChart,
+  ChartData,
+  Container,
   Document,
+  HorizontalStack,
   TextBlock,
   Table,
   StandardFonts,
@@ -72,6 +76,62 @@ export function generate(): Document {
   }
   doc.add(table);
   // #endregion table
+
+  // The same figures as a chart, read from the same rows as the table and the attachment.
+  doc.add(
+    new BarChart({
+      theme: 'modern',
+      data: new ChartData({
+        title: 'Revenue by quarter (EUR thousand)',
+        series: [
+          {
+            color: 'indigo-600',
+            dataPoints: ROWS.map(([quarter, revenue]) => ({
+              label: quarter,
+              value: revenue / 1000,
+              labelFormat: 'N0',
+            })),
+          },
+        ],
+        yAxis: { maxValue: 600, stepCount: 6 },
+      }),
+      altText: 'Bar chart of revenue by quarter in 2026, rising from 412 to 560 thousand euros.',
+      height: 240,
+      stretchToFit: true,
+      fontFamily: StandardFonts.Helvetica,
+      labelFontSize: 9,
+      backgroundColor: '#ffffff',
+      margin: { top: 18, bottom: 18 },
+    })
+  );
+
+  // A note that names the attachment, so a reader knows the data is there to open.
+  const note = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12 });
+  note.add(
+    new Container({
+      backgroundColor: 'indigo-100',
+      cornerRadius: 4,
+      padding: [6, 3],
+      child: tb('ATTACHED', 7.5, 'indigo-800', true, 'center'),
+    }),
+    1
+  );
+  note.add(
+    new TextBlock(
+      `quarterly-revenue.csv: ${ROWS.length} rows, 3 columns. Open it from your PDF viewer's attachments panel to reuse the exact figures.`,
+      { fontSize: 9, color: INK }
+    ),
+    6
+  );
+  doc.add(
+    new Container({
+      backgroundColor: 'slate-50',
+      border: { width: 0.75, color: 'slate-200' },
+      cornerRadius: 6,
+      padding: [14, 10],
+      child: note,
+    })
+  );
 
   // ── Embed the source data as an attachment ──
   // #region attach

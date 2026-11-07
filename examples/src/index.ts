@@ -971,7 +971,8 @@ export const examples: ExampleDef[] = [
     id: 'practical-tables',
     name: 'Tables with Real-World Content',
     category: 'Tables & Lists',
-    description: 'Column spans, wrapping descriptions, aligned numbers, repeated headers, and empty results.',
+    description:
+      'A styled data table: banded rows, column spans, wrapping descriptions, aligned numbers, repeated headers, a subtotal carried across page breaks, a totals footer, and empty results.',
     filename: 'practical-tables.pdf',
     generate: practicalTables,
     dotnetClass: 'PracticalTablesExample',
@@ -981,7 +982,7 @@ export const examples: ExampleDef[] = [
     name: 'Tables',
     category: 'Tables & Lists',
     description:
-      'A 45-row employee directory table with portrait photos, running by name, role, and department, with repeating column headers and alternating row colours.',
+      'A 45-row employee directory with round-cropped photos and a coloured pill for each department, repeating column headers and alternating row colours.',
     filename: 'tables.pdf',
     generate: tables,
     requiredAssets: Array.from({ length: 45 }, (_, i) => `images/employees/employee-${i + 1}.jpg`),
@@ -1741,7 +1742,7 @@ export const examples: ExampleDef[] = [
     name: 'Report with Embedded Data',
     category: 'Compliance & Archival',
     description:
-      'A PDF/A-3 report that carries its source CSV inside the file, so a reader can check the numbers without re-keying them. Built with the general-purpose attachment API.',
+      'A PDF/A-3 report that carries its source CSV inside the file: the figures as a table and a chart, and a note naming the attached file, so a reader can check the numbers without re-keying them.',
     filename: 'attached-data.pdf',
     generate: attachedData,
     dotnetClass: 'AttachedDataExample',

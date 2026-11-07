@@ -22,6 +22,14 @@ import {
   TextAlignment,
   TextStyle,
   Table,
+  BarChart,
+  ChartData,
+  ChartDataPoint,
+  ChartSeries,
+  Container,
+  HorizontalStack,
+  WidthDistribution,
+  BorderColors,
   Border,
   Thickness,
   Color,
@@ -87,6 +95,58 @@ export function generate(): Document {
     );
   }
   doc.add(table);
+
+  // The same figures as a chart, read from the same rows as the table and the attachment.
+  const series = new ChartSeries();
+  series.color = ColorPalette.indigo[600];
+  series.dataPoints = ROWS.map(([quarter, revenue]) => {
+    const point = new ChartDataPoint();
+    point.label = quarter;
+    point.value = revenue / 1000;
+    point.labelFormat = 'N0';
+    return point;
+  });
+  const data = new ChartData();
+  data.title = 'Revenue by quarter (EUR thousand)';
+  data.series = [series];
+  data.yAxis.maxValue = 600;
+  data.yAxis.stepCount = 6;
+  const chart = new BarChart();
+  chart.theme = 'modern';
+  chart.data = data;
+  chart.altText = 'Bar chart of revenue by quarter in 2026, rising from 412 to 560 thousand euros.';
+  chart.height = 240;
+  chart.stretchToFit = true;
+  chart.fontFamily = StandardFonts.Helvetica;
+  chart.labelFontSize = 9;
+  chart.backgroundColor = Color.white;
+  chart.margin = new Thickness(0, 18, 0, 18);
+  doc.add(chart);
+
+  // A note that names the attachment, so a reader knows the data is there to open.
+  const badge = new Container();
+  badge.backgroundColor = ColorPalette.indigo[100];
+  badge.cornerRadius = 4;
+  badge.padding = new Thickness(6, 3, 6, 3);
+  badge.child = tb('ATTACHED', 7.5, ColorPalette.indigo[800], true, TextAlignment.Center);
+  const noteText = new TextBlock(
+    `quarterly-revenue.csv: ${ROWS.length} rows, 3 columns. Open it from your PDF viewer's attachments panel to reuse the exact figures.`
+  );
+  noteText.fontSize = 9;
+  noteText.color = INK;
+  const note = new HorizontalStack();
+  note.widthDistribution = WidthDistribution.Weighted;
+  note.spacing = 12;
+  note.add(badge, 1);
+  note.add(noteText, 6);
+  const panel = new Container();
+  panel.backgroundColor = ColorPalette.slate[50];
+  panel.border = new Border(0.75);
+  panel.borderColors = new BorderColors(ColorPalette.slate[200]);
+  panel.cornerRadius = 6;
+  panel.padding = new Thickness(14, 10, 14, 10);
+  panel.child = note;
+  doc.add(panel);
 
   // ── Embed the source data as an attachment ──
   doc.attach({

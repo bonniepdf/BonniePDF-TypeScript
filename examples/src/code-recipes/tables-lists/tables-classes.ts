@@ -24,6 +24,11 @@ import {
   pageTemplate,
   Image,
   ImageFitMode,
+  Container,
+  HorizontalStack,
+  WidthDistribution,
+  Border,
+  BorderColors,
   Placeholders,
 } from '@bonniepdf/core';
 
@@ -104,10 +109,12 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   tableIntro.margin = new Thickness(0, 0, 0, 10);
   doc.add(tableIntro);
 
-  const table = new Table(34, 130, 130, 120);
+  const table = new Table(46, 130, 130, 120);
   table.repeatHeadersOnNewPage = true;
-  table.headerBackgroundColor = ColorPalette.blue[600];
-  table.headerTextColor = Color.white;
+  table.headerBackgroundColor = ColorPalette.slate[100];
+  table.headerTextColor = ColorPalette.slate[800];
+  table.border = new Border(0.5);
+  table.borderColors = new BorderColors(ColorPalette.slate[200]);
 
   const photoHeader = new TextBlock('Photo');
   photoHeader.fontName = StandardFonts.HelveticaBold;
@@ -128,23 +135,30 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   let rowIndex = 0;
   for (const emp of employees) {
     const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
-    const photo = new Image();
-    photo.imageData = photoBytes;
-    photo.width = 24;
-    photo.height = 24;
-    photo.fitMode = ImageFitMode.Cover;
-    photo.altText = `Photo of ${emp.name}`;
+    // The photo is cropped round by a clipping container the size of the photo.
+    const image = new Image();
+    image.imageData = photoBytes;
+    image.width = 34;
+    image.height = 34;
+    image.fitMode = ImageFitMode.Cover;
+    image.altText = `Photo of ${emp.name}`;
+    const photo = new Container();
+    photo.width = 34;
+    photo.height = 34;
+    photo.cornerRadius = 17;
+    photo.clipContent = true;
+    photo.child = image;
 
     const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
     const nameCell = new TextBlock(emp.name);
     nameCell.fontSize = 10;
     nameCell.color = ColorPalette.slate[800];
+    nameCell.margin = new Thickness(0, 10, 0, 0);
     const roleCell = new TextBlock(emp.role);
     roleCell.fontSize = 10;
     roleCell.color = ColorPalette.slate[600];
-    const deptCell = new TextBlock(emp.department);
-    deptCell.fontSize = 10;
-    deptCell.color = ColorPalette.slate[600];
+    roleCell.margin = new Thickness(0, 10, 0, 0);
+    const deptCell = departmentPill(emp.department);
     table.addRow(TableRow.fromElements(photo, nameCell, roleCell, deptCell).withBackground(bg));
   }
 
@@ -181,4 +195,36 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   }
 
   return doc;
+}
+
+/** Each department's hue, so a department reads at a glance down the column. */
+const DEPARTMENT_HUES: Record<string, keyof typeof ColorPalette> = {
+  Engineering: 'indigo',
+  Marketing: 'rose',
+  Sales: 'amber',
+  HR: 'emerald',
+  Finance: 'sky',
+  Design: 'violet',
+  Operations: 'teal',
+};
+
+/**
+ * A department as a small tinted pill: a light fill with dark text of the same hue. The auto-width
+ * stack sizes the pill to its text instead of letting it fill the cell.
+ */
+function departmentPill(department: string): HorizontalStack {
+  const hue = ColorPalette[DEPARTMENT_HUES[department] ?? 'slate'];
+  const label = new TextBlock(department);
+  label.fontSize = 9;
+  label.color = hue[800];
+  const pill = new Container();
+  pill.backgroundColor = hue[100];
+  pill.cornerRadius = 8;
+  pill.padding = new Thickness(8, 3, 8, 3);
+  pill.child = label;
+  const wrap = new HorizontalStack();
+  wrap.widthDistribution = WidthDistribution.Auto;
+  wrap.margin = new Thickness(0, 9, 0, 0);
+  wrap.add(pill);
+  return wrap;
 }

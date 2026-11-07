@@ -1,15 +1,19 @@
-/** Column spans, wrapping, aligned numbers, repeated headers, and empty data. */
+/** A styled data table: banded rows, column spans, wrapping, aligned numbers, repeated headers, a subtotal carried across page breaks, a totals footer, and empty data. */
 import { Document, Heading, TextBlock, Table, TableRow, TableCell, PageBreak, Container } from '@bonniepdf/core';
 
 export function generate(): Document {
   const doc = new Document({
     metadata: { title: 'Tables with real-world content' },
-    settings: { language: 'en-GB', margin: 40 },
+    settings: {
+      language: 'en-GB',
+      margin: 40,
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: 'slate-700' },
+    },
   });
   doc.add(new Heading('Tables with real-world content', { level: 1, fontSize: 23 }));
   doc.add(
     new TextBlock(
-      'The description column has most of the available width. Numbers align right, headers repeat, and a spanning row labels each section.',
+      'The description column has most of the available width. Numbers align right, headers repeat, a spanning row labels each section, and the amount subtotal is carried from page to page.',
       { margin: { bottom: 12 } }
     )
   );
@@ -50,22 +54,70 @@ interface Item {
 }
 
 function buildTable(items: Item[]): Table {
-  // These are relative weights, not fixed pixel widths.
-  const table = new Table({ columns: [1.3, 5, 0.7, 1.2], cellPadding: 7, repeatHeadersOnNewPage: true });
-  table.addHeader('Item', 'Description', 'Qty', 'Amount');
-  table.addRow(new TableRow({ cells: [new TableCell({ content: new TextBlock('Order detail'), columnSpan: 4 })] }));
+  // These are relative weights, not fixed pixel widths. When the table breaks across pages it carries
+  // its amount subtotal forward, and the footer totals the whole table.
+  const table = new Table({
+    columns: [1.3, 5, 0.7, 1.2],
+    cellPadding: 7,
+    repeatHeadersOnNewPage: true,
+    border: { width: 0.5, color: 'slate-200' },
+    headerBackgroundColor: 'slate-800',
+    headerTextColor: '#ffffff',
+    footerBackgroundColor: 'slate-100',
+    footerTextColor: 'slate-900',
+    runningTotalColumn: 3,
+  });
+  table.addHeader(
+    ...['Item', 'Description', 'Qty', 'Amount'].map(
+      (label, i) => new TextBlock(label, { fontWeight: 'bold', alignment: i >= 2 ? 'right' : 'left' })
+    )
+  );
+  table.addRow(
+    new TableRow({
+      cells: [new TableCell({ content: new TextBlock('Order detail', { fontWeight: 'bold' }), columnSpan: 4 })],
+      backgroundColor: 'slate-100',
+    })
+  );
   if (!items.length)
     table.addRow(
       new TableRow({
-        cells: [new TableCell({ content: new TextBlock('No items match this selection.'), columnSpan: 4 })],
+        cells: [
+          new TableCell({
+            content: new TextBlock('No items match this selection.', { italic: true, color: 'slate-500' }),
+            columnSpan: 4,
+          }),
+        ],
       })
     );
-  for (const item of items)
+  items.forEach((item, i) =>
     table.addRow(
-      new TextBlock(item.id, { fontSize: 10 }),
-      new TextBlock(item.description, { fontSize: 10 }),
-      new TextBlock(String(item.quantity), { alignment: 'right', fontSize: 10 }),
-      new TextBlock((item.amount / 100).toFixed(2), { alignment: 'right', fontSize: 10 })
-    );
+      new TableRow({
+        cells: [
+          new TextBlock(item.id),
+          new TextBlock(item.description),
+          new TextBlock(String(item.quantity), { alignment: 'right' }),
+          new TextBlock(money(item.amount), { alignment: 'right' }),
+        ].map(content => new TableCell({ content })),
+        // Every other row is banded, so a long row is easy to follow across the page.
+        backgroundColor: i % 2 === 1 ? 'slate-50' : undefined,
+        runningValue: item.amount / 100,
+      })
+    )
+  );
+  const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const amount = items.reduce((sum, item) => sum + item.amount, 0);
+  table.addFooter(
+    new TableRow({
+      cells: [
+        new TableCell({ content: new TextBlock('Total', { fontWeight: 'bold' }), columnSpan: 2 }),
+        new TableCell({ content: new TextBlock(String(quantity), { fontWeight: 'bold', alignment: 'right' }) }),
+        new TableCell({ content: new TextBlock(money(amount), { fontWeight: 'bold', alignment: 'right' }) }),
+      ],
+    })
+  );
   return table;
+}
+
+function money(pence: number): string {
+  return (pence / 100).toFixed(2);
 }

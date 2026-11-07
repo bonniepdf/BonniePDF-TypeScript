@@ -398,7 +398,8 @@ export const examples: ExampleDef[] = [
     id: 'browser-download',
     name: 'Download a PDF from a Browser',
     category: 'Getting Started',
-    description: 'A document built from explicit font and image bytes, with a runnable browser download companion.',
+    description:
+      'A product card on an A5 page, built from explicit font and photo bytes, with a runnable browser download companion.',
     filename: 'browser-download.pdf',
     generate: browserDownload,
     dotnetClass: 'BrowserDownloadExample',
@@ -410,7 +411,7 @@ export const examples: ExampleDef[] = [
     name: 'Simple Document',
     category: 'Getting Started',
     description:
-      'A three-page tour of the core Document API: semantic headings, body text, spacers, a custom square page, and a QR code with alt text. A good first example.',
+      'A three-page tour of the core Document API: a title block, a feature panel, a QR code with alt text, a summary table and a custom square page. A good first example.',
     filename: 'simple-document.pdf',
     generate: simpleDocument,
     dotnetClass: 'SimpleDocumentExample',
@@ -437,7 +438,8 @@ export const examples: ExampleDef[] = [
     id: 'first-pdf',
     name: 'Your First PDF',
     category: 'Getting Started',
-    description: 'Create a document with a title and language, add a text block, and export it as PDF.',
+    description:
+      'Create a short invoice with a title and language, a heading, a table and a total, and export it as PDF.',
     filename: 'first-pdf.pdf',
     generate: firstPdf,
     dotnetClass: 'FirstPdfExample',
@@ -1061,11 +1063,19 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'images',
-    requiredAssets: ['images/recipes/gradient.png', 'images/recipes/alpha.png', 'images/recipes/divider.png'],
+    requiredAssets: [
+      'images/products/ceramic-pour-over.jpg',
+      'images/products/linen-throw.jpg',
+      'images/products/brass-reading-lamp.jpg',
+      'images/products/smoked-glass-carafe.jpg',
+      'images/products/oak-wall-shelf.jpg',
+      'images/recipes/alpha.png',
+      'images/recipes/divider.png',
+    ],
     name: 'Images',
     category: 'Images, SVG & Colour',
     description:
-      'PNG embedding with contain, cover, and fill fit modes, bordered containers, and alpha transparency. Informative images carry alt text; the decorative divider is skipped.',
+      'JPEG and PNG embedding: contain, cover and fill in clipping frames, a product photo row, and alpha transparency on light and dark panels. Informative images carry alt text; the decorative divider is skipped.',
     filename: 'images.pdf',
     generate: images,
     dotnetClass: 'ImagesExample',
@@ -1074,7 +1084,15 @@ export const examples: ExampleDef[] = [
   },
   {
     id: 'images-classes',
-    requiredAssets: ['images/recipes/gradient.png', 'images/recipes/alpha.png', 'images/recipes/divider.png'],
+    requiredAssets: [
+      'images/products/ceramic-pour-over.jpg',
+      'images/products/linen-throw.jpg',
+      'images/products/brass-reading-lamp.jpg',
+      'images/products/smoked-glass-carafe.jpg',
+      'images/products/oak-wall-shelf.jpg',
+      'images/recipes/alpha.png',
+      'images/recipes/divider.png',
+    ],
     name: 'Images (Class API)',
     category: 'Images, SVG & Colour',
     description:

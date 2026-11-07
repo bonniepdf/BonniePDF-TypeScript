@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { FontMetrics } from '../../src/Typography/FontMetrics';
+import { StandardFonts } from '../../src/Typography/StandardFonts';
 import { inflateSync } from 'node:zlib';
 
 /** Standard (unembedded) fonts use WinAnsiEncoding: typographic punctuation has its own byte, not the low byte of the code point. */
@@ -39,6 +40,30 @@ describe('standard font text encoding', () => {
     expect(pdf).toContain('(b)');
     expect(pdf).toContain('(c)');
     expect(pdf).not.toContain('?');
+  });
+});
+
+describe('standard font dictionary', () => {
+  function fontDictionaries(fontName?: string): string[] {
+    const doc = new Document();
+    doc.add(new TextBlock('café', fontName ? { fontName } : {}));
+    try {
+      const raw = Buffer.from(doc.generateBytes()).toString('latin1');
+      return raw.match(/<<[^<>]*\/Type \/Font[^<>]*>>/g) ?? [];
+    } finally {
+      doc.dispose();
+    }
+  }
+
+  it('declares WinAnsiEncoding, so viewers decode the bytes it writes (spec 03)', () => {
+    const [helvetica] = fontDictionaries().filter(d => d.includes('/BaseFont /Helvetica'));
+    expect(helvetica).toContain('/Encoding /WinAnsiEncoding');
+  });
+
+  it('leaves Symbol on its built-in encoding', () => {
+    const [symbol] = fontDictionaries(StandardFonts.Symbol).filter(d => d.includes('/BaseFont /Symbol'));
+    expect(symbol).toBeDefined();
+    expect(symbol).not.toContain('/Encoding');
   });
 });
 

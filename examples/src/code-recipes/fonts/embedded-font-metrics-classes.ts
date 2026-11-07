@@ -1,35 +1,27 @@
 /**
  * Embedded-Font Metrics (Class API).
- * The same embedded-Liberation-Sans alignment demo as Embedded-Font Metrics, built with the class API: construct each element and assign properties. The output is identical.
+ * The same framed alignment samples as Embedded-Font Metrics, built with the class API: construct each element and assign properties. The output is identical.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
-/**
- * Embedded-Font Metrics — why an embedded font makes alignment edges exact.
- *
- * The standard-14 Type1 fonts (Helvetica, Times, …) are measured from approximate
- * AFM width tables. An embedded TrueType font instead carries its own `hmtx`
- * advance widths, so BonniePDF measures and places every glyph from the real
- * metrics. That precision is what makes right, centre, and justified edges land
- * exactly on the margin — the same alignment operations, but measured from the
- * font's own glyph widths rather than an approximation.
- *
- * This example renders the four alignments entirely in embedded Liberation Sans,
- * served from `/fonts/liberation/` (copied from `core/assets/fonts/` at build
- * time) and embedded as a compact glyph subset. PDF/A-2a + PDF/UA-1.
- */
 import {
-  Document,
-  DocumentSettings,
-  DocumentMetadata,
-  PdfSize,
   AccessibilityMode,
-  TextBlock,
-  TextAlignment,
-  TextStyle,
-  Heading,
+  Border,
+  BorderColors,
   ColorPalette,
-  Thickness,
+  Container,
+  Document,
+  DocumentMetadata,
+  DocumentSettings,
+  Heading,
+  HorizontalStack,
   PdfAConformance,
+  PdfSize,
+  TextAlignment,
+  TextBlock,
+  TextStyle,
+  Thickness,
+  VerticalStack,
+  WidthDistribution,
 } from '@bonniepdf/core';
 
 // Liberation Sans — Regular for body text, Bold for headings.
@@ -37,10 +29,9 @@ const SANS = '/fonts/liberation/LiberationSans-Regular.ttf';
 const SANS_BOLD = '/fonts/liberation/LiberationSans-Bold.ttf';
 
 const SAMPLE_TEXT =
-  'The quick brown fox jumps over the lazy dog. This sentence demonstrates how text alignment ' +
-  'affects the visual appearance of a paragraph. When text is justified, the word spacing is ' +
-  'adjusted so that both the left and right edges align perfectly with the margins, creating a ' +
-  'clean, professional look commonly seen in books and formal documents.';
+  'The quick brown fox jumps over the lazy dog. Every line here is measured from the advance ' +
+  'widths stored in the embedded font, the same font that draws it, so the edge this alignment ' +
+  'promises lands on the rule beside it in any viewer.';
 
 const BOOK_PARAS = [
   'In the beginning, there was only the vast emptiness of space, stretching infinitely in all directions. ' +
@@ -57,15 +48,9 @@ const BOOK_PARAS = [
 /**
  * The **class / construct-then-mutate** companion to `embedded-font-metrics.ts`.
  *
- * Same embedded-Liberation-Sans alignment demo, authored the long way: `new`
- * each element and assign properties, using the `TextAlignment` enum,
- * `DocumentSettings(PdfSize.a4, 60)`, `TextStyle`, `Thickness` and
- * `ColorPalette` directly. This is the escape hatch the options-object front
- * door sits on top of.
- *
- * It renders **byte-for-byte identically** to the options-style
- * `embedded-font-metrics.ts` (an equivalence test binds the two). Reach for the
- * options form first; this variant exists to show what it desugars to.
+ * Same framed samples, authored the long way: `new` each element and assign
+ * its properties. It renders **byte-for-byte identically** to the options-style
+ * `embedded-font-metrics.ts` (an equivalence test binds the two).
  */
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, 60);
@@ -81,7 +66,6 @@ export function generate(): Document {
   metadata.keywords = 'pdf, pdf/ua, pdf/a, fonts, embedding, metrics, hmtx, alignment, truetype, liberation';
 
   const doc = new Document(settings, metadata);
-  // Body text inherits Liberation Sans (Regular) via the default-style cascade.
 
   const h1 = new Heading('Embedded-Font Metrics');
   h1.tocIdentifier = 'intro';
@@ -93,49 +77,98 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'The standard-14 fonts are measured from approximate width tables. An embedded TrueType font carries ' +
-      'its own hmtx advance widths, so glyph placement is exact — which is what makes the right, centre, and ' +
-      'justified edges below land precisely on the margin. Every element here is set in embedded Liberation Sans.'
+    'An embedded font carries its own advance widths, and the same font program draws the text, so the widths ' +
+      'measured during layout are the widths every reader sees. Each frame below marks the measure with a rule on ' +
+      'each side; the edges each alignment promises land on them.'
   );
-  intro.margin = new Thickness(0, 0, 0, 14);
+  intro.lineHeight = 1.45;
+  intro.margin = new Thickness(0, 0, 0, 18);
   doc.add(intro);
 
-  alignedSample(doc, 'Left Aligned (Default)', 's-left', TextAlignment.Left);
-  alignedSample(doc, 'Centre Aligned', 's-centre', TextAlignment.Center);
-  alignedSample(doc, 'Right Aligned', 's-right', TextAlignment.Right);
-  alignedSample(doc, 'Justified', 's-justify', TextAlignment.Justify);
+  doc.add(
+    row(
+      framedSample('Left', 'left edge on the rule', TextAlignment.Left),
+      framedSample('Centre', 'centred between the rules', TextAlignment.Center),
+      18
+    )
+  );
+  doc.add(
+    row(
+      framedSample('Right', 'right edge on the rule', TextAlignment.Right),
+      framedSample('Justified', 'both edges on the rules', TextAlignment.Justify),
+      24
+    )
+  );
 
-  // ── Book-style justified paragraphs ─────────────────────────────────────────
-  section(doc, 'Book-Style Justified Paragraphs', 'book');
+  // ── Book-style justified paragraphs, framed the same way ──────────────────
+  const book = new Heading('Book-style justified paragraphs');
+  book.tocIdentifier = 'book';
+  book.level = 2;
+  book.fontName = SANS_BOLD;
+  book.fontSize = 13;
+  book.color = ColorPalette.slate[900];
+  book.margin = new Thickness(0, 0, 0, 8);
+  doc.add(book);
+
+  const paragraphs = new VerticalStack();
+  paragraphs.spacing = 8;
   for (const text of BOOK_PARAS) {
     const p = new TextBlock(text);
     p.fontName = SANS;
     p.alignment = TextAlignment.Justify;
-    p.margin = new Thickness(0, 0, 0, 8);
-    doc.add(p);
+    p.lineHeight = 1.4;
+    paragraphs.add(p);
   }
+  doc.add(frame(paragraphs));
 
   return doc;
 }
 
 // Local helpers and sample types used by this document.
 
-function section(doc: Document, title: string, tocId: string, alignment: TextAlignment = TextAlignment.Left): void {
-  const h = new Heading(title);
-  h.tocIdentifier = tocId;
-  h.level = 2;
-  h.fontName = SANS_BOLD;
-  h.fontSize = 13;
-  h.color = ColorPalette.indigo[600];
-  h.margin = new Thickness(0, 0, 0, 6);
-  h.alignment = alignment;
-  doc.add(h);
+/** Two framed samples side by side. */
+function row(left: VerticalStack, right: VerticalStack, marginBottom: number): HorizontalStack {
+  const stack = new HorizontalStack();
+  stack.spacing = 24;
+  stack.widthDistribution = WidthDistribution.Equal;
+  stack.margin = new Thickness(0, 0, 0, marginBottom);
+  stack.add(left);
+  stack.add(right);
+  return stack;
 }
 
-function alignedSample(doc: Document, title: string, tocId: string, alignment: TextAlignment): void {
-  section(doc, title, tocId, alignment);
-  const p = new TextBlock(SAMPLE_TEXT);
-  p.alignment = alignment;
-  p.margin = new Thickness(0, 0, 0, 14);
-  doc.add(p);
+/** A frame whose left and right rules mark the measure, with no padding between rule and text. */
+function frame(child: TextBlock | VerticalStack): Container {
+  const container = new Container();
+  container.border = new Border(0.75, 0, 0.75, 0);
+  container.borderColors = new BorderColors(ColorPalette.teal[500]);
+  container.backgroundColor = ColorPalette.slate[50];
+  container.padding = new Thickness(0, 8, 0, 8);
+  container.child = child;
+  return container;
+}
+
+/** One alignment: a heading, a caption saying what to look for, and the framed sample. */
+function framedSample(title: string, caption: string, alignment: TextAlignment): VerticalStack {
+  const heading = new Heading(title);
+  heading.level = 2;
+  heading.fontName = SANS_BOLD;
+  heading.fontSize = 12;
+  heading.color = ColorPalette.slate[900];
+
+  const note = new TextBlock(caption);
+  note.fontSize = 9;
+  note.color = ColorPalette.teal[700];
+
+  const sample = new TextBlock(SAMPLE_TEXT);
+  sample.alignment = alignment;
+  sample.fontSize = 10.5;
+  sample.lineHeight = 1.4;
+
+  const stack = new VerticalStack();
+  stack.spacing = 4;
+  stack.add(heading);
+  stack.add(note);
+  stack.add(frame(sample));
+  return stack;
 }

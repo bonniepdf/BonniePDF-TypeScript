@@ -9,7 +9,7 @@ import {
   TextBlock,
   HorizontalStack,
   Container,
-  PageBreak,
+  VerticalStack,
   StandardFonts,
   type ColorInput,
 } from '@bonniepdf/core';
@@ -32,6 +32,7 @@ export function generate(): Document {
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
+      margin: 40,
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
     },
     metadata: {
@@ -90,7 +91,7 @@ export function generate(): Document {
     new HorizontalStack({
       spacing: 10,
       widthDistribution: 'equal',
-      children: [box('Column 1', 'blue-600'), box('Column 2', 'indigo-600'), box('Column 3', 'slate-600')],
+      children: [box('Column 1', 'indigo-600'), box('Column 2', 'indigo-700'), box('Column 3', 'indigo-900')],
     })
   );
 
@@ -110,9 +111,9 @@ export function generate(): Document {
   // the 4.5:1 WCAG AA threshold; slate-500 clears it (4.76:1) and still reads
   // lighter than the 600/800 boxes beside it.
   for (const [label, weight, bg] of [
-    ['1×', 1, 'slate-500'],
-    ['2×', 2, 'slate-600'],
-    ['3×', 3, 'slate-800'],
+    ['1×', 1, 'indigo-600'],
+    ['2×', 2, 'indigo-700'],
+    ['3×', 3, 'indigo-900'],
   ] as const) {
     weightedStack.add(box(label, bg), weight);
   }
@@ -123,59 +124,65 @@ export function generate(): Document {
   doc.add(sectionHeading('Cross-Axis Alignment', 's-align', 16));
   doc.add(
     new TextBlock(
-      'When a stack has a fixed height and its children differ in height, stack.alignment positions each child along the cross (vertical) axis. The same three boxes - 40pt, 65pt and 90pt tall - are shown top-aligned, centred, and bottom-aligned.',
+      'When a stack has a fixed height and its children differ in height, stack.alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.',
       { margin: { bottom: 8 } }
     )
   );
 
   const boxes = [
-    ['40pt', 40, 'blue-600'],
-    ['65pt', 65, 'indigo-600'],
-    ['90pt', 90, 'slate-600'],
+    ['24pt', 24, 'indigo-600'],
+    ['42pt', 42, 'indigo-700'],
+    ['60pt', 60, 'indigo-900'],
   ] as const;
 
-  for (const [caption, align] of [
-    ['Top (Start)', 'start'],
-    ['Centre (Center)', 'center'],
-    ['Bottom (End)', 'end'],
-  ] as const) {
-    doc.add(
-      new TextBlock(caption, {
-        fontName: StandardFonts.HelveticaBold,
-        fontSize: 11,
-        color: 'slate-600',
-        margin: { top: 8, bottom: 4 },
-      })
-    );
-
-    doc.add(
-      new HorizontalStack({
-        spacing: 10,
-        widthDistribution: 'equal',
-        height: 90,
-        alignment: align,
-        children: boxes.map(
-          ([label, boxHeight, bg]) =>
-            new Container({
-              padding: [12, 6],
-              backgroundColor: bg,
-              height: boxHeight,
-              child: new TextBlock(label, {
+  // The three alignments side by side, each a captioned 60pt-tall stack of the same three boxes.
+  doc.add(
+    new HorizontalStack({
+      spacing: 16,
+      widthDistribution: 'equal',
+      margin: { bottom: 4 },
+      children: (
+        [
+          ['Top (Start)', 'start'],
+          ['Centre (Center)', 'center'],
+          ['Bottom (End)', 'end'],
+        ] as const
+      ).map(
+        ([caption, align]) =>
+          new VerticalStack({
+            children: [
+              new TextBlock(caption, {
                 fontName: StandardFonts.HelveticaBold,
                 fontSize: 11,
-                color: '#ffffff',
+                color: 'slate-600',
+                margin: { top: 8, bottom: 4 },
               }),
-            })
-        ),
-      })
-    );
-  }
+              new HorizontalStack({
+                spacing: 6,
+                widthDistribution: 'equal',
+                height: 60,
+                alignment: align,
+                children: boxes.map(
+                  ([label, boxHeight, bg]) =>
+                    new Container({
+                      padding: [8, 6],
+                      backgroundColor: bg,
+                      height: boxHeight,
+                      child: new TextBlock(label, {
+                        fontName: StandardFonts.HelveticaBold,
+                        fontSize: 10,
+                        color: '#ffffff',
+                      }),
+                    })
+                ),
+              }),
+            ],
+          })
+      ),
+    })
+  );
 
   // ── Key-value pairs ───────────────────────────────────────────────────────
-
-  // Keep the heading with its section: no keep-with-next primitive exists,
-  // so force the whole block onto the next page with an explicit break.
-  doc.add(new PageBreak());
 
   doc.add(sectionHeading('Key-Value Pairs', 's-kv', 16));
   doc.add(
@@ -214,12 +221,10 @@ export function generate(): Document {
       children: [
         new TextBlock(
           'The first column contains flowing prose that demonstrates how text wraps within a constrained width. ' +
-            'HorizontalStack automatically divides the available page width so each child receives its share. ' +
             'Text inside each column wraps independently, giving a true two-column reading experience.'
         ),
         new TextBlock(
-          'The second column runs in parallel with the first. Both columns sit within a single HorizontalStack ' +
-            'element, meaning they are rendered side-by-side. This pattern is commonly used for newsletters, ' +
+          'The second column runs in parallel with the first. This pattern is commonly used for newsletters, ' +
             'product sheets, and comparison tables where parallel content aids comprehension.'
         ),
       ],

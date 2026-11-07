@@ -72,14 +72,14 @@ export function generate(): Document {
       children: [
         comparisonColumn(
           'Padding on the outer box',
-          'The blue band is 16pt of padding: space the container reserves inside its own border.',
+          'The tinted band is 16pt of padding: space the container reserves inside its own border.',
           // Outer box owns the space via padding; the inner content sits on a
           // contrasting fill so the padding band is actually visible.
           paddingDemo()
         ),
         comparisonColumn(
           'Margin on the inner box',
-          'The blue band is 16pt of margin: space the inner element holds outside itself.',
+          'The tinted band is 16pt of margin: space the inner element holds outside itself.',
           // Outer box has no padding; the inner element pushes itself away from the
           // border with its own margin, producing the same gutter a different way.
           marginDemo()
@@ -114,9 +114,9 @@ export function generate(): Document {
       margin: 20,
       width: 100, // Fixed size so the label's stated dimensions are honest.
       height: 60,
-      backgroundColor: 'amber-400',
+      backgroundColor: 'indigo-200',
       padding: 6,
-      child: new TextBlock('Image 100x60', { fontSize: 10, color: 'amber-900', alignment: 'center' }),
+      child: new TextBlock('Image 100x60', { fontSize: 10, color: 'indigo-900', alignment: 'center' }),
     })
   );
 
@@ -155,9 +155,9 @@ export function generate(): Document {
       margin: { left: 20, top: 6, right: 20, bottom: 6 },
       children: (
         [
-          ['green-100', 'green-800', 'Item 1 in stack', false],
-          ['purple-100', 'purple-800', 'Item 2 in stack (with top margin)', true],
-          ['red-100', 'red-800', 'Item 3 in stack (with top margin)', true],
+          ['indigo-50', 'indigo-900', 'Item 1 in stack', false],
+          ['indigo-100', 'indigo-900', 'Item 2 in stack (with top margin)', true],
+          ['indigo-200', 'indigo-900', 'Item 3 in stack (with top margin)', true],
         ] as const
       ).map(
         ([bg, fg, text, topMargin]) =>
@@ -219,21 +219,21 @@ function contentChip(margin?: number): Container {
   });
 }
 
-/** Space created by the OUTER box's padding (the blue band is padding). */
+/** Space created by the OUTER box's padding (the tinted band is padding). */
 function paddingDemo(): Container {
   return new Container({
-    backgroundColor: 'blue-200',
-    border: { width: 1, color: 'blue-500' },
+    backgroundColor: 'indigo-100',
+    border: { width: 1, color: 'indigo-400' },
     padding: 16, // The gutter you see IS this padding.
     child: contentChip(),
   });
 }
 
-/** Space created by the INNER element's margin (the blue band is margin). */
+/** Space created by the INNER element's margin (the tinted band is margin). */
 function marginDemo(): Container {
   return new Container({
-    backgroundColor: 'blue-200',
-    border: { width: 1, color: 'blue-500' },
+    backgroundColor: 'indigo-100',
+    border: { width: 1, color: 'indigo-400' },
     padding: 0, // No padding: the inner element spaces itself.
     child: contentChip(16), // The gutter you see IS this margin.
   });

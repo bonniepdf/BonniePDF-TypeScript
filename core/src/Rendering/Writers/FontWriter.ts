@@ -24,7 +24,7 @@ export class FontWriter {
   // ─── Type1 (standard, non-embedded) ─────────────────────────────────────────
 
   public writeType1Font(id: number, fontName: string): void {
-    const dict = new Map([
+    const dict = new Map<string, string>([
       [PdfKeys.Common.Type, '/Font'],
       [PdfKeys.Common.Subtype, '/Type1'],
       [PdfKeys.Font.BaseFont, `/${fontName}`],

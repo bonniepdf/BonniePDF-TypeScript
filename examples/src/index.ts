@@ -7,6 +7,8 @@ import { generate as finalInspectionRecord } from './industry-templates/manufact
 import { generate as certificateOfAnalysis } from './industry-templates/manufacturing-quality/certificate-of-analysis';
 import { generate as safetyDataSheet } from './industry-templates/manufacturing-quality/safety-data-sheet';
 import { generate as palletLabel } from './industry-templates/manufacturing-quality/pallet-label';
+import { generate as carbonEmissionsReport } from './industry-templates/sustainability/carbon-emissions-report';
+import { generate as energyPerformanceCertificate } from './industry-templates/sustainability/energy-performance-certificate';
 import { generate as multilingualCustomerLetter } from './industry-templates/sales-supply-chain/multilingual-customer-letter';
 import { generate as longBasketReceipt } from './industry-templates/retail-events/long-basket-receipt';
 import { generate as largeOrderInvoice } from './industry-templates/invoices/large-order-invoice';
@@ -3555,6 +3557,37 @@ export const examples: ExampleDef[] = [
     industries: ['Manufacturing', 'Logistics'],
     documentType: 'label',
     capabilities: ['barcodes', 'dataMatrix'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'carbon-emissions-report',
+    name: 'Greenhouse Gas Emissions Statement',
+    category: 'Sustainability',
+    tier: 'examples',
+    description:
+      'A greenhouse gas emissions statement: headline figures, a donut of emissions by scope with the total in the centre, every source against last year, progress towards a 2030 target, the method behind the numbers, and the figures attached as a CSV file inside the PDF.',
+    filename: 'carbon-emissions-report.pdf',
+    generate: carbonEmissionsReport,
+    dotnetClass: 'CarbonEmissionsReportExample',
+    pdfUa1: true,
+    industries: ['Compliance', 'Logistics'],
+    documentType: 'report',
+    capabilities: ['charts', 'attachments', 'numbering'],
+    compliance: ['pdf/a-3a', 'pdf/ua-1'],
+  },
+  {
+    id: 'energy-performance-certificate',
+    name: 'Energy Performance Certificate',
+    category: 'Sustainability',
+    tier: 'examples',
+    description:
+      'An energy performance certificate for a house: the A to G rating scale drawn with the current and potential ratings marked, each part of the building rated, the recommended improvements with their cost and saving, and the assessor’s details.',
+    filename: 'energy-performance-certificate.pdf',
+    generate: energyPerformanceCertificate,
+    dotnetClass: 'EnergyPerformanceCertificateExample',
+    pdfUa1: true,
+    industries: ['Property', 'Utilities'],
+    documentType: 'certificate',
     compliance: ['pdf/a-2a', 'pdf/ua-1'],
   },
   {

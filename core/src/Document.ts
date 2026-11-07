@@ -553,6 +553,8 @@ export class Document {
     if (el instanceof TextElementBase) {
       el.applyDefaultStyleIfNotSet(style);
     }
+    // A table builds its running-total rows during layout, so it keeps the style for them.
+    (el as { applyCascadedTextStyle?: (style: TextStyle) => void }).applyCascadedTextStyle?.(style);
     // Canonical traversal: containers expose their renderable children via
     // IElement.getChildren() (stacks, Container, lists, Table).
     for (const child of el.getChildren?.() ?? []) {

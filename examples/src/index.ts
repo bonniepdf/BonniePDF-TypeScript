@@ -3019,7 +3019,7 @@ export const examples: ExampleDef[] = [
     name: 'Business Invoice: Large Order',
     category: 'Invoices',
     description:
-      'A 72-line, three-page invoice: a styled header row repeated on every page, line discounts and mixed VAT rates, and a VAT summary and total due kept together on the last page.',
+      'A 72-line, three-page invoice: a styled header row repeated on every page, the net subtotal carried forward at each page break, line discounts and mixed VAT rates, and a VAT summary and total due kept together on the last page.',
     filename: 'large-order-invoice.pdf',
     generate: largeOrderInvoice,
     dotnetClass: 'LargeOrderInvoiceExample',

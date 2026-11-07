@@ -1,4 +1,4 @@
-/** A 72-line invoice: a styled header row that repeats on every page, per-line discounts, mixed VAT rates, and the totals kept together on the last page. */
+/** A 72-line invoice: a styled header row that repeats on every page, a carried-forward subtotal at each page break, per-line discounts, mixed VAT rates, and the totals kept together on the last page. */
 import {
   Container,
   Document,
@@ -8,6 +8,8 @@ import {
   PreventPageBreak,
   StandardFonts,
   Table,
+  TableCell,
+  TableRow,
   TextBlock,
   VerticalStack,
   pageTemplate,
@@ -164,7 +166,8 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
   );
   doc.add(parties);
 
-  // ── Line items: the header row repeats at the top of every page ──
+  // ── Line items: the header row repeats at the top of every page, and each page
+  // break carries the net subtotal forward to the next ──
   const table = new Table({
     columns: [4.4, 0.6, 1, 1.1, 0.6, 1.1],
     repeatHeadersOnNewPage: true,
@@ -172,6 +175,9 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
     border: { width: 0.5, color: 'slate-200' },
     headerBackgroundColor: 'slate-800',
     headerTextColor: '#ffffff',
+    footerBackgroundColor: 'slate-100',
+    footerTextColor: 'slate-900',
+    runningTotalColumn: 5,
   });
   table.addHeader(
     text('Description', 8.5, '#ffffff', { bold: true }),
@@ -181,17 +187,24 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
     text('VAT', 8.5, '#ffffff', { bold: true, align: 'right' }),
     text('Net £', 8.5, '#ffffff', { bold: true, align: 'right' })
   );
-  for (const line of lines)
+  for (const line of lines) {
+    const net = line.quantity * line.unitPence - line.discountPence;
     table.addRow(
-      text(line.description, 9, 'slate-800'),
-      ...[
-        String(line.quantity),
-        money(line.unitPence),
-        line.discountPence ? money(line.discountPence) : '–',
-        `${line.taxPercent}%`,
-        money(line.quantity * line.unitPence - line.discountPence),
-      ].map(value => text(value, 9, 'slate-800', { align: 'right' }))
+      new TableRow({
+        cells: [
+          text(line.description, 9, 'slate-800'),
+          ...[
+            String(line.quantity),
+            money(line.unitPence),
+            line.discountPence ? money(line.discountPence) : '–',
+            `${line.taxPercent}%`,
+            money(net),
+          ].map(value => text(value, 9, 'slate-800', { align: 'right' })),
+        ].map(content => new TableCell({ content })),
+        runningValue: net / 100,
+      })
     );
+  }
   if (!lines.length) table.addRow('No billable items', '', '', '', '', '0.00');
   doc.add(table);
 

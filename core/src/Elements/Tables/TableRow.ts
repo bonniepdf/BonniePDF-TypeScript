@@ -21,6 +21,7 @@ export const TABLE_ROW_OPTION_KEYS = [
   'isFooter',
   'minHeight',
   'backgroundColor',
+  'runningValue',
 ] as const;
 
 type TableRowKey = (typeof TABLE_ROW_OPTION_KEYS)[number];
@@ -89,6 +90,12 @@ export class TableRow implements IElement, IBackgroundColor, IRoleProvider {
 
   /** Whether this is a footer row */
   public isFooter = false;
+
+  /**
+   * The amount this body row adds to the table's running total, when the table has a
+   * `runningTotalColumn`. Rows without one add nothing.
+   */
+  public runningValue?: number;
 
   private get _minHeight(): number | undefined {
     return this._cell.minHeight;

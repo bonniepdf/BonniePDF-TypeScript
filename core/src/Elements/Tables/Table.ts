@@ -16,12 +16,14 @@ import { TableCell } from './TableCell';
 import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
 import { TextBlock } from '../Text/TextBlock';
+import type { TextStyle } from '../Text/TextStyle';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
 import { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
 import { captureTypeOf, captureNameOf, paintForBackground } from '../../Rendering/LayoutRecorder';
 import { beginChildTag, endChildTag, ChildTagToken } from '../../Rendering/Tagging/ChildTagging';
 import { toLength, type LengthInput } from '../../Normalize/toLength';
+import { formatChartNumber, sumChartNumbers } from '../../Charts/ChartNumberFormat';
 
 /**
  * A table element with support for column weights, cell padding, borders, headers, and footers
@@ -32,6 +34,11 @@ export const TABLE_OWN_OPTION_KEYS = [
   'cellPadding',
   'repeatHeadersOnNewPage',
   'showFootersOnAllPages',
+  'runningTotalColumn',
+  'carriedForwardLabel',
+  'broughtForwardLabel',
+  'runningTotalFormat',
+  'runningTotalPrefix',
   'headerBackgroundColor',
   'headerTextColor',
   'footerBackgroundColor',
@@ -143,6 +150,21 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   private lastRowRendered = -1;
   private headersPending = true;
   private taggedHeaderEmitted = false;
+  /** The running values of the body rows drawn so far, for the carried-forward total. */
+  private runningValues: number[] = [];
+  /** A page ended with a carried-forward row, so the next page opens with a brought-forward one. */
+  private carryPending = false;
+  /** The document's default text style, handed over by the style cascade for the rows the table makes itself. */
+  private cascadedTextStyle: TextStyle | undefined;
+
+  /**
+   * Receives the document's default text style. The running-total rows are built during layout,
+   * after the cascade has visited the tree, so the table applies the style to them itself.
+   * @internal
+   */
+  public applyCascadedTextStyle(style: TextStyle): void {
+    this.cascadedTextStyle = style;
+  }
 
   /** Creates a table with the given relative column weights, e.g. `new Table(1, 2, 1)`. */
   constructor(...columnWeights: number[]);
@@ -190,6 +212,24 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * Whether to show footers on each page (only last page if false)
    */
   public showFootersOnAllPages = false;
+
+  /**
+   * Turns on a running total: the column (0-based, at least 1) that shows it. When the body breaks
+   * across pages, each page that continues ends with a "carried forward" row holding the total of
+   * the rows' `runningValue` so far, and the next page opens, after any repeated header, with a
+   * "brought forward" row holding the same total. The label spans the columns before this one.
+   * Both rows are drawn in the footer colours and left out of the accessibility structure, since
+   * they repeat what the rows already say. Unset (the default) turns the feature off.
+   */
+  public runningTotalColumn?: number;
+  /** Label of the row that ends a page that continues. Default `'Carried forward'`. */
+  public carriedForwardLabel = 'Carried forward';
+  /** Label of the row that opens a continuation page. Default `'Brought forward'`. */
+  public broughtForwardLabel = 'Brought forward';
+  /** Number format of the running total: `G`, `F<n>`, `N<n>` or `P<n>`, as for charts. Default `'N2'`. */
+  public runningTotalFormat = 'N2';
+  /** Text written before the running total, such as a currency symbol. Default empty. */
+  public runningTotalPrefix = '';
   /**
    * Default background color for header rows
    */
@@ -505,23 +545,41 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     // Render data rows
     let tbodyOpen = false;
+    const running = this.runningTotalColumn !== undefined;
     for (let i = startRow; i < this._rows.length; i++) {
       const row = this.rowForLayout(i, ctx.layoutRecorder === undefined);
       const rowHeight = this.measureRowHeight(row, widths);
+      // A running total opens a continuation page with a brought-forward row, and needs room after
+      // every row but the last for the carried-forward row that may end the page.
+      const broughtForward = running && this.carryPending ? this.runningRow(this.broughtForwardLabel) : undefined;
+      const broughtForwardHeight = broughtForward ? this.measureRowHeight(broughtForward, widths) : 0;
+      const carryHeight =
+        running && i < this._rows.length - 1
+          ? this.measureRowHeight(this.runningRow(this.carriedForwardLabel), widths)
+          : 0;
 
       // Pagination check
-      if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
+      if (ctx.currentY + broughtForwardHeight + rowHeight + carryHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
         if (tbodyOpen && groupTagging) tagging!.tree.end();
+        if (running && i > startRow) {
+          this.renderRowDirect(ctx, this.runningRow(this.carriedForwardLabel), widths, true);
+          this.carryPending = true;
+        }
         this.lastRowRendered = i - 1;
         this.headersPending = this.repeatHeadersOnNewPage && this.headers.length > 0;
         return i === startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
       }
 
+      if (broughtForward) {
+        this.renderRowDirect(ctx, broughtForward, widths, true);
+        this.carryPending = false;
+      }
       if (!tbodyOpen && groupTagging) {
         tagging!.tree.begin(SemanticRole.TBody);
         tbodyOpen = true;
       }
       this.renderRowDirect(ctx, row, widths);
+      if (running) this.runningValues.push(row.runningValue ?? 0);
       this.lastRowRendered = i;
     }
     if (tbodyOpen && groupTagging) tagging!.tree.end();
@@ -549,6 +607,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   public resetState(): void {
     this.lastRowRendered = -1;
     this.headersPending = true;
+    this.runningValues = [];
+    this.carryPending = false;
     this.taggedHeaderEmitted = false;
     this._bottomsAbove = undefined;
     this._edgePlan.clear();
@@ -937,7 +997,43 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * renderRow (which adds the footer-visibility and pagination checks first).
    * @private
    */
-  private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[]): void {
+  private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[], asArtifact = false): void {
+    // A carried- or brought-forward row repeats what the rows already say: draw it as an artifact.
+    const artifact = asArtifact && ctx.tagging != null && !ctx.canvas.isInsideArtifact?.();
+    if (artifact) ctx.canvas.beginArtifact();
+    try {
+      this.renderRowContent(ctx, row, widths, artifact);
+    } finally {
+      if (artifact) ctx.canvas.endArtifact();
+    }
+  }
+
+  /**
+   * The carried-forward or brought-forward row: the label across the columns before
+   * `runningTotalColumn`, the running total formatted in that column, and empty cells after it.
+   */
+  private runningRow(label: string): TableRow {
+    const column = this.runningTotalColumn!;
+    if (!Number.isInteger(column) || column < 1 || column >= this.columnCount())
+      throw new RangeError('runningTotalColumn must be a column index from 1 to the last column.');
+    const value =
+      this.runningTotalPrefix + formatChartNumber(sumChartNumbers(this.runningValues), this.runningTotalFormat);
+    const labelText = new TextBlock(label, { fontWeight: 'bold' });
+    const valueText = new TextBlock(value, { fontWeight: 'bold', alignment: 'right' });
+    if (this.cascadedTextStyle) {
+      labelText.applyDefaultStyleIfNotSet(this.cascadedTextStyle);
+      valueText.applyDefaultStyleIfNotSet(this.cascadedTextStyle);
+    }
+    const labelCell = new TableCell({ content: labelText, columnSpan: column });
+    const cells = [labelCell, new TableCell({ content: valueText })];
+    for (let k = column + 1; k < this.columnCount(); k++) cells.push(new TableCell({ content: new TextBlock('') }));
+    const row = new TableRow(cells);
+    if (this.footerBackgroundColor) row.backgroundColor = this.footerBackgroundColor;
+    if (this.footerTextColor) row.color = this.footerTextColor;
+    return row;
+  }
+
+  private renderRowContent(ctx: RenderContext, row: TableRow, widths: number[], suppressTagging: boolean): void {
     const rowHeight = this.measureRowHeight(row, widths);
     this.planRowEdges(ctx, row);
 
@@ -948,7 +1044,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Data tables tag TR/TH/TD; presentation (layout) tables tag each cell's
     // content in reading order instead (no table structure). Exactly one
     // applies. No-op when tagging is off.
-    const tagging = ctx.tagging;
+    const tagging = suppressTagging ? undefined : ctx.tagging;
     const dataTagging = tagging != null && !this.isLayoutGrid;
     const presTagging = tagging != null && this.isLayoutGrid;
     if (dataTagging) {

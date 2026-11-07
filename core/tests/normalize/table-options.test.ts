@@ -10,7 +10,19 @@ import { ColorPalette } from '../../src/Core/ColorPalette';
 
 const INTERNAL = {
   elementBase: ['startingY'],
-  table: ['columnWeights', 'footers', 'headers', 'rows', 'lastRowRendered', 'headersPending', 'taggedHeaderEmitted'],
+  table: [
+    'columnWeights',
+    'footers',
+    'headers',
+    'rows',
+    'lastRowRendered',
+    'headersPending',
+    'taggedHeaderEmitted',
+    'runningValues',
+    'carryPending',
+    'cascadedTextStyle',
+    'applyCascadedTextStyle',
+  ],
 } as const;
 
 function settableSurface(instance: object, internal: readonly string[] = []): string[] {

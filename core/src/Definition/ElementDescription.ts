@@ -1025,6 +1025,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "backgroundColor": {
           "kind": "color"
+        },
+        "runningValue": {
+          "kind": "number"
         }
       }
     },
@@ -1587,6 +1590,22 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "showFootersOnAllPages": {
           "kind": "boolean"
         },
+        "runningTotalColumn": {
+          "kind": "integer",
+          "min": 1
+        },
+        "carriedForwardLabel": {
+          "kind": "string"
+        },
+        "broughtForwardLabel": {
+          "kind": "string"
+        },
+        "runningTotalFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "runningTotalPrefix": {
+          "kind": "string"
+        },
         "headerBackgroundColor": {
           "kind": "color"
         },
@@ -2008,6 +2027,22 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "showFootersOnAllPages": {
           "kind": "boolean"
+        },
+        "runningTotalColumn": {
+          "kind": "integer",
+          "min": 1
+        },
+        "carriedForwardLabel": {
+          "kind": "string"
+        },
+        "broughtForwardLabel": {
+          "kind": "string"
+        },
+        "runningTotalFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "runningTotalPrefix": {
+          "kind": "string"
         },
         "headerBackgroundColor": {
           "kind": "color"

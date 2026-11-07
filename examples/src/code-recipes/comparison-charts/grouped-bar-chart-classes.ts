@@ -28,7 +28,7 @@ import {
   pageTemplate,
 } from '@bonniepdf/core';
 
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
 
 /**
  * The **class / construct-then-mutate** companion to `grouped-bar-chart.ts`.
@@ -67,7 +67,7 @@ export function generate(): Document {
   const metadata = new DocumentMetadata();
   metadata.title = 'Grouped Bar Chart';
   metadata.author = 'BonniePDF';
-  metadata.subject = 'Grouped bar chart example - three product lines compared across 12 months';
+  metadata.subject = 'Grouped bar chart example - three product lines compared quarter by quarter';
 
   const doc = new Document(settings, metadata);
 
@@ -78,7 +78,7 @@ export function generate(): Document {
   title.margin = new Thickness(0, 0, 0, 8);
   doc.add(title);
 
-  const subtitle = new TextBlock('Comparison of three product lines across all months');
+  const subtitle = new TextBlock('Three product lines compared quarter by quarter, 2026');
   subtitle.fontSize = 14;
   subtitle.color = ColorPalette.slate[600];
   subtitle.alignment = TextAlignment.Center;
@@ -87,15 +87,15 @@ export function generate(): Document {
 
   const data = new ChartData();
   data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 15000;
-  data.yAxis.stepCount = 5;
+  data.yAxis.maxValue = 35000;
+  data.yAxis.stepCount = 7;
   const electronics = new ChartSeries();
   electronics.color = Color.fromHex('#4f46e5');
   electronics.name = 'Electronics';
-  electronics.dataPoints = MONTH_LABELS.map((label, i) => {
+  electronics.dataPoints = QUARTERS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
-    p.value = [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800][i];
+    p.value = [14500, 21800, 22500, 31500][i];
     p.labelFormat = 'N0';
     return p;
   });
@@ -103,10 +103,10 @@ export function generate(): Document {
   const clothing = new ChartSeries();
   clothing.color = Color.fromHex('#f43f5e');
   clothing.name = 'Clothing';
-  clothing.dataPoints = MONTH_LABELS.map((label, i) => {
+  clothing.dataPoints = QUARTERS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
-    p.value = [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200][i];
+    p.value = [10500, 14200, 14100, 19400][i];
     p.labelFormat = 'N0';
     return p;
   });
@@ -114,10 +114,10 @@ export function generate(): Document {
   const homeAndGarden = new ChartSeries();
   homeAndGarden.color = Color.fromHex('#22c55e');
   homeAndGarden.name = 'Home & Garden';
-  homeAndGarden.dataPoints = MONTH_LABELS.map((label, i) => {
+  homeAndGarden.dataPoints = QUARTERS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
-    p.value = [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800][i];
+    p.value = [9300, 13000, 12900, 17400][i];
     p.labelFormat = 'N0';
     return p;
   });
@@ -125,14 +125,16 @@ export function generate(): Document {
   data.series = [electronics, clothing, homeAndGarden];
 
   const chart = new GroupedBarChart();
+  chart.theme = 'modern';
   chart.height = 380;
   chart.stretchToFit = true;
   chart.showValueLabels = true;
   chart.fontFamily = StandardFonts.Helvetica;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
-  chart.altText = 'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.';
+  chart.altText =
+    'Grouped bar chart comparing Electronics, Clothing, and Home and Garden revenue in each quarter of 2026; Electronics leads every quarter, reaching 31,500 GBP in Q4.';
   doc.add(chart);
 
   return doc;

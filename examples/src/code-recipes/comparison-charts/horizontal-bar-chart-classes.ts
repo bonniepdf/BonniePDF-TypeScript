@@ -87,12 +87,12 @@ export function generate(): Document {
   doc.add(subtitle);
 
   const regions = [
-    { label: 'North East', value: 142000 },
-    { label: 'North West', value: 187000 },
-    { label: 'Midlands', value: 203000 },
-    { label: 'East Anglia', value: 96000 },
     { label: 'South East', value: 261000 },
+    { label: 'Midlands', value: 203000 },
+    { label: 'North West', value: 187000 },
+    { label: 'North East', value: 142000 },
     { label: 'South West', value: 118000 },
+    { label: 'East Anglia', value: 96000 },
   ];
 
   const s = new ChartSeries();
@@ -116,6 +116,7 @@ export function generate(): Document {
   data.xAxis.legend = 'Region';
 
   const chart = new BarChart();
+  chart.theme = 'modern';
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 380;
   chart.stretchToFit = true;
@@ -125,7 +126,7 @@ export function generate(): Document {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = 'Horizontal bar chart showing regional sales performance across six UK regions.';

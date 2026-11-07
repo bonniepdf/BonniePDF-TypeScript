@@ -368,15 +368,19 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
   const chartData = new ChartData({
     series: [{ dataPoints: data.history.map(h => ({ label: h.month, value: h.units })) }],
   });
+  // Fit the axis to the data: the top of the scale is the busiest month rounded up to 500 units.
+  chartData.yAxis.maxValue = Math.ceil(Math.max(...data.history.map(h => h.units)) / 500) * 500;
+  chartData.yAxis.stepCount = 4;
 
   const chart = new BarChart();
+  chart.theme = 'modern';
   chart.data = chartData;
   chart.altText = `Monthly energy use over the last twelve months, from ${data.history[0]?.month ?? ''} to ${
     data.history[data.history.length - 1]?.month ?? ''
   }, ranging from ${Math.min(...data.history.map(h => h.units))} to ${Math.max(
     ...data.history.map(h => h.units)
   )} units. Use peaks in winter and falls through the summer.`;
-  chart.height = 120;
+  chart.height = 150;
   chart.stretchToFit = true;
   chart.barColor = ACCENT;
   chart.fontFamily = StandardFonts.Helvetica;

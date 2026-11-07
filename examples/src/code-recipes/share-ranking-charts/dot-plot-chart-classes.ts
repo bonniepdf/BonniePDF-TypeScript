@@ -107,13 +107,14 @@ export function generate(): Document {
   data.xAxis.legend = 'Product';
 
   const chart = new DotPlotChart();
+  chart.theme = 'modern';
   chart.height = 380;
   chart.stretchToFit = true;
   chart.dotColor = Color.fromHex(C_TEAL);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';

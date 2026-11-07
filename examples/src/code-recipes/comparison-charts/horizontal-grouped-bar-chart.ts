@@ -99,6 +99,7 @@ export function generate(): Document {
   });
 
   const chart = new GroupedBarChart({
+    theme: 'modern',
     data,
     altText: 'Horizontal grouped bar chart comparing quarterly sales across three product lines.',
     orientation: ChartOrientation.Horizontal,
@@ -110,7 +111,7 @@ export function generate(): Document {
     fontFamily: StandardFonts.Helvetica,
 
     showLegend: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

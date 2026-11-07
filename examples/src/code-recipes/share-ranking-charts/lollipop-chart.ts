@@ -1,6 +1,6 @@
 /**
  * Lollipop Chart.
- * Stems with circular heads, a lighter alternative to bar charts, showing quarterly revenue rising from Q1 to Q4, with a legend and alt text.
+ * Stems with circular heads, a lighter alternative to bar charts, showing twelve months of revenue rising through 2026, with a legend and alt text.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -60,7 +60,7 @@ export function generate(): Document {
   });
 
   doc.add(
-    new TextBlock('Lollipop Chart: Quarterly Metrics', {
+    new TextBlock('Lollipop Chart: Monthly Revenue', {
       fontSize: 24,
       color: 'slate-800',
       alignment: 'center',
@@ -77,26 +77,27 @@ export function generate(): Document {
     })
   );
 
-  const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
-  const values = [4500, 6200, 8500, 11500];
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const values = [1420, 1510, 1630, 1580, 1720, 1890, 1960, 1840, 2030, 2210, 2380, 2640];
 
   const data = new ChartData({
-    title: 'Quarterly Revenue',
+    title: 'Monthly Revenue',
     series: [{ color: C_PINK, dataPoints: labels.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) }],
-    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5, legend: 'Revenue' },
-    xAxis: { legend: 'Quarter' },
+    yAxis: { prefix: '£', maxValue: 3000, stepCount: 6, legend: 'Revenue' },
+    xAxis: { legend: 'Month' },
   });
 
   const chart = new LollipopChart({
+    theme: 'modern',
     data,
-    altText: 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.',
+    altText: 'Lollipop chart of monthly revenue in 2026, rising from 1,420 GBP in January to 2,640 GBP in December.',
     height: 380,
     stretchToFit: true,
     lollipopColor: C_PINK,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

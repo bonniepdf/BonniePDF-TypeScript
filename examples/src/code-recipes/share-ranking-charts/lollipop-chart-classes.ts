@@ -71,7 +71,7 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
 
-  const title = new TextBlock('Lollipop Chart: Quarterly Metrics');
+  const title = new TextBlock('Lollipop Chart: Monthly Revenue');
   title.fontSize = 24;
   title.color = ColorPalette.slate[800];
   title.alignment = TextAlignment.Center;
@@ -85,8 +85,8 @@ export function generate(): Document {
   subtitle.margin = new Thickness(0, 0, 0, 20);
   doc.add(subtitle);
 
-  const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
-  const values = [4500, 6200, 8500, 11500];
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const values = [1420, 1510, 1630, 1580, 1720, 1890, 1960, 1840, 2030, 2210, 2380, 2640];
   const s = new ChartSeries();
   s.color = Color.fromHex(C_PINK);
   s.dataPoints = labels.map((label, i) => {
@@ -98,25 +98,27 @@ export function generate(): Document {
   });
 
   const data = new ChartData();
-  data.title = 'Quarterly Revenue';
+  data.title = 'Monthly Revenue';
   data.series = [s];
   data.yAxis.prefix = '£';
-  data.yAxis.maxValue = 15000;
-  data.yAxis.stepCount = 5;
+  data.yAxis.maxValue = 3000;
+  data.yAxis.stepCount = 6;
   data.yAxis.legend = 'Revenue';
-  data.xAxis.legend = 'Quarter';
+  data.xAxis.legend = 'Month';
 
   const chart = new LollipopChart();
+  chart.theme = 'modern';
   chart.height = 380;
   chart.stretchToFit = true;
   chart.lollipopColor = Color.fromHex(C_PINK);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
-  chart.altText = 'Lollipop chart of quarterly revenue, increasing from 4,500 GBP in Q1 to 11,500 GBP in Q4.';
+  chart.altText =
+    'Lollipop chart of monthly revenue in 2026, rising from 1,420 GBP in January to 2,640 GBP in December.';
   doc.add(chart);
 
   return doc;

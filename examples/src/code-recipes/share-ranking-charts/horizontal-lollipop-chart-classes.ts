@@ -89,14 +89,14 @@ export function generate(): Document {
   doc.add(subtitle);
 
   const products = [
-    { label: 'Product A', value: 45000 },
-    { label: 'Product B', value: 62000 },
-    { label: 'Product C', value: 38500 },
-    { label: 'Product D', value: 71000 },
-    { label: 'Product E', value: 55000 },
-    { label: 'Product F', value: 83000 },
-    { label: 'Product G', value: 49000 },
     { label: 'Product H', value: 91000 },
+    { label: 'Product F', value: 83000 },
+    { label: 'Product D', value: 71000 },
+    { label: 'Product B', value: 62000 },
+    { label: 'Product E', value: 55000 },
+    { label: 'Product G', value: 49000 },
+    { label: 'Product A', value: 45000 },
+    { label: 'Product C', value: 38500 },
   ];
 
   const s = new ChartSeries();
@@ -120,6 +120,7 @@ export function generate(): Document {
   data.xAxis.legend = 'Product';
 
   const chart = new LollipopChart();
+  chart.theme = 'modern';
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 400;
   chart.stretchToFit = true;
@@ -128,7 +129,7 @@ export function generate(): Document {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = 'Horizontal lollipop chart showing product revenue ranking for eight product lines.';

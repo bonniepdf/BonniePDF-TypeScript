@@ -13,6 +13,11 @@ import {
   TextAlignment,
   TextElementBase,
   VerticalStack,
+  HorizontalStack,
+  WidthDistribution,
+  Container,
+  Border,
+  BorderColors,
   Barcode,
   BarcodeSymbology,
   Heading,
@@ -58,6 +63,16 @@ const LOCATIONS: string[] = [
   'WH2-B05-R01-B02',
   'WH2-B05-R03-B06',
   'WH2-B06-R04-B03',
+  'WH3-C01-R01-B01',
+  'WH3-C01-R01-B02',
+  'WH3-C01-R02-B01',
+  'WH3-C02-R01-B03',
+  'WH3-C02-R03-B02',
+  'WH3-C03-R01-B01',
+  'WH3-C03-R02-B04',
+  'WH3-C04-R01-B02',
+  'WH3-C04-R04-B01',
+  'WH3-C05-R02-B03',
 ];
 
 /**
@@ -110,23 +125,55 @@ export function generate(): Document {
   doc.add(h1);
 
   const intro = new TextBlock(
-    'One Code 128 label per storage location. Barcodes have no pagination of their own, so a VerticalStack lays the column out and carries each label that would fall off the page onto the next one - nothing is lost off the bottom edge.'
+    'One Code 128 label per storage location, three across. Barcodes have no pagination of their own, so a VerticalStack lays the rows out and carries each row that would fall off the page onto the next one - nothing is lost off the bottom edge.'
   );
   intro.margin = new Thickness(0, 0, 0, 16);
   doc.add(intro);
 
+  // Three labels per row: each row is one child of the VerticalStack, so a row moves to the next page whole.
   const sheet = new VerticalStack();
-  sheet.spacing = 18;
-  for (const location of LOCATIONS) {
-    const label = new Barcode();
-    label.value = location;
-    label.symbology = BarcodeSymbology.Code128;
-    label.height = 46;
-    label.textLabelFontSize = 10;
-    label.altText = `Warehouse location barcode ${location}`;
-    sheet.add(label);
+  sheet.spacing = 10;
+  for (let i = 0; i < LOCATIONS.length; i += 3) {
+    const row = new HorizontalStack();
+    row.spacing = 10;
+    row.widthDistribution = WidthDistribution.Equal;
+    for (const location of LOCATIONS.slice(i, i + 3)) row.add(label(location));
+    sheet.add(row);
   }
   doc.add(sheet);
 
   return doc;
+}
+
+// Local helpers used by this document.
+
+/** One cut-out label: the warehouse and aisle above the location's barcode, inside a thin cut line. */
+function label(location: string): Container {
+  const [warehouse, aisle] = location.split('-');
+  const heading = new TextBlock(`WAREHOUSE ${warehouse.slice(2)}  ·  AISLE ${aisle}`);
+  heading.fontName = StandardFonts.HelveticaBold;
+  heading.fontSize = 7;
+  heading.letterSpacing = 0.8;
+  heading.color = ColorPalette.slate[600];
+
+  const barcode = new Barcode();
+  barcode.value = location;
+  barcode.symbology = BarcodeSymbology.Code128;
+  barcode.moduleWidth = 0.75;
+  barcode.height = 40;
+  barcode.textLabelFontSize = 8;
+  barcode.altText = `Warehouse location barcode ${location}`;
+
+  const stack = new VerticalStack();
+  stack.spacing = 6;
+  stack.add(heading);
+  stack.add(barcode);
+
+  const card = new Container();
+  card.border = new Border(0.5);
+  card.borderColors = new BorderColors(ColorPalette.slate[300]);
+  card.cornerRadius = 4;
+  card.padding = new Thickness(10, 8, 10, 8);
+  card.child = stack;
+  return card;
 }

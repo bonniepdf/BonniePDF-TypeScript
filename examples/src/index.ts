@@ -585,7 +585,7 @@ export const examples: ExampleDef[] = [
     name: 'VerticalStack Overflow',
     category: 'Layout & Flow',
     description:
-      'A sheet of Code 128 asset labels in a VerticalStack. Barcodes do not split across pages, so the stack moves labels that would fall off the page onto the next one.',
+      'A three-across sheet of Code 128 asset labels, one row per VerticalStack child. Barcodes do not split across pages, so the stack moves a row that would fall off the page onto the next one.',
     filename: 'vertical-stack-overflow.pdf',
     generate: verticalStackOverflow,
     dotnetClass: 'VerticalStackOverflowExample',
@@ -730,7 +730,7 @@ export const examples: ExampleDef[] = [
     name: 'Custom Fonts',
     category: 'Fonts',
     description:
-      'TrueType font embedding with Unicode coverage: symbols, currency, arrows, maths, dingbats, and Greek across NotoSans, NotoSansMath, and NotoSansSymbols2.',
+      'TrueType font embedding: a large specimen of the embedded face, then Unicode coverage in two columns: symbols, currency, arrows, maths, dingbats, and Greek across NotoSans, NotoSansMath, and NotoSansSymbols2.',
     filename: 'custom-fonts.pdf',
     generate: customFonts,
     thumbnails: false,
@@ -805,7 +805,7 @@ export const examples: ExampleDef[] = [
     name: 'Colour Emojis',
     category: 'Scripts & Emoji',
     description:
-      'Colour emoji alongside regular text, including joined families, skin tones, flags and keycaps. PDF/A-2b and PDF/UA-1.',
+      'A team update where each item is led by a colour emoji, plus joined families, skin tones, flags and keycaps kept whole.',
     filename: 'colour-emojis.pdf',
     generate: colourEmojis,
     requiredAssets: [

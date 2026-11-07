@@ -1702,7 +1702,7 @@ export const examples: ExampleDef[] = [
     name: 'Check the Generated Document',
     category: 'Compliance & Archival',
     description:
-      'Inspect a real missing-character warning, build a clean retry, and distinguish diagnostics from external validation.',
+      'A generation-check report: the real warnings a draft build raised, shown as a table with severity labels, what the corrected build changed, and why diagnostics are not external validation.',
     filename: 'document-diagnostics.pdf',
     generate: documentDiagnostics,
     dotnetClass: 'DocumentDiagnosticsExample',

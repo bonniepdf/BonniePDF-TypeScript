@@ -103,7 +103,7 @@ export function generate(): Document {
     },
     metadata: {
       title: 'Patient summary: Priya Shah',
-      author: 'Sample Healthcare NHS Trust',
+      author: 'Sample Healthcare Trust',
       subject: 'Inpatient summary: identity, alerts, observations, medicines, results and plan',
     },
   });
@@ -115,7 +115,7 @@ export function generate(): Document {
     new VerticalStack({
       spacing: 2,
       children: [
-        tb('Sample Healthcare NHS Trust', 12, '#ffffff', { bold: true }),
+        tb('Sample Healthcare Trust', 12, '#ffffff', { bold: true }),
         tb('Cardiology, ward 4B', 8, 'teal-100'),
       ],
     }),
@@ -147,7 +147,7 @@ export function generate(): Document {
       spacing: 3,
       children: [
         tb('SHAH, Priya (Ms)', 16, INK, { bold: true }),
-        tb('Born 14 March 1979 (47)  ·  Female  ·  NHS number 999 482 9310', 9, BODY),
+        tb('Born 14 March 1979 (47)  ·  Female  ·  Patient ID 999 482 9310', 9, BODY),
       ],
     }),
     1

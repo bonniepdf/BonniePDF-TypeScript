@@ -61,7 +61,7 @@ const NEGATIVE = ColorPalette.rose[700];
 const EPISODE = {
   reference: 'DS-2026-44127',
   patient: 'Sample Patient',
-  patientId: 'NHS 000 000 0000 (sample)',
+  patientId: 'ID 000 000 0000 (sample)',
   dateOfBirth: '14 Mar 1958',
   address: 'Sample Address, Sample Town, ST2 6PL',
   admitted: new Date(Date.UTC(2026, 8, 3)),

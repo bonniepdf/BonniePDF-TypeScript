@@ -1588,7 +1588,7 @@ export const examples: ExampleDef[] = [
     name: 'Pie Chart',
     category: 'Share & Ranking Charts',
     description:
-      'A donut chart of revenue by sales channel, with each channel’s share in the legend, the formatted total beneath it, a summary table alongside, and alt text for screen readers.',
+      'A donut chart of revenue by sales channel, with each channel’s share in the legend, the total in the centre, a summary table alongside, and alt text for screen readers.',
     filename: 'pie-chart.pdf',
     generate: pieChart,
     dotnetClass: 'PieChartExample',

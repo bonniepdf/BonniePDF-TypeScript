@@ -109,7 +109,9 @@ export function generate(): Document {
   chart.height = 360;
   chart.stretchToFit = true;
   chart.isDonut = true;
-  chart.totalLabel = 'Total (£)';
+  chart.totalLabel = 'Total revenue (£)';
+  // The total goes in the donut hole, which widens to fit it, instead of under the legend.
+  chart.totalPosition = 'center';
   chart.totalValueFormat = 'N0';
   chart.showLegend = true;
   chart.colors = COLORS;

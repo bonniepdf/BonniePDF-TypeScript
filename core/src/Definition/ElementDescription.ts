@@ -508,6 +508,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "modern"
       ]
     },
+    "PieTotalPosition": {
+      "via": "options",
+      "tokens": [
+        "legend",
+        "center"
+      ]
+    },
     "ChartGradientScope": {
       "via": "options",
       "tokens": [
@@ -1956,6 +1963,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "showTotal": {
           "kind": "boolean"
+        },
+        "totalPosition": {
+          "kind": "enum:PieTotalPosition"
         },
         "sliceGradient": {
           "kind": "boolean"

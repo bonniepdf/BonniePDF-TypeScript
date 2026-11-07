@@ -184,8 +184,8 @@ export abstract class ListElementBase extends TextElementBase {
         const textX = ctx.currentX + markerWidth + 5;
 
         if (!tagging) {
-          // Non-tagged: original behavior - marker drawn on every wrapped line
-          renderMarker(markerX, y);
+          // The marker sits beside the first line only; wrapped lines carry no marker (spec 03 §3).
+          if (i === 0) renderMarker(markerX, y);
           ctx.canvas.drawText(textX, y, line, this.color, this.fontSize, this.fontName, 0);
         } else {
           if (i === 0) {

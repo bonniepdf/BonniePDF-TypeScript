@@ -8,6 +8,7 @@ import {
   Heading,
   HorizontalStack,
   StandardFonts,
+  Svg,
   Table,
   TableCell,
   TableRow,
@@ -55,7 +56,7 @@ const STAFF: [string, number, string][] = [
   ['Bar staff', 3, '15:00'],
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       margin: 36,
@@ -77,27 +78,37 @@ export function generate(): Document {
       subject: 'Wedding reception, 14 November 2026',
     },
   });
+  const crestBytes = assets.get('images/svg/ardmore-house.svg');
+  if (!crestBytes) throw new Error('Supply images/svg/ardmore-house.svg.');
+  const crestSvg = new TextDecoder().decode(crestBytes);
 
   // ── Masthead ──
   const masthead = new HorizontalStack({ widthDistribution: 'equal' });
   masthead.add(
-    new VerticalStack({
-      spacing: 3,
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 10,
       children: [
-        new TextBlock('ARDMORE HOUSE  ·  EVENTS', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 8,
-          letterSpacing: 2,
-          color: HOTEL,
+        new Svg({ svgData: crestSvg, width: 28, height: 28, isDecorative: true }),
+        new VerticalStack({
+          spacing: 3,
+          children: [
+            new TextBlock('ARDMORE HOUSE  ·  EVENTS', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 8,
+              letterSpacing: 2,
+              color: HOTEL,
+            }),
+            new Heading('Banquet event order', {
+              level: 1,
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 20,
+              color: INK,
+              margin: 0,
+            }),
+            new TextBlock('Okafor and Lindqvist wedding reception', { fontSize: 10.5, color: 'stone-700' }),
+          ],
         }),
-        new Heading('Banquet event order', {
-          level: 1,
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 20,
-          color: INK,
-          margin: 0,
-        }),
-        new TextBlock('Okafor and Lindqvist wedding reception', { fontSize: 10.5, color: 'stone-700' }),
       ],
     })
   );

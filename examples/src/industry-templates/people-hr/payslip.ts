@@ -15,6 +15,7 @@
 // output is PDF/UA-1 tagged, not PDF/A, since archival PDF/A cannot be encrypted.
 
 import {
+  pageNumber,
   Container,
   Document,
   DocumentMetadata,
@@ -24,7 +25,6 @@ import {
   StandardFonts,
   Table,
   TextBlock,
-  TextElementBase,
   VerticalStack,
   withEncryptionAes256,
   ColorPalette,
@@ -301,7 +301,7 @@ export function createPayslipSettings(): DocumentSettings {
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 8.5, color: INK },
   });
   settings.footerTemplate = pageTemplate({
-    default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+    default: pageNumber(undefined, {
       fontName: HELVETICA,
       fontSize: 6.5,
       color: FAINT,

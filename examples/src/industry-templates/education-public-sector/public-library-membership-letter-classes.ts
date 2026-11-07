@@ -14,6 +14,7 @@
 // Fictional member, library authority, and locations throughout.
 
 import {
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -36,9 +37,9 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  Svg,
   PdfAConformance,
   pageTemplate,
-  TextElementBase,
 } from '@bonniepdf/core';
 
 const LIBRARY_INK = Color.fromHex('#172033');
@@ -76,7 +77,8 @@ const OPENING_HOURS: InfoLine[] = [
  * front door sits on top of. Renders **byte-for-byte identically** to the
  * options-style `public-library-membership-letter.ts`.
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const crestSvg = new TextDecoder().decode(assets.get('images/svg/borough-crest.svg'));
   const now = new Date();
   const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
   const renewalDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(
@@ -91,7 +93,7 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(LIBRARY_INK);
 
   function pageFooter(): TextBlock {
-    const f = new TextBlock(`Sample Libraries  -  Ref NBL-4471-208823  -  Page ${TextElementBase.CurrentPageToken}`);
+    const f = pageNumber('Sample Libraries  -  Ref NBL-4471-208823  -  Page {page}');
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = LIBRARY_SECONDARY;
@@ -108,19 +110,30 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // The library's own masthead: its name and the service writing, on the library's teal.
+  const crest = new Svg();
+  crest.svgData = crestSvg;
+  crest.width = 28;
+  crest.height = 34;
+  crest.altText = 'Sample Borough Council crest';
   const brand = new TextBlock('Sample Libraries');
   brand.fontName = StandardFonts.HelveticaBold;
   brand.fontSize = 18;
   brand.color = Color.white;
+  brand.margin = new Thickness(0, 6, 0, 0);
+  const brandRow = new HorizontalStack();
+  brandRow.widthDistribution = WidthDistribution.Auto;
+  brandRow.spacing = 10;
+  brandRow.add(crest);
+  brandRow.add(brand);
   const service = new TextBlock('Membership Services');
   service.fontName = StandardFonts.HelveticaBold;
   service.fontSize = 11;
   service.color = CARD_TINT;
   service.alignment = TextAlignment.Right;
-  service.margin = new Thickness(0, 5, 0, 0);
+  service.margin = new Thickness(0, 10, 0, 0);
   const mastRow = new HorizontalStack();
   mastRow.widthDistribution = WidthDistribution.Equal;
-  mastRow.add(brand);
+  mastRow.add(brandRow);
   mastRow.add(service);
   const mast = new Container();
   mast.backgroundColor = LIBRARY_GREEN;

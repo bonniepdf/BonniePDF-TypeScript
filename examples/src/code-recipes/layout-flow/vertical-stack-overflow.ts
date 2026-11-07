@@ -4,10 +4,10 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  pageNumber,
   Document,
   Heading,
   TextBlock,
-  TextElementBase,
   VerticalStack,
   HorizontalStack,
   Container,
@@ -72,7 +72,7 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
       footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+        default: pageNumber(undefined, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
           color: 'slate-400',

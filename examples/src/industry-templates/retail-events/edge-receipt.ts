@@ -31,6 +31,7 @@
 // the library does all the work locally.
 
 import {
+  Line,
   Document,
   TextBlock,
   Heading,
@@ -42,6 +43,7 @@ import {
   PdfSize,
   ColorPalette,
   StandardFonts,
+  Svg,
   type ColorInput,
   type TextAlignmentInput,
 } from '@bonniepdf/core';
@@ -61,8 +63,11 @@ const ITEMS: Item[] = [
 
 const ORDER_NO = '4021';
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const stamp = '16 Jun 2026 10:30';
+  const logoBytes = assets.get('images/svg/sample-coffee.svg');
+  if (!logoBytes) throw new Error('Supply images/svg/sample-coffee.svg.');
+  const logoSvg = new TextDecoder().decode(logoBytes);
 
   const doc = new Document({
     settings: {
@@ -81,6 +86,13 @@ export function generate(): Document {
   });
 
   // ── Store header ────────────────────────────────────────────────────────
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      margin: { bottom: 4 },
+      child: new Svg({ svgData: logoSvg, width: 24, height: 24, isDecorative: true }),
+    })
+  );
   doc.add(
     new Heading('SAMPLE COFFEE', {
       level: 1,
@@ -215,12 +227,11 @@ function cell(text: string, size: number, bold = false, align: TextAlignmentInpu
 }
 
 /** A dashed tear-line rule, the way a thermal printer separates sections. */
-function rule(): TextBlock {
-  return new TextBlock('- - - - - - - - - - - - - - - -', {
-    fontName: StandardFonts.Courier,
-    fontSize: 9,
+function rule(): Line {
+  return new Line({
+    thickness: 0.8,
     color: MUTE,
-    alignment: 'center',
-    margin: { top: 5, bottom: 5 },
+    dashPattern: [3, 4],
+    margin: { top: 10, bottom: 10 },
   });
 }

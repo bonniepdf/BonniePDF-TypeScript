@@ -56,7 +56,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     settings: {
       // Landscape boarding-pass style ticket: 640 x 300 pt.
       pageSize: new PdfSize(640, 300, 'Event Ticket'),
-      orientation: 'landscape',
+      preservePageDimensions: true,
       margin: 0,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',

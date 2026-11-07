@@ -18,6 +18,7 @@ import {
   BorderColors,
   pageTemplate,
   Spacer,
+  Svg,
   type IElement,
   TextBlock,
   TextAlignment,
@@ -167,7 +168,11 @@ const GP_ACTIONS = [
   'Ensure the patient is added to the cardiac rehabilitation pathway if they have not been contacted within two weeks.',
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markBytes = assets.get('images/svg/sample-healthcare.svg');
+  if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
+  const markSvg = new TextDecoder().decode(markBytes);
+
   const settings = new DocumentSettings(PdfSize.a4, 46);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -194,7 +199,15 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   doc.add(accentBar());
-  doc.add(
+  const mark = new Svg();
+  mark.svgData = markSvg;
+  mark.width = 24;
+  mark.height = 24;
+  mark.isDecorative = true;
+  mark.margin = new Thickness(0, 2, 0, 0);
+
+  const headerText = new VerticalStack();
+  headerText.add(
     cell('DISCHARGE SUMMARY · FOR THE ATTENTION OF THE GENERAL PRACTITIONER', {
       bold: true,
       size: 8.5,
@@ -202,8 +215,16 @@ export function generate(): Document {
       mb: 4,
     })
   );
-  doc.add(h1('Inpatient discharge summary'));
-  doc.add(cell(`${EPISODE.ward} · ${EPISODE.consultant}`, { color: MUTED, mb: 14 }));
+  headerText.add(h1('Inpatient discharge summary'));
+  headerText.add(cell(`${EPISODE.ward} · ${EPISODE.consultant}`, { color: MUTED }));
+
+  const headerRow = new HorizontalStack();
+  headerRow.widthDistribution = WidthDistribution.Auto;
+  headerRow.spacing = 10;
+  headerRow.margin = new Thickness(0, 0, 0, 14);
+  headerRow.add(mark);
+  headerRow.add(headerText);
+  doc.add(headerRow);
 
   doc.add(
     weightedRow(

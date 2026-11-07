@@ -260,17 +260,13 @@ function ratingColor(score: number): Color {
 }
 
 /** A rating as a small chip in its band's colour. */
-function ratingChip(score: number): HorizontalStack {
-  return new HorizontalStack({
-    widthDistribution: 'auto',
-    children: [
-      new Container({
-        backgroundColor: ratingColor(score),
-        cornerRadius: 3,
-        padding: [5, 1.5],
-        child: tb(`${letter(score)} ${score}`, 8, INK, { bold: true }),
-      }),
-    ],
+function ratingChip(score: number): Container {
+  return new Container({
+    fitContent: true,
+    backgroundColor: ratingColor(score),
+    cornerRadius: 3,
+    padding: [5, 1.5],
+    child: tb(`${letter(score)} ${score}`, 8, INK, { bold: true }),
   });
 }
 
@@ -302,14 +298,14 @@ function drawScale(canvas: ICanvas, size: { width: number; height: number }): vo
   const gap = 5;
   const column = 54;
   const ladder = size.width - column * 2 - 8;
-  const label = ColorPalette.stone[600];
+  const label = 'stone-600';
   canvas.drawText(ladder + 8, 0, 'Current', label, 7.5, StandardFonts.HelveticaBold, TextAlignment.Left);
   canvas.drawText(ladder + 8 + column, 0, 'Potential', label, 7.5, StandardFonts.HelveticaBold, TextAlignment.Left);
   BANDS.forEach(([band, , range, color], i) => {
     const top = 14 + i * (rowHeight + gap);
     const width = ladder * (0.42 + i * 0.09);
     canvas.fillRect(0, top, width, rowHeight, color);
-    const ink = i >= 1 && i <= 4 ? ColorPalette.stone[900] : Color.white;
+    const ink = i >= 1 && i <= 4 ? 'stone-900' : '#ffffff';
     canvas.drawText(6, top + 9, range, ink, 7.5, StandardFonts.Helvetica, TextAlignment.Left);
     const w = canvas.measureText(band, 14, StandardFonts.HelveticaBold).width;
     canvas.drawText(width - w - 8, top + 6, band, ink, 14, StandardFonts.HelveticaBold, TextAlignment.Left);
@@ -338,7 +334,7 @@ function arrow(canvas: ICanvas, x: number, score: number, rowHeight: number, gap
     x + 10 + (width - 10 - w) / 2,
     top + 9,
     text,
-    ColorPalette.stone[900],
+    'stone-900',
     9,
     StandardFonts.HelveticaBold,
     TextAlignment.Left

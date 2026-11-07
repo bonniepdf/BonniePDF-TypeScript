@@ -29,6 +29,8 @@ import {
   Spacer,
   type IElement,
   Heading,
+  Image,
+  ImageFitMode,
 } from '@bonniepdf/core';
 
 // ── Palette ──────────────────────────────────────────────────────────────────
@@ -125,6 +127,7 @@ const ROOMS: Room[] = [
   },
   {
     name: 'Living room',
+    photo: 'images/inventory/living-room.jpg',
     items: [
       {
         item: 'Walls and ceiling',
@@ -165,6 +168,7 @@ const ROOMS: Room[] = [
   },
   {
     name: 'Kitchen',
+    photo: 'images/inventory/kitchen.jpg',
     items: [
       {
         item: 'Units, doors and handles',
@@ -212,6 +216,7 @@ const ROOMS: Room[] = [
   },
   {
     name: 'Bathroom',
+    photo: 'images/inventory/bathroom.jpg',
     items: [
       {
         item: 'Bath, shower and screen',
@@ -252,6 +257,7 @@ const ROOMS: Room[] = [
   },
   {
     name: 'Bedroom 1',
+    photo: 'images/inventory/bedroom-1.jpg',
     items: [
       {
         item: 'Walls and ceiling',
@@ -279,6 +285,7 @@ const ROOMS: Room[] = [
   },
   {
     name: 'Bedroom 2',
+    photo: 'images/inventory/bedroom-2.jpg',
     items: [
       {
         item: 'Walls and ceiling',
@@ -327,7 +334,7 @@ const CONDITION_COLOUR: Record<Condition, Color> = {
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const allItems = ROOMS.flatMap(room => room.items);
   const byCondition = new Map<Condition, number>();
   for (const item of allItems) byCondition.set(item.condition, (byCondition.get(item.condition) ?? 0) + 1);
@@ -426,6 +433,9 @@ export function generate(): Document {
         firstRoom = false;
       }
       roomStack.add(h3(room.name));
+      if (room.photo) {
+        roomStack.add(roomPhoto(asset(assets, room.photo), `Check-in photograph of ${room.name}`));
+      }
 
       const table = new Table(3.1, 1.1, 1.3, 4.2, 0.95);
       table.cellPadding = 5;
@@ -551,6 +561,7 @@ interface Item {
 
 interface Room {
   name: string;
+  photo?: string;
   items: Item[];
 }
 
@@ -802,4 +813,28 @@ function signatureRow(slots: IElement[]): HorizontalStack {
 
 function shortDate(d: Date): string {
   return GB_DATE.format(d);
+}
+
+function roomPhoto(imageData: Uint8Array, altText: string): Container {
+  const img = new Image();
+  img.imageData = imageData;
+  img.width = 88;
+  img.height = 66;
+  img.fitMode = ImageFitMode.Cover;
+  img.altText = altText;
+
+  const box = new Container();
+  box.width = 88;
+  box.height = 66;
+  box.cornerRadius = 4;
+  box.clipContent = true;
+  box.margin = new Thickness(0, 0, 0, 6);
+  box.child = img;
+  return box;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

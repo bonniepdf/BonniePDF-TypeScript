@@ -17,6 +17,7 @@ import {
   pageTemplate,
   Spacer,
   Heading,
+  Image,
   type IElement,
 } from '@bonniepdf/core';
 
@@ -145,7 +146,7 @@ const SEVERITY_COLOUR = {
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const labourTotal = LABOUR.reduce((sum, l) => sum + l.hours * l.rate, 0);
   const partsTotal = PARTS.filter(p => p.fitted).reduce((sum, p) => sum + p.quantity * p.unitPrice, 0);
   const onSite = (VISIT.completed.getTime() - VISIT.attended.getTime()) / 3_600_000;
@@ -220,14 +221,38 @@ export function generate(): Document {
 
   // ── Reported fault and work done ───────────────────────────────────────────
 
-  doc.add(h2('Fault reported'));
-  doc.add(
-    body(
-      'Occupier reported intermittent noise and reduced airflow from the level 2 supply grilles. ' +
-        'Building management system showed the unit running but with supply air temperature drifting ' +
-        'above setpoint during the morning occupancy period.'
-    )
+  const faultSummary = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14 });
+  faultSummary.add(
+    new VerticalStack({
+      children: [
+        h2('Fault reported'),
+        body(
+          'Occupier reported intermittent noise and reduced airflow from the level 2 supply grilles. ' +
+            'Building management system showed the unit running but with supply air temperature drifting ' +
+            'above setpoint during the morning occupancy period.'
+        ),
+      ],
+    }),
+    3.4
   );
+  faultSummary.add(
+    new Container({
+      width: 110,
+      height: 82,
+      cornerRadius: 6,
+      clipContent: true,
+      margin: { top: 14 },
+      child: new Image({
+        imageData: asset(assets, 'images/field-service/ahu.jpg'),
+        width: 110,
+        height: 82,
+        fitMode: 'cover',
+        altText: 'Rooftop air handling unit with access panel open showing belt-driven fan.',
+      }),
+    }),
+    1
+  );
+  doc.add(faultSummary);
 
   doc.add(h2('Work carried out'));
   doc.add(
@@ -683,4 +708,10 @@ function gbp(value: number): string {
 /** Decimal hours, as engineers record them: 1.5, 0.75. */
 function hours(value: number): string {
   return `${value.toFixed(2)} h`;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

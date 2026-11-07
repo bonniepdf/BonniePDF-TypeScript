@@ -35,6 +35,8 @@ import {
   type IElement,
   Heading,
   EnsureSpace,
+  Image,
+  ImageFitMode,
 } from '@bonniepdf/core';
 
 // ── Palette ──────────────────────────────────────────────────────────────────
@@ -256,7 +258,7 @@ const SEVERITY_ORDER: Severity[] = ['Critical', 'Major', 'Minor', 'Observation']
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const counts = countBy(DEFECTS, d => d.severity);
   const byTrade = countBy(DEFECTS, d => d.trade);
 
@@ -347,6 +349,33 @@ export function generate(): Document {
       { accent: STATUS.critical }
     )
   );
+
+  const evidenceStrip = new HorizontalStack();
+  evidenceStrip.widthDistribution = WidthDistribution.Equal;
+  evidenceStrip.spacing = 10;
+  evidenceStrip.margin = new Thickness(0, 0, 0, 6);
+  evidenceStrip.add(
+    evidenceCard(
+      asset(assets, 'images/inspection/s-002-cable-tray.jpg'),
+      'S-002 · Riser cable tray earth strap',
+      'Inspection photograph for S-002 showing cable tray coupling in Riser 2B with disconnected earth strap.'
+    )
+  );
+  evidenceStrip.add(
+    evidenceCard(
+      asset(assets, 'images/inspection/s-003-penetration.jpg'),
+      'S-003 · Unsealed fire penetration',
+      'Inspection photograph for S-003 showing three cables passing through an unsealed compartment wall penetration.'
+    )
+  );
+  evidenceStrip.add(
+    evidenceCard(
+      asset(assets, 'images/inspection/s-008-emergency-light.jpg'),
+      'S-008 · Corridor emergency bulkhead',
+      'Inspection photograph for S-008 showing corridor emergency bulkhead luminaire EM-2-14 unlit during key test.'
+    )
+  );
+  doc.add(evidenceStrip);
 
   // ── Items by trade ─────────────────────────────────────────────────────────
 
@@ -735,4 +764,35 @@ function signatureRow(slots: IElement[]): HorizontalStack {
 
 function shortDate(d: Date): string {
   return GB_DATE.format(d);
+}
+
+function evidenceCard(imageData: Uint8Array, caption: string, altText: string): VerticalStack {
+  const img = new Image();
+  img.imageData = imageData;
+  img.height = 76;
+  img.fitMode = ImageFitMode.Cover;
+  img.altText = altText;
+
+  const photo = new Container();
+  photo.height = 76;
+  photo.cornerRadius = 4;
+  photo.clipContent = true;
+  photo.child = img;
+
+  const label = new TextBlock(caption);
+  label.fontName = StandardFonts.Helvetica;
+  label.fontSize = 8;
+  label.color = MUTED;
+
+  const card = new VerticalStack();
+  card.spacing = 4;
+  card.add(photo);
+  card.add(label);
+  return card;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

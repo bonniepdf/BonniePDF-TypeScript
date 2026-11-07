@@ -16,6 +16,7 @@
 // show what it desugars to. See `quotation.ts` for the narrated walkthrough.
 
 import {
+  pageNumber,
   Border,
   BorderColors,
   Container,
@@ -30,10 +31,10 @@ import {
   OrderedList,
   Spacer,
   StandardFonts,
+  Svg,
   Table,
   TextAlignment,
   TextBlock,
-  TextElementBase,
   Thickness,
   UnorderedList,
   VerticalStack,
@@ -43,6 +44,18 @@ import {
   type IElement,
   pageTemplate,
 } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK = ColorPalette.slate[800];
@@ -136,8 +149,8 @@ export const sampleQuotation: QuotationData = {
   currency: 'GBP',
 };
 
-export function generate(): Document {
-  return buildDocument(sampleQuotation);
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+  return buildDocument(sampleQuotation, createQuotationSettings(), assets);
 }
 
 // Local helpers and sample types used by this document.
@@ -229,7 +242,7 @@ function field(label: string, value: string): VerticalStack {
 
 // ── Section builders (top to bottom) ─────────────────────────────────────────
 
-function masthead(data: QuotationData): VerticalStack {
+function masthead(data: QuotationData, assets?: ReadonlyMap<string, Uint8Array>): VerticalStack {
   const identity = new VerticalStack();
   identity.spacing = 2;
   const title = new Heading(data.supplier.name);
@@ -242,6 +255,18 @@ function masthead(data: QuotationData): VerticalStack {
   identity.add(cell(data.supplier.address, { size: 7.5, color: MUTED }));
   identity.add(cell(data.supplier.registration, { size: 7.5, color: FAINT }));
 
+  const logo = new Svg();
+  logo.svgData = logoMarkup(assets);
+  logo.width = 26;
+  logo.height = 26;
+  logo.isDecorative = true;
+
+  const brand = new HorizontalStack();
+  brand.widthDistribution = WidthDistribution.Auto;
+  brand.spacing = 8;
+  brand.add(logo);
+  brand.add(identity);
+
   const marker = new VerticalStack();
   marker.spacing = 2;
   marker.add(cell('QUOTATION', { bold: true, size: 15, align: TextAlignment.Right }));
@@ -249,7 +274,7 @@ function masthead(data: QuotationData): VerticalStack {
 
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
-  row.add(identity, 1);
+  row.add(brand, 1);
   row.add(marker, 1);
 
   const rule = new Container();
@@ -475,9 +500,7 @@ export function createQuotationSettings(): DocumentSettings {
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
   });
   function pageFooter() {
-    const footer = new TextBlock(
-      `${sampleQuotation.reference.quoteNumber} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
-    );
+    const footer = pageNumber(`${sampleQuotation.reference.quoteNumber} · Page {page} of {total}`);
     footer.fontName = StandardFonts.Helvetica;
     footer.fontSize = 7;
     footer.color = FAINT;
@@ -489,7 +512,11 @@ export function createQuotationSettings(): DocumentSettings {
   return settings;
 }
 
-export function buildDocument(data: QuotationData, settings: DocumentSettings = createQuotationSettings()): Document {
+export function buildDocument(
+  data: QuotationData,
+  settings: DocumentSettings = createQuotationSettings(),
+  assets?: ReadonlyMap<string, Uint8Array>
+): Document {
   const doc = new Document(
     settings,
     new DocumentMetadata({
@@ -498,7 +525,7 @@ export function buildDocument(data: QuotationData, settings: DocumentSettings = 
       subject: 'Commercial quotation with tiered pricing options (fictional sample data).',
     })
   );
-  doc.add(masthead(data));
+  doc.add(masthead(data, assets));
   doc.add(referenceStrip(data));
   doc.add(scopeSection(data));
   doc.add(tierColumns(data));

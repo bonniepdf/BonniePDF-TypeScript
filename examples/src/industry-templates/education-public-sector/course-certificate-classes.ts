@@ -18,7 +18,6 @@
 
 import {
   CanvasElement,
-  Color,
   Container,
   Document,
   DocumentMetadata,
@@ -31,6 +30,7 @@ import {
   QRCode,
   Spacer,
   StandardFonts,
+  Svg,
   TextAlignment,
   TextBlock,
   Thickness,
@@ -46,7 +46,6 @@ const MUTED = ColorPalette.slate[500];
 const FAINT = ColorPalette.slate[400];
 const ACCENT = ColorPalette.indigo[700];
 const ACCENT_MID = ColorPalette.indigo[400];
-const ACCENT_SOFT = ColorPalette.indigo[100];
 const GOLD = ColorPalette.amber[600];
 // The seal's foil: light, mid and deep golds, with the deepest for its lettering.
 const FOIL_LIGHT = ColorPalette.amber[300];
@@ -79,8 +78,11 @@ export const sampleCertificate: CertificateData = {
   locale: 'en-GB',
 };
 
-export function generate(): Document {
-  return buildDocument(sampleCertificate);
+const FALLBACK_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" fill="none"/></svg>';
+
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+  return buildDocument(sampleCertificate, createCertificateSettings(), assets);
 }
 
 // Local helpers and sample types used by this document.
@@ -159,52 +161,6 @@ function ornamentalFrame(): CanvasElement {
   return element;
 }
 
-function sealMedallion(institutionName: string): CanvasElement {
-  const element = new CanvasElement((canvas, size) => {
-    const cx = size.width / 2;
-    const cy = size.height / 2;
-    const outer = Math.min(cx, cy) - 6;
-
-    for (const a of [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2]) {
-      const distance = outer + 3.5;
-      const px = cx + Math.cos(a) * distance;
-      const py = cy + Math.sin(a) * distance;
-      const tangentX = Math.cos(a + Math.PI / 2) * 2.5;
-      const tangentY = Math.sin(a + Math.PI / 2) * 2.5;
-      const radialX = Math.cos(a) * 3.5;
-      const radialY = Math.sin(a) * 3.5;
-      canvas.fillPath(
-        [
-          { x: px + radialX, y: py + radialY },
-          { x: px + tangentX, y: py + tangentY },
-          { x: px - radialX, y: py - radialY },
-          { x: px - tangentX, y: py - tangentY },
-        ],
-        GOLD
-      );
-    }
-
-    canvas.fillCircle(cx, cy, outer, ACCENT);
-    canvas.fillCircle(cx, cy, outer - 1.5, Color.white);
-    canvas.fillCircle(cx, cy, outer - 4.5, ACCENT_SOFT);
-
-    const monogram = institutionName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(word => word[0])
-      .join('')
-      .toUpperCase();
-    const fontSize = 13;
-    const width = canvas.measureText(monogram, fontSize, SERIF_BOLD).width;
-    canvas.drawText(cx - width / 2, cy - fontSize / 2, monogram, ACCENT, fontSize, SERIF_BOLD, 0);
-  });
-  element.drawWidth = 52;
-  element.drawHeight = 52;
-  element.isDecorative = true;
-  return element;
-}
-
 /**
  * The seal: a gold starburst with foil-toned rings and the award's grade, on two ribbon tails.
  * Shades of gold stand in for foil, so the seal prints the same on any printer.
@@ -267,9 +223,16 @@ function loweredSignature(name: string, role: string): VerticalStack {
   return stack;
 }
 
-function institutionCrest(name: string): HorizontalStack {
+function institutionCrest(crestSvg: string): HorizontalStack {
+  const crestMark = new Svg();
+  crestMark.svgData = crestSvg;
+  crestMark.width = 32;
+  crestMark.height = 37;
+  crestMark.altText = 'Institutional crest';
+
   const crest = new Container();
-  crest.child = sealMedallion(name);
+  crest.horizontalAlignment = HorizontalAlignment.Center;
+  crest.child = crestMark;
 
   const row = new HorizontalStack();
   row.widthDistribution = WidthDistribution.Weighted;
@@ -296,10 +259,10 @@ function signatureColumn(name: string, role: string): VerticalStack {
   return stack;
 }
 
-function citation(data: CertificateData): VerticalStack {
+function citation(data: CertificateData, crestSvg: string, guillocheSvg: string): VerticalStack {
   const stack = new VerticalStack();
 
-  stack.add(institutionCrest(data.institution.name));
+  stack.add(institutionCrest(crestSvg));
 
   stack.add(
     text(data.institution.name.toUpperCase(), { font: SANS, size: 9, color: ACCENT, align: TextAlignment.Center })
@@ -322,8 +285,18 @@ function citation(data: CertificateData): VerticalStack {
   const rule = new Container();
   rule.height = 1;
   rule.backgroundColor = ACCENT_MID;
-  rule.margin = new Thickness(210, 0, 210, 16);
+  rule.margin = new Thickness(210, 0, 210, 6);
   stack.add(rule);
+
+  const guilloche = new Svg();
+  guilloche.svgData = guillocheSvg;
+  guilloche.height = 14;
+  guilloche.isDecorative = true;
+  const guillocheBox = new Container();
+  guillocheBox.horizontalAlignment = HorizontalAlignment.Center;
+  guillocheBox.margin = new Thickness(0, 0, 0, 8);
+  guillocheBox.child = guilloche;
+  stack.add(guillocheBox);
 
   stack.add(
     text('This is to certify that', { font: SERIF_ITALIC, size: 11, color: MUTED, align: TextAlignment.Center })
@@ -432,8 +405,14 @@ export function createCertificateSettings(): DocumentSettings {
 
 export function buildDocument(
   data: CertificateData,
-  settings: DocumentSettings = createCertificateSettings()
+  settings: DocumentSettings = createCertificateSettings(),
+  assets?: ReadonlyMap<string, Uint8Array>
 ): Document {
+  const crestBytes = assets?.get('images/svg/university-crest.svg');
+  const crestSvg = crestBytes ? new TextDecoder().decode(crestBytes) : FALLBACK_SVG;
+  const guillocheBytes = assets?.get('images/svg/guilloche.svg');
+  const guillocheSvg = guillocheBytes ? new TextDecoder().decode(guillocheBytes) : FALLBACK_SVG;
+
   const doc = new Document(
     settings,
     new DocumentMetadata({
@@ -443,12 +422,10 @@ export function buildDocument(
     })
   );
 
-  // 30pt clears the crest's own lozenge points (which reach to the very top of
-  // its 52pt box) past the frame's inner rule at 16pt inset - without this the
-  // crest visually crosses the border instead of sitting inside it.
+  // 30pt clears the crest past the frame's inner rule at 16pt inset.
   const body = new VerticalStack();
   body.add(new Spacer(30));
-  body.add(citation(data));
+  body.add(citation(data, crestSvg, guillocheSvg));
   body.add(attestation(data));
 
   const framed = new Layers();

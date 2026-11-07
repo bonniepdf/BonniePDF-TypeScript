@@ -16,6 +16,7 @@ import {
   pageTemplate,
   TextBlock,
   Heading,
+  Image,
   Svg,
   type IElement,
 } from '@bonniepdf/core';
@@ -44,12 +45,19 @@ const RULE = ColorPalette.slate[200];
 // rating in the data and the graphic follows, no asset pipeline in between.
 //
 // The floor plans are drawn the same way: an SVG generated from the room data
-// below, so a changed room size redraws the plan. Photography is what a real
-// brochure leads with; it is deliberately absent here, because an example
-// carrying placeholder images reads as unfinished.
+// below, so a changed room size redraws the plan.
 //
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample property, agency, and figures
 // throughout. Nothing here is a valuation or property advice.
+
+const GALLERY: [string, string][] = [
+  [
+    'images/property/kitchen.jpg',
+    'Extended kitchen and dining room with shaker units, oak worktops, and roof lantern.',
+  ],
+  ['images/property/living-room.jpg', 'Front reception room with bay window and open fireplace.'],
+  ['images/property/garden.jpg', 'South-facing rear garden with paved terrace and lawn.'],
+];
 
 const PROPERTY = {
   headline: 'Three-bedroom semi-detached house',
@@ -219,7 +227,7 @@ const EPC_BANDS: { letter: string; from: number; to: number; fill: ColorInput; l
     { letter: 'G', from: 1, to: 20, fill: ColorPalette.rose[700], label: '#ffffff', ink: ColorPalette.rose[700] },
   ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const current = bandFor(PROPERTY.epcCurrent);
   const potential = bandFor(PROPERTY.epcPotential);
 
@@ -258,9 +266,27 @@ export function generate(): Document {
         size: 18,
         bold: true,
         color: ACCENT,
-        mb: 14,
+        mb: 12,
       }
     )
+  );
+
+  doc.add(
+    photoFrame(
+      asset(assets, 'images/property/hero.jpg'),
+      150,
+      6,
+      'Front elevation of 14 Meadowcroft Avenue, a 1930s semi-detached house with a block-paved drive.',
+      8
+    )
+  );
+  doc.add(
+    new HorizontalStack({
+      spacing: 8,
+      widthDistribution: 'equal',
+      margin: { bottom: 12 },
+      children: GALLERY.map(([path, altText]) => photoFrame(asset(assets, path), 68, 4, altText)),
+    })
   );
 
   doc.add(
@@ -631,4 +657,25 @@ function band(left: string, right: string): HorizontalStack {
   row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
   row.add(cell(right, { size: 7.5, color: MUTED, align: 'right' }), 2);
   return row;
+}
+
+function photoFrame(imageData: Uint8Array, height: number, cornerRadius: number, altText: string, mb = 0): Container {
+  return new Container({
+    height,
+    cornerRadius,
+    clipContent: true,
+    margin: { bottom: mb },
+    child: new Image({
+      imageData,
+      height,
+      fitMode: 'cover',
+      altText,
+    }),
+  });
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

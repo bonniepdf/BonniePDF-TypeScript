@@ -22,6 +22,7 @@
 // variant exists to show what it desugars to.
 
 import {
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -29,7 +30,6 @@ import {
   PdfSize,
   TextBlock,
   TextStyle,
-  TextElementBase,
   TextAlignment,
   Heading,
   VerticalStack,
@@ -47,6 +47,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  Svg,
   WidthDistribution,
   PdfAConformance,
   pageTemplate,
@@ -88,7 +89,8 @@ const PANELS: Panel[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markSvg = new TextDecoder().decode(assets.get('images/svg/sample-healthcare.svg'));
   const settings = new DocumentSettings(PdfSize.a4, 50);
   settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
@@ -97,8 +99,8 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
   function pageFooter(): TextBlock {
-    const f = new TextBlock(
-      `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    const f = pageNumber(
+      'CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {page} of {total}'
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
@@ -119,6 +121,12 @@ export function generate(): Document {
   const header = new Grid(2.4, 1);
   header.cellPadding = 0;
   header.border = Border.none;
+  const mark = new Svg();
+  mark.svgData = markSvg;
+  mark.width = 24;
+  mark.height = 24;
+  mark.isDecorative = true;
+  mark.margin = new Thickness(0, 2, 0, 0);
   const org = new VerticalStack();
   const trust = new TextBlock('Sample Hospital Pathology Services');
   trust.fontName = StandardFonts.HelveticaBold;
@@ -135,13 +143,18 @@ export function generate(): Document {
   accred.color = MUTED;
   accred.margin = new Thickness(0, 1, 0, 0);
   org.add(accred);
+  const orgRow = new HorizontalStack();
+  orgRow.widthDistribution = WidthDistribution.Auto;
+  orgRow.spacing = 10;
+  orgRow.add(mark);
+  orgRow.add(org);
   const title = new Heading('LABORATORY REPORT');
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 13;
   title.color = INK;
   title.alignment = TextAlignment.Right;
-  header.addRow(org, title);
+  header.addRow(orgRow, title);
   doc.add(header);
 
   const blueRule = new Container();

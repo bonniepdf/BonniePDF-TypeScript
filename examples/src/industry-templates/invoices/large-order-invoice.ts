@@ -1,5 +1,6 @@
 /** A 72-line invoice: a styled header row that repeats on every page, a carried-forward subtotal at each page break, per-line discounts, mixed VAT rates, and the totals kept together on the last page. */
 import {
+  formatNumber,
   Container,
   Document,
   Grid,
@@ -7,6 +8,7 @@ import {
   HorizontalStack,
   PreventPageBreak,
   StandardFonts,
+  Svg,
   Table,
   TableCell,
   TableRow,
@@ -16,6 +18,18 @@ import {
   type ColorInput,
   type TextAlignmentInput,
 } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 export interface InvoiceLine {
   description: string;
@@ -54,7 +68,7 @@ const CATALOGUE: [string, number, number][] = [
 ];
 const SITES = ['Riverside block A', 'Riverside block B', 'Station Road depot'];
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   return buildInvoice(
     Array.from({ length: 72 }, (_, i) => {
       const [product, unitPence, taxPercent] = CATALOGUE[i % CATALOGUE.length];
@@ -66,12 +80,13 @@ export function generate(): Document {
         taxPercent,
       };
     }),
-    'PO-WFM-44817'
+    'PO-WFM-44817',
+    assets
   );
 }
 
 /** Integer minor units; tax rounds half up on each line, then those amounts are summed. */
-export function calculateTotals(lines: InvoiceLine[]) {
+export function calculateTotals(lines: readonly InvoiceLine[]) {
   let netPence = 0,
     taxPence = 0;
   const rates = new Map<number, { netPence: number; taxPence: number }>();
@@ -101,7 +116,13 @@ export function calculateTotals(lines: InvoiceLine[]) {
   return { netPence, taxPence, grossPence: netPence + taxPence, rates };
 }
 
-export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Document {
+export function buildInvoice(
+  lines: readonly InvoiceLine[],
+  purchaseOrder?: string | ReadonlyMap<string, Uint8Array>,
+  assets?: ReadonlyMap<string, Uint8Array>
+): Document {
+  const po = typeof purchaseOrder === 'string' ? purchaseOrder : undefined;
+  const resolvedAssets = typeof purchaseOrder === 'object' ? purchaseOrder : assets;
   const totals = calculateTotals(lines);
   const doc = new Document({
     metadata: { title: 'Large-order invoice INV-2026-072' },
@@ -126,17 +147,24 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
   // ── Header: brand and invoice details ──
   const header = new Grid({ columns: [1, 1], border: 0, cellPadding: 0, margin: { bottom: 14 } });
   header.addRow(
-    new VerticalStack({
-      spacing: 2,
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 8,
       children: [
-        new Heading('NORTHFIELD SUPPLY', {
-          level: 1,
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 20,
-          letterSpacing: 0.5,
-          color: 'violet-800',
+        new Svg({ svgData: logoMarkup(resolvedAssets), width: 20, height: 20, isDecorative: true }),
+        new VerticalStack({
+          spacing: 2,
+          children: [
+            new Heading('NORTHFIELD SUPPLY', {
+              level: 1,
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 20,
+              letterSpacing: 0.5,
+              color: 'violet-800',
+            }),
+            text('Facilities and maintenance supplies', 9, 'slate-500'),
+          ],
         }),
-        text('Facilities and maintenance supplies', 9, 'slate-500'),
       ],
     }),
     new VerticalStack({
@@ -158,11 +186,7 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
       'Accounts payable\n4 Minster Court, York YO1 7HH'
     ),
     party('DELIVER TO', 'Riverside Industrial Estate', 'Blocks A and B, and Station Road depot\nYork YO1 1AA'),
-    party(
-      'REFERENCES',
-      purchaseOrder ? `Purchase order ${purchaseOrder}` : 'No purchase order',
-      'Account WFM-0193\nCurrency GBP'
-    )
+    party('REFERENCES', po ? `Purchase order ${po}` : 'No purchase order', 'Account WFM-0193\nCurrency GBP')
   );
   doc.add(parties);
 
@@ -306,7 +330,7 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
 // Local helpers used by this document.
 
 function money(pence: number): string {
-  return (pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return formatNumber(pence / 100, 'N2');
 }
 
 function text(

@@ -7,12 +7,11 @@ import {
   Document,
   Grid,
   Heading,
-  PreventPageBreak,
+  pageNumber,
   HorizontalStack,
   StandardFonts,
   Table,
   TextBlock,
-  TextElementBase,
   VerticalStack,
   pageTemplate,
   type ColorInput,
@@ -312,11 +311,9 @@ export function generate(): Document {
   // ── The 16 sections ──
   // Each heading is kept on the same page as the first block beneath it.
   SECTIONS.forEach(([title, blocks], i) => {
-    const opening = new VerticalStack({ children: [sectionHeading(i + 1, title)] });
-    if (i === 1) opening.add(hazardBanner());
-    opening.add(render(blocks[0]));
-    doc.add(new PreventPageBreak({ child: opening }));
-    for (const block of blocks.slice(1)) doc.add(render(block));
+    doc.add(sectionHeading(i + 1, title));
+    if (i === 1) doc.add(hazardBanner());
+    for (const block of blocks) doc.add(render(block));
   });
   return doc;
 }
@@ -342,16 +339,14 @@ function tb(
 function footer(): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted' });
   row.add(tb(`${PRODUCT}  ·  Safety data sheet, revision 3, 5 November 2026`, 7, MUTE), 3);
-  row.add(
-    tb(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, 7, MUTE, { align: 'right' }),
-    1
-  );
+  row.add(pageNumber(undefined, { fontSize: 7, color: MUTE, alignment: 'right' }), 1);
   return row;
 }
 
 /** A numbered section heading on a tinted band. */
 function sectionHeading(number: number, title: string): Container {
   return new Container({
+    keepWithNext: true,
     backgroundColor: 'orange-50',
     border: { left: 3, color: ACCENT },
     padding: [8, 3.5],
@@ -390,7 +385,12 @@ function render(block: Block): IElement {
 
 /** The label elements of section 2: two pictograms and the signal word. */
 function hazardBanner(): HorizontalStack {
-  const banner = new HorizontalStack({ widthDistribution: 'auto', spacing: 10, margin: { bottom: 6 } });
+  const banner = new HorizontalStack({
+    keepWithNext: true,
+    widthDistribution: 'auto',
+    spacing: 10,
+    margin: { bottom: 6 },
+  });
   banner.add(pictogram('flame', 'Hazard pictogram GHS02, a flame: flammable'));
   banner.add(pictogram('exclamation', 'Hazard pictogram GHS07, an exclamation mark: irritant and narcotic effects'));
   banner.add(

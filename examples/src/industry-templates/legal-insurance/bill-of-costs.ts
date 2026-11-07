@@ -371,7 +371,7 @@ export function generate(): Document {
   // ── Rates ──────────────────────────────────────────────────────────────────
 
   // Each heading asks for room for the start of what it introduces, so it is never left alone at the foot of a page.
-  doc.add(keepWithNext(h2('Hourly rates claimed')));
+  doc.add(h2('Hourly rates claimed'));
   const rates = new Table({
     columns: [1, 4.6, 1.4, 1.4],
     cellPadding: 6,
@@ -462,7 +462,7 @@ export function generate(): Document {
 
   // ── Disbursements ──────────────────────────────────────────────────────────
 
-  doc.add(keepWithNext(h2('Disbursements')));
+  doc.add(h2('Disbursements'));
 
   const disbursements = new Table({
     columns: [1.2, 5.4, 1.2, 1.3],

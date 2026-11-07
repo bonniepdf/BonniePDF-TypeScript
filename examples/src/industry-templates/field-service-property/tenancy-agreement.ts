@@ -4,6 +4,7 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  formatNumber,
   Document,
   TextElementBase,
   Container,
@@ -268,8 +269,7 @@ function clauses(deposit: number, end: Date): ClauseBlock[] {
 
 /** Pence as pounds: £1,234.56. */
 function money(pence: number): string {
-  const whole = String(Math.floor(pence / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `£${whole}.${String(pence % 100).padStart(2, '0')}`;
+  return formatNumber(pence / 100, 'N2', '£');
 }
 
 /** 1 → 1st, 2 → 2nd, 3 → 3rd, 4 → 4th … for the days of a month. */

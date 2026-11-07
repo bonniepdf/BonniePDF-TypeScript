@@ -4,6 +4,7 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  formatNumber,
   Document,
   TextElementBase,
   Container,
@@ -307,10 +308,7 @@ function spendingByCategory(): CategorySpend[] {
 
 /** Pence as pounds: £1,234.56, with a leading minus when negative. */
 function money(pence: number): string {
-  const abs = Math.abs(pence);
-  const pounds = String(Math.floor(abs / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  const rest = String(abs % 100).padStart(2, '0');
-  return `${pence < 0 ? '-' : ''}£${pounds}.${rest}`;
+  return formatNumber(pence / 100, 'N2', '£');
 }
 
 // Local helpers keep this example ready to copy into a single file.

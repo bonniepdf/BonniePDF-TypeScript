@@ -6,11 +6,26 @@ import {
   Heading,
   PageBreak,
   StandardFonts,
+  Svg,
   Table,
   TextBlock,
   VerticalStack,
   pageTemplate,
 } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/atlas-homewares.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <circle cx="24" cy="24" r="20" fill="#f0fdfa" stroke="#0f766e" stroke-width="3"/>
+  <path d="M24 4a26 26 0 0 0 0 40M24 4a26 26 0 0 1 0 40" fill="none" stroke="#0f766e" stroke-width="2.5"/>
+  <path d="M6 17c5.5 3 11.5 4.5 18 4.5S36.5 20 42 17" fill="none" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M6 31c5.5-3 11.5-4.5 18-4.5S36.5 28 42 31" fill="none" stroke="#14b8a6" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="4" y1="24" x2="44" y2="24" stroke="#0f766e" stroke-width="2.2"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 interface Letter {
   font: string;
@@ -139,11 +154,18 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         child: new HorizontalStack({
           widthDistribution: 'equal',
           children: [
-            new TextBlock('ATLAS HOMEWARES', {
-              fontName: StandardFonts.HelveticaBold,
-              fontSize: 16,
-              letterSpacing: 2,
-              color: 'teal-700',
+            new HorizontalStack({
+              widthDistribution: 'auto',
+              spacing: 8,
+              children: [
+                new Svg({ svgData: logoMarkup(assets), width: 22, height: 22, isDecorative: true }),
+                new TextBlock('ATLAS HOMEWARES', {
+                  fontName: StandardFonts.HelveticaBold,
+                  fontSize: 16,
+                  letterSpacing: 2,
+                  color: 'teal-700',
+                }),
+              ],
             }),
             new TextBlock('London  ·  Paris  ·  Athens  ·  Riyadh', {
               fontSize: 9,

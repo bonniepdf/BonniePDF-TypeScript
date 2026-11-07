@@ -14,6 +14,8 @@ import {
   DocumentSettings,
   Heading,
   HorizontalStack,
+  Image,
+  ImageFitMode,
   PageBreak,
   PageNumberOf,
   PdfAConformance,
@@ -94,7 +96,7 @@ const CHAPTERS: [string, string, string[], [string, string]][] = [
  * properties. It renders **byte-for-byte identically** to the options-style
  * `cross-references.ts` (an equivalence test binds the two).
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const footer = new TextBlock('Harbour & Finch staff handbook  ·  page {{CurrentPage}} of {{TotalPages}}');
   footer.fontSize = 8;
   footer.color = ColorPalette.slate[500];
@@ -138,8 +140,22 @@ export function generate(): Document {
   const edition = new TextBlock(
     'Edition 4, spring 2026. Select a chapter to jump to it; every page number below is filled in when the handbook is laid out.'
   );
-  edition.margin = new Thickness(0, 0, 0, 28);
+  edition.margin = new Thickness(0, 0, 0, 16);
   doc.add(edition);
+
+  const coverImage = new Image();
+  coverImage.imageData = asset(assets, 'images/handbook/office.jpg');
+  coverImage.height = 150;
+  coverImage.fitMode = ImageFitMode.Cover;
+  coverImage.altText = 'Open-plan studio office with exposed brick walls and oak desks.';
+
+  const coverPhoto = new Container();
+  coverPhoto.height = 150;
+  coverPhoto.cornerRadius = 6;
+  coverPhoto.clipContent = true;
+  coverPhoto.margin = new Thickness(0, 0, 0, 20);
+  coverPhoto.child = coverImage;
+  doc.add(coverPhoto);
 
   const contents = new Heading('Contents');
   contents.level = 2;
@@ -229,4 +245,10 @@ function muted(text: string): TextBlock {
   block.fontSize = 10;
   block.color = ColorPalette.slate[500];
   return block;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

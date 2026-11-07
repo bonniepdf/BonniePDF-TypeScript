@@ -233,21 +233,19 @@ function tb(
 
 /** A check's name and requirement, turned a quarter turn to read upwards. */
 function vertical(name: string, requirement: string): Rotate {
+  const title = tb(name, 7.5, '#ffffff', { bold: true });
+  const limit = tb(requirement, 6.5, 'stone-300');
   return new Rotate({
     angle: 270,
     mode: 'constrained',
-    // A fixed length before turning, so every name starts from the bottom of the header row.
-    contentWidth: 84,
-    child: new VerticalStack({
-      spacing: 1,
-      children: [tb(name, 7.5, '#ffffff', { bold: true }), tb(requirement, 6.5, 'stone-300')],
-    }),
+    contentWidth: Math.ceil(Math.max(title.getPreferredWidth(), limit.getPreferredWidth())) + 1,
+    child: new VerticalStack({ spacing: 1, children: [title, limit] }),
   });
 }
 
 /** A header cell, padded for the dark header row. */
 function headerCell(content: TextBlock | Rotate): TableCell {
-  return new TableCell({ content, padding: [4, 6] });
+  return new TableCell({ content, padding: [4, 6], verticalAlignment: 'bottom' });
 }
 
 /** True when a result is a failed attribute check or a measurement outside its tolerance. */
@@ -260,16 +258,12 @@ function outside(result: string, check: number): boolean {
 }
 
 /** The part's verdict as a small chip. */
-function verdict(failed: boolean): HorizontalStack {
-  return new HorizontalStack({
-    widthDistribution: 'auto',
-    children: [
-      new Container({
-        backgroundColor: failed ? 'rose-100' : 'emerald-50',
-        cornerRadius: 3,
-        padding: [5, 1.5],
-        child: tb(failed ? 'Reject' : 'Accept', 7.5, failed ? 'rose-800' : 'emerald-800', { bold: true }),
-      }),
-    ],
+function verdict(failed: boolean): Container {
+  return new Container({
+    fitContent: true,
+    backgroundColor: failed ? 'rose-100' : 'emerald-50',
+    cornerRadius: 3,
+    padding: [5, 1.5],
+    child: tb(failed ? 'Reject' : 'Accept', 7.5, failed ? 'rose-800' : 'emerald-800', { bold: true }),
   });
 }

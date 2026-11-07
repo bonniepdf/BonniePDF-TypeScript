@@ -4,8 +4,10 @@ import {
   Document,
   Heading,
   HorizontalStack,
+  Image,
   PageBreak,
   StandardFonts,
+  Svg,
   Table,
   TextBlock,
   pageTemplate,
@@ -76,7 +78,19 @@ const DEPOTS: [string, string, string, string][] = [
   ['York', '600', '97.8%', '92.2%'],
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const firstPage = new HorizontalStack({ widthDistribution: 'weighted', spacing: 6 });
+  firstPage.add(
+    new Svg({
+      svgData: svgAsset(assets, 'images/svg/northfield.svg'),
+      width: 14,
+      height: 14,
+      isDecorative: true,
+    })
+  );
+  firstPage.add(small(BRAND, 'left', { bold: true, size: 11, color: 'teal-700' }), 1);
+  firstPage.add(small('Board pack  ·  14 October 2026', 'right'), 1);
+
   const doc = new Document({
     metadata: { title: 'Operations review Q3 2026' },
     settings: {
@@ -88,13 +102,7 @@ export function generate(): Document {
       // Page one carries the larger brand line; later pages alternate so the
       // brand and the page number always sit on the outer edge, as in a printed report.
       headerTemplate: pageTemplate({
-        firstPage: new HorizontalStack({
-          widthDistribution: 'equal',
-          children: [
-            small(BRAND, 'left', { bold: true, size: 11, color: 'teal-700' }),
-            small('Board pack  ·  14 October 2026', 'right'),
-          ],
-        }),
+        firstPage,
         odd: runningHeader(small(TITLE, 'left'), small(BRAND, 'right', { bold: true, color: 'teal-700' })),
         even: runningHeader(small(BRAND, 'left', { bold: true, color: 'teal-700' }), small(TITLE, 'right')),
       }),
@@ -118,7 +126,21 @@ export function generate(): Document {
     new TextBlock('July to September 2026. Prepared for the board by the operations team.', {
       fontSize: 12,
       color: 'slate-600',
-      margin: { bottom: 18 },
+      margin: { bottom: 10 },
+    })
+  );
+  doc.add(
+    new Container({
+      height: 95,
+      cornerRadius: 6,
+      clipContent: true,
+      margin: { bottom: 12 },
+      child: new Image({
+        imageData: asset(assets, 'images/logistics/depot.jpg'),
+        height: 95,
+        fitMode: 'cover',
+        altText: 'Northfield distribution depot loading bays at dawn.',
+      }),
     })
   );
 
@@ -140,10 +162,10 @@ export function generate(): Document {
         fontName: StandardFonts.HelveticaBold,
         fontSize: 15,
         color: 'slate-900',
-        margin: { top: 14, bottom: 6 },
+        margin: { top: 10, bottom: 4 },
       })
     );
-    for (const paragraph of paragraphs) doc.add(new TextBlock(paragraph, { lineHeight: 1.5, margin: { bottom: 8 } }));
+    for (const paragraph of paragraphs) doc.add(new TextBlock(paragraph, { lineHeight: 1.4, margin: { bottom: 6 } }));
   }
 
   // The appendix starts a page of its own, so the third page shows the odd-page header.
@@ -221,4 +243,14 @@ function cell(text: string, alignment: TextAlignmentInput, bold = false): TextBl
     fontSize: 10,
     alignment,
   });
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
+}
+
+function svgAsset(assets: ReadonlyMap<string, Uint8Array>, path: string): string {
+  return new TextDecoder().decode(asset(assets, path));
 }

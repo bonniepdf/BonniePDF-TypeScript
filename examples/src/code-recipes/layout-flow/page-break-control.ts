@@ -9,6 +9,7 @@ import {
   PreventPageBreak,
   ShowEntire,
   StandardFonts,
+  Svg,
   TextBlock,
   VerticalStack,
   pageTemplate,
@@ -77,7 +78,7 @@ const CHECKLIST = [
   'Handover meeting minutes circulated',
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     metadata: { title: 'Supply agreement SA-2026-118' },
     settings: {
@@ -95,15 +96,25 @@ export function generate(): Document {
     },
   });
 
-  doc.add(
+  const brandRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 6, margin: { bottom: 4 } });
+  brandRow.add(
+    new Svg({
+      svgData: svgAsset(assets, 'images/svg/sample-company.svg'),
+      width: 9,
+      height: 9,
+      altText: 'Sample Company logo',
+    })
+  );
+  brandRow.add(
     new TextBlock('SUPPLY AGREEMENT', {
       fontName: StandardFonts.HelveticaBold,
       fontSize: 8,
       letterSpacing: 1.5,
       color: 'teal-700',
-      margin: { bottom: 4 },
-    })
+    }),
+    1
   );
+  doc.add(brandRow);
   doc.add(
     new Heading('Northfield Logistics and Calder Print & Pack', {
       level: 1,
@@ -241,4 +252,14 @@ function signatory(label: string): VerticalStack {
       new TextBlock('Date  ___________________________', { fontSize: 8.5 }),
     ],
   });
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
+}
+
+function svgAsset(assets: ReadonlyMap<string, Uint8Array>, path: string): string {
+  return new TextDecoder().decode(asset(assets, path));
 }

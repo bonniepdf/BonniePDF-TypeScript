@@ -8,6 +8,7 @@ import {
   Document,
   Heading,
   HorizontalStack,
+  Image,
   PageBreak,
   PageNumberOf,
   Section,
@@ -86,7 +87,7 @@ const CHAPTERS: [string, string, string[], [string, string]][] = [
  * The reference elements keep their target positional (`new SectionLink(text,
  * id, { … })`, `new PageNumberOf(id, { … })`); styling goes in the options.
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -134,9 +135,23 @@ export function generate(): Document {
     new TextBlock(
       'Edition 4, spring 2026. Select a chapter to jump to it; every page number below is filled in when the handbook is laid out.',
       {
-        margin: { bottom: 28 },
+        margin: { bottom: 16 },
       }
     )
+  );
+  doc.add(
+    new Container({
+      height: 150,
+      cornerRadius: 6,
+      clipContent: true,
+      margin: { bottom: 20 },
+      child: new Image({
+        imageData: asset(assets, 'images/handbook/office.jpg'),
+        height: 150,
+        fitMode: 'cover',
+        altText: 'Open-plan studio office with exposed brick walls and oak desks.',
+      }),
+    })
   );
   doc.add(
     new Heading('Contents', {
@@ -194,4 +209,10 @@ export function generate(): Document {
   });
 
   return doc;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

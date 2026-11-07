@@ -9,6 +9,7 @@ import {
   Heading,
   HorizontalStack,
   StandardFonts,
+  Svg,
   Table,
   TextBlock,
   UnorderedList,
@@ -32,7 +33,7 @@ const CHARGES: [string, string][] = [
  * options-object front door: PDF/UA-1 so every resident can read it with a
  * screen reader, PDF/A-2a so the council can archive it unchanged.
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -70,16 +71,29 @@ export function generate(): Document {
   });
 
   // ── Masthead and address ──
+  const mastheadRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 10 });
+  mastheadRow.add(
+    new Svg({
+      svgData: svgAsset(assets, 'images/svg/borough-crest.svg'),
+      width: 24,
+      height: 24,
+      altText: 'Sample Borough Council crest',
+    })
+  );
+  mastheadRow.add(
+    new TextBlock('Sample Borough Council', {
+      fontName: StandardFonts.HelveticaBold,
+      fontSize: 17,
+      color: '#ffffff',
+    }),
+    1
+  );
   doc.add(
     new Container({
       backgroundColor: COUNCIL,
       padding: [16, 12],
       margin: { bottom: 20 },
-      child: new TextBlock('Sample Borough Council', {
-        fontName: StandardFonts.HelveticaBold,
-        fontSize: 17,
-        color: '#ffffff',
-      }),
+      child: mastheadRow,
     })
   );
   doc.add(
@@ -175,4 +189,14 @@ export function generate(): Document {
   );
 
   return doc;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
+}
+
+function svgAsset(assets: ReadonlyMap<string, Uint8Array>, path: string): string {
+  return new TextDecoder().decode(asset(assets, path));
 }

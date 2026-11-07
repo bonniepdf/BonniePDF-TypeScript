@@ -4,6 +4,7 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  formatNumber,
   Document,
   TextElementBase,
   Container,
@@ -349,12 +350,12 @@ interface Goods {
 
 /** A whole number with thousands separators: 1,490. */
 function thousands(n: number): string {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return formatNumber(n, 'N0');
 }
 
 /** Cents as a decimal amount: 1,234.56. */
 function amount(cents: number): string {
-  return `${thousands(Math.floor(cents / 100))}.${String(cents % 100).padStart(2, '0')}`;
+  return formatNumber(cents / 100, 'N2');
 }
 
 /** Grams as kilograms to one decimal place, rounding half up: 290.1. */

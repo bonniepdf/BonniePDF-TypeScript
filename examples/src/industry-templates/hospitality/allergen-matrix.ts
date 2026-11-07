@@ -5,6 +5,7 @@ import {
   Heading,
   HorizontalStack,
   StandardFonts,
+  Svg,
   Table,
   TableCell,
   TextBlock,
@@ -83,10 +84,22 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const bytes = assets.get('fonts/SourceSerif4-Regular.ttf');
   if (!bytes) throw new Error('Supply fonts/SourceSerif4-Regular.ttf.');
   const serif = doc.fonts.add(bytes).fontName;
+  const sprigBytes = assets.get('images/svg/the-larder.svg');
+  if (!sprigBytes) throw new Error('Supply images/svg/the-larder.svg.');
+  const sprigSvg = new TextDecoder().decode(sprigBytes);
 
   // ── Title and review line ──
   const top = new HorizontalStack({ widthDistribution: 'equal', margin: { bottom: 12 } });
-  top.add(new Heading('Allergen guide', { level: 1, fontName: serif, fontSize: 24, color: 'stone-900' }));
+  top.add(
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 8,
+      children: [
+        new Svg({ svgData: sprigSvg, width: 24, height: 24, isDecorative: true, margin: { top: 2 } }),
+        new Heading('Allergen guide', { level: 1, fontName: serif, fontSize: 24, color: 'stone-900' }),
+      ],
+    })
+  );
   top.add(
     new TextBlock('The Larder  ·  Dinner menu\nReviewed 5 November 2026 by the head chef', {
       alignment: 'right',

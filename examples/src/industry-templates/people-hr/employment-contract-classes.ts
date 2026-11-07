@@ -17,6 +17,7 @@
 // the narrated walkthrough.
 
 import {
+  pageNumber,
   BookmarkItem,
   Border,
   BorderColors,
@@ -35,7 +36,6 @@ import {
   Table,
   TextAlignment,
   TextBlock,
-  TextElementBase,
   Thickness,
   VerticalStack,
   WidthDistribution,
@@ -409,7 +409,7 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
 
   settings.headerTemplate = pageTemplate({ default: pageHeader() });
   function pageFooter() {
-    const footer = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
+    const footer = pageNumber();
     footer.fontName = StandardFonts.Helvetica;
     footer.fontSize = 7;
     footer.color = FAINT;

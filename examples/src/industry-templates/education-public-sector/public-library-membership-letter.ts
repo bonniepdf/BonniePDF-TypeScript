@@ -15,6 +15,7 @@
 // through the options-object front door.
 
 import {
+  pageNumber,
   Document,
   TextBlock,
   Heading,
@@ -26,10 +27,10 @@ import {
   Table,
   Grid,
   StandardFonts,
+  Svg,
   type ColorInput,
   type TextAlignmentInput,
   pageTemplate,
-  TextElementBase,
 } from '@bonniepdf/core';
 
 const LIBRARY_INK = '#172033';
@@ -55,7 +56,8 @@ const OPENING_HOURS: InfoLine[] = [
   { label: 'Saturday', value: '10:00-16:00', note: 'Main library only' },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const crestSvg = new TextDecoder().decode(assets.get('images/svg/borough-crest.svg'));
   const now = new Date();
   const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
   const renewalDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(
@@ -72,14 +74,11 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: LIBRARY_INK },
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `Sample Libraries  -  Ref NBL-4471-208823  -  Page ${TextElementBase.CurrentPageToken}`,
-          {
-            fontName: StandardFonts.Helvetica,
-            fontSize: 8,
-            color: LIBRARY_SECONDARY,
-          }
-        ),
+        default: pageNumber('Sample Libraries  -  Ref NBL-4471-208823  -  Page {page}', {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 8,
+          color: LIBRARY_SECONDARY,
+        }),
       }),
     },
     metadata: {
@@ -98,13 +97,25 @@ export function generate(): Document {
       child: new HorizontalStack({
         widthDistribution: 'equal',
         children: [
-          new TextBlock('Sample Libraries', { fontName: StandardFonts.HelveticaBold, fontSize: 18, color: '#ffffff' }),
+          new HorizontalStack({
+            widthDistribution: 'auto',
+            spacing: 10,
+            children: [
+              new Svg({ svgData: crestSvg, width: 28, height: 34, altText: 'Sample Borough Council crest' }),
+              new TextBlock('Sample Libraries', {
+                fontName: StandardFonts.HelveticaBold,
+                fontSize: 18,
+                color: '#ffffff',
+                margin: { top: 6 },
+              }),
+            ],
+          }),
           new TextBlock('Membership Services', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 11,
             color: CARD_TINT,
             alignment: 'right',
-            margin: { top: 5 },
+            margin: { top: 10 },
           }),
         ],
       }),

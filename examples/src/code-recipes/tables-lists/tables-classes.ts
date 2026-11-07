@@ -4,12 +4,13 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  TableCell,
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
   AccessibilityMode,
   TextBlock,
-  TextElementBase,
   TextStyle,
   TextAlignment,
   Table,
@@ -20,13 +21,10 @@ import {
   Thickness,
   StandardFonts,
   PdfAConformance,
-  VerticalStack,
   pageTemplate,
   Image,
   ImageFitMode,
   Container,
-  HorizontalStack,
-  WidthDistribution,
   Border,
   BorderColors,
   Placeholders,
@@ -75,7 +73,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   settings.language = 'en-GB';
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[700]);
   function pageFooter(): TextBlock {
-    const b = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
+    const b = pageNumber();
     b.fontSize = 9;
     b.color = ColorPalette.slate[400];
     b.alignment = TextAlignment.Right;
@@ -110,6 +108,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(tableIntro);
 
   const table = new Table(46, 130, 130, 120);
+  table.rowBackgroundColor = Color.white;
+  table.alternateRowBackgroundColor = ColorPalette.slate[50];
   table.repeatHeadersOnNewPage = true;
   table.headerBackgroundColor = ColorPalette.slate[100];
   table.headerTextColor = ColorPalette.slate[800];
@@ -132,7 +132,6 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   const employees = Placeholders.withSeed(42).employees(45);
 
-  let rowIndex = 0;
   for (const emp of employees) {
     const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
     // The photo is cropped round by a clipping container the size of the photo.
@@ -149,17 +148,19 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     photo.clipContent = true;
     photo.child = image;
 
-    const bg = rowIndex++ % 2 === 0 ? Color.white : ColorPalette.slate[50];
     const nameCell = new TextBlock(emp.name);
     nameCell.fontSize = 10;
     nameCell.color = ColorPalette.slate[800];
-    nameCell.margin = new Thickness(0, 10, 0, 0);
     const roleCell = new TextBlock(emp.role);
     roleCell.fontSize = 10;
     roleCell.color = ColorPalette.slate[600];
-    roleCell.margin = new Thickness(0, 10, 0, 0);
-    const deptCell = departmentPill(emp.department);
-    table.addRow(TableRow.fromElements(photo, nameCell, roleCell, deptCell).withBackground(bg));
+    const name = TableCell.from(nameCell);
+    const role = TableCell.from(roleCell);
+    const department = TableCell.from(departmentPill(emp.department));
+    name.verticalAlignment = 'middle';
+    role.verticalAlignment = 'middle';
+    department.verticalAlignment = 'middle';
+    table.addRow(photo, name, role, department);
   }
 
   doc.add(table);
@@ -177,8 +178,6 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   for (const [title, body] of OVERVIEW_SECTIONS) {
     // Each heading is kept with its paragraph, so a heading never ends a page on its own.
-    const section = new VerticalStack();
-    section.breakAllowed = false;
     const h2 = new Heading(title);
     h2.tocIdentifier = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     h2.level = 2;
@@ -186,12 +185,11 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     h2.fontSize = 14;
     h2.color = ColorPalette.slate[700];
     h2.margin = new Thickness(0, 14, 0, 6);
-    section.add(h2);
+    doc.add(h2);
 
     const p = new TextBlock(body);
     p.margin = new Thickness(0, 0, 0, 6);
-    section.add(p);
-    doc.add(section);
+    doc.add(p);
   }
 
   return doc;
@@ -209,10 +207,9 @@ const DEPARTMENT_HUES: Record<string, keyof typeof ColorPalette> = {
 };
 
 /**
- * A department as a small tinted pill: a light fill with dark text of the same hue. The auto-width
- * stack sizes the pill to its text instead of letting it fill the cell.
+ * A tinted department label sized to its text.
  */
-function departmentPill(department: string): HorizontalStack {
+function departmentPill(department: string): Container {
   const hue = ColorPalette[DEPARTMENT_HUES[department] ?? 'slate'];
   const label = new TextBlock(department);
   label.fontSize = 9;
@@ -222,9 +219,6 @@ function departmentPill(department: string): HorizontalStack {
   pill.cornerRadius = 8;
   pill.padding = new Thickness(8, 3, 8, 3);
   pill.child = label;
-  const wrap = new HorizontalStack();
-  wrap.widthDistribution = WidthDistribution.Auto;
-  wrap.margin = new Thickness(0, 9, 0, 0);
-  wrap.add(pill);
-  return wrap;
+  pill.fitContent = true;
+  return pill;
 }

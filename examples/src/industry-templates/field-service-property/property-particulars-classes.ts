@@ -27,6 +27,8 @@ import {
   TextBlock,
   TextAlignment,
   Heading,
+  Image,
+  ImageFitMode,
   StandardFonts,
   Svg,
 } from '@bonniepdf/core';
@@ -55,6 +57,15 @@ const RULE = ColorPalette.slate[200];
 // literals. It renders **byte-for-byte identically** to the options-object form
 // (an equivalence test binds the two). Reach for the options form first; this
 // variant exists to show what it desugars to.
+
+const GALLERY: [string, string][] = [
+  [
+    'images/property/kitchen.jpg',
+    'Extended kitchen and dining room with shaker units, oak worktops, and roof lantern.',
+  ],
+  ['images/property/living-room.jpg', 'Front reception room with bay window and open fireplace.'],
+  ['images/property/garden.jpg', 'South-facing rear garden with paved terrace and lawn.'],
+];
 
 const PROPERTY = {
   headline: 'Three-bedroom semi-detached house',
@@ -223,7 +234,7 @@ const EPC_BANDS: { letter: string; from: number; to: number; fill: Color; label:
   { letter: 'G', from: 1, to: 20, fill: ColorPalette.rose[700], label: Color.white, ink: ColorPalette.rose[700] },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const current = bandFor(PROPERTY.epcCurrent);
   const potential = bandFor(PROPERTY.epcPotential);
 
@@ -264,10 +275,28 @@ export function generate(): Document {
         size: 18,
         bold: true,
         color: ACCENT,
-        mb: 14,
+        mb: 12,
       }
     )
   );
+
+  doc.add(
+    photoFrame(
+      asset(assets, 'images/property/hero.jpg'),
+      150,
+      6,
+      'Front elevation of 14 Meadowcroft Avenue, a 1930s semi-detached house with a block-paved drive.',
+      8
+    )
+  );
+  const gallery = new HorizontalStack();
+  gallery.spacing = 8;
+  gallery.widthDistribution = WidthDistribution.Equal;
+  gallery.margin = new Thickness(0, 0, 0, 12);
+  for (const [path, altText] of GALLERY) {
+    gallery.add(photoFrame(asset(assets, path), 68, 4, altText));
+  }
+  doc.add(gallery);
 
   doc.add(
     weightedRow(
@@ -645,4 +674,26 @@ function band(left: string, right: string): HorizontalStack {
   row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
   row.add(cell(right, { size: 7.5, color: MUTED, align: TextAlignment.Right }), 2);
   return row;
+}
+
+function photoFrame(imageData: Uint8Array, height: number, cornerRadius: number, altText: string, mb = 0): Container {
+  const image = new Image();
+  image.imageData = imageData;
+  image.height = height;
+  image.fitMode = ImageFitMode.Cover;
+  image.altText = altText;
+
+  const box = new Container();
+  box.height = height;
+  box.cornerRadius = cornerRadius;
+  box.clipContent = true;
+  box.margin = new Thickness(0, 0, 0, mb);
+  box.child = image;
+  return box;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

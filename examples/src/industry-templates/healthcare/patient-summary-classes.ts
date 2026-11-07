@@ -112,7 +112,7 @@ export function generate(): Document {
 
   const metadata = new DocumentMetadata();
   metadata.title = 'Patient summary: Priya Shah';
-  metadata.author = 'Sample Healthcare NHS Trust';
+  metadata.author = 'Sample Healthcare Trust';
   metadata.subject = 'Inpatient summary: identity, alerts, observations, medicines, results and plan';
 
   const doc = new Document(settings, metadata);
@@ -120,7 +120,7 @@ export function generate(): Document {
   // ── Trust masthead ──
   const trust = new VerticalStack();
   trust.spacing = 2;
-  trust.add(tb('Sample Healthcare NHS Trust', 12, Color.white, { bold: true }));
+  trust.add(tb('Sample Healthcare Trust', 12, Color.white, { bold: true }));
   trust.add(tb('Cardiology, ward 4B', 8, ColorPalette.teal[100]));
   const title = new Heading('Patient summary');
   title.level = 1;
@@ -149,7 +149,7 @@ export function generate(): Document {
   const name = new VerticalStack();
   name.spacing = 3;
   name.add(tb('SHAH, Priya (Ms)', 16, INK, { bold: true }));
-  name.add(tb('Born 14 March 1979 (47)  ·  Female  ·  NHS number 999 482 9310', 9, BODY));
+  name.add(tb('Born 14 March 1979 (47)  ·  Female  ·  Patient ID 999 482 9310', 9, BODY));
   const barcode = new Barcode();
   barcode.value = 'H0482931';
   barcode.symbology = BarcodeSymbology.Code128;

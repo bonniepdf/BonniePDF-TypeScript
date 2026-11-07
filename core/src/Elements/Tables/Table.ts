@@ -866,11 +866,6 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   }
 
   private renderRow(ctx: RenderContext, row: TableRow, widths: number[], _isFirstPage: boolean): void {
-    // For footers, only show on last page if ShowFootersOnAllPages is false
-    if (row.isFooter && !this.showFootersOnAllPages && !this.isLastPage(ctx)) {
-      return;
-    }
-
     const rowHeight = this.measureRowHeight(row, widths);
 
     // Pagination check
@@ -1212,10 +1207,6 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     }
 
     return maxHeight;
-  }
-
-  private isLastPage(ctx: RenderContext): boolean {
-    return ctx.isLastPage;
   }
 }
 

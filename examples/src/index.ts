@@ -451,7 +451,7 @@ export const examples: ExampleDef[] = [
     name: 'Headers & Footers',
     category: 'Page Setup',
     description:
-      'Running header and footer templates on every page. The templates are marked decorative, so screen readers skip them, while the numbered body sections are fully structured.',
+      'A three-page report with a distinct first-page header, mirrored odd and even headers with a brand mark and rule, and page numbers on the outer edge. Screen readers skip the headers and footers.',
     filename: 'headers-footers.pdf',
     generate: headersFooters,
     dotnetClass: 'HeadersFootersExample',
@@ -3034,7 +3034,7 @@ export const examples: ExampleDef[] = [
     category: 'Invoices',
     tier: 'examples',
     description:
-      'An accessible subscription invoice for a Pro plan: per-seat and storage line items, proration, a QR payment code, VAT, and totals, in a clean UK layout.',
+      'An accessible subscription invoice for a Pro plan: billing period and status, per-seat and storage line items, a proration line, VAT, a prominent total and a QR payment code, in a clean UK layout.',
     filename: 'saas-invoice.pdf',
     generate: saasInvoice,
     dotnetClass: 'SaasInvoiceExample',

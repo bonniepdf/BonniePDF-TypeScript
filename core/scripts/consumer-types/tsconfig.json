@@ -1,0 +1,20 @@
+{
+  // Typechecks a consumer of the built package, the way an application that
+  // uses `moduleResolution: "nodenext"` sees it. The package refers to itself
+  // by name, so this resolves through `exports` to dist/, exactly as an
+  // installed copy would. Run after `pnpm build`: `pnpm check:consumer-types`.
+  //
+  // It exists because the declarations once shipped extensionless relative
+  // imports. Bundler resolution accepts them; Node16/NodeNext does not, and a
+  // consumer then saw no exports at all.
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": ["node"]
+  },
+  "files": ["esm.ts"]
+}

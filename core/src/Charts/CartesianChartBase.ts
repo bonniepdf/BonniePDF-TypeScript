@@ -1,7 +1,7 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { drawPlacedLabel, type ChartLabelBox } from './Graphics/ChartLabels';
 import { formatChartNumber } from './ChartNumberFormat';
-import { type ICanvas, Color, Point, TextAlignment, StandardFonts, toLength, type LengthInput } from './ChartHost';
+import { type ICanvas, Color, toColor, type ColorInput, Point, TextAlignment, StandardFonts, toLength, type LengthInput } from './ChartHost';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
@@ -25,6 +25,7 @@ export const CARTESIAN_CHART_OWN_OPTION_KEYS = [
   'labelFontSize',
   'showLegend',
   'orientation',
+  'references',
 ] as const;
 
 /** The full option surface of a cartesian chart, base included. */
@@ -45,6 +46,20 @@ export type CartesianChartOptions = ChartBaseOptions &
     /** Value axis presentation; accepts an AxisOptions instance or literal. */
     yAxis?: AxisOptions | AxisOptionsOptions;
   };
+
+/** A value-axis line, or a band when endValue is supplied. */
+export interface ChartReference {
+  /** The line value or the first band endpoint. */
+  value: number;
+  /** Fill or stroke colour. */
+  color: ColorInput;
+  /** The second band endpoint. Omit it for a line. */
+  endValue?: number;
+  /** The line thickness in points. Defaults to one. */
+  thickness?: number;
+  /** Optional alternating dash and gap lengths in points. */
+  dashPattern?: readonly number[];
+}
 
 /** Provides shared axis, scale, grid, and label behavior for Cartesian charts. */
 export abstract class CartesianChartBase extends ChartBase {
@@ -152,6 +167,13 @@ export abstract class CartesianChartBase extends ChartBase {
    */
   orientation: ChartOrientation = ChartOrientation.Vertical;
 
+  /** Reference lines and bands on the value axis. */
+  references: readonly ChartReference[] = [];
+
+  protected drawCompact(_canvas: ICanvas, _data: ChartData): boolean {
+    return false;
+  }
+
   /**
    * Draws the chart content using a Template Method pattern.
    * This ensures consistent drawing order across all Cartesian chart types.
@@ -164,7 +186,9 @@ export abstract class CartesianChartBase extends ChartBase {
     if (data.series.length === 0) return;
     checkValueRange(data.yAxis.minValue, data.yAxis.maxValue);
 
+    if (this.drawCompact(canvas, data)) return;
     const layout = this.calculateLayout(data);
+    this.drawReferences(canvas, data, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY, true);
 
     // 1. Draw grid lines first (behind everything)
     if (data.yAxis.showGridLines) {
@@ -188,6 +212,8 @@ export abstract class CartesianChartBase extends ChartBase {
 
     // 4. Draw chart-specific data elements
     this.drawAllSeries(canvas, data, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY, layout.topY);
+
+    this.drawReferences(canvas, data, layout.chartAreaWidth, layout.chartAreaHeight, layout.baselineY, false);
 
     // 5. Draw value labels on top of data
     if (this.showValueLabels) {
@@ -226,6 +252,55 @@ export abstract class CartesianChartBase extends ChartBase {
     }
 
     } finally {this._renderData=previousData;this._labelBoxes=[];}
+  }
+
+  private drawReferences(
+    canvas: ICanvas, data: ChartData, width: number, height: number, baseline: number, bands: boolean
+  ): void {
+    const { minValue, maxValue } = data.yAxis;
+    const left = CartesianChartBase.LEFT_PADDING;
+    const horizontal = this.orientation === ChartOrientation.Horizontal;
+    for (const { value, endValue, thickness = 1, color, dashPattern } of this.references) {
+      if ((endValue !== undefined) !== bands) continue;
+      const a = valueFraction(value, minValue, maxValue);
+      const paint = toColor(color);
+      if (endValue !== undefined) {
+        const b = valueFraction(endValue, minValue, maxValue);
+        const low = Math.max(0, Math.min(a, b));
+        const high = Math.min(1, Math.max(a, b));
+        if (!(high > low)) continue;
+        if (horizontal) canvas.fillRect(left + low * width, baseline - height, (high - low) * width, height, paint);
+        else canvas.fillRect(left, baseline - high * height, width, (high - low) * height, paint);
+      } else if (a >= 0 && a <= 1 && Number.isFinite(thickness) && thickness > 0) {
+        const x = horizontal ? left + a * width : left;
+        const y = baseline - (horizontal ? height : a * height);
+        this.drawReferenceLine(canvas, x, y, horizontal ? height : width, horizontal, paint, thickness, dashPattern);
+      }
+    }
+  }
+
+  private drawReferenceLine(
+    canvas: ICanvas, x: number, y: number, length: number, vertical: boolean, color: Color,
+    thickness: number, pattern?: readonly number[]
+  ): void {
+    const draw = (from: number, to: number): void => {
+      if (vertical) canvas.drawLine(x, y + from, x, y + to, color, thickness);
+      else canvas.drawLine(x + from, y, x + to, y, color, thickness);
+    };
+    if (!pattern?.length) {
+      draw(0, length);
+      return;
+    }
+
+    const minimum = Math.min(...pattern);
+    if (pattern.some(dash => !Number.isFinite(dash)) || minimum <= 0 || length / minimum > 100_000)
+      throw new RangeError('Reference dash lengths must be finite and positive and allow at most 100,000 segments.');
+    let from = 0;
+    for (let i = 0; from < length; i++) {
+      const to = Math.min(length, from + pattern[i % pattern.length]);
+      if (i % 2 === 0) draw(from, to);
+      from = to;
+    }
   }
 
   /**

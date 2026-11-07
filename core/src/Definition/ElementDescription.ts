@@ -528,6 +528,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       "margin": {
         "kind": "spacing"
       },
+      "keepWithNext": {
+        "kind": "boolean"
+      },
       "breakAllowed": {
         "kind": "boolean"
       },
@@ -673,6 +676,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       }
     },
     "Cartesian": {
+      "references": {
+        "kind": "array:object:ChartReference"
+      },
       "xAxis": {
         "kind": "object:Axis"
       },
@@ -1036,6 +1042,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Bordered"
       ],
       "keys": {
+        "verticalAlignment": {
+          "kind": "enum:VerticalAlignment"
+        },
         "type": {
           "kind": "string",
           "required": true
@@ -1088,6 +1097,27 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         }
       }
     },
+    "ChartReference": {
+      "keys": {
+        "value": {
+          "kind": "number",
+          "required": true
+        },
+        "endValue": {
+          "kind": "number"
+        },
+        "color": {
+          "kind": "color",
+          "required": true
+        },
+        "thickness": {
+          "kind": "length"
+        },
+        "dashPattern": {
+          "kind": "array:number"
+        }
+      }
+    },
     "ChartBarStyle": {
       "keys": {
         "cornerRadius": {
@@ -1107,6 +1137,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Bordered"
       ],
       "keys": {
+        "fitContent": {
+          "kind": "boolean"
+        },
         "child": {
           "kind": "element"
         },
@@ -1566,6 +1599,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Bordered"
       ],
       "keys": {
+        "alternateRowBackgroundColor": {
+          "kind": "color"
+        },
         "columns": {
           "kind": "array:number"
         },
@@ -1706,6 +1742,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Element"
       ],
       "keys": {
+        "dashPattern": {
+          "kind": "array:number"
+        },
         "thickness": {
           "kind": "length"
         },
@@ -1777,6 +1816,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Code"
       ],
       "keys": {
+        "gs1": {
+          "kind": "boolean"
+        },
         "value": {
           "kind": "string",
           "required": true
@@ -1807,6 +1849,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Code"
       ],
       "keys": {
+        "gs1": {
+          "kind": "boolean"
+        },
         "data": {
           "kind": "string",
           "required": true
@@ -1878,6 +1923,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Cartesian"
       ],
       "keys": {
+        "sparkline": {
+          "kind": "boolean"
+        },
         "defaultLineWidth": {
           "kind": "length"
         },
@@ -2171,6 +2219,12 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "orientation": {
           "kind": "enum:PageOrientation"
         },
+        "margins": {
+          "kind": "spacing"
+        },
+        "preservePageDimensions": {
+          "kind": "boolean"
+        },
         "margin": {
           "kind": "length"
         },
@@ -2364,6 +2418,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "orientation": {
           "kind": "enum:PageOrientation"
+        },
+        "margins": {
+          "kind": "spacing"
         },
         "margin": {
           "kind": "length"

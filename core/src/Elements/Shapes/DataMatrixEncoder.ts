@@ -71,6 +71,14 @@ function randomise255State(value: number, position: number): number {
   return (value + ((149 * position) % 255) + 1) & 255;
 }
 
+function encodeGs1(text: string): number[] {
+  const fields = text.split('\x1d');
+  if (fields.some(field => field.length === 0 || /[^ -~]/.test(field))) {
+    throw new DataMatrixContentException('GS1 DataMatrix requires printable ASCII fields separated by ASCII 29.');
+  }
+  return fields.flatMap(field => [232, ...encodeAscii(field)]);
+}
+
 function encodeAscii(text: string): number[] {
   const result: number[] = [];
   for (let i = 0; i < text.length; i++) {
@@ -464,9 +472,9 @@ export class DataMatrixEncoder {
    * @throws {DataMatrixContentException} if the message is too long for the
    *         largest (144×144) symbol.
    */
-  static encode(message: string, rectangular = false): EncodedDataMatrix {
+  static encode(message: string, rectangular = false, gs1 = false): EncodedDataMatrix {
     const bytes = toLatin1Bytes(message);
-    const encoded = chooseBestEncoding(bytes);
+    const encoded = gs1 ? encodeGs1(message) : chooseBestEncoding(bytes);
     const sizeProps = calculateSymbolSize(encoded.length, rectangular);
 
     applyReedSolomonErrorCorrection(

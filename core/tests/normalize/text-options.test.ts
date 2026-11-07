@@ -94,9 +94,9 @@ describe('TextBlock options (09a Phase 2.C)', () => {
   });
 });
 
-describe('Heading options — the deepest chain (28 properties)', () => {
-  it('exposes 30 option keys spanning three levels', () => {
-    expect(HEADING_OPTION_KEYS).toHaveLength(30);
+describe('Heading options — the deepest chain', () => {
+  it('exposes 31 option keys spanning three levels', () => {
+    expect(HEADING_OPTION_KEYS).toHaveLength(31);
   });
 
   it('applies own, TextBlock, TextElement and Element keys together', () => {

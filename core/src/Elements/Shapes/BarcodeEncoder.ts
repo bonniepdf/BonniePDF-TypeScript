@@ -24,14 +24,17 @@ export interface EncodedBarcode {
  * 32-bit signed bitwise semantics never come into play.
  */
 export const BarcodeEncoder = {
-  encode(symbology: BarcodeSymbology, value: string): EncodedBarcode {
+  encode(symbology: BarcodeSymbology, value: string, gs1 = false): EncodedBarcode {
     if (value === null || value === undefined) {
       throw new BarcodeContentException(symbology, 'Barcode value must not be null.');
     }
 
+    if (gs1 && symbology !== BarcodeSymbology.Code128) {
+      throw new BarcodeContentException(symbology, 'GS1 mode is supported for Code 128 only.');
+    }
     switch (symbology) {
       case BarcodeSymbology.Code128:
-        return encodeCode128(value);
+        return encodeCode128(value, gs1);
       case BarcodeSymbology.Ean13:
         return encodeEan13(value);
       case BarcodeSymbology.UpcA:
@@ -174,14 +177,14 @@ const CODE128_START_B = 104;
 const CODE128_START_C = 105;
 const CODE128_STOP = 106;
 
-function encodeCode128(value: string): EncodedBarcode {
+function encodeCode128(value: string, gs1: boolean): EncodedBarcode {
   if (value.length === 0) {
     throw new BarcodeContentException(BarcodeSymbology.Code128, 'Code 128 requires at least one character.');
   }
 
   for (const ch of value) {
     const code = ch.charCodeAt(0);
-    if (code < 32 || code > 126) {
+    if (!(gs1 && code === 29) && (code < 32 || code > 126)) {
       throw new BarcodeContentException(
         BarcodeSymbology.Code128,
         `Code 128 (subset B) supports ASCII 32-126 only. Got character U+${code.toString(16).toUpperCase().padStart(4, '0')}.`
@@ -189,7 +192,14 @@ function encodeCode128(value: string): EncodedBarcode {
     }
   }
 
-  const codes = buildCode128Values(value);
+  const fields = gs1 ? value.split('\x1d') : [value];
+  if (gs1 && (fields.some(field => field.length === 0) || value.length - fields.length + 1 > 48)) {
+    throw new BarcodeContentException(
+      BarcodeSymbology.Code128,
+      'Invalid GS1 separators or more than 48 data characters.'
+    );
+  }
+  const codes = gs1 ? buildGs1Code128Values(fields) : buildCode128Values(value);
 
   // Modulo-103 weighted checksum: start value + sum(i * value_i).
   let sum = codes[0];
@@ -204,7 +214,7 @@ function encodeCode128(value: string): EncodedBarcode {
     appendCode128Symbol(modules, code);
   }
 
-  return { modules, humanReadable: value };
+  return { modules, humanReadable: gs1 ? fields.join(' ') : value };
 }
 
 function buildCode128Values(value: string): number[] {
@@ -226,6 +236,23 @@ function buildCode128Values(value: string): number[] {
     }
   }
 
+  return codes;
+}
+
+function buildGs1Code128Values(fields: string[]): number[] {
+  const codes: number[] = [];
+  let set = 0;
+  for (const field of fields) {
+    const [start, ...data] = buildCode128Values(field);
+    if (set === 0) {
+      codes.push(start, 102); // FNC1 following the start character
+    } else {
+      codes.push(102); // FNC1 field separator
+      if (start !== set) codes.push(start === CODE128_START_C ? 99 : 100);
+    }
+    set = start;
+    codes.push(...data);
+  }
   return codes;
 }
 

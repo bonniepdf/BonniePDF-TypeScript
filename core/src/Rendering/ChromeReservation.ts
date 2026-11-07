@@ -41,7 +41,7 @@ export function chromeReservationFor(
   if (!headerTemplate && !footerTemplate) return undefined;
 
   return (pageNumber: number): ChromeReservation => {
-    const contentWidth = ctx.pageSize.width - ctx.margin * 2;
+    const contentWidth = ctx.pageSize.width - ctx.margins.left - ctx.margins.right;
     return {
       header: measure(headerTemplate?.(pageNumber), contentWidth, settings),
       footer: measure(footerTemplate?.(pageNumber), contentWidth, settings),

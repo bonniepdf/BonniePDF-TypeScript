@@ -321,6 +321,17 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
   /**
    * Renders lines from startLine (inclusive) to endLine (exclusive).
    */
+  /** @internal */
+  public override minimumStartHeight(width: number): number {
+    if (!this.breakAllowed) return this.measureHeight(width);
+    const lines = this.getOrComputeLines(this.getContentWidth(width));
+    const minimum = Math.max(1, this.minLinesBeforeBreak);
+    if (lines.length < minimum + Math.max(1, this.minLinesAfterBreak)) return this.measureHeight(width);
+    let height = this.margin.top;
+    for (let i = 0; i < minimum; i++) height += this.spaceBeforeOf(i) + this.effectiveLineHeight;
+    return height;
+  }
+
   private renderLines(
     ctx: RenderContext,
     lines: string[],
@@ -428,7 +439,7 @@ export class TextBlock extends TextElementBase implements IStatefulElement, IRol
     // Substitute current page number inline - it is known at render time
     let processedLine = line;
     if (line.includes(TextElementBase.CurrentPageToken)) {
-      processedLine = line.replace(TextElementBase.CurrentPageToken, (ctx.currentPageIndex + 1).toString());
+      processedLine = line.replaceAll(TextElementBase.CurrentPageToken, (ctx.currentPageIndex + 1).toString());
     }
 
     if (line.includes(TextElementBase.TotalPagesToken)) {

@@ -584,7 +584,10 @@ export async function documentFromDefinition(input: unknown, options: Definition
   const first = pages[0];
   const construction: Obj = { ...settingsBag };
   if (first.size !== undefined) construction.pageSize = convert('pageSize', first.size);
-  if (first.orientation !== undefined) construction.orientation = first.orientation;
+  if (first.orientation !== undefined) {
+    construction.orientation = first.orientation;
+    construction.preservePageDimensions = false;
+  }
   if (first.margin !== undefined) construction.margin = toPoints(first.margin);
 
   const metadata = isObj(definition.metadata) ? convertShape(definition.metadata, D.objects.Metadata) : {};
@@ -596,8 +599,10 @@ export async function documentFromDefinition(input: unknown, options: Definition
   // Put the document-level page defaults back now the first page exists, so later pages start from them.
   const baseline = new DocumentSettings();
   if (first.size !== undefined) doc.settings.pageSize = (settingsBag.pageSize ?? baseline.pageSize) as never;
-  if (first.orientation !== undefined)
+  if (first.orientation !== undefined) {
     doc.settings.orientation = (settingsBag.orientation ?? baseline.orientation) as never;
+    doc.settings.preservePageDimensions = settingsBag.preservePageDimensions === true;
+  }
   if (first.margin !== undefined) doc.settings.margin = (settingsBag.margin ?? baseline.margin) as never;
 
   if (settings.namedDestinations !== undefined) {
@@ -628,7 +633,9 @@ export async function documentFromDefinition(input: unknown, options: Definition
     if (i === 0) page = doc.pages[0];
     else {
       const named =
-        entry.size !== undefined ? (entry.orientation ?? settings.orientation ?? 'portrait') : entry.orientation;
+        entry.size !== undefined && !doc.settings.preservePageDimensions
+          ? (entry.orientation ?? settings.orientation ?? 'portrait')
+          : entry.orientation;
       const pageOrientation = named === undefined ? undefined : toPageOrientation(named as never);
       page = doc.addPage({
         size: entry.size !== undefined ? toPageSize(entry.size as never) : undefined,
@@ -637,6 +644,7 @@ export async function documentFromDefinition(input: unknown, options: Definition
         margin: entry.margin !== undefined ? toPoints(entry.margin) : undefined,
       });
     }
+    if (entry.margins !== undefined) page.margins = convert('spacing', entry.margins) as never;
     if (entry.pageColor !== undefined) page.pageColor = entry.pageColor as never;
     if (entry.background !== undefined) page.pageBackground = builder.element(entry.background as Obj);
     if (entry.foreground !== undefined) page.pageForeground = builder.element(entry.foreground as Obj);

@@ -32,6 +32,7 @@ export const CONTAINER_OWN_OPTION_KEYS = [
   'width',
   'height',
   'fillHeight',
+  'fitContent',
   'clipContent',
   'crispEdges',
   'horizontalAlignment',
@@ -68,6 +69,9 @@ export type ContainerOptions = BorderedElementOptions &
 export class Container extends BorderedElementBase implements IContentContainer, IStatefulElement {
   /** The element placed inside the container. */
   public child?: IElement;
+
+  /** Size the box to its child, within the available width. */
+  public fitContent = false;
 
   /** Creates an empty container. */
   constructor();
@@ -261,12 +265,19 @@ export class Container extends BorderedElementBase implements IContentContainer,
     return childWidth + this.padding.left + this.padding.right + this.childInset.horizontalWidth;
   }
 
+  private resolveWidth(available: number): number {
+    if (this.width !== undefined) return this.width;
+    if (!this.fitContent) return available;
+    const preferred = this.child?.getPreferredWidth();
+    return preferred === 0 ? available : Math.min(available, this.getPreferredContentWidth());
+  }
+
   protected measureContentHeight(contentWidth: number): number {
     // A fixed height wins outright.
     if (this.height !== undefined) return this.height;
 
     // Use the fixed width if specified, otherwise the available width.
-    const effectiveWidth = this.width ?? contentWidth;
+    const effectiveWidth = this.resolveWidth(contentWidth);
     const childContentWidth = effectiveWidth - this.padding.left - this.padding.right - this.childInset.horizontalWidth;
 
     const childHeight = this.child ? this.child.measureHeight(childContentWidth) : 0;
@@ -288,7 +299,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
     // Inside a table cell the cell's own container fills the row, so its border and background span the
     // row, however tall the neighbouring cells are.
-    if (ctx.cellStretchTarget === this) natural = Math.max(natural, ctx.cellStretchHeight);
+    if (!this.fitContent && ctx.cellStretchTarget === this) natural = Math.max(natural, ctx.cellStretchHeight);
 
     if (!this.fillHeight) return natural;
 
@@ -341,7 +352,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
     const entryX = ctx.currentX;
     const entryY = ctx.currentY;
 
-    const effectiveWidth = this.width ?? this.getContentWidth(width);
+    const effectiveWidth = this.resolveWidth(this.getContentWidth(width));
     if (first) ctx.currentY += this.margin.top;
     const boxX = ctx.currentX + this.margin.left;
     const boxTop = ctx.currentY;
@@ -435,7 +446,7 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
   protected renderContent(ctx: RenderContext, contentWidth: number): void {
     // Use the fixed width/height if specified, otherwise size to content.
-    const effectiveWidth = this.width ?? contentWidth;
+    const effectiveWidth = this.resolveWidth(contentWidth);
     let containerHeight = this.resolveHeight(ctx, effectiveWidth);
 
     // Pagination: if the whole container would not fit and we are not already at

@@ -11,6 +11,7 @@ import { Container } from '../Layout/Container';
 import { PaginationWrapperBase } from '../Layout/Pagination/PaginationWrapperBase';
 import type { IBorderFrameHost } from './IBorderFrameHost';
 import { Border } from '../../Core/Border';
+import { VerticalAlignment } from '../../Core/VerticalAlignment';
 import type { BorderColors } from '../../Core/BorderColors';
 import { TableCell } from './TableCell';
 import { Color } from '../../Core/Color';
@@ -44,6 +45,7 @@ export const TABLE_OWN_OPTION_KEYS = [
   'footerBackgroundColor',
   'footerTextColor',
   'rowBackgroundColor',
+  'alternateRowBackgroundColor',
   'rowTextColor',
 ] as const;
 
@@ -58,6 +60,7 @@ type TableColorKey =
   | 'footerBackgroundColor'
   | 'footerTextColor'
   | 'rowBackgroundColor'
+  | 'alternateRowBackgroundColor'
   | 'rowTextColor';
 
 /**
@@ -81,6 +84,8 @@ export type TableOptions = BorderedElementOptions &
     footerTextColor?: ColorInput;
     /** Body row fill. Accepts a palette token or hex. */
     rowBackgroundColor?: ColorInput;
+    /** Fill for every second data row. */
+    alternateRowBackgroundColor?: ColorInput;
     /** Body row text colour. Accepts a palette token or hex. */
     rowTextColor?: ColorInput;
     /** Relative column weights, e.g. `[1, 2, 1]`. Constructor-only sugar. */
@@ -281,6 +286,16 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
   /**
    * Default background color for data rows
    */
+  private _alternateRowBackgroundColor?: Color;
+
+  /** Fill for every second data row. Explicit row and cell fills take precedence. */
+  public get alternateRowBackgroundColor(): Color | undefined {
+    return this._alternateRowBackgroundColor;
+  }
+  public set alternateRowBackgroundColor(value: ColorInput | undefined) {
+    this._alternateRowBackgroundColor = value === undefined ? undefined : toColor(value);
+  }
+
   private _rowBackgroundColor?: Color;
 
   /** Body row fill. Accepts a palette token or hex. */
@@ -580,7 +595,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
         tagging!.tree.begin(SemanticRole.TBody);
         tbodyOpen = true;
       }
-      this.renderRowDirect(ctx, row, widths);
+      this.renderRowDirect(ctx, row, widths, false, i);
       if (running) this.runningValues.push(row.runningValue ?? 0);
       this.lastRowRendered = i;
     }
@@ -738,6 +753,19 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this._bottomsAbovePage = ctx.currentPageIndex;
   }
 
+  /** @internal */
+  public override minimumStartHeight(width: number): number {
+    if (!this.breakAllowed || this._rows.length === 0) return this.measureHeight(width);
+    const widths = this.calculateColumnWidths(this.getContentWidth(width));
+    let height = this.margin.top;
+    for (const header of this.headers) height += this.measureRowHeight(header, widths);
+    height += this.measureRowHeight(this.rowForLayout(0, true), widths);
+    if (this.runningTotalColumn !== undefined && this._rows.length > 1) {
+      height += this.measureRowHeight(this.runningRow(this.carriedForwardLabel), widths);
+    }
+    return height;
+  }
+
   protected override measureContentHeight(contentWidth: number): number {
     const widths = this.calculateColumnWidths(contentWidth);
     let totalHeight = 0;
@@ -821,7 +849,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
             }
           }
 
-          this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage);
+          this.renderRow(ctx, row, widths, isFirstPage && !headersAddedOnNewPage, i);
         }
       } finally {
         if (groupTagging) tagging!.tree.end();
@@ -874,7 +902,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     };
   }
 
-  private renderRow(ctx: RenderContext, row: TableRow, widths: number[], _isFirstPage: boolean): void {
+  private renderRow(ctx: RenderContext, row: TableRow, widths: number[], _isFirstPage: boolean, dataIndex = 0): void {
     const rowHeight = this.measureRowHeight(row, widths);
 
     // Pagination check
@@ -883,7 +911,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       ctx.newPage();
     }
 
-    this.renderRowDirect(ctx, row, widths);
+    this.renderRowDirect(ctx, row, widths, false, dataIndex);
   }
 
   /**
@@ -908,13 +936,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     row: TableRow,
     x: number,
     width: number,
-    rowHeight: number
+    rowHeight: number,
+    dataIndex: number
   ): void {
     // The fill cascade is the only place a cell's effective fill is known — the
     // cell element itself carries no `backgroundColor` when the colour came from
     // the row or the table. Hand it to the recorder so the contrast rules measure
     // the cell's text against its real backdrop rather than against the page.
-    const bgColor = this.cellFill(cell, row);
+    const bgColor = this.cellFill(cell, row, dataIndex);
     if (bgColor) ctx.layoutRecorder?.annotatePaint(cell, paintForBackground(bgColor));
 
     // Determine effective styling (cell > row > table defaults)
@@ -948,8 +977,15 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     ctx.currentY += padding.top;
 
     const contentWidth = width - padding.left - padding.right;
-    ctx.cellStretchTarget = Table.stretchableContainer(content);
-    ctx.cellStretchHeight = rowHeight - padding.top - padding.bottom;
+    const innerHeight = rowHeight - padding.top - padding.bottom;
+    const alignment = cell.verticalAlignment;
+    if (alignment === VerticalAlignment.Center || alignment === VerticalAlignment.End) {
+      const slack = Math.max(0, innerHeight - content.measureHeight(contentWidth));
+      ctx.currentY += alignment === VerticalAlignment.Center ? slack / 2 : slack;
+    } else {
+      ctx.cellStretchTarget = Table.stretchableContainer(content);
+      ctx.cellStretchHeight = innerHeight;
+    }
     try {
       content.render(ctx, contentWidth);
     } finally {
@@ -971,19 +1007,21 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     row: TableRow,
     x: number,
     width: number,
-    rowHeight: number
+    rowHeight: number,
+    dataIndex: number
   ): void {
-    const bgColor = this.cellFill(cell, row);
+    const bgColor = this.cellFill(cell, row, dataIndex);
     if (bgColor) this.drawBackground(ctx, x, ctx.currentY, width, rowHeight, bgColor);
   }
 
   /** A cell's effective fill: cell, then row, then the table's header, footer or row default. */
-  private cellFill(cell: TableCell, row: TableRow): Color | undefined {
+  private cellFill(cell: TableCell, row: TableRow, dataIndex: number): Color | undefined {
     return (
       cell.backgroundColor ??
       row.backgroundColor ??
       (row.isHeader ? this.headerBackgroundColor : undefined) ??
       (row.isFooter ? this.footerBackgroundColor : undefined) ??
+      (dataIndex % 2 === 1 ? this.alternateRowBackgroundColor : undefined) ??
       this.rowBackgroundColor
     );
   }
@@ -1001,14 +1039,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     const left = plan !== undefined && !(plan & DRAW_LEFT) ? 0 : edges.border.left;
     const top = plan !== undefined && !(plan & DRAW_TOP) ? 0 : edges.border.top;
     const bottom = edges.border.bottom;
-    if (!rounded && bottom > 0) {
+    if (!rounded && bottom > 0 && edges.colors.bottom) {
       this._pendingBottomsPage = ctx.currentPageIndex;
       this._pendingBottoms.push({
         x,
         y: ctx.currentY + rowHeight,
         width,
         lineWidth: bottom,
-        color: edges.colors.bottom ?? Color.black,
+        color: edges.colors.bottom,
       });
     }
     // Save and restore border settings for per-cell borders
@@ -1016,7 +1054,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     const savedBorderColors = this.borderColors;
     this.border = new Border(left, top, edges.border.right, rounded ? bottom : 0);
     this.borderColors = edges.colors;
-    this.drawBorder(ctx, x, ctx.currentY, width, rowHeight);
+    this.drawBorder(ctx, x, ctx.currentY, width, rowHeight, false);
     this.border = savedBorder;
     this.borderColors = savedBorderColors;
   }
@@ -1045,12 +1083,18 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * renderRow (which adds the footer-visibility and pagination checks first).
    * @private
    */
-  private renderRowDirect(ctx: RenderContext, row: TableRow, widths: number[], asArtifact = false): void {
+  private renderRowDirect(
+    ctx: RenderContext,
+    row: TableRow,
+    widths: number[],
+    asArtifact = false,
+    dataIndex = 0
+  ): void {
     // A carried- or brought-forward row repeats what the rows already say: draw it as an artifact.
     const artifact = asArtifact && ctx.tagging != null && !ctx.canvas.isInsideArtifact?.();
     if (artifact) ctx.canvas.beginArtifact();
     try {
-      this.renderRowContent(ctx, row, widths, artifact);
+      this.renderRowContent(ctx, row, widths, artifact, dataIndex);
     } finally {
       if (artifact) ctx.canvas.endArtifact();
     }
@@ -1081,7 +1125,13 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     return row;
   }
 
-  private renderRowContent(ctx: RenderContext, row: TableRow, widths: number[], suppressTagging: boolean): void {
+  private renderRowContent(
+    ctx: RenderContext,
+    row: TableRow,
+    widths: number[],
+    suppressTagging: boolean,
+    dataIndex: number
+  ): void {
     const rowHeight = this.measureRowHeight(row, widths);
     this.planRowEdges(ctx, row);
 
@@ -1127,7 +1177,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       // Paint order: the row's fills, then the edges held back from the row above, then the cells'
       // content, then the row's own edges. No fill is painted over an edge.
       for (let i = 0; i < row.cells.length; i++)
-        this.paintCellFill(ctx, row.cells[i], row, cellX[i], cellWidth[i], rowHeight);
+        this.paintCellFill(ctx, row.cells[i], row, cellX[i], cellWidth[i], rowHeight, dataIndex);
       this.flushBottomEdges(ctx);
 
       for (let i = 0; i < row.cells.length; i++) {
@@ -1157,7 +1207,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
         }
 
         try {
-          this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight);
+          this.renderCell(ctx, cell, row, currentX, colWidth, rowHeight, dataIndex);
         } finally {
           if (dataTagging) {
             ctx.canvas.endMarkedContent();

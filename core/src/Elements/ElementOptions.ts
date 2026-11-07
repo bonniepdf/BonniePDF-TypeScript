@@ -10,7 +10,13 @@ import type { ThicknessInput } from '../Normalize/toThickness';
  * not in its options is a knob TypeScript callers can reach and C# callers
  * cannot, which is a parity defect rather than a spelling difference.
  */
-export const ELEMENT_OPTION_KEYS = ['margin', 'breakAllowed', 'captureName', 'contentDirection'] as const;
+export const ELEMENT_OPTION_KEYS = [
+  'margin',
+  'breakAllowed',
+  'keepWithNext',
+  'captureName',
+  'contentDirection',
+] as const;
 
 type ElementOptionKey = (typeof ELEMENT_OPTION_KEYS)[number];
 

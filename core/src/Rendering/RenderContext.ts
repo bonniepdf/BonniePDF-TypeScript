@@ -1,3 +1,4 @@
+import { Thickness } from '../Core/Thickness';
 import { type PaintTransform, mapPaintBox } from '../Drawing/PaintTransform';
 import { FALLBACK_PREFIX, PdfResourceRegistry, ResolvedTextRun, type TextRunFont } from './PdfResourceRegistry';
 import type { ShadingRequest } from './Pdf/GradientShading';
@@ -129,7 +130,16 @@ export class RenderContext implements RenderContextContract {
   /** The size of the page being rendered. */
   public pageSize: PdfSize;
   /** The page margin, in points. */
-  public margin: number;
+  /** @internal */
+  public margins: Thickness;
+
+  /** Left page margin in points. Setting it assigns the same margin on all sides. */
+  public get margin(): number {
+    return this.margins.left;
+  }
+  public set margin(value: number) {
+    this.margins = new Thickness(value);
+  }
   /** `true` while the last page is being rendered. */
   public isLastPage: boolean = false;
   /** Called with the page index each time a new page is started. */
@@ -208,7 +218,7 @@ export class RenderContext implements RenderContextContract {
   ) {
     this.isSvgMode = isSvgMode;
     this.pageSize = size;
-    this.margin = margin;
+    this.margins = new Thickness(margin);
     this.pages.push('');
     this.currentX = margin;
     this.currentY = this.contentTop;
@@ -343,15 +353,15 @@ export class RenderContext implements RenderContextContract {
    */
   public get contentTop(): number {
     if (this.atomicLayoutBounds) return this.atomicLayoutBounds.top;
-    if (this.chromeReservationSuspended) return this.margin;
-    return Math.max(this.margin, this.chrome.header);
+    if (this.chromeReservationSuspended) return this.margins.top;
+    return Math.max(this.margins.top, this.chrome.header);
   }
 
   /** Bottom of the body content band: `pageHeight - max(margin, footerHeight)`. */
   public get contentBottom(): number {
     if (this.atomicLayoutBounds) return this.atomicLayoutBounds.bottom;
-    if (this.chromeReservationSuspended) return this.pageSize.height - this.margin;
-    return this.pageSize.height - Math.max(this.margin, this.chrome.footer);
+    if (this.chromeReservationSuspended) return this.pageSize.height - this.margins.bottom;
+    return this.pageSize.height - Math.max(this.margins.bottom, this.chrome.footer);
   }
 
   /** The bottom of the area available for body content on this page, in points from the top. */
@@ -380,8 +390,8 @@ export class RenderContext implements RenderContextContract {
    * every subsequent break decision would be made against a negative band.
    */
   private assertUsableContentBand(): void {
-    const top = Math.max(this.margin, this.chrome.header);
-    const bottom = this.pageSize.height - Math.max(this.margin, this.chrome.footer);
+    const top = Math.max(this.margins.top, this.chrome.header);
+    const bottom = this.pageSize.height - Math.max(this.margins.bottom, this.chrome.footer);
     if (bottom > top) return;
     throw new Error(
       `Page ${this.currentPageIndex + 1}: the header (${round(this.chrome.header)}pt) and footer ` +

@@ -688,8 +688,8 @@ export abstract class TextElementBase extends ElementBase {
     try {
       // Replace tokens with estimated placeholders (2 digits) for measurement
       const measuredText = text
-        .replace(TextElementBase.TotalPagesToken, '00')
-        .replace(TextElementBase.CurrentPageToken, '00');
+        .replaceAll(TextElementBase.TotalPagesToken, '00')
+        .replaceAll(TextElementBase.CurrentPageToken, '00');
       return (
         FontMetrics.getStringWidth(measuredText, this.fontName, this.fontSize, this.fontFeatures) +
         this.spacingWidth(measuredText)

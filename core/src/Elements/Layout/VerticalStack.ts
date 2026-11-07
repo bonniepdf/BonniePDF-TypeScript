@@ -1,3 +1,4 @@
+import { keepWithNextHeight } from './Pagination/KeepWithNext';
 import { toElement } from '../../Normalize/toElement';
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
@@ -86,9 +87,8 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
    * Children that implement IStatefulElement will be rendered with overflow support.
    */
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
-    if (this.lastChildRendered < 0) {
-      ctx.currentY += this.margin.top;
-    }
+    const topMargin = this.lastChildRendered < 0 ? this.margin.top : 0;
+    ctx.currentY += topMargin;
 
     const contentWidth = width - this.margin.left - this.margin.right;
     const originalX = ctx.currentX;
@@ -104,6 +104,11 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
 
     for (let i = startChild; i < this._children.length; i++) {
       const child = this._children[i];
+      const keepHeight = keepWithNextHeight(this._children, i, contentWidth, this.spacing);
+      if (keepHeight > 0 && keepHeight <= ctx.contentHeight - topMargin && ctx.currentY + keepHeight > ctx.maxY) {
+        ctx.currentX = originalX;
+        return i === startChild ? RenderStatus.WrapRequired : RenderStatus.Overflow;
+      }
 
       // Tag children that declare a semantic role. Uses the same try/finally
       // pattern as PdfRenderPipeline so tagging is closed before

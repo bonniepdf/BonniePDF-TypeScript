@@ -1,3 +1,5 @@
+import { Thickness } from '../Core/Thickness';
+import { toThickness, type ThicknessInput } from '../Normalize/toThickness';
 import { ContentDirection, toContentDirection, type ContentDirectionInput } from './ContentDirection';
 import { applyOptions } from '../Core/applyOptions';
 import { EmojiRendering } from './EmojiRendering';
@@ -44,6 +46,8 @@ export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'pageSize',
   'pageColor',
   'orientation',
+  'preservePageDimensions',
+  'margins',
   'margin',
   'maxImageDpi',
   'defaultZoom',
@@ -93,7 +97,8 @@ type DocumentSettingsSpecialKey =
   | 'pageLabel'
   | 'defaultTextStyle'
   | 'bookmarks'
-  | 'margin';
+  | 'margin'
+  | 'margins';
 
 /**
  * Options for {@link DocumentSettings} - the largest options bag in the library.
@@ -109,10 +114,14 @@ export type DocumentSettingsOptions = Partial<
   pageSize?: PageSizeInput;
   /** Uniform page margin. Accepts a length: `50`, `'2cm'`, or `{ value, unit }`. */
   margin?: LengthInput;
+  /** Optional four-sided page margin. */
+  margins?: ThicknessInput;
   /** Page background fill. Accepts a palette token or hex. */
   pageColor?: ColorInput;
   /** Page orientation. Accepts `'portrait' | 'landscape'`. */
   orientation?: PageOrientationInput;
+  /** Preserve the supplied width and height. */
+  preservePageDimensions?: boolean;
   /** Initial zoom. Accepts `'fit-page' | 'fit-width' | 'fit-height' | 'custom'`. */
   defaultZoom?: ZoomLevelInput;
   /** Viewer page mode. Accepts `'use-none' | 'use-outlines' | …`. */
@@ -233,6 +242,16 @@ export class DocumentSettings {
   /**
    * The page orientation for the document (default: Portrait)
    */
+  private _margins?: Thickness;
+
+  /** Optional four-sided margin, taking precedence over the uniform margin. */
+  public get margins(): Thickness | undefined {
+    return this._margins;
+  }
+  public set margins(value: ThicknessInput | undefined) {
+    this._margins = value === undefined ? undefined : toThickness(value);
+  }
+
   private _orientation!: PageOrientation;
 
   /** Page orientation. Accepts `'portrait' | 'landscape'`. */
@@ -528,10 +547,12 @@ export class DocumentSettings {
     }
   }
 
-  /**
-   * Gets the actual page size with orientation applied
-   */
+  /** Preserve the supplied width and height when true. */
+  public preservePageDimensions = false;
+
+  /** Gets the actual page size with orientation applied unless dimensions are preserved. */
   getOrientedPageSize(): PdfSize {
+    if (this.preservePageDimensions) return this.pageSize;
     return this.pageSize.getOrientedSize(this.orientation);
   }
 }

@@ -5,7 +5,7 @@ export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
 export { type AxisOptionsOptions, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';
 export { type ChartBaseOptions, ChartBase } from './Charts/ChartBase';
-export { type CartesianChartOptions, CartesianChartBase } from './Charts/CartesianChartBase';
+export { type CartesianChartOptions, type ChartReference, CartesianChartBase } from './Charts/CartesianChartBase';
 export { type ChartElementOptions, ChartElement } from './Charts/ChartElement';
 export { type BarChartOptions, BarChart } from './Charts/BarChart';
 export { type AreaChartOptions, AreaChart } from './Charts/AreaChart';

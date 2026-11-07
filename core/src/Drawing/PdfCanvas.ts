@@ -1,3 +1,5 @@
+import type { CanvasContrast } from './CanvasContrast';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
 import { orderRunsVisually } from '../Typography/VisualTextRuns';
 import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
@@ -67,6 +69,8 @@ function isSpaceSource(text: string, cluster: number, length: number): boolean {
 
 /** Translates drawing operations into a PDF page content stream. */
 export class PdfCanvas implements ICanvas {
+  /** @internal */
+  public contrast?: CanvasContrast;
   /** @internal */
   public emojiRendering: () => 'outline' | 'colour' = () => 'outline';
 
@@ -200,13 +204,24 @@ export class PdfCanvas implements ICanvas {
     }
   }
 
-  public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
+  public fillRect(x: number, y: number, width: number, height: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.rect(x, y, width, height, color);
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     this.drawWithColorAlpha(color, () => PdfDrawing.fillRect(this.stream, pdfX, pdfY, width, height, color));
   }
 
-  public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
+  public strokeRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colorInput: ColorInput,
+    strokeWidth: number
+  ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     this.drawWithColorAlpha(color, () =>
@@ -214,7 +229,16 @@ export class PdfCanvas implements ICanvas {
     );
   }
 
-  public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+  public fillRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    colorInput: ColorInput
+  ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     this.drawWithColorAlpha(color, () =>
@@ -228,9 +252,11 @@ export class PdfCanvas implements ICanvas {
     width: number,
     height: number,
     radius: number,
-    color: Color,
+    colorInput: ColorInput,
     strokeWidth: number
   ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     this.drawWithColorAlpha(color, () =>
@@ -244,6 +270,7 @@ export class PdfCanvas implements ICanvas {
    * Converts the top-left `y` to PDF's bottom-up space.
    */
   public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    this.contrast?.unknownState();
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + height);
     this.saveState();
@@ -255,7 +282,9 @@ export class PdfCanvas implements ICanvas {
     this.restoreState();
   }
 
-  public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
+  public drawLine(x1: number, y1: number, x2: number, y2: number, colorInput: ColorInput, lineWidth: number): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfX1 = x1 + this.xOffset;
     const pdfX2 = x2 + this.xOffset;
     const pdfY1 = this.height - (y1 + this.yOffset);
@@ -267,19 +296,25 @@ export class PdfCanvas implements ICanvas {
     });
   }
 
-  public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
+  public fillCircle(cx: number, cy: number, radius: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfCx = cx + this.xOffset;
     const pdfCy = this.height - (cy + this.yOffset);
     this.drawWithColorAlpha(color, () => PdfDrawing.fillCircle(this.stream, pdfCx, pdfCy, radius, color));
   }
 
-  public fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+  public fillEllipse(cx: number, cy: number, rx: number, ry: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     const pdfCx = cx + this.xOffset;
     const pdfCy = this.height - (cy + this.yOffset);
     this.drawWithColorAlpha(color, () => PdfDrawing.fillEllipse(this.stream, pdfCx, pdfCy, rx, ry, color));
   }
 
-  public fillPath(points: Point[], color: Color): void {
+  public fillPath(points: Point[], colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     if (!points || points.length < 3) return;
     const pdfPoints = points.map(p => new Point(p.x + this.xOffset, this.height - (p.y + this.yOffset)));
     this.drawWithColorAlpha(color, () => PdfDrawing.fillPath(this.stream, pdfPoints, color));
@@ -289,11 +324,14 @@ export class PdfCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     align: TextAlignment
   ): void {
+    const color = toColor(colorInput);
+    if (this.contrast && text.trim())
+      this.contrast.text(x, y, this.measureText(text, fontSize, fontFamily).width, fontSize, color, fontFamily, align);
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
     this.beginColorAlpha(color);
@@ -343,11 +381,23 @@ export class PdfCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     angleDegrees: number
   ): void {
+    const color = toColor(colorInput);
+    if (this.contrast && text.trim())
+      this.contrast.text(
+        x,
+        y,
+        this.measureText(text, fontSize, fontFamily).width,
+        fontSize,
+        color,
+        fontFamily,
+        TextAlignment.Left,
+        true
+      );
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset + fontSize);
 
@@ -374,11 +424,12 @@ export class PdfCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     availableWidth: number
   ): void {
+    const color = toColor(colorInput);
     let spaceCount = 0;
     for (const c of text) if (c === ' ') spaceCount++;
 
@@ -387,6 +438,17 @@ export class PdfCanvas implements ICanvas {
       return;
     }
 
+    if (this.contrast && text.trim())
+      this.contrast.text(
+        x,
+        y,
+        this.measureText(text, fontSize, fontFamily).width,
+        fontSize,
+        color,
+        fontFamily,
+        TextAlignment.Left,
+        true
+      );
     const runs = this.resolveRuns(text, fontFamily);
     const wordSpacing = (availableWidth - this.measureRuns(runs, fontSize)) / spaceCount;
 
@@ -408,6 +470,7 @@ export class PdfCanvas implements ICanvas {
   }
 
   public drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void {
+    this.contrast?.unknownPaint();
     const imageName = this._imageResolver(image);
 
     // Tell the resource registry how large the image is actually painted, on the page, so it
@@ -451,6 +514,7 @@ export class PdfCanvas implements ICanvas {
   }
 
   public drawFormXObject(resourceName: string, x: number, y: number): void {
+    this.contrast?.unknownPaint();
     const pdfX = x + this.xOffset;
     const pdfY = this.height - (y + this.yOffset);
 
@@ -515,7 +579,9 @@ export class PdfCanvas implements ICanvas {
 
   // -- Painting the current path ------------------------------------
 
-  public fillCurrentPath(paint: Paint | Color, rule: FillRule = 'nonzero'): void {
+  public fillCurrentPath(paintInput: Paint | ColorInput, rule: FillRule = 'nonzero'): void {
+    this.contrast?.unknownPaint();
+    const paint = typeof paintInput === 'string' ? toColor(paintInput) : paintInput;
     if (this.currentPath.length === 0) return;
     const p = toPaint(paint);
     this.drawAsArtifactFallback(() => {
@@ -543,9 +609,11 @@ export class PdfCanvas implements ICanvas {
   }
 
   public strokeCurrentPath(style: StrokeStyle): void {
+    this.contrast?.unknownPaint();
+    const paint = typeof style.paint === 'string' ? toColor(style.paint) : style.paint;
     if (this.currentPath.length === 0) return;
     style = this.toDeviceStroke(style);
-    const p = toPaint(style.paint);
+    const p = toPaint(paint);
     // A gradient whose transform cannot be inverted has no space to sample in,
     // so it strokes nothing - and writes nothing, not even the stroke settings.
     if (!(p instanceof SolidPaint)) {
@@ -615,14 +683,17 @@ export class PdfCanvas implements ICanvas {
   // drawing keeps full precision, and its bytes are unchanged.
 
   public translate(tx: number, ty: number): void {
+    this.contrast?.unknownState();
     this.multiplyCtm(1, 0, 0, 1, tx, ty);
   }
 
   public scale(sx: number, sy: number): void {
+    this.contrast?.unknownState();
     this.multiplyCtm(sx, 0, 0, sy, 0, 0);
   }
 
   public rotate(angleDegrees: number): void {
+    this.contrast?.unknownState();
     const rad = f32(f32(angleDegrees) * f32(Math.PI / 180));
     const cos = f32(Math.cos(rad));
     const sin = f32(Math.sin(rad));
@@ -631,17 +702,20 @@ export class PdfCanvas implements ICanvas {
   }
 
   public transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this.contrast?.unknownState();
     this.multiplyCtm(a, b, c, d, e, f);
   }
 
   // -- Clipping + compositing ---------------------------------------
 
   public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
+    this.contrast?.unknownState();
     this.emitCurrentPath();
     this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
   }
 
   public setGlobalAlpha(alpha: number): void {
+    this.contrast?.unknownState();
     PdfOperators.setGraphicsState(this.stream, this._alphaGraphicsStateResolver(alpha));
   }
 
@@ -652,6 +726,7 @@ export class PdfCanvas implements ICanvas {
 
   /** @inheritdoc */
   public setTextSpacing(letterSpacing: number, wordSpacing: number): void {
+    this.contrast?.unknownState();
     this._letterSpacing = letterSpacing;
     this._wordSpacing = wordSpacing;
   }

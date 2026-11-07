@@ -504,7 +504,8 @@ export const examples: ExampleDef[] = [
     id: 'page-break-control',
     name: 'Control Page Breaks',
     category: 'Layout & Flow',
-    description: 'Keep headings and approval blocks together, with a safe continuation for oversized content.',
+    description:
+      'A supply agreement: clause headings never stranded at the foot of a page, a signature panel kept in one piece, and a handover checklist that continues across pages.',
     filename: 'page-break-control.pdf',
     generate: pageBreakControl,
     dotnetClass: 'PageBreakControlExample',
@@ -762,11 +763,11 @@ export const examples: ExampleDef[] = [
     name: 'Font Fallback & Missing Characters',
     category: 'Fonts',
     description:
-      'Select regular and bold faces, register a mathematical fallback, and test strict missing-character failures.',
+      'An international customer list in Helvetica: Polish, Greek, Cyrillic and Hebrew names fall back to Liberation Sans, Arabic and maths symbols to registered fonts, under strict missing-character checks.',
     filename: 'font-fallback.pdf',
     generate: fontFallback,
     dotnetClass: 'FontFallbackExample',
-    requiredAssets: ['fonts/NotoSansMath-Regular.ttf'],
+    requiredAssets: ['fonts/NotoNaskhArabic-Regular.ttf', 'fonts/NotoSansMath-Regular.ttf'],
     guideSlug: 'font-fallback',
   },
   {

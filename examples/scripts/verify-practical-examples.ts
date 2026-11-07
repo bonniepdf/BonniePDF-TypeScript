@@ -95,7 +95,7 @@ for (const [name, doc] of [
     doc.dispose();
   }
 }
-await verifyMissingCharacter(load(['fonts/NotoSansMath-Regular.ttf']));
+await verifyMissingCharacter(load(['fonts/NotoNaskhArabic-Regular.ttf', 'fonts/NotoSansMath-Regular.ttf']));
 await verifyDiagnostics();
 
 // Real HTTP responses: valid PDF, invalid input, oversized data and route handling.

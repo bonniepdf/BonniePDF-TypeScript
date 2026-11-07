@@ -6,7 +6,7 @@ import { applyOptions } from '../../Core/applyOptions';
  * Each span carries its own TextStyle that is merged with the parent's default style at render time.
  */
 /** Settable properties of {@link TextSpan} (a standalone value, no base class). */
-export const TEXT_SPAN_OPTION_KEYS = ['text', 'style', 'isLineBreak'] as const;
+export const TEXT_SPAN_OPTION_KEYS = ['text', 'style', 'isLineBreak', 'link'] as const;
 
 type TextSpanKey = (typeof TEXT_SPAN_OPTION_KEYS)[number];
 
@@ -23,6 +23,13 @@ export class TextSpan {
 
   /** When true, a line break is inserted after this span's text. */
   public isLineBreak = false;
+
+  /**
+   * A URI that makes this span a link: each line the span wraps onto becomes a clickable
+   * region, tagged as a Link inside the paragraph, with the span's text as its description.
+   * The link's look is the span's style (colour, underline); nothing is added.
+   */
+  public link?: string;
 
   /** Creates a span, optionally configured in one expression. */
   constructor(options?: TextSpanOptions) {

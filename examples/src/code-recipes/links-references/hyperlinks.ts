@@ -1,6 +1,6 @@
 /**
  * Hyperlinks.
- * A resources page: web links with descriptions, a button-style link, and email and phone links, all in one link colour. Every link is tagged for screen readers.
+ * A resources page: web links with descriptions, an underlined link inside a sentence, a button-style link, and email and phone links, all in one link colour. Every link is tagged for screen readers.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -9,8 +9,10 @@ import {
   Heading,
   HorizontalStack,
   Hyperlink,
+  RichText,
   StandardFonts,
   TextBlock,
+  TextStyle,
   VerticalStack,
 } from '@bonniepdf/core';
 
@@ -92,6 +94,21 @@ export function generate(): Document {
       })
     );
   }
+
+  // ── A link inside a sentence: a RichText span with a URI, styled as the link's look ──
+  doc.add(sectionHeading('Links in a sentence', 28));
+  doc.add(
+    new RichText({ defaultStyle: new TextStyle({ fontFamily: 'Helvetica', fontSize: 11, color: 'slate-600' }) })
+      .span('Orders are accepted on our ')
+      .link(
+        'terms of business',
+        'https://www.bonniepdf.dev/legal',
+        new TextStyle({ color: LINK, decoration: 'underline' })
+      )
+      .span(
+        ', which set out delivery times, returns and how we handle your data. The link sits in the sentence and wraps with it.'
+      )
+  );
 
   // ── A button-style link: a Hyperlink inside a filled, rounded container ──
   doc.add(sectionHeading('Start a trial', 28));

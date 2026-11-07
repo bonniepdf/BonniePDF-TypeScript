@@ -18,6 +18,9 @@ import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { getTextSpacingWidth } from '../../Typography/TextSpacing';
 import type { SvgCanvas } from '../../Drawing/SvgCanvas';
+import type { RegisteredLink } from '../../Rendering/RegisteredLink';
+import type { StructureElement } from '../../Rendering/Tagging/StructureElement';
+import { PdfSyntax } from '../../Rendering/Pdf/PdfSyntax';
 
 /**
  * A rich text element that supports mixed styling within a single flowing paragraph.
@@ -142,6 +145,26 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     textSpan.style = spanStyle;
     this.spans.push(textSpan);
     this.invalidateCache();
+    return this;
+  }
+
+  /**
+   * Adds a span that links to a URI, in the flow of the paragraph.
+   *
+   * The span's style is its look (a colour, an underline); the link adds only the clickable region,
+   * one per line the span wraps onto, and tags it as a Link for screen readers.
+   *
+   * @example
+   * ```ts
+   * new RichText()
+   *   .span('Read our ')
+   *   .link('terms of service', 'https://example.com/terms', s => s.withColor('blue-700').underline())
+   *   .span(' before you order.');
+   * ```
+   */
+  public link(text: string, uri: string, style?: TextStyle | ((style: TextStyle) => void)): RichText {
+    this.span(text, style);
+    this.spans[this.spans.length - 1].link = uri;
     return this;
   }
 
@@ -326,7 +349,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       if (word.isLineBreak) {
         // Add any text before the break
         if (word.text !== '') {
-          currentLine.runs.push(new StyledRun(word.text, word.style));
+          currentLine.runs.push(new StyledRun(word.text, word.style, word.link, word.linkText));
           currentWidth += word.width;
         }
 
@@ -350,31 +373,27 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
         currentWidth = 0;
         // Don't add leading space at start of new line
         const newWordWidth = wordWidth;
-        currentLine.runs.push(new StyledRun(word.text, word.style));
+        currentLine.runs.push(new StyledRun(word.text, word.style, word.link, word.linkText));
         currentWidth = newWordWidth;
       } else {
         // Add leading space with its own style
         if (currentWidth > 0 && word.hasLeadingSpace) {
           const spaceStyle = word.leadingSpaceStyle ?? word.style;
-          if (
-            currentLine.runs.length > 0 &&
-            this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, spaceStyle)
-          ) {
-            currentLine.runs[currentLine.runs.length - 1].text += ' ';
+          const last = currentLine.runs[currentLine.runs.length - 1];
+          if (last && this.stylesEqual(last.style, spaceStyle) && last.link === word.leadingSpaceLink) {
+            last.text += ' ';
           } else {
-            currentLine.runs.push(new StyledRun(' ', spaceStyle));
+            currentLine.runs.push(new StyledRun(' ', spaceStyle, word.leadingSpaceLink, word.leadingSpaceLinkText));
           }
           currentWidth += word.leadingSpaceWidth;
         }
 
         // Add the word text with its own style
-        if (
-          currentLine.runs.length > 0 &&
-          this.stylesEqual(currentLine.runs[currentLine.runs.length - 1].style, word.style)
-        ) {
-          currentLine.runs[currentLine.runs.length - 1].text += word.text;
+        const previous = currentLine.runs[currentLine.runs.length - 1];
+        if (previous && this.stylesEqual(previous.style, word.style) && previous.link === word.link) {
+          previous.text += word.text;
         } else {
-          currentLine.runs.push(new StyledRun(word.text, word.style));
+          currentLine.runs.push(new StyledRun(word.text, word.style, word.link, word.linkText));
         }
 
         currentWidth = candidateWidth;
@@ -413,6 +432,8 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     const words: StyledWord[] = [];
     let prevSpanEndedWithSpace = false;
     let prevResolvedStyle: TextStyle | undefined;
+    let prevLink: string | undefined;
+    let prevLinkText: string | undefined;
 
     for (const span of this.spans) {
       const resolved = this.resolveStyle(span.style);
@@ -473,6 +494,11 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
             : 0;
 
           const word = new StyledWord(resolved, part, false);
+          word.link = span.link;
+          word.linkText = span.link ? rawText.trim() : undefined;
+          // A space between spans belongs to the span before it, so a link's region never takes it in.
+          word.leadingSpaceLink = isInterSpanSpace ? prevLink : span.link;
+          word.leadingSpaceLinkText = isInterSpanSpace ? prevLinkText : word.linkText;
           word.width = partWidth;
           word.hasLeadingSpace = hasLeadingSpace;
           word.leadingSpaceWidth = spaceWidth;
@@ -490,6 +516,8 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       }
 
       prevResolvedStyle = resolved;
+      prevLink = span.link;
+      prevLinkText = span.link ? rawText.trim() : undefined;
     }
 
     return words;
@@ -560,6 +588,8 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
     for (const run of line.runs) {
       if (!run.text) continue;
+      const runStartX = currentX;
+      const linkElement = run.link ? RichText.beginLinkContent(ctx) : undefined;
 
       const style = run.style;
       const fontName = style.effectiveFontName;
@@ -616,7 +646,69 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
       if (spaced) ctx.canvas.setTextSpacing(0, 0);
       ctx.canvas.setTextFeatures?.();
+
+      if (run.link) {
+        RichText.registerLink(ctx, run, runStartX, y, currentX - runStartX, line.height, linkElement);
+        RichText.endLinkContent(ctx, linkElement);
+      }
     }
+  }
+
+  /**
+   * In a tagged document, suspends the paragraph's marked content and opens a Link structure
+   * element with its own marked content for a link run, so the link sits inside the paragraph in
+   * reading order (PDF/UA-1 7.18.5). Returns the Link element, or `undefined` when untagged.
+   */
+  private static beginLinkContent(ctx: RenderContext): StructureElement | undefined {
+    const tagging = ctx.tagging;
+    if (!tagging || ctx.canvas.isInsideArtifact?.()) return undefined;
+    ctx.canvas.endMarkedContent();
+    const element = tagging.tree.begin(SemanticRole.Link);
+    ctx.canvas.beginMarkedContent('Link');
+    return element;
+  }
+
+  /** Closes the Link scope opened by {@link beginLinkContent} and resumes the paragraph. */
+  private static endLinkContent(ctx: RenderContext, element: StructureElement | undefined): void {
+    if (!element) return;
+    ctx.canvas.endMarkedContent();
+    ctx.tagging!.tree.end();
+    ctx.canvas.beginMarkedContent('P');
+  }
+
+  /** Registers the clickable region of one link run: the run's width by the line's height. */
+  private static registerLink(
+    ctx: RenderContext,
+    run: StyledRun,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    element: StructureElement | undefined
+  ): void {
+    if (width <= 0 || ctx.canvas.isInsideArtifact?.()) return;
+    const link: RegisteredLink = {
+      uri: run.link,
+      text: run.linkText ?? run.text.trim(),
+      renderX: x,
+      renderY: ctx.pageSize.height - (y + height),
+      renderWidth: width,
+      renderHeight: height,
+      linkedStructElement: element,
+      setRenderBounds(rx: number, ry: number, rw: number, rh: number) {
+        this.renderX = rx;
+        this.renderY = ry;
+        this.renderWidth = rw;
+        this.renderHeight = rh;
+      },
+      getRectangleString(): string {
+        return (
+          `[${PdfSyntax.formatDecimal(this.renderX)} ${PdfSyntax.formatDecimal(this.renderY)} ` +
+          `${PdfSyntax.formatDecimal(this.renderX + this.renderWidth)} ${PdfSyntax.formatDecimal(this.renderY + this.renderHeight)}]`
+        );
+      },
+    };
+    ctx.registerHyperlink(link);
   }
 
   /**
@@ -912,9 +1004,17 @@ export class StyledRun {
   /** The resolved style for this run */
   public style: TextStyle;
 
-  constructor(text: string, style: TextStyle) {
+  /** The URI this run links to, when it belongs to a link span. */
+  public link?: string;
+
+  /** The whole text of the link span this run belongs to, used as the link's description. */
+  public linkText?: string;
+
+  constructor(text: string, style: TextStyle, link?: string, linkText?: string) {
     this.text = text;
     this.style = style;
+    this.link = link;
+    this.linkText = linkText;
   }
 }
 
@@ -929,6 +1029,14 @@ export class StyledWord {
   public leadingSpaceWidth = 0;
   public leadingSpaceStyle?: TextStyle;
   public isLineBreak = false;
+  /** The URI of the link span this word belongs to. */
+  public link?: string;
+  /** The whole text of that link span. */
+  public linkText?: string;
+  /** The link the word's leading space belongs to: the previous span's when the space came from it. */
+  public leadingSpaceLink?: string;
+  /** The whole text of that link span. */
+  public leadingSpaceLinkText?: string;
 
   /**
    * True when this line break came from a raw break character (`\n`) inside

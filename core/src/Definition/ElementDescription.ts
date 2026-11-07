@@ -1066,6 +1066,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "lineBreak": {
           "kind": "boolean"
+        },
+        "link": {
+          "kind": "string"
         }
       }
     },
@@ -1452,6 +1455,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "color": {
           "kind": "color"
+        },
+        "underline": {
+          "kind": "boolean"
         }
       },
       "exactlyOne": [

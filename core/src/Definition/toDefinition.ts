@@ -829,6 +829,7 @@ class Writer {
         const style = this.shape(span.style as unknown as Obj, D.shapes.TextStyle, new TextStyle() as unknown as Obj);
         if (isObj(style) && Object.keys(style).length) node.style = style;
       }
+      if (span.link) node.link = span.link;
       return node;
     });
   }

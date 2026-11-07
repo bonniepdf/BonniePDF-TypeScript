@@ -1248,7 +1248,7 @@ export const examples: ExampleDef[] = [
     name: 'Hyperlinks',
     category: 'Links & References',
     description:
-      'A resources page: web links with descriptions, a button-style link, and email and phone links, all in one link colour. Every link is tagged for screen readers.',
+      'A resources page: web links with descriptions, an underlined link inside a sentence, a button-style link, and email and phone links, all in one link colour. Every link is tagged for screen readers.',
     filename: 'hyperlinks.pdf',
     generate: hyperlinks,
     thumbnails: false,

@@ -18,6 +18,7 @@ import {
   HorizontalStack,
   Hyperlink,
   PdfAConformance,
+  RichText,
   StandardFonts,
   TextBlock,
   TextStyle,
@@ -110,6 +111,17 @@ export function generate(): Document {
     row.child = stack;
     doc.add(row);
   }
+
+  // ── A link inside a sentence: a RichText span with a URI, styled as the link's look ──
+  doc.add(sectionHeading('Links in a sentence', 28));
+  const sentence = new RichText();
+  sentence.defaultStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(ColorPalette.slate[600]);
+  sentence.span('Orders are accepted on our ');
+  sentence.link('terms of business', 'https://www.bonniepdf.dev/legal', new TextStyle().withColor(LINK).underline());
+  sentence.span(
+    ', which set out delivery times, returns and how we handle your data. The link sits in the sentence and wraps with it.'
+  );
+  doc.add(sentence);
 
   // ── A button-style link: a Hyperlink inside a filled, rounded container ──
   doc.add(sectionHeading('Start a trial', 28));

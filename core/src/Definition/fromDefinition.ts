@@ -469,7 +469,8 @@ class Builder {
           span.style !== undefined
             ? new TextStyle(convertShape(span.style as Obj, D.shapes.TextStyle) as never)
             : undefined;
-        rich.span(span.text as string, style);
+        if (typeof span.link === 'string') rich.link(span.text as string, span.link, style);
+        else rich.span(span.text as string, style);
       }
     }
     return rich;

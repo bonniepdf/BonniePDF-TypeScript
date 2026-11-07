@@ -2119,7 +2119,7 @@ export const examples: ExampleDef[] = [
     category: 'Education & Public Sector',
     tier: 'examples',
     description:
-      'A landscape course certificate: an ornamental frame behind the wording, a vector monogram crest, centred serif type, and a verification code. Decoration stays out of reading order.',
+      'A landscape course certificate: a triple-ruled frame behind the wording, a vector monogram crest, a gold foil-style seal between the signatures, centred serif type, and a verification code. Decoration stays out of reading order.',
     filename: 'course-certificate.pdf',
     generate: courseCertificate,
     dotnetClass: 'CourseCertificateExample',
@@ -2194,7 +2194,7 @@ export const examples: ExampleDef[] = [
     tier: 'examples',
     region: 'UK',
     description:
-      'A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice.',
+      "A fictional UK library membership letter: a teal library masthead, the member's library card with a scannable number, borrowing limits, branch opening hours, and an alternative-formats notice.",
     filename: 'public-library-membership-letter.pdf',
     generate: publicLibraryMembershipLetter,
     dotnetClass: 'PublicLibraryMembershipLetterExample',
@@ -2232,7 +2232,7 @@ export const examples: ExampleDef[] = [
     tier: 'examples',
     region: 'UK',
     description:
-      'A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level that flows across pages, and a QR verification link.',
+      'A UK degree transcript: institution header, student details, a 2:1 honours banner, a module register by FHEQ level, how the award was calculated against the honours bands, and a QR verification link.',
     filename: 'uk-degree-transcript.pdf',
     generate: ukDegreeTranscript,
     dotnetClass: 'UkDegreeTranscriptExample',
@@ -2831,7 +2831,7 @@ export const examples: ExampleDef[] = [
     tier: 'examples',
     region: 'UK',
     description:
-      'A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, generated client-side so data never leaves the browser.',
+      'A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, and trend charts for the flagged kidney results, generated client-side so data never leaves the browser.',
     filename: 'lab-report.pdf',
     generate: labReport,
     dotnetClass: 'LabReportExample',
@@ -3480,14 +3480,13 @@ export const examples: ExampleDef[] = [
     name: 'Point-of-Sale Receipt: Long Basket',
     category: 'Retail & Events',
     description:
-      'An 80 mm receipt with a long basket, accented names, per-line discounts, a return, and scannable receipt codes.',
+      'An 80 mm till receipt on one continuous roll: a long basket, accented names, per-line discounts, a return, and scannable receipt codes.',
     filename: 'long-basket-receipt.pdf',
     generate: longBasketReceipt,
     dotnetClass: 'LongBasketReceiptExample',
     tier: 'examples',
     series: 'edge-receipt',
     capabilities: ['qr', 'barcodes', 'longTables'],
-    requiredAssets: ['fonts/NotoSans-Regular.ttf'],
   },
   {
     id: 'product-photo-gallery',
@@ -3595,7 +3594,7 @@ export const examples: ExampleDef[] = [
     tier: 'examples',
     region: 'UK',
     description:
-      'A delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, a goods-received signature, and a discrepancy period.',
+      'A one-page delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, items to follow beside the discrepancy period, and a goods-received signature.',
     filename: 'delivery-note.pdf',
     generate: deliveryNote,
     dotnetClass: 'DeliveryNoteExample',

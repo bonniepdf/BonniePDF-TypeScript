@@ -235,23 +235,32 @@ export function generate(): Document {
   }
   doc.add(table);
 
+  // What to report sits beside what is still to come, so the note stays on one page.
+  const discrepancies = panel('Discrepancies', [
+    cell(
+      'Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery and ' +
+        'reported to the supplier within three working days, quoting the delivery note number.',
+      { size: 9, mb: 0 }
+    ),
+  ]);
   if (backOrdered.length > 0) {
-    doc.add(
-      panel(
-        'Items to follow',
-        [
-          ...backOrdered.map(line =>
-            cell(
-              `Line ${line.orderLine} · ${line.partCode} — ${line.ordered - line.despatched} ${line.unit} to follow ` +
-                'on a later delivery against the same order.',
-              { size: 9, mb: 3 }
-            )
-          ),
-          cell('Back-ordered items are not invoiced until they are despatched.', { size: 9, color: MUTED, mb: 0 }),
-        ],
-        NEGATIVE
-      )
+    const itemsToFollow = panel(
+      'Items to follow',
+      [
+        ...backOrdered.map(line =>
+          cell(
+            `Line ${line.orderLine} · ${line.partCode} — ${line.ordered - line.despatched} ${line.unit} to follow ` +
+              'on a later delivery against the same order.',
+            { size: 9, mb: 3 }
+          )
+        ),
+        cell('Back-ordered items are not invoiced until they are despatched.', { size: 9, color: MUTED, mb: 0 }),
+      ],
+      NEGATIVE
     );
+    doc.add(weightedRow([itemsToFollow, discrepancies], { mb: 0 }));
+  } else {
+    doc.add(discrepancies);
   }
 
   doc.add(h2('Goods received'));
@@ -268,16 +277,6 @@ export function generate(): Document {
       [receiptSlot('Received by', 'Name in capitals'), receiptSlot('Signature', ''), receiptSlot('Date and time', '')],
       { spacing: 22, mb: 6 }
     )
-  );
-
-  doc.add(
-    panel('Discrepancies', [
-      cell(
-        'Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery and ' +
-          'reported to the supplier within three working days, quoting the delivery note number.',
-        { size: 9, mb: 0 }
-      ),
-    ])
   );
 
   return doc;
@@ -297,7 +296,7 @@ interface DeliveryLine {
 
 function receiptSlot(role: string, hint: string): VerticalStack {
   const stack = new VerticalStack();
-  stack.add(cell(role.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 20 }));
+  stack.add(cell(role.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 14 }));
 
   const rule = new Container();
   rule.backgroundColor = RULE;

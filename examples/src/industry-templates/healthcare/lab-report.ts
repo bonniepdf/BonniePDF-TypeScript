@@ -1,6 +1,6 @@
 /**
  * Pathology Lab Report.
- * A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, generated client-side so data never leaves the browser.
+ * A fictional pathology report: patient details, specimen times, FBC and U&E panels with reference ranges and High/Low flags, and trend charts for the flagged kidney results, generated client-side so data never leaves the browser.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // ── UK / EU laboratory (pathology) report ────────────────────────────────────
@@ -26,6 +26,8 @@ import {
   Container,
   Table,
   Grid,
+  ChartData,
+  LineChart,
   ColorPalette,
   StandardFonts,
   type ColorInput,
@@ -43,6 +45,9 @@ const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
 // 700, not 600: this flag's text on white needs 4.5:1 and 600 falls to 3.20:1.
 const LOW = ColorPalette.amber[700];
+
+/** The dates of this and the patient's previous three renal results. */
+const TREND_DATES = ['Jan 2025', 'Jul 2025', 'Jan 2026', 'Jul 2026'];
 
 const PANELS: Panel[] = [
   {
@@ -196,6 +201,29 @@ export function generate(): Document {
     doc.add(table);
   }
 
+  // ── Kidney function trend ─────────────────────────────────────────────────
+  // The two flagged renal results against the previous three, kept with their heading.
+  const trend = new VerticalStack({ spacing: 12, margin: { bottom: 14 } });
+  trend.add(
+    trendChart(
+      'Creatinine (µmol/L)',
+      [78, 84, 89, 96],
+      120,
+      HIGH,
+      'Line chart of creatinine over the last four results, rising from 78 to 96 µmol/L, above the upper limit of 90.'
+    )
+  );
+  trend.add(
+    trendChart(
+      'eGFR (mL/min/1.73m²)',
+      [84, 76, 70, 62],
+      100,
+      CLINICAL_BLUE,
+      'Line chart of eGFR over the last four results, falling from 84 to 62 mL/min/1.73m².'
+    )
+  );
+  doc.add(new VerticalStack({ breakAllowed: false, children: [h2('Kidney function, last four results'), trend] }));
+
   // ── Interpretation ────────────────────────────────────────────────────────
   // The interpretation and the sign-off that authorises it stay on one page.
   const sign = new VerticalStack({ breakAllowed: false });
@@ -257,6 +285,38 @@ interface Panel {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** A small labelled trend chart of one analyte over {@link TREND_DATES}. */
+function trendChart(
+  title: string,
+  values: number[],
+  maxValue: number,
+  color: ColorInput,
+  altText: string
+): VerticalStack {
+  return new VerticalStack({
+    spacing: 4,
+    children: [
+      new TextBlock(title, { fontName: StandardFonts.HelveticaBold, fontSize: 9.5, color: INK }),
+      new LineChart({
+        theme: 'modern',
+        data: new ChartData({
+          series: [
+            { color, dataPoints: TREND_DATES.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) },
+          ],
+          yAxis: { maxValue, stepCount: 4 },
+        }),
+        altText,
+        height: 130,
+        stretchToFit: true,
+        fontFamily: StandardFonts.Helvetica,
+        labelFontSize: 8,
+        showValueLabels: true,
+        backgroundColor: '#ffffff',
+      }),
+    ],
+  });
+}
 
 function h2(text: string): Heading {
   return new Heading(text, {

@@ -37,6 +37,10 @@ import {
   Container,
   Table,
   Grid,
+  ChartData,
+  ChartDataPoint,
+  ChartSeries,
+  LineChart,
   Color,
   ColorPalette,
   Thickness,
@@ -55,6 +59,9 @@ const RULE = ColorPalette.slate[200];
 const HEADER_BG = ColorPalette.slate[100];
 const HIGH = ColorPalette.rose[600];
 const LOW = ColorPalette.amber[700];
+
+/** The dates of this and the patient's previous three renal results. */
+const TREND_DATES = ['Jan 2025', 'Jul 2025', 'Jan 2026', 'Jul 2026'];
 
 const PANELS: Panel[] = [
   {
@@ -197,6 +204,35 @@ export function generate(): Document {
     doc.add(table);
   }
 
+  // ── Kidney function trend ─────────────────────────────────────────────────
+  // The two flagged renal results against the previous three, kept with their heading.
+  const trend = new VerticalStack();
+  trend.spacing = 12;
+  trend.margin = new Thickness(0, 0, 0, 14);
+  trend.add(
+    trendChart(
+      'Creatinine (µmol/L)',
+      [78, 84, 89, 96],
+      120,
+      HIGH,
+      'Line chart of creatinine over the last four results, rising from 78 to 96 µmol/L, above the upper limit of 90.'
+    )
+  );
+  trend.add(
+    trendChart(
+      'eGFR (mL/min/1.73m²)',
+      [84, 76, 70, 62],
+      100,
+      CLINICAL_BLUE,
+      'Line chart of eGFR over the last four results, falling from 84 to 62 mL/min/1.73m².'
+    )
+  );
+  const kidney = new VerticalStack();
+  kidney.breakAllowed = false;
+  kidney.add(h2('Kidney function, last four results'));
+  kidney.add(trend);
+  doc.add(kidney);
+
   // ── Interpretation ────────────────────────────────────────────────────────
   // The interpretation and the sign-off that authorises it stay on one page.
   const sign = new VerticalStack();
@@ -256,6 +292,45 @@ interface Panel {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** A small labelled trend chart of one analyte over {@link TREND_DATES}. */
+function trendChart(title: string, values: number[], maxValue: number, color: Color, altText: string): VerticalStack {
+  const label = new TextBlock(title);
+  label.fontName = StandardFonts.HelveticaBold;
+  label.fontSize = 9.5;
+  label.color = INK;
+
+  const series = new ChartSeries();
+  series.color = color;
+  series.dataPoints = TREND_DATES.map((date, i) => {
+    const point = new ChartDataPoint();
+    point.label = date;
+    point.value = values[i];
+    point.labelFormat = 'N0';
+    return point;
+  });
+  const data = new ChartData();
+  data.series = [series];
+  data.yAxis.maxValue = maxValue;
+  data.yAxis.stepCount = 4;
+
+  const chart = new LineChart();
+  chart.theme = 'modern';
+  chart.data = data;
+  chart.altText = altText;
+  chart.height = 130;
+  chart.stretchToFit = true;
+  chart.fontFamily = StandardFonts.Helvetica;
+  chart.labelFontSize = 8;
+  chart.showValueLabels = true;
+  chart.backgroundColor = Color.white;
+
+  const stack = new VerticalStack();
+  stack.spacing = 4;
+  stack.add(label);
+  stack.add(chart);
+  return stack;
+}
 
 function h2(text: string): Heading {
   const h = new Heading(text);

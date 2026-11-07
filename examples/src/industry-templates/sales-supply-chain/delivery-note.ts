@@ -1,6 +1,6 @@
 /**
  * Delivery Note.
- * A delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, a goods-received signature, and a discrepancy period.
+ * A one-page delivery note: ordered, despatched, and to-follow quantities for part-shipments, a package breakdown, items to follow beside the discrepancy period, and a goods-received signature.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -231,23 +231,39 @@ export function generate(): Document {
   }
   doc.add(table);
 
+  // What to report sits beside what is still to come, so the note stays on one page.
+  const discrepancies = panel('Discrepancies', [
+    cell(
+      'Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery and ' +
+        'reported to the supplier within three working days, quoting the delivery note number.',
+      { size: 9, mb: 0 }
+    ),
+  ]);
   if (backOrdered.length > 0) {
     doc.add(
-      panel(
-        'Items to follow',
+      weightedRow(
         [
-          ...backOrdered.map(line =>
-            cell(
-              `Line ${line.orderLine} · ${line.partCode} — ${line.ordered - line.despatched} ${line.unit} to follow ` +
-                'on a later delivery against the same order.',
-              { size: 9, mb: 3 }
-            )
+          panel(
+            'Items to follow',
+            [
+              ...backOrdered.map(line =>
+                cell(
+                  `Line ${line.orderLine} · ${line.partCode} — ${line.ordered - line.despatched} ${line.unit} to follow ` +
+                    'on a later delivery against the same order.',
+                  { size: 9, mb: 3 }
+                )
+              ),
+              cell('Back-ordered items are not invoiced until they are despatched.', { size: 9, color: MUTED, mb: 0 }),
+            ],
+            { accent: NEGATIVE }
           ),
-          cell('Back-ordered items are not invoiced until they are despatched.', { size: 9, color: MUTED, mb: 0 }),
+          discrepancies,
         ],
-        { accent: NEGATIVE }
+        { mb: 0 }
       )
     );
+  } else {
+    doc.add(discrepancies);
   }
 
   doc.add(h2('Goods received'));
@@ -264,16 +280,6 @@ export function generate(): Document {
       [receiptSlot('Received by', 'Name in capitals'), receiptSlot('Signature', ''), receiptSlot('Date and time', '')],
       { spacing: 22, mb: 6 }
     )
-  );
-
-  doc.add(
-    panel('Discrepancies', [
-      cell(
-        'Shortages, damage, or incorrect items must be noted on this delivery note at the point of delivery and ' +
-          'reported to the supplier within three working days, quoting the delivery note number.',
-        { size: 9, mb: 0 }
-      ),
-    ])
   );
 
   return doc;
@@ -294,7 +300,7 @@ interface DeliveryLine {
 function receiptSlot(role: string, hint: string): VerticalStack {
   return new VerticalStack({
     children: [
-      cell(role.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 20 }),
+      cell(role.toUpperCase(), { bold: true, size: 6.5, color: MUTED, mb: 14 }),
       new Container({ backgroundColor: RULE, height: 0.75, margin: { bottom: 5 } }),
       cell(hint, { size: 8, color: MUTED }),
     ],

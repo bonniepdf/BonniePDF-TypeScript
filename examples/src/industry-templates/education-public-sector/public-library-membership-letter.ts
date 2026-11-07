@@ -1,6 +1,6 @@
 /**
  * Public Library Membership.
- * A fictional UK library membership letter: service masthead, membership details, borrowing limits, branch opening hours, and an alternative-formats notice.
+ * A fictional UK library membership letter: a teal library masthead, the member's library card with a scannable number, borrowing limits, branch opening hours, and an alternative-formats notice.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // Public Library Membership
@@ -19,7 +19,10 @@ import {
   TextBlock,
   Heading,
   VerticalStack,
+  HorizontalStack,
   Container,
+  Barcode,
+  BarcodeSymbology,
   Table,
   Grid,
   StandardFonts,
@@ -34,6 +37,8 @@ const LIBRARY_GREEN = '#0f766e';
 const LIBRARY_SECONDARY = '#526071';
 const LIBRARY_MIDGREY = '#cbd5e1';
 const LIBRARY_LIGHT = '#f1f5f9';
+// Teal-100: the card's small print, 7.3:1 against the card's teal.
+const CARD_TINT = '#ccfbf1';
 
 const MARGIN = 50;
 
@@ -84,33 +89,25 @@ export function generate(): Document {
     },
   });
 
-  doc.add(
-    new Container({
-      backgroundColor: LIBRARY_INK,
-      padding: [14, 10],
-      margin: { bottom: 6 },
-      child: new TextBlock('Sample Libraries', {
-        fontName: StandardFonts.HelveticaBold,
-        fontSize: 18,
-        color: '#ffffff',
-      }),
-    })
-  );
-
-  doc.add(
-    new TextBlock('Membership Services', {
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 12,
-      color: LIBRARY_INK,
-      margin: { bottom: 2 },
-    })
-  );
-
+  // The library's own masthead: its name and the service writing, on the library's teal.
   doc.add(
     new Container({
       backgroundColor: LIBRARY_GREEN,
-      height: 1.5,
+      padding: [14, 10],
       margin: { bottom: 20 },
+      child: new HorizontalStack({
+        widthDistribution: 'equal',
+        children: [
+          new TextBlock('Sample Libraries', { fontName: StandardFonts.HelveticaBold, fontSize: 18, color: '#ffffff' }),
+          new TextBlock('Membership Services', {
+            fontName: StandardFonts.HelveticaBold,
+            fontSize: 11,
+            color: CARD_TINT,
+            alignment: 'right',
+            margin: { top: 5 },
+          }),
+        ],
+      }),
     })
   );
 
@@ -137,32 +134,72 @@ export function generate(): Document {
     )
   );
 
-  doc.add(
-    new Container({
-      backgroundColor: LIBRARY_LIGHT,
-      border: { left: 5, color: LIBRARY_GREEN },
-      padding: [16, 14],
-      margin: { top: 8, bottom: 22 },
-      child: new VerticalStack({
-        children: [
-          new TextBlock('Membership status', { fontSize: 11, color: LIBRARY_SECONDARY }),
-          new TextBlock('Active', {
-            fontName: StandardFonts.HelveticaBold,
-            fontSize: 28,
-            color: LIBRARY_INK,
-            margin: { top: 2, bottom: 2 },
+  // The member's card beside their status: the number on the card is the one the branch scans.
+  const card = new Container({
+    backgroundColor: LIBRARY_GREEN,
+    cornerRadius: 10,
+    padding: [18, 14],
+    child: new VerticalStack({
+      spacing: 3,
+      children: [
+        new TextBlock('SAMPLE LIBRARIES  ·  LIBRARY CARD', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 7.5,
+          letterSpacing: 1.2,
+          color: CARD_TINT,
+        }),
+        new TextBlock('Sample Member', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 16,
+          color: '#ffffff',
+          margin: { top: 6 },
+        }),
+        new TextBlock(`Valid until ${renewalDate}`, { fontSize: 9, color: CARD_TINT, margin: { bottom: 8 } }),
+        new Container({
+          backgroundColor: '#ffffff',
+          cornerRadius: 6,
+          padding: [10, 8],
+          child: new Barcode({
+            value: 'NBL-4471-208823',
+            symbology: BarcodeSymbology.Code128,
+            moduleWidth: 1,
+            height: 34,
+            altText: 'Barcode of membership number NBL-4471-208823.',
           }),
-          new TextBlock('Borrow, renew, and reserve items from today', { fontSize: 11, color: LIBRARY_SECONDARY }),
-        ],
-      }),
-    })
-  );
+        }),
+      ],
+    }),
+  });
+  const status = new Container({
+    backgroundColor: LIBRARY_LIGHT,
+    border: { left: 5, color: LIBRARY_GREEN },
+    padding: [16, 14],
+    child: new VerticalStack({
+      children: [
+        new TextBlock('Membership status', { fontSize: 11, color: LIBRARY_SECONDARY }),
+        new TextBlock('Active', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 28,
+          color: LIBRARY_INK,
+          margin: { top: 2, bottom: 2 },
+        }),
+        new TextBlock('Borrow, renew, and reserve items from today. Bring photo ID to collect your card.', {
+          fontSize: 11,
+          color: LIBRARY_SECONDARY,
+        }),
+      ],
+    }),
+  });
+  const cardRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 24, margin: { top: 8, bottom: 22 } });
+  cardRow.add(card, 1.1);
+  cardRow.add(status, 1);
+  doc.add(cardRow);
 
   const table = new Table({
     columns: [2.5, 1, 2.7],
     cellPadding: 9,
     border: { width: 0.75, color: LIBRARY_MIDGREY },
-    headerBackgroundColor: LIBRARY_INK,
+    headerBackgroundColor: LIBRARY_GREEN,
     headerTextColor: '#ffffff',
     margin: { top: 4, bottom: 22 },
   });

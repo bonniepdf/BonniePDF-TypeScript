@@ -24,7 +24,11 @@ import {
   TextAlignment,
   Heading,
   VerticalStack,
+  HorizontalStack,
+  WidthDistribution,
   Container,
+  Barcode,
+  BarcodeSymbology,
   Table,
   Grid,
   Color,
@@ -42,6 +46,8 @@ const LIBRARY_GREEN = Color.fromHex('#0f766e');
 const LIBRARY_SECONDARY = Color.fromHex('#526071');
 const LIBRARY_MIDGREY = Color.fromHex('#cbd5e1');
 const LIBRARY_LIGHT = Color.fromHex('#f1f5f9');
+// Teal-100: the card's small print, 7.3:1 against the card's teal.
+const CARD_TINT = Color.fromHex('#ccfbf1');
 
 const MARGIN = 50;
 const PAGE = PdfSize.a4;
@@ -101,29 +107,27 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
 
-  const mast = new Container();
-  mast.backgroundColor = LIBRARY_INK;
-  mast.padding = new Thickness(14, 10, 14, 10);
-  mast.margin = new Thickness(0, 0, 0, 6);
+  // The library's own masthead: its name and the service writing, on the library's teal.
   const brand = new TextBlock('Sample Libraries');
   brand.fontName = StandardFonts.HelveticaBold;
   brand.fontSize = 18;
   brand.color = Color.white;
-  mast.child = brand;
-  doc.add(mast);
-
   const service = new TextBlock('Membership Services');
   service.fontName = StandardFonts.HelveticaBold;
-  service.fontSize = 12;
-  service.color = LIBRARY_INK;
-  service.margin = new Thickness(0, 0, 0, 2);
-  doc.add(service);
-
-  const rule = new Container();
-  rule.backgroundColor = LIBRARY_GREEN;
-  rule.height = 1.5;
-  rule.margin = new Thickness(0, 0, 0, 20);
-  doc.add(rule);
+  service.fontSize = 11;
+  service.color = CARD_TINT;
+  service.alignment = TextAlignment.Right;
+  service.margin = new Thickness(0, 5, 0, 0);
+  const mastRow = new HorizontalStack();
+  mastRow.widthDistribution = WidthDistribution.Equal;
+  mastRow.add(brand);
+  mastRow.add(service);
+  const mast = new Container();
+  mast.backgroundColor = LIBRARY_GREEN;
+  mast.padding = new Thickness(14, 10, 14, 10);
+  mast.margin = new Thickness(0, 0, 0, 20);
+  mast.child = mastRow;
+  doc.add(mast);
 
   const top = new Grid(1, 1);
   top.cellPadding = 0;
@@ -157,12 +161,49 @@ export function generate(): Document {
     )
   );
 
-  const callout = new Container();
-  callout.backgroundColor = LIBRARY_LIGHT;
-  callout.border = Border.leftOnly(5);
-  callout.borderColors = BorderColors.leftOnly(LIBRARY_GREEN);
-  callout.padding = new Thickness(16, 14, 16, 14);
-  callout.margin = new Thickness(0, 8, 0, 22);
+  // The member's card beside their status: the number on the card is the one the branch scans.
+  const cardLabel = new TextBlock('SAMPLE LIBRARIES  ·  LIBRARY CARD');
+  cardLabel.fontName = StandardFonts.HelveticaBold;
+  cardLabel.fontSize = 7.5;
+  cardLabel.letterSpacing = 1.2;
+  cardLabel.color = CARD_TINT;
+  const cardName = new TextBlock('Sample Member');
+  cardName.fontName = StandardFonts.HelveticaBold;
+  cardName.fontSize = 16;
+  cardName.color = Color.white;
+  cardName.margin = new Thickness(0, 6, 0, 0);
+  const cardValid = new TextBlock(`Valid until ${renewalDate}`);
+  cardValid.fontSize = 9;
+  cardValid.color = CARD_TINT;
+  cardValid.margin = new Thickness(0, 0, 0, 8);
+  const barcode = new Barcode();
+  barcode.value = 'NBL-4471-208823';
+  barcode.symbology = BarcodeSymbology.Code128;
+  barcode.moduleWidth = 1;
+  barcode.height = 34;
+  barcode.altText = 'Barcode of membership number NBL-4471-208823.';
+  const barcodePanel = new Container();
+  barcodePanel.backgroundColor = Color.white;
+  barcodePanel.cornerRadius = 6;
+  barcodePanel.padding = new Thickness(10, 8, 10, 8);
+  barcodePanel.child = barcode;
+  const cardStack = new VerticalStack();
+  cardStack.spacing = 3;
+  cardStack.add(cardLabel);
+  cardStack.add(cardName);
+  cardStack.add(cardValid);
+  cardStack.add(barcodePanel);
+  const card = new Container();
+  card.backgroundColor = LIBRARY_GREEN;
+  card.cornerRadius = 10;
+  card.padding = new Thickness(18, 14, 18, 14);
+  card.child = cardStack;
+
+  const status = new Container();
+  status.backgroundColor = LIBRARY_LIGHT;
+  status.border = Border.leftOnly(5);
+  status.borderColors = BorderColors.leftOnly(LIBRARY_GREEN);
+  status.padding = new Thickness(16, 14, 16, 14);
   const cstack = new VerticalStack();
   const clabel = new TextBlock('Membership status');
   clabel.fontSize = 11;
@@ -174,18 +215,25 @@ export function generate(): Document {
   cval.color = LIBRARY_INK;
   cval.margin = new Thickness(0, 2, 0, 2);
   cstack.add(cval);
-  const cdate = new TextBlock('Borrow, renew, and reserve items from today');
+  const cdate = new TextBlock('Borrow, renew, and reserve items from today. Bring photo ID to collect your card.');
   cdate.fontSize = 11;
   cdate.color = LIBRARY_SECONDARY;
   cstack.add(cdate);
-  callout.child = cstack;
-  doc.add(callout);
+  status.child = cstack;
+
+  const cardRow = new HorizontalStack();
+  cardRow.widthDistribution = WidthDistribution.Weighted;
+  cardRow.spacing = 24;
+  cardRow.margin = new Thickness(0, 8, 0, 22);
+  cardRow.add(card, 1.1);
+  cardRow.add(status, 1);
+  doc.add(cardRow);
 
   const table = new Table(2.5, 1, 2.7);
   table.cellPadding = 9;
   table.border = new Border(0.75);
   table.borderColors = new BorderColors(LIBRARY_MIDGREY);
-  table.headerBackgroundColor = LIBRARY_INK;
+  table.headerBackgroundColor = LIBRARY_GREEN;
   table.headerTextColor = Color.white;
   table.margin = new Thickness(0, 4, 0, 22);
   table.addHeader(th('Service', TextAlignment.Left), th('Limit', TextAlignment.Left), th('Notes', TextAlignment.Left));

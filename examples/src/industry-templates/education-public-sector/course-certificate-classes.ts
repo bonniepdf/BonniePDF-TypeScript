@@ -48,6 +48,11 @@ const ACCENT = ColorPalette.indigo[700];
 const ACCENT_MID = ColorPalette.indigo[400];
 const ACCENT_SOFT = ColorPalette.indigo[100];
 const GOLD = ColorPalette.amber[600];
+// The seal's foil: light, mid and deep golds, with the deepest for its lettering.
+const FOIL_LIGHT = ColorPalette.amber[300];
+const FOIL_MID = ColorPalette.amber[500];
+const FOIL_DEEP = ColorPalette.amber[700];
+const FOIL_INK = ColorPalette.amber[900];
 
 const SERIF_BOLD = StandardFonts.TimesBold;
 const SERIF_ITALIC = StandardFonts.TimesItalic;
@@ -125,6 +130,9 @@ function ornamentalFrame(): CanvasElement {
 
     canvas.strokeRect(outer, outer, size.width - outer * 2, size.height - outer * 2, line, 1.6);
     canvas.strokeRect(inner, inner, size.width - inner * 2, size.height - inner * 2, hair, 0.5);
+    // A fine gold rule just inside the inner one.
+    const gilt = inner + 4;
+    canvas.strokeRect(gilt, gilt, size.width - gilt * 2, size.height - gilt * 2, GOLD, 0.4);
 
     const r = 4.5;
     for (const [cx, cy] of [
@@ -195,6 +203,68 @@ function sealMedallion(institutionName: string): CanvasElement {
   element.drawHeight = 52;
   element.isDecorative = true;
   return element;
+}
+
+/**
+ * The seal: a gold starburst with foil-toned rings and the award's grade, on two ribbon tails.
+ * Shades of gold stand in for foil, so the seal prints the same on any printer.
+ */
+function goldSeal(institutionName: string, grade: string): CanvasElement {
+  const element = new CanvasElement((canvas, size) => {
+    const cx = size.width / 2;
+    const cy = 40;
+
+    // Ribbon tails first, so the seal sits on top of them.
+    for (const side of [-1, 1]) {
+      canvas.fillPath(
+        [
+          { x: cx + side * 16, y: cy + 18 },
+          { x: cx + side * 26, y: cy + 50 },
+          { x: cx + side * 19, y: cy + 45 },
+          { x: cx + side * 13, y: cy + 52 },
+          { x: cx + side * 5, y: cy + 22 },
+        ],
+        ACCENT
+      );
+    }
+
+    // A 32-point starburst: points alternate between the outer and inner radius.
+    const points = [];
+    for (let i = 0; i < 32; i++) {
+      const angle = -Math.PI / 2 + (i * Math.PI) / 16;
+      const radius = i % 2 === 0 ? 36 : 32.5;
+      points.push({ x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius });
+    }
+    canvas.fillPath(points, GOLD);
+    canvas.fillCircle(cx, cy, 30, FOIL_DEEP);
+    canvas.fillCircle(cx, cy, 28.5, FOIL_LIGHT);
+    canvas.fillCircle(cx, cy, 26.5, FOIL_MID);
+
+    const monogram = institutionName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+    const monogramWidth = canvas.measureText(monogram, 16, SERIF_BOLD).width;
+    canvas.drawText(cx - monogramWidth / 2, cy - 13, monogram, FOIL_INK, 16, SERIF_BOLD, 0);
+    const label = grade.toUpperCase();
+    const labelWidth = canvas.measureText(label, 5.5, StandardFonts.HelveticaBold).width;
+    canvas.drawText(cx - labelWidth / 2, cy + 6, label, FOIL_INK, 5.5, StandardFonts.HelveticaBold, 0);
+  });
+  element.drawWidth = 84;
+  element.drawHeight = 94;
+  element.isDecorative = true;
+  return element;
+}
+
+/** A signature column lowered so its rule lines up with the seal's centre. */
+function loweredSignature(name: string, role: string): VerticalStack {
+  const stack = new VerticalStack();
+  stack.add(new Spacer(40));
+  stack.add(signatureColumn(name, role));
+  return stack;
 }
 
 function institutionCrest(name: string): HorizontalStack {
@@ -292,12 +362,17 @@ function attestation(data: CertificateData): VerticalStack {
   const [registrar, programmeLead] = data.signatories;
   const signatures = new HorizontalStack();
   signatures.widthDistribution = WidthDistribution.Weighted;
-  signatures.spacing = 56;
-  signatures.margin = new Thickness(0, 74, 0, 26);
-  signatures.add(new Spacer(1), 1);
-  signatures.add(signatureColumn(registrar.name, registrar.role), 1.3);
-  signatures.add(signatureColumn(programmeLead.name, programmeLead.role), 1.3);
-  signatures.add(new Spacer(1), 1);
+  signatures.spacing = 28;
+  signatures.margin = new Thickness(0, 34, 0, 10);
+  // The seal sits between the two signatures, where a certificate is sealed.
+  const seal = new Container();
+  seal.horizontalAlignment = HorizontalAlignment.Center;
+  seal.child = goldSeal(data.institution.name, data.course.grade);
+  signatures.add(new Spacer(1), 0.8);
+  signatures.add(loweredSignature(registrar.name, registrar.role), 1.3);
+  signatures.add(seal, 0.6);
+  signatures.add(loweredSignature(programmeLead.name, programmeLead.role), 1.3);
+  signatures.add(new Spacer(1), 0.8);
 
   const qr = new QRCode();
   qr.data = data.verificationUrl;

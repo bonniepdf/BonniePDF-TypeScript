@@ -586,6 +586,12 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
 
     let currentX = startX;
 
+    // Spans on a line share one baseline: the canvas puts a run's baseline one font size below the y it is
+    // drawn at, so each run is lowered by the difference between the line's largest font size and its own.
+    let baselineFontSize = 0;
+    for (const run of line.runs)
+      if (run.text) baselineFontSize = Math.max(baselineFontSize, run.style.effectiveFontSize);
+
     for (const run of line.runs) {
       if (!run.text) continue;
       const runStartX = currentX;
@@ -608,7 +614,7 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
       // affecting the run's advance width, so `currentX` and measurement are
       // untouched. Positive shift = up, so subtract from the top-down y.
       const shift = resolveBaselineShift(style.baselineAlignment, style.baselineShift, fontSize);
-      const runY = y - shift;
+      const runY = y + (baselineFontSize - fontSize) - shift;
 
       // Letter/word spacing as canvas state for this run.
       const ls = style.letterSpacing ?? 0;

@@ -908,8 +908,8 @@ class Validator {
           if (!this.validateShape(span, D.shapes.Span, at, owner, 'unknown-key')) return;
           const s = span as Record<string, unknown>;
           if (s.lineBreak === true) {
-            if (s.text !== undefined || s.style !== undefined)
-              this.error(at, 'conflicting-keys', 'A line break has no text or style.', { id: owner });
+            if (s.text !== undefined || s.style !== undefined || s.link !== undefined)
+              this.error(at, 'conflicting-keys', 'A line break has no text, style or link.', { id: owner });
           } else if (typeof s.text !== 'string') {
             this.error(at, 'missing-required', 'A span needs `text`, or `lineBreak: true`.', {
               id: owner,

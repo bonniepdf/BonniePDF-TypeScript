@@ -33,6 +33,7 @@ export const HYPERLINK_OPTION_KEYS = [
   'fontSize',
   'color',
   'margin',
+  'underline',
 ] as const;
 
 type HyperlinkKey = (typeof HYPERLINK_OPTION_KEYS)[number];
@@ -62,6 +63,11 @@ export class Hyperlink implements IElement, IRoleProvider {
    * Gets or sets the target 0-based page index (for internal links)
    */
   targetPageIndex: number | undefined;
+  /**
+   * Draws a line under the link text, in the link colour, placed as an underline decoration on
+   * text is. Default `false`.
+   */
+  underline = false;
   /**
    * Gets the link text to display
    */
@@ -244,6 +250,12 @@ export class Hyperlink implements IElement, IRoleProvider {
         this.fontName,
         TextAlignment.Left
       );
+      if (this.underline) {
+        // The same position and weight as an underline decoration on text (spec 03, Hyperlink).
+        const underlineY = localY + this.fontSize + this.fontSize / 7;
+        const x = ctx.currentX + this.margin.left;
+        ctx.canvas.drawLine(x, underlineY, x + lineWidth, underlineY, this.color, Math.max(0.5, this.fontSize / 18));
+      }
 
       localY += this.lineHeight;
     }

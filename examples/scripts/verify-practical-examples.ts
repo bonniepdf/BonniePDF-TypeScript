@@ -59,11 +59,16 @@ assert.ok(pageText.get('large-order-invoice')!.length > 2);
 assert.ok(pageText.get('long-basket-receipt')!.length > 1);
 assert.equal(pageText.get('multilingual-customer-letter')!.length, 3);
 assert.equal(pageText.get('headers-footers')!.length, 3);
-assert.ok(pageText.get('headers-footers')![0].includes('FIRST PAGE'));
-assert.ok(pageText.get('headers-footers')![1].includes('EVEN PAGE'));
-assert.ok(pageText.get('headers-footers')![2].includes('ODD PAGE'));
-assert.ok(!pageText.get('page-break-control')![0].includes('Approval'));
-assert.ok(pageText.get('page-break-control')!.join('').includes('Checklist 28'));
+// First page: its own header. Later pages: the brand and the title swap sides between even and odd pages
+// (the left one is drawn first; the document title also opens each SVG, hence lastIndexOf).
+const [firstPage, evenPage, oddPage] = pageText.get('headers-footers')!.map(svg => svg.replace(/<[^>]*>/g, ''));
+assert.ok(firstPage.includes('Board pack') && !evenPage.includes('Board pack') && !oddPage.includes('Board pack'));
+assert.ok(evenPage.indexOf('NORTHFIELD LOGISTICS') < evenPage.lastIndexOf('Operations review'));
+assert.ok(oddPage.lastIndexOf('Operations review') < oddPage.indexOf('NORTHFIELD LOGISTICS'));
+// The signature panel moves off page one whole; the checklist starts on page three and continues overleaf.
+const agreement = pageText.get('page-break-control')!;
+assert.ok(!agreement[0].includes('Signed for') && agreement[1].includes('Signed for'));
+assert.ok(agreement[2].includes('Artwork files approved') && agreement[3].includes('Handover meeting minutes'));
 assert.ok(pageText.get('practical-tables')!.at(-1)!.includes('No items match'));
 
 const totals = calculateTotals([

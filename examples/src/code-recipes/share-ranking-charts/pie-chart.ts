@@ -1,6 +1,6 @@
 /**
  * Pie Chart.
- * A donut chart of revenue by sales channel, with each channel's share in the legend, the formatted total beneath it, a summary table alongside, and alt text for screen readers.
+ * A donut chart of revenue by sales channel, with each channel's share in the legend, the total in the centre, a summary table alongside, and alt text for screen readers.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -99,7 +99,9 @@ export function generate(): Document {
     height: 360,
     stretchToFit: true,
     isDonut: true,
-    totalLabel: 'Total (£)',
+    totalLabel: 'Total revenue (£)',
+    // The total goes in the donut hole, which widens to fit it, instead of under the legend.
+    totalPosition: 'center',
     totalValueFormat: 'N0',
     showLegend: true,
     colors: COLORS,

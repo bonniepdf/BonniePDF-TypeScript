@@ -24,6 +24,7 @@ export const PIE_CHART_OWN_OPTION_KEYS = [
   'totalValueFormat',
   'showLegend',
   'showTotal',
+  'totalPosition',
   'sliceGradient',
 ] as const;
 
@@ -52,6 +53,12 @@ export class PieChart extends ChartBase {
 
   // Donut hole proportions
   private static readonly DONUT_HOLE_RATIO = 0.33;
+  /** A donut with its total in the hole needs a wider hole. */
+  private static readonly CENTRE_TOTAL_HOLE_RATIO = 0.56;
+  private static readonly CENTRE_VALUE_MAX_SIZE = 22;
+  private static readonly CENTRE_VALUE_MIN_SIZE = 7;
+  private static readonly CENTRE_LABEL_GAP = 3;
+  private static readonly CENTRE_VALUE_COLOR = Color.fromHex('#111827');
 
   private static readonly FONT_FAMILY = StandardFonts.Helvetica;
 
@@ -119,6 +126,13 @@ export class PieChart extends ChartBase {
   showTotal: boolean = true;
 
   /**
+   * Where the total is shown: `'legend'` (default), as a row below the legend items, or
+   * `'center'`, as a large figure with `totalLabel` beneath it in the donut hole, which then
+   * widens to fit. A full pie has no hole, so it keeps the total in the legend.
+   */
+  totalPosition: 'legend' | 'center' = 'legend';
+
+  /**
    * Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
    * own colour at the rim. Slice colours must be opaque. Default is false.
    */
@@ -156,6 +170,53 @@ export class PieChart extends ChartBase {
     // Draw legend (including optional total row)
     if (this.showLegend) {
       this.drawLegend(canvas, dataPoints, colors, layout, total);
+    }
+
+    if (this.showTotal && this.totalInCentre) {
+      this.drawCentreTotal(canvas, dataPoints, layout);
+    }
+  }
+
+  /** The total sits in the donut hole rather than the legend. */
+  private get totalInCentre(): boolean {
+    return this.isDonut && this.totalPosition === 'center';
+  }
+
+  /** The total as text: the exact sum of the values as written, so 0.1 + 0.2 is 0.3 in every implementation. */
+  private totalValueText(dataPoints: ChartDataPoint[]): string {
+    return formatChartNumber(
+      sumChartNumbers(dataPoints.map((dp) => dp.value)),
+      this.totalValueFormat
+    );
+  }
+
+  /**
+   * Draws the total in the donut hole: the figure as large as fits (up to 22pt, shrinking a
+   * point at a time while it is wider than 80% of the hole), with `totalLabel` beneath it at
+   * 55% of that size, the pair centred on the hole.
+   */
+  private drawCentreTotal(canvas: ICanvas, dataPoints: ChartDataPoint[], layout: PieLayout): void {
+    const value = this.totalValueText(dataPoints);
+    const maxWidth = layout.donutHoleRadius * 1.6;
+    let size = Math.min(PieChart.CENTRE_VALUE_MAX_SIZE, Math.floor(layout.donutHoleRadius * 0.45));
+    while (size > PieChart.CENTRE_VALUE_MIN_SIZE && canvas.measureText(value, size, StandardFonts.HelveticaBold).width > maxWidth) {
+      size -= 1;
+    }
+    const labelSize = Math.max(PieChart.CENTRE_VALUE_MIN_SIZE, Math.round(size * 0.55));
+    const hasLabel = this.totalLabel !== '';
+    const blockHeight = size + (hasLabel ? PieChart.CENTRE_LABEL_GAP + labelSize : 0);
+    const top = layout.centerY - blockHeight / 2;
+    canvas.drawText(layout.centerX, top, value, PieChart.CENTRE_VALUE_COLOR, size, StandardFonts.HelveticaBold, TextAlignment.Center);
+    if (hasLabel) {
+      canvas.drawText(
+        layout.centerX,
+        top + size + PieChart.CENTRE_LABEL_GAP,
+        this.totalLabel,
+        PieChart.LEGEND_TEXT_COLOR,
+        labelSize,
+        PieChart.FONT_FAMILY,
+        TextAlignment.Center
+      );
     }
   }
 
@@ -210,7 +271,8 @@ export class PieChart extends ChartBase {
     const legendStartY = pieCenterY - totalLegendHeight / 2;
 
     // Donut hole radius
-    const donutHoleRadius = pieRadius * PieChart.DONUT_HOLE_RATIO;
+    const donutHoleRadius =
+      pieRadius * (this.totalInCentre && this.showTotal ? PieChart.CENTRE_TOTAL_HOLE_RATIO : PieChart.DONUT_HOLE_RATIO);
 
     return new PieLayout(pieCenterX, pieCenterY, pieRadius, donutHoleRadius, legendX, legendStartY);
   }
@@ -388,12 +450,8 @@ export class PieChart extends ChartBase {
       );
     }
 
-    if (this.showTotal) {
-      // The exact sum of the values as written, so 0.1 + 0.2 is 0.3 in every implementation.
-      const totalText = `${this.totalLabel}: ${formatChartNumber(
-        sumChartNumbers(dataPoints.map((dp) => dp.value)),
-        this.totalValueFormat
-      )}`;
+    if (this.showTotal && !this.totalInCentre) {
+      const totalText = `${this.totalLabel}: ${this.totalValueText(dataPoints)}`;
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
       const totalY = layout.legendStartY + dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT + PieChart.TOTAL_ROW_GAP;
       canvas.drawText(

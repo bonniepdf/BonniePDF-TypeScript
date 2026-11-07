@@ -57,7 +57,7 @@ for (const id of ids) {
 }
 assert.ok(pageText.get('large-order-invoice')!.length > 2);
 assert.ok(pageText.get('long-basket-receipt')!.length > 1);
-assert.equal(pageText.get('multilingual-customer-letter')!.length, 3);
+assert.equal(pageText.get('multilingual-customer-letter')!.length, 4);
 assert.equal(pageText.get('headers-footers')!.length, 3);
 // First page: its own header. Later pages: the brand and the title swap sides between even and odd pages
 // (the left one is drawn first; the document title also opens each SVG, hence lastIndexOf).

@@ -1,4 +1,5 @@
 import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
+import { orderRunsVisually } from '../Typography/VisualTextRuns';
 import type { GlyphUsageTracker } from '../Typography/GlyphUsageTracker';
 import { ICanvas } from './ICanvas';
 import { ellipseToBeziers } from './EllipseGeometry';
@@ -40,6 +41,8 @@ interface TextRun {
 
 interface PreparedTextRun extends TextRun {
   glyphs?: GlyphRun;
+  /** Set on every piece of a line painted in visual order: the line's logical text, its one ActualText. */
+  lineText?: string;
 }
 
 interface PathCmd {
@@ -793,6 +796,12 @@ export class PdfCanvas implements ICanvas {
             text,
           },
         ];
+    // A bidirectional line in several fonts is shaped as one line and painted piece by piece in visual order.
+    const pieces = orderRunsVisually(runs, index => runs[index].embeddedFont?.engineFace ?? null, this._fontFeatures);
+    if (pieces) {
+      const lineText = runs.map(run => run.text).join('');
+      return pieces.map(piece => ({ ...runs[piece.run], text: piece.text, glyphs: piece.glyphs, lineText }));
+    }
     // Copy resolver-owned runs; retain glyphs only for this operation.
     return runs.map(run => ({ ...run, glyphs: run.embeddedFont?.shape(run.text, this._fontFeatures) }));
   }
@@ -833,6 +842,10 @@ export class PdfCanvas implements ICanvas {
   }
 
   private emitShowText(runs: PreparedTextRun[], fontSize: number, wordSpacing = this._wordSpacing): void {
+    // Pieces painted in visual order share one ActualText, the logical line, so text extraction reads it in order.
+    const lineText = runs[0]?.lineText;
+    if (lineText !== undefined)
+      this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(lineText)} >> BDC\n`);
     for (const run of runs) {
       if (!run.text) continue;
       const font = run.embeddedFont;
@@ -860,7 +873,8 @@ export class PdfCanvas implements ICanvas {
           'The selected emoji font has no monochrome outlines. Select colour emoji rendering or register an outline font.'
         );
       if (colourFont) this.stream.push('3 Tr\n');
-      this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
+      if (lineText === undefined)
+        this.stream.push(`/Span << /ActualText ${PdfSyntax.encodeMetadataString(run.text)} >> BDC\n`);
       if (allHorizontal(glyphs)) {
         // The operator is built in one string from character codes: `[<hex> n <hex>] TJ` when
         // any glyph is adjusted, otherwise `<hex> Tj` (the same characters after the `[`).
@@ -888,7 +902,7 @@ export class PdfCanvas implements ICanvas {
         text.char(62); // >
         if (adjusted) this.stream.push(text.char(93).ascii(' TJ\n').toString(0));
         else this.stream.push(text.ascii(' Tj\n').toString(1));
-        this.stream.push('EMC\n');
+        if (lineText === undefined) this.stream.push('EMC\n');
         if (colourFont) this.stream.push('0 Tr\n');
         continue;
       }
@@ -911,9 +925,10 @@ export class PdfCanvas implements ICanvas {
           );
         if (rise !== 0) this.stream.push('0 Ts\n');
       }
-      this.stream.push('EMC\n');
+      if (lineText === undefined) this.stream.push('EMC\n');
       if (colourFont) this.stream.push('0 Tr\n');
     }
+    if (lineText !== undefined) this.stream.push('EMC\n');
   }
 
   private paintColourRuns(

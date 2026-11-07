@@ -117,7 +117,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const intro = new TextBlock(
     'BonniePDF embeds compact glyph subsets of TrueType fonts directly in the PDF — ' +
       'only the characters actually used are stored. Fonts with different Unicode coverage ' +
-      'can be mixed within a single document by setting fontName per block.'
+      'can be mixed within a single document by choosing a font for each block.'
   );
   intro.fontName = FONT;
   intro.margin = new Thickness(0, 0, 0, 16);
@@ -183,7 +183,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(standard);
 
   const embedded = new TextBlock(
-    'Embedded NotoSans (TrueType) — full Unicode range, subsetting keeps file size compact.'
+    'Embedded Noto Sans (TrueType) — full Unicode range, subsetting keeps file size compact.'
   );
   embedded.fontName = FONT;
   doc.add(embedded);

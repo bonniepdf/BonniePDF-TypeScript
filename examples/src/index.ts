@@ -1714,7 +1714,7 @@ export const examples: ExampleDef[] = [
     name: 'Archival & Accessible PDF',
     category: 'Compliance & Archival',
     description:
-      'A concise archival and accessible document: the PDF/A-2a and PDF/UA-1 settings it uses, what BonniePDF handles for you, and what the author must supply to keep the claim true.',
+      'A council tax letter that has to reach every resident and be kept for years: tagged for screen readers (PDF/UA-1), archived as PDF/A-2a, with the settings that make it so explained on the page.',
     filename: 'pdf-compliance.pdf',
     generate: pdfCompliance,
     dotnetClass: 'PdfComplianceExample',
@@ -2869,7 +2869,7 @@ export const examples: ExampleDef[] = [
     category: 'Healthcare',
     tier: 'examples',
     description:
-      'An A4 patient-summary sheet built from rounded cards, each clipping a full-bleed coloured header band to its outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.',
+      'An A4 patient-summary sheet of rounded cards: patient details, vitals, current medications and active problems in one teal, with rose kept for allergies and alerts.',
     filename: 'patient-summary.pdf',
     generate: patientSummary,
     dotnetClass: 'PatientSummaryExample',

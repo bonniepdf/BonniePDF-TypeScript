@@ -1,12 +1,36 @@
 /**
  * Archival & Accessible PDF.
- * A concise archival and accessible document: the PDF/A-2a and PDF/UA-1 settings it uses, what BonniePDF handles for you, and what the author must supply to keep the claim true.
+ * A council tax letter that has to reach every resident and be kept for years: tagged for screen readers (PDF/UA-1), archived as PDF/A-2a, with the settings that make it so explained on the page.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
-import { Document, Heading, Line, StandardFonts, TextBlock, UnorderedList } from '@bonniepdf/core';
+import {
+  Container,
+  Document,
+  Heading,
+  HorizontalStack,
+  StandardFonts,
+  Table,
+  TextBlock,
+  UnorderedList,
+  VerticalStack,
+  pageTemplate,
+} from '@bonniepdf/core';
+
+/** The council's colour: a deep teal, used for the masthead and the table header. */
+const COUNCIL = 'teal-800';
+
+/** The charge, by row: what it is for and the amount for the year. */
+const CHARGES: [string, string][] = [
+  ['Sample Borough Council', '£1,642.18'],
+  ['Adult social care', '£214.06'],
+  ['County fire authority', '£98.40'],
+  ['Police and crime commissioner', '£276.12'],
+];
 
 /**
- * A concise PDF/A-2a + PDF/UA-1 example.
+ * A letter that benefits from both standards, authored through the
+ * options-object front door: PDF/UA-1 so every resident can read it with a
+ * screen reader, PDF/A-2a so the council can archive it unchanged.
  */
 export function generate(): Document {
   const doc = new Document({
@@ -14,84 +38,140 @@ export function generate(): Document {
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10.5, color: 'slate-700' },
+      footerTemplate: pageTemplate({
+        default: new HorizontalStack({
+          widthDistribution: 'equal',
+          children: [
+            new TextBlock('Sample Borough Council  ·  Revenues and Benefits', { fontSize: 8, color: 'slate-500' }),
+            new Container({
+              horizontalAlignment: 'end',
+              child: new Container({
+                border: { width: 0.75, color: 'teal-700' },
+                cornerRadius: 4,
+                padding: [6, 2],
+                child: new TextBlock('PDF/A-2a  ·  PDF/UA-1', {
+                  fontName: StandardFonts.HelveticaBold,
+                  fontSize: 7,
+                  color: 'teal-800',
+                }),
+              }),
+            }),
+          ],
+        }),
+      }),
     },
     metadata: {
-      title: 'Archival and Accessible PDF with BonniePDF',
-      author: 'BonniePDF',
-      subject: 'A concise PDF/A-2a and PDF/UA-1 example.',
-      keywords: 'pdf/a-2a, pdf/ua-1, accessibility, archival, BonniePDF',
+      title: 'Your council tax for 2027 to 2028',
+      author: 'Sample Borough Council',
+      subject: 'Council tax notice, archival (PDF/A-2a) and accessible (PDF/UA-1).',
+      keywords: 'pdf/a-2a, pdf/ua-1, accessibility, archival, council tax, BonniePDF',
     },
   });
 
+  // ── Masthead and address ──
   doc.add(
-    new Heading('Archival and accessible PDF', {
+    new Container({
+      backgroundColor: COUNCIL,
+      padding: [16, 12],
+      margin: { bottom: 20 },
+      child: new TextBlock('Sample Borough Council', {
+        fontName: StandardFonts.HelveticaBold,
+        fontSize: 17,
+        color: '#ffffff',
+      }),
+    })
+  );
+  doc.add(
+    new HorizontalStack({
+      widthDistribution: 'equal',
+      margin: { bottom: 20 },
+      children: [
+        new TextBlock('Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR'),
+        new TextBlock('5 November 2026\nAccount 7700 4821 93\nBand D', { alignment: 'right', color: 'slate-600' }),
+      ],
+    })
+  );
+
+  doc.add(
+    new Heading('Your council tax for 2027 to 2028', {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
-      fontSize: 24,
+      fontSize: 20,
       color: 'slate-900',
       margin: { bottom: 8 },
     })
   );
   doc.add(
     new TextBlock(
-      'BonniePDF treats archival conformance and accessibility as separate settings, so a document can use either standard or combine both.',
-      { fontSize: 11, color: 'slate-600', margin: { bottom: 12 } }
+      'This letter sets out your council tax for the year from 1 April 2027. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.',
+      { margin: { bottom: 12 } }
     )
   );
-  doc.add(new Line({ thickness: 2, color: 'blue-600', margin: { bottom: 14 } }));
+
+  // ── The charge: a real data table, with a header row screen readers announce ──
+  const table = new Table({
+    columns: [3, 1],
+    cellPadding: 6,
+    border: { width: 0.5, color: 'slate-200' },
+    headerBackgroundColor: COUNCIL,
+    headerTextColor: '#ffffff',
+    margin: { bottom: 14 },
+  });
+  table.addHeader(
+    new TextBlock('Part of the charge', { fontName: StandardFonts.HelveticaBold }),
+    new TextBlock('Amount for the year', { fontName: StandardFonts.HelveticaBold, alignment: 'right' })
+  );
+  for (const [part, amount] of CHARGES)
+    table.addRow(new TextBlock(part), new TextBlock(amount, { alignment: 'right' }));
+  table.addFooter(
+    new TextBlock('Total', { fontName: StandardFonts.HelveticaBold }),
+    new TextBlock('£2,230.76', { fontName: StandardFonts.HelveticaBold, alignment: 'right' })
+  );
+  doc.add(table);
 
   doc.add(
-    new Heading('Settings used by this document', {
+    new Heading('What to do next', {
       level: 2,
       fontName: StandardFonts.HelveticaBold,
-      fontSize: 15,
-      color: 'slate-800',
+      fontSize: 14,
+      color: 'slate-900',
       margin: { bottom: 5 },
     })
   );
   doc.add(
     new UnorderedList({
       items: [
-        'conformance: pdf/a-2a - requests modern PDF/A archival output.',
-        'accessibility: pdf/ua-1 - emits tagged structure for assistive technology.',
-        'language: en-GB - declares the document language for screen readers.',
+        'Nothing, if the details above are right: your first instalment is taken on 1 April.',
+        'Tell us within 21 days if you live alone, so we can apply the single person discount.',
+        'Call 0117 496 0123 or visit sample.example/counciltax if you need help paying.',
       ],
-      fontSize: 10,
+      fontSize: 10.5,
       color: 'slate-700',
-      bulletColor: 'blue-600',
+      bulletColor: 'teal-700',
       itemSpacing: 5,
-      margin: { bottom: 14 },
+      margin: { bottom: 20 },
     })
   );
 
+  // ── How this letter was made: the settings, for the developer reading the example ──
   doc.add(
-    new Heading('Responsibilities', {
-      level: 2,
-      fontName: StandardFonts.HelveticaBold,
-      fontSize: 15,
-      color: 'slate-800',
-      margin: { bottom: 5 },
+    new Container({
+      backgroundColor: 'slate-50',
+      border: { width: 0.75, color: 'slate-200' },
+      cornerRadius: 6,
+      padding: [14, 12],
+      child: new VerticalStack({
+        spacing: 4,
+        children: [
+          new TextBlock('How this letter was made', { fontName: StandardFonts.HelveticaBold, color: 'slate-900' }),
+          new TextBlock(
+            'It is set to the PDF/A-2a archival level, so it can be kept unchanged for years, and to PDF/UA-1, so its headings, list and table are tagged for screen readers; its language is British English. BonniePDF writes the metadata, colour profile, embedded fonts and tags. The author supplies the title, language, reading order and table headers, and validates the result.',
+            { fontSize: 9, color: 'slate-600' }
+          ),
+        ],
+      }),
     })
-  );
-  doc.add(
-    new TextBlock(
-      'BonniePDF handles the PDF version, conformance metadata, colour profiles, embedded standard-font substitutes, semantic tags, setting validation, and resource checks that keep the conformance claim accurate.',
-      { fontSize: 10, color: 'slate-700', margin: { bottom: 8 } }
-    )
-  );
-  doc.add(
-    new TextBlock(
-      'The author supplies the required profile, title and language, logical reading order, alt text and table headers, and validates the final PDF against the required external profile.',
-      { fontSize: 10, color: 'slate-700', margin: { bottom: 16 } }
-    )
-  );
-
-  doc.add(new Line({ color: 'slate-300', margin: { bottom: 10 } }));
-  doc.add(
-    new TextBlock(
-      'Legacy compatibility: pdfAEnabled reads true for any PDF/A profile. Assigning true selects PdfA2b; assigning false selects None. New code should use conformance.',
-      { fontName: StandardFonts.HelveticaOblique, fontSize: 9, color: 'slate-500' }
-    )
   );
 
   return doc;

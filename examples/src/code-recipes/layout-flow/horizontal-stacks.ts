@@ -124,7 +124,7 @@ export function generate(): Document {
   doc.add(sectionHeading('Cross-Axis Alignment', 's-align', 16));
   doc.add(
     new TextBlock(
-      'When a stack has a fixed height and its children differ in height, stack.alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.',
+      'When a stack has a fixed height and its children differ in height, the stack’s alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.',
       { margin: { bottom: 8 } }
     )
   );

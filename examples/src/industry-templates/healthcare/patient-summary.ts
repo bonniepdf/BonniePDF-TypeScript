@@ -1,14 +1,14 @@
 /**
  * Patient Summary.
- * An A4 patient-summary sheet built from rounded cards, each clipping a full-bleed coloured header band to its outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.
+ * An A4 patient-summary sheet built from rounded cards, each clipping a full-bleed header band to its outline: patient details, vitals, current medications and active problems in one teal, with rose kept for allergies and alerts.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // Patient Summary
 //
 // An A4 portrait healthcare patient-summary sheet built from rounded-corner
-// cards: each card clips a full-bleed coloured header band to its
-// rounded outline - a teal patient card, an indigo vitals grid, and a rose
-// allergies/alerts panel. Entirely fictional. Authored through the
+// cards: each card clips a full-bleed header band to its rounded outline.
+// One teal carries the patient, vitals, medications and problems; rose is
+// kept for allergies and alerts, so red always means a warning. Entirely fictional. Authored through the
 // options-object front door.
 
 import {
@@ -16,6 +16,7 @@ import {
   TextBlock,
   VerticalStack,
   Container,
+  HorizontalStack,
   Table,
   Grid,
   StandardFonts,
@@ -24,7 +25,7 @@ import {
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
-// ── Healthcare palette (Slate neutrals + Teal/Indigo/Rose accents) ───────────
+// ── Healthcare palette (Slate neutrals, one Teal accent, Rose for alerts) ─────
 const INK = '#0f172a'; // slate-900  headings / values
 const BODY = '#334155'; // slate-700  body text
 const MUTE = '#64748b'; // slate-500  labels / captions
@@ -35,9 +36,23 @@ const TINT = '#f8fafc'; // slate-50   page tint
 // text) and as small status text on white, and #0d9488 only reaches 3.42-3.74:1
 // either way, below the 4.5:1 WCAG AA threshold. #0a7164 clears it in both roles.
 const TEAL = '#0a7164'; // patient band
-const INDIGO = '#4f46e5'; // vitals band
 const ROSE = '#e11d48'; // allergy band / alerts
 const CREAM = '#f1f5f9';
+
+/** Current medicines: name, dose and when it is taken. */
+const MEDICATIONS: [string, string, string][] = [
+  ['Warfarin', '5 mg', 'Evening'],
+  ['Bisoprolol', '2.5 mg', 'Morning'],
+  ['Atorvastatin', '40 mg', 'Night'],
+  ['Lansoprazole', '15 mg', 'Before breakfast'],
+];
+
+/** Active problems and the year each was diagnosed. */
+const PROBLEMS: [string, string][] = [
+  ['Atrial fibrillation', 'Since 2021'],
+  ['Hypertension', 'Since 2018'],
+  ['Hypercholesterolaemia', 'Since 2019'],
+];
 
 export function generate(): Document {
   const doc = new Document({
@@ -142,7 +157,7 @@ export function generate(): Document {
     vital('97', '% SpO2', 'Oxygen', 'Watch', ROSE)
   );
 
-  const vitalsCard = card(INDIGO, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid);
+  const vitalsCard = card(TEAL, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid);
   vitalsCard.margin = { bottom: 16 };
   doc.add(pad(vitalsCard));
 
@@ -158,8 +173,30 @@ export function generate(): Document {
   alert('Warfarin', 'On anticoagulation - INR target 2.0-3.0.', 6);
 
   const alertsCard = card(ROSE, 'ALLERGIES & ALERTS', alerts);
-  alertsCard.margin = { bottom: 28 };
+  alertsCard.margin = { bottom: 16 };
   doc.add(pad(alertsCard));
+
+  // ── 4. Medications and problems, side by side ────────────────────────────
+  const medications = new Table({ columns: [1.6, 1, 1.4], border: 0, cellPadding: 3 });
+  medications.addHeader(
+    tb('MEDICINE', 7.5, MUTE, { bold: true }),
+    tb('DOSE', 7.5, MUTE, { bold: true }),
+    tb('WHEN', 7.5, MUTE, { bold: true })
+  );
+  for (const [name, dose, when] of MEDICATIONS)
+    medications.addRow(tb(name, 9.5, INK, { bold: true }), tb(dose, 9.5, BODY), tb(when, 9.5, BODY));
+
+  const problems = new VerticalStack();
+  PROBLEMS.forEach(([condition, since], i) => {
+    const row = new Grid({ columns: [2.2, 1], border: 0, cellPadding: 3 });
+    row.addRow(tb(condition, 9.5, INK, { bold: true }), tb(since, 9, MUTE, { align: 'right' }));
+    problems.add(new Container({ margin: i ? { top: 4 } : undefined, child: row }));
+  });
+
+  const clinical = new HorizontalStack({ widthDistribution: 'weighted', spacing: 16, margin: { bottom: 28 } });
+  clinical.add(card(TEAL, 'CURRENT MEDICATIONS', medications), 1.35);
+  clinical.add(card(TEAL, 'ACTIVE PROBLEMS', problems), 1);
+  doc.add(pad(clinical));
 
   return doc;
 }

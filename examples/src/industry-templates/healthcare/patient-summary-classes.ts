@@ -1,6 +1,6 @@
 /**
  * Patient Summary (Class API).
- * A4 portrait healthcare patient-summary sheet built from rounded-corner cards. Each card clips a full-bleed coloured header band to its rounded outline: a teal patient card, an indigo vitals grid, and a rose allergies panel.
+ * A4 portrait healthcare patient-summary sheet built from rounded-corner cards. Each card clips a full-bleed header band to its rounded outline: patient details, vitals, current medications and active problems in one teal, with rose kept for allergies and alerts.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 // The **class / construct-then-mutate** companion to `patient-summary.ts`.
@@ -22,6 +22,8 @@ import {
   Container,
   Table,
   Grid,
+  HorizontalStack,
+  WidthDistribution,
   Color,
   Thickness,
   Border,
@@ -30,7 +32,7 @@ import {
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
-// ── Healthcare palette (Slate neutrals + Teal/Indigo/Rose accents) ───────────
+// ── Healthcare palette (Slate neutrals, one Teal accent, Rose for alerts) ─────
 const INK = Color.fromHex('#0f172a'); // slate-900  headings / values
 const BODY = Color.fromHex('#334155'); // slate-700  body text
 const MUTE = Color.fromHex('#64748b'); // slate-500  labels / captions
@@ -38,9 +40,23 @@ const HAIRLINE = Color.fromHex('#e2e8f0'); // slate-200  card border / rules
 const CARD = Color.fromHex('#ffffff'); // card surface
 const TINT = Color.fromHex('#f8fafc'); // slate-50   page tint
 const TEAL = Color.fromHex('#0a7164'); // patient band
-const INDIGO = Color.fromHex('#4f46e5'); // vitals band
 const ROSE = Color.fromHex('#e11d48'); // allergy band / alerts
 const CREAM = Color.fromHex('#f1f5f9');
+
+/** Current medicines: name, dose and when it is taken. */
+const MEDICATIONS: [string, string, string][] = [
+  ['Warfarin', '5 mg', 'Evening'],
+  ['Bisoprolol', '2.5 mg', 'Morning'],
+  ['Atorvastatin', '40 mg', 'Night'],
+  ['Lansoprazole', '15 mg', 'Before breakfast'],
+];
+
+/** Active problems and the year each was diagnosed. */
+const PROBLEMS: [string, string][] = [
+  ['Atrial fibrillation', 'Since 2021'],
+  ['Hypertension', 'Since 2018'],
+  ['Hypercholesterolaemia', 'Since 2019'],
+];
 
 export function generate(): Document {
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Portrait, 0);
@@ -127,7 +143,7 @@ export function generate(): Document {
   patientCard.child = patientStack;
   doc.add(pad(patientCard));
 
-  // ── 2. Vitals card (indigo bleed band, 4-up grid) ────────────────────────
+  // ── 2. Vitals card (teal bleed band, 4-up grid) ──────────────────────────
   const vital = (value: string, unit: string, label: string, status: string, tone: Color): VerticalStack => {
     const v = new VerticalStack();
     v.add(tb(value, 18, INK, { bold: true }));
@@ -147,7 +163,7 @@ export function generate(): Document {
     vital('97', '% SpO2', 'Oxygen', 'Watch', ROSE)
   );
 
-  const vitalsCard = card(INDIGO, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid);
+  const vitalsCard = card(TEAL, 'VITALS  ·  18 Jun 2026, 09:14', vitalsGrid);
   vitalsCard.margin = new Thickness(0, 0, 0, 16);
   doc.add(pad(vitalsCard));
 
@@ -168,8 +184,40 @@ export function generate(): Document {
   alert('Warfarin', 'On anticoagulation - INR target 2.0-3.0.', 6);
 
   const alertsCard = card(ROSE, 'ALLERGIES & ALERTS', alerts);
-  alertsCard.margin = new Thickness(0, 0, 0, 28);
+  alertsCard.margin = new Thickness(0, 0, 0, 16);
   doc.add(pad(alertsCard));
+
+  // ── 4. Medications and problems, side by side ────────────────────────────
+  const medications = new Table(1.6, 1, 1.4);
+  medications.border = Border.none;
+  medications.cellPadding = 3;
+  medications.addHeader(
+    tb('MEDICINE', 7.5, MUTE, { bold: true }),
+    tb('DOSE', 7.5, MUTE, { bold: true }),
+    tb('WHEN', 7.5, MUTE, { bold: true })
+  );
+  for (const [name, dose, when] of MEDICATIONS)
+    medications.addRow(tb(name, 9.5, INK, { bold: true }), tb(dose, 9.5, BODY), tb(when, 9.5, BODY));
+
+  const problems = new VerticalStack();
+  PROBLEMS.forEach(([condition, since], i) => {
+    const row = new Grid(2.2, 1);
+    row.border = Border.none;
+    row.cellPadding = 3;
+    row.addRow(tb(condition, 9.5, INK, { bold: true }), tb(since, 9, MUTE, { align: TextAlignment.Right }));
+    const c = new Container();
+    c.child = row;
+    if (i) c.margin = new Thickness(0, 4, 0, 0);
+    problems.add(c);
+  });
+
+  const clinical = new HorizontalStack();
+  clinical.widthDistribution = WidthDistribution.Weighted;
+  clinical.spacing = 16;
+  clinical.margin = new Thickness(0, 0, 0, 28);
+  clinical.add(card(TEAL, 'CURRENT MEDICATIONS', medications), 1.35);
+  clinical.add(card(TEAL, 'ACTIVE PROBLEMS', problems), 1);
+  doc.add(pad(clinical));
 
   return doc;
 }

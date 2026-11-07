@@ -54,7 +54,7 @@ import {
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
 
-const PRIMARY = ColorPalette.indigo[700];
+const PRIMARY = ColorPalette.slate[700];
 const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
@@ -412,7 +412,7 @@ function kpi(value: string, label: string, accent: Color): Container {
   l.color = MUTED;
   stack.add(l);
   const c = new Container();
-  c.backgroundColor = ColorPalette.indigo[50];
+  c.backgroundColor = ColorPalette.slate[50];
   c.cornerRadius = 8;
   c.padding = new Thickness(14, 12, 14, 12);
   c.child = stack;

@@ -38,7 +38,7 @@ const MUTED = ColorPalette.slate[600];
 
 const HEADING = ColorPalette.slate[800];
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.purple[800];
 
 const RULE = ColorPalette.slate[200];
 
@@ -534,7 +534,7 @@ function totalsPanel(children: IElement[], weight = 1.6): HorizontalStack {
   const body = new VerticalStack();
   for (const child of children) body.add(child);
   const box = new Container();
-  box.backgroundColor = ColorPalette.indigo[50];
+  box.backgroundColor = ColorPalette.purple[50];
   box.cornerRadius = 6;
   box.padding = new Thickness(12);
   box.child = body;

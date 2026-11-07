@@ -138,7 +138,7 @@ export function generate(): Document {
   });
   doc.add(pad(patientCard));
 
-  // ── 2. Vitals card (indigo bleed band, 4-up grid) ────────────────────────
+  // ── 2. Vitals card (teal bleed band, 4-up grid) ────────────────────────
   const vital = (value: string, unit: string, label: string, status: string, tone: ColorInput): VerticalStack =>
     new VerticalStack({
       children: [

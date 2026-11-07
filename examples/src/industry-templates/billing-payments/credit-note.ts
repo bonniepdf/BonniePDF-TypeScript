@@ -26,7 +26,7 @@ const MUTED = ColorPalette.slate[600];
 
 const HEADING = ColorPalette.slate[800];
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.blue[800];
 
 const RULE = ColorPalette.slate[200];
 
@@ -107,7 +107,7 @@ export function generate(): Document {
     },
   });
 
-  // The accent is the reversal colour, not the house indigo: a credit note read
+  // The accent is the reversal colour, not the house colour: a credit note read
   // at a glance must not be mistaken for another invoice.
   doc.add(accentBar(NEGATIVE));
   doc.add(cell('CREDIT NOTE', { bold: true, size: 8.5, color: NEGATIVE, mb: 4 }));
@@ -325,7 +325,7 @@ function totalsPanel(children: IElement[], weight = 1.6): HorizontalStack {
   row.add(new Container({}), 2);
   row.add(
     new Container({
-      backgroundColor: ColorPalette.indigo[50],
+      backgroundColor: ColorPalette.blue[50],
       cornerRadius: 6,
       padding: 12,
       child: new VerticalStack({ children }),

@@ -25,7 +25,7 @@ import {
 } from '@bonniepdf/core';
 
 // ── Palette ──────────────────────────────────────────────────────────────────
-// Slate ink with an indigo accent, per the shared example design tokens.
+// Slate ink with a cyan accent, per the shared example design tokens.
 
 const INK = ColorPalette.slate[700];
 
@@ -34,7 +34,7 @@ const MUTED = ColorPalette.slate[600];
 
 const HEADING = ColorPalette.slate[800];
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.cyan[700];
 
 const RULE = ColorPalette.slate[200];
 

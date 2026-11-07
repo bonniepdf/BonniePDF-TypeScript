@@ -44,7 +44,7 @@ const RULE = ColorPalette.slate[200];
 // Tagged PDF/UA-1 and archival PDF/A-2a. Sample organisations, references, and
 // amounts throughout.
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.blue[800];
 const OVERDUE = ColorPalette.rose[700];
 const CREDIT = ColorPalette.emerald[700];
 
@@ -352,7 +352,7 @@ export function generate(): Document {
   closingRow.add(new Container({}), 2);
   closingRow.add(
     new Container({
-      backgroundColor: ColorPalette.indigo[50],
+      backgroundColor: ColorPalette.blue[50],
       cornerRadius: 6,
       padding: 12,
       child: new VerticalStack({

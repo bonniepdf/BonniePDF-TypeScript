@@ -40,7 +40,7 @@ const MUTED = ColorPalette.slate[600];
 
 const HEADING = ColorPalette.slate[800];
 
-const ACCENT = ColorPalette.indigo[700];
+const ACCENT = ColorPalette.cyan[700];
 
 const RULE = ColorPalette.slate[200];
 

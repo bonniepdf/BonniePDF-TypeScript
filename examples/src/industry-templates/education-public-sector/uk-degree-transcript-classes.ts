@@ -35,6 +35,9 @@ import {
   HorizontalStack,
   Container,
   Table,
+  TableCell,
+  TableRow,
+  PreventPageBreak,
   Grid,
   QRCode,
   QrEcc,
@@ -55,6 +58,15 @@ const INK = ColorPalette.slate[700];
 const MUTED = ColorPalette.slate[600];
 const RULE = ColorPalette.slate[200];
 const GOLD = ColorPalette.amber[700];
+
+/** The UK honours classifications by weighted average; the award is the one this transcript records. */
+const AWARD = 'Upper Second-Class Honours (2:1)';
+const BANDS: [string, string][] = [
+  ['First-Class Honours (1st)', '70–100%'],
+  [AWARD, '60–69%'],
+  ['Lower Second-Class Honours (2:2)', '50–59%'],
+  ['Third-Class Honours (3rd)', '40–49%'],
+];
 
 const MODULES: Module[] = [
   { level: 4, code: 'CS4101', title: 'Programming Fundamentals', credits: 20, mark: 68 },
@@ -168,7 +180,7 @@ export function generate(): Document {
   // The award is the transcript's primary heading (H1). Tagging it as the
   // first heading satisfies PDF/UA rule 7.4.2-1 (H1 must precede any H2); the
   // section headings below are H2. Styling is unchanged.
-  const bval = h1('Upper Second-Class Honours (2:1)');
+  const bval = h1(AWARD);
   bstack.add(bval);
   const bmeta = new TextBlock(`Weighted average ${weighted.toFixed(1)}%  -  ${total} credits  -  FHEQ Level 6`);
   bmeta.fontSize = 9;
@@ -203,6 +215,75 @@ export function generate(): Document {
     );
   }
   doc.add(table);
+
+  // ── How the award was calculated ──────────────────────────────────────────
+  // Each level's average beside the honours bands, with this award highlighted, kept on one page.
+  const levels = new Table(1.3, 1, 1, 1.2);
+  levels.cellPadding = 6;
+  levels.border = new Border(0.5);
+  levels.borderColors = new BorderColors(RULE);
+  levels.headerBackgroundColor = NAVY;
+  levels.headerTextColor = Color.white;
+  levels.addHeader(
+    th('Level', TextAlignment.Left),
+    th('Credits', TextAlignment.Right),
+    th('Average', TextAlignment.Right),
+    th('Weight', TextAlignment.Right)
+  );
+  for (const level of [4, 5, 6]) {
+    const modules = MODULES.filter(m => m.level === level);
+    const credits = modules.reduce((s, m) => s + m.credits, 0);
+    const average = modules.reduce((s, m) => s + m.mark * m.credits, 0) / credits;
+    levels.addRow(
+      td(`Level ${level}`, TextAlignment.Left, INK),
+      td(String(credits), TextAlignment.Right, INK),
+      td(`${average.toFixed(1)}%`, TextAlignment.Right, INK),
+      td(level === 4 ? 'None' : level === 5 ? '× 1' : '× 2', TextAlignment.Right, MUTED)
+    );
+  }
+  const bands = new Table(2.6, 1);
+  bands.cellPadding = 6;
+  bands.border = new Border(0.5);
+  bands.borderColors = new BorderColors(RULE);
+  bands.headerBackgroundColor = NAVY;
+  bands.headerTextColor = Color.white;
+  bands.addHeader(th('Classification', TextAlignment.Left), th('Average', TextAlignment.Right));
+  for (const [name, range] of BANDS) {
+    const awarded = name === AWARD;
+    const font = awarded ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
+    const nameText = new TextBlock(name);
+    nameText.fontName = font;
+    nameText.fontSize = 9.5;
+    nameText.color = awarded ? NAVY : INK;
+    const rangeText = new TextBlock(range);
+    rangeText.fontName = font;
+    rangeText.fontSize = 9.5;
+    rangeText.color = awarded ? NAVY : INK;
+    rangeText.alignment = TextAlignment.Right;
+    const row = new TableRow([TableCell.from(nameText), TableCell.from(rangeText)]);
+    if (awarded) row.backgroundColor = ColorPalette.blue[50];
+    bands.addRow(row);
+  }
+  const calculation = new HorizontalStack();
+  calculation.widthDistribution = WidthDistribution.Weighted;
+  calculation.spacing = 20;
+  calculation.margin = new Thickness(0, 0, 0, 10);
+  calculation.add(levels, 1);
+  calculation.add(bands, 1.3);
+  const note = new TextBlock(
+    `Level 4 does not count towards the classification. Level 6 counts twice as much as level 5, giving a ` +
+      `weighted average of ${weighted.toFixed(1)}%.`
+  );
+  note.fontSize = 9;
+  note.color = MUTED;
+  note.margin = new Thickness(0, 0, 0, 22);
+  const section = new VerticalStack();
+  section.add(h2('How the award was calculated'));
+  section.add(calculation);
+  section.add(note);
+  const keep = new PreventPageBreak();
+  keep.child = section;
+  doc.add(keep);
 
   // ── Verification ──────────────────────────────────────────────────────────
   // The heading, wording and QR code stay on one page.

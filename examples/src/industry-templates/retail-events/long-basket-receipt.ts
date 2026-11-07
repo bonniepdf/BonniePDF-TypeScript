@@ -1,18 +1,25 @@
-/** A multi-page 80 mm receipt with long names, discounts, returns, and font coverage. */
+/** An 80 mm till receipt on one continuous roll: a long basket, accented names, per-line discounts, a return, and scannable receipt codes. */
 import {
+  Container,
   Document,
   Heading,
+  HorizontalStack,
   TextBlock,
-  TextStyle,
-  Table,
   PdfSize,
   QRCode,
   Barcode,
   BarcodeSymbology,
-  VerticalStack,
-  PreventPageBreak,
-  pageTemplate,
+  ColorPalette,
+  StandardFonts,
+  type ColorInput,
+  type TextAlignmentInput,
 } from '@bonniepdf/core';
+
+const INK = ColorPalette.slate[900];
+const MUTE = ColorPalette.slate[600];
+
+// A till receipt is one continuous roll, never separate sheets: an 80 mm page tall enough for the basket.
+const ROLL = new PdfSize(226.77, 1425, 'Receipt roll 80mm');
 
 export interface ReceiptLine {
   name: string;
@@ -21,7 +28,7 @@ export interface ReceiptLine {
   discountPence: number;
 }
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(): Document {
   const lines: ReceiptLine[] = Array.from({ length: 35 }, (_, i) => ({
     name:
       i % 3 === 0
@@ -32,7 +39,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     discountPence: i % 7 === 0 ? 50 : 0,
   }));
   lines.push({ name: 'Returned reusable cup', quantity: -1, unitPence: 500, discountPence: 0 });
-  return buildReceipt(lines, assets);
+  return buildReceipt(lines);
 }
 
 export function calculateTotal(lines: ReceiptLine[]): number {
@@ -53,58 +60,115 @@ export function calculateTotal(lines: ReceiptLine[]): number {
   return total;
 }
 
-export function buildReceipt(lines: ReceiptLine[], assets: ReadonlyMap<string, Uint8Array>): Document {
+export function buildReceipt(lines: ReceiptLine[]): Document {
   const total = calculateTotal(lines);
-  const font = assets.get('fonts/NotoSans-Regular.ttf');
-  if (!font) throw new Error('Supply fonts/NotoSans-Regular.ttf.');
+  const discounts = lines.reduce((sum, line) => sum + line.discountPence, 0);
+  // Courier shows the Western European characters itself. A character outside them, such as the ř in
+  // Dvořák, comes from Courier's metric-compatible fallback face, and 'throw' turns any character no
+  // font can show into an error instead of a gap on the receipt.
   const doc = new Document({
     metadata: { title: 'Long-basket receipt #4022' },
     settings: {
-      pageSize: new PdfSize(226.77, 720, 'Receipt 80mm'),
+      pageSize: ROLL,
       margin: 16,
       language: 'en-GB',
       missingGlyphs: 'throw',
-      footerTemplate: pageTemplate({
-        default: new TextBlock('Receipt 4022 · {{CurrentPage}} / {{TotalPages}}', { fontSize: 8, alignment: 'center' }),
-      }),
+      defaultTextStyle: { fontFamily: 'Courier', fontSize: 8.5, color: INK },
     },
   });
-  const face = doc.fonts.add(font);
-  doc.settings.defaultTextStyle = new TextStyle({ fontFamily: face.fontName, fontSize: 9 });
-  doc.add(new Heading('SAMPLE COFFEE', { level: 1, fontSize: 17 }));
-  doc.add(new TextBlock('Receipt #4022\n25 October 2026 · GBP\nCustomer: Zoë Dvořák', { margin: { bottom: 12 } }));
-  const table = new Table({ columns: [4, 0.6, 1.1], repeatHeadersOnNewPage: true, cellPadding: 4 });
-  table.addHeader('Item', 'Qty', 'GBP');
-  for (const line of lines) {
-    const name = line.name + (line.discountPence ? ` (discount ${(line.discountPence / 100).toFixed(2)} GBP)` : '');
-    table.addRow(
-      new TextBlock(name),
-      new TextBlock(String(line.quantity), { alignment: 'right' }),
-      new TextBlock(((line.quantity * line.unitPence - line.discountPence) / 100).toFixed(2), { alignment: 'right' })
-    );
-  }
-  if (!lines.length) table.addRow('No purchases', '', '0.00');
-  doc.add(table);
+
   doc.add(
-    new PreventPageBreak({
-      child: new VerticalStack({
-        spacing: 10,
-        margin: { top: 12 },
-        children: [
-          new TextBlock(`TOTAL ${(total / 100).toFixed(2)} GBP`, { fontSize: 12 }),
-          new TextBlock('Discounts are shown per line. Negative quantities are returns.'),
-          new QRCode({ data: 'https://example.com/receipts/4022', size: 72, altText: 'Open receipt 4022 online.' }),
-          new Barcode({
-            value: '4022',
-            symbology: BarcodeSymbology.Code128,
-            moduleWidth: 1.5,
-            height: 38,
-            altText: 'Receipt number 4022.',
-          }),
-          new TextBlock('Thank you for shopping with us.'),
-        ],
+    new Heading('SAMPLE COFFEE', {
+      level: 1,
+      fontName: StandardFonts.CourierBold,
+      fontSize: 13,
+      color: INK,
+      alignment: 'center',
+      margin: { bottom: 3 },
+    })
+  );
+  doc.add(center('123 Harbour Road, Bristol BS1 4RW'));
+  doc.add(rule());
+  doc.add(row('Receipt', '#4022', { weights: [1, 2] }));
+  doc.add(row('Date', '25 Oct 2026 16:42', { weights: [1, 2] }));
+  doc.add(row('Customer', 'Zoë Dvořák', { weights: [1, 2] }));
+  doc.add(rule());
+
+  for (const line of lines) {
+    doc.add(row(`${line.quantity} x ${line.name}`, money(line.quantity * line.unitPence)));
+    if (line.discountPence) doc.add(row('    Discount', money(-line.discountPence), { color: MUTE }));
+  }
+  if (!lines.length) doc.add(row('No purchases', money(0)));
+
+  doc.add(rule());
+  doc.add(row('Items', String(lines.filter(line => line.quantity > 0).length)));
+  doc.add(row('Discounts', money(-discounts)));
+  doc.add(row('TOTAL GBP', money(total), { bold: true, size: 11 }));
+  doc.add(rule());
+  doc.add(center('Negative quantities are returns.'));
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      margin: { top: 10, bottom: 8 },
+      child: new QRCode({ data: 'https://example.com/receipts/4022', size: 72, altText: 'Open receipt 4022 online.' }),
+    })
+  );
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      child: new Barcode({
+        value: '4022',
+        symbology: BarcodeSymbology.Code128,
+        moduleWidth: 1.5,
+        height: 38,
+        altText: 'Receipt number 4022.',
       }),
     })
   );
+  doc.add(center('Thank you for shopping with us.', 6));
   return doc;
+}
+
+// Local helpers used by this document.
+
+function money(pence: number): string {
+  return (pence / 100).toFixed(2);
+}
+
+/** A centred line of receipt text. */
+function center(text: string, marginTop = 0): TextBlock {
+  return new TextBlock(text, {
+    fontName: StandardFonts.Courier,
+    fontSize: 8,
+    color: MUTE,
+    alignment: 'center',
+    margin: { top: marginTop },
+  });
+}
+
+/** An item and its amount: the text wraps on the left, the amount hugs the right edge. */
+function row(
+  label: string,
+  value: string,
+  o: { bold?: boolean; size?: number; color?: ColorInput; weights?: [number, number] } = {}
+): HorizontalStack {
+  const font = o.bold ? StandardFonts.CourierBold : StandardFonts.Courier;
+  const text = (content: string, alignment: TextAlignmentInput) =>
+    new TextBlock(content, { fontName: font, fontSize: o.size ?? 8.5, color: o.color ?? INK, alignment });
+  const line = new HorizontalStack({ widthDistribution: 'weighted', spacing: 6, margin: { top: 1.5, bottom: 1.5 } });
+  const [labelWeight, valueWeight] = o.weights ?? [3.2, 1];
+  line.add(text(label, 'left'), labelWeight);
+  line.add(text(value, 'right'), valueWeight);
+  return line;
+}
+
+/** A dashed tear-line rule, the way a thermal printer separates sections. */
+function rule(): TextBlock {
+  return new TextBlock('- - - - - - - - - - - - - - - -', {
+    fontName: StandardFonts.Courier,
+    fontSize: 9,
+    color: MUTE,
+    alignment: 'center',
+    margin: { top: 5, bottom: 5 },
+  });
 }

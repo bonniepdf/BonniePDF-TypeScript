@@ -32,9 +32,11 @@ describe('the definition code stays out of the main entry', () => {
 
   it('is exported as a package subpath', () => {
     const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf8'));
-    expect(pkg.exports['./definition']).toMatchObject({
-      import: './dist/definition.js',
-      require: './dist/definition.cjs',
+    // Each format carries declarations of the same format: ES module types for
+    // `import`, CommonJS (`.d.cts`) for `require`.
+    expect(pkg.exports['./definition']).toEqual({
+      import: { types: './dist/definition.d.ts', default: './dist/definition.js' },
+      require: { types: './dist/definition.d.cts', default: './dist/definition.cjs' },
     });
   });
 });

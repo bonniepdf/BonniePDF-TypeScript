@@ -151,7 +151,7 @@ export function generate(): Document {
   doc.add(h2Align);
 
   const alignDesc = new TextBlock(
-    'When a stack has a fixed height and its children differ in height, stack.alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.'
+    'When a stack has a fixed height and its children differ in height, the stack’s alignment positions each child along the cross (vertical) axis. The same three boxes - 24pt, 42pt and 60pt tall - are shown top-aligned, centred, and bottom-aligned, side by side.'
   );
   alignDesc.margin = new Thickness(0, 0, 0, 8);
   doc.add(alignDesc);

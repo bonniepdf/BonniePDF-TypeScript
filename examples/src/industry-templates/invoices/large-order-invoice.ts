@@ -1,5 +1,19 @@
-/** A large order with discounts, mixed tax rates, and a totals block kept together. */
-import { Document, Heading, TextBlock, Table, VerticalStack, PreventPageBreak, pageTemplate } from '@bonniepdf/core';
+/** A 72-line invoice: a styled header row that repeats on every page, per-line discounts, mixed VAT rates, and the totals kept together on the last page. */
+import {
+  Container,
+  Document,
+  Grid,
+  Heading,
+  HorizontalStack,
+  PreventPageBreak,
+  StandardFonts,
+  Table,
+  TextBlock,
+  VerticalStack,
+  pageTemplate,
+  type ColorInput,
+  type TextAlignmentInput,
+} from '@bonniepdf/core';
 
 export interface InvoiceLine {
   description: string;
@@ -9,15 +23,48 @@ export interface InvoiceLine {
   taxPercent: number;
 }
 
+/** [product, unit price in pence, VAT %] - the supplier's catalogue. */
+const CATALOGUE: [string, number, number][] = [
+  ['LED panel 600 × 600, 40 W, 4000 K', 2_450, 20],
+  ['Emergency exit sign, maintained, 3 h', 4_890, 20],
+  ['Loft insulation roll, 200 mm × 5.2 m', 2_175, 0],
+  ['Thermostatic radiator valve, 15 mm', 1_299, 20],
+  ['Smart heating controller, wall-mounted', 13_900, 20],
+  ['Draught-proofing strip, 10 m', 699, 0],
+  ['Fire door closer, adjustable, size 2–4', 3_650, 20],
+  ['Mobility grab rail, 600 mm, white', 2_840, 0],
+  ['Hand sanitiser refill, 5 l', 1_575, 20],
+  ['Children’s safety gate, pressure-fit', 3_299, 20],
+  ['Low-energy extractor fan, 100 mm', 5_820, 5],
+  ['Solar PIR floodlight, 20 W', 4_495, 5],
+  ['Air-source heat pump service kit', 18_750, 5],
+  ['Water-saving tap aerator, pack of 10', 1_890, 20],
+  ['Ceiling tile, mineral fibre, box of 16', 3_120, 20],
+  ['Fire extinguisher, 2 kg CO₂, annual service', 2_250, 20],
+  ['Anti-slip stair nosing, 1 m', 1_640, 20],
+  ['Carbon monoxide alarm, sealed battery', 2_199, 20],
+  ['Wall-mounted defibrillator cabinet', 26_500, 0],
+  ['Cleaning trolley, two-bucket', 9_850, 20],
+  ['Signage pack, accessible toilets', 4_120, 0],
+  ['Window restrictor, cable lock', 899, 20],
+  ['Lighting control module, DALI', 11_400, 20],
+  ['Batteries, AA lithium, pack of 24', 2_380, 20],
+];
+const SITES = ['Riverside block A', 'Riverside block B', 'Station Road depot'];
+
 export function generate(): Document {
   return buildInvoice(
-    Array.from({ length: 72 }, (_, i) => ({
-      description: `Component ${i + 1}: replacement assembly with installation, commissioning and handover notes${i % 9 === 0 ? '; includes extended warranty and a detailed maintenance schedule for the customer site' : ''}.`,
-      quantity: (i % 4) + 1,
-      unitPence: 1299 + i * 25,
-      discountPence: i % 5 === 0 ? 150 : 0,
-      taxPercent: [20, 5, 0][i % 3],
-    }))
+    Array.from({ length: 72 }, (_, i) => {
+      const [product, unitPence, taxPercent] = CATALOGUE[i % CATALOGUE.length];
+      return {
+        description: `${product}, ${SITES[Math.floor(i / CATALOGUE.length)]}`,
+        quantity: (i % 4) + 1,
+        unitPence,
+        discountPence: i % 5 === 0 ? 150 : 0,
+        taxPercent,
+      };
+    }),
+    'PO-WFM-44817'
   );
 }
 
@@ -61,57 +108,217 @@ export function buildInvoice(lines: InvoiceLine[], purchaseOrder?: string): Docu
       margin: 42,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
-      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: 'slate-800' },
+      defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: 'slate-700' },
       footerTemplate: pageTemplate({
-        default: new TextBlock('INV-2026-072 · Page {{CurrentPage}} of {{TotalPages}}', {
-          fontSize: 9,
-          alignment: 'right',
+        default: new HorizontalStack({
+          widthDistribution: 'equal',
+          children: [
+            text('Northfield Supply Ltd  ·  VAT GB 318 4402 17', 8, 'slate-500'),
+            text('INV-2026-072  ·  page {{CurrentPage}} of {{TotalPages}}', 8, 'slate-500', { align: 'right' }),
+          ],
         }),
       }),
     },
   });
-  doc.add(new Heading('NORTHFIELD SUPPLY', { level: 1, fontSize: 25, color: 'indigo-700' }));
-  doc.add(new TextBlock('Invoice INV-2026-072 · 25 October 2026 · GBP', { margin: { bottom: 16 } }));
-  doc.add(
-    new TextBlock(
-      'Bill to: Westborough Facilities and Maintenance Services Limited\nCustomer site: 18 Riverside Industrial Estate, York YO1 1AA',
-      { margin: { bottom: 12 } }
+
+  // ── Header: brand and invoice details ──
+  const header = new Grid({ columns: [1, 1], border: 0, cellPadding: 0, margin: { bottom: 14 } });
+  header.addRow(
+    new VerticalStack({
+      spacing: 2,
+      children: [
+        new Heading('NORTHFIELD SUPPLY', {
+          level: 1,
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 20,
+          letterSpacing: 0.5,
+          color: 'indigo-700',
+        }),
+        text('Facilities and maintenance supplies', 9, 'slate-500'),
+      ],
+    }),
+    new VerticalStack({
+      spacing: 2,
+      children: [
+        text('INVOICE', 9, 'slate-900', { bold: true, align: 'right' }),
+        text('INV-2026-072', 14, 'slate-900', { bold: true, align: 'right' }),
+        text('Issued 25 October 2026  ·  due 24 November 2026', 9, 'slate-500', { align: 'right' }),
+      ],
+    })
+  );
+  doc.add(header);
+
+  const parties = new Grid({ columns: [1, 1, 1], border: 0, cellPadding: 0, margin: { bottom: 16 } });
+  parties.addRow(
+    party(
+      'BILL TO',
+      'Westborough Facilities and Maintenance Services Ltd',
+      'Accounts payable\n4 Minster Court, York YO1 7HH'
+    ),
+    party('DELIVER TO', 'Riverside Industrial Estate', 'Blocks A and B, and Station Road depot\nYork YO1 1AA'),
+    party(
+      'REFERENCES',
+      purchaseOrder ? `Purchase order ${purchaseOrder}` : 'No purchase order',
+      'Account WFM-0193\nCurrency GBP'
     )
   );
-  if (purchaseOrder) doc.add(new TextBlock(`Purchase order: ${purchaseOrder}`));
-  const table = new Table({ columns: [5, 0.5, 1, 1, 0.6, 1], repeatHeadersOnNewPage: true, cellPadding: 6 });
-  table.addHeader('Description', 'Qty', 'Unit GBP', 'Discount', 'Tax %', 'Net GBP');
+  doc.add(parties);
+
+  // ── Line items: the header row repeats at the top of every page ──
+  const table = new Table({
+    columns: [4.4, 0.6, 1, 1.1, 0.6, 1.1],
+    repeatHeadersOnNewPage: true,
+    cellPadding: 5,
+    border: { width: 0.5, color: 'slate-200' },
+    headerBackgroundColor: 'slate-800',
+    headerTextColor: '#ffffff',
+  });
+  table.addHeader(
+    text('Description', 8.5, '#ffffff', { bold: true }),
+    text('Qty', 8.5, '#ffffff', { bold: true, align: 'right' }),
+    text('Unit £', 8.5, '#ffffff', { bold: true, align: 'right' }),
+    text('Discount £', 8.5, '#ffffff', { bold: true, align: 'right' }),
+    text('VAT', 8.5, '#ffffff', { bold: true, align: 'right' }),
+    text('Net £', 8.5, '#ffffff', { bold: true, align: 'right' })
+  );
   for (const line of lines)
     table.addRow(
-      new TextBlock(line.description),
+      text(line.description, 9, 'slate-800'),
       ...[
         String(line.quantity),
         money(line.unitPence),
-        money(line.discountPence),
-        String(line.taxPercent),
+        line.discountPence ? money(line.discountPence) : '–',
+        `${line.taxPercent}%`,
         money(line.quantity * line.unitPence - line.discountPence),
-      ].map(value => new TextBlock(value, { alignment: 'right' }))
+      ].map(value => text(value, 9, 'slate-800', { align: 'right' }))
     );
   if (!lines.length) table.addRow('No billable items', '', '', '', '', '0.00');
   doc.add(table);
-  const summary = new VerticalStack({
-    spacing: 7,
-    margin: { top: 16 },
-    children: [new Heading('Invoice totals', { level: 2, fontSize: 17 })],
+
+  // ── Totals: kept together, so they always appear whole on the last page ──
+  const vat = new Table({
+    columns: [1, 1.4, 1.4],
+    cellPadding: 5,
+    border: 0,
+    headerBackgroundColor: 'slate-100',
+    headerTextColor: 'slate-900',
   });
-  for (const [rate, group] of [...totals.rates].sort(([a], [b]) => a - b))
-    summary.add(new TextBlock(`Tax ${rate}%: net ${money(group.netPence)} · tax ${money(group.taxPence)} GBP`));
-  summary.add(
-    new TextBlock(
-      `Net ${money(totals.netPence)} · Tax ${money(totals.taxPence)} · Total due ${money(totals.grossPence)} GBP`,
-      { fontWeight: 'bold' }
-    )
+  vat.addHeader(
+    text('VAT rate', 8.5, 'slate-900', { bold: true }),
+    text('Net £', 8.5, 'slate-900', { bold: true, align: 'right' }),
+    text('VAT £', 8.5, 'slate-900', { bold: true, align: 'right' })
   );
-  summary.add(new TextBlock('Payment terms: 30 days. Reference INV-2026-072 with your payment.'));
-  doc.add(new PreventPageBreak({ child: summary }));
+  for (const [rate, group] of [...totals.rates].sort(([a], [b]) => b - a))
+    vat.addRow(
+      text(`${rate}%`, 9, 'slate-700'),
+      text(money(group.netPence), 9, 'slate-700', { align: 'right' }),
+      text(money(group.taxPence), 9, 'slate-700', { align: 'right' })
+    );
+
+  const sums = new Grid({ columns: [1, 1], border: 0, cellPadding: 4 });
+  sums.addRow(
+    text('Net', 10, 'slate-700', { align: 'right' }),
+    text(`£${money(totals.netPence)}`, 10, 'slate-700', { align: 'right' })
+  );
+  sums.addRow(
+    text('VAT', 10, 'slate-700', { align: 'right' }),
+    text(`£${money(totals.taxPence)}`, 10, 'slate-700', { align: 'right' })
+  );
+
+  const due = new Container({
+    backgroundColor: 'indigo-50',
+    cornerRadius: 6,
+    padding: [10, 8],
+    margin: { top: 6 },
+    child: new HorizontalStack({
+      widthDistribution: 'equal',
+      children: [
+        text('Total due', 13, 'indigo-900', { bold: true }),
+        text(`£${money(totals.grossPence)}`, 13, 'indigo-900', { bold: true, align: 'right' }),
+      ],
+    }),
+  });
+
+  const totalsRow = new HorizontalStack({ spacing: 24, widthDistribution: 'weighted', margin: { top: 16 } });
+  totalsRow.add(
+    new VerticalStack({
+      spacing: 6,
+      children: [
+        new Heading('VAT summary', {
+          level: 2,
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 11,
+          color: 'slate-900',
+        }),
+        vat,
+      ],
+    }),
+    3
+  );
+  totalsRow.add(
+    new VerticalStack({
+      spacing: 6,
+      children: [
+        new Heading('Invoice totals', {
+          level: 2,
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 11,
+          color: 'slate-900',
+        }),
+        sums,
+        due,
+      ],
+    }),
+    2
+  );
+
+  doc.add(
+    new PreventPageBreak({
+      child: new VerticalStack({
+        children: [
+          totalsRow,
+          text(
+            'Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote INV-2026-072 with your payment.',
+            9,
+            'slate-600',
+            { top: 14 }
+          ),
+        ],
+      }),
+    })
+  );
   return doc;
 }
 
+// Local helpers used by this document.
+
 function money(pence: number): string {
-  return (pence / 100).toFixed(2);
+  return (pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function text(
+  content: string,
+  size: number,
+  color: ColorInput,
+  style: { bold?: boolean; align?: TextAlignmentInput; top?: number } = {}
+): TextBlock {
+  return new TextBlock(content, {
+    fontName: style.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
+    fontSize: size,
+    color,
+    alignment: style.align ?? 'left',
+    margin: style.top ? { top: style.top } : undefined,
+  });
+}
+
+/** A labelled address block. */
+function party(label: string, name: string, detail: string): VerticalStack {
+  return new VerticalStack({
+    spacing: 2,
+    children: [
+      text(label, 7.5, 'slate-500', { bold: true }),
+      text(name, 9.5, 'slate-900', { bold: true }),
+      text(detail, 9, 'slate-600'),
+    ],
+  });
 }

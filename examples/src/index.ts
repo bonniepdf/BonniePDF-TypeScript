@@ -613,7 +613,7 @@ export const examples: ExampleDef[] = [
     name: 'Advanced Typography',
     category: 'Text Styling',
     description:
-      'Superscript and subscript with baseline shift (H₂O, E=mc²), plus decoration styling: overlines, and coloured or thick underlines and strikethroughs.',
+      'A type-specimen sheet: superscript and subscript with baseline shift (H₂O, E=mc²), decoration styling (overlines, coloured or thick underlines and strikethroughs), letter and word spacing, line clamping, and paragraph indents, one ruled row per feature.',
     filename: 'advanced-typography.pdf',
     generate: advancedTypography,
     thumbnails: false,

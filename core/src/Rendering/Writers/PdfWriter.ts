@@ -218,6 +218,9 @@ export class PdfWriter implements IPdfWriter {
       [PdfKeys.Common.Subtype, '/Link'],
       [PdfKeys.Annotation.Rectangle, link.getRectangleString ? link.getRectangleString() : '[0 0 0 0]'],
       [PdfKeys.Annotation.Flags, '4'], // Print flag (required for PDF/A-1B)
+      // No border: the default is [0 0 1], which many viewers draw as a box
+      // around the link. A link's look belongs to its text (spec 11 §2).
+      [PdfKeys.Annotation.Border, '[0 0 0]'],
       // PDF/UA rule 7-18: /Contents must mirror the visible link
       // text. Emitted unconditionally - even untagged docs benefit, and
       // the field is a no-op for viewers that don't surface annotation

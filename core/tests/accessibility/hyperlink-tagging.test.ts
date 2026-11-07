@@ -53,6 +53,11 @@ describe('Hyperlink tagging', () => {
     expect(text).toContain('/Contents (Visit Example)');
   });
 
+  it('link annotation draws no border (spec 11 §2)', () => {
+    const text = generateTagged(d => d.add(makeLink('https://example.com', 'Visit Example')));
+    expect(text).toContain('/Border [0 0 0]');
+  });
+
   it('link text with parentheses is PDF-escaped in /Contents', () => {
     const text = generateTagged(d => d.add(makeLink('https://example.com', 'Click here (now)')));
     expect(text).toContain('/Contents (Click here \\(now\\))');

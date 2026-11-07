@@ -9,6 +9,7 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 ### Packaging
 
 - **Types resolve under `moduleResolution: "node16"` and `"nodenext"`:** the published declaration files now import their siblings with explicit `.js` extensions, as the JavaScript already did. Before, TypeScript applications using those settings saw no exports at all (`Module '"@bonniepdf/core"' has no exported member 'Document'`). Bundler resolution and runtime behaviour are unchanged. CI and the release workflow now typecheck a NodeNext consumer of every entry point against the built package.
+- **CommonJS declarations for `require`:** every entry point now ships `.d.cts` declarations, and the `require` conditions in `exports` point at them. CommonJS TypeScript projects on `moduleResolution: "node16"` (or on `"nodenext"` with TypeScript older than 5.8) used to get `TS1479` on every import, because the CommonJS build was described by ES module declarations. Runtime files and ES module consumers are unchanged. The consumer check now covers an ES module and a CommonJS consumer under `node16`.
 
 ### Document Engine & API
 

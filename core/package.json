@@ -19,44 +19,79 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "node": {
-        "types": "./dist/index.node.d.ts",
-        "import": "./dist/index.node.js",
-        "require": "./dist/index.node.cjs"
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.node.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.node.cjs"
+        }
       },
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./charts": {
-      "types": "./dist/charts.d.ts",
-      "import": "./dist/charts.js",
-      "require": "./dist/charts.cjs"
+      "import": {
+        "types": "./dist/charts.d.ts",
+        "default": "./dist/charts.js"
+      },
+      "require": {
+        "types": "./dist/charts.d.cts",
+        "default": "./dist/charts.cjs"
+      }
     },
     "./security": {
-      "types": "./dist/security.d.ts",
-      "import": "./dist/security.js",
-      "require": "./dist/security.cjs"
+      "import": {
+        "types": "./dist/security.d.ts",
+        "default": "./dist/security.js"
+      },
+      "require": {
+        "types": "./dist/security.d.cts",
+        "default": "./dist/security.cjs"
+      }
     },
     "./qr": {
-      "types": "./dist/qr.d.ts",
-      "import": "./dist/qr.js",
-      "require": "./dist/qr.cjs"
+      "import": {
+        "types": "./dist/qr.d.ts",
+        "default": "./dist/qr.js"
+      },
+      "require": {
+        "types": "./dist/qr.d.cts",
+        "default": "./dist/qr.cjs"
+      }
     },
     "./datamatrix": {
-      "types": "./dist/datamatrix.d.ts",
-      "import": "./dist/datamatrix.js",
-      "require": "./dist/datamatrix.cjs"
+      "import": {
+        "types": "./dist/datamatrix.d.ts",
+        "default": "./dist/datamatrix.js"
+      },
+      "require": {
+        "types": "./dist/datamatrix.d.cts",
+        "default": "./dist/datamatrix.cjs"
+      }
     },
     "./definition": {
-      "types": "./dist/definition.d.ts",
-      "import": "./dist/definition.js",
-      "require": "./dist/definition.cjs"
+      "import": {
+        "types": "./dist/definition.d.ts",
+        "default": "./dist/definition.js"
+      },
+      "require": {
+        "types": "./dist/definition.d.cts",
+        "default": "./dist/definition.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "node scripts/verify-chart-sources.mjs && tsup && tsup --config tsup.cjs.config.ts && node scripts/fix-esm-extensions.mjs dist && tsc --noEmit false --emitDeclarationOnly --declaration --declarationMap --outDir dist && node scripts/fix-esm-extensions.mjs dist",
+    "build": "node scripts/verify-chart-sources.mjs && tsup && tsup --config tsup.cjs.config.ts && node scripts/fix-esm-extensions.mjs dist && tsc --noEmit false --emitDeclarationOnly --declaration --declarationMap --outDir dist && node scripts/fix-esm-extensions.mjs dist && node scripts/emit-cjs-declarations.mjs dist",
     "check:consumer-types": "tsc -p scripts/consumer-types/tsconfig.json",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.tests.json",

@@ -15,9 +15,9 @@
 // options-object front door.
 
 import {
+  pageNumber,
   Document,
   TextBlock,
-  TextElementBase,
   Heading,
   VerticalStack,
   HorizontalStack,
@@ -30,6 +30,7 @@ import {
   PreventPageBreak,
   ColorPalette,
   StandardFonts,
+  Svg,
   type ColorInput,
   type TextAlignmentInput,
   pageTemplate,
@@ -73,7 +74,8 @@ const MODULES: Module[] = [
   { level: 6, code: 'CS6305', title: 'Ethics & Society in Computing', credits: 20, mark: 67 },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const crestSvg = new TextDecoder().decode(assets.get('images/svg/university-crest.svg'));
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -83,10 +85,11 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `Sample University  -  Transcript 20458812  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
-        ),
+        default: pageNumber('Sample University  -  Transcript 20458812  -  Page {page} of {total}', {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 8,
+          color: MUTED,
+        }),
       }),
     },
     metadata: {
@@ -99,14 +102,21 @@ export function generate(): Document {
   // ── Institution header ────────────────────────────────────────────────────
   const header = new Grid({ columns: [2.4, 1], cellPadding: 0, border: 0, margin: { bottom: 6 } });
   header.addRow(
-    new VerticalStack({
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 10,
       children: [
-        new TextBlock('SAMPLE UNIVERSITY', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 16,
-          color: NAVY,
+        new Svg({ svgData: crestSvg, width: 30, height: 35, altText: 'University of Sampleford heraldic crest' }),
+        new VerticalStack({
+          children: [
+            new TextBlock('SAMPLE UNIVERSITY', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 16,
+              color: NAVY,
+            }),
+            new TextBlock("Founded 1887 - Registrar's Office", { fontSize: 9, color: MUTED, margin: { top: 2 } }),
+          ],
         }),
-        new TextBlock("Founded 1887 - Registrar's Office", { fontSize: 9, color: MUTED, margin: { top: 2 } }),
       ],
     }),
     new TextBlock('ACADEMIC TRANSCRIPT', {

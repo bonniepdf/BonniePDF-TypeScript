@@ -21,6 +21,7 @@ import {
   Spacer,
   Heading,
   EnsureSpace,
+  Image,
   type IElement,
 } from '@bonniepdf/core';
 
@@ -258,7 +259,7 @@ const SEVERITY_ORDER: Severity[] = ['Critical', 'Major', 'Minor', 'Observation']
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const counts = countBy(DEFECTS, d => d.severity);
   const byTrade = countBy(DEFECTS, d => d.trade);
 
@@ -348,6 +349,31 @@ export function generate(): Document {
       ),
       { accent: STATUS.critical }
     )
+  );
+
+  doc.add(
+    new HorizontalStack({
+      widthDistribution: 'equal',
+      spacing: 10,
+      margin: { bottom: 6 },
+      children: [
+        evidenceCard(
+          asset(assets, 'images/inspection/s-002-cable-tray.jpg'),
+          'S-002 · Riser cable tray earth strap',
+          'Inspection photograph for S-002 showing cable tray coupling in Riser 2B with disconnected earth strap.'
+        ),
+        evidenceCard(
+          asset(assets, 'images/inspection/s-003-penetration.jpg'),
+          'S-003 · Unsealed fire penetration',
+          'Inspection photograph for S-003 showing three cables passing through an unsealed compartment wall penetration.'
+        ),
+        evidenceCard(
+          asset(assets, 'images/inspection/s-008-emergency-light.jpg'),
+          'S-008 · Corridor emergency bulkhead',
+          'Inspection photograph for S-008 showing corridor emergency bulkhead luminaire EM-2-14 unlit during key test.'
+        ),
+      ],
+    })
   );
 
   // ── Items by trade ─────────────────────────────────────────────────────────
@@ -711,4 +737,34 @@ function signatureRow(slots: IElement[]): HorizontalStack {
 
 function shortDate(d: Date): string {
   return GB_DATE.format(d);
+}
+
+function evidenceCard(imageData: Uint8Array, caption: string, altText: string): VerticalStack {
+  return new VerticalStack({
+    spacing: 4,
+    children: [
+      new Container({
+        height: 76,
+        cornerRadius: 4,
+        clipContent: true,
+        child: new Image({
+          imageData,
+          height: 76,
+          fitMode: 'cover',
+          altText,
+        }),
+      }),
+      new TextBlock(caption, {
+        fontName: StandardFonts.Helvetica,
+        fontSize: 8,
+        color: MUTED,
+      }),
+    ],
+  });
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

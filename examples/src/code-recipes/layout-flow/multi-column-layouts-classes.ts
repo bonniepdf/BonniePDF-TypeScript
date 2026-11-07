@@ -25,13 +25,14 @@ import {
   TextAlignment,
   ImageFitMode,
   PdfAConformance,
-  Placeholders,
 } from '@bonniepdf/core';
 
-/** A community newsletter's three front-page stories: headline and paragraphs. */
-const ARTICLE: [string, string[]][] = [
+/** A community newsletter's three front-page stories: headline, photo asset, alt text, and paragraphs. */
+const ARTICLE: [string, string, string, string[]][] = [
   [
     'Community garden opens',
+    'images/newsletter/community-garden.jpg',
+    'Raised timber beds and a greenhouse in the new Mill Lane community garden.',
     [
       'The community garden on Mill Lane opened its gates on Saturday after two years of planning. Forty raised beds, a greenhouse and a tool store now stand on what was an empty car park behind the station.',
       'Every bed has been taken for the first season, and a waiting list is open at the library desk. Volunteers meet on Wednesday evenings and Sunday mornings; no experience is needed and tools are provided.',
@@ -39,6 +40,8 @@ const ARTICLE: [string, string[]][] = [
   ],
   [
     'Library open later',
+    'images/newsletter/library.jpg',
+    'Reading tables with desk lamps in the refurbished central library.',
     [
       'The central library will stay open until 8pm on Tuesdays and Thursdays from next month. The change follows a survey in which most respondents asked for evening access to study space.',
       'The reading room has new tables with power at every seat, and study rooms can now be booked online up to a week ahead. Membership remains free for everyone who lives, works or studies in the town.',
@@ -46,6 +49,8 @@ const ARTICLE: [string, string[]][] = [
   ],
   [
     'High Street works',
+    'images/newsletter/high-street.jpg',
+    'Overnight resurfacing works along the High Street.',
     [
       'Work to resurface the High Street begins on 12 January and is expected to last six weeks. The road will close between 8pm and 6am, and the number 4 bus will divert along Station Road at night.',
       'Shops stay open throughout, and pavements will remain clear during trading hours. Updates will be posted on the noticeboard outside the town hall every Friday until the work is complete.',
@@ -86,15 +91,12 @@ const MARKET_HALL = [
  * `multi-column-layouts.ts` (an equivalence test binds the two). Reach for
  * the options form first; this variant exists to show what it desugars to.
  */
-export function generate(): Document {
-  // Same seeded source and same call order as the options variant, so the
-  // placeholder images match byte-for-byte.
-  const source = Placeholders.withSeed(42);
-
-  const articleColumns = ARTICLE.map(([heading, paragraphs]) => ({
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const articleColumns = ARTICLE.map(([heading, photoPath, altText, paragraphs]) => ({
     heading,
     paragraphs,
-    imageData: source.image({ width: 153, height: 64 }),
+    altText,
+    imageData: asset(assets, photoPath),
   }));
   const dividerParagraphs = { left: EDITOR, right: WHATS_ON };
   const balanceParagraphs = MARKET_HALL;
@@ -168,7 +170,7 @@ export function generate(): Document {
 
     const image = new Image();
     image.imageData = column.imageData;
-    image.altText = 'Abstract placeholder illustration.';
+    image.altText = column.altText;
     image.width = 153;
     image.height = 64;
     image.fitMode = ImageFitMode.Cover;
@@ -282,4 +284,10 @@ function columnOf(paragraphs: string[]): VerticalStack {
     column.add(paragraph);
   }
   return column;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

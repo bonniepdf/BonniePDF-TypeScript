@@ -7,6 +7,8 @@ import {
   VisualToc,
   HorizontalStack,
   VerticalStack,
+  Container,
+  Image,
   PageBreak,
   StandardFonts,
   TextElementBase,
@@ -16,6 +18,8 @@ import {
 export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const bytes = assets?.get('novels/pg98.txt');
   if (!bytes) throw new Error('Supply novels/pg98.txt in the asset dictionary.');
+  const frontispiece = assets?.get('images/novels/frontispiece.png');
+  if (!frontispiece) throw new Error('Supply images/novels/frontispiece.png in the asset dictionary.');
   const sections = parseNovel(new TextDecoder().decode(bytes));
   const header = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0 });
   header.add(text('A Tale of Two Cities', StandardFonts.TimesItalic, 9, 'slate-500', 'left'), 1);
@@ -42,10 +46,24 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       subject: 'Project Gutenberg eBook #98 - A public domain classic.',
     },
   });
-  doc.add(heading('A TALE OF TWO CITIES', 'title', 1, 28, 'slate-900', 100, 12));
-  doc.add(text('A Story of the French Revolution', StandardFonts.TimesItalic, 15, 'slate-600', 'center', 0, 40));
-  doc.add(text('---------------', StandardFonts.TimesRoman, 13, 'slate-600', 'center', 0, 40));
-  doc.add(text('Charles Dickens', StandardFonts.TimesBold, 20, 'slate-800', 'center', 0, 60));
+  doc.add(heading('A TALE OF TWO CITIES', 'title', 1, 28, 'slate-900', 28, 10));
+  doc.add(text('A Story of the French Revolution', StandardFonts.TimesItalic, 15, 'slate-600', 'center', 0, 20));
+  doc.add(
+    new Container({
+      horizontalAlignment: 'center',
+      margin: { bottom: 20 },
+      child: new Image({
+        imageData: frontispiece,
+        width: 190,
+        height: 253,
+        fitMode: 'contain',
+        altText:
+          'Engraved frontispiece showing a narrow cobbled street in eighteenth-century Paris with a spilled wine cask outside a wine shop.',
+      }),
+    })
+  );
+  doc.add(text('---------------', StandardFonts.TimesRoman, 13, 'slate-600', 'center', 0, 20));
+  doc.add(text('Charles Dickens', StandardFonts.TimesBold, 20, 'slate-800', 'center', 0, 28));
   doc.add(text('Project Gutenberg Edition · eBook #98', StandardFonts.TimesRoman, 10, 'slate-600', 'center', 0, 4));
   doc.add(text('Public domain - free to read, copy, and share.', StandardFonts.TimesItalic, 9, 'slate-600', 'center'));
   doc.addPage();

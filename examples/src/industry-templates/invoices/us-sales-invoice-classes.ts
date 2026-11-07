@@ -17,6 +17,7 @@ import {
   Container,
   Table,
   Grid,
+  Svg,
   Color,
   ColorPalette,
   Thickness,
@@ -29,6 +30,18 @@ import {
   type IElement,
   type TextAlignmentInput,
 } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 const INK = ColorPalette.slate[700];
 
@@ -72,7 +85,7 @@ const COUNTY_TAX_RATE = 0.0225; // district add-on
  * It renders **byte-for-byte identically** to the options-style
  * `us-sales-invoice.ts` (an equivalence test binds the two).
  */
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const now = new Date();
   const year = now.getFullYear();
   const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -98,8 +111,19 @@ export function generate(): Document {
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 16, 0, 18);
+  const logo = new Svg();
+  logo.svgData = logoMarkup(assets);
+  logo.width = 26;
+  logo.height = 26;
+  logo.isDecorative = true;
+  const brandRow = new HorizontalStack();
+  brandRow.widthDistribution = WidthDistribution.Auto;
+  brandRow.spacing = 8;
+  brandRow.margin = new Thickness(0, 0, 0, 4);
+  brandRow.add(logo);
+  brandRow.add(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 4, 0, 0) }));
   const seller = new VerticalStack();
-  seller.add(cell('Sample Company Inc.', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }));
+  seller.add(brandRow);
   seller.add(lines(['500 Market Street, Suite 1200', 'San Francisco, CA 94105', 'EIN 47-0912288'], { color: MUTED }));
   const title = new Heading('INVOICE');
   title.level = 1;

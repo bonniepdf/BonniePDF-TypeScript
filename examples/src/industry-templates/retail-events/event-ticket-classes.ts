@@ -16,7 +16,6 @@ import {
   DocumentSettings,
   DocumentMetadata,
   PdfSize,
-  PageOrientation,
   PdfAConformance,
   AccessibilityMode,
   TextStyle,
@@ -60,7 +59,7 @@ const STUB = ColorPalette.slate[800];
 export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   // Landscape boarding-pass style ticket: 640 x 300 pt.
   const settings = new DocumentSettings(new PdfSize(640, 300, 'Event Ticket'), 0);
-  settings.orientation = PageOrientation.Landscape;
+  settings.preservePageDimensions = true;
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
   settings.language = 'en-GB';

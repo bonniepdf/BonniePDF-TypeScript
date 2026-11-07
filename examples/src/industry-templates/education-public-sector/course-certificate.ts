@@ -25,7 +25,6 @@
 
 import {
   CanvasElement,
-  Color,
   Container,
   Document,
   DocumentMetadata,
@@ -37,6 +36,7 @@ import {
   QRCode,
   Spacer,
   StandardFonts,
+  Svg,
   TextBlock,
   VerticalStack,
   ColorPalette,
@@ -49,7 +49,6 @@ const MUTED = ColorPalette.slate[500];
 const FAINT = ColorPalette.slate[400];
 const ACCENT = ColorPalette.indigo[700];
 const ACCENT_MID = ColorPalette.indigo[400];
-const ACCENT_SOFT = ColorPalette.indigo[100];
 const GOLD = ColorPalette.amber[600];
 // The seal's foil: light, mid and deep golds, with the deepest for its lettering.
 const FOIL_LIGHT = ColorPalette.amber[300];
@@ -89,8 +88,11 @@ export const sampleCertificate: CertificateData = {
   locale: 'en-GB',
 };
 
-export function generate(): Document {
-  return buildDocument(sampleCertificate);
+const FALLBACK_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" fill="none"/></svg>';
+
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+  return buildDocument(sampleCertificate, createCertificateSettings(), assets);
 }
 
 // Local helpers and sample types used by this document.
@@ -155,60 +157,6 @@ function ornamentalFrame(): CanvasElement {
 }
 
 /**
- * The crest: a restrained circular monogram with four small gold lozenges.
- * Drawn rather than embedded so it scales cleanly and carries no bitmap payload.
- */
-function sealMedallion(institutionName: string): CanvasElement {
-  return new CanvasElement(
-    (canvas, size) => {
-      const cx = size.width / 2;
-      const cy = size.height / 2;
-      const outer = Math.min(cx, cy) - 6;
-      const gold = GOLD;
-      const soft = ACCENT_SOFT;
-      const deep = ACCENT;
-
-      // Four restrained lozenges give the crest a ceremonial detail without
-      // the visual noise of a full starburst.
-      for (const a of [0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2]) {
-        const distance = outer + 3.5;
-        const px = cx + Math.cos(a) * distance;
-        const py = cy + Math.sin(a) * distance;
-        const tangentX = Math.cos(a + Math.PI / 2) * 2.5;
-        const tangentY = Math.sin(a + Math.PI / 2) * 2.5;
-        const radialX = Math.cos(a) * 3.5;
-        const radialY = Math.sin(a) * 3.5;
-        canvas.fillPath(
-          [
-            { x: px + radialX, y: py + radialY },
-            { x: px + tangentX, y: py + tangentY },
-            { x: px - radialX, y: py - radialY },
-            { x: px - tangentX, y: py - tangentY },
-          ],
-          gold
-        );
-      }
-
-      canvas.fillCircle(cx, cy, outer, deep);
-      canvas.fillCircle(cx, cy, outer - 1.5, Color.white);
-      canvas.fillCircle(cx, cy, outer - 4.5, soft);
-
-      const monogram = institutionName
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map(word => word[0])
-        .join('')
-        .toUpperCase();
-      const fontSize = 13;
-      const width = canvas.measureText(monogram, fontSize, SERIF_BOLD).width;
-      canvas.drawText(cx - width / 2, cy - fontSize / 2, monogram, deep, fontSize, SERIF_BOLD, 0);
-    },
-    { drawWidth: 52, drawHeight: 52, isDecorative: true }
-  );
-}
-
-/**
  * The seal: a gold starburst with foil-toned rings and the award's grade, on two ribbon tails.
  * Shades of gold stand in for foil, so the seal prints the same on any printer.
  */
@@ -261,10 +209,16 @@ function goldSeal(institutionName: string, grade: string): CanvasElement {
   );
 }
 
-function institutionCrest(name: string): HorizontalStack {
+function institutionCrest(crestSvg: string): HorizontalStack {
   const row = new HorizontalStack({ widthDistribution: 'weighted', margin: { bottom: 7 } });
   row.add(new Spacer(1), 1);
-  row.add(new Container({ child: sealMedallion(name) }), 0.15);
+  row.add(
+    new Container({
+      horizontalAlignment: 'center',
+      child: new Svg({ svgData: crestSvg, width: 32, height: 37, altText: 'Institutional crest' }),
+    }),
+    0.15
+  );
   row.add(new Spacer(1), 1);
   return row;
 }
@@ -285,10 +239,10 @@ function signatureColumn(name: string, role: string): VerticalStack {
 }
 
 /** The wording, centred and stacked — the part actually read aloud. */
-function citation(data: CertificateData): VerticalStack {
+function citation(data: CertificateData, crestSvg: string, guillocheSvg: string): VerticalStack {
   return new VerticalStack({
     children: [
-      institutionCrest(data.institution.name),
+      institutionCrest(crestSvg),
       new TextBlock(data.institution.name.toUpperCase(), {
         fontName: SANS,
         fontSize: 9,
@@ -309,7 +263,12 @@ function citation(data: CertificateData): VerticalStack {
       new Container({
         height: 1,
         backgroundColor: ACCENT_MID,
-        margin: { left: 210, right: 210, bottom: 16 },
+        margin: { left: 210, right: 210, bottom: 6 },
+      }),
+      new Container({
+        horizontalAlignment: 'center',
+        margin: { bottom: 8 },
+        child: new Svg({ svgData: guillocheSvg, height: 14, isDecorative: true }),
       }),
 
       new TextBlock('This is to certify that', {
@@ -427,8 +386,14 @@ export function createCertificateSettings(): DocumentSettings {
 
 export function buildDocument(
   data: CertificateData,
-  settings: DocumentSettings = createCertificateSettings()
+  settings: DocumentSettings = createCertificateSettings(),
+  assets?: ReadonlyMap<string, Uint8Array>
 ): Document {
+  const crestBytes = assets?.get('images/svg/university-crest.svg');
+  const crestSvg = crestBytes ? new TextDecoder().decode(crestBytes) : FALLBACK_SVG;
+  const guillocheBytes = assets?.get('images/svg/guilloche.svg');
+  const guillocheSvg = guillocheBytes ? new TextDecoder().decode(guillocheBytes) : FALLBACK_SVG;
+
   const doc = new Document(
     settings,
     new DocumentMetadata({
@@ -442,10 +407,10 @@ export function buildDocument(
   // as the primary layer, which is also what sets the block's flow height.
   // A leading spacer settles the wording into the frame rather than letting it
   // start hard against the top rule; the frame's fixed height does the rest.
-  // 30pt clears the crest's own lozenge points (which reach to the very top of
-  // its 52pt box) past the frame's inner rule at 16pt inset - without this the
-  // crest visually crosses the border instead of sitting inside it.
-  const body = new VerticalStack({ children: [new Spacer(30), citation(data), attestation(data)] });
+  // 30pt clears the crest past the frame's inner rule at 16pt inset.
+  const body = new VerticalStack({
+    children: [new Spacer(30), citation(data, crestSvg, guillocheSvg), attestation(data)],
+  });
 
   const framed = new Layers();
   framed.addBackground(ornamentalFrame());

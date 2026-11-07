@@ -8,9 +8,11 @@ import {
   Document,
   Heading,
   HorizontalStack,
+  Image,
   PdfSize,
   QRCode,
   StandardFonts,
+  Svg,
   TextBlock,
   VerticalStack,
 } from '@bonniepdf/core';
@@ -23,7 +25,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       pageSize: DL,
-      orientation: 'landscape',
+      preservePageDimensions: true,
       margin: 0,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
@@ -35,34 +37,59 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const bytes = assets.get('fonts/SourceSerif4-Regular.ttf');
   if (!bytes) throw new Error('Supply fonts/SourceSerif4-Regular.ttf.');
   const serif = doc.fonts.add(bytes).fontName;
+  const voucherPhoto = assets.get('images/hospitality/voucher.jpg');
+  if (!voucherPhoto) throw new Error('Supply images/hospitality/voucher.jpg.');
+  const sprigBytes = assets.get('images/svg/the-larder.svg');
+  if (!sprigBytes) throw new Error('Supply images/svg/the-larder.svg.');
+  const sprigSvg = new TextDecoder().decode(sprigBytes);
 
   // ── The voucher: dark, with the value large ──
   const voucher = new Container({
     backgroundColor: 'stone-900',
     height: DL.height,
-    padding: [30, 26],
+    padding: [28, 14],
     child: new VerticalStack({
-      spacing: 4,
+      spacing: 2,
       children: [
-        new TextBlock('THE LARDER  ·  GIFT VOUCHER', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 8,
-          letterSpacing: 2.5,
-          color: 'amber-300',
-          margin: { bottom: 10 },
+        new HorizontalStack({
+          widthDistribution: 'auto',
+          spacing: 6,
+          margin: { bottom: 2 },
+          children: [
+            new Svg({ svgData: sprigSvg, width: 22, height: 22, isDecorative: true }),
+            new TextBlock('THE LARDER  ·  GIFT VOUCHER', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 8,
+              letterSpacing: 2.5,
+              color: 'amber-300',
+              margin: { top: 6 },
+            }),
+          ],
         }),
-        new Heading('A gift for dinner', { level: 1, fontName: serif, fontSize: 28, color: '#ffffff', margin: 0 }),
-        new TextBlock('£100', { fontName: serif, fontSize: 46, color: 'amber-200' }),
+        new Container({
+          height: 56,
+          cornerRadius: 4,
+          clipContent: true,
+          margin: { bottom: 2 },
+          child: new Image({
+            imageData: voucherPhoto,
+            height: 56,
+            fitMode: 'cover',
+            altText: 'Candlelit dining room tables laid with white linen and glassware.',
+          }),
+        }),
+        new Heading('A gift for dinner', { level: 1, fontName: serif, fontSize: 22, color: '#ffffff', margin: 0 }),
+        new TextBlock('£100', { fontName: serif, fontSize: 36, color: 'amber-200' }),
         new TextBlock('to spend on food and drink, at lunch or dinner, any day we are open', {
-          fontSize: 9,
+          fontSize: 8.5,
           color: 'stone-300',
-          margin: { bottom: 12 },
+          margin: { bottom: 2 },
         }),
         new TextBlock('For Priya Shah, with love from Tom', {
           fontName: serif,
-          fontSize: 13,
+          fontSize: 12,
           color: '#ffffff',
-          margin: { bottom: 14 },
+          margin: { bottom: 4 },
         }),
         new HorizontalStack({
           widthDistribution: 'auto',

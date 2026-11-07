@@ -61,7 +61,7 @@ export function generate(): Document {
   const doc = new Document({
     settings: {
       pageSize: 'a4',
-      margin: 42,
+      margins: { left: 48, top: 42, right: 36, bottom: 42 },
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
@@ -237,17 +237,13 @@ function declaration(label: string, text: string): VerticalStack {
 }
 
 /** A conforming result's status, as a small chip. */
-function pass(): HorizontalStack {
-  return new HorizontalStack({
-    widthDistribution: 'auto',
-    children: [
-      new Container({
-        backgroundColor: 'emerald-50',
-        cornerRadius: 3,
-        padding: [5, 1.5],
-        child: tb('Pass', 7.5, 'emerald-800', { bold: true }),
-      }),
-    ],
+function pass(): Container {
+  return new Container({
+    fitContent: true,
+    backgroundColor: 'emerald-50',
+    cornerRadius: 3,
+    padding: [5, 1.5],
+    child: tb('Pass', 7.5, 'emerald-800', { bold: true }),
   });
 }
 

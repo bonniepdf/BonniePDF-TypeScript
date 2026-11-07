@@ -96,11 +96,12 @@ export function generate(): Document {
       children: [
         tb('PRODUCT, BATCH, EXPIRY', 6, MUTE, { bold: true }),
         new DataMatrix({
-          data: '(01)15060000000002(10)24-1187(17)291013',
+          data: '0115060000000006172910131024-1187',
+          gs1: true,
           size: 46,
           quietZone: 1,
           foregroundColor: INK,
-          altText: 'DataMatrix code: product 15060000000002, batch 24-1187, expiry 13 October 2029',
+          altText: 'DataMatrix code: product 15060000000006, batch 24-1187, expiry 13 October 2029',
         }),
       ],
     })
@@ -113,12 +114,13 @@ export function generate(): Document {
       new Barcode({
         value: '00350600000000000017',
         symbology: BarcodeSymbology.Code128,
+        gs1: true,
         height: 72,
         moduleWidth: 0.95,
         foregroundColor: INK,
         backgroundColor: '#ffffff',
         textLabelFontSize: 7,
-        altText: 'Code 128 barcode of the serial shipping container code 00350600000000000017',
+        altText: 'GS1-128 barcode of the serial shipping container code 350600000000000017',
       }),
     ],
   });

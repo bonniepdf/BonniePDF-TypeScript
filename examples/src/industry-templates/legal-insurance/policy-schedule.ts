@@ -18,6 +18,7 @@
 // self-contained — no shared kit. Authored through the options-object front door.
 
 import {
+  pageNumber,
   Document,
   TextBlock,
   Heading,
@@ -25,7 +26,6 @@ import {
   Container,
   Table,
   Grid,
-  TextElementBase,
   QRCode,
   StandardFonts,
   TextAlignment,
@@ -244,16 +244,20 @@ export function buildDocument(data: PolicyScheduleData): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
       headerTemplate: pageTemplate({
-        default: new TextBlock(
-          `${data.insurer.name} · Policy ${data.policy.number} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Left }
-        ),
+        default: pageNumber(`${data.insurer.name} · Policy ${data.policy.number} · Page {page} of {total}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 7.5,
+          color: FAINT,
+          alignment: TextAlignment.Left,
+        }),
       }),
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `${data.policy.product} · Renewal ${data.policy.renewal} · Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
-          { fontName: StandardFonts.Helvetica, fontSize: 7.5, color: FAINT, alignment: TextAlignment.Center }
-        ),
+        default: pageNumber(`${data.policy.product} · Renewal ${data.policy.renewal} · Page {page} of {total}`, {
+          fontName: StandardFonts.Helvetica,
+          fontSize: 7.5,
+          color: FAINT,
+          alignment: TextAlignment.Center,
+        }),
       }),
     },
     metadata: {

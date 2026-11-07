@@ -29,6 +29,8 @@ import {
   Spacer,
   type IElement,
   Heading,
+  Image,
+  ImageFitMode,
 } from '@bonniepdf/core';
 
 // ── Palette ──────────────────────────────────────────────────────────────────
@@ -145,7 +147,7 @@ const SEVERITY_COLOUR = {
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const labourTotal = LABOUR.reduce((sum, l) => sum + l.hours * l.rate, 0);
   const partsTotal = PARTS.filter(p => p.fitted).reduce((sum, p) => sum + p.quantity * p.unitPrice, 0);
   const onSite = (VISIT.completed.getTime() - VISIT.attended.getTime()) / 3_600_000;
@@ -221,14 +223,37 @@ export function generate(): Document {
 
   // ── Reported fault and work done ───────────────────────────────────────────
 
-  doc.add(h2('Fault reported'));
-  doc.add(
+  const faultText = new VerticalStack();
+  faultText.add(h2('Fault reported'));
+  faultText.add(
     body(
       'Occupier reported intermittent noise and reduced airflow from the level 2 supply grilles. ' +
         'Building management system showed the unit running but with supply air temperature drifting ' +
         'above setpoint during the morning occupancy period.'
     )
   );
+
+  const assetImage = new Image();
+  assetImage.imageData = asset(assets, 'images/field-service/ahu.jpg');
+  assetImage.width = 110;
+  assetImage.height = 82;
+  assetImage.fitMode = ImageFitMode.Cover;
+  assetImage.altText = 'Rooftop air handling unit with access panel open showing belt-driven fan.';
+
+  const assetPhoto = new Container();
+  assetPhoto.width = 110;
+  assetPhoto.height = 82;
+  assetPhoto.cornerRadius = 6;
+  assetPhoto.clipContent = true;
+  assetPhoto.margin = new Thickness(0, 14, 0, 0);
+  assetPhoto.child = assetImage;
+
+  const faultSummary = new HorizontalStack();
+  faultSummary.widthDistribution = WidthDistribution.Weighted;
+  faultSummary.spacing = 14;
+  faultSummary.add(faultText, 3.4);
+  faultSummary.add(assetPhoto, 1);
+  doc.add(faultSummary);
 
   doc.add(h2('Work carried out'));
   doc.add(
@@ -690,4 +715,10 @@ function gbp(value: number): string {
 /** Decimal hours, as engineers record them: 1.5, 0.75. */
 function hours(value: number): string {
   return `${value.toFixed(2)} h`;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

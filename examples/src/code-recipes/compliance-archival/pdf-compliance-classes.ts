@@ -18,6 +18,7 @@ import {
   HorizontalStack,
   PdfAConformance,
   StandardFonts,
+  Svg,
   Table,
   TextAlignment,
   TextBlock,
@@ -41,7 +42,7 @@ const CHARGES: [string, string][] = [
 ];
 
 /** The construct-then-mutate companion to `pdf-compliance.ts`. */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   // ── Footer: the sender on the left, a discreet standards badge on the right ──
   const sender = new TextBlock('Sample Borough Council  ·  Revenues and Benefits');
   sender.fontSize = 8;
@@ -80,15 +81,25 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Masthead and address ──
+  const crest = new Svg();
+  crest.svgData = svgAsset(assets, 'images/svg/borough-crest.svg');
+  crest.width = 24;
+  crest.height = 24;
+  crest.altText = 'Sample Borough Council crest';
   const councilName = new TextBlock('Sample Borough Council');
   councilName.fontName = StandardFonts.HelveticaBold;
   councilName.fontSize = 17;
   councilName.color = Color.white;
+  const mastheadRow = new HorizontalStack();
+  mastheadRow.widthDistribution = WidthDistribution.Weighted;
+  mastheadRow.spacing = 10;
+  mastheadRow.add(crest);
+  mastheadRow.add(councilName, 1);
   const masthead = new Container();
   masthead.backgroundColor = COUNCIL;
   masthead.padding = new Thickness(16, 12, 16, 12);
   masthead.margin = new Thickness(0, 0, 0, 20);
-  masthead.child = councilName;
+  masthead.child = mastheadRow;
   doc.add(masthead);
 
   const address = new TextBlock('Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR');
@@ -185,4 +196,14 @@ export function generate(): Document {
   doc.add(note);
 
   return doc;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
+}
+
+function svgAsset(assets: ReadonlyMap<string, Uint8Array>, path: string): string {
+  return new TextDecoder().decode(asset(assets, path));
 }

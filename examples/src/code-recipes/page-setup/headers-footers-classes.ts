@@ -8,8 +8,11 @@ import {
   Document,
   Heading,
   HorizontalStack,
+  Image,
+  ImageFitMode,
   PageBreak,
   StandardFonts,
+  Svg,
   Table,
   TextAlignment,
   TextBlock,
@@ -83,7 +86,7 @@ const DEPOTS: [string, string, string, string][] = [
   ['York', '600', '97.8%', '92.2%'],
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document();
   doc.metadata.title = 'Operations review Q3 2026';
   doc.settings.language = 'en-GB';
@@ -98,10 +101,18 @@ export function generate(): Document {
   // Page one carries the larger brand line; later pages alternate so the
   // brand and the page number always sit on the outer edge, as in a printed report.
   const teal = ColorPalette.teal[700];
+  const mark = new Svg();
+  mark.svgData = svgAsset(assets, 'images/svg/northfield.svg');
+  mark.width = 14;
+  mark.height = 14;
+  mark.isDecorative = true;
+
   const firstPage = new HorizontalStack();
-  firstPage.widthDistribution = WidthDistribution.Equal;
-  firstPage.add(small(BRAND, TextAlignment.Left, true, 11, teal));
-  firstPage.add(small('Board pack  \u00b7  14 October 2026', TextAlignment.Right));
+  firstPage.widthDistribution = WidthDistribution.Weighted;
+  firstPage.spacing = 6;
+  firstPage.add(mark);
+  firstPage.add(small(BRAND, TextAlignment.Left, true, 11, teal), 1);
+  firstPage.add(small('Board pack  \u00b7  14 October 2026', TextAlignment.Right), 1);
   doc.settings.headerTemplate = pageTemplate({
     firstPage,
     odd: running(small(TITLE, TextAlignment.Left), small(BRAND, TextAlignment.Right, true, 8.5, teal), 'header'),
@@ -131,8 +142,22 @@ export function generate(): Document {
   const subtitle = new TextBlock('July to September 2026. Prepared for the board by the operations team.');
   subtitle.fontSize = 12;
   subtitle.color = ColorPalette.slate[600];
-  subtitle.margin = new Thickness(0, 0, 0, 18);
+  subtitle.margin = new Thickness(0, 0, 0, 10);
   doc.add(subtitle);
+
+  const depotImage = new Image();
+  depotImage.imageData = asset(assets, 'images/logistics/depot.jpg');
+  depotImage.height = 95;
+  depotImage.fitMode = ImageFitMode.Cover;
+  depotImage.altText = 'Northfield distribution depot loading bays at dawn.';
+
+  const depotBanner = new Container();
+  depotBanner.height = 95;
+  depotBanner.cornerRadius = 6;
+  depotBanner.clipContent = true;
+  depotBanner.margin = new Thickness(0, 0, 0, 12);
+  depotBanner.child = depotImage;
+  doc.add(depotBanner);
 
   const kpis = new Table(3, 1.2, 1.2);
   kpis.cellPadding = 7;
@@ -152,11 +177,11 @@ export function generate(): Document {
   doc.add(kpiWrap);
 
   for (const [heading, paragraphs] of SECTIONS) {
-    doc.add(sectionHeading(heading, 14));
+    doc.add(sectionHeading(heading, 10, 4));
     for (const paragraph of paragraphs) {
       const block = new TextBlock(paragraph);
-      block.lineHeight = 1.5;
-      block.margin = new Thickness(0, 0, 0, 8);
+      block.lineHeight = 1.4;
+      block.margin = new Thickness(0, 0, 0, 6);
       doc.add(block);
     }
   }
@@ -193,13 +218,13 @@ export function generate(): Document {
 // Local helpers used by this document.
 
 /** A 15pt section heading. */
-function sectionHeading(text: string, top: number): Heading {
+function sectionHeading(text: string, top: number, bottom = 6): Heading {
   const heading = new Heading(text);
   heading.level = 2;
   heading.fontName = StandardFonts.HelveticaBold;
   heading.fontSize = 15;
   heading.color = ColorPalette.slate[900];
-  heading.margin = new Thickness(0, top, 0, 6);
+  heading.margin = new Thickness(0, top, 0, bottom);
   return heading;
 }
 
@@ -242,4 +267,14 @@ function cell(text: string, alignment: TextAlignment, bold = false): TextBlock {
   block.fontSize = 10;
   block.alignment = alignment;
   return block;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
+}
+
+function svgAsset(assets: ReadonlyMap<string, Uint8Array>, path: string): string {
+  return new TextDecoder().decode(asset(assets, path));
 }

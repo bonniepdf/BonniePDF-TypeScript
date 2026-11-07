@@ -22,6 +22,7 @@
 // Everything derives from `ContractData`. Output is PDF/A-2a + PDF/UA-1.
 
 import {
+  pageNumber,
   BookmarkItem,
   Container,
   Document,
@@ -36,7 +37,6 @@ import {
   StandardFonts,
   Table,
   TextBlock,
-  TextElementBase,
   VerticalStack,
   ColorPalette,
   type IElement,
@@ -422,7 +422,7 @@ export function createContractSettings(data: ContractData = sampleContract): Doc
     }),
   });
   settings.footerTemplate = pageTemplate({
-    default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+    default: pageNumber(undefined, {
       fontName: HELVETICA,
       fontSize: 7,
       color: FAINT,

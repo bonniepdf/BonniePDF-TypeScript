@@ -10,14 +10,15 @@
 import {
   Barcode,
   BarcodeSymbology,
-  CanvasElement,
-  ColorPalette,
+  ChartData,
+  LineChart,
   Container,
   Document,
   Grid,
   Heading,
   HorizontalStack,
   StandardFonts,
+  Svg,
   Table,
   TableCell,
   TableRow,
@@ -25,7 +26,6 @@ import {
   TextBlock,
   VerticalStack,
   type ColorInput,
-  type ICanvas,
   type IElement,
 } from '@bonniepdf/core';
 
@@ -91,7 +91,8 @@ const NEXT_STEPS: [string, string][] = [
   ['Echocardiogram', 'Booked for 2 July 2026'],
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markSvg = new TextDecoder().decode(assets.get('images/svg/sample-healthcare.svg'));
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -110,7 +111,7 @@ export function generate(): Document {
 
   // ── Trust masthead ──
   const masthead = new HorizontalStack({ widthDistribution: 'weighted', spacing: 10 });
-  masthead.add(trustMark());
+  masthead.add(new Svg({ svgData: markSvg, width: 24, height: 24, isDecorative: true }));
   masthead.add(
     new VerticalStack({
       spacing: 2,
@@ -267,13 +268,20 @@ export function generate(): Document {
   const chart = new VerticalStack({
     spacing: 4,
     children: [
-      new CanvasElement(drawInrChart, {
-        drawWidth: 0,
-        drawHeight: 112,
+      new LineChart({
+        data: new ChartData({
+          series: [{ color: 'teal-700', dataPoints: INR.map(([label, value]) => ({ label, value })) }],
+          yAxis: { minValue: 1, maxValue: 4, stepCount: 3 },
+        }),
+        height: 112,
+        stretchToFit: true,
+        theme: 'modern',
+        showValueLabels: false,
+        references: [{ value: 2, endValue: 3, color: 'teal-50' }],
         altText:
           'INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.',
       }),
-      tb('Weekly INR. The band is the target range; red points fell outside it.', 7, MUTE),
+      tb('Weekly INR. Two readings fell outside the shaded target range.', 7, MUTE),
     ],
   });
   const clinical = new HorizontalStack({ widthDistribution: 'weighted', spacing: 18, margin: { bottom: 14 } });
@@ -394,23 +402,21 @@ function fact(label: string, value: string): VerticalStack {
 }
 
 /** A status pill: teal for an active problem, grey for a past one. */
-function pill(text: string, active: boolean): HorizontalStack {
-  return new HorizontalStack({
-    widthDistribution: 'auto',
-    children: [
-      new Container({
-        backgroundColor: active ? 'teal-50' : 'slate-100',
-        cornerRadius: 6,
-        padding: [6, 1.5],
-        child: tb(text, 7, active ? 'teal-800' : 'slate-600', { bold: true }),
-      }),
-    ],
+function pill(text: string, active: boolean): Container {
+  return new Container({
+    fitContent: true,
+    backgroundColor: active ? 'teal-50' : 'slate-100',
+    cornerRadius: 6,
+    padding: [6, 1.5],
+    child: tb(text, 7, active ? 'teal-800' : 'slate-600', { bold: true }),
   });
 }
 
 /** One observation: its latest value, a six-reading trend line, and its NEWS2 points. */
 function observation(name: string, value: string, unit: string, points: number, trend: number[]): Container {
   const flagged = points > 0;
+  const low = Math.min(...trend);
+  const high = Math.max(...trend);
   return new Container({
     backgroundColor: flagged ? 'amber-50' : 'slate-50',
     border: { width: 0.75, color: flagged ? 'amber-300' : 'slate-200' },
@@ -422,74 +428,20 @@ function observation(name: string, value: string, unit: string, points: number, 
         tb(name.toUpperCase(), 6.5, MUTE, { bold: true }),
         tb(value, 16, INK, { bold: true }),
         tb(unit, 7, MUTE),
-        new CanvasElement((canvas, size) => drawTrend(canvas, size.width, size.height, trend), {
-          drawWidth: 0,
-          drawHeight: 16,
+        new LineChart({
+          sparkline: true,
+          backgroundColor: flagged ? 'amber-50' : 'slate-50',
+          height: 16,
+          stretchToFit: true,
+          defaultLineWidth: 1,
+          data: new ChartData({
+            series: [{ color: 'teal-600', dataPoints: trend.map(value => ({ value })) }],
+            yAxis: { minValue: low, maxValue: high > low ? high : low + 1 },
+          }),
           altText: `${name}, last six readings: ${trend.join(', ')}`,
         }),
         tb(points === 0 ? 'NEWS2 0' : `NEWS2 ${points}`, 7, flagged ? 'amber-800' : 'teal-800', { bold: true }),
       ],
     }),
   });
-}
-
-/** A trend line through six readings, with the latest marked. */
-function drawTrend(canvas: ICanvas, width: number, height: number, values: number[]): void {
-  const low = Math.min(...values);
-  const high = Math.max(...values);
-  const span = high - low || 1;
-  const x = (i: number): number => 2 + (i * (width - 4)) / (values.length - 1);
-  const y = (v: number): number => height - 3 - ((v - low) * (height - 6)) / span;
-  for (let i = 1; i < values.length; i++)
-    canvas.drawLine(x(i - 1), y(values[i - 1]), x(i), y(values[i]), ColorPalette.teal[600], 1);
-  canvas.fillCircle(x(values.length - 1), y(values[values.length - 1]), 2, ColorPalette.teal[800]);
-}
-
-/** Weekly INR against the 2.0 to 3.0 target band, with readings outside the band in red. */
-function drawInrChart(canvas: ICanvas, size: { width: number; height: number }): void {
-  const left = 18;
-  const top = 6;
-  const plotWidth = size.width - left - 4;
-  const plotHeight = size.height - top - 16;
-  const y = (v: number): number => top + plotHeight - ((v - 1) * plotHeight) / 3;
-  const x = (i: number): number => left + 6 + (i * (plotWidth - 12)) / (INR.length - 1);
-  const label = ColorPalette.slate[500];
-  canvas.fillRect(left, y(3), plotWidth, y(2) - y(3), ColorPalette.teal[50]);
-  for (const v of [1, 2, 3, 4]) {
-    canvas.drawLine(left, y(v), left + plotWidth, y(v), ColorPalette.slate[200], 0.5);
-    canvas.drawText(2, y(v) - 3, v.toFixed(1), label, 6.5, StandardFonts.Helvetica, TextAlignment.Left);
-  }
-  for (let i = 1; i < INR.length; i++)
-    canvas.drawLine(x(i - 1), y(INR[i - 1][1]), x(i), y(INR[i][1]), ColorPalette.slate[400], 1);
-  INR.forEach(([date, value], i) => {
-    const outside = value < 2 || value > 3;
-    canvas.fillCircle(x(i), y(value), 2.5, outside ? ColorPalette.rose[600] : ColorPalette.teal[700]);
-    if (i % 2 === 1 || i === INR.length - 1) {
-      const w = canvas.measureText(date, 6.5, StandardFonts.Helvetica).width;
-      canvas.drawText(
-        x(i) - w / 2,
-        top + plotHeight + 5,
-        date,
-        label,
-        6.5,
-        StandardFonts.Helvetica,
-        TextAlignment.Left
-      );
-    }
-  });
-}
-
-/** The trust's mark: a white cross of four rounded squares. */
-function trustMark(): CanvasElement {
-  return new CanvasElement(
-    canvas => {
-      const white = ColorPalette.teal[50];
-      canvas.fillRoundedRect(10, 0, 10, 10, 2, white);
-      canvas.fillRoundedRect(0, 10, 10, 10, 2, white);
-      canvas.fillRoundedRect(20, 10, 10, 10, 2, white);
-      canvas.fillRoundedRect(10, 20, 10, 10, 2, white);
-      canvas.fillRoundedRect(10, 10, 10, 10, 0, ColorPalette.teal[300]);
-    },
-    { drawWidth: 30, drawHeight: 30, isDecorative: true }
-  );
 }

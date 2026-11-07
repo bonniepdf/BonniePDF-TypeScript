@@ -1,9 +1,12 @@
 /** An 80 mm till receipt on one continuous roll: a long basket, accented names, per-line discounts, a return, and scannable receipt codes. */
 import {
+  formatNumber,
+  Line,
   Container,
   Document,
   Heading,
   HorizontalStack,
+  Svg,
   TextBlock,
   PdfSize,
   QRCode,
@@ -19,7 +22,7 @@ const INK = ColorPalette.slate[900];
 const MUTE = ColorPalette.slate[600];
 
 // A till receipt is one continuous roll, never separate sheets: an 80 mm page tall enough for the basket.
-const ROLL = new PdfSize(226.77, 1425, 'Receipt roll 80mm');
+const ROLL = new PdfSize(226.77, 1455, 'Receipt roll 80mm');
 
 export interface ReceiptLine {
   name: string;
@@ -28,7 +31,7 @@ export interface ReceiptLine {
   discountPence: number;
 }
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const lines: ReceiptLine[] = Array.from({ length: 35 }, (_, i) => ({
     name:
       i % 3 === 0
@@ -39,7 +42,7 @@ export function generate(): Document {
     discountPence: i % 7 === 0 ? 50 : 0,
   }));
   lines.push({ name: 'Returned reusable cup', quantity: -1, unitPence: 500, discountPence: 0 });
-  return buildReceipt(lines);
+  return buildReceipt(lines, assets);
 }
 
 export function calculateTotal(lines: ReceiptLine[]): number {
@@ -60,7 +63,7 @@ export function calculateTotal(lines: ReceiptLine[]): number {
   return total;
 }
 
-export function buildReceipt(lines: ReceiptLine[]): Document {
+export function buildReceipt(lines: ReceiptLine[], assets?: ReadonlyMap<string, Uint8Array>): Document {
   const total = calculateTotal(lines);
   const discounts = lines.reduce((sum, line) => sum + line.discountPence, 0);
   // Courier shows the Western European characters itself. A character outside them, such as the ř in
@@ -77,6 +80,16 @@ export function buildReceipt(lines: ReceiptLine[]): Document {
     },
   });
 
+  const logoBytes = assets?.get('images/svg/sample-coffee.svg');
+  if (logoBytes) {
+    doc.add(
+      new Container({
+        horizontalAlignment: 'center',
+        margin: { bottom: 3 },
+        child: new Svg({ svgData: new TextDecoder().decode(logoBytes), width: 22, height: 22, isDecorative: true }),
+      })
+    );
+  }
   doc.add(
     new Heading('SAMPLE COFFEE', {
       level: 1,
@@ -132,7 +145,7 @@ export function buildReceipt(lines: ReceiptLine[]): Document {
 // Local helpers used by this document.
 
 function money(pence: number): string {
-  return (pence / 100).toFixed(2);
+  return formatNumber(pence / 100, 'F2');
 }
 
 /** A centred line of receipt text. */
@@ -163,12 +176,11 @@ function row(
 }
 
 /** A dashed tear-line rule, the way a thermal printer separates sections. */
-function rule(): TextBlock {
-  return new TextBlock('- - - - - - - - - - - - - - - -', {
-    fontName: StandardFonts.Courier,
-    fontSize: 9,
+function rule(): Line {
+  return new Line({
+    thickness: 0.8,
     color: MUTE,
-    alignment: 'center',
-    margin: { top: 5, bottom: 5 },
+    dashPattern: [3, 4],
+    margin: { top: 10, bottom: 10 },
   });
 }

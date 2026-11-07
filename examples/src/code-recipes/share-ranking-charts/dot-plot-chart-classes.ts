@@ -4,6 +4,7 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -12,7 +13,6 @@ import {
   PageOrientation,
   TextBlock,
   TextStyle,
-  TextElementBase,
   TextAlignment,
   HorizontalStack,
   Color,
@@ -53,7 +53,7 @@ export function generate(): Document {
     left.fontSize = 10;
     left.color = ColorPalette.slate[500];
     stack.add(left);
-    const right = new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`);
+    const right = pageNumber();
     right.fontName = StandardFonts.Helvetica;
     right.fontSize = 10;
     right.color = ColorPalette.slate[500];

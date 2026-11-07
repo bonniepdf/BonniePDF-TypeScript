@@ -19,16 +19,13 @@
 //   - a detachable `remittanceSlip` below a real dashed cut line, carrying the
 //     payment reference as a scannable barcode.
 //
-// The cut line is drawn with a dashed stroke through the canvas path API rather
-// than faked with a row of dots. Output is PDF/A-2a + PDF/UA-1.
 
 import {
+  Line,
   BarChart,
   Barcode,
   BarcodeSymbology,
-  CanvasElement,
   ChartData,
-  Color,
   Container,
   Document,
   DocumentMetadata,
@@ -408,21 +405,14 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
   });
 }
 
-/**
- * A real dashed rule, drawn through the canvas path API with a dash pattern,
- * rather than a row of hyphens pretending to be one. `isDecorative` keeps it
- * out of the reading order — it is a cutting guide, not content.
- */
-function cutLine(): CanvasElement {
-  return new CanvasElement(
-    (canvas, size) => {
-      canvas.beginPath();
-      canvas.moveTo(0, size.height / 2);
-      canvas.lineTo(size.width, size.height / 2);
-      canvas.strokeCurrentPath({ paint: Color.fromHex('#94a3b8'), width: 0.75, dashPattern: [3, 3] });
-    },
-    { drawHeight: 10, isDecorative: true, margin: { top: 6, bottom: 6 } }
-  );
+/** A dashed cutting guide above the remittance slip. */
+function cutLine(): Line {
+  return new Line({
+    thickness: 0.75,
+    color: 'slate-400',
+    dashPattern: [3, 3],
+    margin: { top: 10.625, bottom: 10.625 },
+  });
 }
 
 /** The detachable half: what a payments team keys in, or a scanner reads. */

@@ -11,6 +11,7 @@ import {
   Grid,
   Heading,
   HorizontalStack,
+  Image,
   QRCode,
   StandardFonts,
   Table,
@@ -76,7 +77,7 @@ const VAT_RATE = 0.2;
 const gbp = (n: number) => `GBP ${n.toFixed(2)}`;
 
 // ── Document ─────────────────────────────────────────────────────────────────
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -149,13 +150,41 @@ export function generate(): Document {
   doc.add(cards);
 
   // Narrative sections
-  doc.add(sectionHeading('Reported fault'));
-  doc.add(
-    panel(
-      'AHU-07 serving the retail mall has tripped and will not restart. Mall temperature is rising and the unit ' +
-        'is making a loud grinding noise before shutdown. Building management system shows a supply fan failure alarm.'
-    )
+  const faultRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 12, margin: { bottom: 10 } });
+  faultRow.add(
+    new VerticalStack({
+      children: [
+        sectionHeading('Reported fault'),
+        new Container({
+          backgroundColor: PANEL,
+          cornerRadius: 6,
+          padding: 10,
+          child: text(
+            'AHU-07 serving the retail mall has tripped and will not restart. Mall temperature is rising and the unit ' +
+              'is making a loud grinding noise before shutdown. Building management system shows a supply fan failure alarm.'
+          ),
+        }),
+      ],
+    }),
+    3.4
   );
+  faultRow.add(
+    new Container({
+      width: 110,
+      height: 82,
+      cornerRadius: 6,
+      clipContent: true,
+      child: new Image({
+        imageData: asset(assets, 'images/field-service/leak.jpg'),
+        width: 110,
+        height: 82,
+        fitMode: 'cover',
+        altText: 'Close-up of copper water pipe joint above ceiling tile showing reported leak.',
+      }),
+    }),
+    1
+  );
+  doc.add(faultRow);
 
   doc.add(sectionHeading('Work carried out'));
   doc.add(
@@ -343,4 +372,10 @@ function footerRow(left: string, right: string): IElement {
   row.add(text(left, { size: 7.5, color: MUTED }), 4);
   row.add(text(right, { font: BOLD, size: 7.5, color: MUTED, alignment: 'right' }), 1);
   return row;
+}
+
+function asset(assets: ReadonlyMap<string, Uint8Array>, path: string): Uint8Array {
+  const bytes = assets.get(path);
+  if (!bytes) throw new Error(`Missing required asset: ${path}`);
+  return bytes;
 }

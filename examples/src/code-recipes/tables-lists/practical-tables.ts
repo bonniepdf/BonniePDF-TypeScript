@@ -1,5 +1,15 @@
 /** A styled data table: banded rows, column spans, wrapping, aligned numbers, repeated headers, a subtotal carried across page breaks, a totals footer, and empty data. */
-import { Document, Heading, TextBlock, Table, TableRow, TableCell, PageBreak, Container } from '@bonniepdf/core';
+import {
+  formatNumber,
+  Document,
+  Heading,
+  TextBlock,
+  Table,
+  TableRow,
+  TableCell,
+  PageBreak,
+  Container,
+} from '@bonniepdf/core';
 
 export function generate(): Document {
   const doc = new Document({
@@ -66,6 +76,7 @@ function buildTable(items: Item[]): Table {
     footerBackgroundColor: 'slate-100',
     footerTextColor: 'slate-900',
     runningTotalColumn: 3,
+    alternateRowBackgroundColor: 'slate-50',
   });
   table.addHeader(
     ...['Item', 'Description', 'Qty', 'Amount'].map(
@@ -89,17 +100,21 @@ function buildTable(items: Item[]): Table {
         ],
       })
     );
-  items.forEach((item, i) =>
+  items.forEach(item =>
     table.addRow(
       new TableRow({
         cells: [
-          new TextBlock(item.id),
-          new TextBlock(item.description),
-          new TextBlock(String(item.quantity), { alignment: 'right' }),
-          new TextBlock(money(item.amount), { alignment: 'right' }),
-        ].map(content => new TableCell({ content })),
-        // Every other row is banded, so a long row is easy to follow across the page.
-        backgroundColor: i % 2 === 1 ? 'slate-50' : undefined,
+          TableCell.from(new TextBlock(item.id)),
+          TableCell.from(new TextBlock(item.description)),
+          new TableCell({
+            content: new TextBlock(String(item.quantity), { alignment: 'right' }),
+            verticalAlignment: 'middle',
+          }),
+          new TableCell({
+            content: new TextBlock(money(item.amount), { alignment: 'right' }),
+            verticalAlignment: 'middle',
+          }),
+        ],
         runningValue: item.amount / 100,
       })
     )
@@ -119,5 +134,5 @@ function buildTable(items: Item[]): Table {
 }
 
 function money(pence: number): string {
-  return (pence / 100).toFixed(2);
+  return formatNumber(pence / 100, 'F2');
 }

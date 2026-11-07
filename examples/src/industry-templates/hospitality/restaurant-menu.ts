@@ -6,8 +6,10 @@ import {
   Document,
   Heading,
   HorizontalStack,
+  Image,
   PdfSize,
   StandardFonts,
+  Svg,
   TextBlock,
   VerticalStack,
   type ColorInput,
@@ -60,7 +62,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       pageSize: MENU,
-      margin: 34,
+      margin: 26,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
@@ -71,17 +73,26 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const bytes = assets.get('fonts/SourceSerif4-Regular.ttf');
   if (!bytes) throw new Error('Supply fonts/SourceSerif4-Regular.ttf.');
   const serif = doc.fonts.add(bytes).fontName;
+  const headerPhoto = assets.get('images/hospitality/menu-header.jpg');
+  if (!headerPhoto) throw new Error('Supply images/hospitality/menu-header.jpg.');
+  const sprigBytes = assets.get('images/svg/the-larder.svg');
+  if (!sprigBytes) throw new Error('Supply images/svg/the-larder.svg.');
+  const sprigSvg = new TextDecoder().decode(sprigBytes);
 
   // ── Masthead ──
   doc.add(
     new Container({
       backgroundColor: 'stone-900',
-      padding: [20, 18],
-      margin: { bottom: 18 },
+      padding: [16, 10],
+      margin: { bottom: 8 },
       child: new VerticalStack({
-        spacing: 4,
+        spacing: 2,
         children: [
-          new Heading('The Larder', { level: 1, fontName: serif, fontSize: 30, color: '#ffffff', alignment: 'center' }),
+          new Container({
+            horizontalAlignment: 'center',
+            child: new Svg({ svgData: sprigSvg, width: 24, height: 24, isDecorative: true }),
+          }),
+          new Heading('The Larder', { level: 1, fontName: serif, fontSize: 26, color: '#ffffff', alignment: 'center' }),
           new TextBlock('DINNER  ·  FROM 6PM', {
             fontName: StandardFonts.HelveticaBold,
             fontSize: 7.5,
@@ -94,23 +105,38 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     })
   );
 
+  doc.add(
+    new Container({
+      height: 82,
+      cornerRadius: 4,
+      clipContent: true,
+      margin: { bottom: 6 },
+      child: new Image({
+        imageData: headerPhoto,
+        height: 82,
+        fitMode: 'cover',
+        altText: 'Seasonal small plates and sourdough on a rustic wooden bistro table.',
+      }),
+    })
+  );
+
   // ── Courses ──
   for (const [course, dishes] of COURSES) {
     doc.add(
       new Heading(course, {
         level: 2,
         fontName: serif,
-        fontSize: 17,
+        fontSize: 15,
         color: ACCENT,
         alignment: 'center',
-        margin: { top: 6, bottom: 8 },
+        margin: { top: 4, bottom: 5 },
       })
     );
     for (const [dish, description, price, marks] of dishes) doc.add(menuItem(serif, dish, description, price, marks));
   }
 
   // ── Dietary key ──
-  const key = new HorizontalStack({ widthDistribution: 'auto', spacing: 12, margin: { top: 10 } });
+  const key = new HorizontalStack({ widthDistribution: 'auto', spacing: 12, margin: { top: 6 } });
   for (const [mark, [meaning, fill, ink]] of Object.entries(MARKS))
     key.add(
       new HorizontalStack({
@@ -124,7 +150,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     new TextBlock('Please tell us about any allergies before you order; our allergen guide lists every dish.', {
       fontSize: 7.5,
       color: 'stone-500',
-      margin: { top: 6 },
+      margin: { top: 4 },
     })
   );
   return doc;
@@ -142,7 +168,7 @@ function menuItem(serif: string, dish: string, description: string, price: strin
   const detail = new HorizontalStack({ widthDistribution: 'auto', spacing: 5 });
   detail.add(new TextBlock(description, { fontSize: 8.5 }));
   for (const mark of marks) detail.add(badge(mark, MARKS[mark][1], MARKS[mark][2]));
-  return new VerticalStack({ spacing: 2, margin: { bottom: 10 }, children: [line, detail] });
+  return new VerticalStack({ spacing: 1, margin: { bottom: 6 }, children: [line, detail] });
 }
 
 /** A row of small dots from the dish to its price, drawn as decoration so screen readers skip it. */

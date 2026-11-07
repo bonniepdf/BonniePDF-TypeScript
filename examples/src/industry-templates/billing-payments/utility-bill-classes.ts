@@ -16,14 +16,13 @@
 // show what it desugars to. See `utility-bill.ts` for the narrated walkthrough.
 
 import {
+  Line,
   BarChart,
   Barcode,
   BarcodeSymbology,
   Border,
   BorderColors,
-  CanvasElement,
   ChartData,
-  Color,
   Container,
   Document,
   DocumentMetadata,
@@ -401,22 +400,14 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
   return stack;
 }
 
-/**
- * A real dashed rule, drawn through the canvas path API with a dash pattern,
- * rather than a row of hyphens pretending to be one. `isDecorative` keeps it
- * out of the reading order — it is a cutting guide, not content.
- */
-function cutLine(): CanvasElement {
-  const element = new CanvasElement((canvas, size) => {
-    canvas.beginPath();
-    canvas.moveTo(0, size.height / 2);
-    canvas.lineTo(size.width, size.height / 2);
-    canvas.strokeCurrentPath({ paint: Color.fromHex('#94a3b8'), width: 0.75, dashPattern: [3, 3] });
-  });
-  element.drawHeight = 10;
-  element.isDecorative = true;
-  element.margin = new Thickness(0, 6, 0, 6);
-  return element;
+/** A dashed cutting guide above the remittance slip. */
+function cutLine(): Line {
+  const line = new Line();
+  line.thickness = 0.75;
+  line.color = 'slate-400';
+  line.dashPattern = [3, 3];
+  line.margin = new Thickness(0, 10.625, 0, 10.625);
+  return line;
 }
 
 function remittanceSlip(data: UtilityBillData): Container {

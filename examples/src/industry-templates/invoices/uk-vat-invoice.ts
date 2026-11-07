@@ -11,6 +11,7 @@ import {
   Container,
   Table,
   Grid,
+  Svg,
   ColorPalette,
   Thickness,
   StandardFonts,
@@ -21,6 +22,18 @@ import {
   type IElement,
   type TextAlignmentInput,
 } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 const INK = ColorPalette.slate[700];
 
@@ -54,7 +67,7 @@ const ITEMS: UkLine[] = [
   { description: 'Printed training manuals', qty: 200, unitPrice: 3.25, vatRate: 0, rateLabel: 'Z' },
 ];
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const now = new Date();
   const year = now.getFullYear();
   const fmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -81,7 +94,15 @@ export function generate(): Document {
   const header = new Grid({ columns: [1.3, 1], cellPadding: 0, border: 0, margin: { top: 16, bottom: 18 } });
   const seller = new VerticalStack({
     children: [
-      cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 0, 0, 2) }),
+      new HorizontalStack({
+        widthDistribution: 'auto',
+        spacing: 8,
+        margin: { bottom: 4 },
+        children: [
+          new Svg({ svgData: logoMarkup(assets), width: 26, height: 26, isDecorative: true }),
+          cell('Sample Company Ltd', { bold: true, size: 16, color: INK, margin: new Thickness(0, 4, 0, 0) }),
+        ],
+      }),
       lines(['Unit 7, Kingswood Business Park', 'Bristol BS15 8NY', 'United Kingdom'], { color: MUTED }),
       cell('VAT Reg. No. GB 218 4471 09', { bold: true, color: ACCENT, margin: new Thickness(0, 6, 0, 0) }),
       cell('Company No. 09182773 (England & Wales)', { size: 8, color: MUTED }),

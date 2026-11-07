@@ -17,9 +17,9 @@
 // front door.
 
 import {
+  pageNumber,
   Document,
   TextBlock,
-  TextElementBase,
   Heading,
   VerticalStack,
   HorizontalStack,
@@ -30,6 +30,7 @@ import {
   LineChart,
   ColorPalette,
   StandardFonts,
+  Svg,
   type ColorInput,
   type TextAlignmentInput,
   pageTemplate,
@@ -74,7 +75,8 @@ const PANELS: Panel[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markSvg = new TextDecoder().decode(assets.get('images/svg/sample-healthcare.svg'));
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -85,8 +87,8 @@ export function generate(): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: INK },
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+        default: pageNumber(
+          'CONFIDENTIAL - Patient: SAMPLE, Harold (Patient ID SH-9434765919)  -  Page {page} of {total}',
           { fontName: StandardFonts.Helvetica, fontSize: 8, color: MUTED }
         ),
       }),
@@ -101,22 +103,29 @@ export function generate(): Document {
   // ── Header ────────────────────────────────────────────────────────────────
   const header = new Grid({ columns: [2.4, 1], cellPadding: 0, border: 0 });
   header.addRow(
-    new VerticalStack({
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 10,
       children: [
-        new TextBlock('Sample Hospital Pathology Services', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 14,
-          color: CLINICAL_BLUE,
-        }),
-        new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry', {
-          fontSize: 9,
-          color: MUTED,
-          margin: { top: 2 },
-        }),
-        new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189', {
-          fontSize: 8,
-          color: MUTED,
-          margin: { top: 1 },
+        new Svg({ svgData: markSvg, width: 24, height: 24, isDecorative: true, margin: { top: 2 } }),
+        new VerticalStack({
+          children: [
+            new TextBlock('Sample Hospital Pathology Services', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 14,
+              color: CLINICAL_BLUE,
+            }),
+            new TextBlock('Department of Laboratory Medicine - Haematology & Clinical Chemistry', {
+              fontSize: 9,
+              color: MUTED,
+              margin: { top: 2 },
+            }),
+            new TextBlock('UKAS Medical Laboratory 8842 - accredited to ISO 15189', {
+              fontSize: 8,
+              color: MUTED,
+              margin: { top: 1 },
+            }),
+          ],
         }),
       ],
     }),

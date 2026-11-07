@@ -12,6 +12,7 @@ import {
   Container,
   Table,
   Grid,
+  Svg,
   StandardFonts,
   Placeholders,
   type ColorInput,
@@ -34,10 +35,17 @@ const TEXT_MEDIUM = '#555555';
 // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
 const TEXT_LIGHT = '#707070';
 
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
 const usd = (n: number): string =>
   `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const now = new Date();
   const year = now.getFullYear();
   const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${year}`;
@@ -73,11 +81,17 @@ export function generate(): Document {
   const headerRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 0, margin: { top: 16, bottom: 16 } });
 
   // The address lines share one style, so they flow as a single paragraph.
-  const companyStack = new VerticalStack({
+  const brandRow = new HorizontalStack({
+    widthDistribution: 'auto',
+    spacing: 8,
+    margin: { bottom: 4 },
     children: [
-      tb('SAMPLE COMPANY INC.', { bold: true, size: 20, color: TEXT_DARK, mb: 4 }),
-      tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com'),
+      new Svg({ svgData: logoMarkup(assets), width: 28, height: 28, isDecorative: true }),
+      tb('SAMPLE COMPANY INC.', { bold: true, size: 20, color: TEXT_DARK, mt: 3 }),
     ],
+  });
+  const companyStack = new VerticalStack({
+    children: [brandRow, tb('42 Design District\nBrooklyn, NY 11201\nPhone  (555) 123-4567\nEmail  hello@example.com')],
   });
 
   // H1 heading - visually identical to a styled TextBlock but carries the
@@ -297,4 +311,9 @@ function paymentColumn(title: string, body: string): VerticalStack {
   return new VerticalStack({
     children: [tb(title, { size: 8, bold: true, color: ACCENT_GREEN_TEXT, mb: 4 }), tb(body, { size: 8 })],
   });
+}
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
 }

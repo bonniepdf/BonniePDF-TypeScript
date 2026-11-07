@@ -1,11 +1,13 @@
 /** A hotel guest folio that doubles as the VAT invoice: nightly room charges, restaurant and bar postings, Edinburgh’s visitor levy, the deposit and payment, VAT by rate, a signature line and a QR code for a copy. */
 import {
+  formatNumber,
   Container,
   Document,
   Heading,
   HorizontalStack,
   QRCode,
   StandardFonts,
+  Svg,
   Table,
   TableCell,
   TableRow,
@@ -37,7 +39,7 @@ const LINES: [string, string, number | null, number, number][] = [
   ['5 Nov', 'Payment, Visa ending 4417', null, 0, 54625],
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const doc = new Document({
     settings: {
       margin: 40,
@@ -58,20 +60,30 @@ export function generate(): Document {
       subject: 'Guest folio and VAT invoice',
     },
   });
+  const crestBytes = assets.get('images/svg/ardmore-house.svg');
+  if (!crestBytes) throw new Error('Supply images/svg/ardmore-house.svg.');
+  const crestSvg = new TextDecoder().decode(crestBytes);
 
   // ── Masthead ──
   const masthead = new HorizontalStack({ widthDistribution: 'equal', margin: { bottom: 14 } });
   masthead.add(
-    new VerticalStack({
-      spacing: 3,
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 10,
       children: [
-        new TextBlock('ARDMORE HOUSE', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 15,
-          letterSpacing: 3,
-          color: HOTEL,
+        new Svg({ svgData: crestSvg, width: 28, height: 28, isDecorative: true }),
+        new VerticalStack({
+          spacing: 3,
+          children: [
+            new TextBlock('ARDMORE HOUSE', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 15,
+              letterSpacing: 3,
+              color: HOTEL,
+            }),
+            new TextBlock('18 Royal Terrace, Edinburgh EH7 5AB  ·  0131 496 0742', { fontSize: 8, color: MUTED }),
+          ],
         }),
-        new TextBlock('18 Royal Terrace, Edinburgh EH7 5AB  ·  0131 496 0742', { fontSize: 8, color: MUTED }),
       ],
     })
   );
@@ -228,10 +240,7 @@ export function generate(): Document {
 
 /** Pence as pounds: 54625 becomes £546.25. */
 function money(pence: number): string {
-  const pounds = Math.floor(Math.abs(pence) / 100)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `${pence < 0 ? '−' : ''}£${pounds}.${String(Math.abs(pence) % 100).padStart(2, '0')}`;
+  return formatNumber(pence / 100, 'N2', '£').replace(/^-/, '−');
 }
 
 /** A labelled block of details on a light panel. */

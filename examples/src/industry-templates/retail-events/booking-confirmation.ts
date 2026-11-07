@@ -4,6 +4,7 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  formatNumber,
   Document,
   TextElementBase,
   Container,
@@ -15,6 +16,7 @@ import {
   TextBlock,
   Heading,
   HorizontalStack,
+  Image,
   StandardFonts,
   ColorPalette,
   type ColorInput,
@@ -109,14 +111,16 @@ const PRICE_LINES: PriceLine[] = [
   { description: 'Seat selection — 4 seats', pence: 3_800 },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const total = PRICE_LINES.reduce((sum, l) => sum + l.pence, 0);
   const nights = Math.round((STAY.checkOut.getTime() - STAY.checkIn.getTime()) / 86_400_000);
+  const lisbonPhoto = assets.get('images/travel/lisbon.jpg');
+  if (!lisbonPhoto) throw new Error('Supply images/travel/lisbon.jpg.');
 
   const doc = new Document({
     settings: {
       pageSize: 'a4',
-      margin: 46,
+      margin: 38,
       conformance: 'pdf/a-2a',
       accessibility: 'pdf/ua-1',
       language: 'en-GB',
@@ -161,10 +165,25 @@ export function generate(): Document {
       altText: `QR code that opens booking ${BOOKING.reference} for management`,
     }),
   });
-  const top = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14, margin: { bottom: 14 } });
+  const top = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14, margin: { bottom: 10 } });
   top.add(heading, 3);
   top.add(code, 1);
   doc.add(top);
+
+  doc.add(
+    new Container({
+      height: 92,
+      cornerRadius: 6,
+      clipContent: true,
+      margin: { bottom: 10 },
+      child: new Image({
+        imageData: lisbonPhoto,
+        height: 92,
+        fitMode: 'cover',
+        altText: 'Terracotta rooftops and pastel facades of Lisbon old town at golden hour.',
+      }),
+    })
+  );
 
   doc.add(
     panel(
@@ -300,15 +319,15 @@ function legCard(leg: FlightLeg): Container {
     backgroundColor: ColorPalette.slate[50],
     border: { width: 0.75, color: RULE },
     cornerRadius: 6,
-    padding: 12,
-    margin: { bottom: 10 },
+    padding: 9,
+    margin: { bottom: 8 },
     child: new VerticalStack({
       children: [
         cell(`${leg.label.toUpperCase()} · ${gbDate(leg.date)} · ${leg.carrier}`, {
           bold: true,
           size: 8.5,
           color: ACCENT,
-          mb: 8,
+          mb: 6,
         }),
         route,
         cell(`Baggage: ${leg.baggage}`, { size: 8.5, color: MUTED }),
@@ -330,8 +349,7 @@ function endpoint(role: string, airport: Airport): VerticalStack {
 
 /** Pence as pounds: £1,234.56. */
 function money(pence: number): string {
-  const pounds = String(Math.floor(pence / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `£${pounds}.${String(pence % 100).padStart(2, '0')}`;
+  return formatNumber(pence / 100, 'N2', '£');
 }
 
 // Local helpers keep this example ready to copy into a single file.
@@ -387,13 +405,13 @@ function h2(text: string, color: ColorInput = ACCENT): Heading {
     fontName: StandardFonts.HelveticaBold,
     fontSize: 13,
     color: color,
-    margin: { top: 16, bottom: 8 },
+    margin: { top: 10, bottom: 6 },
   });
 }
 
 /** The full-width accent rule at the top of each document. */
 function accentBar(color: ColorInput = ACCENT, height = 4): Container {
-  return new Container({ backgroundColor: color, height, margin: { bottom: 14 } });
+  return new Container({ backgroundColor: color, height, margin: { bottom: 10 } });
 }
 
 /** One label/value pair for the reference grid. */
@@ -420,8 +438,8 @@ function panel(title: string, children: IElement[], o: { accent?: ColorInput } =
     backgroundColor: ColorPalette.slate[50],
     border: { width: 0.75, color: RULE },
     cornerRadius: 6,
-    padding: 12,
-    margin: { top: 4, bottom: 12 },
+    padding: 9,
+    margin: { top: 2, bottom: 8 },
     child: new VerticalStack({
       spacing: 4,
       children: [cell(title, { bold: true, size: 9.5, color: o.accent ?? ACCENT, mb: 4 }), ...children],

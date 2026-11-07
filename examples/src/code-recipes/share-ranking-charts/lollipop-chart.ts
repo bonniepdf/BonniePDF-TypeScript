@@ -4,10 +4,10 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  pageNumber,
   Document,
   TextBlock,
   HorizontalStack,
-  TextElementBase,
   ChartData,
   LollipopChart,
   StandardFonts,
@@ -31,7 +31,7 @@ export function generate(): Document {
       })
     );
     stack.add(
-      new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+      pageNumber(undefined, {
         fontName: StandardFonts.Helvetica,
         fontSize: 10,
         color: 'slate-500',

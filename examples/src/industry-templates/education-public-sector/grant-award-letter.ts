@@ -17,14 +17,16 @@
 // Authored through the options-object front door.
 
 import {
+  pageNumber,
   Container,
   Document,
   Grid,
   Heading,
+  HorizontalStack,
+  Image,
   StandardFonts,
   Table,
   TextBlock,
-  TextElementBase,
   UnorderedList,
   VerticalStack,
   type ColorInput,
@@ -64,7 +66,8 @@ const DECISION_DETAILS: Detail[] = [
   { label: 'First instalment', value: 'Friday 26 September 2026' },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const gardenImage = assets.get('images/newsletter/community-garden.jpg')!;
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -76,8 +79,8 @@ export function generate(): Document {
       displayDocTitle: true,
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: BODY },
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+        default: pageNumber(
+          'SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page {page} of {total}',
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
@@ -154,24 +157,45 @@ export function generate(): Document {
   details.addRow(detail(DECISION_DETAILS[0]), detail(DECISION_DETAILS[1]));
   details.addRow(detail(DECISION_DETAILS[2]), detail(DECISION_DETAILS[3]));
 
+  const calloutRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14 });
+  calloutRow.add(
+    new VerticalStack({
+      children: [
+        new TextBlock('Our decision', { fontSize: 11, color: MUTED }),
+        new TextBlock('Awarded', {
+          fontName: StandardFonts.HelveticaBold,
+          fontSize: 28,
+          color: AWARD,
+          margin: { top: 2, bottom: 10 },
+        }),
+        details,
+      ],
+    }),
+    1
+  );
+  calloutRow.add(
+    new Container({
+      width: 84,
+      height: 56,
+      cornerRadius: 4,
+      clipContent: true,
+      child: new Image({
+        imageData: gardenImage,
+        width: 84,
+        height: 56,
+        fitMode: 'cover',
+        altText: 'Community garden raised vegetable beds funded by the grant.',
+      }),
+    })
+  );
+
   doc.add(
     new Container({
       backgroundColor: PALE,
       border: { left: 5, color: AWARD },
       padding: [16, 14],
       margin: { top: 8, bottom: 22 },
-      child: new VerticalStack({
-        children: [
-          new TextBlock('Our decision', { fontSize: 11, color: MUTED }),
-          new TextBlock('Awarded', {
-            fontName: StandardFonts.HelveticaBold,
-            fontSize: 28,
-            color: AWARD,
-            margin: { top: 2, bottom: 10 },
-          }),
-          details,
-        ],
-      }),
+      child: calloutRow,
     })
   );
 

@@ -16,6 +16,7 @@
 // Fictional applicant, fund, project, amounts, and references throughout.
 
 import {
+  pageNumber,
   AccessibilityMode,
   Border,
   BorderColors,
@@ -26,17 +27,20 @@ import {
   DocumentSettings,
   Grid,
   Heading,
+  HorizontalStack,
+  Image,
+  ImageFitMode,
   PdfAConformance,
   PdfSize,
   StandardFonts,
   Table,
   TextAlignment,
   TextBlock,
-  TextElementBase,
   TextStyle,
   Thickness,
   UnorderedList,
   VerticalStack,
+  WidthDistribution,
   pageTemplate,
 } from '@bonniepdf/core';
 
@@ -81,7 +85,8 @@ const DECISION_DETAILS: Detail[] = [
  * the escape hatch the options-object front door sits on top of. Renders
  * **byte-for-byte identically** to the options-style `grant-award-letter.ts`.
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const gardenImage = assets.get('images/newsletter/community-garden.jpg')!;
   const settings = new DocumentSettings(PAGE, MARGIN);
   settings.pageColor = Color.white;
   settings.conformance = PdfAConformance.PdfA2a;
@@ -91,8 +96,8 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(BODY);
 
   function pageFooter(): TextBlock {
-    const f = new TextBlock(
-      `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    const f = pageNumber(
+      'SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any funding body  |  Page {page} of {total}'
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 7.5;
@@ -181,13 +186,32 @@ export function generate(): Document {
   calloutStack.add(calloutValue);
   calloutStack.add(details);
 
+  const photo = new Image();
+  photo.imageData = gardenImage;
+  photo.width = 84;
+  photo.height = 56;
+  photo.fitMode = ImageFitMode.Cover;
+  photo.altText = 'Community garden raised vegetable beds funded by the grant.';
+  const photoFrame = new Container();
+  photoFrame.width = 84;
+  photoFrame.height = 56;
+  photoFrame.cornerRadius = 4;
+  photoFrame.clipContent = true;
+  photoFrame.child = photo;
+
+  const calloutRow = new HorizontalStack();
+  calloutRow.widthDistribution = WidthDistribution.Weighted;
+  calloutRow.spacing = 14;
+  calloutRow.add(calloutStack, 1);
+  calloutRow.add(photoFrame);
+
   const callout = new Container();
   callout.backgroundColor = PALE;
   callout.border = Border.leftOnly(5);
   callout.borderColors = BorderColors.leftOnly(AWARD);
   callout.padding = new Thickness(16, 14, 16, 14);
   callout.margin = new Thickness(0, 8, 0, 22);
-  callout.child = calloutStack;
+  callout.child = calloutRow;
   doc.add(callout);
 
   doc.add(h2('How your grant is made up', 'breakdown'));

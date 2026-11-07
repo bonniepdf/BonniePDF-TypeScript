@@ -19,6 +19,7 @@
 // desugars to.
 
 import {
+  pageNumber,
   AccessibilityMode,
   Border,
   BorderColors,
@@ -29,16 +30,18 @@ import {
   DocumentSettings,
   Grid,
   Heading,
+  HorizontalStack,
   PdfAConformance,
   PdfSize,
   StandardFonts,
+  Svg,
   TextAlignment,
   TextBlock,
-  TextElementBase,
   TextStyle,
   Thickness,
   UnorderedList,
   VerticalStack,
+  WidthDistribution,
   pageTemplate,
 } from '@bonniepdf/core';
 
@@ -52,7 +55,14 @@ const BLUE_BORDER = Color.fromHex('#b8d8e3');
 const NOTICE = Color.fromHex('#fff4ce');
 const NOTICE_BORDER = Color.fromHex('#d69e00');
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markBytes = assets.get('images/svg/sample-healthcare.svg');
+  if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
+  const markSvg = new TextDecoder().decode(markBytes);
+  const mapBytes = assets.get('images/svg/clinic-map.svg');
+  if (!mapBytes) throw new Error('Supply images/svg/clinic-map.svg.');
+  const mapSvg = new TextDecoder().decode(mapBytes);
+
   const settings = new DocumentSettings(PdfSize.a4, 48);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -60,8 +70,8 @@ export function generate(): Document {
   settings.displayDocTitle = true;
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(11).withColor(BODY);
   function pageFooter(): TextBlock {
-    const f = new TextBlock(
-      `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
+    const f = pageNumber(
+      'SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page {page} of {total}'
     );
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 7.5;
@@ -95,6 +105,19 @@ export function generate(): Document {
   brand.add(brandName);
   brand.add(brandSub);
 
+  const mark = new Svg();
+  mark.svgData = markSvg;
+  mark.width = 24;
+  mark.height = 24;
+  mark.isDecorative = true;
+  mark.margin = new Thickness(0, 2, 0, 0);
+
+  const brandRow = new HorizontalStack();
+  brandRow.widthDistribution = WidthDistribution.Auto;
+  brandRow.spacing = 8;
+  brandRow.add(mark);
+  brandRow.add(brand);
+
   const issuedDate = new TextBlock('Issued 1 August 2026');
   issuedDate.fontSize = 9.5;
   issuedDate.color = MUTED;
@@ -108,7 +131,7 @@ export function generate(): Document {
   issued.add(issuedDate);
   issued.add(issuedRef);
 
-  masthead.addRow(brand, issued);
+  masthead.addRow(brandRow, issued);
   doc.add(masthead);
 
   const banner = new Container();
@@ -173,21 +196,37 @@ export function generate(): Document {
   appointmentBox.child = appointmentStack;
   doc.add(appointmentBox);
 
-  doc.add(sectionHeading('What you need to do', 'what-to-do'));
   const list = new UnorderedList();
   list.fontName = StandardFonts.Helvetica;
   list.fontSize = 10.5;
   list.color = BODY;
   list.bulletColor = BLUE;
   list.itemSpacing = 4;
-  list.margin = new Thickness(0, 0, 0, 18);
   list.addItem('Arrive 15 minutes before your appointment and check in at Blue reception.');
   list.addItem('Bring an up-to-date list of any medicines you take.');
   list.addItem('Tell us as soon as possible if you cannot attend so the appointment can be rearranged.');
   list.addItem(
     'Contact us before your visit if you need an interpreter, step-free access, or information in another format.'
   );
-  doc.add(list);
+
+  const actionsCol = new VerticalStack();
+  actionsCol.add(sectionHeading('What you need to do', 'what-to-do'));
+  actionsCol.add(list);
+
+  const map = new Svg();
+  map.svgData = mapSvg;
+  map.width = 170;
+  map.height = 109;
+  map.altText =
+    'Site map of Sample General Hospital showing Main Entrance on Hospital Road and Rheumatology Outpatient Clinic in Wing B.';
+
+  const actionsSection = new HorizontalStack();
+  actionsSection.widthDistribution = WidthDistribution.Weighted;
+  actionsSection.spacing = 14;
+  actionsSection.margin = new Thickness(0, 0, 0, 18);
+  actionsSection.add(actionsCol, 1.7);
+  actionsSection.add(map, 1);
+  doc.add(actionsSection);
 
   const noticeHeading = new TextBlock('If you feel unwell before the appointment');
   noticeHeading.fontName = StandardFonts.HelveticaBold;

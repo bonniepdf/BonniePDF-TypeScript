@@ -5,9 +5,9 @@
  * The host supplies image, font, or attachment bytes through the assets map.
  */
 import {
+  pageNumber,
   Document,
   TextBlock,
-  TextElementBase,
   VerticalStack,
   HorizontalStack,
   Container,
@@ -89,7 +89,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: ColorPalette.slate[700] },
       footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+        default: pageNumber(undefined, {
           fontName: StandardFonts.Helvetica,
           fontSize: 9,
           color: ColorPalette.slate[400],

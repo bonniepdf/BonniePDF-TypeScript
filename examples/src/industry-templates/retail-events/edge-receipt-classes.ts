@@ -31,6 +31,7 @@
 // the library does all the work locally.
 
 import {
+  Line,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -51,6 +52,7 @@ import {
   ColorPalette,
   Thickness,
   StandardFonts,
+  Svg,
   WidthDistribution,
   PdfAConformance,
 } from '@bonniepdf/core';
@@ -80,8 +82,11 @@ const ORDER_NO = '4021';
  * door sits on top of. Renders **byte-for-byte identically** to the options-style
  * `edge-receipt.ts`.
  */
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const stamp = '16 Jun 2026 10:30';
+  const logoBytes = assets.get('images/svg/sample-coffee.svg');
+  if (!logoBytes) throw new Error('Supply images/svg/sample-coffee.svg.');
+  const logoSvg = new TextDecoder().decode(logoBytes);
 
   const settings = new DocumentSettings(PAGE, 16);
   settings.conformance = PdfAConformance.PdfA2a;
@@ -97,6 +102,17 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Store header ────────────────────────────────────────────────────────
+  const logo = new Svg();
+  logo.svgData = logoSvg;
+  logo.width = 24;
+  logo.height = 24;
+  logo.isDecorative = true;
+  const logoWrap = new Container();
+  logoWrap.horizontalAlignment = HorizontalAlignment.Center;
+  logoWrap.margin = new Thickness(0, 0, 0, 4);
+  logoWrap.child = logo;
+  doc.add(logoWrap);
+
   const name = new Heading('SAMPLE COFFEE');
   name.level = 1;
   name.fontName = StandardFonts.CourierBold;
@@ -227,12 +243,11 @@ function cell(text: string, size: number, bold = false, align: TextAlignment = T
 }
 
 /** A dashed tear-line rule, the way a thermal printer separates sections. */
-function rule(): TextBlock {
-  const b = new TextBlock('- - - - - - - - - - - - - - - -');
-  b.fontName = StandardFonts.Courier;
-  b.fontSize = 9;
-  b.color = MUTE;
-  b.alignment = TextAlignment.Center;
-  b.margin = new Thickness(0, 5, 0, 5);
-  return b;
+function rule(): Line {
+  const line = new Line();
+  line.thickness = 0.8;
+  line.color = MUTE;
+  line.dashPattern = [3, 4];
+  line.margin = new Thickness(0, 10, 0, 10);
+  return line;
 }

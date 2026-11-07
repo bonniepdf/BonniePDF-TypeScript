@@ -12,16 +12,18 @@
 // names, or contact details.
 
 import {
+  pageNumber,
   AccessibilityMode,
   Container,
   Document,
   Grid,
   Heading,
+  HorizontalStack,
   PdfAConformance,
   PdfSize,
   StandardFonts,
+  Svg,
   TextBlock,
-  TextElementBase,
   UnorderedList,
   VerticalStack,
   pageTemplate,
@@ -37,7 +39,14 @@ const BLUE_BORDER = '#b8d8e3';
 const NOTICE = '#fff4ce';
 const NOTICE_BORDER = '#d69e00';
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markBytes = assets.get('images/svg/sample-healthcare.svg');
+  if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
+  const markSvg = new TextDecoder().decode(markBytes);
+  const mapBytes = assets.get('images/svg/clinic-map.svg');
+  if (!mapBytes) throw new Error('Supply images/svg/clinic-map.svg.');
+  const mapSvg = new TextDecoder().decode(mapBytes);
+
   const doc = new Document({
     settings: {
       pageSize: PdfSize.a4,
@@ -48,8 +57,8 @@ export function generate(): Document {
       displayDocTitle: true,
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: BODY },
       footerTemplate: pageTemplate({
-        default: new TextBlock(
-          `SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`,
+        default: pageNumber(
+          'SAMPLE DOCUMENT - FICTIONAL DATA  |  Not issued by any health service provider  |  Page {page} of {total}',
           {
             fontName: StandardFonts.Helvetica,
             fontSize: 7.5,
@@ -69,15 +78,22 @@ export function generate(): Document {
 
   const masthead = new Grid({ columns: [1.5, 1], cellPadding: 0, margin: { bottom: 8 } });
   masthead.addRow(
-    new VerticalStack({
-      spacing: 3,
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 8,
       children: [
-        new TextBlock('Sample Healthcare', {
-          fontName: StandardFonts.HelveticaBold,
-          fontSize: 21,
-          color: BLUE_DARK,
+        new Svg({ svgData: markSvg, width: 24, height: 24, isDecorative: true, margin: { top: 2 } }),
+        new VerticalStack({
+          spacing: 3,
+          children: [
+            new TextBlock('Sample Healthcare', {
+              fontName: StandardFonts.HelveticaBold,
+              fontSize: 21,
+              color: BLUE_DARK,
+            }),
+            new TextBlock('Outpatient services', { fontSize: 10, color: MUTED }),
+          ],
         }),
-        new TextBlock('Outpatient services', { fontSize: 10, color: MUTED }),
       ],
     }),
     new VerticalStack({
@@ -164,23 +180,43 @@ export function generate(): Document {
     })
   );
 
-  doc.add(sectionHeading('What you need to do', 'what-to-do'));
-  doc.add(
-    new UnorderedList({
-      fontName: StandardFonts.Helvetica,
-      fontSize: 10.5,
-      color: BODY,
-      bulletColor: BLUE,
-      itemSpacing: 4,
-      margin: { bottom: 18 },
-      items: [
-        'Arrive 15 minutes before your appointment and check in at Blue reception.',
-        'Bring an up-to-date list of any medicines you take.',
-        'Tell us as soon as possible if you cannot attend so the appointment can be rearranged.',
-        'Contact us before your visit if you need an interpreter, step-free access, or information in another format.',
+  const actionsSection = new HorizontalStack({
+    widthDistribution: 'weighted',
+    spacing: 14,
+    margin: { bottom: 18 },
+  });
+  actionsSection.add(
+    new VerticalStack({
+      children: [
+        sectionHeading('What you need to do', 'what-to-do'),
+        new UnorderedList({
+          fontName: StandardFonts.Helvetica,
+          fontSize: 10.5,
+          color: BODY,
+          bulletColor: BLUE,
+          itemSpacing: 4,
+          items: [
+            'Arrive 15 minutes before your appointment and check in at Blue reception.',
+            'Bring an up-to-date list of any medicines you take.',
+            'Tell us as soon as possible if you cannot attend so the appointment can be rearranged.',
+            'Contact us before your visit if you need an interpreter, step-free access, or information in another format.',
+          ],
+        }),
       ],
-    })
+    }),
+    1.7
   );
+  actionsSection.add(
+    new Svg({
+      svgData: mapSvg,
+      width: 170,
+      height: 109,
+      altText:
+        'Site map of Sample General Hospital showing Main Entrance on Hospital Road and Rheumatology Outpatient Clinic in Wing B.',
+    }),
+    1
+  );
+  doc.add(actionsSection);
 
   doc.add(
     new Container({

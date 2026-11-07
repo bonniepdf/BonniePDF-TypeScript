@@ -10,6 +10,7 @@ import {
   type ColorInput,
   pageTemplate,
   Spacer,
+  Svg,
   TextBlock,
   Heading,
   Container,
@@ -162,7 +163,11 @@ const GP_ACTIONS = [
   'Ensure the patient is added to the cardiac rehabilitation pathway if they have not been contacted within two weeks.',
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const markBytes = assets.get('images/svg/sample-healthcare.svg');
+  if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
+  const markSvg = new TextDecoder().decode(markBytes);
+
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -193,15 +198,27 @@ export function generate(): Document {
 
   doc.add(accentBar());
   doc.add(
-    cell('DISCHARGE SUMMARY · FOR THE ATTENTION OF THE GENERAL PRACTITIONER', {
-      bold: true,
-      size: 8.5,
-      color: ACCENT,
-      mb: 4,
+    new HorizontalStack({
+      widthDistribution: 'auto',
+      spacing: 10,
+      margin: { bottom: 14 },
+      children: [
+        new Svg({ svgData: markSvg, width: 24, height: 24, isDecorative: true, margin: { top: 2 } }),
+        new VerticalStack({
+          children: [
+            cell('DISCHARGE SUMMARY · FOR THE ATTENTION OF THE GENERAL PRACTITIONER', {
+              bold: true,
+              size: 8.5,
+              color: ACCENT,
+              mb: 4,
+            }),
+            h1('Inpatient discharge summary'),
+            cell(`${EPISODE.ward} · ${EPISODE.consultant}`, { color: MUTED }),
+          ],
+        }),
+      ],
     })
   );
-  doc.add(h1('Inpatient discharge summary'));
-  doc.add(cell(`${EPISODE.ward} · ${EPISODE.consultant}`, { color: MUTED, mb: 14 }));
 
   doc.add(
     weightedRow(

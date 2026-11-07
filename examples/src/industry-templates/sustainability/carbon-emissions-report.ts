@@ -2,6 +2,7 @@
 import {
   AttachmentRelationship,
   BarChart,
+  formatNumber,
   CanvasElement,
   ChartData,
   ColorPalette,
@@ -209,6 +210,7 @@ export function generate(): Document {
   doc.add(section('Progress towards the 2030 target'));
   const history = new BarChart({
     theme: 'modern',
+    references: [{ value: TARGET / 1000, color: 'green-900', thickness: 1.5, dashPattern: [5, 3] }],
     data: new ChartData({
       series: [
         {
@@ -426,7 +428,7 @@ function sum(values: number[]): number {
 
 /** Tonnes with a thousands separator: 18420 becomes 18,420. */
 function thousands(value: number): string {
-  return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return formatNumber(value, 'N0');
 }
 
 /** A change as a signed percentage to one decimal place: −0.096 becomes −9.6%. */

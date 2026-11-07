@@ -21,6 +21,7 @@
 // it desugars to.
 
 import {
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -28,13 +29,13 @@ import {
   PdfSize,
   TextBlock,
   TextStyle,
-  TextElementBase,
   TextAlignment,
   Heading,
   VerticalStack,
   HorizontalStack,
   Container,
   Spacer,
+  Svg,
   Color,
   ColorPalette,
   Thickness,
@@ -44,6 +45,18 @@ import {
   pageTemplate,
 } from '@bonniepdf/core';
 import type { IElement } from '@bonniepdf/core';
+
+const LOGO_ASSET = 'images/svg/sample-company.svg';
+const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="10" fill="#334155"/>
+  <path d="M31 15.5c0-2.5-2.8-4.5-7-4.5-4.4 0-7.5 2.2-7.5 5.5 0 3.1 2.4 4.7 6.8 5.7l2.2.5c2.5.6 3.8 1.5 3.8 3.1 0 1.9-1.9 3.2-4.8 3.2-3.1 0-5.2-1.4-5.6-3.5h-4.4c.4 4.5 4.2 7.5 10 7.5 5.6 0 9.2-2.9 9.2-7.1 0-3.5-2.4-5.4-7.2-6.5l-2.2-.5c-2.2-.5-3.4-1.3-3.4-2.7 0-1.6 1.5-2.7 3.9-2.7 2.4 0 4 1.1 4.3 2.5H31z" fill="#f8fafc"/>
+  <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
+</svg>`;
+
+function logoMarkup(assets?: ReadonlyMap<string, Uint8Array>): string {
+  const bytes = assets?.get(LOGO_ASSET);
+  return bytes ? new TextDecoder().decode(bytes) : FALLBACK_LOGO_SVG;
+}
 
 const NAVY = ColorPalette.slate[800];
 const INK = ColorPalette.slate[700];
@@ -93,7 +106,7 @@ const POSITION: Line[] = [
   { label: 'Total equity', cur: 28135, prior: 22400, kind: 'total' },
 ];
 
-export function generate(): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const settings = new DocumentSettings(PdfSize.a4, 54);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -101,9 +114,7 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
   function pageFooter(): TextBlock {
-    const f = new TextBlock(
-      `Sample Company Ltd  -  Company no. 07741122  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
-    );
+    const f = pageNumber('Sample Company Ltd  -  Company no. 07741122  -  Page {page} of {total}');
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = MUTED;
@@ -120,7 +131,7 @@ export function generate(): Document {
   const doc = new Document(settings, metadata);
 
   // ── Title block ───────────────────────────────────────────────────────────
-  doc.add(company('Sample Company Ltd'));
+  doc.add(company('Sample Company Ltd', assets));
   doc.add(h1('Annual Report and Financial Statements'));
   doc.add(sub('For the year ended 31 March 2026'));
   doc.add(sub('Company registration number 07741122 (England & Wales)  -  Prepared under UK-adopted IFRS'));
@@ -229,13 +240,26 @@ function fmt(n?: number): string {
 
 // ── Text helpers ──────────────────────────────────────────────────────────────
 
-function company(text: string): TextBlock {
+function company(text: string, assets?: ReadonlyMap<string, Uint8Array>): HorizontalStack {
+  const logo = new Svg();
+  logo.svgData = logoMarkup(assets);
+  logo.width = 26;
+  logo.height = 26;
+  logo.isDecorative = true;
+
   const b = new TextBlock(text);
   b.fontName = StandardFonts.HelveticaBold;
   b.fontSize = 11;
   b.color = MUTED;
-  b.margin = new Thickness(0, 0, 0, 4);
-  return b;
+  b.margin = new Thickness(0, 7, 0, 0);
+
+  const row = new HorizontalStack();
+  row.widthDistribution = WidthDistribution.Auto;
+  row.spacing = 8;
+  row.margin = new Thickness(0, 0, 0, 6);
+  row.add(logo);
+  row.add(b);
+  return row;
 }
 
 function h1(text: string): Heading {

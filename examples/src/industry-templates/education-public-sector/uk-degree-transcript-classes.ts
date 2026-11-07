@@ -21,6 +21,7 @@
 // to.
 
 import {
+  pageNumber,
   Document,
   DocumentSettings,
   DocumentMetadata,
@@ -28,7 +29,6 @@ import {
   PdfSize,
   TextBlock,
   TextStyle,
-  TextElementBase,
   TextAlignment,
   Heading,
   VerticalStack,
@@ -47,6 +47,7 @@ import {
   Border,
   BorderColors,
   StandardFonts,
+  Svg,
   WidthDistribution,
   HorizontalAlignment,
   PdfAConformance,
@@ -88,7 +89,8 @@ const MODULES: Module[] = [
   { level: 6, code: 'CS6305', title: 'Ethics & Society in Computing', credits: 20, mark: 67 },
 ];
 
-export function generate(): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+  const crestSvg = new TextDecoder().decode(assets.get('images/svg/university-crest.svg'));
   const settings = new DocumentSettings(PdfSize.a4, 50);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -96,9 +98,7 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(INK);
 
   function pageFooter(): TextBlock {
-    const f = new TextBlock(
-      `Sample University  -  Transcript 20458812  -  Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
-    );
+    const f = pageNumber('Sample University  -  Transcript 20458812  -  Page {page} of {total}');
     f.fontName = StandardFonts.Helvetica;
     f.fontSize = 8;
     f.color = MUTED;
@@ -119,6 +119,11 @@ export function generate(): Document {
   header.cellPadding = 0;
   header.border = Border.none;
   header.margin = new Thickness(0, 0, 0, 6);
+  const crestMark = new Svg();
+  crestMark.svgData = crestSvg;
+  crestMark.width = 30;
+  crestMark.height = 35;
+  crestMark.altText = 'University of Sampleford heraldic crest';
   const uni = new VerticalStack();
   const crest = new TextBlock('SAMPLE UNIVERSITY');
   crest.fontName = StandardFonts.HelveticaBold;
@@ -130,12 +135,17 @@ export function generate(): Document {
   estd.color = MUTED;
   estd.margin = new Thickness(0, 2, 0, 0);
   uni.add(estd);
+  const uniRow = new HorizontalStack();
+  uniRow.widthDistribution = WidthDistribution.Auto;
+  uniRow.spacing = 10;
+  uniRow.add(crestMark);
+  uniRow.add(uni);
   const doctype = new TextBlock('ACADEMIC TRANSCRIPT');
   doctype.fontName = StandardFonts.HelveticaBold;
   doctype.fontSize = 12;
   doctype.color = GOLD;
   doctype.alignment = TextAlignment.Right;
-  header.addRow(uni, doctype);
+  header.addRow(uniRow, doctype);
   doc.add(header);
 
   const navyRule = new Container();

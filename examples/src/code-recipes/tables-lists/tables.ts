@@ -4,18 +4,16 @@
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
+  TableCell,
+  pageNumber,
   Document,
   Heading,
   Container,
-  HorizontalStack,
   Image,
   Placeholders,
   TextBlock,
-  TextElementBase,
   Table,
-  TableRow,
   StandardFonts,
-  VerticalStack,
   type ColorInput,
   pageTemplate,
 } from '@bonniepdf/core';
@@ -60,7 +58,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 11, color: 'slate-700' },
       footerTemplate: pageTemplate({
-        default: new TextBlock(`Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`, {
+        default: pageNumber(undefined, {
           fontSize: 9,
           color: 'slate-400',
           alignment: 'right',
@@ -97,6 +95,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   const table = new Table({
     columns: [46, 130, 130, 120],
+    rowBackgroundColor: '#ffffff',
+    alternateRowBackgroundColor: 'slate-50',
     repeatHeadersOnNewPage: true,
     headerBackgroundColor: 'slate-100',
     headerTextColor: 'slate-800',
@@ -109,7 +109,6 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   const employees = Placeholders.withSeed(42).employees(45);
 
-  let rowIndex = 0;
   for (const emp of employees) {
     const photoBytes = assets?.get(`images/employees/employee-${emp.id}.jpg`) ?? emp.avatar;
     // The photo is cropped round by a clipping container the size of the photo.
@@ -127,15 +126,18 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       }),
     });
 
-    const bg = rowIndex++ % 2 === 0 ? '#ffffff' : 'slate-50';
-    const row = TableRow.fromElements(
+    table.addRow(
       photo,
-      new TextBlock(emp.name, { fontSize: 10, color: 'slate-800', margin: { top: 10 } }),
-      new TextBlock(emp.role, { fontSize: 10, color: 'slate-600', margin: { top: 10 } }),
-      departmentPill(emp.department)
+      new TableCell({
+        content: new TextBlock(emp.name, { fontSize: 10, color: 'slate-800' }),
+        verticalAlignment: 'middle',
+      }),
+      new TableCell({
+        content: new TextBlock(emp.role, { fontSize: 10, color: 'slate-600' }),
+        verticalAlignment: 'middle',
+      }),
+      new TableCell({ content: departmentPill(emp.department), verticalAlignment: 'middle' })
     );
-    row.backgroundColor = bg;
-    table.addRow(row);
   }
 
   doc.add(table);
@@ -155,8 +157,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   for (const [title, body] of OVERVIEW_SECTIONS) {
     // Each heading is kept with its paragraph, so a heading never ends a page on its own.
-    const section = new VerticalStack({ breakAllowed: false });
-    section.add(
+    doc.add(
       new Heading(title, {
         tocIdentifier: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         level: 2,
@@ -167,8 +168,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       })
     );
 
-    section.add(new TextBlock(body, { margin: { bottom: 6 } }));
-    doc.add(section);
+    doc.add(new TextBlock(body, { margin: { bottom: 6 } }));
   }
 
   return doc;
@@ -186,21 +186,15 @@ const DEPARTMENT_HUES: Record<string, string> = {
 };
 
 /**
- * A department as a small tinted pill: a light fill with dark text of the same hue. The auto-width
- * stack sizes the pill to its text instead of letting it fill the cell.
+ * A tinted department label sized to its text.
  */
-function departmentPill(department: string): HorizontalStack {
+function departmentPill(department: string): Container {
   const hue = DEPARTMENT_HUES[department] ?? 'slate';
-  return new HorizontalStack({
-    widthDistribution: 'auto',
-    margin: { top: 9 },
-    children: [
-      new Container({
-        backgroundColor: `${hue}-100` as ColorInput,
-        cornerRadius: 8,
-        padding: [8, 3],
-        child: new TextBlock(department, { fontSize: 9, color: `${hue}-800` as ColorInput }),
-      }),
-    ],
+  return new Container({
+    fitContent: true,
+    backgroundColor: `${hue}-100` as ColorInput,
+    cornerRadius: 8,
+    padding: [8, 3],
+    child: new TextBlock(department, { fontSize: 9, color: `${hue}-800` as ColorInput }),
   });
 }

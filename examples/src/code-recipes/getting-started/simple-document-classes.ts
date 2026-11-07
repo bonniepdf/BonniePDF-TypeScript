@@ -16,7 +16,6 @@ import {
   Table,
   TableRow,
   Color,
-  Line,
   TextStyle,
   TextAlignment,
   UnorderedList,
@@ -25,6 +24,13 @@ import {
   StandardFonts,
   PdfAConformance,
   AccessibilityMode,
+  Border,
+  BorderColors,
+  Container,
+  HorizontalStack,
+  VerticalAlignment,
+  VerticalStack,
+  WidthDistribution,
 } from '@bonniepdf/core';
 
 /**
@@ -60,32 +66,49 @@ export function generate(): Document {
 
   const doc = new Document(settings, metadata);
 
-  // ── Page 1 ──
+  // ── Page 1: a title block with an accent rule, then the feature panel ──
+  const eyebrow = new TextBlock('GETTING STARTED');
+  eyebrow.fontName = HEADING;
+  eyebrow.fontSize = 9;
+  eyebrow.letterSpacing = 1.5;
+  eyebrow.color = ColorPalette.indigo[600];
+
   const h1 = new Heading('Hello, Document API!');
   h1.tocIdentifier = 'intro';
   h1.level = 1;
   h1.fontName = HEADING;
-  h1.fontSize = 24;
-  h1.color = ColorPalette.slate[800];
-  h1.margin = new Thickness(0, 0, 0, 12);
-  doc.add(h1);
+  h1.fontSize = 28;
+  h1.color = ColorPalette.slate[900];
 
-  const introduction = new TextBlock('This PDF was created using the high-level Document API.');
-  introduction.margin = new Thickness(0, 0, 0, 16);
-  doc.add(introduction);
+  const titleStack = new VerticalStack();
+  titleStack.spacing = 6;
+  titleStack.add(eyebrow);
+  titleStack.add(h1);
+  titleStack.add(
+    new TextBlock(
+      'Headings, text, a list, a table and a QR code across three pages, written with the high-level Document API.'
+    )
+  );
 
-  const keyFeatures = new Heading('Key Features');
+  const titleBlock = new Container();
+  titleBlock.border = new Border(4, 0, 0, 0);
+  titleBlock.borderColors = new BorderColors(ColorPalette.indigo[500]);
+  titleBlock.padding = new Thickness(16, 2, 0, 2);
+  titleBlock.margin = new Thickness(0, 0, 0, 24);
+  titleBlock.child = titleStack;
+  doc.add(titleBlock);
+
+  const keyFeatures = new Heading('Key features');
   keyFeatures.tocIdentifier = 'features';
   keyFeatures.level = 2;
   keyFeatures.fontName = HEADING;
   keyFeatures.fontSize = 14;
-  keyFeatures.color = ColorPalette.slate[700];
-  keyFeatures.margin = new Thickness(0, 0, 0, 6);
-  doc.add(keyFeatures);
+  keyFeatures.color = ColorPalette.indigo[900];
 
   const features = new UnorderedList();
   features.fontSize = 11;
-  features.itemSpacing = 2;
+  features.itemSpacing = 3;
+  features.bulletColor = ColorPalette.indigo[500];
   for (const item of [
     'Simple, intuitive API',
     'Built-in metadata support',
@@ -95,44 +118,64 @@ export function generate(): Document {
   ]) {
     features.addItem(item);
   }
-  doc.add(features);
 
-  // ── Divider, then the accessibility note ──
-  const divider = new Line();
-  divider.thickness = 1;
-  divider.color = ColorPalette.slate[300];
-  divider.margin = new Thickness(0, 16, 0, 16);
-  doc.add(divider);
+  const featureStack = new VerticalStack();
+  featureStack.spacing = 8;
+  featureStack.add(keyFeatures);
+  featureStack.add(features);
+
+  const featurePanel = new Container();
+  featurePanel.backgroundColor = ColorPalette.indigo[50];
+  featurePanel.cornerRadius = 8;
+  featurePanel.padding = new Thickness(16);
+  featurePanel.margin = new Thickness(0, 0, 0, 20);
+  featurePanel.child = featureStack;
+  doc.add(featurePanel);
 
   const accessibilityNote = new TextBlock(
     'Existing elements (Heading, TextBlock, UnorderedList, Image, QRCode) tag themselves automatically - no semantic verbs required.'
   );
-  accessibilityNote.margin = new Thickness(0, 0, 0, 16);
+  accessibilityNote.margin = new Thickness(0, 0, 0, 20);
   doc.add(accessibilityNote);
+
+  // ── The QR code beside its explanation: a weighted row, 1 part code to 4 parts text ──
+  const qr = new QRCode();
+  qr.data = 'https://bonniepdf.dev';
+  qr.size = 90;
+  qr.altText = 'QR code linking to https://bonniepdf.dev';
 
   const scan = new Heading('Scan to verify');
   scan.tocIdentifier = 'verify';
   scan.level = 2;
   scan.fontName = HEADING;
   scan.fontSize = 14;
-  scan.color = ColorPalette.slate[700];
-  scan.margin = new Thickness(0, 0, 0, 6);
-  doc.add(scan);
+  scan.color = ColorPalette.slate[900];
 
-  const qr = new QRCode();
-  qr.data = 'https://bonniepdf.dev';
-  qr.size = 100;
-  qr.altText = 'QR code linking to https://bonniepdf.dev';
-  doc.add(qr);
+  const scanText = new TextBlock(
+    'Point a phone camera at the code to open bonniepdf.dev. The code carries alt text, so a screen reader says where it leads.'
+  );
+  scanText.fontSize = 11;
+
+  const scanStack = new VerticalStack();
+  scanStack.spacing = 6;
+  scanStack.add(scan);
+  scanStack.add(scanText);
+
+  const scanRow = new HorizontalStack();
+  scanRow.spacing = 18;
+  scanRow.widthDistribution = WidthDistribution.Weighted;
+  scanRow.add(qr, 1);
+  scanRow.add(scanStack, 4);
+  doc.add(scanRow);
 
   // ── Page 2 ──
   doc.addPage();
-  const page2 = new Heading('Page 2: Summary Table');
+  const page2 = new Heading('Page 2: Summary table');
   page2.tocIdentifier = 'page2';
   page2.level = 1;
   page2.fontName = HEADING;
   page2.fontSize = 20;
-  page2.color = ColorPalette.slate[800];
+  page2.color = ColorPalette.slate[900];
   page2.margin = new Thickness(0, 0, 0, 12);
   doc.add(page2);
   const intro = new TextBlock('This demonstrates multipage support with automatic page management.');
@@ -153,20 +196,33 @@ export function generate(): Document {
   };
 
   const table = new Table(160, 160, 175);
-  table.headerBackgroundColor = ColorPalette.slate[800];
+  table.headerBackgroundColor = ColorPalette.indigo[700];
   table.headerTextColor = Color.white;
   table.addHeader(header('Component'), header('Runtime'), header('Status'));
-  const ready = ColorPalette.emerald[700];
-  table.addRow(TableRow.fromElements(body('Core Engine'), body('.NET / TypeScript'), body('Production Ready', ready)));
-  table.addRow(
-    TableRow.fromElements(body('Typography Engine'), body('Embedded Fonts'), body('Production Ready', ready))
-  );
-  table.addRow(
-    TableRow.fromElements(body('Vector Graphics'), body('SVG / QR / Barcode'), body('Production Ready', ready))
-  );
+  for (const [component, runtime] of [
+    ['Core Engine', '.NET / TypeScript'],
+    ['Typography Engine', 'Embedded Fonts'],
+    ['Vector Graphics', 'SVG / QR / Barcode'],
+    ['Charts', 'Bar / Line / Pie'],
+    ['Compliance', 'PDF/A / PDF/UA'],
+  ]) {
+    table.addRow(TableRow.fromElements(body(component), body(runtime), body('Available', ColorPalette.emerald[700])));
+  }
   doc.add(table);
 
-  // ── Page 3 - custom square ──
+  const flowNote = new TextBlock(
+    'Content flows onto new pages by itself as the document grows. Start a page yourself only when you want a break on purpose, as before this page and before the square card that follows.'
+  );
+  flowNote.fontSize = 11;
+  const flowPanel = new Container();
+  flowPanel.backgroundColor = ColorPalette.slate[100];
+  flowPanel.cornerRadius = 8;
+  flowPanel.padding = new Thickness(14);
+  flowPanel.margin = new Thickness(0, 20, 0, 0);
+  flowPanel.child = flowNote;
+  doc.add(flowPanel);
+
+  // ── Page 3 - custom square: a card that fills the page body ──
   const squareSize = new PdfSize(300, 300, 'Square Card');
   doc.addPage(squareSize);
 
@@ -174,15 +230,27 @@ export function generate(): Document {
   p3title.tocIdentifier = 'square';
   p3title.level = 1;
   p3title.fontName = HEADING;
-  p3title.fontSize = 16;
-  p3title.color = ColorPalette.slate[800];
+  p3title.fontSize = 18;
+  p3title.color = Color.white;
   p3title.alignment = TextAlignment.Center;
-  p3title.margin = new Thickness(0, 50, 0, 0);
-  doc.add(p3title);
 
-  const p3sub = new TextBlock(`${squareSize.width}pt x ${squareSize.height}pt`);
+  const p3sub = new TextBlock(`${squareSize.width}pt × ${squareSize.height}pt`);
   p3sub.alignment = TextAlignment.Center;
-  doc.add(p3sub);
+  p3sub.color = ColorPalette.indigo[100];
+
+  const cardStack = new VerticalStack();
+  cardStack.spacing = 6;
+  cardStack.add(p3title);
+  cardStack.add(p3sub);
+
+  const card = new Container();
+  card.fillHeight = true;
+  card.backgroundColor = ColorPalette.indigo[600];
+  card.cornerRadius = 12;
+  card.padding = new Thickness(20);
+  card.verticalAlignment = VerticalAlignment.Center;
+  card.child = cardStack;
+  doc.add(card);
 
   return doc;
 }

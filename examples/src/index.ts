@@ -3,6 +3,10 @@ import { generate as allergenMatrix } from './industry-templates/hospitality/all
 import { generate as guestFolio } from './industry-templates/hospitality/guest-folio';
 import { generate as banquetEventOrder } from './industry-templates/hospitality/banquet-event-order';
 import { generate as giftVoucher } from './industry-templates/hospitality/gift-voucher';
+import { generate as finalInspectionRecord } from './industry-templates/manufacturing-quality/final-inspection-record';
+import { generate as certificateOfAnalysis } from './industry-templates/manufacturing-quality/certificate-of-analysis';
+import { generate as safetyDataSheet } from './industry-templates/manufacturing-quality/safety-data-sheet';
+import { generate as palletLabel } from './industry-templates/manufacturing-quality/pallet-label';
 import { generate as multilingualCustomerLetter } from './industry-templates/sales-supply-chain/multilingual-customer-letter';
 import { generate as longBasketReceipt } from './industry-templates/retail-events/long-basket-receipt';
 import { generate as largeOrderInvoice } from './industry-templates/invoices/large-order-invoice';
@@ -3488,6 +3492,69 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     industries: ['Hospitality'],
     documentType: 'voucher',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'certificate-of-analysis',
+    name: 'Certificate of Analysis',
+    category: 'Manufacturing & Quality',
+    tier: 'examples',
+    description:
+      'A certificate of analysis for one batch of a food ingredient: a vertical title running up the edge of the page, the batch details, every test against its specification and method, a release statement, and a QR code to verify the certificate.',
+    filename: 'certificate-of-analysis.pdf',
+    generate: certificateOfAnalysis,
+    dotnetClass: 'CertificateOfAnalysisExample',
+    pdfUa1: true,
+    industries: ['Manufacturing'],
+    documentType: 'certificate',
+    capabilities: ['qr'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'safety-data-sheet',
+    name: 'Safety Data Sheet',
+    category: 'Manufacturing & Quality',
+    tier: 'examples',
+    description:
+      'A safety data sheet for a flammable cleaning product: all 16 sections in the order the regulation sets, drawn hazard pictograms with the signal word, composition and exposure-limit tables, transport details, and the product and page number on every page.',
+    filename: 'safety-data-sheet.pdf',
+    generate: safetyDataSheet,
+    dotnetClass: 'SafetyDataSheetExample',
+    pdfUa1: true,
+    industries: ['Manufacturing'],
+    documentType: 'report',
+    capabilities: ['numbering'],
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'final-inspection-record',
+    name: 'Final Inspection Record',
+    category: 'Manufacturing & Quality',
+    tier: 'examples',
+    description:
+      'A final inspection record on landscape A4: twelve machined parts against ten checks, with the check names set vertically above narrow columns, measurements beside pass or fail marks, and the rejected part flagged for a nonconformance report.',
+    filename: 'final-inspection-record.pdf',
+    generate: finalInspectionRecord,
+    dotnetClass: 'FinalInspectionRecordExample',
+    pdfUa1: true,
+    industries: ['Manufacturing'],
+    documentType: 'report',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'pallet-label',
+    name: 'Pallet Label',
+    category: 'Manufacturing & Quality',
+    tier: 'examples',
+    description:
+      'An A6 pallet label for a batch of ingredients: the shipper and consignee, product, batch and dates, a serial shipping container code and an ITF-14 carton barcode, a DataMatrix of the product, batch and expiry, and handling text set vertically along both edges.',
+    filename: 'pallet-label.pdf',
+    generate: palletLabel,
+    dotnetClass: 'PalletLabelExample',
+    pdfUa1: true,
+    industries: ['Manufacturing', 'Logistics'],
+    documentType: 'label',
+    capabilities: ['barcodes', 'dataMatrix'],
     compliance: ['pdf/a-2a', 'pdf/ua-1'],
   },
   {

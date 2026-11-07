@@ -992,9 +992,16 @@ class Writer {
       const docPortrait = this.pageSize(baseline.pageSize);
       const landscape = page.width > page.height;
       const docLandscape = baseline.orientation === PageOrientation.Landscape;
-      if (!same(portrait, docPortrait)) node.size = portrait;
-      if (landscape !== docLandscape) node.orientation = landscape ? 'landscape' : 'portrait';
+      if (baseline.preservePageDimensions) {
+        if (page.width !== baseline.pageSize.width || page.height !== baseline.pageSize.height) {
+          node.size = { width: page.width, height: page.height };
+        }
+      } else {
+        if (!same(portrait, docPortrait)) node.size = portrait;
+        if (landscape !== docLandscape) node.orientation = landscape ? 'landscape' : 'portrait';
+      }
       if (page.hasExplicitMargin) node.margin = page.margin;
+      if (page.margins) node.margins = this.wire('spacing', page.margins);
       if (page.pageColor !== undefined) node.pageColor = this.colour(page.pageColor);
       if (page.pageBackground) {
         const background = await this.element(page.pageBackground, `${at}/background`);
@@ -1064,6 +1071,12 @@ class Writer {
     for (const [key, ks] of Object.entries(D.objects.Settings.keys)) {
       const at = `/settings/${key}`;
       switch (key) {
+        case 'pageSize':
+          if (settings.preservePageDimensions && settings.pageSize.width > settings.pageSize.height) {
+            out.pageSize = { width: settings.pageSize.width, height: settings.pageSize.height };
+            continue;
+          }
+          break;
         case 'pageChrome': {
           const chrome = await this.pageChrome();
           if (chrome) out.pageChrome = chrome;

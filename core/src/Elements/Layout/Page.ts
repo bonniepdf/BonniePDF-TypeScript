@@ -1,3 +1,5 @@
+import { Thickness } from '../../Core/Thickness';
+import { toThickness, type ThicknessInput } from '../../Normalize/toThickness';
 import { toElement } from '../../Normalize/toElement';
 import { applyOptions } from '../../Core/applyOptions';
 import { IElement } from '../IElement';
@@ -15,16 +17,28 @@ import { toLength, type LengthInput } from '../../Normalize/toLength';
  * `size` and `margin` are `readonly` - they are the page's identity and stay
  * constructor-only, so they are not options.
  */
-export const PAGE_OPTION_KEYS = ['pageColor', 'pageBackground', 'pageForeground'] as const;
+export const PAGE_OPTION_KEYS = ['pageColor', 'pageBackground', 'pageForeground', 'margins'] as const;
 
 /** Options for {@link Page}. */
-export type PageOptions = Partial<Omit<Pick<Page, (typeof PAGE_OPTION_KEYS)[number]>, 'pageColor'>> & {
+export type PageOptions = Partial<Omit<Pick<Page, (typeof PAGE_OPTION_KEYS)[number]>, 'pageColor' | 'margins'>> & {
+  /** Optional four-sided margin for this page. */
+  margins?: ThicknessInput;
   /** Page background fill. Accepts a palette token or hex. */
   pageColor?: ColorInput;
 };
 
 /** Contains the body, header, footer, and background elements for one document page. */
 export class Page {
+  private _margins?: Thickness;
+
+  /** Optional four-sided margin, taking precedence over the uniform margin. */
+  public get margins(): Thickness | undefined {
+    return this._margins;
+  }
+  public set margins(value: ThicknessInput | undefined) {
+    this._margins = value === undefined ? undefined : toThickness(value);
+  }
+
   private readonly elements: IElement[] = [];
   /** The page size, in points. */
   public readonly size: PdfSize;
@@ -129,14 +143,14 @@ export class Page {
    * Gets the available content width (page width minus margins)
    */
   get contentWidth(): number {
-    return this.width - this.margin * 2;
+    return this.width - (this.margins ? this.margins.left + this.margins.right : this.margin * 2);
   }
 
   /**
    * Gets the available content height (page height minus margins)
    */
   get contentHeight(): number {
-    return this.height - this.margin * 2;
+    return this.height - (this.margins ? this.margins.top + this.margins.bottom : this.margin * 2);
   }
 
   /**

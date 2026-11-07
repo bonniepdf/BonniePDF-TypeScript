@@ -1,3 +1,5 @@
+import type { CanvasContrast } from './CanvasContrast';
+import { toColor, type ColorInput } from '../Normalize/toColor';
 import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
 import { orderRunsVisually } from '../Typography/VisualTextRuns';
 import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
@@ -166,6 +168,8 @@ export class SvgIdAllocator {
 /** Translates drawing operations into SVG markup. */
 export class SvgCanvas implements ICanvas {
   /** @internal */
+  public contrast?: CanvasContrast;
+  /** @internal */
   public emojiRendering: () => 'outline' | 'colour' = () => 'outline';
 
   private fontFeatures?: Readonly<Record<string, number>>;
@@ -252,7 +256,9 @@ export class SvgCanvas implements ICanvas {
 
   // -- Shapes -------------------------------------------------------------
 
-  public fillRect(x: number, y: number, width: number, height: number, color: Color): void {
+  public fillRect(x: number, y: number, width: number, height: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.rect(x, y, width, height, color);
     this.svgElements.push(
       `<rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(
         height
@@ -260,7 +266,16 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void {
+  public strokeRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colorInput: ColorInput,
+    strokeWidth: number
+  ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     this.svgElements.push(
       `<rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(
         height
@@ -268,7 +283,9 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void {
+  public drawLine(x1: number, y1: number, x2: number, y2: number, colorInput: ColorInput, lineWidth: number): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     this.svgElements.push(
       `<line x1="${this.n(x1)}" y1="${this.n(y1)}" x2="${this.n(x2)}" y2="${this.n(
         y2
@@ -276,13 +293,17 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public fillCircle(cx: number, cy: number, radius: number, color: Color): void {
+  public fillCircle(cx: number, cy: number, radius: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     this.svgElements.push(
       `<circle cx="${this.n(cx)}" cy="${this.n(cy)}" r="${this.n(radius)}" ${this.getFillAttributes(color)}/>`
     );
   }
 
-  public fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void {
+  public fillEllipse(cx: number, cy: number, rx: number, ry: number, colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     this.svgElements.push(
       `<ellipse cx="${this.n(cx)}" cy="${this.n(cy)}" rx="${this.n(rx)}" ry="${this.n(
         ry
@@ -290,13 +311,24 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public fillPath(points: Point[], color: Color): void {
+  public fillPath(points: Point[], colorInput: ColorInput): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     if (points.length < 3) return;
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${this.n(p.x)} ${this.n(p.y)}`).join(' ') + ' Z';
     this.svgElements.push(`<path d="${pathData}" ${this.getFillAttributes(color)}/>`);
   }
 
-  public fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void {
+  public fillRoundedRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+    colorInput: ColorInput
+  ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     // `ry` is written alongside `rx` even though SVG defaults it to `rx`: the
     // .NET exporter writes both, and the shared specification names SVG as the
     // artefact the conformance tooling compares, so the attribute set is part
@@ -314,9 +346,11 @@ export class SvgCanvas implements ICanvas {
     width: number,
     height: number,
     radius: number,
-    color: Color,
+    colorInput: ColorInput,
     strokeWidth: number
   ): void {
+    const color = toColor(colorInput);
+    this.contrast?.unknownPaint();
     this.svgElements.push(
       `<rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(height)}" rx="${this.n(
         radius
@@ -330,11 +364,14 @@ export class SvgCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     align: TextAlignment
   ): void {
+    const color = toColor(colorInput);
+    if (this.contrast && text.trim())
+      this.contrast.text(x, y, this.measureText(text, fontSize, fontFamily).width, fontSize, color, fontFamily, align);
     if (text.length === 0) return;
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
@@ -420,11 +457,23 @@ export class SvgCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     angleDegrees: number
   ): void {
+    const color = toColor(colorInput);
+    if (this.contrast && text.trim())
+      this.contrast.text(
+        x,
+        y,
+        this.measureText(text, fontSize, fontFamily).width,
+        fontSize,
+        color,
+        fontFamily,
+        TextAlignment.Left,
+        true
+      );
     if (text.length === 0) return;
     const hex = color.toHexString();
     const baselineY = this.calculateBaselineY(y, fontSize, fontFamily);
@@ -450,11 +499,12 @@ export class SvgCanvas implements ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    colorInput: ColorInput,
     fontSize: number,
     fontFamily: string,
     availableWidth: number
   ): void {
+    const color = toColor(colorInput);
     if (text.length === 0) return;
 
     let spaceCount = 0;
@@ -465,6 +515,17 @@ export class SvgCanvas implements ICanvas {
       return;
     }
 
+    if (this.contrast && text.trim())
+      this.contrast.text(
+        x,
+        y,
+        this.measureText(text, fontSize, fontFamily).width,
+        fontSize,
+        color,
+        fontFamily,
+        TextAlignment.Left,
+        true
+      );
     const naturalWidth = this.measureText(text, fontSize, fontFamily).width;
     const extraPerSpace = (availableWidth - naturalWidth) / spaceCount;
     const hex = color.toHexString();
@@ -511,6 +572,7 @@ export class SvgCanvas implements ICanvas {
   // -- Images -------------------------------------------------------------
 
   public drawImage(image: ImageInfo, x: number, y: number, width: number, height: number): void {
+    this.contrast?.unknownPaint();
     const mode = this.options.embedImages ?? 'data-uri';
     if (mode === 'omit') return;
     if (!image) return;
@@ -541,7 +603,9 @@ export class SvgCanvas implements ICanvas {
     );
   }
 
-  public drawFormXObject(_resourceName: string, _x: number, _y: number): void {}
+  public drawFormXObject(_resourceName: string, _x: number, _y: number): void {
+    this.contrast?.unknownPaint();
+  }
 
   // -- Marked content (no-ops in SVG) -------------------------------------
 
@@ -564,6 +628,7 @@ export class SvgCanvas implements ICanvas {
   // -- Clipping (legacy) --------------------------------------------------
 
   public beginRoundedClip(x: number, y: number, width: number, height: number, radius: number): void {
+    this.contrast?.unknownState();
     const id = this.idAllocator.nextClipId();
     this.svgElements.push(
       `<clipPath id="${id}"><rect x="${this.n(x)}" y="${this.n(y)}" width="${this.n(width)}" height="${this.n(
@@ -630,7 +695,9 @@ export class SvgCanvas implements ICanvas {
 
   // -- Painting the current path ------------------------------------
 
-  public fillCurrentPath(paint: Paint | Color, rule: FillRule = 'nonzero'): void {
+  public fillCurrentPath(paintInput: Paint | ColorInput, rule: FillRule = 'nonzero'): void {
+    this.contrast?.unknownPaint();
+    const paint = typeof paintInput === 'string' ? toColor(paintInput) : paintInput;
     const d = this.currentPathData.join(' ');
     if (!d) return;
     const p = toPaint(paint);
@@ -644,9 +711,11 @@ export class SvgCanvas implements ICanvas {
   }
 
   public strokeCurrentPath(style: StrokeStyle): void {
+    this.contrast?.unknownPaint();
+    const paint = typeof style.paint === 'string' ? toColor(style.paint) : style.paint;
     const d = this.currentPathData.join(' ');
     if (!d) return;
-    const p = toPaint(style.paint);
+    const p = toPaint(paint);
     const attrs: string[] = [];
     attrs.push(`stroke-width="${this.n(style.width)}"`);
     if (style.lineCap && style.lineCap !== 'butt') attrs.push(`stroke-linecap="${style.lineCap}"`);
@@ -671,21 +740,25 @@ export class SvgCanvas implements ICanvas {
   // -- Affine transforms --------------------------------------------
 
   public translate(tx: number, ty: number): void {
+    this.contrast?.unknownState();
     this.svgElements.push(`<g transform="translate(${this.n(tx)} ${this.n(ty)})">`);
     this.groupDepth++;
   }
 
   public scale(sx: number, sy: number): void {
+    this.contrast?.unknownState();
     this.svgElements.push(`<g transform="scale(${this.n(sx)} ${this.n(sy)})">`);
     this.groupDepth++;
   }
 
   public rotate(angleDegrees: number): void {
+    this.contrast?.unknownState();
     this.svgElements.push(`<g transform="rotate(${this.n(angleDegrees)})">`);
     this.groupDepth++;
   }
 
   public transform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+    this.contrast?.unknownState();
     this.svgElements.push(
       `<g transform="matrix(${this.n(a)} ${this.n(b)} ${this.n(c)} ${this.n(d)} ${this.n(e)} ${this.n(f)})">`
     );
@@ -695,6 +768,7 @@ export class SvgCanvas implements ICanvas {
   // -- Clipping + compositing ---------------------------------------
 
   public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
+    this.contrast?.unknownState();
     const d = this.currentPathData.join(' ');
     if (!d) return;
     const id = this.idAllocator.nextClipId();
@@ -705,6 +779,7 @@ export class SvgCanvas implements ICanvas {
   }
 
   public setGlobalAlpha(alpha: number): void {
+    this.contrast?.unknownState();
     this.svgElements.push(`<g opacity="${this.formatOpacity(alpha)}">`);
     this.groupDepth++;
   }
@@ -716,6 +791,7 @@ export class SvgCanvas implements ICanvas {
 
   /** @inheritdoc */
   public setTextSpacing(letterSpacing: number, wordSpacing: number): void {
+    this.contrast?.unknownState();
     this.letterSpacing = letterSpacing;
     this.wordSpacing = wordSpacing;
   }

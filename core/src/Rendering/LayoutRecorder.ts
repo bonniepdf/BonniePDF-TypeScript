@@ -130,6 +130,8 @@ export interface NodePaint {
   text?: string;
   /** Text alpha in `[0,1)`; omitted when fully opaque. */
   textAlpha?: number;
+  /** An opaque backdrop resolved from earlier drawing operations in the same canvas. */
+  textBackdrop?: string;
   /** The element's own resolved background fill, `"#rrggbb"`. */
   background?: string;
   /** Background alpha in `[0,1)`; omitted when fully opaque. */

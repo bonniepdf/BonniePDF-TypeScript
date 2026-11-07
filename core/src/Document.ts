@@ -1,3 +1,4 @@
+import type { ThicknessInput } from './Normalize/toThickness';
 import { toElement } from './Normalize/toElement';
 import { throwIfAborted } from './Core/throwIfAborted';
 import { applyContentDirection } from './Elements/ContentDirectionResolver';
@@ -55,6 +56,8 @@ export interface AddPageOptions {
   orientation?: PageOrientation;
   /** Page margin in points; defaults to the document's margin. */
   margin?: number;
+  /** Optional four-sided page margin. */
+  margins?: ThicknessInput;
 }
 
 /** Options for the asynchronous generate and save methods. */
@@ -355,6 +358,7 @@ export class Document {
           : this.settings.getOrientedPageSize();
     }
     const page = new Page(size, margin);
+    page.margins = options.margins;
     page.hasExplicitMargin = options.margin !== undefined;
     this._pages.push(page);
     return page;

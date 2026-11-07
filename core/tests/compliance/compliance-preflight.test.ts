@@ -1,4 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import { CanvasElement } from '../../src/Elements/Drawing/CanvasElement';
+import { TextAlignment } from '../../src/Elements/Text/TextAlignment';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { Heading } from '../../src/Elements/Text/Heading';
@@ -17,6 +19,28 @@ function find(node: LayoutNode, pred: (n: LayoutNode) => boolean): LayoutNode | 
   }
   return undefined;
 }
+
+it('checks ordinary canvas text over a solid rectangle and reports unknown for mixed backdrops', async () => {
+  const doc = new Document();
+  doc.add(
+    new CanvasElement(
+      canvas => {
+        canvas.fillRect(0, 0, 140, 28, '#bbf7d0');
+        canvas.drawText(8, 4, 'Low contrast', '#ffffff', 10, StandardFonts.Helvetica, TextAlignment.Left);
+        canvas.fillRect(0, 30, 16, 28, '#bbf7d0');
+        canvas.drawText(8, 34, 'Mixed backdrop', '#ffffff', 10, StandardFonts.Helvetica, TextAlignment.Left);
+      },
+      { drawWidth: 140, drawHeight: 60, altText: 'Two sample labels' }
+    )
+  );
+  const { snapshot } = await doc.generateSvgDocumentAsync({ captureLayout: true });
+  const report = evaluateCompliance(snapshot!);
+  expect(report.findings.filter(f => f.code.startsWith('contrast-')).map(f => f.code)).toEqual([
+    'contrast-insufficient',
+    'contrast-unknown',
+  ]);
+  doc.dispose();
+});
 
 describe('accessibilityOf — intrinsic a11y derivation', () => {
   it('derives heading level and tagged=true for a Heading', () => {

@@ -1,5 +1,5 @@
 import { Paint } from './Paint';
-import { Color } from '../Core/Color';
+import type { ColorInput } from '../Normalize/toColor';
 
 /** How overlapping sub-paths are filled: `'nonzero'` or `'evenodd'`. */
 export type FillRule = 'nonzero' | 'evenodd';
@@ -11,7 +11,7 @@ export type LineJoin = 'miter' | 'round' | 'bevel';
 /** How a path is outlined. */
 export interface StrokeStyle {
   /** The colour or gradient of the stroke. */
-  paint: Paint | Color;
+  paint: Paint | ColorInput;
   /** Stroke width, in points. */
   width: number;
   /** Alternating dash and gap lengths, in points. Omit for a solid line. */

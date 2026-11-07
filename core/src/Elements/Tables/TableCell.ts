@@ -12,6 +12,8 @@ import { RenderContext } from '../../Rendering/RenderContext';
 import { Thickness } from '../../Core/Thickness';
 import { Border } from '../../Core/Border';
 import { BorderColors } from '../../Core/BorderColors';
+import { VerticalAlignment } from '../../Core/VerticalAlignment';
+import { toVerticalAlignment, type VerticalAlignmentInput } from '../../Normalize/toEnum';
 import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
@@ -20,7 +22,14 @@ import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
  * A table cell with support for custom styling, background color, and padding overrides
  */
 /** Settable properties declared by {@link TableCell} itself. */
-export const TABLE_CELL_OWN_OPTION_KEYS = ['content', 'color', 'padding', 'columnSpan', 'isHeader'] as const;
+export const TABLE_CELL_OWN_OPTION_KEYS = [
+  'content',
+  'color',
+  'padding',
+  'columnSpan',
+  'isHeader',
+  'verticalAlignment',
+] as const;
 
 /** The full settable surface of a cell, bases included. */
 export const TABLE_CELL_OPTION_KEYS = [...BORDERED_ELEMENT_OPTION_KEYS, ...TABLE_CELL_OWN_OPTION_KEYS] as const;
@@ -29,7 +38,9 @@ type TableCellOwnKey = (typeof TABLE_CELL_OWN_OPTION_KEYS)[number];
 
 /** Options for {@link TableCell}. Intersects {@link BorderedElementOptions}. */
 export type TableCellOptions = BorderedElementOptions &
-  Partial<Omit<Pick<TableCell, TableCellOwnKey>, 'color' | 'padding'>> & {
+  Partial<Omit<Pick<TableCell, TableCellOwnKey>, 'color' | 'padding' | 'verticalAlignment'>> & {
+    /** Vertical placement of the content within the row. */
+    verticalAlignment?: VerticalAlignmentInput;
     /** Cell text colour. Accepts a palette token or hex. */
     color?: ColorInput;
     /** Cell padding. Accepts `12`, `[h, v]`, `[l, t, r, b]` or `{ bottom: 12 }`. */
@@ -40,6 +51,16 @@ export type TableCellOptions = BorderedElementOptions &
 export class TableCell extends BorderedElementBase implements IRoleProvider {
   /** The content element to display in this cell */
   public content!: IElement;
+
+  private _verticalAlignment: ReturnType<typeof toVerticalAlignment> = VerticalAlignment.Start;
+
+  /** Vertical placement of the content within the row. */
+  public get verticalAlignment(): ReturnType<typeof toVerticalAlignment> {
+    return this._verticalAlignment;
+  }
+  public set verticalAlignment(value: VerticalAlignmentInput) {
+    this._verticalAlignment = toVerticalAlignment(value);
+  }
 
   /** Creates a cell, optionally configured in one expression. */
   constructor(options?: TableCellOptions) {

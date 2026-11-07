@@ -1,4 +1,6 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
+import { valueFraction } from './Graphics/ChartValueScale';
+import { ChartOrientation } from './ChartOrientation';
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
 import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } from './ChartHost';
@@ -13,6 +15,7 @@ import { CartesianChartBase } from './CartesianChartBase';
 /** Settable properties declared by {@link LineChart} itself. */
 export const LINE_CHART_OWN_OPTION_KEYS = [
   'defaultLineWidth',
+  'sparkline',
   'defaultShowMarkers',
   'defaultMarkerRadius',
   'lineColor',
@@ -45,6 +48,28 @@ export class LineChart extends CartesianChartBase {
    * Default line width for all series (can be overridden per series via Style).
    */
   defaultLineWidth: number = 2;
+
+  /** Use the chart box for a compact plot without axes, labels or legend. */
+  sparkline = false;
+
+  protected override drawCompact(canvas: ICanvas, data: ChartData): boolean {
+    if (!this.sparkline) return false;
+    const horizontal = this.orientation === ChartOrientation.Horizontal;
+    for (const series of data.series) {
+      const lineWidth = series.style?.lineWidth && series.style.lineWidth > 0 ? series.style.lineWidth : this.defaultLineWidth;
+      const inset = Math.min(lineWidth / 2, this.width / 2, this.height / 2);
+      const points = series.dataPoints.map(({ value }, index, all) => {
+        const category = all.length > 1 ? index / (all.length - 1) : 0.5;
+        const fraction = Math.max(0, Math.min(1, valueFraction(value, data.yAxis.minValue, data.yAxis.maxValue)));
+        return new Point(
+          inset + (horizontal ? fraction : category) * (this.width - 2 * inset),
+          inset + (horizontal ? category : 1 - fraction) * (this.height - 2 * inset)
+        );
+      });
+      this.drawConnectingLine(canvas, points, this.resolveSeriesColor(series), lineWidth);
+    }
+    return true;
+  }
 
   /**
    * Whether to show data point markers by default (can be overridden per series via Style).

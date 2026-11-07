@@ -27,6 +27,7 @@ const STANDARD_FONT_FAMILY = 'Helvetica';
 export const BARCODE_OWN_OPTION_KEYS = [
   'value',
   'symbology',
+  'gs1',
   'altText',
   'isDecorative',
   'height',
@@ -69,6 +70,9 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
     super();
     applyOptions(this, options);
   }
+
+  /** Encode Code 128 with the GS1 start and field separators. */
+  public gs1 = false;
 
   /** The value to encode. Content rules depend on {@link symbology}. */
   public value = '';
@@ -170,7 +174,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
 
   protected override getPreferredContentWidth(): number {
     if (!this.value) return 0;
-    const encoded = BarcodeEncoder.encode(this.symbology, this.value);
+    const encoded = BarcodeEncoder.encode(this.symbology, this.value, this.gs1);
     const totalModules = encoded.modules.length + this.effectiveQuietZone * 2;
     return totalModules * this.moduleWidth;
   }
@@ -185,7 +189,7 @@ export class Barcode extends ElementBase implements IRoleProvider, IAltTextProvi
       return;
     }
 
-    const encoded: EncodedBarcode = BarcodeEncoder.encode(this.symbology, this.value);
+    const encoded: EncodedBarcode = BarcodeEncoder.encode(this.symbology, this.value, this.gs1);
     const modules = encoded.modules;
 
     const x = ctx.currentX;

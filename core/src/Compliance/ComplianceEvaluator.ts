@@ -374,7 +374,7 @@ function evaluateContrast(
     return { kind: 'indeterminate', reason: 'translucent' };
   }
 
-  const backdrop = resolveBackdrop(ancestors, pages, pageOf(node));
+  const backdrop = paint.textBackdrop ? { hex: paint.textBackdrop } : resolveBackdrop(ancestors, pages, pageOf(node));
   if ('unknown' in backdrop) return { kind: 'indeterminate', reason: backdrop.unknown };
 
   const fg = parseHexRgb(paint.text);

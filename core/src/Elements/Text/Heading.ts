@@ -51,6 +51,9 @@ export class Heading extends TextBlock implements IStatefulElement {
    */
   public level = 1;
 
+  /** @inheritdoc */
+  public override keepWithNext = true;
+
   private tocRegistered = false;
 
   /** @inheritdoc */
@@ -95,8 +98,9 @@ export class Heading extends TextBlock implements IStatefulElement {
    * @returns The render status indicating whether the element is complete or overflowed
    */
   public override renderStateful(ctx: RenderContext, width: number): RenderStatus {
-    this.registerToc(ctx);
-    return super.renderStateful(ctx, width);
+    const status = super.renderStateful(ctx, width);
+    if (status !== RenderStatus.WrapRequired) this.registerToc(ctx);
+    return status;
   }
 
   /**

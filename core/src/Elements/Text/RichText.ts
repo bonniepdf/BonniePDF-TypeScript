@@ -253,6 +253,17 @@ export class RichText extends ElementBase implements IStatefulElement, IRoleProv
     return this.renderLines(ctx, lines, startLine, endLine, contentWidth, startY);
   }
 
+  /** @internal */
+  public override minimumStartHeight(width: number): number {
+    if (!this.breakAllowed) return this.measureHeight(width);
+    const lines = this.getOrComputeLines(this.getContentWidth(width));
+    const minimum = Math.max(1, this.minLinesBeforeBreak);
+    if (lines.length < minimum + Math.max(1, this.minLinesAfterBreak)) return this.measureHeight(width);
+    let height = this.margin.top;
+    for (let i = 0; i < minimum; i++) height += lines[i].height;
+    return height;
+  }
+
   private renderLines(
     ctx: RenderContext,
     lines: RichTextLine[],

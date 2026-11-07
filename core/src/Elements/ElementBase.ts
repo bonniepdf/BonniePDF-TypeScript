@@ -66,6 +66,14 @@ export abstract class ElementBase implements IElement, IMargin {
     this._options = this._options.with('breakAllowed', value);
   }
 
+  /** Keeps this element with the start of its next sibling in vertical flow. */
+  public keepWithNext = false;
+
+  /** @internal Height needed to start this element in vertical flow. */
+  public minimumStartHeight(width: number): number {
+    return this.measureHeight(width);
+  }
+
   /**
    * Gets the preferred width of this element, if any.
    * This implementation includes margins.

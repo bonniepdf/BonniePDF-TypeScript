@@ -1,3 +1,6 @@
+import { CanvasContrast } from '../../Drawing/CanvasContrast';
+import { PdfCanvas } from '../../Drawing/PdfCanvas';
+import { SvgCanvas } from '../../Drawing/SvgCanvas';
 import { ElementBase } from '../ElementBase';
 import { RenderContext } from '../../Rendering/RenderContext';
 import { ICanvas } from '../../Drawing/ICanvas';
@@ -108,9 +111,15 @@ export class CanvasElement extends ElementBase implements IRoleProvider, IAltTex
     canvas.addRect(0, 0, drawWidth, this.drawHeight);
     canvas.clipToCurrentPath();
 
+    const capture =
+      ctx.layoutRecorder?.capturing && (canvas instanceof PdfCanvas || canvas instanceof SvgCanvas)
+        ? canvas
+        : undefined;
+    if (capture) capture.contrast = new CanvasContrast(ctx, drawWidth, this.drawHeight);
     try {
       this.drawHandler(canvas, new Size(drawWidth, this.drawHeight));
     } finally {
+      if (capture) capture.contrast = undefined;
       canvas.restoreState();
     }
 

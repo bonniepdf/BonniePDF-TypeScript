@@ -1,3 +1,5 @@
+import { Thickness } from '../Core/Thickness';
+import { keepWithNextHeight } from '../Elements/Layout/Pagination/KeepWithNext';
 import { ContentDirection } from '../Configuration/ContentDirection';
 import { applyContentDirection } from '../Elements/ContentDirectionResolver';
 import { IElement, IStatefulElement } from '../Elements/IElement';
@@ -51,19 +53,22 @@ export class PdfRenderPipeline {
       const pageWidth = page.width;
       // Pages created from document settings inherit the margin lazily, so a
       // DocumentSettings assigned after construction still reaches page 1.
-      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
+      const margins =
+        page.margins ??
+        (page.hasExplicitMargin ? new Thickness(page.margin) : (settings.margins ?? new Thickness(settings.margin)));
 
       ctx.pageSize = page.size;
-      ctx.margin = pageMargin;
+      ctx.margins = margins;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
       ctx.resetCursorToContentTop();
 
-      const contentWidth = pageWidth - pageMargin * 2;
+      const contentWidth = pageWidth - (margins.left + margins.right);
 
       result.pageDimensions.set(currentOutputIndex, {
         size: page.size,
-        margin: pageMargin,
+        margin: margins.left,
+        margins,
       });
 
       this.renderElementsWithOverflow(page.getElements(), ctx, contentWidth);
@@ -71,7 +76,8 @@ export class PdfRenderPipeline {
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         result.pageDimensions.set(i, {
           size: page.size,
-          margin: pageMargin,
+          margin: margins.left,
+          margins,
         });
       }
 
@@ -100,8 +106,10 @@ export class PdfRenderPipeline {
     ctx: RenderContext,
     contentWidth: number
   ): void {
-    for (const element of elements) {
-      this.renderElementWithOverflow(element, ctx, contentWidth);
+    for (let i = 0; i < elements.length; i++) {
+      const keepHeight = keepWithNextHeight(elements, i, contentWidth);
+      if (keepHeight <= ctx.contentHeight && ctx.currentY + keepHeight > ctx.maxY && keepHeight > 0) ctx.newPage();
+      this.renderElementWithOverflow(elements[i], ctx, contentWidth);
     }
   }
 
@@ -227,7 +235,14 @@ export class PdfRenderPipeline {
 
     const pageDimensions = new Map<
       number,
-      { size: PdfSize; margin: number; pageColor?: Color; pageBackground?: IElement; pageForeground?: IElement }
+      {
+        size: PdfSize;
+        margin: number;
+        margins: Thickness;
+        pageColor?: Color;
+        pageBackground?: IElement;
+        pageForeground?: IElement;
+      }
     >();
 
     let currentOutputIndex = 0;
@@ -238,21 +253,24 @@ export class PdfRenderPipeline {
       }
 
       // See above: settings-derived pages resolve their margin at render time.
-      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
+      const margins =
+        page.margins ??
+        (page.hasExplicitMargin ? new Thickness(page.margin) : (settings.margins ?? new Thickness(settings.margin)));
 
       ctx.pageSize = page.size;
-      ctx.margin = pageMargin;
+      ctx.margins = margins;
 
       ctx.switchToPage(currentOutputIndex); // also resets the tagging context's per-page MCID state
       // The previous input page's body is complete; the switch has flushed its last operators.
       if (previousPage < currentOutputIndex) ctx.sealPage(previousPage);
       ctx.resetCursorToContentTop();
 
-      const contentWidth = page.width - pageMargin * 2;
+      const contentWidth = page.width - (margins.left + margins.right);
 
       pageDimensions.set(currentOutputIndex, {
         size: page.size,
-        margin: pageMargin,
+        margin: margins.left,
+        margins,
         pageColor: page.pageColor,
         pageBackground: page.pageBackground,
         pageForeground: page.pageForeground,
@@ -263,7 +281,8 @@ export class PdfRenderPipeline {
       for (let i = currentOutputIndex + 1; i <= ctx.currentPageIndex; i++) {
         pageDimensions.set(i, {
           size: page.size,
-          margin: pageMargin,
+          margin: margins.left,
+          margins,
           pageColor: page.pageColor,
           pageBackground: page.pageBackground,
           pageForeground: page.pageForeground,
@@ -286,7 +305,7 @@ export class PdfRenderPipeline {
       }
 
       ctx.pageSize = pageSize;
-      ctx.margin = dimensions?.margin || settings.margin;
+      ctx.margins = dimensions?.margins ?? settings.margins ?? new Thickness(settings.margin);
       ctx.switchToPage(i);
 
       // Full-page background slot. Painted behind everything, ignoring
@@ -435,8 +454,8 @@ export class PdfRenderPipeline {
     ctx.chromeReservationSuspended = true;
 
     try {
-      const contentWidth = ctx.pageSize.width - ctx.margin * 2;
-      const startX = ctx.margin;
+      const contentWidth = ctx.pageSize.width - ctx.margins.left - ctx.margins.right;
+      const startX = ctx.margins.left;
 
       if (hasHeader) {
         const headerElement = settings.headerTemplate!(pageNumber);
@@ -444,7 +463,7 @@ export class PdfRenderPipeline {
         if (headerElement) {
           const headerHeight = headerElement.measureHeight(contentWidth);
           ctx.currentX = startX;
-          ctx.currentY = Math.max(0, (ctx.margin - headerHeight) / 2);
+          ctx.currentY = Math.max(0, (ctx.margins.top - headerHeight) / 2);
           if (ctx.tagging) ctx.canvas.beginArtifact();
           headerElement.render(ctx, contentWidth);
           if (ctx.tagging) ctx.canvas.endArtifact();
@@ -459,9 +478,9 @@ export class PdfRenderPipeline {
           // Centred in the bottom margin band while it fits there, flush to the
           // bottom page edge once it outgrows it - continuous at footerHeight ==
           // margin, and it never runs off the page.
-          const bandTop = ctx.pageSize.height - Math.max(ctx.margin, footerHeight);
+          const bandTop = ctx.pageSize.height - Math.max(ctx.margins.bottom, footerHeight);
           ctx.currentX = startX;
-          ctx.currentY = bandTop + Math.max(0, (ctx.margin - footerHeight) / 2);
+          ctx.currentY = bandTop + Math.max(0, (ctx.margins.bottom - footerHeight) / 2);
           if (ctx.tagging) ctx.canvas.beginArtifact();
           footerElement.render(ctx, contentWidth);
           if (ctx.tagging) ctx.canvas.endArtifact();

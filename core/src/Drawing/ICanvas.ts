@@ -1,4 +1,4 @@
-import { Color } from '../Core/Color';
+import type { ColorInput } from '../Normalize/toColor';
 import { Point } from '../Core/Point';
 import { Size } from '../Core/Size';
 import { TextAlignment } from '../Elements/Text/TextAlignment';
@@ -33,19 +33,19 @@ export interface ICanvas {
   restoreState(): void;
 
   /** Fills an axis-aligned rectangle with a solid colour. */
-  fillRect(x: number, y: number, width: number, height: number, color: Color): void;
+  fillRect(x: number, y: number, width: number, height: number, color: ColorInput): void;
   /** Outlines an axis-aligned rectangle with a solid colour and stroke width. */
-  strokeRect(x: number, y: number, width: number, height: number, color: Color, strokeWidth: number): void;
+  strokeRect(x: number, y: number, width: number, height: number, color: ColorInput, strokeWidth: number): void;
   /** Draws a straight line between two points. */
-  drawLine(x1: number, y1: number, x2: number, y2: number, color: Color, lineWidth: number): void;
+  drawLine(x1: number, y1: number, x2: number, y2: number, color: ColorInput, lineWidth: number): void;
   /** Fills a circle centred on `(cx, cy)`. */
-  fillCircle(cx: number, cy: number, radius: number, color: Color): void;
+  fillCircle(cx: number, cy: number, radius: number, color: ColorInput): void;
   /** Fills an axis-aligned ellipse centred on `(cx, cy)` with radii `rx` and `ry`. */
-  fillEllipse(cx: number, cy: number, rx: number, ry: number, color: Color): void;
+  fillEllipse(cx: number, cy: number, rx: number, ry: number, color: ColorInput): void;
   /** Fills the closed polygon described by `points`. */
-  fillPath(points: Point[], color: Color): void;
+  fillPath(points: Point[], color: ColorInput): void;
   /** Fills a rectangle with rounded corners of the given radius. */
-  fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: Color): void;
+  fillRoundedRect(x: number, y: number, width: number, height: number, radius: number, color: ColorInput): void;
   /** Outlines a rectangle with rounded corners of the given radius. */
   strokeRoundedRect(
     x: number,
@@ -53,7 +53,7 @@ export interface ICanvas {
     width: number,
     height: number,
     radius: number,
-    color: Color,
+    color: ColorInput,
     strokeWidth: number
   ): void;
 
@@ -62,7 +62,7 @@ export interface ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    color: ColorInput,
     fontSize: number,
     fontFamily: string,
     align: TextAlignment
@@ -72,7 +72,7 @@ export interface ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    color: ColorInput,
     fontSize: number,
     fontFamily: string,
     angleDegrees: number
@@ -82,7 +82,7 @@ export interface ICanvas {
     x: number,
     y: number,
     text: string,
-    color: Color,
+    color: ColorInput,
     fontSize: number,
     fontFamily: string,
     availableWidth: number
@@ -132,7 +132,7 @@ export interface ICanvas {
   // -- Painting the current path -----------------------------------
 
   /** Fills the current path with a colour or gradient, using the given fill rule (non-zero by default). */
-  fillCurrentPath(paint: Paint | Color, rule?: FillRule): void;
+  fillCurrentPath(paint: Paint | ColorInput, rule?: FillRule): void;
   /** Strokes the current path with the given {@link StrokeStyle}. */
   strokeCurrentPath(style: StrokeStyle): void;
 

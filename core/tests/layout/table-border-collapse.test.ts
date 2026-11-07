@@ -84,6 +84,16 @@ const gridTable = (): Table => {
 };
 
 describe('table border collapse', () => {
+  it('paints only coloured square edges, in the specified order', async () => {
+    const table = new Table(1);
+    const cell = TableCell.from(new TextBlock('Edge test'));
+    cell.border = 2;
+    cell.borderColors = new BorderColors(Color.red, Color.blue, undefined, Color.black);
+    table.addRow(cell);
+
+    expect((await render(table)).map(stroke => stroke.colour)).toEqual(['1 0 0', '0 0 1', '0 0 0']);
+  });
+
   it("applies the table's own border to every cell", async () => {
     const table = gridTable();
     table.border = 1;

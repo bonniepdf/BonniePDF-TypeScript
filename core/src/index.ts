@@ -115,6 +115,8 @@ export { type VerticalStackOptions, VerticalStack } from './Elements/Layout/Vert
 // Pagination control primitives. Single-child
 // wrappers that decide whether and where their child renders; one type per
 // file, mirroring the .NET Elements/Layout/Pagination namespace.
+export { pageNumber } from './Elements/Text/pageNumber';
+export { formatNumber } from './Core/formatNumber';
 export { type PageContext } from './Elements/Layout/Pagination/PageContext';
 export * from './Elements/Layout/Pagination/PaginationWrapperBase';
 export { type EnsureSpaceOptions, EnsureSpace } from './Elements/Layout/Pagination/EnsureSpace';
@@ -181,7 +183,7 @@ export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
 export { type AxisOptionsOptions, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';
 export { type ChartBaseOptions, ChartBase } from './Charts/ChartBase';
-export { type CartesianChartOptions, CartesianChartBase } from './Charts/CartesianChartBase';
+export { type CartesianChartOptions, type ChartReference, CartesianChartBase } from './Charts/CartesianChartBase';
 export { type ChartElementOptions, ChartElement } from './Charts/ChartElement';
 export { type BarChartOptions, BarChart } from './Charts/BarChart';
 export { type AreaChartOptions, AreaChart } from './Charts/AreaChart';

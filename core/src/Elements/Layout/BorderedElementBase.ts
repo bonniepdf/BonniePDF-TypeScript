@@ -116,19 +116,33 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
    * When cornerRadius > 0, draws a single rounded stroke instead of individual sides.
    * Otherwise each side is drawn independently, allowing for different widths and colors per side.
    */
-  protected drawBorder(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
+  protected drawBorder(
+    ctx: RenderContext,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    fallbackColor = true
+  ): void {
     if (!this.border.hasAnyBorder) return;
 
     // Decorative strokes - tag as an artifact (no-op for non-tagged output).
     ctx.canvas.beginArtifact();
     try {
-      this.drawBorderStrokes(ctx, x, y, width, height);
+      this.drawBorderStrokes(ctx, x, y, width, height, fallbackColor);
     } finally {
       ctx.canvas.endArtifact();
     }
   }
 
-  private drawBorderStrokes(ctx: RenderContext, x: number, y: number, width: number, height: number): void {
+  private drawBorderStrokes(
+    ctx: RenderContext,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    fallbackColor: boolean
+  ): void {
     if (this.cornerRadius > 0) {
       // Rounded rectangle - use the first available colour and the max side width
       const strokeColor =
@@ -144,34 +158,17 @@ export abstract class BorderedElementBase extends ElementBase implements IBackgr
       return;
     }
 
-    // Flat rectangle - draw each active side independently so per-side
-    // colours and widths are respected (e.g. left-only accent borders).
-    if (this.border.top > 0) {
-      ctx.canvas.drawLine(x, y, x + width, y, this.borderColors.top ?? Color.black, this.border.top);
-    }
-    if (this.border.bottom > 0) {
-      ctx.canvas.drawLine(
-        x,
-        y + height,
-        x + width,
-        y + height,
-        this.borderColors.bottom ?? Color.black,
-        this.border.bottom
-      );
-    }
-    if (this.border.left > 0) {
-      ctx.canvas.drawLine(x, y, x, y + height, this.borderColors.left ?? Color.black, this.border.left);
-    }
-    if (this.border.right > 0) {
-      ctx.canvas.drawLine(
-        x + width,
-        y,
-        x + width,
-        y + height,
-        this.borderColors.right ?? Color.black,
-        this.border.right
-      );
-    }
+    const { left, right, top, bottom } = this.border;
+    const colors = this.borderColors;
+    const fallback = fallbackColor ? Color.black : undefined;
+    const leftColor = colors.left ?? fallback;
+    const rightColor = colors.right ?? fallback;
+    const topColor = colors.top ?? fallback;
+    const bottomColor = colors.bottom ?? fallback;
+    if (left > 0 && leftColor) ctx.canvas.drawLine(x, y, x, y + height, leftColor, left);
+    if (right > 0 && rightColor) ctx.canvas.drawLine(x + width, y, x + width, y + height, rightColor, right);
+    if (top > 0 && topColor) ctx.canvas.drawLine(x, y, x + width, y, topColor, top);
+    if (bottom > 0 && bottomColor) ctx.canvas.drawLine(x, y + height, x + width, y + height, bottomColor, bottom);
   }
 
   /**

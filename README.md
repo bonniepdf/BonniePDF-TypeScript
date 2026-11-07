@@ -147,6 +147,8 @@ You can pass text directly to document, page and stack `add` methods: `doc.add('
 
 ## Capabilities
 
+Headings keep with the start of the next block in vertical flow. Templates can use four-sided page margins, fit-to-content containers, vertically aligned table cells, and alternating row fills. Cartesian charts support reference lines and shaded ranges, and line charts can render as sparklines. GS1 modes for Code 128 and Data Matrix accept a prepared GS1 element string.
+
 Native [rotation](https://www.bonniepdf.dev/docs/typescript/rotation) supports constrained quarter turns that swap layout dimensions and free angles around the child's centre. Use `rotate({ angle, mode, contentWidth, child })`. Text stays selectable, SVG previews and link bounds follow the transform, and the subtree stays on one page. Free angles keep the original flow box and need surrounding clearance.
 
 | Area                  | Included                                                                                                                                                              |

@@ -280,28 +280,9 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
   }
 
   protected getPreferredContentWidth(): number {
-    if (this._children.length === 0) return 0;
-
-    if (this.widthDistribution === WidthDistribution.Equal) {
-      // For equal distribution, return 0 to indicate flexible sizing
-      return 0;
-    }
-
-    // Sum up fixed widths where specified
-    let totalFixedWidth = 0;
-    for (let i = 0; i < this._children.length; i++) {
-      const w = this.widths[i];
-      if (w !== null) {
-        totalFixedWidth += w;
-      }
-    }
-
-    if (totalFixedWidth > 0) {
-      return totalFixedWidth;
-    }
-
-    // Fallback: sum of preferred widths
-    return this._children.reduce((sum, child) => sum + child.getPreferredWidth(), 0);
+    if (this._children.length === 0 || this.widthDistribution !== WidthDistribution.Auto) return 0;
+    const spacing = (this._children.length - 1) * this.spacing;
+    return this._children.reduce((sum, child) => sum + child.getPreferredWidth(), spacing);
   }
 
   protected measureContentHeight(contentWidth: number): number {

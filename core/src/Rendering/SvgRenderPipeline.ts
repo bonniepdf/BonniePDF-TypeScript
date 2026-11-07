@@ -1,3 +1,4 @@
+import { Thickness } from '../Core/Thickness';
 import { DocumentSettings } from '../Configuration/DocumentSettings';
 import { Page } from '../Elements/Layout/Page';
 import { IElement } from '../Elements/IElement';
@@ -77,6 +78,7 @@ export class SvgRenderPipeline {
         width: number;
         height: number;
         margin: number;
+        margins: Thickness;
         pageColor?: Color;
         pageBackground?: IElement;
         pageForeground?: IElement;
@@ -92,18 +94,21 @@ export class SvgRenderPipeline {
 
       // Pages created from document settings inherit the margin lazily, so a
       // DocumentSettings assigned after construction still reaches page 1.
-      const pageMargin = page.hasExplicitMargin ? page.margin : settings.margin;
+      const margins =
+        page.margins ??
+        (page.hasExplicitMargin ? new Thickness(page.margin) : (settings.margins ?? new Thickness(settings.margin)));
 
       ctx.pageSize = page.size;
-      ctx.margin = pageMargin;
+      ctx.margins = margins;
       ctx.switchToPage(currentOutputIndex);
       ctx.resetCursorToContentTop();
 
-      const contentWidth = page.width - pageMargin * 2;
+      const contentWidth = page.width - (margins.left + margins.right);
       pageDimensions.set(currentOutputIndex, {
         width: page.width,
         height: page.height,
-        margin: pageMargin,
+        margin: margins.left,
+        margins,
         pageColor: page.pageColor,
         pageBackground: page.pageBackground,
         pageForeground: page.pageForeground,
@@ -112,7 +117,15 @@ export class SvgRenderPipeline {
       // Layout capture: wrap each input page's body content in a Page node so
       // the snapshot tree reads Document → Page → content. Overflow onto further
       // physical pages splits the Page node's rect via ctx.newPage().
-      ctx.layoutRecorder?.openNode(page, 'Page', undefined, currentOutputIndex, pageMargin, ctx.currentY, contentWidth);
+      ctx.layoutRecorder?.openNode(
+        page,
+        'Page',
+        undefined,
+        currentOutputIndex,
+        margins.left,
+        ctx.currentY,
+        contentWidth
+      );
       PdfRenderPipeline.layoutElements(page.getElements(), ctx, contentWidth);
       ctx.layoutRecorder?.closeNode(page, ctx.currentPageIndex, ctx.currentY, true);
 
@@ -120,7 +133,8 @@ export class SvgRenderPipeline {
         pageDimensions.set(i, {
           width: page.width,
           height: page.height,
-          margin: pageMargin,
+          margin: margins.left,
+          margins,
           pageColor: page.pageColor,
           pageBackground: page.pageBackground,
           pageForeground: page.pageForeground,
@@ -140,10 +154,11 @@ export class SvgRenderPipeline {
         width: ctx.pageSize.width,
         height: ctx.pageSize.height,
         margin: settings.margin,
+        margins: settings.margins ?? new Thickness(settings.margin),
       };
 
       ctx.pageSize = pages[0].size; // restore a sensible default for child canvases
-      ctx.margin = dim.margin;
+      ctx.margins = dim.margins;
       ctx.switchToPage(i);
 
       const canvas = ctx.getSvgPage(i);
@@ -163,7 +178,7 @@ export class SvgRenderPipeline {
       // SVG (the backmost paint layer), behind the pageBackground slot. A
       // per-page Page.pageColor overrides the document-level setting.
       this.renderPageColor(canvas, dim.pageColor ?? settings.pageColor, dim.width, dim.height);
-      this.renderTemplate(ctx, settings, i, dim.width, dim.height, dim.margin);
+      this.renderTemplate(ctx, settings, i, dim.width, dim.height, dim.margins);
       // The watermark is appended after the body content and header/footer so it
       // overlays them and is never occluded; only the foreground slot sits above.
       this.renderWatermark(canvas, settings, dim.width, dim.height);
@@ -360,7 +375,7 @@ export class SvgRenderPipeline {
     pageIndex: number,
     pageWidth: number,
     pageHeight: number,
-    margin: number
+    margins: Thickness
   ): void {
     const pageNumber = pageIndex + 1;
     const hasHeader = !!settings.headerTemplate;
@@ -370,8 +385,8 @@ export class SvgRenderPipeline {
     const originalX = ctx.currentX;
     const originalY = ctx.currentY;
     const originalSuspended = ctx.chromeReservationSuspended;
-    const contentWidth = pageWidth - margin * 2;
-    const startX = margin;
+    const contentWidth = pageWidth - margins.left - margins.right;
+    const startX = margins.left;
 
     // A header is not laid out inside the band it reserves for the body.
     ctx.chromeReservationSuspended = true;
@@ -382,7 +397,7 @@ export class SvgRenderPipeline {
         if (headerElement) {
           const headerHeight = headerElement.measureHeight(contentWidth);
           ctx.currentX = startX;
-          ctx.currentY = Math.max(0, (margin - headerHeight) / 2);
+          ctx.currentY = Math.max(0, (margins.top - headerHeight) / 2);
           headerElement.render(ctx, contentWidth);
         }
       }
@@ -391,9 +406,9 @@ export class SvgRenderPipeline {
         const footerElement = settings.footerTemplate!(pageNumber);
         if (footerElement) {
           const footerHeight = footerElement.measureHeight(contentWidth);
-          const bandTop = pageHeight - Math.max(margin, footerHeight);
+          const bandTop = pageHeight - Math.max(margins.bottom, footerHeight);
           ctx.currentX = startX;
-          ctx.currentY = bandTop + Math.max(0, (margin - footerHeight) / 2);
+          ctx.currentY = bandTop + Math.max(0, (margins.bottom - footerHeight) / 2);
           footerElement.render(ctx, contentWidth);
         }
       }

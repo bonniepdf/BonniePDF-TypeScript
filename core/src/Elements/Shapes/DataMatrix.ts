@@ -30,6 +30,7 @@ export const DATA_MATRIX_OWN_OPTION_KEYS = [
   'isDecorative',
   'size',
   'rectangular',
+  'gs1',
   'quietZone',
   'foregroundColor',
   'backgroundColor',
@@ -99,6 +100,9 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
    */
   public rectangular = false;
 
+  /** Encode the GS1 start and field separators. */
+  public gs1 = false;
+
   /** Number of quiet-zone modules around the symbol. The spec requires at least 1. Default 2. */
   public quietZone = 2;
 
@@ -130,9 +134,9 @@ export class DataMatrix extends ElementBase implements IRoleProvider, IAltTextPr
   private memo?: { key: string; encoded: EncodedDataMatrix };
 
   private encodeMatrix(): EncodedDataMatrix {
-    const key = `${this.rectangular ? 'r' : 's'}:${this.data}`;
+    const key = `${this.rectangular ? 'r' : 's'}:${this.gs1}:${this.data}`;
     if (this.memo?.key !== key) {
-      this.memo = { key, encoded: DataMatrixEncoder.encode(this.data, this.rectangular) };
+      this.memo = { key, encoded: DataMatrixEncoder.encode(this.data, this.rectangular, this.gs1) };
     }
     return this.memo.encoded;
   }

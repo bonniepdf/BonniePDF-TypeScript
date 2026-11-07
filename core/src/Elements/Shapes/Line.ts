@@ -11,7 +11,7 @@ import { toLength, type LengthInput, toOptionalLength } from '../../Normalize/to
  * Useful for visual dividers and structural lines.
  */
 /** Settable properties declared by {@link Line} itself. */
-export const LINE_OWN_OPTION_KEYS = ['thickness', 'color', 'orientation', 'length'] as const;
+export const LINE_OWN_OPTION_KEYS = ['thickness', 'color', 'orientation', 'length', 'dashPattern'] as const;
 
 /** The full settable surface, base included. */
 export const LINE_OPTION_KEYS = [...ELEMENT_OPTION_KEYS, ...LINE_OWN_OPTION_KEYS] as const;
@@ -60,6 +60,9 @@ export class Line extends ElementBase {
   /** Orientation of the line. Default is Horizontal. */
   public orientation: LineOrientation = LineOrientation.Horizontal;
 
+  /** Alternating dash and gap lengths in points. */
+  public dashPattern?: readonly number[];
+
   private _length?: number;
 
   /**
@@ -85,6 +88,23 @@ export class Line extends ElementBase {
     }
   }
 
+  private draw(ctx: RenderContext, x: number, y: number, length: number, horizontal: boolean): void {
+    const pattern = this.dashPattern;
+    if (!pattern?.length) {
+      ctx.canvas.fillRect(x, y, horizontal ? length : this.thickness, horizontal ? this.thickness : length, this.color);
+      return;
+    }
+    if (pattern.some(dash => !Number.isFinite(dash) || dash <= 0)) {
+      throw new RangeError('Dash lengths must be finite and positive.');
+    }
+
+    const half = this.thickness / 2;
+    ctx.canvas.beginPath();
+    ctx.canvas.moveTo(x + (horizontal ? 0 : half), y + (horizontal ? half : 0));
+    ctx.canvas.lineTo(x + (horizontal ? length : half), y + (horizontal ? half : length));
+    ctx.canvas.strokeCurrentPath({ paint: this.color, width: this.thickness, dashPattern: pattern });
+  }
+
   protected override renderContent(ctx: RenderContext, contentWidth: number): void {
     const x = ctx.currentX;
     const y = ctx.currentY;
@@ -93,7 +113,7 @@ export class Line extends ElementBase {
       // Draw horizontal line
       const width = this.length ?? contentWidth;
 
-      ctx.canvas.fillRect(x, y, width, this.thickness, this.color);
+      this.draw(ctx, x, y, width, true);
 
       // Advance Y
       ctx.currentY += this.thickness;
@@ -101,7 +121,7 @@ export class Line extends ElementBase {
       // Draw vertical line
       const height = this.length ?? 100;
 
-      ctx.canvas.fillRect(x, y, this.thickness, height, this.color);
+      this.draw(ctx, x, y, height, false);
 
       // Advance Y
       ctx.currentY += height;

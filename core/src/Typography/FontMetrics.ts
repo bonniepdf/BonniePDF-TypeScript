@@ -1,4 +1,5 @@
 import type { GlyphRun } from './Engine/Api/GlyphRun';
+import { FontError } from './Engine/Api/FontError';
 import { FontManager } from './FontManager';
 import { winAnsiByte } from './WinAnsi';
 import {
@@ -424,7 +425,15 @@ export class FontMetrics {
     identifier: string,
     features?: Readonly<Record<string, number>>
   ): (offset: number) => boolean {
-    const glyphs = this.metricFace(identifier)?.shape(text, features);
+    let glyphs: GlyphRun | undefined;
+    try {
+      glyphs = this.metricFace(identifier)?.shape(text, features);
+    } catch (error) {
+      // The face lacks a glyph that fallback will draw (a full stop in a Hebrew face, say), so
+      // it cannot shape the paragraph whole. Its break flags are then unavailable: allow every
+      // grapheme boundary rather than failing the document (spec 19, Layout).
+      if (!(error instanceof FontError && error.name === 'NotSupportedException')) throw error;
+    }
     return offset => {
       if (!glyphs) return true;
       for (let i = 0; i < glyphs.count; i++) {

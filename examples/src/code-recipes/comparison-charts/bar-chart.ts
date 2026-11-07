@@ -94,6 +94,7 @@ export function generate(): Document {
   });
 
   const chart = new BarChart({
+    theme: 'modern',
     data,
     altText: 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.',
     height: 380,
@@ -101,7 +102,7 @@ export function generate(): Document {
     barColor: C_INDIGO,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

@@ -87,12 +87,12 @@ export function generate(): Document {
     series: [
       {
         name: String(year - 1),
-        color: '#4f46e5',
+        color: '#94a3b8',
         dataPoints: points([65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000]),
       },
       {
         name: String(year),
-        color: '#7c3aed',
+        color: '#4f46e5',
         dataPoints: points([75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000]),
       },
     ],
@@ -101,14 +101,16 @@ export function generate(): Document {
   });
 
   const chart = new LineChart({
+    theme: 'modern',
+    // Twelve points per line: value labels would collide, so the axis carries the scale.
+    showValueLabels: false,
     data,
     altText: `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`,
     height: 380,
     stretchToFit: true,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
-    showValueLabels: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

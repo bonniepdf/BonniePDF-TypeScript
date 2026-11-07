@@ -112,12 +112,13 @@ export function generate(): Document {
   data.yAxis.stepCount = 5;
 
   const chart = new BarChart();
+  chart.theme = 'modern';
   chart.height = 380;
   chart.stretchToFit = true;
   chart.barColor = Color.fromHex(C_INDIGO);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';

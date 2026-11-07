@@ -1332,7 +1332,7 @@ export const examples: ExampleDef[] = [
     name: 'Grouped Bar Chart',
     category: 'Comparison Charts',
     description:
-      'Side-by-side bars comparing Electronics, Clothing, and Home and Garden sales across twelve months, with a colour legend and alt text.',
+      'Side-by-side bars comparing Electronics, Clothing, and Home and Garden revenue in each quarter of 2026, with a colour legend and alt text.',
     filename: 'grouped-bar-chart.pdf',
     generate: groupedBarChart,
     dotnetClass: 'GroupedBarChartExample',
@@ -1560,7 +1560,7 @@ export const examples: ExampleDef[] = [
     name: 'Lollipop Chart',
     category: 'Share & Ranking Charts',
     description:
-      'Stems with circular heads, a lighter alternative to bar charts, showing quarterly revenue rising from Q1 to Q4, with a legend and alt text.',
+      'Stems with circular heads, a lighter alternative to bar charts, showing twelve months of revenue rising through 2026, with a legend and alt text.',
     filename: 'lollipop-chart.pdf',
     generate: lollipopChart,
     dotnetClass: 'LollipopChartExample',

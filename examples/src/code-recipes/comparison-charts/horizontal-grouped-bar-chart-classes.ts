@@ -133,6 +133,7 @@ export function generate(): Document {
   data.xAxis.legend = 'Quarter';
 
   const chart = new GroupedBarChart();
+  chart.theme = 'modern';
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 380;
   chart.stretchToFit = true;
@@ -142,7 +143,7 @@ export function generate(): Document {
   chart.fontFamily = StandardFonts.Helvetica;
   chart.showValueLabels = true;
   chart.showLegend = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = 'Horizontal grouped bar chart comparing quarterly sales across three product lines.';

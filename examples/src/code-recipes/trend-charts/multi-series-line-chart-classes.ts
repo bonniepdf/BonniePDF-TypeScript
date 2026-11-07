@@ -90,7 +90,7 @@ export function generate(): Document {
   const data = new ChartData();
   data.title = 'Year-over-Year Revenue Comparison';
   const previousYear = new ChartSeries();
-  previousYear.color = Color.fromHex('#4f46e5');
+  previousYear.color = Color.fromHex('#94a3b8');
   previousYear.name = String(year - 1);
   previousYear.dataPoints = MONTH_LABELS.map((label, i) => {
     const p = new ChartDataPoint();
@@ -101,7 +101,7 @@ export function generate(): Document {
   });
 
   const currentYear = new ChartSeries();
-  currentYear.color = Color.fromHex('#7c3aed');
+  currentYear.color = Color.fromHex('#4f46e5');
   currentYear.name = String(year);
   currentYear.dataPoints = MONTH_LABELS.map((label, i) => {
     const p = new ChartDataPoint();
@@ -119,12 +119,14 @@ export function generate(): Document {
   data.xAxis.legend = 'Month';
 
   const chart = new LineChart();
+  chart.theme = 'modern';
+  // Twelve points per line: value labels would collide, so the axis carries the scale.
+  chart.showValueLabels = false;
   chart.height = 380;
   chart.stretchToFit = true;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
-  chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
+  chart.backgroundColor = Color.white;
 
   chart.data = data;
   chart.altText = `Multi-series line chart comparing monthly revenue for ${year - 1} and ${year}.`;

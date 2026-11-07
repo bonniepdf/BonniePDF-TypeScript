@@ -88,6 +88,7 @@ export function generate(): Document {
   });
 
   const chart = new DotPlotChart({
+    theme: 'modern',
     data,
     altText: 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.',
     height: 380,
@@ -96,7 +97,7 @@ export function generate(): Document {
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

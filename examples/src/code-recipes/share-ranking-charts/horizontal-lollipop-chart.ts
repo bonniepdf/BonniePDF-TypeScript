@@ -79,14 +79,14 @@ export function generate(): Document {
   );
 
   const products = [
-    { label: 'Product A', value: 45000 },
-    { label: 'Product B', value: 62000 },
-    { label: 'Product C', value: 38500 },
-    { label: 'Product D', value: 71000 },
-    { label: 'Product E', value: 55000 },
-    { label: 'Product F', value: 83000 },
-    { label: 'Product G', value: 49000 },
     { label: 'Product H', value: 91000 },
+    { label: 'Product F', value: 83000 },
+    { label: 'Product D', value: 71000 },
+    { label: 'Product B', value: 62000 },
+    { label: 'Product E', value: 55000 },
+    { label: 'Product G', value: 49000 },
+    { label: 'Product A', value: 45000 },
+    { label: 'Product C', value: 38500 },
   ];
 
   const data = new ChartData({
@@ -102,6 +102,7 @@ export function generate(): Document {
   });
 
   const chart = new LollipopChart({
+    theme: 'modern',
     data,
     altText: 'Horizontal lollipop chart showing product revenue ranking for eight product lines.',
     orientation: ChartOrientation.Horizontal,
@@ -111,7 +112,7 @@ export function generate(): Document {
     lollipopColor: C_VIOLET,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

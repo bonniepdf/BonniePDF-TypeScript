@@ -1,6 +1,6 @@
 /**
  * Grouped Bar Chart.
- * Side-by-side bars comparing Electronics, Clothing, and Home and Garden sales across twelve months, with a colour legend and alt text.
+ * Side-by-side bars comparing Electronics, Clothing, and Home and Garden revenue in each quarter, with a colour legend and alt text.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -15,10 +15,10 @@ import {
   pageTemplate,
 } from '@bonniepdf/core';
 
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
 
 /**
- * A grouped bar chart comparing three product lines across twelve months,
+ * A grouped bar chart comparing three product lines across four quarters,
  * authored through the options-object front door. Each series is a `ChartData`
  * `series` literal (`name` + `color` + a `dataPoints` array of `{ label, value }`).
  */
@@ -57,7 +57,7 @@ export function generate(): Document {
     metadata: {
       title: 'Grouped Bar Chart',
       author: 'BonniePDF',
-      subject: 'Grouped bar chart example - three product lines compared across 12 months',
+      subject: 'Grouped bar chart example - three product lines compared quarter by quarter',
     },
   });
 
@@ -71,7 +71,7 @@ export function generate(): Document {
   );
 
   doc.add(
-    new TextBlock('Comparison of three product lines across all months', {
+    new TextBlock('Three product lines compared quarter by quarter, 2026', {
       fontSize: 14,
       color: 'slate-600',
       alignment: 'center',
@@ -82,26 +82,28 @@ export function generate(): Document {
   const series = (name: string, color: ColorInput, values: number[]) => ({
     name,
     color,
-    dataPoints: MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })),
+    dataPoints: QUARTERS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })),
   });
 
   const data = new ChartData({
-    yAxis: { prefix: '£', maxValue: 15000, stepCount: 5 },
+    yAxis: { prefix: '£', maxValue: 35000, stepCount: 7 },
     series: [
-      series('Electronics', '#4f46e5', [4500, 5200, 4800, 6200, 7500, 8100, 7200, 6800, 8500, 9200, 10500, 11800]),
-      series('Clothing', '#f43f5e', [3200, 3800, 3500, 4200, 4800, 5200, 4600, 4400, 5100, 5800, 6400, 7200]),
-      series('Home & Garden', '#22c55e', [2800, 3400, 3100, 3800, 4400, 4800, 4200, 4000, 4700, 5400, 6000, 6800]),
+      series('Electronics', '#4f46e5', [14500, 21800, 22500, 31500]),
+      series('Clothing', '#f43f5e', [10500, 14200, 14100, 19400]),
+      series('Home & Garden', '#22c55e', [9300, 13000, 12900, 17400]),
     ],
   });
 
   const chart = new GroupedBarChart({
+    theme: 'modern',
     data,
-    altText: 'Grouped bar chart comparing Electronics, Clothing, and Home and Garden sales across twelve months.',
+    altText:
+      'Grouped bar chart comparing Electronics, Clothing, and Home and Garden revenue in each quarter of 2026; Electronics leads every quarter, reaching 31,500 GBP in Q4.',
     height: 380,
     stretchToFit: true,
     showValueLabels: true,
     fontFamily: StandardFonts.Helvetica,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

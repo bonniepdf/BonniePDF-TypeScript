@@ -495,6 +495,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     try {
       return this.renderStatefulRows(ctx, width, tagging);
     } finally {
+      // Each call draws one page's fragment: the last row's bottom edges belong to this page.
+      this.flushBottomEdges(ctx);
       ctx.currentX = originalX;
       if (ownTable) tagging!.tree.end();
     }
@@ -612,6 +614,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     this.taggedHeaderEmitted = false;
     this._bottomsAbove = undefined;
     this._edgePlan.clear();
+    this._pendingBottoms = [];
     this._paginatedWidths = undefined;
   }
 
@@ -625,6 +628,10 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
   // Each cell's planned shared edges: DRAW_LEFT and DRAW_TOP bits.
   private readonly _edgePlan = new Map<TableCell, number>();
+
+  // The bottom edges of the row last drawn, held until the next row's fills are down (see paintCellFill).
+  private _pendingBottoms: { x: number; y: number; width: number; lineWidth: number; color: Color }[] = [];
+  private _pendingBottomsPage = -1;
 
   // The bottom edge of each column in the row above, on the page being drawn; undefined when there is none.
   private _bottomsAbove: { width: number; color: Color | undefined }[] | undefined = undefined;
@@ -764,6 +771,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     try {
       this.renderContentRows(ctx, contentWidth);
     } finally {
+      this.flushBottomEdges(ctx);
       if (ownTable) tagging!.tree.end();
     }
   }
@@ -800,6 +808,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
           // Pagination check
           if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
+            this.flushBottomEdges(ctx);
             ctx.newPage();
             isFirstPage = false;
 
@@ -870,6 +879,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     // Pagination check
     if (ctx.currentY + rowHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
+      this.flushBottomEdges(ctx);
       ctx.newPage();
     }
 
@@ -900,20 +910,14 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     width: number,
     rowHeight: number
   ): void {
-    // Determine effective styling (cell > row > table defaults)
-    const bgColor =
-      cell.backgroundColor ??
-      row.backgroundColor ??
-      (row.isHeader ? this.headerBackgroundColor : undefined) ??
-      (row.isFooter ? this.footerBackgroundColor : undefined) ??
-      this.rowBackgroundColor;
-
-    // The cascade above is the only place a cell's effective fill is known — the
+    // The fill cascade is the only place a cell's effective fill is known — the
     // cell element itself carries no `backgroundColor` when the colour came from
     // the row or the table. Hand it to the recorder so the contrast rules measure
     // the cell's text against its real backdrop rather than against the page.
+    const bgColor = this.cellFill(cell, row);
     if (bgColor) ctx.layoutRecorder?.annotatePaint(cell, paintForBackground(bgColor));
 
+    // Determine effective styling (cell > row > table defaults)
     const textColor =
       cell.color ??
       row.color ??
@@ -937,11 +941,6 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       content = tb;
     }
 
-    // Draw background (fills entire cell including padding area)
-    if (bgColor) {
-      this.drawBackground(ctx, x, ctx.currentY, width, rowHeight, bgColor);
-    }
-
     // Render content with padding
     const originalX = ctx.currentX;
     const yBeforeCell = ctx.currentY;
@@ -960,30 +959,84 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Restore X and Y positions
     ctx.currentX = originalX;
     ctx.currentY = yBeforeCell;
+  }
 
-    // Draw border
+  /**
+   * Paints a cell's fill. Every fill in a row is painted before any of the row's edges, and a row's
+   * bottom edges wait for the next row's fills, so no fill covers an edge (spec: Paint order).
+   */
+  private paintCellFill(
+    ctx: RenderContext,
+    cell: TableCell,
+    row: TableRow,
+    x: number,
+    width: number,
+    rowHeight: number
+  ): void {
+    const bgColor = this.cellFill(cell, row);
+    if (bgColor) this.drawBackground(ctx, x, ctx.currentY, width, rowHeight, bgColor);
+  }
+
+  /** A cell's effective fill: cell, then row, then the table's header, footer or row default. */
+  private cellFill(cell: TableCell, row: TableRow): Color | undefined {
+    return (
+      cell.backgroundColor ??
+      row.backgroundColor ??
+      (row.isHeader ? this.headerBackgroundColor : undefined) ??
+      (row.isFooter ? this.footerBackgroundColor : undefined) ??
+      this.rowBackgroundColor
+    );
+  }
+
+  /**
+   * Draws a cell's left, top and right edges, and holds its bottom edge for {@link flushBottomEdges}.
+   * A rounded cell draws its whole outline at once.
+   */
+  private drawCellEdges(ctx: RenderContext, cell: TableCell, x: number, width: number, rowHeight: number): void {
     const edges = this.edgesOf(cell);
-    if (edges.border.hasAnyBorder) {
-      // A shared edge is drawn once, by the cell that wins it (planRowEdges).
-      const plan = this._edgePlan.get(cell);
-      const effectiveBorder =
-        plan !== undefined
-          ? new Border(
-              plan & DRAW_LEFT ? edges.border.left : 0,
-              plan & DRAW_TOP ? edges.border.top : 0,
-              edges.border.right,
-              edges.border.bottom
-            )
-          : edges.border;
-      const effectiveBorderColors = edges.colors;
-      // Save and restore border settings for per-cell borders
-      const savedBorder = this.border;
-      const savedBorderColors = this.borderColors;
-      this.border = effectiveBorder;
-      this.borderColors = effectiveBorderColors;
-      this.drawBorder(ctx, x, ctx.currentY, width, rowHeight);
-      this.border = savedBorder;
-      this.borderColors = savedBorderColors;
+    if (!edges.border.hasAnyBorder) return;
+    // A shared edge is drawn once, by the cell that wins it (planRowEdges).
+    const plan = this._edgePlan.get(cell);
+    const rounded = this.cornerRadius > 0;
+    const left = plan !== undefined && !(plan & DRAW_LEFT) ? 0 : edges.border.left;
+    const top = plan !== undefined && !(plan & DRAW_TOP) ? 0 : edges.border.top;
+    const bottom = edges.border.bottom;
+    if (!rounded && bottom > 0) {
+      this._pendingBottomsPage = ctx.currentPageIndex;
+      this._pendingBottoms.push({
+        x,
+        y: ctx.currentY + rowHeight,
+        width,
+        lineWidth: bottom,
+        color: edges.colors.bottom ?? Color.black,
+      });
+    }
+    // Save and restore border settings for per-cell borders
+    const savedBorder = this.border;
+    const savedBorderColors = this.borderColors;
+    this.border = new Border(left, top, edges.border.right, rounded ? bottom : 0);
+    this.borderColors = edges.colors;
+    this.drawBorder(ctx, x, ctx.currentY, width, rowHeight);
+    this.border = savedBorder;
+    this.borderColors = savedBorderColors;
+  }
+
+  /**
+   * Draws the bottom edges held back from the row above, once the row below has painted its fills, or
+   * when the table leaves the page. Edges held on another page are already drawn there.
+   */
+  private flushBottomEdges(ctx: RenderContext): void {
+    const edges = this._pendingBottoms;
+    const page = this._pendingBottomsPage;
+    if (edges.length === 0) return;
+    this._pendingBottoms = [];
+    if (page !== ctx.currentPageIndex) return;
+    ctx.canvas.beginArtifact();
+    try {
+      for (const edge of edges)
+        ctx.canvas.drawLine(edge.x, edge.y, edge.x + edge.width, edge.y, edge.color, edge.lineWidth);
+    } finally {
+      ctx.canvas.endArtifact();
     }
   }
 
@@ -1052,24 +1105,38 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     try {
       const startX = ctx.currentX;
+      // Each cell's left edge and width. `col` tracks the column the cell starts in, which runs ahead
+      // of the cell index once any cell in the row spans more than one column.
+      const cellX: number[] = [];
+      const cellWidth: number[] = [];
       let currentX = startX + (this.isRightToLeft ? rowWidth : 0);
-
-      // `col` tracks the column the cell starts in, which runs ahead of the cell
-      // index `i` once any cell in the row spans more than one column.
       let col = 0;
+      for (const cell of row.cells) {
+        const span = Math.max(1, cell.columnSpan);
+        let colWidth = 0;
+        for (let j = 0; j < span && col + j < widths.length; j++) {
+          colWidth += widths[col + j];
+        }
+        if (this.isRightToLeft) currentX -= colWidth;
+        cellX.push(currentX);
+        cellWidth.push(colWidth);
+        if (!this.isRightToLeft) currentX += colWidth;
+        col += span;
+      }
+
+      // Paint order: the row's fills, then the edges held back from the row above, then the cells'
+      // content, then the row's own edges. No fill is painted over an edge.
+      for (let i = 0; i < row.cells.length; i++)
+        this.paintCellFill(ctx, row.cells[i], row, cellX[i], cellWidth[i], rowHeight);
+      this.flushBottomEdges(ctx);
 
       for (let i = 0; i < row.cells.length; i++) {
         const cell = row.cells[i];
 
         if (row.isHeader && !cell.isHeader) cell.isHeader = true;
 
-        const span = Math.max(1, cell.columnSpan);
-        let colWidth = 0;
-        for (let j = 0; j < span && col + j < widths.length; j++) {
-          colWidth += widths[col + j];
-        }
-
-        if (this.isRightToLeft) currentX -= colWidth;
+        const colWidth = cellWidth[i];
+        currentX = cellX[i];
         capture.openCell(cell, currentX, colWidth);
 
         let childTag: ChildTagToken | null = null;
@@ -1100,10 +1167,10 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
           }
           capture.closeCell(cell);
         }
-
-        if (!this.isRightToLeft) currentX += colWidth;
-        col += span;
       }
+
+      for (let i = 0; i < row.cells.length; i++)
+        this.drawCellEdges(ctx, row.cells[i], cellX[i], cellWidth[i], rowHeight);
 
       ctx.currentX = startX;
       this.recordRowBottoms(ctx, row, widths);

@@ -80,3 +80,8 @@ jobs:
       - name: Verify package exports
         run: node --input-type=module -e "import('@bonniepdf/core')"
         working-directory: core
+
+      # Declarations must resolve for applications on moduleResolution
+      # "node16"/"nodenext", not only for bundlers.
+      - name: Verify package types for Node16/NodeNext consumers
+        run: pnpm --filter @bonniepdf/core run check:consumer-types

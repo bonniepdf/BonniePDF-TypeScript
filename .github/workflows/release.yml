@@ -70,6 +70,9 @@ jobs:
       - name: Build packages
         run: pnpm turbo build
 
+      - name: Verify package types for Node16/NodeNext consumers
+        run: pnpm --filter @bonniepdf/core run check:consumer-types
+
       # The tag is authoritative. If the manifest disagrees with it, the wrong
       # thing is about to be published, so stop rather than guess which is right.
       - name: Check the tag matches the package version

@@ -8,6 +8,12 @@
  * build preserves module structure (see tsup.config.ts) and so ships those
  * specifiers verbatim; this step makes them loadable without a bundler.
  *
+ * The emitted declaration files (`.d.ts`) carry the same extensionless
+ * specifiers, including `import("./X")` type references. TypeScript consumers
+ * using `moduleResolution: "node16"` or `"nodenext"` cannot follow those, and
+ * then see no exports at all, so declarations are rewritten the same way. The
+ * build runs this script again after `tsc --emitDeclarationOnly` for that.
+ *
  * A directory specifier resolves to its `index.js`. Specifiers that already
  * carry an extension, and bare package specifiers, are left alone.
  */
@@ -15,14 +21,15 @@ import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from '
 import { join, dirname, resolve } from 'node:path'
 
 const distDir = resolve(process.argv[2] ?? 'dist')
-const SPEC = /(from\s*|import\s*|export\s*\*\s*from\s*)(['"])(\.\.?\/[^'"]*?)\2/g
+const SPEC = /(from\s*|import\s*|import\(\s*|export\s*\*\s*from\s*)(['"])(\.\.?\/[^'"]*?)\2/g
+const isDeclaration = (p) => p.endsWith('.d.ts')
 
 function walk (dir) {
   const out = []
   for (const name of readdirSync(dir)) {
     const p = join(dir, name)
     if (statSync(p).isDirectory()) out.push(...walk(p))
-    else if (p.endsWith('.js')) out.push(p)
+    else if (p.endsWith('.js') || isDeclaration(p)) out.push(p)
   }
   return out
 }
@@ -35,9 +42,11 @@ for (const file of walk(distDir)) {
   const next = src.replace(SPEC, (whole, head, quote, spec) => {
     if (/\.[cm]?js$/.test(spec)) return whole
     const base = resolve(dirname(file), spec)
+    // A declaration's target is the sibling `.d.ts`; it is still imported as `.js`.
+    const target = isDeclaration(file) ? '.d.ts' : '.js'
     let fixed = null
-    if (existsSync(`${base}.js`)) fixed = `${spec}.js`
-    else if (existsSync(join(base, 'index.js'))) fixed = `${spec.replace(/\/$/, '')}/index.js`
+    if (existsSync(`${base}${target}`)) fixed = `${spec}.js`
+    else if (existsSync(join(base, `index${target}`))) fixed = `${spec.replace(/\/$/, '')}/index.js`
     if (!fixed) return whole
     specifiersRewritten++
     return `${head}${quote}${fixed}${quote}`

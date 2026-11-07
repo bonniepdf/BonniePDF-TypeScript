@@ -61,7 +61,9 @@ assert.equal(pageText.get('multilingual-customer-letter')!.length, 3);
 assert.equal(pageText.get('headers-footers')!.length, 3);
 // First page: its own header. Later pages: the brand and the title swap sides between even and odd pages
 // (the left one is drawn first; the document title also opens each SVG, hence lastIndexOf).
-const [firstPage, evenPage, oddPage] = pageText.get('headers-footers')!.map(svg => svg.replace(/<[^>]*>/g, ''));
+const [firstPage, evenPage, oddPage] = pageText
+  .get('headers-footers')!
+  .map(svg => [...svg.matchAll(/>([^<]*)</g)].map(match => match[1]).join(''));
 assert.ok(firstPage.includes('Board pack') && !evenPage.includes('Board pack') && !oddPage.includes('Board pack'));
 assert.ok(evenPage.indexOf('NORTHFIELD LOGISTICS') < evenPage.lastIndexOf('Operations review'));
 assert.ok(oddPage.lastIndexOf('Operations review') < oddPage.indexOf('NORTHFIELD LOGISTICS'));

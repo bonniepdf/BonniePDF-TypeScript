@@ -3631,12 +3631,16 @@ export const examples: ExampleDef[] = [
     name: 'Multilingual Customer Letter',
     category: 'Sales & Supply Chain',
     description:
-      'One order confirmation in French, Greek and Arabic under the same letterhead, with the Arabic letter and its order table mirrored right to left.',
+      'One order confirmation in French, Greek, Arabic and Hebrew under the same letterhead, with the Arabic and Hebrew letters and their order tables mirrored right to left.',
     filename: 'multilingual-customer-letter.pdf',
     generate: multilingualCustomerLetter,
     dotnetClass: 'MultilingualCustomerLetterExample',
     tier: 'examples',
-    requiredAssets: ['fonts/NotoSans-Regular.ttf', 'fonts/NotoNaskhArabic-Regular.ttf'],
+    requiredAssets: [
+      'fonts/NotoSans-Regular.ttf',
+      'fonts/NotoNaskhArabic-Regular.ttf',
+      'fonts/NotoSerifHebrew-Regular.ttf',
+    ],
   },
   {
     id: 'purchase-order',

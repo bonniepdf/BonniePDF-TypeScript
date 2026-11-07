@@ -1,4 +1,4 @@
-/** One order-confirmation letter in French, Greek and Arabic: the same letterhead and layout, mirrored for right-to-left Arabic, with each letter set in a font that covers all of its text. */
+/** One order-confirmation letter in French, Greek, Arabic and Hebrew: the same letterhead and layout, mirrored for right-to-left Arabic and Hebrew. Each letter is set in a font for its script; digits the Hebrew face lacks come from the document's Latin font. */
 import {
   Container,
   Document,
@@ -71,6 +71,22 @@ const LETTERS: Letter[] = [
     total: ['المجموع', '655.00 ر.س'],
     signOff: 'مع أطيب التحيات،\nخدمة العملاء',
   },
+  {
+    // The Hebrew face has no digits: they fall back to the Latin font added for the French letter.
+    font: 'NotoSerifHebrew-Regular.ttf',
+    rtl: true,
+    title: 'אישור הזמנה',
+    address: 'גב׳ מרים לוי\nרחוב הרצל 12\nתל אביב 6578210',
+    date: '25 באוקטובר 2026',
+    body: 'תודה על הזמנתכם. ההזמנה אושרה ותגיע לכתובתכם בתוך חמישה ימי עסקים. פרטי ההזמנה מופיעים להלן; נא לשמור מכתב זה.',
+    columns: ['מוצר', 'כמות', 'מחיר'],
+    items: [
+      ['מנורת קריאה מפליז', '1', '480.00 ₪'],
+      ['שמיכת פשתן', '1', '215.00 ₪'],
+    ],
+    total: ['סה״כ', '695.00 ₪'],
+    signOff: 'בברכה,\nשירות הלקוחות',
+  },
 ];
 
 export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
@@ -139,7 +155,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       })
     );
 
-    // Everything below follows the letter's direction: start is the right edge in Arabic, and
+    // Everything below follows the letter's direction: start is the right edge in Arabic and Hebrew, and
     // the order table's columns mirror.
     const table = new Table({
       columns: [4, 1, 1.6],

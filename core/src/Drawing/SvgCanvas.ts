@@ -1,4 +1,5 @@
 import type { GlyphRun } from '../Typography/Engine/Api/GlyphRun';
+import { orderRunsVisually } from '../Typography/VisualTextRuns';
 import { glyphOutlinePath } from '../Typography/GlyphOutlinePath';
 import { drawColourGlyph } from '../Typography/ColourGlyphPainter';
 import { ICanvas } from './ICanvas';
@@ -805,6 +806,9 @@ export class SvgCanvas implements ICanvas {
     } catch {
       return [];
     }
+    // A bidirectional line in several fonts is shaped as one line and painted piece by piece in visual order.
+    const pieces = orderRunsVisually(runs, index => runs[index].font.engineFace, this.fontFeatures);
+    if (pieces) return pieces.map(piece => ({ ...runs[piece.run], text: piece.text, glyphs: piece.glyphs! }));
     return runs.map(run => ({ ...run, glyphs: run.font.shape(run.text, this.fontFeatures) }));
   }
 

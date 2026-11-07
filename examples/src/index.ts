@@ -3019,7 +3019,7 @@ export const examples: ExampleDef[] = [
     name: 'Business Invoice: Large Order',
     category: 'Invoices',
     description:
-      'A multi-page 72-line invoice with long descriptions, discounts, mixed rates, integer totals and a grouped payment summary.',
+      'A 72-line, three-page invoice: a styled header row repeated on every page, line discounts and mixed VAT rates, and a VAT summary and total due kept together on the last page.',
     filename: 'large-order-invoice.pdf',
     generate: largeOrderInvoice,
     dotnetClass: 'LargeOrderInvoiceExample',
@@ -3630,16 +3630,13 @@ export const examples: ExampleDef[] = [
     id: 'multilingual-customer-letter',
     name: 'Multilingual Customer Letter',
     category: 'Sales & Supply Chain',
-    description: 'Localized French, Arabic and Hebrew customer letters with real fonts, addresses, dates and currency.',
+    description:
+      'One order confirmation in French, Greek and Arabic under the same letterhead, with the Arabic letter and its order table mirrored right to left.',
     filename: 'multilingual-customer-letter.pdf',
     generate: multilingualCustomerLetter,
     dotnetClass: 'MultilingualCustomerLetterExample',
     tier: 'examples',
-    requiredAssets: [
-      'fonts/NotoSans-Regular.ttf',
-      'fonts/NotoNaskhArabic-Regular.ttf',
-      'fonts/NotoSerifHebrew-Regular.ttf',
-    ],
+    requiredAssets: ['fonts/NotoSans-Regular.ttf', 'fonts/NotoNaskhArabic-Regular.ttf'],
   },
   {
     id: 'purchase-order',

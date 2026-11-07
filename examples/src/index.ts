@@ -1,3 +1,8 @@
+import { generate as restaurantMenu } from './industry-templates/hospitality/restaurant-menu';
+import { generate as allergenMatrix } from './industry-templates/hospitality/allergen-matrix';
+import { generate as guestFolio } from './industry-templates/hospitality/guest-folio';
+import { generate as banquetEventOrder } from './industry-templates/hospitality/banquet-event-order';
+import { generate as giftVoucher } from './industry-templates/hospitality/gift-voucher';
 import { generate as multilingualCustomerLetter } from './industry-templates/sales-supply-chain/multilingual-customer-letter';
 import { generate as longBasketReceipt } from './industry-templates/retail-events/long-basket-receipt';
 import { generate as largeOrderInvoice } from './industry-templates/invoices/large-order-invoice';
@@ -233,6 +238,7 @@ export type Industry =
   | 'Media'
   | 'Compliance'
   | 'Utilities'
+  | 'Hospitality'
   | 'General';
 
 /** The kind of document, independent of which industry it serves. */
@@ -256,7 +262,9 @@ export type DocumentType =
   | 'roadmap'
   | 'chart'
   | 'worksheet'
-  | 'permit';
+  | 'permit'
+  | 'menu'
+  | 'voucher';
 
 /** BonniePDF engine capabilities a document exercises. */
 export type Capability =
@@ -3400,6 +3408,86 @@ export const examples: ExampleDef[] = [
     runtime: ['node', 'browser', 'edge'],
     dataDensity: 'medium',
     variantLabel: 'Options API',
+  },
+  {
+    id: 'restaurant-menu',
+    name: 'Restaurant Menu',
+    category: 'Hospitality',
+    tier: 'examples',
+    description:
+      'A bistro dinner menu on a tall custom page: a serif masthead, courses with dotted leaders to right-aligned prices, and dietary marks with a key.',
+    filename: 'restaurant-menu.pdf',
+    generate: restaurantMenu,
+    requiredAssets: ['fonts/SourceSerif4-Regular.ttf'],
+    dotnetClass: 'RestaurantMenuExample',
+    pdfUa1: true,
+    industries: ['Hospitality'],
+    documentType: 'menu',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'allergen-matrix',
+    name: 'Allergen Guide',
+    category: 'Hospitality',
+    tier: 'examples',
+    description:
+      'A kitchen allergen guide on landscape A4: every dish against the 14 allergens named in UK food law, marked contains or may contain, as a table screen readers can navigate.',
+    filename: 'allergen-matrix.pdf',
+    generate: allergenMatrix,
+    requiredAssets: ['fonts/SourceSerif4-Regular.ttf'],
+    dotnetClass: 'AllergenMatrixExample',
+    pdfUa1: true,
+    industries: ['Hospitality'],
+    documentType: 'menu',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'guest-folio',
+    name: 'Hotel Guest Folio',
+    category: 'Hospitality',
+    tier: 'examples',
+    description:
+      'A hotel guest folio that doubles as the VAT invoice: nightly room charges, restaurant and bar postings, Edinburgh’s visitor levy, the deposit and payment, VAT by rate, a signature line and a QR code for a copy.',
+    filename: 'guest-folio.pdf',
+    generate: guestFolio,
+    dotnetClass: 'GuestFolioExample',
+    capabilities: ['qr'],
+    pdfUa1: true,
+    industries: ['Hospitality'],
+    documentType: 'invoice',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'banquet-event-order',
+    name: 'Banquet Event Order',
+    category: 'Hospitality',
+    tier: 'examples',
+    description:
+      'A banquet event order for a wedding reception: the day’s timeline, a drawn room plan, dietary counts by table, staffing with call times, and sign-off lines for the client, the event manager and the head chef.',
+    filename: 'banquet-event-order.pdf',
+    generate: banquetEventOrder,
+    dotnetClass: 'BanquetEventOrderExample',
+    pdfUa1: true,
+    industries: ['Hospitality'],
+    documentType: 'schedule',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
+  },
+  {
+    id: 'gift-voucher',
+    name: 'Gift Voucher',
+    category: 'Hospitality',
+    tier: 'examples',
+    description:
+      'A restaurant gift voucher on a DL page: the value in large serif type, the recipient’s name, a serial barcode, and a perforated stub the restaurant keeps, with a QR code to check the balance.',
+    filename: 'gift-voucher.pdf',
+    generate: giftVoucher,
+    requiredAssets: ['fonts/SourceSerif4-Regular.ttf'],
+    dotnetClass: 'GiftVoucherExample',
+    capabilities: ['qr', 'barcodes'],
+    pdfUa1: true,
+    industries: ['Hospitality'],
+    documentType: 'voucher',
+    compliance: ['pdf/a-2a', 'pdf/ua-1'],
   },
   {
     id: 'event-ticket',

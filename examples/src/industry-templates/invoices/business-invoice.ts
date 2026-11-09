@@ -29,6 +29,7 @@ const ACCENT_GREEN = '#0B9444';
 const ACCENT_GREEN_TEXT = '#097636';
 const ACCENT_GREEN_LIGHT = '#E8F5EC';
 const HEADER_GRAY = '#F5F5F5';
+const ADDRESS_LINE_HEIGHT = 1.3;
 const TEXT_DARK = '#333333';
 const TEXT_MEDIUM = '#555555';
 // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
@@ -117,14 +118,20 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const address = 'Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack({
-    children: [tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }), tb(address)],
+    children: [
+      tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }),
+      tb(address, { lineHeight: ADDRESS_LINE_HEIGHT }),
+    ],
   });
   const shipToStack = new VerticalStack({
-    children: [tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4 }), tb(address)],
+    children: [
+      tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }),
+      tb(address, { lineHeight: ADDRESS_LINE_HEIGHT }),
+    ],
   });
   const detailsStack = new VerticalStack({
     children: [
-      tb('Details', { bold: true, color: TEXT_DARK, mb: 4 }),
+      tb('Details', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }),
       detailRow('Invoice #', `${year}-001`),
       detailRow('Invoice date', dateStr),
       detailRow('Terms', 'Net 14'),
@@ -255,6 +262,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
 interface TextOpts {
   size?: number;
+  lineHeight?: number;
   color?: ColorInput;
   bold?: boolean;
   align?: TextAlignmentInput;
@@ -266,6 +274,7 @@ function tb(content: string, o: TextOpts = {}): TextBlock {
   return new TextBlock(content, {
     fontName: o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica,
     fontSize: o.size ?? 9,
+    lineHeight: o.lineHeight,
     color: o.color ?? TEXT_MEDIUM,
     alignment: o.align,
     margin: o.mt !== undefined || o.mb !== undefined ? { top: o.mt ?? 0, bottom: o.mb ?? 0 } : undefined,
@@ -286,7 +295,13 @@ function kvRow(left: number, right: number, padding: number, label: TextBlock, v
 
 /** A bold label + plain value line in the Details column. */
 function detailRow(label: string, value: string): Grid {
-  return kvRow(0.9, 1, 0, tb(label, { bold: true, color: TEXT_DARK }), tb(value));
+  return kvRow(
+    0.9,
+    1,
+    0,
+    tb(label, { bold: true, color: TEXT_DARK, lineHeight: ADDRESS_LINE_HEIGHT }),
+    tb(value, { lineHeight: ADDRESS_LINE_HEIGHT })
+  );
 }
 
 /** A totals line: left label, right-aligned amount, with per-row colour/weight. */

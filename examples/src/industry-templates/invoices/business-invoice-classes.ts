@@ -46,7 +46,6 @@ const ACCENT_GREEN = Color.fromHex('#0B9444');
 const ACCENT_GREEN_TEXT = Color.fromHex('#097636');
 const ACCENT_GREEN_LIGHT = Color.fromHex('#E8F5EC');
 const HEADER_GRAY = Color.fromHex('#F5F5F5');
-const BORDER_GRAY = Color.fromHex('#D9D9D9');
 const TEXT_DARK = Color.fromHex('#333333');
 const TEXT_MEDIUM = Color.fromHex('#555555');
 const TEXT_LIGHT = Color.fromHex('#707070');
@@ -137,8 +136,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   // ── Bill To / Ship To / Details ───────────────────────────────────────────
   const addressTable = new Grid(1, 1, 1.1);
   addressTable.cellPadding = 10;
-  addressTable.border = new Border(0.5);
-  addressTable.borderColors = new BorderColors(BORDER_GRAY);
+  addressTable.border = Border.none;
   addressTable.margin = new Thickness(0, 0, 0, 16);
 
   // Each address is one TextBlock with hard line breaks, so it tags as a single

@@ -29,7 +29,6 @@ const ACCENT_GREEN = '#0B9444';
 const ACCENT_GREEN_TEXT = '#097636';
 const ACCENT_GREEN_LIGHT = '#E8F5EC';
 const HEADER_GRAY = '#F5F5F5';
-const BORDER_GRAY = '#D9D9D9';
 const TEXT_DARK = '#333333';
 const TEXT_MEDIUM = '#555555';
 // #707070, not #888888: 3.54:1 on white, below the 4.5:1 WCAG AA threshold.
@@ -136,7 +135,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const addressTable = new Grid({
     columns: [1, 1, 1.1],
     cellPadding: 10,
-    border: { width: 0.5, color: BORDER_GRAY },
+    border: 0,
     margin: { bottom: 16 },
   });
   // The stacks drop straight into the grid cells; the cell supplies the padding.

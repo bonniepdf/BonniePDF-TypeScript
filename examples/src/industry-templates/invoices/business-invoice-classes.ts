@@ -46,6 +46,7 @@ const ACCENT_GREEN = Color.fromHex('#0B9444');
 const ACCENT_GREEN_TEXT = Color.fromHex('#097636');
 const ACCENT_GREEN_LIGHT = Color.fromHex('#E8F5EC');
 const HEADER_GRAY = Color.fromHex('#F5F5F5');
+const ADDRESS_LINE_HEIGHT = 1.3;
 const TEXT_DARK = Color.fromHex('#333333');
 const TEXT_MEDIUM = Color.fromHex('#555555');
 const TEXT_LIGHT = Color.fromHex('#707070');
@@ -144,15 +145,15 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   const address = 'Sample Customer Inc.\nSample Contact\n88 Innovation Way\nAustin, TX 78701';
 
   const billToStack = new VerticalStack();
-  billToStack.add(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4 }));
-  billToStack.add(tb(address));
+  billToStack.add(tb('Bill to', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }));
+  billToStack.add(tb(address, { lineHeight: ADDRESS_LINE_HEIGHT }));
 
   const shipToStack = new VerticalStack();
-  shipToStack.add(tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4 }));
-  shipToStack.add(tb(address));
+  shipToStack.add(tb('Ship to', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }));
+  shipToStack.add(tb(address, { lineHeight: ADDRESS_LINE_HEIGHT }));
 
   const detailsStack = new VerticalStack();
-  detailsStack.add(tb('Details', { bold: true, color: TEXT_DARK, mb: 4 }));
+  detailsStack.add(tb('Details', { bold: true, color: TEXT_DARK, mb: 4, lineHeight: ADDRESS_LINE_HEIGHT }));
   detailsStack.add(detailRow('Invoice #', `${year}-001`));
   detailsStack.add(detailRow('Invoice date', dateStr));
   detailsStack.add(detailRow('Terms', 'Net 14'));
@@ -280,6 +281,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
 interface TextOpts {
   size?: number;
+  lineHeight?: number;
   color?: Color;
   bold?: boolean;
   align?: TextAlignment;
@@ -291,6 +293,7 @@ function tb(content: string, o: TextOpts = {}): TextBlock {
   const t = new TextBlock(content);
   t.fontName = o.bold ? StandardFonts.HelveticaBold : StandardFonts.Helvetica;
   t.fontSize = o.size ?? 9;
+  if (o.lineHeight !== undefined) t.lineHeight = o.lineHeight;
   t.color = o.color ?? TEXT_MEDIUM;
   if (o.align !== undefined) t.alignment = o.align;
   if (o.mt !== undefined || o.mb !== undefined) t.margin = new Thickness(0, o.mt ?? 0, 0, o.mb ?? 0);
@@ -317,7 +320,13 @@ function kvRow(left: number, right: number, padding: number, label: TextBlock, v
 
 /** A bold label + plain value line in the Details column. */
 function detailRow(label: string, value: string): Grid {
-  return kvRow(0.9, 1, 0, tb(label, { bold: true, color: TEXT_DARK }), tb(value));
+  return kvRow(
+    0.9,
+    1,
+    0,
+    tb(label, { bold: true, color: TEXT_DARK, lineHeight: ADDRESS_LINE_HEIGHT }),
+    tb(value, { lineHeight: ADDRESS_LINE_HEIGHT })
+  );
 }
 
 /** A totals line: left label, right-aligned amount, with per-row colour/weight. */

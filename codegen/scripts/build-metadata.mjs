@@ -1,0 +1,13 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { parseArgs } from 'node:util';
+import { createHash } from 'node:crypto';
+const { values } = parseArgs({ options: { schema: { type: 'string' }, 'dotnet-api': { type: 'string' }, out: { type: 'string', default: new URL('../src/api.generated.json', import.meta.url).pathname } } });
+if (!values.schema || !values['dotnet-api']) throw Error('Supply --schema (the published JSON Schema) and --dotnet-api (public assembly inspection JSON).');
+const schemaBytes = await readFile(values.schema), apiBytes = await readFile(values['dotnet-api']);
+const schema = JSON.parse(schemaBytes), api = JSON.parse(apiBytes);
+if (schema.$id !== 'https://www.bonniepdf.dev/schema/definition/1.0.json') throw Error('Expected the published BonniePDF definition 1.0 schema.');
+const elements = Object.keys(schema.$defs).filter(key => schema.$defs[key]?.properties?.type?.const === key);
+if (!elements.length || !api.types?.Document) throw Error('Missing element schema or public API.');
+const checksum = bytes => createHash('sha256').update(bytes).digest('hex');
+await writeFile(values.out, JSON.stringify({ provenance: { schemaId: schema.$id, schemaSha256: checksum(schemaBytes), assembly: api.assembly, assemblyVersion: api.version, publicApiSha256: checksum(apiBytes) }, elements, schemas: schema.$defs, dotnet: api.types }, null, 2) + '\n');
+console.log(`Generated mappings input for ${elements.length} schema elements from published schema and public .NET API metadata.`);

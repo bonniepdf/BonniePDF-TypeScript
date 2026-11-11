@@ -94,9 +94,13 @@ describe('PDF/UA 7.1 - no untagged text in tagged documents', () => {
         continue;
       }
       if (tok === '<<' || tok === '>>' || tok === '[' || tok === ']' || tok === '') continue;
+      if (/^[-+]?[\d.]+$/.test(tok)) continue; // numeric operand, such as an MCID's value
       if (tok === 'BDC' || tok === 'BMC') {
+        // Tagged content is marked content with an MCID. A span that only
+        // carries ActualText for an embedded font's glyphs is not tagged.
         const isArtifact = operands[0] === '/Artifact';
-        if (!isArtifact && artifactStack.some(a => a)) bad++;
+        const isTagged = operands.includes('/MCID');
+        if (isTagged && artifactStack.some(a => a)) bad++;
         artifactStack.push(isArtifact);
       } else if (tok === 'EMC') {
         artifactStack.pop();

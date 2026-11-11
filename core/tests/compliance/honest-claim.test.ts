@@ -1,21 +1,22 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { fileURLToPath } from 'node:url';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { FontManager } from '../../src/Typography/FontManager';
 import { pdfToText } from '../helpers/test-base';
+import { BUNDLED_FONTS_DIR, registerBundledFonts } from '../helpers/bundled-fonts';
 
 // Mirrors the shared fixture honest-claim/unembedded-standard-fonts: the
 // honest-claim guard withholds the PDF/A and PDF/UA-1 claims when the
 // standard-14 fonts cannot be embedded, keeps the tagging, reports one
 // compliance warning per withheld claim, and never changes the document.
 //
-// Tests import from src/, so no Liberation faces are registered unless a test
-// registers them: exactly the "no fonts available" state the fixture needs.
+// The suite registers the bundled Liberation faces for every test, as the Node
+// entry point does; these tests clear the registry first, giving the "no fonts
+// available" state the fixture needs, and restore it afterwards.
 
-const BUNDLED_FONTS = fileURLToPath(new URL('../../assets/fonts', import.meta.url));
+const BUNDLED_FONTS = BUNDLED_FONTS_DIR;
 
 function fixtureDocument(conformance: PdfAConformance, accessibility: AccessibilityMode): Document {
   const doc = new Document();
@@ -47,9 +48,11 @@ function complianceDiagnostics(doc: Document) {
 
 describe('honest-claim guard without embeddable fonts', () => {
   let doc: Document;
+  beforeEach(() => FontManager.clear());
   afterEach(() => {
     doc?.dispose();
     FontManager.clear();
+    registerBundledFonts();
   });
 
   it('withholds both claims, keeps the tagging, and reports each once (PDF/A-2a + PDF/UA-1)', async () => {

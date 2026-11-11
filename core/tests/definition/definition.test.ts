@@ -594,3 +594,31 @@ describe('reading', () => {
     doc.dispose();
   });
 });
+
+it('visits structured row content once and still rejects genuine cell ID collisions', () => {
+  const document = minimal({
+    pages: [
+      {
+        content: [
+          {
+            type: 'Grid',
+            columns: [1, 1],
+            rows: [
+              {
+                cells: [
+                  { type: 'TextBlock', id: 'left-label', text: 'Left' },
+                  { type: 'TableCell', content: { type: 'TextBlock', id: 'right-label', text: 'Right' } },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  expect(validateDefinition(document).errors).toEqual([]);
+  (document.pages[0].content[0] as any).rows[0].cells[1].content.id = 'left-label';
+  expect(validateDefinition(document).errors.map(key)).toEqual([
+    '/pages/0/content/0/rows/0/cells/1/content/id duplicate-id',
+  ]);
+});

@@ -9,6 +9,8 @@ export * from './Core/ColorPalette';
 export * from './Normalize';
 export * from './Core/Diagnostics';
 export * from './Core/BonniePdfError';
+export * from './Core/ElementCycleError';
+export * from './Core/OversizedContentError';
 export {
   type PaintTransform,
   IDENTITY_PAINT_TRANSFORM,
@@ -39,6 +41,7 @@ export { type DocumentSettingsOptions, DocumentSettings } from './Configuration/
 export { ContentDirection, type ContentDirectionInput } from './Configuration/ContentDirection';
 export { EmojiRendering } from './Configuration/EmojiRendering';
 export { MissingGlyphs } from './Configuration/MissingGlyphs';
+export { OversizedContent } from './Configuration/OversizedContent';
 export { MissingGlyphException } from './Core/MissingGlyphException';
 export { pageTemplate, type PageTemplate, type PageTemplateElements } from './Configuration/PageTemplate';
 export {

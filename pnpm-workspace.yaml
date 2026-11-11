@@ -1,5 +1,6 @@
 packages:
   - 'core'
   - 'examples'
+  - 'codegen'
 allowBuilds:
   esbuild: true

@@ -1,4 +1,5 @@
 import { PdfCanvas } from '../Drawing/PdfCanvas';
+import { drawPossiblyOversized } from './OversizedContent';
 import { type PaintTransform, isIdentityPaintTransform } from '../Drawing/PaintTransform';
 import { type IElement, type IStatefulElement, type RenderContext, RenderStatus } from '../Elements/IElement';
 import { composeElementTransform } from './ElementTransforms';
@@ -13,10 +14,8 @@ export function resetTransformChild(child?: IElement): void {
 export function renderAtomicTransform(element: IElement, ctx: RenderContext, width: number, draw: () => void): void {
   const x = ctx.currentX,
     y = ctx.currentY;
-  if (element.measureHeight(width) > ctx.contentHeight + 0.001)
-    throw new Error('Transformed element is taller than the page content band.');
   try {
-    draw();
+    drawPossiblyOversized(ctx, element, element.measureHeight(width), draw);
   } catch (error) {
     ctx.currentX = x;
     ctx.currentY = y;
@@ -32,9 +31,10 @@ export function renderAtomicTransformStateful(
   draw: () => void
 ): RenderStatus {
   const height = element.measureHeight(width);
-  if (height > ctx.contentHeight + 0.001) throw new Error('Transformed element is taller than the page content band.');
-  if (height > ctx.maxY - ctx.currentY + 0.001) return RenderStatus.WrapRequired;
-  draw();
+  // Taller than a whole page: drawn at the top of one, clipped and reported (spec 02 §4.3).
+  if (height > ctx.maxY - ctx.currentY + 0.001 && ctx.currentY > ctx.contentTop + 0.001)
+    return RenderStatus.WrapRequired;
+  drawPossiblyOversized(ctx, element, height, draw);
   return RenderStatus.Complete;
 }
 /** @internal Scope a native subtree's transform, geometry and atomic child band. */

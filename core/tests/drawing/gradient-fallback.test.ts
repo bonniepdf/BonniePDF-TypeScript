@@ -76,11 +76,6 @@ describe('gradient shading fallback', () => {
     expect(count(content, 'f\n')).toBe(101);
     expect(greyLevels(content)).toHaveLength(101);
     expect(content).not.toContain('/Sh');
-
-    // Note: how the *clip* path spells a rectangle is deliberately not asserted
-    // here. The two implementations differ on that (.NET emits `re` for an
-    // axis-aligned rect, this one always decomposes to m/l/l/l/h), which is a
-    // separate parity question with a far wider blast radius than this path.
   });
 
   it('approximates a radial gradient with 100 overlapping discs', () => {

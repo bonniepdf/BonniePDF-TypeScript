@@ -151,6 +151,20 @@ const EFFECT_ATTRIBUTES: readonly string[] = ['filter', 'mask', 'marker-start', 
 /** A `<use>` chain deeper than this is treated as runaway rather than legitimate. */
 const MAX_USE_DEPTH = 16;
 
+/**
+ * The most elements `<use>` references may expand to in one document. Depth alone does not bound the work: a
+ * file of a few hundred bytes can reference a shape that references ten more, six levels deep, and expand to
+ * a million drawn nodes. Elements written in the file itself are not counted; their number is bounded by the
+ * file's size.
+ */
+const MAX_USE_EXPANSION = 50_000;
+
+/** How many elements `<use>` references have expanded to so far. Shared by every context of one build. */
+interface UseBudget {
+  expanded: number;
+  reported: boolean;
+}
+
 export interface BuildOptions {
   readonly width?: number;
   readonly height?: number;
@@ -177,6 +191,8 @@ interface Context {
   readonly transform: Matrix;
   /** Ids currently being expanded by `<use>`, to catch cycles. */
   readonly activeUses: readonly string[];
+  /** Shared, not copied: one count for the whole document. */
+  readonly useBudget: UseBudget;
   readonly fonts: FontProvider | undefined;
   /**
    * The elements whose inherited properties reach this point, outermost first -
@@ -255,7 +271,7 @@ export function buildIr(source: string, options: BuildOptions = {}): IrDocument 
   }
 
   const rootStyle = cascade(INITIAL_STYLE, root.attributes);
-  const context: Context = { style: rootStyle, transform: IDENTITY, activeUses: [], fonts: options.fonts, lineage: [root], raster };
+  const context: Context = { style: rootStyle, transform: IDENTITY, activeUses: [], useBudget: { expanded: 0, reported: false }, fonts: options.fonts, lineage: [root], raster };
 
   for (const child of root.children) {
     visit(child, context, dom, children, unsupported);
@@ -314,6 +330,21 @@ function visit(
   output: IrNode[],
   unsupported: UnsupportedFeature[]
 ): void {
+  if (context.activeUses.length > 0) {
+    const budget = context.useBudget;
+    if (budget.expanded >= MAX_USE_EXPANSION) {
+      if (!budget.reported) {
+        budget.reported = true;
+        unsupported.push({
+          feature: 'use',
+          detail: `references expand to more than ${MAX_USE_EXPANSION} elements, which is treated as runaway`,
+        });
+      }
+      return;
+    }
+    budget.expanded++;
+  }
+
   const raster = context.raster;
   if (!raster) {
     visitElement(element, context, dom, output, unsupported);

@@ -166,6 +166,13 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       ],
       "via": "options"
     },
+    "OversizedContent": {
+      "tokens": [
+        "clip",
+        "throw"
+      ],
+      "via": "options"
+    },
     "AccessibilityMode": {
       "tokens": [
         "none",
@@ -2245,6 +2252,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "missingGlyphs": {
           "kind": "enum:MissingGlyphs"
+        },
+        "oversizedContent": {
+          "kind": "enum:OversizedContent"
         },
         "language": {
           "kind": "string"

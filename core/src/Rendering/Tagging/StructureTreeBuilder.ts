@@ -51,6 +51,17 @@ export class StructureTreeBuilder {
   }
 
   /**
+   * Reopen an element begun earlier, so content drawn on a later page is marked as part of it. The element keeps
+   * its place in the tree; it is only made current again. Pair with {@link end}, as for {@link begin}. A table row
+   * split across pages (spec 02 §4.2) resumes its row and cells on each page.
+   *
+   * @internal
+   */
+  resume(element: StructureElement): void {
+    this._stack.push(element);
+  }
+
+  /**
    * Close the current structure element, returning to its parent.
    * Throws {@link StructureTreeException} if called more times than
    * {@link begin} (the document root cannot be closed - it is owned by

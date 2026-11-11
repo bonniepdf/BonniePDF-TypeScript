@@ -2,6 +2,7 @@ import { keepWithNextHeight } from './Pagination/KeepWithNext';
 import { toElement } from '../../Normalize/toElement';
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
+import { drawPossiblyOversized } from '../../Rendering/OversizedContent';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
 import { captureTypeOf, captureNameOf } from '../../Rendering/LayoutRecorder';
 import { applyOptions } from '../../Core/applyOptions';
@@ -188,7 +189,7 @@ export class VerticalStack extends ElementBase implements IStatefulElement {
           }
 
           const yBefore = ctx.currentY;
-          child.render(ctx, contentWidth);
+          drawPossiblyOversized(ctx, child, childHeight, () => child.render(ctx, contentWidth));
 
           if (ctx.currentY === yBefore) {
             ctx.currentY += childHeight;

@@ -435,7 +435,8 @@ function runs(chunks: readonly Chunk[]): TextRun[] {
  * One glyph's outline, placed. Font units are y-up and user space y-down, so y is
  * negated; a glyph rotation turns about its own origin on the baseline. Quadratic
  * segments are raised to cubic after placing - an affine map takes a Bezier to a
- * Bezier of the same degree, so the order does not change the curve.
+ * Bezier of the same degree, so the order does not change the curve. Cubic
+ * segments, from CFF outlines, are placed as they are.
  */
 function glyphSegments(glyph: Placed): PathSegment[] {
   const outline = glyph.face.outline(glyph.glyph);
@@ -471,6 +472,10 @@ function glyphSegments(glyph: Placed): PathSegment[] {
       startY = y;
     } else if (segment.kind === 'line') {
       segments.push({ kind: 'line', x, y });
+    } else if (segment.kind === 'cubic') {
+      const [c1x, c1y] = map(segment.c1x, segment.c1y);
+      const [c2x, c2y] = map(segment.c2x, segment.c2y);
+      segments.push({ kind: 'cubic', c1x, c1y, c2x, c2y, x, y });
     } else {
       const [qx, qy] = map(segment.cx, segment.cy);
       segments.push({

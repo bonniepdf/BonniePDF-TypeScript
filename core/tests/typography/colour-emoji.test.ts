@@ -145,7 +145,7 @@ describe('colour emoji integration', () => {
       try {
         const bytes = await doc.generateBytesAsync();
         const svg = await doc.generateFirstPageSvgAsync();
-        expect(svg).toContain('aria-label=');
+        expect(svg).toContain('<g role="img" aria-label=');
         expect(svg).toContain(f.file.startsWith('Twemoji') ? '<path' : 'data:image/png;base64,');
         expect(pdfToText(bytes)).toContain('/ActualText');
         const task = getDocument({ data: new Uint8Array(bytes), useSystemFonts: false, disableFontFace: true });

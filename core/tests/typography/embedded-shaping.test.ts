@@ -219,7 +219,7 @@ describe('embedded Latin shaping', () => {
     const doc = document('ffi a\u0308\u0301');
     try {
       const svg = await doc.generateFirstPageSvgAsync();
-      expect(svg).toContain('aria-label="ffi a');
+      expect(svg).toContain('role="img" aria-label="ffi a');
       expect(svg).toContain('<path d="M');
       expect(svg).toContain('scale(0.012 -0.012)');
     } finally {

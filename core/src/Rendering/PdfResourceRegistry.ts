@@ -31,6 +31,7 @@ import {
   standardFallbackChain,
 } from '../Typography/StandardFontCoverage';
 import { MissingGlyphs } from '../Configuration/MissingGlyphs';
+import { OversizedContent } from '../Configuration/OversizedContent';
 import { MissingGlyphException, formatCodePoint } from '../Core/MissingGlyphException';
 import { ShadingRequest, buildColorShadingDict, buildAlphaShadingDict } from './Pdf/GradientShading';
 
@@ -137,6 +138,8 @@ export class PdfResourceRegistry {
 
   /** What happens to a code point no font can draw; wired from the document's settings. */
   public missingGlyphs: MissingGlyphs | 'drop' | 'throw' = MissingGlyphs.Drop;
+  /** What layout does with content that fits on no page; from the document's settings. */
+  public oversizedContent: OversizedContent | 'clip' | 'throw' = OversizedContent.Clip;
 
   public fontAliasMap: Map<string, string> = new Map();
   public fontNameMap: Map<string, string> = new Map();

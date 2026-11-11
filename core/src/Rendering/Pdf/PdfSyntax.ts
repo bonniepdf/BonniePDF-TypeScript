@@ -53,6 +53,27 @@ export class PdfSyntax {
     return sb + '>';
   }
 
+  /**
+   * Makes a URI safe to write as a URI action's target, which is a 7-bit ASCII string (ISO 32000-1,
+   * 12.6.4.7). Characters outside printable ASCII, and spaces, are percent-encoded as UTF-8; everything
+   * else, including existing percent escapes, is left as written.
+   */
+  public static encodeUri(uri: string): string {
+    let ascii = true;
+    for (let i = 0; i < uri.length && ascii; i++) {
+      const c = uri.charCodeAt(i);
+      ascii = c > 0x20 && c < 0x7f;
+    }
+    if (ascii) return uri;
+
+    let result = '';
+    for (const byte of new TextEncoder().encode(uri)) {
+      result +=
+        byte > 0x20 && byte < 0x7f ? String.fromCharCode(byte) : '%' + byte.toString(16).toUpperCase().padStart(2, '0');
+    }
+    return result;
+  }
+
   public static escape(input: string): string {
     if (!input) return input;
     // Most text has nothing to escape: return it as it is rather than rebuilding it.

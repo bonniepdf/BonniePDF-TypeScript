@@ -6,6 +6,9 @@ import { Border } from '../../Core/Border';
 import { isBorderFrameHost } from '../Tables/IBorderFrameHost';
 import { PaginationWrapperBase } from './Pagination/PaginationWrapperBase';
 import { RenderContext } from '../IElement';
+import { drawPossiblyOversized } from '../../Rendering/OversizedContent';
+import { KAPPA } from '../../Drawing/EllipseGeometry';
+import { Color } from '../../Core/Color';
 import { Thickness } from '../../Core/Thickness';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { TextAlignment } from '../Text/TextAlignment';
@@ -317,14 +320,13 @@ export class Container extends BorderedElementBase implements IContentContainer,
   /** Number of fragments already drawn; greater than zero while a split render is in progress. */
   private _fragments = 0;
 
+  /** @internal Whether this container splits across pages rather than moving whole (spec 02 §4.1). */
+  public get splitsAcrossPages(): boolean {
+    return this.canSplit;
+  }
+
   private get canSplit(): boolean {
-    return (
-      this.child !== undefined &&
-      'renderStateful' in this.child &&
-      this.height === undefined &&
-      !this.fillHeight &&
-      this.cornerRadius <= 0
-    );
+    return this.child !== undefined && 'renderStateful' in this.child && this.height === undefined && !this.fillHeight;
   }
 
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
@@ -333,12 +335,95 @@ export class Container extends BorderedElementBase implements IContentContainer,
       if (!overflows || !this.canSplit) {
         // Whole, on this page, or on a fresh one: what an atomic box has always done.
         if (overflows && ctx.currentY > ctx.contentTop) return RenderStatus.WrapRequired;
-        this.render(ctx, width);
+        drawPossiblyOversized(ctx, this, this.measureHeight(width), () => this.render(ctx, width));
         return RenderStatus.Complete;
       }
     }
 
     return this.renderFragment(ctx, width);
+  }
+
+  /**
+   * Paints one fragment of a rounded box (spec 02 §4.1): only the corners at the ends of the box are rounded, the
+   * top two on the first fragment and the bottom two on the last. The fill is that shape; the border is one
+   * stroke along the sides the fragment carries.
+   */
+  private paintRoundedFragment(
+    ctx: RenderContext,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    first: boolean,
+    last: boolean,
+    mode: 'fill' | 'stroke'
+  ): void {
+    const canvas = ctx.canvas;
+    const r = Math.min(this.cornerRadius, w / 2, first && last ? h / 2 : h);
+    const k = r * KAPPA;
+    const top = first ? r : 0;
+    const bottom = last ? r : 0;
+
+    const topEdge = (): void => {
+      canvas.cubicBezierTo(x, y + r - k, x + r - k, y, x + r, y);
+      canvas.lineTo(x + w - r, y);
+      canvas.cubicBezierTo(x + w - r + k, y, x + w, y + r - k, x + w, y + r);
+    };
+    const bottomEdge = (): void => {
+      canvas.cubicBezierTo(x + w, y + h - r + k, x + w - r + k, y + h, x + w - r, y + h);
+      canvas.lineTo(x + r, y + h);
+      canvas.cubicBezierTo(x + r - k, y + h, x, y + h - r + k, x, y + h - r);
+    };
+
+    canvas.beginArtifact();
+    try {
+      canvas.beginPath();
+      if (mode === 'fill') {
+        canvas.moveTo(x, y + top);
+        if (first) topEdge();
+        else canvas.lineTo(x + w, y);
+        canvas.lineTo(x + w, y + h - bottom);
+        if (last) bottomEdge();
+        else canvas.lineTo(x, y + h);
+        canvas.closePath();
+        canvas.fillCurrentPath(this.backgroundColor!);
+        return;
+      }
+
+      const strokeWidth = Math.max(this.border.top, this.border.left, this.border.bottom, this.border.right);
+      if (strokeWidth <= 0) return;
+      const color =
+        this.borderColors.top ??
+        this.borderColors.left ??
+        this.borderColors.bottom ??
+        this.borderColors.right ??
+        Color.black;
+      if (first && last) {
+        canvas.moveTo(x, y + r);
+        topEdge();
+        canvas.lineTo(x + w, y + h - r);
+        bottomEdge();
+        canvas.closePath();
+      } else if (first) {
+        canvas.moveTo(x, y + h);
+        canvas.lineTo(x, y + r);
+        topEdge();
+        canvas.lineTo(x + w, y + h);
+      } else if (last) {
+        canvas.moveTo(x + w, y);
+        canvas.lineTo(x + w, y + h - r);
+        bottomEdge();
+        canvas.lineTo(x, y);
+      } else {
+        canvas.moveTo(x, y);
+        canvas.lineTo(x, y + h);
+        canvas.moveTo(x + w, y);
+        canvas.lineTo(x + w, y + h);
+      }
+      canvas.strokeCurrentPath({ paint: color, width: strokeWidth });
+    } finally {
+      canvas.endArtifact();
+    }
   }
 
   public resetState(): void {
@@ -408,8 +493,25 @@ export class Container extends BorderedElementBase implements IContentContainer,
 
     if (ctx.canvas === canvas && ctx.currentPageIndex === pageIndex) {
       const decorationStart = canvas.streamLength?.();
-      if (this.backgroundColor) this.drawBackground(ctx, boxX, boxTop, effectiveWidth, height, this.backgroundColor);
+      const rounded = this.cornerRadius > 0;
+      if (this.backgroundColor) {
+        if (rounded) this.paintRoundedFragment(ctx, boxX, boxTop, effectiveWidth, height, first, last, 'fill');
+        else this.drawBackground(ctx, boxX, boxTop, effectiveWidth, height, this.backgroundColor);
+      }
       const drawFragmentBorder = (complete: boolean): void => {
+        if (rounded) {
+          this.paintRoundedFragment(
+            ctx,
+            boxX,
+            boxTop,
+            effectiveWidth,
+            height,
+            first || complete,
+            last || complete,
+            'stroke'
+          );
+          return;
+        }
         const full = this.border;
         this.border = complete ? full : new Border(full.left, first ? full.top : 0, full.right, last ? full.bottom : 0);
         try {

@@ -96,6 +96,7 @@ export async function exportSvgDocumentAsync(
   const registry = new PdfResourceRegistry();
   registry.conformance = settings.conformance;
   registry.missingGlyphs = settings.missingGlyphs;
+  registry.oversizedContent = settings.oversizedContent;
   // PDF/UA requires standard fonts to be embedded independently of PDF/A.
   // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
   registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;

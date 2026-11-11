@@ -12,8 +12,8 @@ import { PdfCanvas } from '../../src/Drawing/PdfCanvas';
  * pinned them. Mirrors BonniePDF.Tests/Drawing/PdfCanvasParityTests.cs,
  * expected strings included.
  *
- * Shapes are built from segments, not `addRect`: how each implementation
- * spells a rectangle (`re`, or four segments) is a separate open question.
+ * `addRect` writes the same four segments as building the rectangle by hand,
+ * in the order given, so a reversed rectangle keeps its winding.
  */
 describe('PDF canvas fill and stroke bytes', () => {
   function draw(script: (canvas: PdfCanvas) => void): string {
@@ -51,6 +51,34 @@ describe('PDF canvas fill and stroke bytes', () => {
     { offset: 1, color: new Color(255, 255, 255) },
   ];
   const RECT = '10 980 m\n40 980 l\n40 940 l\n10 940 l\nh\n';
+
+  it('writes addRect as the four segments, in the order given', () => {
+    expect(
+      draw(c => {
+        c.beginPath();
+        c.addRect(10, 20, 30, 40);
+        c.fillCurrentPath(new SolidPaint(new Color(255, 0, 0)));
+      })
+    ).toBe(`q\n1 0 0 rg\n${RECT}f\nQ\n`);
+  });
+
+  it('keeps the winding of a rectangle with a negative width, under a transform too', () => {
+    expect(
+      draw(c => {
+        c.beginPath();
+        c.addRect(40, 20, -30, 40);
+        c.fillCurrentPath(new SolidPaint(new Color(255, 0, 0)));
+      })
+    ).toBe('q\n1 0 0 rg\n40 980 m\n10 980 l\n10 940 l\n40 940 l\nh\nf\nQ\n');
+    expect(
+      draw(c => {
+        c.translate(5, 5);
+        c.beginPath();
+        c.addRect(40, 20, -30, 40);
+        c.fillCurrentPath(new SolidPaint(new Color(255, 0, 0)));
+      })
+    ).toBe('q\n1 0 0 rg\n45 975 m\n15 975 l\n15 935 l\n45 935 l\nh\nf\nQ\n');
+  });
 
   it('wraps a solid fill in its own q/Q', () => {
     expect(

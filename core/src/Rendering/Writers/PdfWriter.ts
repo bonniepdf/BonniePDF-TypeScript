@@ -232,7 +232,10 @@ export class PdfWriter implements IPdfWriter {
       const pageIdx = Math.max(0, Math.min(link.targetPageIndex, pageIds.length - 1));
       dict.set(PdfKeys.Annotation.Action, `<< /S /GoTo /D [${pageIds[pageIdx]} 0 R /Fit] >>`);
     } else {
-      dict.set(PdfKeys.Annotation.Action, `<< /S /URI /URI (${PdfSyntax.escape(link.uri ?? '')}) >>`);
+      dict.set(
+        PdfKeys.Annotation.Action,
+        `<< /S /URI /URI (${PdfSyntax.escape(PdfSyntax.encodeUri(link.uri ?? ''))}) >>`
+      );
     }
 
     // /StructParent wires this annotation into the parent tree for

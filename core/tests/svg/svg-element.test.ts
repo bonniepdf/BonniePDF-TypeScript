@@ -179,6 +179,31 @@ describe('Svg element: fonts', () => {
     expect(ops).toMatch(/ c\n/); // glyph outlines
   });
 
+  it('draws text in a registered CFF (OpenType) font', () => {
+    // A CFF font's glyphs are cubic outlines. Before the font seam carried cubic
+    // segments, this text was silently drawn as nothing.
+    const corpus = JSON.parse(readFileSync(join(__dirname, '../typography/fixtures/cff.json'), 'utf8')) as {
+      fonts: { id: string; fontBase64: string }[];
+    };
+    const bytes = new Uint8Array(Buffer.from(corpus.fonts.find(f => f.id === 'SourceSans3')!.fontBase64, 'base64'));
+    FontManager.registerFont(bytes, { family: 'Source Sans CFF' });
+    const face = new TextFontFaceAdapter(bytes, 'Source Sans CFF');
+    const contours = [...'office'].reduce(
+      (n, c) => n + face.outline(face.glyphIndex(c.codePointAt(0)!)).filter(s => s.kind === 'close').length,
+      0
+    );
+    expect(contours).toBeGreaterThanOrEqual(6);
+
+    const drawing = (content: string) => page(new Svg({ svgData: `<svg ${NS} viewBox="0 0 100 20">${content}</svg>` }));
+    const closes = (ops: string) => (ops.match(/^h$/gm) ?? []).length;
+    const doc = drawing('<text x="0" y="15" font-family="Source Sans CFF" font-size="12">office</text>');
+    const ops = firstContentStream(doc.generateBytes());
+    expect(doc.diagnostics.filter(d => d.source === 'svg')).toEqual([]);
+    expect(ops).toMatch(/ c\n/);
+    // Every contour of every glyph is drawn: the closes beyond the empty drawing's own.
+    expect(closes(ops) - closes(firstContentStream(drawing('').generateBytes()))).toBe(contours);
+  });
+
   it('nothing-resolves: text not drawn; reported, naming the family', () => {
     const doc = page(text('No Such Font'));
     doc.generateBytes();

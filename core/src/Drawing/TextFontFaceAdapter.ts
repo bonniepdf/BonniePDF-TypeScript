@@ -22,8 +22,11 @@ export class TextFontFaceAdapter implements FontFace {
     return this.face.getPairKerning(a, b);
   }
   outline(g: number): readonly GlyphSegment[] {
+    const glyph = this.face.readGlyph(g);
+    // CFF outlines are cubic commands: 0 move, 1 line, 2 cubic, 3 close.
+    if (glyph.commands.length > 0) return cffSegments(glyph.commands);
     const segments: GlyphSegment[] = [];
-    for (const contour of this.face.readGlyph(g).contours) {
+    for (const contour of glyph.contours) {
       if (contour.length < 2) continue;
       const points: { x: number; y: number; onCurve: boolean }[] = [];
       for (let i = 0; i < contour.length; i++) {
@@ -48,4 +51,16 @@ export class TextFontFaceAdapter implements FontFace {
     }
     return segments;
   }
+}
+
+function cffSegments(commands: readonly (readonly number[])[]): GlyphSegment[] {
+  const segments: GlyphSegment[] = [];
+  for (const c of commands) {
+    if (c[0] === 0) segments.push({ kind: 'move', x: c[1]!, y: c[2]! });
+    else if (c[0] === 1) segments.push({ kind: 'line', x: c[1]!, y: c[2]! });
+    else if (c[0] === 2)
+      segments.push({ kind: 'cubic', c1x: c[1]!, c1y: c[2]!, c2x: c[3]!, c2y: c[4]!, x: c[5]!, y: c[6]! });
+    else segments.push({ kind: 'close' });
+  }
+  return segments;
 }

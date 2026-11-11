@@ -1,0 +1,31 @@
+{
+  "name": "@bonniepdf/codegen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Document authoring metadata and native-code generation tooling for BonniePDF.",
+  "exports": {
+    "./authoring": "./src/authoring.ts",
+    "./project": "./src/project.ts",
+    ".": "./src/generate.ts",
+    "./bundle": "./src/bundle.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0",
+    "esbuild": "0.25.12",
+    "@bonniepdf/core": "workspace:*"
+  },
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@bonniepdf/core": "2026.10.28"
+  },
+  "dependencies": {
+    "prettier": "3.6.2"
+  }
+}

@@ -1,4 +1,5 @@
 import { Thickness } from '../Core/Thickness';
+import { drawPossiblyOversized } from './OversizedContent';
 import { keepWithNextHeight } from '../Elements/Layout/Pagination/KeepWithNext';
 import { ContentDirection } from '../Configuration/ContentDirection';
 import { applyContentDirection } from '../Elements/ContentDirectionResolver';
@@ -200,10 +201,13 @@ export class PdfRenderPipeline {
       // reference pipeline (PdfRenderPipeline.cs ResetState after completion).
       if (typeof stateful.resetState === 'function') stateful.resetState();
     } else {
-      // Non-stateful fallback - render once without pagination
+      // An element that cannot split is drawn whole: on this page when it fits, otherwise at the top of the next.
+      // Content taller than a whole page is drawn there too, clipped and reported (spec 02 §4.3).
+      const height = element.measureHeight(contentWidth);
+      if (ctx.currentY + height > ctx.maxY && ctx.currentY > ctx.contentTop) ctx.newPage();
       try {
         ctx.canvas.saveState();
-        element.render(ctx, contentWidth);
+        drawPossiblyOversized(ctx, element, height, () => element.render(ctx, contentWidth));
       } finally {
         ctx.canvas.restoreState();
       }

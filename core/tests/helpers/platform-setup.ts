@@ -18,3 +18,12 @@ configurePlatform(new NodePlatformIO());
 import { settings } from '../../src/Licensing/Settings';
 
 settings.license = 'evaluation';
+
+// Register the bundled Liberation fonts, as the Node entry point does for an
+// application. Without them, tagged and PDF/A documents fall back to
+// unembedded standard fonts and lose their claims, so tests would check output
+// that no Node application produces. Tests of that fallback clear the registry
+// with `withoutRegisteredFonts` (helpers/bundled-fonts.ts).
+import { registerBundledFonts } from './bundled-fonts';
+
+registerBundledFonts();

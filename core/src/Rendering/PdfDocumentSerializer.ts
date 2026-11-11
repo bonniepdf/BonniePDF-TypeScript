@@ -125,6 +125,7 @@ export class PdfDocumentSerializer {
     ctx.resources.diagnostics = this.diagnostics;
     ctx.resources.maxImageDpi = settings.maxImageDpi;
     ctx.resources.missingGlyphs = settings.missingGlyphs;
+    ctx.resources.oversizedContent = settings.oversizedContent;
     ctx.resources.conformance = settings.conformance;
     // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
     // independently of any PDF/A claim - substitute embedded Liberation for
@@ -147,6 +148,7 @@ export class PdfDocumentSerializer {
       dryRunCtx.discardFinishedPages = true;
       dryRunCtx.resources.conformance = settings.conformance;
       dryRunCtx.resources.missingGlyphs = settings.missingGlyphs;
+      dryRunCtx.resources.oversizedContent = settings.oversizedContent;
       dryRunCtx.resources.embedStandardFonts = ctx.resources.embedStandardFonts;
 
       // Drive the streaming generator to completion; we only care about the
@@ -505,6 +507,7 @@ export class PdfDocumentSerializer {
     preRegistry.diagnostics = this.diagnostics;
     preRegistry.conformance = settings.conformance;
     preRegistry.missingGlyphs = settings.missingGlyphs;
+    preRegistry.oversizedContent = settings.oversizedContent;
     const registrationScope = beginDocumentFontMetricScope(
       settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
       undefined,

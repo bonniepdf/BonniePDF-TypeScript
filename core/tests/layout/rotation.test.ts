@@ -56,7 +56,7 @@ describe('native rotation', () => {
     const content = contentStreams(await doc.generateBytesAsync())[0];
     expect(createHash('sha256').update(content, 'latin1').digest('hex')).toBe(fixture._expect.contentStreamSha256);
   });
-  it('wraps before painting and rejects content taller than a fresh page', () => {
+  it('wraps before painting, and clips and reports content taller than a fresh page', () => {
     const ctx = context();
     ctx.currentY = 260;
     const r = new Rotate({ angle: 90, mode: 'constrained', contentWidth: 80, child: new Container({ height: 20 }) });
@@ -65,7 +65,12 @@ describe('native rotation', () => {
     expect(stream(ctx)).toBe(before);
     expect(ctx.currentY).toBe(260);
     r.contentWidth = 400;
-    expect(() => r.renderStateful(ctx, 200)).toThrow('taller');
+    // Taller than any page: it still waits for a fresh one, then is drawn there, clipped, and reported.
+    expect(r.renderStateful(ctx, 200)).toBe('WrapRequired');
+    ctx.currentY = ctx.contentTop;
+    expect(r.renderStateful(ctx, 200)).toBe('Complete');
+    const errors = ctx.resources.diagnostics.all.filter(d => d.severity === 'error');
+    expect(errors.map(d => d.message)).toEqual([expect.stringMatching(/^A Rotate is taller than the page body/)]);
   });
   it('restores the context and graphics state after a forbidden page break', () => {
     const ctx = context();

@@ -5,7 +5,9 @@ import {
   type BorderedElementOptions,
 } from '../Layout/BorderedElementOptions';
 import { toColor, type ColorInput } from '../../Normalize/toColor';
-import { IElement, RenderStatus, RenderContext } from '../IElement';
+import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
+import { drawPossiblyOversized } from '../../Rendering/OversizedContent';
+import type { StructureElement } from '../../Rendering/Tagging/StructureElement';
 import { TableRow } from './TableRow';
 import { Container } from '../Layout/Container';
 import { PaginationWrapperBase } from '../Layout/Pagination/PaginationWrapperBase';
@@ -19,7 +21,7 @@ import { Thickness } from '../../Core/Thickness';
 import { TextBlock } from '../Text/TextBlock';
 import type { TextStyle } from '../Text/TextStyle';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
-import { SemanticRole, toPdfTag } from '../../Rendering/Tagging/SemanticRole';
+import { SemanticRole, toPdfTag, isContainerRole } from '../../Rendering/Tagging/SemanticRole';
 import { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
 import { captureTypeOf, captureNameOf, paintForBackground } from '../../Rendering/LayoutRecorder';
 import { beginChildTag, endChildTag, ChildTagToken } from '../../Rendering/Tagging/ChildTagging';
@@ -543,7 +545,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
           tagging!.tree.begin(headerGroupRole);
           rowGroupOpen = true;
         }
-        this.renderRowDirect(ctx, headerRow, widths);
+        drawPossiblyOversized(ctx, headerRow, headerHeight, () => this.renderRowDirect(ctx, headerRow, widths));
       }
 
       if (rowGroupOpen && groupTagging) tagging!.tree.end();
@@ -563,7 +565,30 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Render data rows
     let tbodyOpen = false;
     const running = this.runningTotalColumn !== undefined;
+    // The first row drawn here starts a page of the table when nothing of the table is above it on the page.
+    const tableAtPageTop = ctx.currentY <= ctx.contentTop + (startRow === 0 ? this.margin.top : 0) + 0.01;
     for (let i = startRow; i < this._rows.length; i++) {
+      // A row taller than a page continues from where its previous fragment stopped (spec 02 §4.2).
+      if (this._split?.index === i) {
+        if (groupTagging && !tbodyOpen && this._split.tbody) {
+          tagging!.tree.resume(this._split.tbody);
+          tbodyOpen = true;
+        }
+        const splitRow = this._split.row;
+        const status = this.renderSplitFragment(ctx, widths, i);
+        if (status === RenderStatus.Complete) {
+          if (running) this.runningValues.push(splitRow.runningValue ?? 0);
+          this.lastRowRendered = i;
+          continue;
+        }
+        if (tbodyOpen && groupTagging) tagging!.tree.end();
+        this.lastRowRendered = i - 1;
+        this.headersPending = this.repeatHeadersOnNewPage && this.headers.length > 0;
+        return status === RenderStatus.WrapRequired && i === startRow
+          ? RenderStatus.WrapRequired
+          : RenderStatus.Overflow;
+      }
+
       const row = this.rowForLayout(i, ctx.layoutRecorder === undefined);
       const rowHeight = this.measureRowHeight(row, widths);
       // A running total opens a continuation page with a brought-forward row, and needs room after
@@ -574,6 +599,36 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
         running && i < this._rows.length - 1
           ? this.measureRowHeight(this.runningRow(this.carriedForwardLabel), widths)
           : 0;
+
+      // A row taller than the space an empty page leaves for it splits instead of moving (spec 02 §4.2). It
+      // moves first when content in it that cannot split would be cut here but fits on the next page.
+      const fitsHere = ctx.currentY + broughtForwardHeight + rowHeight + carryHeight <= ctx.maxY;
+      if (!fitsHere && rowHeight > this.freshPageSpace(ctx, widths, running) + 0.001) {
+        const firstOnPage = i === startRow && tableAtPageTop;
+        if (firstOnPage || !this.unsplittableCellOverruns(ctx, row, widths, broughtForwardHeight)) {
+          if (broughtForward) {
+            this.renderRowDirect(ctx, broughtForward, widths, true);
+            this.carryPending = false;
+          }
+          if (!tbodyOpen && groupTagging) {
+            tagging!.tree.begin(SemanticRole.TBody);
+            tbodyOpen = true;
+          }
+          const stable = this.materialiseRow(i);
+          this._split = {
+            index: i,
+            row: stable,
+            fragments: 0,
+            contents: stable.cells.map(cell => this.effectiveCellContent(cell, stable)),
+            done: stable.cells.map(() => false),
+            tbody: groupTagging ? tagging!.tree.current : undefined,
+            tr: undefined,
+            cells: [],
+          };
+          i--; // draw its first fragment through the continuation branch above
+          continue;
+        }
+      }
 
       // Pagination check
       if (ctx.currentY + broughtForwardHeight + rowHeight + carryHeight > ctx.maxY && ctx.currentY > ctx.contentTop) {
@@ -586,7 +641,6 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
         this.headersPending = this.repeatHeadersOnNewPage && this.headers.length > 0;
         return i === startRow ? RenderStatus.WrapRequired : RenderStatus.Overflow;
       }
-
       if (broughtForward) {
         this.renderRowDirect(ctx, broughtForward, widths, true);
         this.carryPending = false;
@@ -622,6 +676,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * Resets the internal state, preparing the table for a fresh render.
    */
   public resetState(): void {
+    if (this._split) for (const content of this._split.contents) (content as Partial<IStatefulElement>).resetState?.();
+    this._split = undefined;
     this.lastRowRendered = -1;
     this.headersPending = true;
     this.runningValues = [];
@@ -910,7 +966,6 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       this.flushBottomEdges(ctx);
       ctx.newPage();
     }
-
     this.renderRowDirect(ctx, row, widths, false, dataIndex);
   }
 
@@ -955,20 +1010,7 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
       this.rowTextColor;
 
     const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
-
-    // Apply text color to TextBlock content if specified
-    let content = cell.content;
-    if (textColor && content instanceof TextBlock) {
-      // Create a copy with the text color applied
-      const tb = new TextBlock();
-      tb.text = content.text;
-      tb.fontName = content.fontName;
-      tb.fontSize = content.fontSize;
-      tb.color = textColor;
-      if (content.alignmentIsExplicit) tb.alignment = content.alignment;
-      tb.contentDirection = content.effectiveContentDirection;
-      content = tb;
-    }
+    const content = this.effectiveCellContent(cell, row, textColor);
 
     // Render content with padding
     const originalX = ctx.currentX;
@@ -995,6 +1037,242 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
     // Restore X and Y positions
     ctx.currentX = originalX;
     ctx.currentY = yBeforeCell;
+  }
+
+  /** A cell's content as drawn: a TextBlock takes the colour the cascade gives it, on a copy. */
+  private effectiveCellContent(
+    cell: TableCell,
+    row: TableRow,
+    textColor: Color | undefined = this.effectiveTextColor(cell, row)
+  ): IElement {
+    const content = cell.content;
+    if (!textColor || !(content instanceof TextBlock)) return content;
+    const tb = new TextBlock();
+    tb.text = content.text;
+    tb.fontName = content.fontName;
+    tb.fontSize = content.fontSize;
+    tb.color = textColor;
+    if (content.alignmentIsExplicit) tb.alignment = content.alignment;
+    tb.contentDirection = content.effectiveContentDirection;
+    return tb;
+  }
+
+  /** A cell's effective text colour: cell, then row, then the table's header, footer or row default. */
+  private effectiveTextColor(cell: TableCell, row: TableRow): Color | undefined {
+    return (
+      cell.color ??
+      row.color ??
+      (row.isHeader ? this.headerTextColor : undefined) ??
+      (row.isFooter ? this.footerTextColor : undefined) ??
+      this.rowTextColor
+    );
+  }
+
+  /** Height left on an empty page for a body row, after the repeated headers and any running-total rows. */
+  private freshPageSpace(ctx: RenderContext, widths: number[], running: boolean): number {
+    let reserved = 0;
+    if (this.repeatHeadersOnNewPage)
+      for (const header of this.headers) reserved += this.measureRowHeight(header, widths);
+    if (running) {
+      reserved += this.measureRowHeight(this.runningRow(this.broughtForwardLabel), widths);
+      reserved += this.measureRowHeight(this.runningRow(this.carriedForwardLabel), widths);
+    }
+    return ctx.contentHeight - reserved;
+  }
+
+  /** Whether a cell's content that cannot split would run past the bottom of this page. */
+  private unsplittableCellOverruns(ctx: RenderContext, row: TableRow, widths: number[], above: number): boolean {
+    const columns = this.cellColumns(row, widths, 0);
+    for (let i = 0; i < row.cells.length; i++) {
+      const cell = row.cells[i];
+      if (splitsAcrossPages(cell.content)) continue;
+      const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
+      const height = cell.content.measureHeight(columns.width[i] - padding.left - padding.right) + padding.top;
+      if (ctx.currentY + above + height > ctx.maxY) return true;
+    }
+    return false;
+  }
+
+  /** Each cell's left edge and width. A cell spanning columns takes their combined width. */
+  private cellColumns(row: TableRow, widths: number[], startX: number): { x: number[]; width: number[] } {
+    const rowWidth = sumWidths(widths);
+    const x: number[] = [];
+    const width: number[] = [];
+    let currentX = startX + (this.isRightToLeft ? rowWidth : 0);
+    let col = 0;
+    for (const cell of row.cells) {
+      const span = Math.max(1, cell.columnSpan);
+      let colWidth = 0;
+      for (let j = 0; j < span && col + j < widths.length; j++) colWidth += widths[col + j];
+      if (this.isRightToLeft) currentX -= colWidth;
+      x.push(currentX);
+      width.push(colWidth);
+      if (!this.isRightToLeft) currentX += colWidth;
+      col += span;
+    }
+    return { x, width };
+  }
+
+  /** A body row taller than a page, while it is drawn in fragments (spec 02 §4.2). */
+  private _split: SplitRowState | undefined;
+
+  /**
+   * Draws the next page's fragment of a split row: every unfinished cell from the same top, content that can
+   * split continuing where it stopped and content that cannot drawn once, in the first fragment. Fills cover the
+   * fragment and are painted behind the content; the top edges are drawn on the first fragment and the bottom
+   * edges on the last.
+   */
+  private renderSplitFragment(ctx: RenderContext, widths: number[], dataIndex: number): RenderStatus {
+    const split = this._split!;
+    const row = split.row;
+    const first = split.fragments === 0;
+    const startX = ctx.currentX;
+    const top = ctx.currentY;
+    const columns = this.cellColumns(row, widths, startX);
+    const rowWidth = sumWidths(widths);
+    if (first) this.planRowEdges(ctx, row);
+
+    const tagging = ctx.tagging;
+    const dataTagging = tagging != null && !this.isLayoutGrid;
+    const presTagging = tagging != null && this.isLayoutGrid;
+    const canvas = ctx.canvas;
+    const page = ctx.currentPageIndex;
+    const mark = canvas.streamLength?.();
+    const rec = this.isLayoutGrid ? undefined : ctx.layoutRecorder;
+
+    if (dataTagging) {
+      if (split.tr) tagging!.tree.resume(split.tr);
+      else split.tr = tagging!.tree.begin(SemanticRole.TR);
+      canvas.beginContainerContent('TR');
+    }
+    rec?.openNode(row, captureTypeOf(row), captureNameOf(row), page, startX, top, rowWidth);
+
+    let bottom = top;
+    let progress = false;
+    let allDone = true;
+    try {
+      for (let i = 0; i < row.cells.length; i++) {
+        if (split.done[i]) continue;
+        const cell = row.cells[i];
+        const padding = cell.padding ?? row.padding ?? new Thickness(this.cellPadding);
+        const contentWidth = columns.width[i] - padding.left - padding.right;
+        const content = split.contents[i];
+        const cellTop = top + (first ? padding.top : 0);
+        ctx.currentX = columns.x[i] + padding.left;
+        ctx.currentY = cellTop;
+        rec?.openNode(cell, captureTypeOf(cell), captureNameOf(cell), page, columns.x[i], top, columns.width[i]);
+
+        const tag = this.openSplitCellTag(ctx, split, i, cell, content, dataTagging, presTagging);
+        try {
+          if (splitsAcrossPages(content)) {
+            const status = (content as IStatefulElement).renderStateful(ctx, contentWidth);
+            if (status !== RenderStatus.WrapRequired) {
+              progress ||= status === RenderStatus.Complete || ctx.currentY > cellTop;
+              bottom = Math.max(bottom, ctx.currentY + (status === RenderStatus.Complete ? padding.bottom : 0));
+            }
+            if (status === RenderStatus.Complete) {
+              split.done[i] = true;
+              (content as IStatefulElement).resetState?.();
+            }
+          } else {
+            const height = content.measureHeight(contentWidth);
+            drawPossiblyOversized(ctx, content, height, () => content.render(ctx, contentWidth));
+            bottom = Math.max(bottom, cellTop + height + padding.bottom);
+            progress = true;
+            split.done[i] = true;
+          }
+        } finally {
+          if (tag === 'tag') {
+            canvas.endMarkedContent();
+            tagging!.tree.end();
+          } else if (tag === 'artifact') {
+            canvas.endArtifact();
+          }
+          rec?.closeNode(cell, page, Math.max(bottom, ctx.currentY), split.done[i]);
+        }
+        if (!split.done[i]) allDone = false;
+      }
+    } finally {
+      ctx.currentX = startX;
+      if (dataTagging) {
+        canvas.endMarkedContent();
+        tagging!.tree.end();
+      }
+    }
+
+    if (!progress) {
+      rec?.closeNode(row, page, top, false);
+      ctx.currentY = top;
+      return RenderStatus.WrapRequired;
+    }
+
+    const last = allDone;
+    const height = bottom - top;
+    if (ctx.canvas === canvas && ctx.currentPageIndex === page) {
+      ctx.currentY = top;
+      const decorationStart = canvas.streamLength?.();
+      for (let i = 0; i < row.cells.length; i++)
+        this.paintCellFill(ctx, row.cells[i], row, columns.x[i], columns.width[i], height, dataIndex);
+      if (first) this.flushBottomEdges(ctx);
+      if (mark !== undefined && decorationStart !== undefined && canvas.streamLength!() > decorationStart) {
+        canvas.moveTail?.(decorationStart, mark);
+      }
+      for (let i = 0; i < row.cells.length; i++)
+        this.drawCellEdges(ctx, row.cells[i], columns.x[i], columns.width[i], height, first, last);
+    }
+    rec?.closeNode(row, page, top + height, last);
+
+    ctx.currentY = top + height;
+    if (!last) {
+      split.fragments++;
+      return RenderStatus.Overflow;
+    }
+    this.recordRowBottoms(ctx, row, widths);
+    this._split = undefined;
+    return RenderStatus.Complete;
+  }
+
+  /** Opens, or reopens on a later page, the structure element a split row's cell is marked under. */
+  private openSplitCellTag(
+    ctx: RenderContext,
+    split: SplitRowState,
+    index: number,
+    cell: TableCell,
+    content: IElement,
+    dataTagging: boolean,
+    presTagging: boolean
+  ): 'tag' | 'artifact' | 'none' {
+    const tree = ctx.tagging?.tree;
+    if (!tree) return 'none';
+    const known = split.cells[index];
+    if (known) {
+      tree.resume(known.element);
+      if (known.container) ctx.canvas.beginContainerContent(known.tag);
+      else ctx.canvas.beginMarkedContent(known.tag);
+      return 'tag';
+    }
+    if (dataTagging) {
+      if (split.row.isHeader && !cell.isHeader) cell.isHeader = true;
+      const role = cell.semanticRole;
+      const element = tree.begin(role);
+      const attrs: string[] = [];
+      if (cell.columnSpan > 1) attrs.push(`/ColSpan ${cell.columnSpan}`);
+      if (role === SemanticRole.TH) attrs.push('/Scope /Column');
+      if (attrs.length > 0) tree.setAttributes(`<< /O /Table ${attrs.join(' ')} >>`);
+      const tag = toPdfTag(role);
+      ctx.canvas.beginMarkedContent(tag);
+      split.cells[index] = { element, tag, container: false };
+      return 'tag';
+    }
+    if (presTagging) {
+      const token = beginChildTag(ctx, content);
+      if (token.isArtifact) return 'artifact';
+      if (!token.tagThis) return 'none';
+      const role = (content as unknown as IRoleProvider).semanticRole;
+      split.cells[index] = { element: tree.current, tag: toPdfTag(role), container: isContainerRole(role) };
+      return 'tag';
+    }
+    return 'none';
   }
 
   /**
@@ -1030,15 +1308,23 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
    * Draws a cell's left, top and right edges, and holds its bottom edge for {@link flushBottomEdges}.
    * A rounded cell draws its whole outline at once.
    */
-  private drawCellEdges(ctx: RenderContext, cell: TableCell, x: number, width: number, rowHeight: number): void {
+  private drawCellEdges(
+    ctx: RenderContext,
+    cell: TableCell,
+    x: number,
+    width: number,
+    rowHeight: number,
+    drawTop = true,
+    drawBottom = true
+  ): void {
     const edges = this.edgesOf(cell);
     if (!edges.border.hasAnyBorder) return;
     // A shared edge is drawn once, by the cell that wins it (planRowEdges).
     const plan = this._edgePlan.get(cell);
     const rounded = this.cornerRadius > 0;
     const left = plan !== undefined && !(plan & DRAW_LEFT) ? 0 : edges.border.left;
-    const top = plan !== undefined && !(plan & DRAW_TOP) ? 0 : edges.border.top;
-    const bottom = edges.border.bottom;
+    const top = !drawTop || (plan !== undefined && !(plan & DRAW_TOP)) ? 0 : edges.border.top;
+    const bottom = drawBottom ? edges.border.bottom : 0;
     if (!rounded && bottom > 0 && edges.colors.bottom) {
       this._pendingBottomsPage = ctx.currentPageIndex;
       this._pendingBottoms.push({
@@ -1325,6 +1611,25 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
 
     return maxHeight;
   }
+}
+
+/** Whether content can continue on a later page, rather than being drawn whole (spec 02 §4). */
+function splitsAcrossPages(content: IElement): boolean {
+  if (!('renderStateful' in content)) return false;
+  const marker = (content as { splitsAcrossPages?: boolean }).splitsAcrossPages;
+  return marker ?? true;
+}
+
+/** The state of a body row drawn in fragments across pages (spec 02 §4.2). */
+interface SplitRowState {
+  index: number;
+  row: TableRow;
+  fragments: number;
+  contents: IElement[];
+  done: boolean[];
+  tbody: StructureElement | undefined;
+  tr: StructureElement | undefined;
+  cells: Array<{ element: StructureElement; tag: string; container: boolean } | undefined>;
 }
 
 const noRowCapture: {

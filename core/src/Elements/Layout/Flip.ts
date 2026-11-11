@@ -62,6 +62,9 @@ export class Flip extends ElementBase implements IContentContainer, IStatefulEle
     renderAtomicTransform(this, ctx, width, () => super.render(ctx, width));
   }
   /** Move whole to a fresh page before painting when necessary. */
+  /** @internal A transformed subtree is drawn whole, never split across pages. */
+  public readonly splitsAcrossPages = false;
+
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
     return renderAtomicTransformStateful(this, ctx, width, () => this.render(ctx, width));
   }

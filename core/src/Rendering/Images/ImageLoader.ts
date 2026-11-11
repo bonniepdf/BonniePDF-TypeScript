@@ -2,9 +2,41 @@ import { ImageInfo } from './ImageInfo';
 import { ImageFormat } from './ImageFormat';
 import { ImageColorSpace } from './ImageColorSpace';
 import { getPlatformIO } from '../../Platform/PlatformIO';
+import { BonniePdfError } from '../../Core/BonniePdfError';
+
+/**
+ * Thrown when image bytes cannot be decoded: the compressed pixel data is corrupt or truncated, or the image
+ * is larger than {@link ImageLoader.maxPixels}. Images often come from end users, so catch this where an
+ * upload is turned into a document.
+ */
+export class ImageDecodeError extends BonniePdfError {
+  /** Creates the error with a message describing what could not be decoded. */
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+  }
+}
+
+/** Largest inflated ICC profile accepted from a PNG. Real profiles are a few kilobytes to a few megabytes. */
+const MAX_ICC_PROFILE_BYTES = 16 * 1024 * 1024;
 
 /** Parses JPEG and PNG metadata from bytes or a platform-supported file path. */
 export class ImageLoader {
+  /**
+   * Largest image the loader will decode, in pixels (width x height). An image above it is refused with an
+   * {@link ImageDecodeError} before any pixel data is inflated, so a small file that declares enormous
+   * dimensions cannot exhaust memory. The default of 100 million pixels is about 10,000 x 10,000; raise it
+   * for large-format print work.
+   */
+  public static maxPixels = 100_000_000;
+
+  private static assertPixelBudget(width: number, height: number): void {
+    if (width > 0 && height > 0 && width * height > this.maxPixels) {
+      throw new ImageDecodeError(
+        `Image is ${width} x ${height} pixels, above the ${this.maxPixels}-pixel limit (ImageLoader.maxPixels).`
+      );
+    }
+  }
+
   /** Loads and parses an image from a file on platforms with synchronous file I/O. */
   public static load(filePath: string): ImageInfo {
     if (!filePath) {
@@ -173,6 +205,7 @@ export class ImageLoader {
         if (info.width <= 0 || info.height <= 0) {
           throw new Error('Invalid JPEG file: Invalid dimensions');
         }
+        this.assertPixelBudget(info.width, info.height);
 
         // Don't return yet - keep scanning for APP1/APP14 markers that may
         // appear after SOF in some encoders (rare but legal).
@@ -440,6 +473,7 @@ export class ImageLoader {
           info.height = (data[pos + 4] << 24) | (data[pos + 5] << 16) | (data[pos + 6] << 8) | data[pos + 7];
           bitDepth = data[pos + 8];
           colorType = data[pos + 9];
+          this.assertPixelBudget(info.width, info.height);
 
           info.bitsPerComponent = bitDepth;
 
@@ -706,6 +740,10 @@ export class ImageLoader {
       );
     }
 
+    // Read the header first: the declared size bounds how much the pixel data may inflate to, and an
+    // image over the pixel budget is refused before anything is inflated.
+    const maxIdatBytes = this.maxInflatedPixelBytes(pngBytes);
+
     // Walk the chunk stream once, capturing IDAT bytes and any iCCP payload.
     const idatParts: Uint8Array[] = [];
     let iccCompressed: Uint8Array | null = null;
@@ -741,16 +779,54 @@ export class ImageLoader {
       idatZlib.set(c, off);
       off += c.length;
     }
-    const idat = await this.inflateStreamDeflate(idatZlib);
+    const idat = await this.inflateStreamDeflate(idatZlib, maxIdatBytes);
 
     // Inflate iCCP if present.
-    const icc = iccCompressed ? await this.inflateStreamDeflate(iccCompressed) : undefined;
+    // A corrupt or oversized profile is dropped, and the image uses its device colour space.
+    let icc: Uint8Array | undefined;
+    if (iccCompressed) {
+      try {
+        icc = await this.inflateStreamDeflate(iccCompressed, MAX_ICC_PROFILE_BYTES);
+      } catch (error) {
+        if (!(error instanceof ImageDecodeError)) throw error;
+      }
+    }
 
     return { idat, icc };
   }
 
-  /** Inflate a zlib-wrapped deflate stream via `DecompressionStream`. */
-  private static async inflateStreamDeflate(zlib: Uint8Array): Promise<Uint8Array> {
+  /**
+   * The most bytes a PNG's pixel data may inflate to, from its IHDR: one filter byte plus the packed samples
+   * for every row, plus two bytes per row and 64 bytes of allowance (spec 12 §3a). Interlaced images spend a
+   * few more filter bytes, which the allowance covers.
+   */
+  private static maxInflatedPixelBytes(pngBytes: Uint8Array): number {
+    const isIhdr =
+      pngBytes.length >= 33 &&
+      pngBytes[12] === 0x49 &&
+      pngBytes[13] === 0x48 &&
+      pngBytes[14] === 0x44 &&
+      pngBytes[15] === 0x52;
+    if (!isIhdr) throw new ImageDecodeError('Invalid PNG file: Missing or invalid IHDR chunk');
+
+    const view = new DataView(pngBytes.buffer, pngBytes.byteOffset, pngBytes.byteLength);
+    const width = view.getUint32(16);
+    const height = view.getUint32(20);
+    if (width === 0 || height === 0) throw new ImageDecodeError('Invalid PNG file: Missing or invalid IHDR chunk');
+    this.assertPixelBudget(width, height);
+
+    const bitDepth = pngBytes[24];
+    const channelsByColorType: Record<number, number> = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 };
+    const channels = channelsByColorType[pngBytes[25]] ?? 4;
+    const rowBytes = Math.ceil((width * channels * bitDepth) / 8);
+    return height * (1 + rowBytes + 2) + 64;
+  }
+
+  /**
+   * Inflate a zlib-wrapped deflate stream via `DecompressionStream`, refusing to produce more than
+   * `maxBytes`. Corrupt or oversized data is reported as an {@link ImageDecodeError}.
+   */
+  private static async inflateStreamDeflate(zlib: Uint8Array, maxBytes: number): Promise<Uint8Array> {
     const ds = new DecompressionStream('deflate');
     const writer = ds.writable.getWriter();
     const reader = ds.readable.getReader();
@@ -759,15 +835,35 @@ export class ImageLoader {
     // when its buffer might be a SharedArrayBuffer, and Node's web-streams
     // adapter rejects bare ArrayBuffer arguments.  This shape works in
     // both Node and the browser.
-    writer.write(zlib.slice()).then(() => writer.close());
+    // A failed write rejects here as well as on the reader. The reader reports it; this branch must still be
+    // handled, or corrupt data surfaces as an unhandled rejection and ends a Node process.
+    const writing = writer
+      .write(zlib.slice())
+      .then(() => writer.close())
+      .catch(() => undefined);
 
     const outChunks: Uint8Array[] = [];
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      outChunks.push(value);
+    let inflated = 0;
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        inflated += value.length;
+        if (inflated > maxBytes) {
+          await reader.cancel().catch(() => undefined);
+          throw new ImageDecodeError('PNG data inflates to more than its header declares.');
+        }
+        outChunks.push(value);
+      }
+    } catch (error) {
+      if (error instanceof ImageDecodeError) throw error;
+      throw new ImageDecodeError('PNG data is corrupt: its compressed stream could not be inflated.', {
+        cause: error,
+      });
+    } finally {
+      await writing;
     }
-    const outTotal = outChunks.reduce((s, c) => s + c.length, 0);
+    const outTotal = inflated;
     const out = new Uint8Array(outTotal);
     let outOff = 0;
     for (const c of outChunks) {

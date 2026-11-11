@@ -935,7 +935,7 @@ export class SvgCanvas implements ICanvas {
           if (source === ' ') cursor += extraPerSpace;
         }
         elements.push(
-          `<g aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${graphics.getInnerSvg()}</g>`
+          `<g role="img" aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${graphics.getInnerSvg()}</g>`
         );
         continue;
       }
@@ -963,7 +963,7 @@ export class SvgCanvas implements ICanvas {
             cursor += extraPerSpace;
         }
         elements.push(
-          `<g fill="${fillHex}" aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${paths.join('')}</g>`
+          `<g fill="${fillHex}" role="img" aria-label="${escapeAttr(run.text)}"${extraAttributes}${transformAttr}>${paths.join('')}</g>`
         );
         continue;
       }

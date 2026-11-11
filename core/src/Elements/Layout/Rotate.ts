@@ -81,6 +81,9 @@ export class Rotate extends ElementBase implements IContentContainer, IStatefulE
     renderAtomicTransform(this, ctx, width, () => super.render(ctx, width));
   }
   /** Move to a fresh page before painting when the whole rotated box does not fit. */
+  /** @internal A transformed subtree is drawn whole, never split across pages. */
+  public readonly splitsAcrossPages = false;
+
   public renderStateful(ctx: RenderContext, width: number): RenderStatus {
     return renderAtomicTransformStateful(this, ctx, width, () => this.render(ctx, width));
   }

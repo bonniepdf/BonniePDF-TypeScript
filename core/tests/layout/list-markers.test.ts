@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { inflateSync } from 'node:zlib';
+import { fileURLToPath } from 'node:url';
+import { FontManager } from '../../src/Typography/FontManager';
 import { Document } from '../../src/Document';
 import { OrderedList } from '../../src/Elements/Lists/OrderedList';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
@@ -8,6 +10,15 @@ import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 describe('list markers', () => {
   const LONG =
     'This is a long list item that will certainly wrap onto a second line because it keeps going and going well past the right margin of the page.';
+
+  // Tagged output embeds the standard font's Liberation substitute, as it does in an application.
+  beforeAll(() => FontManager.autoRegisterBundledFonts(fileURLToPath(new URL('../../assets/fonts', import.meta.url))));
+
+  /** The text of each run drawn on the page: literal strings untagged, their ActualText when tagged (embedded font). */
+  function drawnRuns(content: string, tagged: boolean): string[] {
+    const pattern = tagged ? /\/ActualText \((.*?)\) >>/g : /\((.*?)\) Tj/g;
+    return [...content.matchAll(pattern)].map(m => m[1]);
+  }
 
   function pageContent(tagged: boolean): string {
     const doc = new Document();
@@ -28,10 +39,13 @@ describe('list markers', () => {
 
   for (const tagged of [false, true]) {
     it(`draws each number once when an item wraps (${tagged ? 'tagged' : 'untagged'})`, () => {
-      const content = pageContent(tagged);
-      expect(content).toContain('(and going well past the right margin of the page.) Tj');
-      expect(content.match(/\(1\.\) Tj/g)).toHaveLength(1);
-      expect(content.match(/\(2\.\) Tj/g)).toHaveLength(1);
+      expect(drawnRuns(pageContent(tagged), tagged)).toEqual([
+        '1.',
+        'This is a long list item that will certainly wrap onto a second line because it keeps going',
+        'and going well past the right margin of the page.',
+        '2.',
+        'Short item',
+      ]);
     });
   }
 });

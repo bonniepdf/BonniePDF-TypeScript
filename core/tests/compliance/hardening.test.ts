@@ -16,6 +16,7 @@ import { FontManager } from '../../src/Typography/FontManager';
 import { pdfToText } from '../helpers/test-base';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { withoutRegisteredFonts } from '../helpers/bundled-fonts';
 
 /**
  * Ten-fixture hardening pass. Throws representative
@@ -79,21 +80,23 @@ describe('Hardening fixtures', () => {
 
   it('fixture 02 - PDF/A and PDF/UA-1 claims are suppressed when standard fonts are not embedded', () => {
     // PDF/A-1b §6.3.4 and PDF/UA-1 §7.21.4.1 both forbid non-embedded
-    // fonts. With no Liberation faces registered (tests import from src/,
-    // skipping the Node entry point's registration), Helvetica cannot be
-    // embedded, so the serializer withholds both claims rather than
-    // emitting invalid ones. The tagging itself is kept.
-    const pdf = generate(d => {
-      d.settings.version = PdfVersion.Pdf17;
-      d.settings.pdfAEnabled = true;
-      d.settings.accessibility = AccessibilityMode.PdfUa1;
-      d.settings.language = 'en-GB';
-      const h = new Heading('Combined');
-      h.tocIdentifier = 'c';
-      h.level = 1;
-      h.fontSize = 18;
-      d.add(h);
-    });
+    // fonts. With no Liberation faces registered, as in a browser host that
+    // has not registered any, Helvetica cannot be embedded, so the serializer
+    // withholds both claims rather than emitting invalid ones. The tagging
+    // itself is kept.
+    const pdf = withoutRegisteredFonts(() =>
+      generate(d => {
+        d.settings.version = PdfVersion.Pdf17;
+        d.settings.pdfAEnabled = true;
+        d.settings.accessibility = AccessibilityMode.PdfUa1;
+        d.settings.language = 'en-GB';
+        const h = new Heading('Combined');
+        h.tocIdentifier = 'c';
+        h.level = 1;
+        h.fontSize = 18;
+        d.add(h);
+      })
+    );
 
     // PDF/A claim and OutputIntent are suppressed (honest about what we ship).
     expect(pdf).not.toContain('pdfaid:part');

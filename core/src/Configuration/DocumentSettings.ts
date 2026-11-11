@@ -4,6 +4,7 @@ import { ContentDirection, toContentDirection, type ContentDirectionInput } from
 import { applyOptions } from '../Core/applyOptions';
 import { EmojiRendering } from './EmojiRendering';
 import { MissingGlyphs } from './MissingGlyphs';
+import { OversizedContent } from './OversizedContent';
 import { PdfSize } from './PdfSize';
 import { PageOrientation } from '../Core/PageOrientation';
 import { Color } from '../Core/Color';
@@ -42,6 +43,7 @@ import type { PageTemplate } from './PageTemplate';
 export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'emojiRendering',
   'missingGlyphs',
+  'oversizedContent',
   'contentDirection',
   'pageSize',
   'pageColor',
@@ -175,6 +177,21 @@ export class DocumentSettings {
   public set missingGlyphs(value: MissingGlyphs | 'drop' | 'throw') {
     if (value !== 'drop' && value !== 'throw') throw new RangeError('Invalid missing-glyph mode');
     this._missingGlyphs = value as MissingGlyphs;
+  }
+
+  private _oversizedContent: OversizedContent = OversizedContent.Clip;
+  /**
+   * What happens to content that cannot split across pages and is taller than a page: `'clip'` (the default) draws
+   * it at the top of a page, cut off at the bottom of the body, and records an error diagnostic; `'throw'` stops
+   * generation with an `OversizedContentError`. Text, tables, lists and stacks split instead, so they are never
+   * oversized.
+   */
+  public get oversizedContent(): OversizedContent | 'clip' | 'throw' {
+    return this._oversizedContent;
+  }
+  public set oversizedContent(value: OversizedContent | 'clip' | 'throw') {
+    if (value !== 'clip' && value !== 'throw') throw new RangeError('Invalid oversized-content mode');
+    this._oversizedContent = value as OversizedContent;
   }
   /**
    * Template function for generating page headers.

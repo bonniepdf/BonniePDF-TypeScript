@@ -50,7 +50,11 @@ describe('native flip and translate', () => {
     expect(element.renderStateful(ctx, 200)).toBe('WrapRequired');
     expect(stream(ctx)).toBe(before);
     element.child = new Container({ height: 400 });
-    expect(() => element.renderStateful(ctx, 200)).toThrow('taller');
+    // Taller than any page: it waits for a fresh one, then is drawn there, clipped, and reported.
+    expect(element.renderStateful(ctx, 200)).toBe('WrapRequired');
+    ctx.currentY = ctx.contentTop;
+    expect(element.renderStateful(ctx, 200)).toBe('Complete');
+    expect(ctx.resources.diagnostics.all.some(d => d.severity === 'error' && d.source === 'pagination')).toBe(true);
   });
   it.each([new Flip({ horizontal: true }), new Translate({ x: 5 })])(
     'restores state after forbidden page breaks',

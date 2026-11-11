@@ -1,6 +1,7 @@
 import { toElement } from '../../Normalize/toElement';
 import { ElementBase } from '../ElementBase';
 import { IElement, IStatefulElement, RenderStatus, RenderContext } from '../IElement';
+import { drawPossiblyOversized } from '../../Rendering/OversizedContent';
 import { HorizontalAlignment } from '../../Core/HorizontalAlignment';
 import { WidthDistribution } from './WidthDistribution';
 import { applyOptions } from '../../Core/applyOptions';
@@ -184,14 +185,19 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
           return RenderStatus.WrapRequired;
         }
 
-        // Fits on this page, or we're at top of page (render anyway to avoid infinite loop)
-        this.render(ctx, width);
+        // Fits on this page, or at the top of one, where a row taller than the body is clipped and reported.
+        drawPossiblyOversized(ctx, this, totalHeight, () => this.render(ctx, width));
         this.rendered = true;
         return RenderStatus.Complete;
       }
     }
 
     return this.renderFragment(ctx, width);
+  }
+
+  /** @internal Whether this row splits across pages rather than moving whole (spec 02 §4.1). */
+  public get splitsAcrossPages(): boolean {
+    return this.canSplit;
   }
 
   private get canSplit(): boolean {
@@ -230,8 +236,9 @@ export class HorizontalStack extends ElementBase implements IStatefulElement {
             if (status === RenderStatus.Complete) done[i] = true;
           } else {
             // An item that cannot split is drawn once, with the first piece.
-            child.render(ctx, childWidths[i]);
-            endY = Math.max(endY, startY + child.measureHeight(childWidths[i]));
+            const childHeight = child.measureHeight(childWidths[i]);
+            drawPossiblyOversized(ctx, child, childHeight, () => child.render(ctx, childWidths[i]));
+            endY = Math.max(endY, startY + childHeight);
             progress = true;
             done[i] = true;
           }

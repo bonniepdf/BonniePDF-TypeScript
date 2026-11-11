@@ -175,6 +175,8 @@ export class RenderContext implements RenderContextContract {
 
   /** The height {@link cellStretchTarget} fills: the row height less the cell's padding. */
   public cellStretchHeight: number = 0;
+  /** @internal Greater than zero while oversized content is drawn inside its clip, so nested content is not reported again. */
+  public oversizedClipDepth: number = 0;
 
   /**
    * The horizontal text alignment a Container establishes for descendant text (TextBlock/Heading/RichText)

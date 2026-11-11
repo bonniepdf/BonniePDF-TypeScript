@@ -14,12 +14,21 @@
 
 /**
  * One command of a glyph outline, in font units with y pointing up - the
- * TrueType convention. Quadratic, because TrueType outlines are.
+ * TrueType convention. Quadratic for TrueType outlines, cubic for CFF ones.
  */
 export type GlyphSegment =
   | { readonly kind: 'move'; readonly x: number; readonly y: number }
   | { readonly kind: 'line'; readonly x: number; readonly y: number }
   | { readonly kind: 'quad'; readonly cx: number; readonly cy: number; readonly x: number; readonly y: number }
+  | {
+      readonly kind: 'cubic';
+      readonly c1x: number;
+      readonly c1y: number;
+      readonly c2x: number;
+      readonly c2y: number;
+      readonly x: number;
+      readonly y: number;
+    }
   | { readonly kind: 'close' };
 
 export interface FontFace {

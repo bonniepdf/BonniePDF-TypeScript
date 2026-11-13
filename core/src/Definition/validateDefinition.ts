@@ -924,9 +924,7 @@ class Validator {
         value.forEach((row, r) => {
           const at = `${path}/${r}`;
           if (Array.isArray(row)) return this.checkCells(row, at, owner, depth);
-          if (this.validateShape(row, D.shapes.TableRow, at, owner, 'unknown-key') && isObject(row)) {
-            if (row.cells !== undefined) this.checkCells(row.cells, `${at}/cells`, owner, depth);
-          }
+          this.validateShape(row, D.shapes.TableRow, at, owner, 'unknown-key', depth);
         });
         return;
       }

@@ -56,6 +56,9 @@ describe('unit-qualified measurements in authoring positions', () => {
   it('produces byte-identical output to the equivalent points', async () => {
     const build = (inches: boolean) => {
       const doc = new Document();
+      const timestamp = new Date('2026-01-01T00:00:00Z');
+      doc.metadata.creationDate = timestamp;
+      doc.metadata.modifiedDate = timestamp;
       doc.settings.pageSize = PdfSize.a4;
       doc.settings.margin = inches ? '0.5in' : 36;
       const stack = new VerticalStack({ spacing: inches ? '0.25in' : 18 });

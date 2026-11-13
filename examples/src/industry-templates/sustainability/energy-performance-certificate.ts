@@ -305,7 +305,7 @@ function drawScale(canvas: ICanvas, size: { width: number; height: number }): vo
     const top = 14 + i * (rowHeight + gap);
     const width = ladder * (0.42 + i * 0.09);
     canvas.fillRect(0, top, width, rowHeight, color);
-    const ink = i >= 1 && i <= 4 ? 'stone-900' : '#ffffff';
+    const ink = i >= 1 && i <= 5 ? 'stone-900' : '#ffffff';
     canvas.drawText(6, top + 9, range, ink, 7.5, StandardFonts.Helvetica, TextAlignment.Left);
     const w = canvas.measureText(band, 14, StandardFonts.HelveticaBold).width;
     canvas.drawText(width - w - 8, top + 6, band, ink, 14, StandardFonts.HelveticaBold, TextAlignment.Left);

@@ -396,7 +396,7 @@ function hazardBanner(): HorizontalStack {
   banner.add(
     new VerticalStack({
       spacing: 2,
-      margin: { left: 6, top: 8 },
+      margin: { top: 8 },
       children: [tb('SIGNAL WORD', 6.5, MUTE, { bold: true }), tb('Danger', 16, 'rose-700', { bold: true })],
     })
   );

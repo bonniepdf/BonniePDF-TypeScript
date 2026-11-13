@@ -4,6 +4,15 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
+## 2026.11.13
+
+Status: Prerelease
+
+### Highlights
+
+- Align the safety data sheet's hazard banner with the .NET example.
+- Improve text contrast on the orange rating band in the energy performance certificate.
+
 ## 2026.11.12
 
 Status: Prerelease

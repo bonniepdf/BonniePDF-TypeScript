@@ -1,6 +1,6 @@
 {
   "name": "@bonniepdf/codegen",
-  "version": "2026.11.12",
+  "version": "2026.11.13",
   "private": true,
   "type": "module",
   "description": "Document authoring metadata and native-code generation tooling for BonniePDF.",

@@ -140,7 +140,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@vitest/coverage-v8": "^5.0.5",
     "pdfjs-dist": "^6.4.299",
     "tsup": "^9.0.0",

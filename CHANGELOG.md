@@ -6,6 +6,16 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## 2026.11.12
 
+Status: Prerelease
+
+### Highlights
+
+- Table rows taller than a page, and rounded containers, now split across pages
+- Carried-forward page subtotals for tables that break across pages
+- Links inside a sentence, and link addresses outside ASCII open correctly
+- Modern chart theme, gradient pie slices and donut totals in the centre
+- Corrupt or oversized images fail with a catchable error before any pixel data is inflated
+
 ### Packaging
 
 - **Types resolve under `moduleResolution: "node16"` and `"nodenext"`:** the published declaration files now import their siblings with explicit `.js` extensions, as the JavaScript already did. Before, TypeScript applications using those settings saw no exports at all (`Module '"@bonniepdf/core"' has no exported member 'Document'`). Bundler resolution and runtime behaviour are unchanged. CI and the release workflow now typecheck a NodeNext consumer of every entry point against the built package.

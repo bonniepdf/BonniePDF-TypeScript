@@ -4,6 +4,10 @@ All notable changes to `@bonniepdf/core` are documented here. Versions use
 CalVer (`yyyy.m.minor`), decided by the versioning tool and released
 by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
+## Unreleased
+
+- Make the length-unit equivalence test independent of the system clock by fixing its PDF metadata timestamps.
+
 ## 2026.11.13
 
 Status: Prerelease

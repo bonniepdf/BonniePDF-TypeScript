@@ -17,6 +17,11 @@ Status: Prerelease
 - Align the safety data sheet's hazard banner with the .NET example.
 - Improve text contrast on the orange rating band in the energy performance certificate.
 
+### Examples
+
+- **Safety data sheet:** the hazard banner now matches the .NET example.
+- **Energy performance certificate:** text on the orange rating band has higher contrast.
+
 ## 2026.11.12
 
 Status: Prerelease

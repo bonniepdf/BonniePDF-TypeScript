@@ -222,9 +222,9 @@ async function main(): Promise<void> {
 
     // The same example as PDF/UA-2 on PDF 2.0. A PDF/A-1, -2 or -3 claim
     // becomes PDF/A-4, the archival level PDF/UA-2 combines with, except in a
-    // document with attachments: PDF/A-4 admits only embedded files that are
-    // themselves PDF/A (PDF/A-4f, which lifts that, is not implemented), so
-    // an e-invoice drops the claim instead.
+    // document with attachments: PDF/A-4 would drop them (it admits only
+    // embedded files that are themselves PDF/A, and PDF/A-4f is not
+    // implemented), so an e-invoice keeps its XML and drops the claim instead.
     const ua2 = def.generate(loadAssets(def));
     ua2.settings.accessibility = AccessibilityMode.PdfUa2;
     ua2.settings.version = PdfVersion.Pdf20;

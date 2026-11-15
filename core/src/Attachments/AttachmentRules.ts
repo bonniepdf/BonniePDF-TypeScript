@@ -14,14 +14,15 @@ import { PdfAConformance } from '../Configuration/PdfAConformance';
  *   byte payload.
  * - PDF/A-3 (3a/3b) - allowed; ISO 19005-3 exists precisely to carry
  *   associated files of any type (the ZUGFeRD / Factur-X basis).
- * - PDF/A-4 - allowed; built on PDF 2.0, which permits associated files.
+ * - PDF/A-4 - forbidden here; ISO 19005-4 6.9 permits embedding only files
+ *   that are themselves PDF/A-1, -2 or -4, which the engine cannot verify.
+ *   PDF/A-4f lifts that restriction and is not implemented.
  */
 export function allowsEmbeddedFiles(conformance: PdfAConformance): boolean {
   switch (conformance) {
     case PdfAConformance.None:
     case PdfAConformance.PdfA3a:
     case PdfAConformance.PdfA3b:
-    case PdfAConformance.PdfA4:
       return true;
     default:
       return false;

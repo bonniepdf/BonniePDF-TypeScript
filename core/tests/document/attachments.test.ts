@@ -4,6 +4,7 @@ import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { AttachmentRelationship } from '../../src/Attachments/AttachmentRelationship';
 import { allowsEmbeddedFiles } from '../../src/Attachments/AttachmentRules';
+import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 import { pdfToText } from '../helpers/test-base';
 
 const xml = () => new TextEncoder().encode('<invoice><total>42.00</total></invoice>');
@@ -90,12 +91,40 @@ describe('File attachments', () => {
     expect(allowsEmbeddedFiles(PdfAConformance.None)).toBe(true);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA3b)).toBe(true);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA3a)).toBe(true);
-    expect(allowsEmbeddedFiles(PdfAConformance.PdfA4)).toBe(true);
+    expect(allowsEmbeddedFiles(PdfAConformance.PdfA4)).toBe(false);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA1b)).toBe(false);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA1a)).toBe(false);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA2b)).toBe(false);
     expect(allowsEmbeddedFiles(PdfAConformance.PdfA2a)).toBe(false);
   });
+
+  // Mirrors the shared fixture honest-claim/attachments (04 §10.2).
+  it.each([
+    [PdfAConformance.None, AccessibilityMode.None, true, null, 0],
+    [PdfAConformance.PdfA1b, AccessibilityMode.None, false, '1', 1],
+    [PdfAConformance.PdfA2b, AccessibilityMode.None, false, '2', 1],
+    [PdfAConformance.PdfA3b, AccessibilityMode.None, true, '3', 0],
+    [PdfAConformance.PdfA4, AccessibilityMode.None, false, '4', 1],
+    [PdfAConformance.PdfA4, AccessibilityMode.PdfUa2, false, '4', 1],
+  ] as const)(
+    'applies the conformance guard for %s (accessibility %s)',
+    (conformance, accessibility, embedded, part, warnings) => {
+      doc = new Document();
+      doc.settings.conformance = conformance;
+      doc.settings.accessibility = accessibility;
+      doc.add(new TextBlock('Attachment guard'));
+      doc.attach('data.xml', new TextEncoder().encode('<a/>'), {
+        relationship: AttachmentRelationship.Data,
+        mediaType: 'text/xml',
+      });
+
+      const out = pdfToText(doc.generateBytes());
+      for (const marker of ['/Type /EmbeddedFile', '/EmbeddedFiles', '/AF '])
+        expect(out.includes(marker)).toBe(embedded);
+      expect(/<pdfaid:part[^>]*>([0-9])<\/pdfaid:part>/.exec(out)?.[1] ?? null).toBe(part);
+      expect(doc.diagnostics.filter(d => d.category === 'attachment')).toHaveLength(warnings);
+    }
+  );
 
   it('ignores empty attachments', () => {
     doc = new Document();

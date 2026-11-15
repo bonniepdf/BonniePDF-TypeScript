@@ -132,6 +132,7 @@ export const toPdfAConformance = resolver<PdfAConformanceToken, PdfAConformance>
   'pdf/a-3b': PdfAConformance.PdfA3b,
   'pdf/a-3a': PdfAConformance.PdfA3a,
   'pdf/a-4': PdfAConformance.PdfA4,
+  'pdf/a-4f': PdfAConformance.PdfA4f,
 });
 
 /** A {@link AccessibilityMode} value or one of its string spellings ({@link AccessibilityModeToken}). */

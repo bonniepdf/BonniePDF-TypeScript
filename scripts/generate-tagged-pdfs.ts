@@ -1,5 +1,5 @@
 // Generates every PDF/UA-1 example, the same examples again as PDF/UA-2, plus the Factur-X invoice and the PDF/A-3a
-// and PDF/A-4 baseline fixtures to generated-pdfs/ for veraPDF validation (and,
+// PDF/A-4, PDF/UA-2 and PDF/A-4f baseline fixtures to generated-pdfs/ for veraPDF validation (and,
 // for the Factur-X file, the Mustang EN 16931 gate).
 // Run with: pnpm generate-tagged  (tsx scripts/generate-tagged-pdfs.ts)
 //
@@ -23,6 +23,7 @@ import {
   Heading,
   OrderedList,
   SectionLink,
+  AttachmentRelationship,
 } from '@bonniepdf/core';
 import { examples } from '../examples/src/index.ts';
 import { configureExampleRuntime, loadAssets } from './example-runtime.ts';
@@ -201,9 +202,56 @@ async function generatePdfUa2Baseline(): Promise<void> {
   }
 }
 
+/**
+ * PDF/A-4f with PDF/UA-2 baseline fixture: pdfaid part=4 with conformance F
+ * selects veraPDF's 4f profile. One attachment states its type and one does
+ * not, so the default media type is checked too. Logically equivalent to the
+ * .NET PdfA4fValidationExample.
+ */
+async function generatePdfA4fBaseline(): Promise<void> {
+  const doc = new Document();
+  try {
+    doc.settings.conformance = PdfAConformance.PdfA4f;
+    doc.settings.accessibility = AccessibilityMode.PdfUa2;
+    doc.settings.language = 'en-GB';
+    doc.metadata.title = 'BonniePDF PDF/A-4f validation sample';
+    doc.metadata.author = 'BonniePDF validation harness';
+    doc.metadata.producer = 'BonniePDF';
+
+    const heading = new Heading('PDF/A-4f validation sample');
+    heading.level = 1;
+    doc.add(heading);
+    const paragraph = new TextBlock(
+      'An archival document that carries its source data: an XML file and a CSV file with no stated type.'
+    );
+    paragraph.fontName = StandardFonts.Helvetica;
+    paragraph.fontSize = 12;
+    doc.add(paragraph);
+
+    const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
+    doc.attach('readings.xml', encode('<readings><reading value="42"/></readings>'), {
+      relationship: AttachmentRelationship.Source,
+      mediaType: 'text/xml',
+    });
+    doc.attach('readings.csv', encode('value\n42\n'), { relationship: AttachmentRelationship.Data });
+
+    const bytes = await doc.generateBytesAsync();
+    const serialized = Buffer.from(bytes).toString('latin1');
+    if (!serialized.includes('<pdfaid:conformance>F</pdfaid:conformance>'))
+      throw new Error('PDF/A-4f fixture lost its conformance F claim');
+    if (!serialized.includes('/Subtype /application#2Foctet-stream'))
+      throw new Error('PDF/A-4f fixture lost the default media type');
+
+    writeFileSync(resolve(outDir, 'pdfa4f_baseline.pdf'), bytes);
+    console.log('  ✓ pdfa4f_baseline.pdf');
+  } finally {
+    doc.dispose();
+  }
+}
+
 async function main(): Promise<void> {
   console.log(
-    `Generating ${taggedExamples.length} PDF/UA-1 examples, each again as PDF/UA-2, plus the Factur-X, PDF/A-1b, 1a, 3a and 4 and PDF/UA-2 fixtures to ${outDir}`
+    `Generating ${taggedExamples.length} PDF/UA-1 examples, each again as PDF/UA-2, plus the Factur-X, PDF/A-1b, 1a, 3a and 4, PDF/UA-2 and PDF/A-4f fixtures to ${outDir}`
   );
   for (const def of taggedExamples) {
     const doc = def.generate(loadAssets(def));
@@ -221,15 +269,13 @@ async function main(): Promise<void> {
     console.log(`  ✓ ${def.filename}`);
 
     // The same example as PDF/UA-2 on PDF 2.0. A PDF/A-1, -2 or -3 claim
-    // becomes PDF/A-4, the archival level PDF/UA-2 combines with, except in a
-    // document with attachments: PDF/A-4 would drop them (it admits only
-    // embedded files that are themselves PDF/A, and PDF/A-4f is not
-    // implemented), so an e-invoice keeps its XML and drops the claim instead.
+    // becomes PDF/A-4, the archival level PDF/UA-2 combines with, or PDF/A-4f
+    // in a document with attachments, which PDF/A-4 would drop.
     const ua2 = def.generate(loadAssets(def));
     ua2.settings.accessibility = AccessibilityMode.PdfUa2;
     ua2.settings.version = PdfVersion.Pdf20;
     if (ua2.settings.conformance !== PdfAConformance.None)
-      ua2.settings.conformance = ua2.attachments.length > 0 ? PdfAConformance.None : PdfAConformance.PdfA4;
+      ua2.settings.conformance = ua2.attachments.length > 0 ? PdfAConformance.PdfA4f : PdfAConformance.PdfA4;
     const ua2Name = def.filename.replace(/\.pdf$/, '.ua2.pdf');
     const ua2Bytes = await ua2.generateBytesAsync();
     if (!Buffer.from(ua2Bytes).toString('latin1').includes('<pdfuaid:part>2</pdfuaid:part>'))
@@ -250,6 +296,7 @@ async function main(): Promise<void> {
   await generatePdfA3aBaseline();
   await generatePdfA4Baseline();
   await generatePdfUa2Baseline();
+  await generatePdfA4fBaseline();
 }
 
 main().catch(err => {

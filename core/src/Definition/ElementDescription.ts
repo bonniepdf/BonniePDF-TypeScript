@@ -148,7 +148,8 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "pdf/a-2a",
         "pdf/a-3b",
         "pdf/a-3a",
-        "pdf/a-4"
+        "pdf/a-4",
+        "pdf/a-4f"
       ],
       "via": "options"
     },
@@ -2504,14 +2505,15 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           {
             "key": "conformance",
             "in": [
-              "pdf/a-4"
+              "pdf/a-4",
+              "pdf/a-4f"
             ]
           }
         ],
         "set": {
           "pdfVersion": "pdf-2.0"
         },
-        "text": "PDF/A-4 is built on PDF 2.0, so the PDF version is raised to `pdf-2.0`."
+        "text": "PDF/A-4 and PDF/A-4f are built on PDF 2.0, so the PDF version is raised to `pdf-2.0`."
       },
       {
         "id": "pdfa-sets-pdf17",
@@ -2550,11 +2552,12 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
             "key": "conformance",
             "in": [
               "none",
-              "pdf/a-4"
+              "pdf/a-4",
+              "pdf/a-4f"
             ]
           }
         ],
-        "text": "PDF/UA-2 is built on PDF 2.0, and PDF/A-1, -2 and -3 are PDF 1.7 formats, so `pdf/ua-2` cannot be combined with them. Use `pdf/a-4` with `pdf/ua-2`, or `pdf/ua-1` with PDF/A-1, -2 or -3."
+        "text": "PDF/UA-2 is built on PDF 2.0, and PDF/A-1, -2 and -3 are PDF 1.7 formats, so `pdf/ua-2` cannot be combined with them. Use `pdf/a-4` or `pdf/a-4f` with `pdf/ua-2`, or `pdf/ua-1` with PDF/A-1, -2 or -3."
       },
       {
         "id": "pdfa-a-levels-need-tagging",
@@ -2659,7 +2662,8 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
             "key": "conformance",
             "in": [
               "none",
-              "pdf/a-4"
+              "pdf/a-4",
+              "pdf/a-4f"
             ]
           }
         ],

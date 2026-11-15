@@ -170,7 +170,11 @@ public final class Validate {
                 }
                 return part + conformance.toLowerCase();
             case "4":
-                return "4";
+                // PDF/A-4 has no conformance letter; PDF/A-4f and -4e carry F or E.
+                if (conformance == null || conformance.isEmpty()) {
+                    return "4";
+                }
+                return "4" + conformance.toLowerCase();
             default:
                 return null;
         }

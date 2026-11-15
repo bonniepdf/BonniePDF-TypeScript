@@ -63,10 +63,10 @@ These are not TS quirks; they are correctness requirements of the format and the
 
 ### PDF/A + PDF/UA compliance (the most accident-prone area)
 
-- **`settings.conformance` is the source of truth.** `PdfAConformance`: `None`, `PdfA1b`, `PdfA1a`, `PdfA2b`, `PdfA2a`, `PdfA3b`, `PdfA3a`, `PdfA4`. All XMP/OutputIntent emission reads `conformance`.
+- **`settings.conformance` is the source of truth.** `PdfAConformance`: `None`, `PdfA1b`, `PdfA1a`, `PdfA2b`, `PdfA2a`, `PdfA3b`, `PdfA3a`, `PdfA4`, `PdfA4f`. All XMP/OutputIntent emission reads `conformance`. `PdfA4` drops attachments; `PdfA4f` (XMP `pdfaid:conformance F`) is the level that writes them, and throws without one. `isPdfA4Level` (`Configuration/PdfALevels.ts`) is the check for either.
 - **"a" levels require tagged output.** `PdfA1a`/`PdfA2a`/`PdfA3a` need `settings.accessibility = AccessibilityMode.PdfUa1`. The serializer enforces this.
-- **PDF/UA-1 is PDF 1.7, PDF/UA-2 is PDF 2.0.** `AccessibilityMode` is `None`, `PdfUa1` or `PdfUa2`. Each raises the default version to its own; requesting `PdfUa1` on `Pdf20`, or `PdfUa2` on `Pdf17` or with PDF/A-1, -2 or -3, **throws** rather than silently dropping tagging or a claim. PDF/UA-2 combines with `PdfA4`. Its additions (PDF 2.0 structure namespace, `ListNumbering`, TOC entries with `/Ref`, structure destinations for links, bookmarks and the opening view) are written only under `PdfUa2`, so PDF/UA-1 output is unchanged; `TaggingContext.pdf20` gates them. `isTagged` (`Configuration/AccessibilityLevels.ts`) is the check for "either level"; don't compare against `PdfUa1` where both levels are meant.
-- **Version auto-upgrade.** PDF/A-1/2/3 → `Pdf17`; PDF/A-4 → `Pdf20`.
+- **PDF/UA-1 is PDF 1.7, PDF/UA-2 is PDF 2.0.** `AccessibilityMode` is `None`, `PdfUa1` or `PdfUa2`. Each raises the default version to its own; requesting `PdfUa1` on `Pdf20`, or `PdfUa2` on `Pdf17` or with PDF/A-1, -2 or -3, **throws** rather than silently dropping tagging or a claim. PDF/UA-2 combines with `PdfA4` and `PdfA4f`. Its additions (PDF 2.0 structure namespace, `ListNumbering`, TOC entries with `/Ref`, structure destinations for links, bookmarks and the opening view) are written only under `PdfUa2`, so PDF/UA-1 output is unchanged; `TaggingContext.pdf20` gates them. `isTagged` (`Configuration/AccessibilityLevels.ts`) is the check for "either level"; don't compare against `PdfUa1` where both levels are meant.
+- **Version auto-upgrade.** PDF/A-1/2/3 → `Pdf17`; PDF/A-4 and PDF/A-4f → `Pdf20`.
 - **Standard-14 embedding is forced under PDF/A _and_ under PDF/UA** (veraPDF 7.21.4.1), independently of any PDF/A claim. The embedding gate is `shouldEmbedStandardFonts` (PDF/A conformance **or** `embedStandardFonts`); the serializer sets `resources.embedStandardFonts` from `isTagged(accessibility)`. Don't narrow it back to a PDF/A-only check.
 - **`FontManager` keys are `family:weight` lowercase.** Casing mismatch → lookup miss → standard-14 fallback → compliance failure.
 - **Honest-claim guard.** When standard-14 fonts slip through unembedded, the serializer emits XMP/OutputIntent from a `settings` clone with `conformance` reset to `None`, suppressing a claim it can't honour. Don't remove it.
@@ -93,7 +93,7 @@ These are not TS quirks; they are correctness requirements of the format and the
 
 ## Implementation status
 
-Encryption (RC4 40/128, AES-256 V5/R6) and PDF/A XMP are implemented and serialized, verified by `core/tests/encryption.test.ts` and the conformance suite. Verify against the tests, not against assumptions. PDF/UA-1 and PDF/UA-2 are implemented; PDF/A-4e/4f are not implemented in either language.
+Encryption (RC4 40/128, AES-256 V5/R6) and PDF/A XMP are implemented and serialized, verified by `core/tests/encryption.test.ts` and the conformance suite. Verify against the tests, not against assumptions. PDF/UA-1, PDF/UA-2 and PDF/A-4f are implemented; PDF/A-4e is not implemented in either language.
 
 ## Commands
 

@@ -14,6 +14,7 @@ import { CatalogOptions } from './Writers/CatalogOptions';
 import { AttachmentWriter } from './Writers/AttachmentWriter';
 import { FileAttachment } from '../Attachments/FileAttachment';
 import { allowsEmbeddedFiles } from '../Attachments/AttachmentRules';
+import { defaultAttachmentMediaType } from '../Attachments/AttachmentMediaType';
 import { IPdfWriter } from './Writers/IPdfWriter';
 import { IAsyncPdfWriter } from './Writers/IAsyncPdfWriter';
 import { StructureTreeWriter } from './Writers/StructureTreeWriter';
@@ -24,6 +25,7 @@ import { openActionView, goToAction } from './Writers/PdfWriter';
 import type { RegisteredLink } from './RegisteredLink';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
+import { isPdfA4Level } from '../Configuration/PdfALevels';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
 import { isTagged, pdfUaClaimToken } from '../Configuration/AccessibilityLevels';
 import { PdfEncryptor } from '../Security/Encryption/PdfEncryptor';
@@ -305,7 +307,7 @@ export class PdfDocumentSerializer {
     // prohibit the legacy dictionary (except for a narrow PieceInfo/ModDate
     // case), so PDF/A-4 metadata is carried exclusively by XMP.
     const metadataWriter = new MetadataWriter(writer);
-    const documentInfoId = conformancePlan.effectivePdfA === PdfAConformance.PdfA4 ? 0 : infoId;
+    const documentInfoId = isPdfA4Level(conformancePlan.effectivePdfA) ? 0 : infoId;
     if (documentInfoId > 0) metadataWriter.writeDocumentInfo(documentInfoId, this.document.metadata);
 
     const catalogOptions = new CatalogOptions();
@@ -428,7 +430,10 @@ export class PdfDocumentSerializer {
     // conformance guard. Populates /Names /EmbeddedFiles and /AF.
     const attachmentsToWrite = this.resolveAttachments();
     if (attachmentsToWrite) {
-      const attachmentWriter = new AttachmentWriter(writer);
+      const attachmentWriter = new AttachmentWriter(writer, {
+        mediaType: defaultAttachmentMediaType(this.document.settings.conformance),
+        describeByFileName: this.document.settings.accessibility === AccessibilityMode.PdfUa2,
+      });
       const result = attachmentWriter.writeAttachments(attachmentsToWrite);
       catalogOptions.namesEmbeddedFilesId = result.namesEmbeddedFilesId;
       catalogOptions.associatedFileIds = result.associatedFileIds;

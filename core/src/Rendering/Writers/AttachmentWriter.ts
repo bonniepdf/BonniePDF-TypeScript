@@ -29,7 +29,17 @@ export interface AttachmentWriteResult {
  * inner writer).
  */
 export class AttachmentWriter {
-  constructor(private writer: IPdfWriter) {}
+  /**
+   * @param defaults what to write for an attachment that leaves a value out
+   *   (spec 04 §10.1). `mediaType`: set under PDF/A, which requires every
+   *   embedded file to state one; undefined leaves `/Subtype` out.
+   *   `describeByFileName`: set under PDF/UA-2, which requires a `/Desc` on
+   *   every embedded file (ISO 14289-2 8.14.1); the file name stands in.
+   */
+  constructor(
+    private writer: IPdfWriter,
+    private readonly defaults: { readonly mediaType?: string; readonly describeByFileName?: boolean } = {}
+  ) {}
 
   public writeAttachments(attachments: readonly FileAttachment[]): AttachmentWriteResult {
     const ordered = AttachmentWriter.orderAndValidate(attachments);
@@ -42,10 +52,17 @@ export class AttachmentWriter {
 
     for (const a of ordered) {
       const streamId = this.writer.getNewId();
-      this.writer.writeBinaryObject(streamId, AttachmentWriter.buildEmbeddedFileDict(a), a.content);
+      this.writer.writeBinaryObject(
+        streamId,
+        AttachmentWriter.buildEmbeddedFileDict(a, this.defaults.mediaType),
+        a.content
+      );
 
       const filespecId = this.writer.getNewId();
-      this.writer.writeObject(filespecId, AttachmentWriter.buildFilespecDict(a, streamId));
+      this.writer.writeObject(
+        filespecId,
+        AttachmentWriter.buildFilespecDict(a, streamId, this.defaults.describeByFileName === true)
+      );
 
       associatedFileIds.push(filespecId);
       nameEntries.push({ name: a.fileName, filespecId });
@@ -71,7 +88,7 @@ export class AttachmentWriter {
       .sort((x, y) => (x.fileName < y.fileName ? -1 : x.fileName > y.fileName ? 1 : 0));
   }
 
-  private static buildEmbeddedFileDict(a: FileAttachment): Map<string, string> {
+  private static buildEmbeddedFileDict(a: FileAttachment, defaultMediaType: string | undefined): Map<string, string> {
     let params = `<< /Size ${a.content.length}`;
     if (a.modificationDate) params += ` /ModDate (${PdfSyntax.formatDate(a.modificationDate)})`;
     if (a.creationDate) params += ` /CreationDate (${PdfSyntax.formatDate(a.creationDate)})`;
@@ -81,11 +98,16 @@ export class AttachmentWriter {
       [PdfKeys.Common.Type, '/EmbeddedFile'],
       [PdfKeys.EmbeddedFile.Parameters, params],
     ]);
-    if (a.mediaType) dict.set(PdfKeys.Common.Subtype, '/' + AttachmentWriter.encodeName(a.mediaType));
+    const mediaType = a.mediaType || defaultMediaType;
+    if (mediaType) dict.set(PdfKeys.Common.Subtype, '/' + AttachmentWriter.encodeName(mediaType));
     return dict;
   }
 
-  private static buildFilespecDict(a: FileAttachment, streamId: number): Map<string, string> {
+  private static buildFilespecDict(
+    a: FileAttachment,
+    streamId: number,
+    describeByFileName: boolean
+  ): Map<string, string> {
     const relationship = a.relationship ?? AttachmentRelationship.Unspecified;
     const dict = new Map<string, string>([
       [PdfKeys.Common.Type, '/Filespec'],
@@ -94,7 +116,8 @@ export class AttachmentWriter {
       [PdfKeys.FileSpecification.EmbeddedFiles, `<< /F ${streamId} 0 R /UF ${streamId} 0 R >>`],
       [PdfKeys.FileSpecification.AssociatedFileRelationship, '/' + relationship],
     ]);
-    if (a.description) dict.set(PdfKeys.FileSpecification.Description, PdfSyntax.encodeMetadataString(a.description));
+    const description = a.description || (describeByFileName ? a.fileName : undefined);
+    if (description) dict.set(PdfKeys.FileSpecification.Description, PdfSyntax.encodeMetadataString(description));
     return dict;
   }
 

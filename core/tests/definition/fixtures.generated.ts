@@ -3834,6 +3834,87 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "pdfa4f-raises-version": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa4f-raises-version",
+        "description": "PDF/A-4f is built on PDF 2.0, so the default version is raised to pdf-2.0. A PDF/A-4f document needs an attachment, so it carries one."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-4f"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ],
+      "resources": {
+        "data-xml": {
+          "kind": "attachment",
+          "mediaType": "text/xml",
+          "data": "PGEvPg=="
+        }
+      },
+      "attachments": [
+        {
+          "resource": "data-xml",
+          "fileName": "data.xml",
+          "relationship": "data",
+          "mediaType": "text/xml"
+        }
+      ]
+    },
+    "pdfa4f-with-ua2": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa4f-with-ua2",
+        "description": "PDF/A-4f and PDF/UA-2 are both PDF 2.0 and combine. A PDF/A-4f document needs an attachment, so it carries one."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-4f",
+        "accessibility": "pdf/ua-2"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ],
+      "resources": {
+        "data-xml": {
+          "kind": "attachment",
+          "mediaType": "text/xml",
+          "data": "PGEvPg=="
+        }
+      },
+      "attachments": [
+        {
+          "resource": "data-xml",
+          "fileName": "data.xml",
+          "relationship": "data",
+          "mediaType": "text/xml"
+        }
+      ]
+    },
     "ua1-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/ua1-on-pdf20",

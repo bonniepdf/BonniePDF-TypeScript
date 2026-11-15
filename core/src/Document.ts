@@ -10,6 +10,7 @@ import { PdfSize } from './Configuration/PdfSize';
 import { PageOrientation } from './Core/PageOrientation';
 import { PdfVersion } from './Configuration/PdfVersion';
 import { PdfAConformance } from './Configuration/PdfAConformance';
+import { isPdfA4Level } from './Configuration/PdfALevels';
 import { AccessibilityMode } from './Configuration/AccessibilityMode';
 import { EncryptionAlgorithm } from './Security/Models/EncryptionAlgorithm';
 import { PdfWriter } from './Rendering/Writers/PdfWriter';
@@ -581,11 +582,11 @@ export class Document {
     }
 
     // PDF/UA-2 is PDF 2.0 output; PDF/A-1, -2 and -3 are PDF 1.7 formats, so
-    // no file can claim both. PDF/A-4 is the PDF 2.0 archival level.
+    // no file can claim both. PDF/A-4 and -4f are the PDF 2.0 archival levels.
     if (
       s.accessibility === AccessibilityMode.PdfUa2 &&
       s.conformance !== PdfAConformance.None &&
-      s.conformance !== PdfAConformance.PdfA4
+      !isPdfA4Level(s.conformance)
     ) {
       throw new Error(
         `PDF/UA-2 requires PDF 2.0, which ${s.conformance} cannot use. ` +
@@ -595,11 +596,11 @@ export class Document {
 
     // PDF/A requires a matching PDF base version. Silently upgrade rather
     // than throw - the caller asked for archival output, so honour that intent.
-    if (s.conformance === PdfAConformance.PdfA4 && s.version !== PdfVersion.Pdf20) {
+    if (isPdfA4Level(s.conformance) && s.version !== PdfVersion.Pdf20) {
       s.version = PdfVersion.Pdf20;
     } else if (
       s.conformance !== PdfAConformance.None &&
-      s.conformance !== PdfAConformance.PdfA4 &&
+      !isPdfA4Level(s.conformance) &&
       s.version !== PdfVersion.Pdf17
     ) {
       s.version = PdfVersion.Pdf17;
@@ -651,6 +652,15 @@ export class Document {
     if (s.hasBookmarks && s.version !== PdfVersion.Pdf17 && s.version !== PdfVersion.Pdf20) {
       throw new Error('Bookmarks require PdfVersion.Pdf17 or PdfVersion.Pdf20.');
     }
+
+    // PDF/A-4f is the PDF/A-4 level that carries files, and must carry at
+    // least one (ISO 19005-4 6.9). An attachment with no name or no content
+    // is dropped before writing, so it does not count.
+    if (s.conformance === PdfAConformance.PdfA4f && !this.attachments.some(isWritableAttachment)) {
+      throw new Error(
+        'PdfA4f requires at least one attachment. Attach a file with doc.attach(...), or use PdfAConformance.PdfA4.'
+      );
+    }
   }
 
   // ─── Disposal ────────────────────────────────────────────────────────────────
@@ -661,6 +671,11 @@ export class Document {
     this._pages.length = 0;
     this._disposed = true;
   }
+}
+
+/** True for an attachment that is written: one with a name and some content. */
+function isWritableAttachment(a: FileAttachment): boolean {
+  return !!a.fileName && a.content.length > 0;
 }
 
 /**

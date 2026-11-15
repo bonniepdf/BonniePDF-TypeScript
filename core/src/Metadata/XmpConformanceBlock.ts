@@ -82,6 +82,11 @@ export class XmpConformanceBlock {
     return XmpConformanceBlock.pdfAid('4', undefined, '2020');
   }
 
+  /** PDF/A-4f: ISO 19005-4:2020, part 4, conformance F (embedded files of any type). */
+  static pdfA4F(): XmpConformanceBlock {
+    return XmpConformanceBlock.pdfAid('4', 'F', '2020');
+  }
+
   /**
    * Returns the conformance block matching `conformance`, or
    * `undefined` if no PDF/A claim should be emitted.
@@ -102,6 +107,8 @@ export class XmpConformanceBlock {
         return XmpConformanceBlock.pdfA3A();
       case PdfAConformance.PdfA4:
         return XmpConformanceBlock.pdfA4();
+      case PdfAConformance.PdfA4f:
+        return XmpConformanceBlock.pdfA4F();
       default:
         return undefined;
     }

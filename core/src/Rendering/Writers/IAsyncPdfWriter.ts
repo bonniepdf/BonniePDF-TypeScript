@@ -32,7 +32,8 @@ export interface IAsyncPdfWriter {
     id: number,
     link: RegisteredLink,
     pageIds: number[],
-    structParentKey?: number
+    structParentKey?: number,
+    goToActionId?: number
   ): Promise<void>;
   writeViewerPreferencesAsync(id: number, settings: ViewerPreferencesSettings): Promise<number>;
   writeCatalogAsync(

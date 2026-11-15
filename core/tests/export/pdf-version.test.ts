@@ -86,7 +86,7 @@ describe('PdfVersion', () => {
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
 
     expect(() => doc.generateBytes()).toThrow(
-      'PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.'
+      'PDF/UA-1 output is only supported with PdfVersion.Pdf17. Use AccessibilityMode.PdfUa2 for PdfVersion.Pdf20.'
     );
   });
 

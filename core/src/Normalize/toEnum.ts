@@ -142,6 +142,7 @@ export type AccessibilityModeInput = AccessibilityMode | AccessibilityModeToken;
 export const toAccessibilityMode = resolver<AccessibilityModeToken, AccessibilityMode>({
   none: AccessibilityMode.None,
   'pdf/ua-1': AccessibilityMode.PdfUa1,
+  'pdf/ua-2': AccessibilityMode.PdfUa2,
 });
 
 /** A {@link ZoomLevel} value or one of its string spellings ({@link ZoomLevelToken}). */

@@ -276,7 +276,7 @@ export interface LayoutNode {
  * missing title, untagged document) without a second source of truth.
  */
 export interface SnapshotMeta {
-  /** The document's declared {@link AccessibilityMode} as a number (0 = None, 1 = PdfUa1). */
+  /** The document's declared {@link AccessibilityMode} as a number (0 = None, 1 = PdfUa1, 2 = PdfUa2). */
   accessibilityMode: number;
   /** The document's declared PDF/A conformance string (e.g. `"None"`, `"PdfA2b"`). */
   conformance: string;

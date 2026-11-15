@@ -176,7 +176,8 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
     "AccessibilityMode": {
       "tokens": [
         "none",
-        "pdf/ua-1"
+        "pdf/ua-1",
+        "pdf/ua-2"
       ],
       "via": "options"
     },
@@ -2534,6 +2535,28 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "text": "PDF/A-1, -2 and -3 are built on PDF 1.7, so the PDF version is set to `pdf-1.7`."
       },
       {
+        "id": "ua2-excludes-pdfa1-3",
+        "outcome": "error",
+        "when": [
+          {
+            "key": "accessibility",
+            "in": [
+              "pdf/ua-2"
+            ]
+          }
+        ],
+        "require": [
+          {
+            "key": "conformance",
+            "in": [
+              "none",
+              "pdf/a-4"
+            ]
+          }
+        ],
+        "text": "PDF/UA-2 is built on PDF 2.0, and PDF/A-1, -2 and -3 are PDF 1.7 formats, so `pdf/ua-2` cannot be combined with them. Use `pdf/a-4` with `pdf/ua-2`, or `pdf/ua-1` with PDF/A-1, -2 or -3."
+      },
+      {
         "id": "pdfa-a-levels-need-tagging",
         "outcome": "error",
         "when": [
@@ -2550,7 +2573,8 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           {
             "key": "accessibility",
             "in": [
-              "pdf/ua-1"
+              "pdf/ua-1",
+              "pdf/ua-2"
             ]
           }
         ],
@@ -2597,7 +2621,57 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
             ]
           }
         ],
-        "text": "PDF/UA-1 is bound to PDF 1.7. PDF/UA-2, for PDF 2.0, is not implemented, so `pdf/ua-1` cannot be combined with `pdf-2.0`. This includes PDF/A-4, which is PDF 2.0."
+        "text": "PDF/UA-1 is bound to PDF 1.7, so `pdf/ua-1` cannot be combined with `pdf-2.0`. Use `pdf/ua-2` for PDF 2.0, including with PDF/A-4."
+      },
+      {
+        "id": "ua2-sets-pdf20",
+        "outcome": "sets",
+        "when": [
+          {
+            "key": "accessibility",
+            "in": [
+              "pdf/ua-2"
+            ]
+          },
+          {
+            "key": "pdfVersion",
+            "in": [
+              "pdf-1.4"
+            ]
+          }
+        ],
+        "set": {
+          "pdfVersion": "pdf-2.0"
+        },
+        "text": "PDF/UA-2 is built on PDF 2.0, so a default PDF version is raised to `pdf-2.0`."
+      },
+      {
+        "id": "ua2-needs-pdf20",
+        "outcome": "error",
+        "when": [
+          {
+            "key": "accessibility",
+            "in": [
+              "pdf/ua-2"
+            ]
+          },
+          {
+            "key": "conformance",
+            "in": [
+              "none",
+              "pdf/a-4"
+            ]
+          }
+        ],
+        "require": [
+          {
+            "key": "pdfVersion",
+            "in": [
+              "pdf-2.0"
+            ]
+          }
+        ],
+        "text": "PDF/UA-2 is bound to PDF 2.0, so `pdf/ua-2` cannot be combined with `pdf-1.7`. Use `pdf/ua-1` for PDF 1.7."
       },
       {
         "id": "bookmarks-need-pdf17",

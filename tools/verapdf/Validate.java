@@ -153,6 +153,8 @@ public final class Validate {
         String pdfUaPart = firstXmlElementValue(text, "pdfuaid", "part");
         if ("1".equals(pdfUaPart)) {
             flavours.add(PDFAFlavour.fromString("ua1"));
+        } else if ("2".equals(pdfUaPart)) {
+            flavours.add(PDFAFlavour.fromString("ua2"));
         }
 
         return flavours;

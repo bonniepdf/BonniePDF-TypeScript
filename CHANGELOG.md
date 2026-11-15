@@ -6,6 +6,12 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+### Document Engine & API
+
+- **PDF/UA-2:** `AccessibilityMode.PdfUa2` (`'pdf/ua-2'`) writes PDF/UA-2 (ISO 14289-2:2024) on PDF 2.0, alone or with `PdfAConformance.PdfA4`, and passes veraPDF's PDF/UA-2 profile. On top of PDF/UA-1's tagging it writes the structure tree in the PDF 2.0 namespace, gives every list its numbering style, links each table-of-contents entry to its heading, and makes in-document links, bookmarks and the opening view go to structure elements as well as pages, so assistive technology lands on the right heading. It raises the default PDF version to 2.0; an explicit PDF 1.7, or PDF/A-1, -2 or -3, throws. PDF/UA-1 output is unchanged.
+
+### Tests
+
 - Make the length-unit equivalence test independent of the system clock by fixing its PDF metadata timestamps.
 
 ## 2026.11.13

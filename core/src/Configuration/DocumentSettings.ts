@@ -130,7 +130,7 @@ export type DocumentSettingsOptions = Partial<
   pageMode?: PageModeInput;
   /** PDF/A claim. Accepts `'none'`, `'pdf/a-2b'`, `'pdf/a-2a'`, `'pdf/a-4'`, … */
   conformance?: PdfAConformanceInput;
-  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1' | 'pdf/ua-2'`. */
   accessibility?: AccessibilityModeInput;
   /** Watermark. Accepts an instance or an options literal. */
   watermark?: Watermark | WatermarkOptions;
@@ -432,7 +432,7 @@ export class DocumentSettings {
    */
   private _accessibility!: AccessibilityMode;
 
-  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1' | 'pdf/ua-2'`. */
   public get accessibility(): AccessibilityMode {
     return this._accessibility;
   }

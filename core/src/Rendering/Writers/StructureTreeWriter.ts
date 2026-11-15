@@ -8,6 +8,9 @@ import type { IAsyncPdfWriter } from './IAsyncPdfWriter';
 import { StructureElement } from '../Tagging/StructureElement';
 import { StructureTreeBuilder } from '../Tagging/StructureTreeBuilder';
 import { toPdfTag } from '../Tagging/SemanticRole';
+import { inPdf20Namespace } from '../Tagging/StructureNamespace';
+import type { TaggingContext } from '../Tagging/TaggingContext';
+import { resolveStructureTarget } from '../Tagging/StructureTargets';
 import { PdfSyntax } from '../Pdf/PdfSyntax';
 
 /**
@@ -50,7 +53,12 @@ export class StructureTreeWriter {
    * @param pageIds Page object IDs in document order. Empty/undefined
    *   when no page-aware output is needed (test fixtures).
    */
-  write(builder: StructureTreeBuilder, pageIds?: number[], annotBindings?: AnnotBinding[]): number {
+  write(
+    builder: StructureTreeBuilder,
+    pageIds?: number[],
+    annotBindings?: AnnotBinding[],
+    pdf20?: TaggingContext
+  ): number {
     if (!this._writer) {
       throw new Error('StructureTreeWriter.write: writer is async; call writeAsync().');
     }
@@ -58,11 +66,14 @@ export class StructureTreeWriter {
     const havePages = pageIds != null && pageIds.length > 0;
     const structTreeRootId = writer.getNewId();
     const parentTreeId = havePages ? writer.getNewId() : 0;
+    const namespaceId = pdf20 ? writer.getNewId() : 0;
 
     const elementIds = new Map<StructureElement, number>();
     const parentTreeNums = havePages ? buildEmptyParentTreeNums(pageIds!.length) : undefined;
 
-    this.writeSubtree(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
+    allocateIds(builder.root, elementIds, () => writer.getNewId());
+    const shape: TreeShape = { elementIds, pageIds, namespaceId, pdf20 };
+    this.writeSubtree(builder.root, structTreeRootId, shape, parentTreeNums);
 
     if (parentTreeId > 0 && parentTreeNums) {
       writer.writeObject(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds, annotBindings));
@@ -70,28 +81,35 @@ export class StructureTreeWriter {
 
     writer.writeObject(
       structTreeRootId,
-      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings)
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings, namespaceId)
     );
+    if (namespaceId > 0) writer.writeObject(namespaceId, buildNamespaceDict());
 
+    this._elementIds = elementIds;
     return structTreeRootId;
+  }
+
+  private _elementIds: ReadonlyMap<StructureElement, number> = new Map();
+
+  /** The object number of each structure element, after {@link write} or {@link writeAsync}. */
+  get elementIds(): ReadonlyMap<StructureElement, number> {
+    return this._elementIds;
   }
 
   private writeSubtree(
     element: StructureElement,
     parentId: number,
-    elementIds: Map<StructureElement, number>,
-    pageIds: number[] | undefined,
+    shape: TreeShape,
     parentTreeNums: ParentTreeEntry[][] | undefined
   ): void {
     const writer = this._writer!;
-    const id = writer.getNewId();
-    elementIds.set(element, id);
+    const id = shape.elementIds.get(element)!;
 
-    for (const child of element.children) this.writeSubtree(child, id, elementIds, pageIds, parentTreeNums);
+    for (const child of element.children) this.writeSubtree(child, id, shape, parentTreeNums);
 
     if (parentTreeNums) recordParentTreeContributions(element, parentTreeNums);
 
-    writer.writeObject(id, buildStructElemDict(element, parentId, elementIds, pageIds));
+    writer.writeObject(id, buildStructElemDict(element, parentId, shape));
   }
 
   // ── Async ───────────────────────────────────────────────────────
@@ -101,6 +119,7 @@ export class StructureTreeWriter {
     builder: StructureTreeBuilder,
     pageIds?: number[],
     annotBindings?: AnnotBinding[],
+    pdf20?: TaggingContext,
     _cancellationToken?: AbortSignal
   ): Promise<number> {
     if (!this._asyncWriter) {
@@ -110,11 +129,14 @@ export class StructureTreeWriter {
     const havePages = pageIds != null && pageIds.length > 0;
     const structTreeRootId = writer.getNewId();
     const parentTreeId = havePages ? writer.getNewId() : 0;
+    const namespaceId = pdf20 ? writer.getNewId() : 0;
 
     const elementIds = new Map<StructureElement, number>();
     const parentTreeNums = havePages ? buildEmptyParentTreeNums(pageIds!.length) : undefined;
 
-    await this.writeSubtreeAsync(builder.root, structTreeRootId, elementIds, pageIds, parentTreeNums);
+    allocateIds(builder.root, elementIds, () => writer.getNewId());
+    const shape: TreeShape = { elementIds, pageIds, namespaceId, pdf20 };
+    await this.writeSubtreeAsync(builder.root, structTreeRootId, shape, parentTreeNums);
 
     if (parentTreeId > 0 && parentTreeNums) {
       await writer.writeObjectAsync(parentTreeId, buildParentTreeDict(parentTreeNums, elementIds, annotBindings));
@@ -122,31 +144,57 @@ export class StructureTreeWriter {
 
     await writer.writeObjectAsync(
       structTreeRootId,
-      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings)
+      buildStructTreeRootDict(builder.root, elementIds, parentTreeId, parentTreeNums, annotBindings, namespaceId)
     );
+    if (namespaceId > 0) await writer.writeObjectAsync(namespaceId, buildNamespaceDict());
 
+    this._elementIds = elementIds;
     return structTreeRootId;
   }
 
   private async writeSubtreeAsync(
     element: StructureElement,
     parentId: number,
-    elementIds: Map<StructureElement, number>,
-    pageIds: number[] | undefined,
+    shape: TreeShape,
     parentTreeNums: ParentTreeEntry[][] | undefined
   ): Promise<void> {
     const writer = this._asyncWriter!;
-    const id = writer.getNewId();
-    elementIds.set(element, id);
+    const id = shape.elementIds.get(element)!;
 
     for (const child of element.children) {
-      await this.writeSubtreeAsync(child, id, elementIds, pageIds, parentTreeNums);
+      await this.writeSubtreeAsync(child, id, shape, parentTreeNums);
     }
 
     if (parentTreeNums) recordParentTreeContributions(element, parentTreeNums);
 
-    await writer.writeObjectAsync(id, buildStructElemDict(element, parentId, elementIds, pageIds));
+    await writer.writeObjectAsync(id, buildStructElemDict(element, parentId, shape));
   }
+}
+
+/**
+ * Numbers every element in pre-order before any is written, so an element can
+ * refer to one later in the tree (/Ref). Pre-order is the order the numbers
+ * were always given in, so the output is unchanged.
+ */
+function allocateIds(element: StructureElement, elementIds: Map<StructureElement, number>, newId: () => number): void {
+  elementIds.set(element, newId());
+  for (const child of element.children) allocateIds(child, elementIds, newId);
+}
+
+/** What every element's dictionary is built from. */
+interface TreeShape {
+  readonly elementIds: Map<StructureElement, number>;
+  readonly pageIds: number[] | undefined;
+  readonly namespaceId: number;
+  readonly pdf20: TaggingContext | undefined;
+}
+
+/** The PDF 2.0 standard structure namespace (ISO 32000-2 §14.7.4.2). */
+function buildNamespaceDict(): Map<string, string> {
+  return new Map<string, string>([
+    [PdfKeys.Common.Type, '/Namespace'],
+    ['/NS', '(http://iso.org/pdf2/ssn)'],
+  ]);
 }
 
 // ── Shared dict construction ──────────────────────────────────────
@@ -164,16 +212,16 @@ interface AnnotBinding {
   structParentKey: number;
 }
 
-function buildStructElemDict(
-  element: StructureElement,
-  parentObjectId: number,
-  elementIds: Map<StructureElement, number>,
-  pageIds: number[] | undefined
-): Map<string, string> {
+function buildStructElemDict(element: StructureElement, parentObjectId: number, shape: TreeShape): Map<string, string> {
+  const { elementIds, pageIds } = shape;
   const dict = new Map<string, string>();
   dict.set(PdfKeys.Common.Type, '/StructElem');
   dict.set(PdfKeys.Structure.Role, '/' + toPdfTag(element.role));
   dict.set(PdfKeys.Structure.Parent, `${parentObjectId} 0 R`);
+
+  // PDF/UA-2: a type the PDF 2.0 namespace defines is written in it; the
+  // types it dropped stay in the default PDF 1.7 namespace (spec 04 §3.4).
+  if (shape.namespaceId > 0 && inPdf20Namespace(element.role)) dict.set('/NS', `${shape.namespaceId} 0 R`);
 
   const built = buildKidsAndPg(element, elementIds, pageIds);
   if (built.kids !== null) dict.set(PdfKeys.Structure.Kids, built.kids);
@@ -192,6 +240,12 @@ function buildStructElemDict(
   // /RowSpan and list characteristics.
   if (element.attributes) dict.set(PdfKeys.Structure.Attributes, element.attributes);
 
+  if (shape.pdf20 && element.refTarget) {
+    const referenced = resolveStructureTarget(shape.pdf20, element.refTarget.anchor, element.refTarget.pageIndex);
+    const referencedId = elementIds.get(referenced);
+    if (referencedId !== undefined) dict.set('/Ref', `[ ${referencedId} 0 R ]`);
+  }
+
   return dict;
 }
 
@@ -200,7 +254,8 @@ function buildStructTreeRootDict(
   elementIds: Map<StructureElement, number>,
   parentTreeId: number,
   parentTreeNums: ParentTreeEntry[][] | undefined,
-  annotBindings?: AnnotBinding[]
+  annotBindings?: AnnotBinding[],
+  namespaceId = 0
 ): Map<string, string> {
   const dict = new Map<string, string>();
   dict.set(PdfKeys.Common.Type, '/StructTreeRoot');
@@ -218,6 +273,8 @@ function buildStructTreeRootDict(
     }
     dict.set(PdfKeys.Structure.ParentTreeNextKey, nextKey.toString());
   }
+
+  if (namespaceId > 0) dict.set('/Namespaces', `[ ${namespaceId} 0 R ]`);
 
   return dict;
 }

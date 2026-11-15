@@ -105,6 +105,7 @@ export class MetadataWriter {
     const pdfA = XmpConformanceBlock.forPdfA(settings.conformance);
     if (pdfA) blocks.push(pdfA);
     if (settings.accessibility === AccessibilityMode.PdfUa1) blocks.push(XmpConformanceBlock.pdfUa1());
+    if (settings.accessibility === AccessibilityMode.PdfUa2) blocks.push(XmpConformanceBlock.pdfUa2());
 
     // ZUGFeRD / Factur-X is only valid on a PDF/A-3 document. Gating on the
     // (possibly guard-reset) conformance means a suppressed PDF/A claim also

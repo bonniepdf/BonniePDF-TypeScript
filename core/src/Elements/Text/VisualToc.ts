@@ -14,6 +14,7 @@ import { Color } from '../../Core/Color';
 import { IRoleProvider } from '../../Rendering/Tagging/IRoleProvider';
 import { SemanticRole } from '../../Rendering/Tagging/SemanticRole';
 import { beginChildTag, endChildTag } from '../../Rendering/Tagging/ChildTagging';
+import type { TaggingContext } from '../../Rendering/Tagging/TaggingContext';
 import { toLength, type LengthInput } from '../../Normalize/toLength';
 
 /**
@@ -190,6 +191,10 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
    */
   private drawTaggedTocEntry(ctx: RenderContext, identifier: string, contentWidth: number, y: number): void {
     const tagging = ctx.tagging;
+    if (tagging?.pdf20 === true) {
+      this.drawPdf20TocEntry(ctx, tagging, identifier, contentWidth, y);
+      return;
+    }
     const tagThisEntry = tagging != null;
     if (tagThisEntry) {
       tagging!.tree.begin(SemanticRole.TOCI);
@@ -203,6 +208,34 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
         ctx.canvas.endMarkedContent();
         tagging!.tree.end();
       }
+    }
+  }
+
+  /**
+   * The PDF/UA-2 form of an entry (spec 04 §3.4): a `TOCI` naming its target
+   * with `/Ref` (8.2.5.8), holding no content itself, around a `Reference` that
+   * holds the entry's text and its link annotation (ISO/TS 32005 Table 5 forbids
+   * content and `Link` directly in a `TOCI`; 8.2.5.20 lets a link annotation sit
+   * in a `Reference`).
+   */
+  private drawPdf20TocEntry(
+    ctx: RenderContext,
+    tagging: TaggingContext,
+    identifier: string,
+    contentWidth: number,
+    y: number
+  ): void {
+    const entry = tagging.tree.begin(SemanticRole.TOCI);
+    const page = ctx.tocEntries.get(identifier);
+    entry.refTarget = { anchor: identifier, pageIndex: page != null ? page - 1 : 0 };
+    tagging.tree.begin(SemanticRole.Reference);
+    ctx.canvas.beginMarkedContent('Reference');
+    try {
+      this.drawTocEntry(ctx, identifier, contentWidth, y);
+    } finally {
+      ctx.canvas.endMarkedContent();
+      tagging.tree.end();
+      tagging.tree.end();
     }
   }
 
@@ -253,6 +286,7 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
       // matching the .NET TOC link which is a Hyperlink(identifier).
       text: identifier,
       targetPageIndex: targetPage,
+      destinationAnchor: identifier,
       renderX: pdfX,
       renderY: pdfY,
       renderWidth: contentWidth,
@@ -288,6 +322,12 @@ export class VisualToc extends ElementBase implements IStatefulElement, IRolePro
     // per-element beginChildTag/endChildTag wrap that assigns
     // linkedStructElement (PDF/UA 14.8.4.4.2 requires every Link annotation
     // to be tagged). Open/close that wrap explicitly here. Mirrors VisualToc.cs.
+    if (ctx.tagging?.pdf20 === true) {
+      // PDF/UA-2: the annotation belongs to the entry's Reference.
+      link.linkedStructElement = ctx.tagging.tree.current;
+      ctx.registerHyperlink(link);
+      return;
+    }
     const token = beginChildTag(ctx, link as unknown as IElement);
     try {
       ctx.registerHyperlink(link);

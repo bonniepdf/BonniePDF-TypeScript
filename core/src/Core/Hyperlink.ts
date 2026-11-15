@@ -124,6 +124,12 @@ export class Hyperlink implements IElement, IRoleProvider {
   linkedStructElement?: StructureElement;
 
   /**
+   * @internal - the anchor an in-document link targets, when it names one. A
+   * PDF/UA-2 structure destination resolves through it (spec 04 §3.4).
+   */
+  destinationAnchor?: string;
+
+  /**
    * @internal - Gets the X position of the rendered annotation rectangle in PDF coordinates (bottom-left origin).
    */
   renderX: number = 0;

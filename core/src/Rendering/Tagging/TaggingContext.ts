@@ -1,4 +1,17 @@
 import { StructureTreeBuilder } from './StructureTreeBuilder';
+import type { StructureElement } from './StructureElement';
+import type { IElement } from '../../Elements/IElement';
+
+/**
+ * An in-document go-to action whose object number was reserved: target page,
+ * optional anchor, and view (`/Fit`, `/FitH 0`, ...).
+ */
+export interface PendingGoTo {
+  readonly actionId: number;
+  readonly pageIndex: number;
+  readonly anchor: string | undefined;
+  readonly view: string;
+}
 
 /**
  * Carries the per-document tagging state through the render pipeline: the
@@ -26,8 +39,30 @@ export class TaggingContext {
    */
   public currentPageIndex = 0;
 
-  constructor(tree: StructureTreeBuilder) {
+  /**
+   * True for PDF/UA-2: the tree is written in the PDF 2.0 structure namespace,
+   * lists carry ListNumbering, TOC entries carry /Ref, and in-document
+   * destinations are structure destinations (spec 04 §3.4).
+   */
+  public readonly pdf20: boolean;
+
+  /** The structure element each element object opened first (spec 04 §3.4, anchor targets). */
+  public readonly elementStructure = new Map<IElement, StructureElement>();
+
+  /** The element object that registered each anchor name: a heading's TOC identifier or anchor id, or a section's anchor id. */
+  public readonly anchorOwners = new Map<string, IElement>();
+
+  /** In-document go-to actions reserved while pages were written, filled in once the structure tree has object numbers. */
+  public readonly pendingGoTos: PendingGoTo[] = [];
+
+  constructor(tree: StructureTreeBuilder, pdf20 = false) {
     this.tree = tree;
+    this.pdf20 = pdf20;
+  }
+
+  /** Records the anchor `name` as registered by `owner`. */
+  recordAnchor(name: string, owner: IElement): void {
+    this.anchorOwners.set(name, owner);
   }
 
   /**

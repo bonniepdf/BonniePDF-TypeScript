@@ -13,7 +13,7 @@ const INTERNAL = {
   elementBase: ['startingY'],
   // `render*` bounds + linkedStructElement are layout output, not options; `text`
   // is set in the ctor. `items` is the private list backing addItem.
-  hyperlink: ['renderX', 'renderY', 'renderWidth', 'renderHeight', 'linkedStructElement'],
+  hyperlink: ['renderX', 'renderY', 'renderWidth', 'renderHeight', 'linkedStructElement', 'destinationAnchor'],
   list: ['items', 'nestedLists'], // both private readonly backing lists
   visualToc: ['lastRenderedIndex'],
 } as const;

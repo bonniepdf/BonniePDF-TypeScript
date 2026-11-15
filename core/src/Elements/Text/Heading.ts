@@ -112,9 +112,11 @@ export class Heading extends TextBlock implements IStatefulElement {
     const pageNumber = ctx.currentPageIndex + 1;
     if (this.tocIdentifier) {
       ctx.tocEntries.set(this.tocIdentifier, pageNumber);
+      ctx.tagging?.recordAnchor(this.tocIdentifier, this);
     }
     if (this.anchorId) {
       ctx.tocEntries.set(this.anchorId, pageNumber);
+      ctx.tagging?.recordAnchor(this.anchorId, this);
     }
     this.tocRegistered = true;
   }

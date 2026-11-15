@@ -99,8 +99,8 @@ export type ImageFitModeToken = 'contain' | 'cover' | 'fill' | 'fit-height' | 'a
 export type PdfAConformanceToken =
   'none' | 'pdf/a-1b' | 'pdf/a-1a' | 'pdf/a-2b' | 'pdf/a-2a' | 'pdf/a-3b' | 'pdf/a-3a' | 'pdf/a-4';
 
-/** String spellings accepted wherever a {@link AccessibilityMode} is expected: `'none'` | `'pdf/ua-1'`. */
-export type AccessibilityModeToken = 'none' | 'pdf/ua-1';
+/** String spellings accepted wherever a {@link AccessibilityMode} is expected: `'none'` | `'pdf/ua-1'` | `'pdf/ua-2'`. */
+export type AccessibilityModeToken = 'none' | 'pdf/ua-1' | 'pdf/ua-2';
 /**
  * String spellings accepted wherever a {@link ZoomLevel} is expected: `'fit-page'` | `'fit-width'` | `'fit-height'` | `'custom'`.
  */

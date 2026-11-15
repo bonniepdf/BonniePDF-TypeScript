@@ -33,4 +33,10 @@ export interface RegisteredLink {
    * (tagged documents only), used for /StructParent + /OBJR wiring.
    */
   linkedStructElement?: StructureElement;
+  /**
+   * The anchor an in-document link targets, when it names one (a section link's
+   * target, a TOC entry's identifier); a PDF/UA-2 structure destination resolves
+   * through it (spec 04 §3.4).
+   */
+  destinationAnchor?: string;
 }

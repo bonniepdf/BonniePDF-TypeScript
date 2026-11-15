@@ -134,6 +134,36 @@ export class XmpConformanceBlock {
   }
 
   /**
+   * PDF/UA-2 conformance claim (ISO 14289-2:2024): `pdfuaid:part` 2 and
+   * `pdfuaid:rev` 2024 (VeraPDF profile `ua2`, rules 5-2 and 5-5). The
+   * extension schema describes both properties, for a PDF/A claim that checks it.
+   */
+  static pdfUa2(): XmpConformanceBlock {
+    return new XmpConformanceBlock(
+      'pdfuaid',
+      'http://www.aiim.org/pdfua/ns/id/',
+      [
+        ['part', '2'],
+        ['rev', '2024'],
+      ],
+      new XmpExtensionSchema('http://www.aiim.org/pdfua/ns/id/', 'pdfuaid', 'PDF/UA identification schema', [
+        new XmpExtensionSchemaProperty(
+          'part',
+          'Integer',
+          'internal',
+          'Indicates, which part of ISO 14289 standard is followed'
+        ),
+        new XmpExtensionSchemaProperty(
+          'rev',
+          'Integer',
+          'internal',
+          'Indicates the year of the revision of the part of ISO 14289 that is followed'
+        ),
+      ])
+    );
+  }
+
+  /**
    * ZUGFeRD / Factur-X 2.x conformance claim. Emits the four `fx:*`
    * properties (DocumentType, DocumentFileName, Version, ConformanceLevel)
    * the Factur-X technical specification requires, plus the

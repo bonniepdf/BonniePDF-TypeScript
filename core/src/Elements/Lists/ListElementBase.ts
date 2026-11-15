@@ -76,6 +76,8 @@ export abstract class ListElementBase extends TextElementBase {
     const tagging = ctx.tagging;
     if (tagging) {
       tagging.tree.begin(SemanticRole.L);
+      // PDF/UA-2 8.2.5.25: a list whose items carry labels names its numbering.
+      if (tagging.pdf20) tagging.tree.setAttributes(`<< /O /List /ListNumbering /${this.listNumbering} >>`);
       ctx.canvas.beginContainerContent('L');
     }
     try {
@@ -96,6 +98,15 @@ export abstract class ListElementBase extends TextElementBase {
    * handles the outer `L` structure-element wrapper.
    */
   protected abstract renderItems(ctx: RenderContext, contentWidth: number): void;
+
+  /**
+   * The PDF/UA-2 `ListNumbering` value naming this list's labels (ISO 32000-2
+   * Table 386).
+   * @internal
+   */
+  public get listNumbering(): string {
+    return 'Unordered';
+  }
 
   /**
    * Measures the height of list items, accounting for item spacing.

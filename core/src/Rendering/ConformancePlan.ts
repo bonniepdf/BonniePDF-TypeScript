@@ -79,13 +79,14 @@ export class ConformancePlan {
       : undefined;
 
     this.needsStructureTree =
-      settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17;
+      (settings.accessibility === AccessibilityMode.PdfUa1 && settings.version === PdfVersion.Pdf17) ||
+      (settings.accessibility === AccessibilityMode.PdfUa2 && settings.version === PdfVersion.Pdf20);
     this.effectiveAccessibility = this.needsStructureTree ? settings.accessibility : AccessibilityMode.None;
     const fontsUnembedded = registry?.hasNonEmbeddedStandardFont() === true;
     this.nonEmbeddedStandardFonts = fontsUnembedded ? (registry?.getNonEmbeddedStandardFonts?.() ?? []) : [];
     // The claim is withheld; the tagging (and the PDF/UA-only OutputIntent,
     // which is colour management rather than a claim) is not.
-    this.pdfUaClaimSuppressed = this.effectiveAccessibility === AccessibilityMode.PdfUa1 && fontsUnembedded;
+    this.pdfUaClaimSuppressed = this.effectiveAccessibility !== AccessibilityMode.None && fontsUnembedded;
     this.needsViewerPreferencesDisplayDocTitle = this.needsStructureTree;
     this.needsXmpMetadata = settings.version === PdfVersion.Pdf17 || settings.version === PdfVersion.Pdf20;
 
@@ -94,7 +95,7 @@ export class ConformancePlan {
     const supportsOutputIntent = settings.version === PdfVersion.Pdf17 || settings.version === PdfVersion.Pdf20;
     this.needsOutputIntent =
       supportsOutputIntent &&
-      (effectivePdfAEnabled || (this.effectiveAccessibility === AccessibilityMode.PdfUa1 && !requestedPdfAEnabled));
+      (effectivePdfAEnabled || (this.effectiveAccessibility !== AccessibilityMode.None && !requestedPdfAEnabled));
     this.needsMarkInfo = effectivePdfAEnabled || this.needsStructureTree;
   }
 

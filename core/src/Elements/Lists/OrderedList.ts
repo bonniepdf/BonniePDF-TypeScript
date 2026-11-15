@@ -85,6 +85,22 @@ export class OrderedList extends ListElementBase {
     return this.measureListHeight(this._items, this.nestedLists, contentWidth);
   }
 
+  /** @internal */
+  public override get listNumbering(): string {
+    switch (this.numberFormat) {
+      case NumberFormat.UpperRoman:
+        return 'UpperRoman';
+      case NumberFormat.LowerRoman:
+        return 'LowerRoman';
+      case NumberFormat.UpperAlpha:
+        return 'UpperAlpha';
+      case NumberFormat.LowerAlpha:
+        return 'LowerAlpha';
+      default:
+        return 'Decimal';
+    }
+  }
+
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
     const itemWidth = contentWidth - this.indent;
 

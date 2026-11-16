@@ -84,7 +84,25 @@ const DETAIL_TILE_HEIGHT = 31;
  * options-object front door sits on top of. Renders **byte-for-byte identically**
  * to the options-style `shelf-label.ts`.
  */
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const end = new Date(day);
+  end.setUTCDate(end.getUTCDate() + 14);
   const settings = new DocumentSettings(PAGE, 8);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -102,7 +120,7 @@ export function generate(): Document {
   card.add(retailerStrip());
   card.add(mainOffer());
   card.add(detailRow());
-  card.add(barcodePanel());
+  card.add(barcodePanel(date.format(end)));
 
   const wrapper = new Container();
   wrapper.border = new Border(0.75);
@@ -199,7 +217,7 @@ function detailCell(label: string, value: string, accent: Color): Container {
   return c;
 }
 
-function barcodePanel(): Container {
+function barcodePanel(promoEnd: string): Container {
   const stack = new VerticalStack();
   stack.add(text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, TextAlignment.Center, 0, 2));
 
@@ -214,7 +232,7 @@ function barcodePanel(): Container {
   barWrap.horizontalAlignment = HorizontalAlignment.Center;
   stack.add(barWrap);
   stack.add(text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, TextAlignment.Center, 4, 1));
-  stack.add(text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, TextAlignment.Center));
+  stack.add(text(`SEL v04  -  Price file GF-27  -  Promo ends ${promoEnd}`, 5.8, MUTED, false, TextAlignment.Center));
 
   const panel = new Container();
   panel.border = new Border(0, 0.75, 0, 0);

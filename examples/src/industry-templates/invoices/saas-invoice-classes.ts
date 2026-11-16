@@ -52,7 +52,31 @@ const PANEL = ColorPalette.slate[50];
  * the options-object front door sits on top of. Renders **byte-for-byte
  * identically** to the options-style `saas-invoice.ts`.
  */
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const dateAt = (days: number) => date.format(new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days)));
+  const invoiceNumber = `INV-${day.getUTCFullYear()}-0042`;
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const settings = new DocumentSettings(PdfSize.a4, 48);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -60,7 +84,7 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(10).withColor(BODY);
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Invoice INV-2026-0042';
+  metadata.title = `Invoice ${invoiceNumber}`;
   metadata.author = 'Sample Company Ltd';
   metadata.subject = 'Subscription invoice - accessible (PDF/UA) and archival (PDF/A-2a)';
 
@@ -72,9 +96,9 @@ export function generate(): Document {
   brand.add(tb('Infrastructure for builders', 9, MUTE, { mb: 0 }));
 
   const meta = new VerticalStack();
-  meta.add(tb('Invoice  INV-2026-0042', 10, INK, { bold: true, align: TextAlignment.Right }));
-  meta.add(tb('Issued  18 Jun 2026', 9, MUTE, { align: TextAlignment.Right }));
-  meta.add(tb('Due  02 Jul 2026', 9, MUTE, { align: TextAlignment.Right }));
+  meta.add(tb(`Invoice  ${invoiceNumber}`, 10, INK, { bold: true, align: TextAlignment.Right }));
+  meta.add(tb(`Issued  ${dateAt(0)}`, 9, MUTE, { align: TextAlignment.Right }));
+  meta.add(tb(`Due  ${dateAt(14)}`, 9, MUTE, { align: TextAlignment.Right }));
 
   const headerTable = new Grid(1, 1);
   headerTable.border = Border.none;
@@ -128,7 +152,7 @@ export function generate(): Document {
   summary.cellPadding = 0;
   summary.addRow(
     fact('PLAN', 'Pro, billed monthly'),
-    fact('BILLING PERIOD', '18 Jun \u2013 17 Jul 2026'),
+    fact('BILLING PERIOD', `${dateAt(0)} – ${dateAt(29)}`),
     fact('CUSTOMER ID', 'CUS-20418')
   );
   const strip = new Container();
@@ -154,21 +178,20 @@ export function generate(): Document {
 
   const lines: [string, number, number][] = [
     ['Pro plan - 25 seats (monthly)', 25, 18.0],
-    ['Proration - 5 seats added 4 Jun (14 of 30 days)', 5, 8.4],
+    [`Proration - 5 seats added ${dateAt(-14)} (14 of 30 days)`, 5, 8.4],
     ['Additional storage - 2 TB', 2, 40.0],
     ['Premium support add-on', 1, 199.0],
-    ['Egress overage - June', 1, 36.5],
+    ['Egress overage - previous billing period', 1, 36.5],
   ];
   let subtotal = 0;
-  const money = (n: number): string => `£${n.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
   for (const [desc, qty, unit] of lines) {
     const amount = qty * unit;
     subtotal += amount;
     items.addRow(
       cell(desc, 10, BODY, TextAlignment.Left),
       cell(String(qty), 10, BODY, TextAlignment.Center),
-      cell(money(unit), 10, BODY, TextAlignment.Right),
-      cell(money(amount), 10, INK, TextAlignment.Right)
+      cell(money.format(unit), 10, BODY, TextAlignment.Right),
+      cell(money.format(amount), 10, INK, TextAlignment.Right)
     );
   }
   doc.add(items);
@@ -187,9 +210,9 @@ export function generate(): Document {
       cell(value, bold ? 15 : 10, bold ? INK : BODY, TextAlignment.Right, bold)
     );
   };
-  totalRow('Subtotal', money(subtotal));
-  totalRow('VAT (20%)', money(vat));
-  totalRow('Total due', money(total), true);
+  totalRow('Subtotal', money.format(subtotal));
+  totalRow('VAT (20%)', money.format(vat));
+  totalRow('Total due', money.format(total), true);
   doc.add(totals);
 
   // ── Payment panel with QR ──────────────────────────────────────────────────
@@ -205,15 +228,15 @@ export function generate(): Document {
   payInfo.add(tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }));
   payInfo.add(tb('Account name  Sample Company Ltd', 10, BODY, { mb: 2 }));
   payInfo.add(tb('Sort code  04-00-72    Account  19483055', 10, BODY, { mb: 2 }));
-  payInfo.add(tb('Reference  INV-2026-0042', 10, BODY, { mb: 2 }));
-  payInfo.add(tb('Amount  ' + money(total), 10, INK, { bold: true }));
+  payInfo.add(tb(`Reference  ${invoiceNumber}`, 10, BODY, { mb: 2 }));
+  payInfo.add(tb('Amount  ' + money.format(total), 10, INK, { bold: true }));
 
   const qr = new QRCode();
-  qr.data = 'https://pay.example.com/inv/INV-2026-0042';
+  qr.data = `https://pay.example.com/inv/${invoiceNumber}`;
   qr.size = 96;
   qr.quietZone = 1;
   qr.errorCorrection = QrEcc.Medium;
-  qr.altText = 'QR code to pay invoice INV-2026-0042 online, total £' + total.toFixed(2);
+  qr.altText = `QR code to pay invoice ${invoiceNumber} online, total ${money.format(total)}`;
   const qrWrap = new Container();
   qrWrap.child = qr;
   qrWrap.padding = new Thickness(6);

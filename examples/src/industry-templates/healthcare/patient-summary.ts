@@ -91,7 +91,22 @@ const NEXT_STEPS: [string, string][] = [
   ['Echocardiogram', 'Booked for 2 July 2026'],
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
   const markSvg = new TextDecoder().decode(assets.get('images/svg/sample-healthcare.svg'));
   const doc = new Document({
     settings: {
@@ -134,7 +149,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
           alignment: 'right',
           margin: 0,
         }),
-        tb('Printed 18 June 2026, 09:30', 8, 'teal-100', { align: 'right' }),
+        tb(`Generated ${stamp}`, 8, 'teal-100', { align: 'right' }),
       ],
     }),
     1
@@ -279,7 +294,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         showValueLabels: false,
         references: [{ value: 2, endValue: 3, color: 'teal-50' }],
         altText:
-          'INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.',
+          'INR results for the eight weeks to 18 June 2026 against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.',
       }),
       tb('Weekly INR. Two readings fell outside the shaded target range.', 7, MUTE),
     ],

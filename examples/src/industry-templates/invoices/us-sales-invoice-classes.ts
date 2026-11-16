@@ -85,11 +85,19 @@ const COUNTY_TAX_RATE = 0.0225; // district add-on
  * It renders **byte-for-byte identically** to the options-style
  * `us-sales-invoice.ts` (an equivalence test binds the two).
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const now = new Date();
-  const year = now.getFullYear();
-  const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const due = new Date(now.getTime() + 30 * 86400000);
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const year = day.getUTCFullYear();
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' });
+  const due = new Date(day);
+  due.setUTCDate(due.getUTCDate() + 30);
 
   const settings = new DocumentSettings(PdfSize.a4, 44);
   settings.conformance = PdfAConformance.PdfA2a;
@@ -151,7 +159,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.add(totalLine('Invoice date', fmt.format(now)));
+  detailsStack.add(totalLine('Invoice date', fmt.format(day)));
   detailsStack.add(totalLine('Due date (Net 30)', fmt.format(due)));
   detailsStack.add(totalLine('Purchase order', 'PO-88213'));
   detailsStack.add(totalLine('Ship to', 'Seattle, WA'));

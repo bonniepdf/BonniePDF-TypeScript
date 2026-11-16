@@ -52,7 +52,23 @@ const BOOK_PARAS = [
  * `text-alignment.ts` (an equivalence test binds the two). Reach for the
  * options form first; this variant exists to show what it desugars to.
  */
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const settings = new DocumentSettings(PdfSize.a4, 60);
   settings.conformance = PdfAConformance.PdfA2a;
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -104,7 +120,7 @@ export function generate(): Document {
     'Right Aligned — addresses and dates',
     's-right',
     TextAlignment.Right,
-    'Sample Supplies Ltd\n12 Exmouth Market\nLondon EC1R 4QE\n5 November 2026'
+    `Sample Supplies Ltd\n12 Exmouth Market\nLondon EC1R 4QE\n${date.format(day)}`
   );
   alignedSample(
     doc,

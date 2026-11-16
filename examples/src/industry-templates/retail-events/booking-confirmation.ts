@@ -54,7 +54,6 @@ const POSITIVE = ColorPalette.emerald[700];
 
 const BOOKING = {
   reference: 'BKG-7Q4M2X',
-  booked: new Date(Date.UTC(2026, 7, 2)),
   destination: 'Lisbon',
   manageUrl: 'https://trips.example.com/manage/BKG-7Q4M2X',
   cardEnding: '4821',
@@ -93,8 +92,6 @@ const LEGS: FlightLeg[] = [
 const STAY = {
   name: 'Hotel Sample Lisboa',
   address: ['Rua Exemplo 12', '1100-000 Lisbon', 'Portugal'],
-  checkIn: new Date(Date.UTC(2026, 9, 10)),
-  checkOut: new Date(Date.UTC(2026, 9, 17)),
   checkInFrom: '15:00',
   checkOutBy: '11:00',
   room: 'Double room, city view',
@@ -111,9 +108,21 @@ const PRICE_LINES: PriceLine[] = [
   { description: 'Seat selection — 4 seats', pence: 3_800 },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const offset = (days: number) => new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days));
+  const checkIn = offset(69);
+  const checkOut = offset(76);
+  const legs = LEGS.map((leg, index) => ({ ...leg, date: index === 0 ? checkIn : checkOut }));
   const total = PRICE_LINES.reduce((sum, l) => sum + l.pence, 0);
-  const nights = Math.round((STAY.checkOut.getTime() - STAY.checkIn.getTime()) / 86_400_000);
+  const nights = Math.round((checkOut.getTime() - checkIn.getTime()) / 86_400_000);
   const lisbonPhoto = assets.get('images/travel/lisbon.jpg');
   if (!lisbonPhoto) throw new Error('Supply images/travel/lisbon.jpg.');
 
@@ -147,7 +156,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     children: [
       cell('BOOKING CONFIRMATION', { bold: true, size: 8.5, color: ACCENT, mb: 4 }),
       h1(`Your trip to ${BOOKING.destination}`),
-      cell(`${gbDate(STAY.checkIn)} to ${gbDate(STAY.checkOut)} · ${nights} nights · ${PASSENGERS.length} adults`, {
+      cell(`${gbDate(checkIn)} to ${gbDate(checkOut)} · ${nights} nights · ${PASSENGERS.length} adults`, {
         color: MUTED,
         mb: 10,
       }),
@@ -190,7 +199,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       'Confirmed',
       [
         cell(
-          `Booked on ${gbDate(BOOKING.booked)} and paid in full by card ending ${BOOKING.cardEnding}. ` +
+          `Booked on ${gbDate(day)} and paid in full by card ending ${BOOKING.cardEnding}. ` +
             'Keep this confirmation: you will be asked for the reference at check-in and at the hotel.',
           { size: 9, mb: 0 }
         ),
@@ -200,7 +209,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   );
 
   doc.add(h2('Your flights'));
-  for (const leg of LEGS) doc.add(legCard(leg));
+  for (const leg of legs) doc.add(legCard(leg));
 
   doc.add(h2('Travellers'));
   const passengers = new Table({
@@ -226,8 +235,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
             lines(STAY.address, { size: 9, color: MUTED }),
           ],
         }),
-        field('Check-in', `${gbDate(STAY.checkIn)}, from ${STAY.checkInFrom}`),
-        field('Check-out', `${gbDate(STAY.checkOut)}, by ${STAY.checkOutBy}`),
+        field('Check-in', `${gbDate(checkIn)}, from ${STAY.checkInFrom}`),
+        field('Check-out', `${gbDate(checkOut)}, by ${STAY.checkOutBy}`),
         field('Room', `${STAY.room}\n${STAY.board}`),
       ],
       { spacing: 14, mb: 4 }

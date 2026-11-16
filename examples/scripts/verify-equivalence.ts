@@ -493,7 +493,11 @@ function loadAssets(def: ExampleDef): ReadonlyMap<string, Uint8Array> {
 }
 
 async function svgFingerprint(def: ExampleDef, title: string): Promise<{ hash: string; len: number; pages: number }> {
-  const doc = def.generate(loadAssets(def));
+  const doc = def.generate(loadAssets(def), {
+    now: new Date('2026-11-13T12:00:00Z'),
+    locale: 'de-DE',
+    timeZone: 'Europe/Berlin',
+  });
   const { pages } = await doc.generateSvgDocumentAsync({
     precision: 3,
     includeAccessibilityMetadata: true,

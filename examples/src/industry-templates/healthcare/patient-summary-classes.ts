@@ -104,7 +104,22 @@ const NEXT_STEPS: [string, string][] = [
   ['Echocardiogram', 'Booked for 2 July 2026'],
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
   const markSvg = new TextDecoder().decode(assets.get('images/svg/sample-healthcare.svg'));
   const settings = new DocumentSettings(PdfSize.a4, PageOrientation.Portrait, 0);
   settings.conformance = PdfAConformance.PdfA2a;
@@ -139,7 +154,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const printed = new VerticalStack();
   printed.spacing = 2;
   printed.add(title);
-  printed.add(tb('Printed 18 June 2026, 09:30', 8, ColorPalette.teal[100], { align: TextAlignment.Right }));
+  printed.add(tb(`Generated ${stamp}`, 8, ColorPalette.teal[100], { align: TextAlignment.Right }));
   const masthead = new HorizontalStack();
   masthead.widthDistribution = WidthDistribution.Weighted;
   masthead.spacing = 10;
@@ -281,7 +296,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   inrChart.showValueLabels = false;
   inrChart.references = [{ value: 2, endValue: 3, color: 'teal-50' }];
   inrChart.altText =
-    'INR results for the last eight weeks against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.';
+    'INR results for the eight weeks to 18 June 2026 against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.';
   const chart = new VerticalStack();
   chart.spacing = 4;
   chart.add(inrChart);

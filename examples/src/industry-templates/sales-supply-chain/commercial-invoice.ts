@@ -156,7 +156,37 @@ const GOODS: Goods[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const now = context.now ?? new Date();
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const amount = (cents: number) => money.format(cents / 100);
   const goodsTotal = GOODS.reduce((sum, g) => sum + g.quantity * g.unitCents, 0);
   const invoiceTotal = goodsTotal + INVOICE.freight + INVOICE.insurance;
   const netGrams = GOODS.reduce((sum, g) => sum + g.quantity * g.netGrams, 0);
@@ -212,6 +242,7 @@ export function generate(): Document {
   top.add(heading, 3);
   top.add(waybill, 2);
   doc.add(top);
+  doc.add(cell(`Generated ${stamp}`, { size: 8, color: MUTED, mb: 8 }));
 
   doc.add(
     weightedRow(
@@ -222,7 +253,7 @@ export function generate(): Document {
   doc.add(
     weightedRow(
       [
-        field('Invoice date', gbDate(INVOICE.date)),
+        field('Invoice date', date.format(INVOICE.date)),
         field('Customer reference', INVOICE.reference),
         field('Delivery terms', INVOICE.incoterm),
         field('Payment terms', INVOICE.paymentTerms),
@@ -321,7 +352,7 @@ export function generate(): Document {
   );
   doc.add(
     weightedRow(
-      [slot('Name and position', 'Authorised signatory'), slot('Signature', ''), slot('Date', gbDate(INVOICE.date))],
+      [slot('Name and position', 'Authorised signatory'), slot('Signature', ''), slot('Date', date.format(INVOICE.date))],
       {
         spacing: 22,
         mb: 6,
@@ -354,10 +385,6 @@ function thousands(n: number): string {
 }
 
 /** Cents as a decimal amount: 1,234.56. */
-function amount(cents: number): string {
-  return formatNumber(cents / 100, 'N2');
-}
-
 /** Grams as kilograms to one decimal place, rounding half up: 290.1. */
 function kg(grams: number): string {
   const tenths = Math.floor((grams + 50) / 100);
@@ -482,10 +509,4 @@ function band(left: string, right: string): HorizontalStack {
   row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
   row.add(cell(right, { size: 7.5, color: MUTED, align: 'right' }), 2);
   return row;
-}
-
-function gbDate(d: Date): string {
-  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
-    d
-  );
 }

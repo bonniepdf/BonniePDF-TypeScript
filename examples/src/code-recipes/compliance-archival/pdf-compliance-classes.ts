@@ -42,7 +42,25 @@ const CHARGES: [string, string][] = [
 ];
 
 /** The construct-then-mutate companion to `pdf-compliance.ts`. */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const startYear = day.getUTCFullYear() + (day.getUTCMonth() >= 3 ? 1 : 0);
+  const titleText = `Your council tax for ${startYear} to ${startYear + 1}`;
   // ── Footer: the sender on the left, a discreet standards badge on the right ──
   const sender = new TextBlock('Sample Borough Council  ·  Revenues and Benefits');
   sender.fontSize = 8;
@@ -73,7 +91,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   settings.footerTemplate = pageTemplate({ default: footer });
 
   const metadata = new DocumentMetadata();
-  metadata.title = 'Your council tax for 2027 to 2028';
+  metadata.title = titleText;
   metadata.author = 'Sample Borough Council';
   metadata.subject = 'Council tax notice, archival (PDF/A-2a) and accessible (PDF/UA-1).';
   metadata.keywords = 'pdf/a-2a, pdf/ua-1, accessibility, archival, council tax, BonniePDF';
@@ -103,7 +121,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(masthead);
 
   const address = new TextBlock('Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR');
-  const reference = new TextBlock('5 November 2026\nAccount 7700 4821 93\nBand D');
+  const reference = new TextBlock(`${date.format(day)}\nAccount 7700 4821 93\nBand D`);
   reference.alignment = TextAlignment.Right;
   reference.color = ColorPalette.slate[600];
   const top = new HorizontalStack();
@@ -113,7 +131,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   top.add(reference);
   doc.add(top);
 
-  const title = new Heading('Your council tax for 2027 to 2028');
+  const title = new Heading(titleText);
   title.level = 1;
   title.fontName = StandardFonts.HelveticaBold;
   title.fontSize = 20;
@@ -122,7 +140,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(title);
 
   const intro = new TextBlock(
-    'This letter sets out your council tax for the year from 1 April 2027. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.'
+    `This letter sets out your council tax for the year from 1 April ${startYear}. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.`
   );
   intro.margin = new Thickness(0, 0, 0, 12);
   doc.add(intro);

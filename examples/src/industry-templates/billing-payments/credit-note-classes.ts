@@ -58,10 +58,6 @@ const NEGATIVE = ColorPalette.rose[700];
 // variant exists to show what it desugars to.
 
 const NOTE = {
-  number: 'CRN-2026-0118',
-  issued: new Date(Date.UTC(2026, 7, 11)),
-  againstInvoice: 'INV-2026-3340',
-  invoiceDated: new Date(Date.UTC(2026, 7, 7)),
   account: 'ACC-004182',
   reasonCode: 'CR-04 — Billed in error',
   supplier: ['Sample Supplier Ltd', '12 Sample Street', 'Sample City', 'SC2 9BD', 'VAT GB 000 0000 00'],
@@ -88,7 +84,28 @@ const LINES: CreditLine[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const issued = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const invoiceDate = new Date(issued);
+  invoiceDate.setUTCDate(invoiceDate.getUTCDate() - 4);
+  // This live sample uses its own references, distinct from the statement’s historical entries.
+  const creditNumber = `CRN-${issued.getUTCFullYear()}-0218`;
+  const invoiceNumber = `INV-${invoiceDate.getUTCFullYear()}-4340`;
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const net = LINES.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
   const vat = net * NOTE.vatRate;
   const total = net + vat;
@@ -100,13 +117,13 @@ export function generate(): Document {
   settings.defaultTextStyle = new TextStyle().withFamily('Helvetica').withSize(9.5).withColor(INK);
   settings.footerTemplate = pageTemplate({
     default: band(
-      `Credit note ${NOTE.number} against invoice ${NOTE.againstInvoice}`,
+      `Credit note ${creditNumber} against invoice ${invoiceNumber}`,
       `Page ${TextElementBase.CurrentPageToken} of ${TextElementBase.TotalPagesToken}`
     ),
   });
 
   const metadata = new DocumentMetadata();
-  metadata.title = `Credit note ${NOTE.number} — against invoice ${NOTE.againstInvoice}`;
+  metadata.title = `Credit note ${creditNumber} — against invoice ${invoiceNumber}`;
   metadata.author = 'Sample Supplier Ltd';
   metadata.subject =
     'Credit note against an earlier invoice: corrected lines with reasons, VAT reversal, and how the credit is applied (sample data).';
@@ -118,15 +135,15 @@ export function generate(): Document {
   // at a glance must not be mistaken for another invoice.
   doc.add(accentBar(NEGATIVE));
   doc.add(cell('CREDIT NOTE', { bold: true, size: 8.5, color: NEGATIVE, mb: 4 }));
-  doc.add(h1(`Credit note ${NOTE.number}`));
-  doc.add(cell(`Against invoice ${NOTE.againstInvoice} dated ${gbDate(NOTE.invoiceDated)}`, { color: MUTED, mb: 14 }));
+  doc.add(h1(`Credit note ${creditNumber}`));
+  doc.add(cell(`Against invoice ${invoiceNumber} dated ${date.format(invoiceDate)}`, { color: MUTED, mb: 14 }));
 
   doc.add(
     weightedRow(
       [
-        field('Credit note date', gbDate(NOTE.issued)),
+        field('Credit note date', date.format(issued)),
         field('Account', NOTE.account),
-        field('Original invoice', NOTE.againstInvoice),
+        field('Original invoice', invoiceNumber),
         field('Reason code', NOTE.reasonCode),
       ],
       { mb: 6 }
@@ -203,14 +220,14 @@ export function generate(): Document {
   doc.add(
     cell(
       `This credit note reverses output tax of ${money(vat)} previously accounted for on invoice ` +
-        `${NOTE.againstInvoice}. The customer should adjust input tax recovered on that invoice by the same amount ` +
+        `${invoiceNumber}. The customer should adjust input tax recovered on that invoice by the same amount ` +
         'in the period in which this credit note is received.',
       { size: 9, color: MUTED, mb: 10 }
     )
   );
 
   doc.add(
-    cell(`Approved by ${NOTE.approvedBy} on ${gbDate(NOTE.issued)}. Queries: quote ${NOTE.number}.`, {
+    cell(`Approved by ${NOTE.approvedBy} on ${date.format(issued)}. Queries: quote ${creditNumber}.`, {
       size: 8.5,
       color: MUTED,
       mb: 0,
@@ -247,11 +264,6 @@ function money(value: number, symbol = '£', locale = 'en-GB'): string {
   return sign + symbol + Math.abs(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function gbDate(d: Date): string {
-  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
-    d
-  );
-}
 
 // ── Building blocks, the long way ────────────────────────────────────────────
 

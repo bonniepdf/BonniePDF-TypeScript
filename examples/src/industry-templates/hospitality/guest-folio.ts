@@ -39,7 +39,23 @@ const LINES: [string, string, number | null, number, number][] = [
   ['5 Nov', 'Payment, Visa ending 4417', null, 0, 54625],
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const doc = new Document({
     settings: {
       margin: 40,
@@ -233,6 +249,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   close.add(sign, 1);
   close.add(copy);
   doc.add(close);
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   return doc;
 }
 

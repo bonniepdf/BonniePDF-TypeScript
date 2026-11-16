@@ -86,7 +86,23 @@ const DEPOTS: [string, string, string, string][] = [
   ['York', '600', '97.8%', '92.2%'],
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const doc = new Document();
   doc.metadata.title = 'Operations review Q3 2026';
   doc.settings.language = 'en-GB';
@@ -212,6 +228,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     );
   }
   doc.add(depots);
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   return doc;
 }
 

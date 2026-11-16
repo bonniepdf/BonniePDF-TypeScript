@@ -65,7 +65,25 @@ const PRODUCT = {
 
 const DETAIL_TILE_HEIGHT = 31;
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const end = new Date(day);
+  end.setUTCDate(end.getUTCDate() + 14);
   const doc = new Document({
     settings: {
       pageSize: PAGE,
@@ -86,7 +104,7 @@ export function generate(): Document {
     new Container({
       border: { width: 0.75, color: RULE },
       padding: 0,
-      child: new VerticalStack({ children: [retailerStrip(), mainOffer(), detailRow(), barcodePanel()] }),
+      child: new VerticalStack({ children: [retailerStrip(), mainOffer(), detailRow(), barcodePanel(date.format(end))] }),
     })
   );
 
@@ -163,7 +181,7 @@ function detailCell(label: string, value: string, accent: ColorInput): Container
   });
 }
 
-function barcodePanel(): Container {
+function barcodePanel(promoEnd: string): Container {
   const barWrap = new Container({
     horizontalAlignment: 'center',
     child: new Barcode({
@@ -183,7 +201,7 @@ function barcodePanel(): Container {
         text('EAN-13 / GS1 UK article number', 6.5, MUTED, true, 'center', 0, 2),
         barWrap,
         text('OATS  -  BEST BEFORE SEE PACK  -  STORE COOL & DRY', 6.2, BODY, true, 'center', 4, 1),
-        text('SEL v04  -  Price file GF-27  -  Promo ends 30 Jul 2026', 5.8, MUTED, false, 'center'),
+        text(`SEL v04  -  Price file GF-27  -  Promo ends ${promoEnd}`, 5.8, MUTED, false, 'center'),
       ],
     }),
   });

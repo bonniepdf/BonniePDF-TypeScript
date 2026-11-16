@@ -119,8 +119,39 @@ export const sampleUtilityBill: UtilityBillData = {
   currency: 'GBP',
 };
 
-export function generate(): Document {
-  return buildDocument(sampleUtilityBill);
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const end = new Date(day);
+  end.setUTCDate(end.getUTCDate() - 5);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 91);
+  const due = new Date(day);
+  due.setUTCDate(due.getUTCDate() + 14);
+  const month = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' });
+  return buildDocument({
+    ...sampleUtilityBill,
+    period: { from: date.format(start), to: date.format(end), issued: date.format(day), dueBy: date.format(due) },
+    locale: context.locale ?? sampleUtilityBill.locale,
+    history: sampleUtilityBill.history.map((reading, index) => ({
+      ...reading,
+      month: month.format(new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - 11 + index, 1))),
+    })),
+  });
 }
 
 // Local helpers and sample types used by this document.

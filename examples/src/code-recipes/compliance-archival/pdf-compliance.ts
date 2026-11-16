@@ -33,7 +33,25 @@ const CHARGES: [string, string][] = [
  * options-object front door: PDF/UA-1 so every resident can read it with a
  * screen reader, PDF/A-2a so the council can archive it unchanged.
  */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const startYear = day.getUTCFullYear() + (day.getUTCMonth() >= 3 ? 1 : 0);
+  const titleText = `Your council tax for ${startYear} to ${startYear + 1}`;
   const doc = new Document({
     settings: {
       conformance: 'pdf/a-2a',
@@ -63,7 +81,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       }),
     },
     metadata: {
-      title: 'Your council tax for 2027 to 2028',
+      title: titleText,
       author: 'Sample Borough Council',
       subject: 'Council tax notice, archival (PDF/A-2a) and accessible (PDF/UA-1).',
       keywords: 'pdf/a-2a, pdf/ua-1, accessibility, archival, council tax, BonniePDF',
@@ -102,13 +120,13 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       margin: { bottom: 20 },
       children: [
         new TextBlock('Sample Resident\n12 Mill Lane\nSample Town\nST4 2QR'),
-        new TextBlock('5 November 2026\nAccount 7700 4821 93\nBand D', { alignment: 'right', color: 'slate-600' }),
+        new TextBlock(`${date.format(day)}\nAccount 7700 4821 93\nBand D`, { alignment: 'right', color: 'slate-600' }),
       ],
     })
   );
 
   doc.add(
-    new Heading('Your council tax for 2027 to 2028', {
+    new Heading(titleText, {
       level: 1,
       fontName: StandardFonts.HelveticaBold,
       fontSize: 20,
@@ -118,7 +136,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   );
   doc.add(
     new TextBlock(
-      'This letter sets out your council tax for the year from 1 April 2027. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.',
+      `This letter sets out your council tax for the year from 1 April ${startYear}. The total is £2,230.76, which we will collect from your bank account in ten monthly instalments: £223.13 on 1 April, then £223.07.`,
       { margin: { bottom: 12 } }
     )
   );

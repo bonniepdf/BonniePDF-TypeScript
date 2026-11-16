@@ -72,8 +72,6 @@ const INSTALMENT_AMOUNT = '£3,950';
 const DECISION_DETAILS: Detail[] = [
   { label: 'Decision', value: 'Awarded' },
   { label: 'Grant', value: 'Community Project Grant' },
-  { label: 'Award period', value: '1 Sep 2026 to 31 Aug 2027' },
-  { label: 'First instalment', value: 'Friday 26 September 2026' },
 ];
 
 /**
@@ -85,7 +83,27 @@ const DECISION_DETAILS: Detail[] = [
  * the escape hatch the options-object front door sits on top of. Renders
  * **byte-for-byte identically** to the options-style `grant-award-letter.ts`.
  */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const awardStart = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth() + 1, 1));
+  const awardEnd = new Date(Date.UTC(awardStart.getUTCFullYear() + 1, awardStart.getUTCMonth(), 0));
+  const firstInstalment = new Date(awardStart);
+  firstInstalment.setUTCDate(1 + (5 - awardStart.getUTCDay() + 7) % 7 + 21);
   const gardenImage = assets.get('images/newsletter/community-garden.jpg')!;
   const settings = new DocumentSettings(PAGE, MARGIN);
   settings.pageColor = Color.white;
@@ -151,8 +169,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const addr = body('Sample Recipient\nSample Community Project\n14 Sample Walk\nSample Town\nST3 2LP', { mb: 0 });
 
   const meta = new VerticalStack();
-  meta.add(body('Issued 4 August 2026', { align: TextAlignment.Right, mb: 0 }));
-  meta.add(body('Reference SAMPLE-GRANT-2026-00417', { align: TextAlignment.Right, color: MUTED, size: 10, mb: 0 }));
+  meta.add(body(`Issued ${date.format(day)}`, { align: TextAlignment.Right, mb: 0 }));
+  meta.add(body(`Reference SAMPLE-GRANT-${day.getUTCFullYear()}-00417`, { align: TextAlignment.Right, color: MUTED, size: 10, mb: 0 }));
 
   top.addRow(addr, meta);
   doc.add(top);
@@ -171,7 +189,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const details = new Grid(1, 1);
   details.cellPadding = 5;
   details.addRow(detail(DECISION_DETAILS[0]), detail(DECISION_DETAILS[1]));
-  details.addRow(detail(DECISION_DETAILS[2]), detail(DECISION_DETAILS[3]));
+  details.addRow(detail({ label: 'Award period', value: `${date.format(awardStart)} to ${date.format(awardEnd)}` }),
+    detail({ label: 'First instalment', value: date.format(firstInstalment) }));
 
   const calloutStack = new VerticalStack();
   const calloutLabel = new TextBlock('Our decision');

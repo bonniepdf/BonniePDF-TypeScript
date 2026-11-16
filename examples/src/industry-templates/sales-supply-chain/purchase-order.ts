@@ -117,7 +117,23 @@ const LINES: OrderLine[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const net = LINES.reduce((sum, l) => sum + l.quantity * l.unitPrice, 0);
   const vat = net * ORDER.vatRate;
 
@@ -152,6 +168,7 @@ export function generate(): Document {
   doc.add(accentBar());
   doc.add(cell('PURCHASE ORDER', { bold: true, size: 8.5, color: ACCENT, mb: 4 }));
   doc.add(h1(`Order ${ORDER.number}`));
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   doc.add(cell(ORDER.revision, { color: MUTED, mb: 14 }));
 
   doc.add(

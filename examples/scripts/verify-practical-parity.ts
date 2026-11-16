@@ -13,11 +13,13 @@ settings.license = 'evaluation';
 registerBundledFonts();
 const netRoot = process.env.BONNIEPDF_NET_ROOT ?? resolve(import.meta.dirname, '../../../BonniePDF-NET');
 const output = mkdtempSync(resolve(tmpdir(), 'bonniepdf-example-parity-'));
+const context = { now: new Date('2026-10-24T22:15:00Z'), locale: 'de-DE', timeZone: 'Europe/Berlin' };
 for (const project of [
   'CodeRecipes/BonniePDF.Examples.PracticalRecipes',
   'IndustryTemplates/BonniePDF.Examples.PracticalDocuments',
 ]) {
-  const run = spawnSync('dotnet', ['run', '--project', resolve(netRoot, 'Examples', project), '-v:q', '--', output], {
+  const run = spawnSync('dotnet', ['run', '--project', resolve(netRoot, 'Examples', project), '-v:q', '--',
+    output, context.now.toISOString(), context.locale, context.timeZone], {
     encoding: 'utf8',
     maxBuffer: 8 * 1024 * 1024,
   });
@@ -53,7 +55,7 @@ for (const id of [
       new Uint8Array(readFileSync(resolve(import.meta.dirname, '../assets', path))),
     ])
   );
-  const doc = example.generate(assets);
+  const doc = example.generate(assets, context);
   try {
     const actual = await doc.generateSvgPagesAsync();
     const files = readdirSync(output)

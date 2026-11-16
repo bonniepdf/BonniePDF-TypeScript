@@ -21,7 +21,33 @@ import {
 const DL = new PdfSize(595.3, 280.6, 'DL');
 const SERIAL = 'LRD-100-4821-7730';
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const renewal = new Date(day);
+  renewal.setUTCFullYear(day.getUTCFullYear() + 1);
+  if (renewal.getUTCMonth() !== day.getUTCMonth()) renewal.setUTCDate(0);
+  const expiry = date.format(renewal);
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const doc = new Document({
     settings: {
       pageSize: DL,
@@ -110,7 +136,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
                 altText: `Voucher serial number barcode: ${SERIAL}`,
               }),
             }),
-            new TextBlock(`Valid until 5 November 2027\nSerial ${SERIAL}`, { fontSize: 7.5, color: 'stone-400' }),
+            new TextBlock(`Valid until ${expiry}\nSerial ${SERIAL}`, { fontSize: 7.5, color: 'stone-400' }),
           ],
         }),
       ],
@@ -133,9 +159,9 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         }),
         ...[
           ['Serial', SERIAL],
-          ['Value', '£100.00'],
-          ['Issued', '5 November 2026'],
-          ['Expires', '5 November 2027'],
+          ['Value', money.format(100)],
+          ['Issued', date.format(day)],
+          ['Expires', expiry],
         ].map(
           ([label, value]) =>
             new VerticalStack({

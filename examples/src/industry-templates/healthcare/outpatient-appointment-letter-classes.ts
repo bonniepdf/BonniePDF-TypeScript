@@ -55,7 +55,25 @@ const BLUE_BORDER = Color.fromHex('#b8d8e3');
 const NOTICE = Color.fromHex('#fff4ce');
 const NOTICE_BORDER = Color.fromHex('#d69e00');
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const offset = (days: number) => new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days));
+  const appointmentDate = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(offset(45)).replace(',', '');
   const markBytes = assets.get('images/svg/sample-healthcare.svg');
   if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
   const markSvg = new TextDecoder().decode(markBytes);
@@ -118,7 +136,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   brandRow.add(mark);
   brandRow.add(brand);
 
-  const issuedDate = new TextBlock('Issued 1 August 2026');
+  const issuedDate = new TextBlock(`Issued ${date.format(day)}`);
   issuedDate.fontSize = 9.5;
   issuedDate.color = MUTED;
   issuedDate.alignment = TextAlignment.Right;
@@ -165,7 +183,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   const appointmentDetails = new Grid(1, 1);
   appointmentDetails.cellPadding = 5;
-  appointmentDetails.addRow(detail('Date', 'Tuesday 15 September 2026'), detail('Time', '10:30 am'));
+  appointmentDetails.addRow(detail('Date', appointmentDate), detail('Time', '10:30 am'));
   appointmentDetails.addRow(
     detail('Clinic', 'Cardiology outpatient clinic'),
     detail('Clinician', 'Dr Sample Clinician')

@@ -51,9 +51,6 @@ const TEXT_DARK = Color.fromHex('#333333');
 const TEXT_MEDIUM = Color.fromHex('#555555');
 const TEXT_LIGHT = Color.fromHex('#707070');
 
-const usd = (n: number): string =>
-  `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 /**
  * The **class / construct-then-mutate** companion to `business-invoice.ts`.
  *
@@ -66,12 +63,34 @@ const usd = (n: number): string =>
  * `business-invoice.ts` (an equivalence test binds the two). Reach for the
  * options form first; this variant exists to show what it desugars to.
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const now = new Date();
-  const year = now.getFullYear();
-  const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${year}`;
-  const dueDate = new Date(now.getTime() + 14 * 86400000);
-  const dueDateStr = `${String(dueDate.getMonth() + 1).padStart(2, '0')}/${String(dueDate.getDate()).padStart(2, '0')}/${dueDate.getFullYear()}`;
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-US', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const year = day.getUTCFullYear();
+  const dueDate = new Date(day);
+  dueDate.setUTCDate(dueDate.getUTCDate() + 14);
+  const dateStr = date.format(day);
+  const dueDateStr = date.format(dueDate);
+  const usd = new Intl.NumberFormat(context.locale ?? 'en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   const settings = new DocumentSettings(PdfSize.a4, 36);
   settings.pageColor = Color.white;
@@ -193,8 +212,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       tb(item.service, { align: TextAlignment.Left }),
       tb(item.description, { color: TEXT_LIGHT, align: TextAlignment.Left }),
       tb(String(item.quantity), { align: TextAlignment.Center }),
-      tb(usd(item.unitPrice), { align: TextAlignment.Right }),
-      tb(usd(lineTotal), { color: TEXT_DARK, align: TextAlignment.Right })
+      tb(usd.format(item.unitPrice), { align: TextAlignment.Right }),
+      tb(usd.format(lineTotal), { color: TEXT_DARK, align: TextAlignment.Right })
     );
   }
   doc.add(lineItemsTable);
@@ -217,17 +236,17 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   messageStack.add(tb('Thanks!', { mt: 4 }));
 
   const totalsStack = new VerticalStack();
-  totalsStack.add(moneyRow('Subtotal', usd(subtotal)));
-  totalsStack.add(moneyRow('Sales tax (8.25%)', usd(tax)));
+  totalsStack.add(moneyRow('Subtotal', usd.format(subtotal)));
+  totalsStack.add(moneyRow('Sales tax (8.25%)', usd.format(tax)));
   totalsStack.add(
-    moneyRow('Discount (early payment)', '-$1,400.00', {
+    moneyRow('Discount (early payment)', usd.format(-1400), {
       labelColor: ACCENT_GREEN_TEXT,
       valueColor: ACCENT_GREEN_TEXT,
     })
   );
   totalsStack.add(bar(TEXT_DARK, 0.5, new Thickness(0, 4, 0, 4)));
   totalsStack.add(
-    moneyRow('Total', usd(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 })
+    moneyRow('Total', usd.format(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 })
   );
 
   // messageStack keeps its Container: the right-padding is real styling. totalsStack

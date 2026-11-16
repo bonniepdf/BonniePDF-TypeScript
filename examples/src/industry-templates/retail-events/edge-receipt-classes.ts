@@ -82,8 +82,28 @@ const ORDER_NO = '4021';
  * door sits on top of. Renders **byte-for-byte identically** to the options-style
  * `edge-receipt.ts`.
  */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
-  const stamp = '16 Jun 2026 10:30';
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const gbp = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
   const logoBytes = assets.get('images/svg/sample-coffee.svg');
   if (!logoBytes) throw new Error('Supply images/svg/sample-coffee.svg.');
   const logoSvg = new TextDecoder().decode(logoBytes);
@@ -137,20 +157,20 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   let total = 0;
   for (const it of ITEMS) {
     total += it.price;
-    doc.add(kv(`${it.qty} x ${it.name}`, gbp(it.price)));
+    doc.add(kv(`${it.qty} x ${it.name}`, gbp.format(it.price)));
   }
 
   doc.add(rule());
 
   // ── Totals (prices are VAT-inclusive; show the VAT portion) ─────────────
   const vat = total - total / 1.2;
-  doc.add(kv('Subtotal', gbp(total - vat)));
-  doc.add(kv('VAT (20%)', gbp(vat)));
-  doc.add(kv('TOTAL', gbp(total), { bold: true, size: 12 }));
+  doc.add(kv('Subtotal', gbp.format(total - vat)));
+  doc.add(kv('VAT (20%)', gbp.format(vat)));
+  doc.add(kv('TOTAL', gbp.format(total), { bold: true, size: 12 }));
 
   doc.add(rule());
 
-  doc.add(kv('Card **** 4242', gbp(total)));
+  doc.add(kv('Card **** 4242', gbp.format(total)));
   doc.add(kv('Approved', 'AUTH 06Q41X'));
 
   doc.add(rule());
@@ -202,9 +222,6 @@ interface Item {
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function gbp(n: number): string {
-  return '£' + n.toFixed(2);
-}
 
 /** A centred single line of receipt text. */
 function center(text: string, size = 8, color: Color = MUTE, marginTop = 0): TextBlock {

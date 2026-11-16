@@ -38,8 +38,9 @@ const CHART_BG = '#ffffff';
 /** Twelve monthly data points from a values array. */
 const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' }));
 // ── Entry point ──────────────────────────────────────────────────────────────
-export function generate(): Document {
-  const year = new Date().getFullYear();
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
   function pageFooter() {
     const stack = new HorizontalStack({ widthDistribution: 'weighted' });
     const textBlock1 = new TextBlock('BonniePDF Charting Examples');

@@ -38,8 +38,9 @@ const BORDER = '#e2e8f0';
 const HEADER_FILL = '#f8fafc';
 const WHITE = '#ffffff';
 const POSITIVE = '#047857';
-export function generate(): Document {
-  const year = new Date().getFullYear() - 1;
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const revenue = [125, 146, 140, 175, 163, 190, 197, 182, 211, 226, 240, 233];
   const products = [

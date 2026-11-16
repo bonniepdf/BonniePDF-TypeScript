@@ -32,7 +32,22 @@ const RULE = ColorPalette.slate[200];
 
 const RUN_SIZE = 250;
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
   // ── The run ────────────────────────────────────────────────────────────────
   //
   // Synchronous here so the example stays a pure `generate()` like every other
@@ -151,7 +166,7 @@ export function generate(): Document {
   // The caveat sits with the figures it qualifies, not alone at the end of the document.
   doc.add(
     cell(
-      `Run completed ${gbDate(new Date())} on the machine that generated this document. ` +
+      `Run completed ${stamp} on the machine that generated this document. ` +
         'Figures are a single sample, not a benchmark: they include process warm-up and whatever else the machine ' +
         'was doing.',
       { size: 8.5, color: MUTED, mt: 8, mb: 0 }
@@ -370,10 +385,4 @@ function band(left: string, right: string): HorizontalStack {
   row.add(cell(left, { size: 7.5, color: MUTED }), 2.5);
   row.add(cell(right, { size: 7.5, color: MUTED, align: 'right' }), 2);
   return row;
-}
-
-function gbDate(d: Date): string {
-  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
-    d
-  );
 }

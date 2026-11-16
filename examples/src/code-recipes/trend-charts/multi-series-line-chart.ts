@@ -1,6 +1,6 @@
 /**
  * Multi-Series Line Chart.
- * Two overlapping line series comparing this year’s monthly revenue with last year’s on a shared axis, with a legend and alt text.
+ * Two overlapping line series comparing the two most recently completed calendar years on a shared axis, with a legend and alt text.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {
@@ -21,8 +21,9 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
  * authored through the options-object front door. Each year is a `series`
  * literal with its own `name` and `color`.
  */
-export function generate(): Document {
-  const year = new Date().getFullYear();
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
 
   function pageFooter() {
     const stack = new HorizontalStack({ widthDistribution: 'weighted' });

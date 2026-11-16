@@ -118,7 +118,23 @@ const CATEGORY_COMPLIANCE: [string, number][] = [
 ];
 
 // ── Document ─────────────────────────────────────────────────────────────────
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -159,6 +175,7 @@ export function generate(): Document {
   addSummaryPage(doc);
   doc.addPage();
   addRegisterAndActions(doc);
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   return doc;
 }
 
@@ -226,7 +243,7 @@ function addSummaryPage(doc: Document): void {
         h2('Key findings', { bottom: 2 }),
         callout(
           'Needs attention: five inspections are overdue, three of them high risk (fire doors, goods lift and roof ' +
-            'fall-arrest anchors). All have a named owner and a date before 6 November.',
+            'fall-arrest anchors). All have a named owner and a target date no later than 6 November.',
           '#fdeceb',
           RED
         ),

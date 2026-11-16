@@ -53,8 +53,6 @@ const RULE = ColorPalette.slate[200];
 // .NET FacturXInvoiceExample.
 
 const ACCENT = ColorPalette.blue[800]; // EU-flag blue
-const EUR = '€';
-const LOCALE = 'en-GB';
 const VAT_RATE = 0.19;
 const ASSET_KEY = 'factur-x/en16931-invoice.xml';
 
@@ -64,7 +62,29 @@ const ITEMS: LineItem[] = [
   { description: 'Software license (annual)', detail: '12-month term', qty: 1, unitPrice: 600 },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -114,6 +134,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   });
   header.addRow(seller, titleStack);
   doc.add(header);
+  doc.add(cell(`Generated ${date.format(day)}`, { size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 8) }));
 
   // ── Buyer + details ─────────────────────────────────────────────────────
   const meta = new Grid({
@@ -129,8 +150,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   );
   const detailsStack = new VerticalStack({
     children: [
-      totalLine('Invoice date', '07 Jul 2026'),
-      totalLine('Due date', '21 Jul 2026'),
+      totalLine('Invoice date', date.format(new Date('2026-07-07T00:00:00Z'))),
+      totalLine('Due date', date.format(new Date('2026-07-21T00:00:00Z'))),
       totalLine('Buyer reference', 'PO-2026-042'),
       totalLine('Terms', '14 days net'),
     ],
@@ -162,8 +183,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     table.addRow(
       desc,
       cell(String(it.qty), { align: 'center' }),
-      cell(money(it.unitPrice, EUR, LOCALE), { align: 'right' }),
-      cell(money(amount, EUR, LOCALE), { align: 'right' })
+      cell(money.format(it.unitPrice), { align: 'right' }),
+      cell(money.format(amount), { align: 'right' })
     );
   }
   doc.add(table);
@@ -173,10 +194,10 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   const vat = net * VAT_RATE;
   const totals = new VerticalStack({
     children: [
-      totalLine('Total net', money(net, EUR, LOCALE)),
-      totalLine('VAT (19%)', money(vat, EUR, LOCALE)),
+      totalLine('Total net', money.format(net)),
+      totalLine('VAT (19%)', money.format(vat)),
       divider(INK, 0.6),
-      totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }),
+      totalLine('Total due (EUR)', money.format(net + vat), { bold: true, size: 13, color: ACCENT }),
     ],
   });
   const totalsBox = new Container({
@@ -250,9 +271,6 @@ function cell(text: string, o: CellOpts = {}): TextBlock {
 }
 
 /** A right-aligned monetary cell using the region's symbol and locale. */
-function money(value: number, symbol: string, locale = 'en-US'): string {
-  return symbol + value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 /** A block of plain text lines, e.g. a postal address. A single TextBlock
  * using hard `\n` breaks, so the block tags as one paragraph under PDF/UA. */

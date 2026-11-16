@@ -298,6 +298,13 @@ export type Runtime = 'browser' | 'node' | 'edge';
 /** Volume of tabular/repeated data — `'scale'` marks a deliberate stress test. */
 export type DataDensity = 'low' | 'medium' | 'high' | 'scale';
 
+/** Optional display preferences and clock supplied by the example host. */
+export interface ExampleContext {
+  now?: Date;
+  locale?: string;
+  timeZone?: string;
+}
+
 export interface ExampleDef {
   /** Paired host/setup guide under /docs/{language}/. */
   guideSlug?: string;
@@ -322,7 +329,7 @@ export interface ExampleDef {
    * quietly rendering a stand-in. Examples needing nothing simply declare
    * `generate()` and ignore the argument.
    */
-  generate: (assets: ReadonlyMap<string, Uint8Array>) => Document;
+  generate: (assets: ReadonlyMap<string, Uint8Array>, context?: ExampleContext) => Document;
   /** Asset paths (relative to examples/assets/) that must be pre-loaded before generate() is called. */
   requiredAssets?: string[];
   /** Should the associated viewer show thumbnails by default */

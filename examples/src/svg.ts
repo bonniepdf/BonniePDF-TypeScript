@@ -1,5 +1,5 @@
 import { embeddedFontFamily } from '@bonniepdf/core';
-import { examples, type ExampleDef } from './index';
+import { examples, type ExampleContext, type ExampleDef } from './index';
 
 /**
  * Resolves the pre-loaded asset bytes an example needs before `generate()` runs
@@ -75,6 +75,8 @@ export interface BuildSvgAssetsOptions {
    * is byte-stable across runs (useful for CI diffing / committed artifacts).
    */
   deterministic?: boolean;
+  /** Generation inputs for build-time preview assets. */
+  context?: ExampleContext;
   /**
    * Supplies the pre-loaded assets (images, embedded data) each example needs.
    * Without it, examples that require external assets render their built-in
@@ -109,6 +111,9 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
     ? examples.filter(e => options.ids!.includes(e.id))
     : examples.filter(e => e.gallery !== false);
 
+  const context = options.context ?? (options.deterministic
+    ? { now: new Date('2026-11-13T12:00:00Z'), timeZone: 'UTC' }
+    : { now: new Date() });
   const files: SvgAssetFile[] = [];
   const manifestExamples: SvgManifestExample[] = [];
   const failures: { id: string; error: string }[] = [];
@@ -116,7 +121,7 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
   for (const def of defs) {
     try {
       const assets = options.loadAssets ? await options.loadAssets(def) : new Map<string, Uint8Array>();
-      const doc = def.generate(assets);
+      const doc = def.generate(assets, context);
       const { pages: renderedPages, fontFaceCss } = await doc.generateSvgDocumentAsync({
         maxPages,
         precision,

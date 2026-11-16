@@ -48,7 +48,23 @@ const STUB = ColorPalette.slate[800];
  * perforation-style tear-off stub. Proves QR + barcode + visual polish on a
  * custom ticket page size. The event name is the document's H1.
  */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const bgData = assets.get(BG_IMAGE);
   if (!bgData) throw new Error(`Missing required asset: ${BG_IMAGE}`);
 
@@ -153,6 +169,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       tb('GA - STANDING', 12, CREAM, { bold: true, mb: 8, align: 'center' }),
       tb('TICKET', 7, MUTE, { bold: true, mb: 2, align: 'center' }),
       tb('ASF26-4471-XK', 10, CREAM, { bold: true, align: 'center' }),
+      tb(`Generated ${date.format(day)}`, 7, MUTE, { align: 'center' }),
     ],
   });
 

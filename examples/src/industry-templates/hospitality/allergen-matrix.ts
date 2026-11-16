@@ -64,7 +64,23 @@ const CONTAINS: [string, ColorInput | undefined, ColorInput] = ['Yes', 'rose-100
 const TRACE: [string, ColorInput | undefined, ColorInput] = ['Trace', 'amber-100', 'amber-900'];
 const ABSENT: [string, ColorInput | undefined, ColorInput] = ['No', undefined, 'stone-500'];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -156,6 +172,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       { fontSize: 8, color: 'stone-500' }
     )
   );
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   return doc;
 }
 

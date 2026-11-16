@@ -60,8 +60,6 @@ const RULE = ColorPalette.slate[200];
 // FacturXInvoiceExample.
 
 const ACCENT = ColorPalette.blue[800]; // EU-flag blue
-const EUR = '€';
-const LOCALE = 'en-GB';
 const VAT_RATE = 0.19;
 const ASSET_KEY = 'factur-x/en16931-invoice.xml';
 
@@ -79,7 +77,29 @@ const ITEMS: LineItem[] = [
  * parent VerticalStack). `applyFacturX` binds the embedded XML in both variants.
  * Renders **byte-for-byte identically** to the options-style `factur-x-invoice.ts`.
  */
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const settings = new DocumentSettings(PdfSize.a4, 44);
   // applyFacturX forces PDF/A-3b; set here too so the intent is explicit.
   settings.conformance = PdfAConformance.PdfA3b;
@@ -123,6 +143,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   titleStack.add(cell('INV-2026-1001', { color: MUTED, align: TextAlignment.Right }));
   header.addRow(seller, titleStack);
   doc.add(header);
+  doc.add(cell(`Generated ${date.format(day)}`, { size: 8, color: MUTED, margin: new Thickness(0, 0, 0, 8) }));
 
   // ── Buyer + details ─────────────────────────────────────────────────────
   const meta = new Grid(1, 1);
@@ -136,8 +157,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.add(totalLine('Invoice date', '07 Jul 2026'));
-  detailsStack.add(totalLine('Due date', '21 Jul 2026'));
+  detailsStack.add(totalLine('Invoice date', date.format(new Date('2026-07-07T00:00:00Z'))));
+  detailsStack.add(totalLine('Due date', date.format(new Date('2026-07-21T00:00:00Z'))));
   detailsStack.add(totalLine('Buyer reference', 'PO-2026-042'));
   detailsStack.add(totalLine('Terms', '14 days net'));
   meta.addRow(buyer, labelled('DETAILS', detailsStack, ACCENT));
@@ -165,8 +186,8 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     table.addRow(
       desc,
       cell(String(it.qty), { align: TextAlignment.Center }),
-      cell(money(it.unitPrice, EUR, LOCALE), { align: TextAlignment.Right }),
-      cell(money(amount, EUR, LOCALE), { align: TextAlignment.Right })
+      cell(money.format(it.unitPrice), { align: TextAlignment.Right }),
+      cell(money.format(amount), { align: TextAlignment.Right })
     );
   }
   doc.add(table);
@@ -175,10 +196,10 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   // ── Totals (mirror the embedded XML exactly: 4000 / 760 / 4760) ───────────
   const vat = net * VAT_RATE;
   const totals = new VerticalStack();
-  totals.add(totalLine('Total net', money(net, EUR, LOCALE)));
-  totals.add(totalLine('VAT (19%)', money(vat, EUR, LOCALE)));
+  totals.add(totalLine('Total net', money.format(net)));
+  totals.add(totalLine('VAT (19%)', money.format(vat)));
   totals.add(divider(INK, 0.6));
-  totals.add(totalLine('Total due (EUR)', money(net + vat, EUR, LOCALE), { bold: true, size: 13, color: ACCENT }));
+  totals.add(totalLine('Total due (EUR)', money.format(net + vat), { bold: true, size: 13, color: ACCENT }));
   const totalsBox = new Container();
   totalsBox.child = totals;
   totalsBox.padding = new Thickness(14, 12, 14, 12);
@@ -254,9 +275,6 @@ function cell(text: string, o: CellOpts = {}): TextBlock {
 }
 
 /** A right-aligned monetary cell using the region's symbol and locale. */
-function money(value: number, symbol: string, locale = 'en-US'): string {
-  return symbol + value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 /** A block of plain text lines, e.g. a postal address. A single TextBlock
  * using hard `\n` breaks, so the block tags as one paragraph under PDF/UA. */

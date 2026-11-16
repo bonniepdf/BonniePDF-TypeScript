@@ -32,7 +32,7 @@ interface Letter {
   rtl: boolean;
   title: string;
   address: string;
-  date: string;
+  locale: string;
   body: string;
   columns: [string, string, string];
   items: [string, string, string][];
@@ -46,7 +46,7 @@ const LETTERS: Letter[] = [
     rtl: false,
     title: 'Confirmation de votre commande',
     address: 'Madame Zoë Martin\n18 rue des Écoles\n75005 Paris',
-    date: '25 octobre 2026',
+    locale: 'fr-FR',
     body: 'Merci pour votre commande. Elle est confirmée et sera livrée à votre adresse sous cinq jours ouvrés. Vous en trouverez le détail ci-dessous ; merci de conserver cette lettre.',
     columns: ['Article', 'Qté', 'Prix'],
     items: [
@@ -61,7 +61,7 @@ const LETTERS: Letter[] = [
     rtl: false,
     title: 'Επιβεβαίωση παραγγελίας',
     address: 'Κυρία Ελένη Παπαδοπούλου\nΟδός Ερμού 24\n105 63 Αθήνα',
-    date: '25 Οκτωβρίου 2026',
+    locale: 'el-GR',
     body: 'Σας ευχαριστούμε για την παραγγελία σας. Επιβεβαιώθηκε και θα παραδοθεί στη διεύθυνσή σας μέσα σε πέντε εργάσιμες ημέρες. Θα βρείτε τις λεπτομέρειες παρακάτω· παρακαλούμε κρατήστε αυτή την επιστολή.',
     columns: ['Προϊόν', 'Ποσ.', 'Τιμή'],
     items: [
@@ -76,7 +76,7 @@ const LETTERS: Letter[] = [
     rtl: true,
     title: 'تأكيد الطلب',
     address: 'السيدة مريم العتيبي\nحي العليا، الرياض 12214',
-    date: '25 أكتوبر 2026',
+    locale: 'ar-SA',
     body: 'شكراً لطلبكم. تم تأكيد الطلب وسيصل إلى عنوانكم خلال خمسة أيام عمل. يرجى مراجعة تفاصيل الطلب أدناه والاحتفاظ بهذه الرسالة.',
     columns: ['المنتج', 'الكمية', 'السعر'],
     items: [
@@ -92,7 +92,7 @@ const LETTERS: Letter[] = [
     rtl: true,
     title: 'אישור הזמנה',
     address: 'גב׳ מרים לוי\nרחוב הרצל 12\nתל אביב 6578210',
-    date: '25 באוקטובר 2026',
+    locale: 'he-IL',
     body: 'תודה על הזמנתכם. ההזמנה אושרה ותגיע לכתובתכם בתוך חמישה ימי עסקים. פרטי ההזמנה מופיעים להלן; נא לשמור מכתב זה.',
     columns: ['מוצר', 'כמות', 'מחיר'],
     items: [
@@ -104,7 +104,15 @@ const LETTERS: Letter[] = [
   },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
   const doc = new Document({
     metadata: { title: 'Multilingual customer letter' },
     settings: {
@@ -204,7 +212,9 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
         children: [
           new HorizontalStack({
             widthDistribution: 'equal',
-            children: [body(letter.address), body(letter.date, { color: 'slate-500', align: 'end' })],
+            children: [body(letter.address), body(new Intl.DateTimeFormat(letter.locale, {
+              day: 'numeric', month: 'long', year: 'numeric', calendar: 'gregory', numberingSystem: 'latn', timeZone: 'UTC',
+            }).format(day), { color: 'slate-500', align: 'end' })],
           }),
           new Heading(letter.title, {
             level: index ? 2 : 1,

@@ -124,7 +124,23 @@ const SECTIONS: BundleSection[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const totalItems = SECTIONS.reduce((sum, s) => sum + s.items.length, 0);
   const totalPages = SECTIONS.reduce((sum, s) => sum + s.items.reduce((n, i) => n + i.pages, 0), 0);
 
@@ -288,6 +304,7 @@ export function generate(): Document {
     doc.add(back);
   }
 
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   return doc;
 }
 

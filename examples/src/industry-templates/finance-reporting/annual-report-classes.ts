@@ -82,16 +82,23 @@ const SEGMENTS: [string, string, string][] = [
 const YEAR = 2025;
 const REPORT_TITLE = `Annual Report ${YEAR}`;
 
-// Captured once, when the document is generated - surfaced in the footer.
-const GENERATED = `Generated ${new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-}).format(new Date(2026, 5, 16, 10, 30, 0))}`;
-
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  const now = context.now ?? new Date();
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
+  const generated = `Generated ${stamp}`;
   const settings = new DocumentSettings(PAGE, MARGIN);
   settings.conformance = PdfAConformance.PdfA2a; // the accessible archival level - requires tagging
   settings.accessibility = AccessibilityMode.PdfUa1;
@@ -110,7 +117,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   settings.headerTemplate = (pageNumber: number): IElement | undefined =>
     pageNumber === 1 ? undefined : headerRow(pageNumber);
   settings.footerTemplate = (pageNumber: number): IElement | undefined =>
-    pageNumber === 1 ? undefined : footerRow(pageNumber);
+    pageNumber === 1 ? undefined : footerRow(pageNumber, generated);
 
   const metadata = new DocumentMetadata();
   metadata.title = `${COMPANY} - ${REPORT_TITLE}`;
@@ -141,7 +148,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
   doc.add(coverSubtitle(`Fiscal Year ${YEAR}`));
   doc.add(new Spacer(40));
   doc.add(coverCredit('Prepared with BonniePDF'));
-  doc.add(coverCredit(GENERATED));
+  doc.add(coverCredit(generated));
 
   // ════════════════════════════════════════════════════════════════════════
   //  Page 2 - letter to shareholders + performance highlights
@@ -292,11 +299,11 @@ function headerRow(pageNumber: number): HorizontalStack {
   );
 }
 
-function footerRow(pageNumber: number): HorizontalStack {
+function footerRow(pageNumber: number, generated: string): HorizontalStack {
   // The generation time needs a wider column than the page number, so the
   // footer leans on weighted columns rather than equal thirds.
   return bandRow(
-    bandCell(GENERATED, TextAlignment.Left, false, ColorPalette.blue[600]),
+    bandCell(generated, TextAlignment.Left, false, ColorPalette.blue[600]),
     bandCell(`${COMPANY} - Confidential`, TextAlignment.Center, false, ColorPalette.blue[600]),
     bandCell(`Page ${pageNumber}`, TextAlignment.Right, true, PRIMARY),
     [5, 4, 2]

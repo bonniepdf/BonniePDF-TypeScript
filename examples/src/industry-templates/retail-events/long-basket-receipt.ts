@@ -1,6 +1,5 @@
 /** An 80 mm till receipt on one continuous roll: a long basket, accented names, per-line discounts, a return, and scannable receipt codes. */
 import {
-  formatNumber,
   Line,
   Container,
   Document,
@@ -31,7 +30,7 @@ export interface ReceiptLine {
   discountPence: number;
 }
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
   const lines: ReceiptLine[] = Array.from({ length: 35 }, (_, i) => ({
     name:
       i % 3 === 0
@@ -42,7 +41,7 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     discountPence: i % 7 === 0 ? 50 : 0,
   }));
   lines.push({ name: 'Returned reusable cup', quantity: -1, unitPence: 500, discountPence: 0 });
-  return buildReceipt(lines, assets);
+  return buildReceipt(lines, assets, context);
 }
 
 export function calculateTotal(lines: ReceiptLine[]): number {
@@ -63,7 +62,27 @@ export function calculateTotal(lines: ReceiptLine[]): number {
   return total;
 }
 
-export function buildReceipt(lines: ReceiptLine[], assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function buildReceipt(
+  lines: ReceiptLine[], assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
+  const now = context.now ?? new Date();
+  const amounts = new Intl.NumberFormat(context.locale ?? 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false });
+  const money = (pence: number) => amounts.format(pence / 100);
+  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    numberingSystem: 'latn',
+    timeZone: context.timeZone,
+  }).format(now);
   const total = calculateTotal(lines);
   const discounts = lines.reduce((sum, line) => sum + line.discountPence, 0);
   // Courier shows the Western European characters itself. A character outside them, such as the ř in
@@ -103,7 +122,7 @@ export function buildReceipt(lines: ReceiptLine[], assets?: ReadonlyMap<string, 
   doc.add(center('123 Harbour Road, Bristol BS1 4RW'));
   doc.add(rule());
   doc.add(row('Receipt', '#4022', { weights: [1, 2] }));
-  doc.add(row('Date', '25 Oct 2026 16:42', { weights: [1, 2] }));
+  doc.add(row('Date', stamp, { weights: [1, 2] }));
   doc.add(row('Customer', 'Zoë Dvořák', { weights: [1, 2] }));
   doc.add(rule());
 
@@ -144,9 +163,6 @@ export function buildReceipt(lines: ReceiptLine[], assets?: ReadonlyMap<string, 
 
 // Local helpers used by this document.
 
-function money(pence: number): string {
-  return formatNumber(pence / 100, 'F2');
-}
 
 /** A centred line of receipt text. */
 function center(text: string, marginTop = 0): TextBlock {

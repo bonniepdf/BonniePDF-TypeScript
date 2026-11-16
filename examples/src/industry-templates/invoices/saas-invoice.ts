@@ -33,7 +33,31 @@ const PANEL = ColorPalette.slate[50];
  * authored through the options-object front door. Elements are added directly
  * with doc.add(...); the document already flows vertically.
  */
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const dateAt = (days: number) => date.format(new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days)));
+  const invoiceNumber = `INV-${day.getUTCFullYear()}-0042`;
+  const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const doc = new Document({
     settings: {
       pageSize: 'a4',
@@ -44,7 +68,7 @@ export function generate(): Document {
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 10, color: BODY },
     },
     metadata: {
-      title: 'Invoice INV-2026-0042',
+      title: `Invoice ${invoiceNumber}`,
       author: 'Sample Company Ltd',
       subject: 'Subscription invoice - accessible (PDF/UA) and archival (PDF/A-2a)',
     },
@@ -57,9 +81,9 @@ export function generate(): Document {
 
   const meta = new VerticalStack({
     children: [
-      tb('Invoice  INV-2026-0042', 10, INK, { bold: true, align: 'right' }),
-      tb('Issued  18 Jun 2026', 9, MUTE, { align: 'right' }),
-      tb('Due  02 Jul 2026', 9, MUTE, { align: 'right' }),
+      tb(`Invoice  ${invoiceNumber}`, 10, INK, { bold: true, align: 'right' }),
+      tb(`Issued  ${dateAt(0)}`, 9, MUTE, { align: 'right' }),
+      tb(`Due  ${dateAt(14)}`, 9, MUTE, { align: 'right' }),
     ],
   });
 
@@ -109,7 +133,7 @@ export function generate(): Document {
   const summary = new Grid({ columns: [1, 1.4, 1], border: 0, cellPadding: 0 });
   summary.addRow(
     fact('PLAN', 'Pro, billed monthly'),
-    fact('BILLING PERIOD', '18 Jun \u2013 17 Jul 2026'),
+    fact('BILLING PERIOD', `${dateAt(0)} – ${dateAt(29)}`),
     fact('CUSTOMER ID', 'CUS-20418')
   );
   doc.add(
@@ -139,21 +163,20 @@ export function generate(): Document {
 
   const lines: [string, number, number][] = [
     ['Pro plan - 25 seats (monthly)', 25, 18.0],
-    ['Proration - 5 seats added 4 Jun (14 of 30 days)', 5, 8.4],
+    [`Proration - 5 seats added ${dateAt(-14)} (14 of 30 days)`, 5, 8.4],
     ['Additional storage - 2 TB', 2, 40.0],
     ['Premium support add-on', 1, 199.0],
-    ['Egress overage - June', 1, 36.5],
+    ['Egress overage - previous billing period', 1, 36.5],
   ];
   let subtotal = 0;
-  const money = (n: number): string => `£${n.toLocaleString('en-GB', { minimumFractionDigits: 2 })}`;
   for (const [desc, qty, unit] of lines) {
     const amount = qty * unit;
     subtotal += amount;
     items.addRow(
       cell(desc, 10, BODY, 'left'),
       cell(String(qty), 10, BODY, 'center'),
-      cell(money(unit), 10, BODY, 'right'),
-      cell(money(amount), 10, INK, 'right')
+      cell(money.format(unit), 10, BODY, 'right'),
+      cell(money.format(amount), 10, INK, 'right')
     );
   }
   doc.add(items);
@@ -169,9 +192,9 @@ export function generate(): Document {
       cell(value, bold ? 15 : 10, bold ? INK : BODY, 'right', bold)
     );
   };
-  totalRow('Subtotal', money(subtotal));
-  totalRow('VAT (20%)', money(vat));
-  totalRow('Total due', money(total), true);
+  totalRow('Subtotal', money.format(subtotal));
+  totalRow('VAT (20%)', money.format(vat));
+  totalRow('Total due', money.format(total), true);
   doc.add(totals);
 
   // ── Payment panel with QR ──────────────────────────────────────────────────
@@ -190,19 +213,19 @@ export function generate(): Document {
       tb('Pay by bank transfer or scan to pay', 10, INK, { bold: true, mb: 6 }),
       tb('Account name  Sample Company Ltd', 10, BODY, { mb: 2 }),
       tb('Sort code  04-00-72    Account  19483055', 10, BODY, { mb: 2 }),
-      tb('Reference  INV-2026-0042', 10, BODY, { mb: 2 }),
-      tb('Amount  ' + money(total), 10, INK, { bold: true }),
+      tb(`Reference  ${invoiceNumber}`, 10, BODY, { mb: 2 }),
+      tb('Amount  ' + money.format(total), 10, INK, { bold: true }),
     ],
   });
 
   const qrWrap = new Container({
     padding: 6,
     child: new QRCode({
-      data: 'https://pay.example.com/inv/INV-2026-0042',
+      data: `https://pay.example.com/inv/${invoiceNumber}`,
       size: 96,
       quietZone: 1,
       errorCorrection: 'medium',
-      altText: 'QR code to pay invoice INV-2026-0042 online, total £' + total.toFixed(2),
+      altText: `QR code to pay invoice ${invoiceNumber} online, total ${money.format(total)}`,
     }),
   });
 

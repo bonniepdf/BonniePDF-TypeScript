@@ -164,8 +164,36 @@ export const sampleQuotation: QuotationData = {
   currency: 'GBP',
 };
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  return buildDocument(sampleQuotation, createQuotationSettings(), assets);
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const validUntil = new Date(day);
+  validUntil.setUTCDate(validUntil.getUTCDate() + 30);
+  const quotation = {
+    ...sampleQuotation,
+    reference: {
+      ...sampleQuotation.reference,
+      quoteNumber: `QTE-${day.getUTCFullYear()}-0417`,
+      issued: date.format(day),
+      validUntil: date.format(validUntil),
+    },
+    locale: context.locale ?? sampleQuotation.locale,
+  };
+  return buildDocument(quotation, createQuotationSettings(quotation.reference.quoteNumber), assets);
 }
 
 // Local helpers and sample types used by this document.
@@ -506,7 +534,7 @@ function acceptanceBlock(data: QuotationData): Container {
 
 // ── buildDocument: pure data → Document ──────────────────────────────────────
 
-export function createQuotationSettings(): DocumentSettings {
+export function createQuotationSettings(quoteNumber = sampleQuotation.reference.quoteNumber): DocumentSettings {
   const settings = new DocumentSettings({
     pageSize: 'a4',
     margin: 40,
@@ -516,7 +544,7 @@ export function createQuotationSettings(): DocumentSettings {
     defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 9, color: INK },
   });
   settings.footerTemplate = pageTemplate({
-    default: pageNumber(`${sampleQuotation.reference.quoteNumber} · Page {page} of {total}`, {
+    default: pageNumber(`${quoteNumber} · Page {page} of {total}`, {
       fontName: HELVETICA,
       fontSize: 7,
       color: FAINT,

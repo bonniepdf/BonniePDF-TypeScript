@@ -196,7 +196,23 @@ const KIND_COLOUR: Record<EntryKind, ColorInput> = {
 
 // ── Document ─────────────────────────────────────────────────────────────────
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   // The running balance is computed, never transcribed. A statement whose
   // closing figure does not follow from its own rows is the one defect this
   // document cannot have.
@@ -282,6 +298,7 @@ export function generate(): Document {
     2
   );
   doc.add(titleRow);
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
 
   const parties = new HorizontalStack({ widthDistribution: 'weighted', spacing: 20, margin: { bottom: 16 } });
   parties.add(partyBlock('Statement for', ACCOUNT.address), 1);

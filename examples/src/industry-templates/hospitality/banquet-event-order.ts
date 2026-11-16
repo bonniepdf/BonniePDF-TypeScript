@@ -56,7 +56,27 @@ const STAFF: [string, number, string][] = [
   ['Bar staff', 3, '15:00'],
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const offset = (days: number) => new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days));
+  const eventDay = offset(9);
+  const eventDate = date.format(eventDay);
+  const reference = `BEO ${eventDay.toISOString().slice(2, 10).replace('-', '')}`;
   const doc = new Document({
     settings: {
       margin: 36,
@@ -65,7 +85,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
       language: 'en-GB',
       defaultTextStyle: { fontFamily: 'Helvetica', fontSize: 8.5, color: 'stone-700' },
       footerTemplate: pageTemplate({
-        default: new TextBlock('Ardmore House Hotel  ·  Events office 0131 496 0745  ·  BEO 2611-14, issue 3', {
+        default: new TextBlock(`Ardmore House Hotel  ·  Events office 0131 496 0745  ·  ${reference}, issue 3`, {
           fontSize: 7.5,
           color: MUTED,
           alignment: 'center',
@@ -75,7 +95,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     metadata: {
       title: 'Banquet event order 2611-14',
       author: 'Ardmore House Hotel',
-      subject: 'Wedding reception, 14 November 2026',
+      subject: `Wedding reception, ${eventDate}`,
     },
   });
   const crestBytes = assets.get('images/svg/ardmore-house.svg');
@@ -113,7 +133,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
     })
   );
   masthead.add(
-    new TextBlock('BEO 2611-14  ·  Issue 3\nIssued 5 November 2026\nFinal numbers due 9 November', {
+    new TextBlock(`${reference}  ·  Issue 3\nIssued ${date.format(day)}\nFinal numbers due ${date.format(offset(4))}`, {
       alignment: 'right',
       color: MUTED,
     })
@@ -129,7 +149,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
 
   // ── The event at a glance ──
   const facts = new HorizontalStack({ widthDistribution: 'equal', spacing: 8, margin: { bottom: 14 } });
-  facts.add(fact('Date', '14 November 2026'));
+  facts.add(fact('Date', eventDate));
   facts.add(fact('Room', 'The Orangery'));
   facts.add(fact('Numbers', '86 guaranteed, 90 laid'));
   facts.add(fact('Client', 'Sofia Lindqvist'));

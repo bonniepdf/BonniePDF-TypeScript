@@ -59,10 +59,17 @@ const CGST = 0.09;
 const SGST = 0.09;
 const IRN = '8a7f1e2c9b4d6f03a1e5c7b90d2f4a6e8c1b3d5f70921a4c6e8b0d2f4a6c8e1b3';
 
-export function generate(): Document {
-  const now = new Date();
-  const year = now.getFullYear();
-  const fmt = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const year = day.getUTCFullYear();
+  const fmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric' });
 
   const doc = new Document({
     settings: {
@@ -103,7 +110,7 @@ export function generate(): Document {
     SellerGstin: '29ABCDE1234F1Z5',
     BuyerGstin: '29XYZAB6789K1Z2',
     DocNo: `INV-IN-${year}-0771`,
-    DocDt: fmt.format(now),
+    DocDt: fmt.format(day),
     Irn: IRN,
   });
   const qrWrap = new HorizontalStack({ widthDistribution: 'weighted' });
@@ -145,7 +152,7 @@ export function generate(): Document {
             margin: new Thickness(0, 0, 0, 2),
           }),
           cell(IRN, { size: 8, color: INK }),
-          cell('Ack No. 112500771223344   ·   Ack Date ' + fmt.format(now), {
+          cell('Ack No. 112500771223344   ·   Ack Date ' + fmt.format(day), {
             size: 8,
             color: MUTED,
             margin: new Thickness(0, 3, 0, 0),
@@ -179,7 +186,7 @@ export function generate(): Document {
   const details = new VerticalStack({
     children: [
       totalLine('Invoice no.', `INV-IN-${year}-0771`),
-      totalLine('Invoice date', fmt.format(now)),
+      totalLine('Invoice date', fmt.format(day)),
       totalLine('Place of supply', 'Karnataka (29)'),
       totalLine('Reverse charge', 'No'),
     ],

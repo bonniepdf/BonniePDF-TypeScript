@@ -103,7 +103,23 @@ const OVERDUE: OverdueItem[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const stage = STAGES[LETTER.stage];
 
   // Days overdue are derived, so the same letter sent a week later says
@@ -173,6 +189,7 @@ export function generate(): Document {
   doc.add(cell(gbDate(LETTER.letterDate), { size: 10, color: MUTED, mb: 14 }));
 
   doc.add(h1(`Overdue account — ${money(principal)} outstanding`));
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   doc.add(cell(`Our reference ${LETTER.reference} · your account ${LETTER.account}`, { color: MUTED, mb: 14 }));
 
   // ── The body ───────────────────────────────────────────────────────────────

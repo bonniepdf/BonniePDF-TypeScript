@@ -42,15 +42,34 @@ const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
 </svg>`;
 
-const usd = (n: number): string =>
-  `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const now = new Date();
-  const year = now.getFullYear();
-  const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${year}`;
-  const dueDate = new Date(now.getTime() + 14 * 86400000);
-  const dueDateStr = `${String(dueDate.getMonth() + 1).padStart(2, '0')}/${String(dueDate.getDate()).padStart(2, '0')}/${dueDate.getFullYear()}`;
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-US', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const year = day.getUTCFullYear();
+  const dueDate = new Date(day);
+  dueDate.setUTCDate(dueDate.getUTCDate() + 14);
+  const dateStr = date.format(day);
+  const dueDateStr = date.format(dueDate);
+  const usd = new Intl.NumberFormat(context.locale ?? 'en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   const doc = new Document({
     settings: {
@@ -179,8 +198,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       tb(item.service, { align: 'left' }),
       tb(item.description, { color: TEXT_LIGHT, align: 'left' }),
       tb(String(item.quantity), { align: 'center' }),
-      tb(usd(item.unitPrice), { align: 'right' }),
-      tb(usd(lineTotal), { color: TEXT_DARK, align: 'right' })
+      tb(usd.format(item.unitPrice), { align: 'right' }),
+      tb(usd.format(lineTotal), { color: TEXT_DARK, align: 'right' })
     );
   }
   doc.add(lineItemsTable);
@@ -203,14 +222,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
 
   const totalsStack = new VerticalStack({
     children: [
-      moneyRow('Subtotal', usd(subtotal)),
-      moneyRow('Sales tax (8.25%)', usd(tax)),
-      moneyRow('Discount (early payment)', '-$1,400.00', {
+      moneyRow('Subtotal', usd.format(subtotal)),
+      moneyRow('Sales tax (8.25%)', usd.format(tax)),
+      moneyRow('Discount (early payment)', usd.format(-1400), {
         labelColor: ACCENT_GREEN_TEXT,
         valueColor: ACCENT_GREEN_TEXT,
       }),
       bar(TEXT_DARK, 0.5, { top: 4, bottom: 4 }),
-      moneyRow('Total', usd(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 }),
+      moneyRow('Total', usd.format(totalDue), { labelColor: TEXT_DARK, valueColor: TEXT_DARK, bold: true, size: 14 }),
     ],
   });
 

@@ -56,13 +56,29 @@ const OPENING_HOURS: InfoLine[] = [
   { label: 'Saturday', value: '10:00-16:00', note: 'Main library only' },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const renewal = new Date(day);
+  renewal.setUTCFullYear(day.getUTCFullYear() + 1);
+  if (renewal.getUTCMonth() !== day.getUTCMonth()) renewal.setUTCDate(0);
+  const longDate = date.format(day);
+  const renewalDate = date.format(renewal);
   const crestSvg = new TextDecoder().decode(assets.get('images/svg/borough-crest.svg'));
-  const now = new Date();
-  const longDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
-  const renewalDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(
-    new Date(now.getTime() + 365 * 86400000)
-  );
 
   const doc = new Document({
     settings: {

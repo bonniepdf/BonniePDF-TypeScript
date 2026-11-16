@@ -129,7 +129,23 @@ const LINES: DeliveryLine[] = [
   },
 ];
 
-export function generate(): Document {
+export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
   const complete = LINES.filter(l => l.despatched === l.ordered).length;
   const backOrdered = LINES.filter(l => l.despatched < l.ordered);
   const units = LINES.reduce((sum, l) => sum + l.despatched, 0);
@@ -158,6 +174,7 @@ export function generate(): Document {
   doc.add(accentBar());
   doc.add(cell('DELIVERY NOTE · PACKING SLIP', { bold: true, size: 8.5, color: ACCENT, mb: 4 }));
   doc.add(h1(`Delivery ${DELIVERY.number}`));
+  doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
   doc.add(cell('This is not an invoice. No payment is due against this document.', { color: MUTED, mb: 14 }));
 
   doc.add(

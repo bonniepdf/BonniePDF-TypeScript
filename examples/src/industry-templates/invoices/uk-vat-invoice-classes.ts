@@ -66,7 +66,7 @@ const ACCENT = ColorPalette.rose[700]; // British racing-adjacent claret
 const GBP = '£';
 
 const ITEMS: UkLine[] = [
-  { description: 'Consultancy services (May 2025)', qty: 12, unitPrice: 480, vatRate: 0.2, rateLabel: 'S' },
+  { description: 'Consultancy services', qty: 12, unitPrice: 480, vatRate: 0.2, rateLabel: 'S' },
   { description: 'On-site installation', qty: 1, unitPrice: 1250, vatRate: 0.2, rateLabel: 'S' },
   { description: "Children's safety equipment", qty: 40, unitPrice: 18.5, vatRate: 0.05, rateLabel: 'R' },
   { description: 'Printed training manuals', qty: 200, unitPrice: 3.25, vatRate: 0, rateLabel: 'Z' },
@@ -80,10 +80,19 @@ const ITEMS: UkLine[] = [
  * VerticalStack). Includes its own formatting helpers below. Renders **byte-for-byte
  * identically** to the options-style `uk-vat-invoice.ts`.
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
-  const now = new Date();
-  const year = now.getFullYear();
-  const fmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const year = day.getUTCFullYear();
+  const previousMonth = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth() - 1, 1));
+  const serviceMonth = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(previousMonth);
+  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric' });
 
   const settings = new DocumentSettings(PdfSize.a4, 44);
   settings.conformance = PdfAConformance.PdfA2a;
@@ -148,8 +157,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
     ACCENT
   );
   const detailsStack = new VerticalStack();
-  detailsStack.add(totalLine('Invoice date', fmt.format(now)));
-  detailsStack.add(totalLine('Tax point', fmt.format(now)));
+  detailsStack.add(totalLine('Invoice date', fmt.format(day)));
+  detailsStack.add(totalLine('Tax point', fmt.format(day)));
   detailsStack.add(totalLine('Customer VAT no.', 'GB 442 8810 21'));
   detailsStack.add(totalLine('Payment terms', '30 days'));
   meta.addRow(customer, labelled('DETAILS', detailsStack, ACCENT));
@@ -172,14 +181,14 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
   // Accumulate net and VAT per rate for the summary block.
   const byRate = new Map<number, { label: string; net: number }>();
   let netTotal = 0;
-  for (const it of ITEMS) {
+  for (const [index, it] of ITEMS.entries()) {
     const net = it.qty * it.unitPrice;
     netTotal += net;
     const bucket = byRate.get(it.vatRate) ?? { label: rateName(it.vatRate), net: 0 };
     bucket.net += net;
     byRate.set(it.vatRate, bucket);
     table.addRow(
-      cell(it.description),
+      cell(index === 0 ? `${it.description} (${serviceMonth})` : it.description),
       cell(String(it.qty), { align: TextAlignment.Center }),
       cell(money(it.unitPrice, GBP, 'en-GB'), { align: TextAlignment.Right }),
       cell(it.rateLabel, { align: TextAlignment.Center, color: MUTED }),

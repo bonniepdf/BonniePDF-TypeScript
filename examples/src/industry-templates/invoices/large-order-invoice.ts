@@ -1,6 +1,5 @@
 /** A 72-line invoice: a styled header row that repeats on every page, a carried-forward subtotal at each page break, per-line discounts, mixed VAT rates, and the totals kept together on the last page. */
 import {
-  formatNumber,
   Container,
   Document,
   Grid,
@@ -68,7 +67,7 @@ const CATALOGUE: [string, number, number][] = [
 ];
 const SITES = ['Riverside block A', 'Riverside block B', 'Station Road depot'];
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
+export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
   return buildInvoice(
     Array.from({ length: 72 }, (_, i) => {
       const [product, unitPence, taxPercent] = CATALOGUE[i % CATALOGUE.length];
@@ -81,7 +80,8 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>): Document {
       };
     }),
     'PO-WFM-44817',
-    assets
+    assets,
+    context
   );
 }
 
@@ -119,13 +119,41 @@ export function calculateTotals(lines: readonly InvoiceLine[]) {
 export function buildInvoice(
   lines: readonly InvoiceLine[],
   purchaseOrder?: string | ReadonlyMap<string, Uint8Array>,
-  assets?: ReadonlyMap<string, Uint8Array>
+  assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
 ): Document {
+  // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
+  const now = context.now ?? new Date();
+  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: context.timeZone,
+  }).format(now) + 'T00:00:00Z');
+  const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+  });
+  const dueDate = new Date(day);
+  dueDate.setUTCDate(dueDate.getUTCDate() + 30);
+  const amounts = new Intl.NumberFormat(context.locale ?? 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (pence: number) => amounts.format(pence / 100);
+  const currency = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const invoiceNumber = `INV-${day.getUTCFullYear()}-072`;
   const po = typeof purchaseOrder === 'string' ? purchaseOrder : undefined;
   const resolvedAssets = typeof purchaseOrder === 'object' ? purchaseOrder : assets;
   const totals = calculateTotals(lines);
   const doc = new Document({
-    metadata: { title: 'Large-order invoice INV-2026-072' },
+    metadata: { title: `Large-order invoice ${invoiceNumber}` },
     settings: {
       language: 'en-GB',
       margin: 42,
@@ -137,7 +165,7 @@ export function buildInvoice(
           widthDistribution: 'equal',
           children: [
             text('Northfield Supply Ltd  ·  VAT GB 318 4402 17', 8, 'slate-500'),
-            text('INV-2026-072  ·  page {{CurrentPage}} of {{TotalPages}}', 8, 'slate-500', { align: 'right' }),
+            text(`${invoiceNumber}  ·  page {{CurrentPage}} of {{TotalPages}}`, 8, 'slate-500', { align: 'right' }),
           ],
         }),
       }),
@@ -171,8 +199,8 @@ export function buildInvoice(
       spacing: 2,
       children: [
         text('INVOICE', 9, 'slate-900', { bold: true, align: 'right' }),
-        text('INV-2026-072', 14, 'slate-900', { bold: true, align: 'right' }),
-        text('Issued 25 October 2026  ·  due 24 November 2026', 9, 'slate-500', { align: 'right' }),
+        text(invoiceNumber, 14, 'slate-900', { bold: true, align: 'right' }),
+        text(`Issued ${date.format(day)}  ·  due ${date.format(dueDate)}`, 9, 'slate-500', { align: 'right' }),
       ],
     })
   );
@@ -255,11 +283,11 @@ export function buildInvoice(
   const sums = new Grid({ columns: [1, 1], border: 0, cellPadding: 4 });
   sums.addRow(
     text('Net', 10, 'slate-700', { align: 'right' }),
-    text(`£${money(totals.netPence)}`, 10, 'slate-700', { align: 'right' })
+    text(currency.format(totals.netPence / 100), 10, 'slate-700', { align: 'right' })
   );
   sums.addRow(
     text('VAT', 10, 'slate-700', { align: 'right' }),
-    text(`£${money(totals.taxPence)}`, 10, 'slate-700', { align: 'right' })
+    text(currency.format(totals.taxPence / 100), 10, 'slate-700', { align: 'right' })
   );
 
   const due = new Container({
@@ -271,7 +299,7 @@ export function buildInvoice(
       widthDistribution: 'equal',
       children: [
         text('Total due', 13, 'violet-900', { bold: true }),
-        text(`£${money(totals.grossPence)}`, 13, 'violet-900', { bold: true, align: 'right' }),
+        text(currency.format(totals.grossPence / 100), 13, 'violet-900', { bold: true, align: 'right' }),
       ],
     }),
   });
@@ -315,7 +343,7 @@ export function buildInvoice(
         children: [
           totalsRow,
           text(
-            'Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote INV-2026-072 with your payment.',
+            `Payment terms: 30 days by bank transfer to Northfield Supply Ltd, sort code 20-45-77, account 61839204. Quote ${invoiceNumber} with your payment.`,
             9,
             'slate-600',
             { top: 14 }
@@ -329,9 +357,6 @@ export function buildInvoice(
 
 // Local helpers used by this document.
 
-function money(pence: number): string {
-  return formatNumber(pence / 100, 'N2');
-}
 
 function text(
   content: string,

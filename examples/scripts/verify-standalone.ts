@@ -55,11 +55,12 @@ for (const example of examples) {
         new Uint8Array(readFileSync(resolve(import.meta.dirname, '../assets', asset))),
       ])
     );
-    const generate = new Function('__core', '__assets', `"use strict";\n${body}\nreturn generate(__assets);`);
-    const document = generate(core, assets);
+    const context = { now: new Date(now), locale: 'de-DE', timeZone: 'Europe/Berlin' };
+    const generate = new Function('__core', '__assets', '__context', `"use strict";\n${body}\nreturn generate(__assets, __context);`);
+    const document = generate(core, assets, context);
     if (!(document instanceof core.Document)) throw new Error('generate() must return a Document');
     const actual = await document.generateSvgPagesAsync({ maxPages: 3 });
-    const expected = await example.generate(assets).generateSvgPagesAsync({ maxPages: 3 });
+    const expected = await example.generate(assets, context).generateSvgPagesAsync({ maxPages: 3 });
     // The batch report measures elapsed time, so two executions print different figures.
     if (
       actual.length !== expected.length ||

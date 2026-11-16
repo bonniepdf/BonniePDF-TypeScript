@@ -42,15 +42,20 @@ const FALLBACK_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   <circle cx="35.5" cy="34.5" r="2.5" fill="#94a3b8"/>
 </svg>`;
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-US', {
     day: '2-digit',
     month: '2-digit',

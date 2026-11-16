@@ -56,7 +56,12 @@ for (const example of examples) {
       ])
     );
     const context = { now: new Date(now), locale: 'de-DE', timeZone: 'Europe/Berlin' };
-    const generate = new Function('__core', '__assets', '__context', `"use strict";\n${body}\nreturn generate(__assets, __context);`);
+    const generate = new Function(
+      '__core',
+      '__assets',
+      '__context',
+      `"use strict";\n${body}\nreturn generate(__assets, __context);`
+    );
     const document = generate(core, assets, context);
     if (!(document instanceof core.Document)) throw new Error('generate() must return a Document');
     const actual = await document.generateSvgPagesAsync({ maxPages: 3 });

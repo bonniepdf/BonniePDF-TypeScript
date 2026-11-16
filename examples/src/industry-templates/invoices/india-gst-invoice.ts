@@ -59,15 +59,20 @@ const CGST = 0.09;
 const SGST = 0.09;
 const IRN = '8a7f1e2c9b4d6f03a1e5c7b90d2f4a6e8c1b3d5f70921a4c6e8b0d2f4a6c8e1b3';
 
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const year = day.getUTCFullYear();
   const fmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric' });
 

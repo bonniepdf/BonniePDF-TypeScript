@@ -55,15 +55,20 @@ const BLUE_BORDER = Color.fromHex('#b8d8e3');
 const NOTICE = Color.fromHex('#fff4ce');
 const NOTICE_BORDER = Color.fromHex('#d69e00');
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -73,7 +78,15 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now
     timeZone: 'UTC',
   });
   const offset = (days: number) => new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days));
-  const appointmentDate = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(offset(45)).replace(',', '');
+  const appointmentDate = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+    .format(offset(45))
+    .replace(',', '');
   const markBytes = assets.get('images/svg/sample-healthcare.svg');
   if (!markBytes) throw new Error('Supply images/svg/sample-healthcare.svg.');
   const markSvg = new TextDecoder().decode(markBytes);

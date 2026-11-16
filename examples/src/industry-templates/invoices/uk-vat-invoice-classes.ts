@@ -80,18 +80,25 @@ const ITEMS: UkLine[] = [
  * VerticalStack). Includes its own formatting helpers below. Renders **byte-for-byte
  * identically** to the options-style `uk-vat-invoice.ts`.
  */
-export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const year = day.getUTCFullYear();
   const previousMonth = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth() - 1, 1));
-  const serviceMonth = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(previousMonth);
+  const serviceMonth = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+    previousMonth
+  );
   const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'UTC', day: '2-digit', month: 'short', year: 'numeric' });
 
   const settings = new DocumentSettings(PdfSize.a4, 44);

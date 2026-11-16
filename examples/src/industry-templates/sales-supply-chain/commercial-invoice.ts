@@ -156,7 +156,10 @@ const GOODS: Goods[] = [
   },
 ];
 
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -166,20 +169,23 @@ export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { n
     timeZone: 'UTC',
   });
   const now = context.now ?? new Date();
-  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    calendar: 'gregory',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now);
+  const stamp =
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now) +
+    ' ' +
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now);
   const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
     style: 'currency',
     currency: 'EUR',
@@ -352,7 +358,11 @@ export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { n
   );
   doc.add(
     weightedRow(
-      [slot('Name and position', 'Authorised signatory'), slot('Signature', ''), slot('Date', date.format(INVOICE.date))],
+      [
+        slot('Name and position', 'Authorised signatory'),
+        slot('Signature', ''),
+        slot('Date', date.format(INVOICE.date)),
+      ],
       {
         spacing: 22,
         mb: 6,

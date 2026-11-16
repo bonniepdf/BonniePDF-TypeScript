@@ -33,15 +33,20 @@ const PANEL = ColorPalette.slate[50];
  * authored through the options-object front door. Elements are added directly
  * with doc.add(...); the document already flows vertically.
  */
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -50,7 +55,8 @@ export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { n
     numberingSystem: 'latn',
     timeZone: 'UTC',
   });
-  const dateAt = (days: number) => date.format(new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days)));
+  const dateAt = (days: number) =>
+    date.format(new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate() + days)));
   const invoiceNumber = `INV-${day.getUTCFullYear()}-0042`;
   const money = new Intl.NumberFormat(context.locale ?? 'en-GB', {
     style: 'currency',

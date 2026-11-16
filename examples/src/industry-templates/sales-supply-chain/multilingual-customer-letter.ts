@@ -104,15 +104,20 @@ const LETTERS: Letter[] = [
   },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const doc = new Document({
     metadata: { title: 'Multilingual customer letter' },
     settings: {
@@ -212,9 +217,20 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now
         children: [
           new HorizontalStack({
             widthDistribution: 'equal',
-            children: [body(letter.address), body(new Intl.DateTimeFormat(letter.locale, {
-              day: 'numeric', month: 'long', year: 'numeric', calendar: 'gregory', numberingSystem: 'latn', timeZone: 'UTC',
-            }).format(day), { color: 'slate-500', align: 'end' })],
+            children: [
+              body(letter.address),
+              body(
+                new Intl.DateTimeFormat(letter.locale, {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  calendar: 'gregory',
+                  numberingSystem: 'latn',
+                  timeZone: 'UTC',
+                }).format(day),
+                { color: 'slate-500', align: 'end' }
+              ),
+            ],
           }),
           new Heading(letter.title, {
             level: index ? 2 : 1,

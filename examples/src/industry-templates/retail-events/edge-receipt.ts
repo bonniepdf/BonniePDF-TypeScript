@@ -63,7 +63,10 @@ const ITEMS: Item[] = [
 
 const ORDER_NO = '4021';
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const now = context.now ?? new Date();
   const gbp = new Intl.NumberFormat(context.locale ?? 'en-GB', {
     style: 'currency',
@@ -71,20 +74,23 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    calendar: 'gregory',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now);
+  const stamp =
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now) +
+    ' ' +
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now);
   const logoBytes = assets.get('images/svg/sample-coffee.svg');
   if (!logoBytes) throw new Error('Supply images/svg/sample-coffee.svg.');
   const logoSvg = new TextDecoder().decode(logoBytes);
@@ -207,7 +213,6 @@ interface Item {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-
 
 /** A centred single line of receipt text. */
 function center(text: string, size = 8, color: ColorInput = MUTE, marginTop = 0): TextBlock {

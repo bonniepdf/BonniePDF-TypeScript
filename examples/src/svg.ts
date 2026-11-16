@@ -111,9 +111,9 @@ export async function buildExampleSvgAssets(options: BuildSvgAssetsOptions = {})
     ? examples.filter(e => options.ids!.includes(e.id))
     : examples.filter(e => e.gallery !== false);
 
-  const context = options.context ?? (options.deterministic
-    ? { now: new Date('2026-11-13T12:00:00Z'), timeZone: 'UTC' }
-    : { now: new Date() });
+  const context =
+    options.context ??
+    (options.deterministic ? { now: new Date('2026-11-13T12:00:00Z'), timeZone: 'UTC' } : { now: new Date() });
   const files: SvgAssetFile[] = [];
   const manifestExamples: SvgManifestExample[] = [];
   const failures: { id: string; error: string }[] = [];

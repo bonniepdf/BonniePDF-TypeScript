@@ -30,7 +30,10 @@ export interface ReceiptLine {
   discountPence: number;
 }
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const lines: ReceiptLine[] = Array.from({ length: 35 }, (_, i) => ({
     name:
       i % 3 === 0
@@ -63,26 +66,34 @@ export function calculateTotal(lines: ReceiptLine[]): number {
 }
 
 export function buildReceipt(
-  lines: ReceiptLine[], assets?: ReadonlyMap<string, Uint8Array>,
+  lines: ReceiptLine[],
+  assets?: ReadonlyMap<string, Uint8Array>,
   context: { now?: Date; locale?: string; timeZone?: string } = {}
 ): Document {
   const now = context.now ?? new Date();
-  const amounts = new Intl.NumberFormat(context.locale ?? 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: false });
+  const amounts = new Intl.NumberFormat(context.locale ?? 'en-GB', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  });
   const money = (pence: number) => amounts.format(pence / 100);
-  const stamp = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    calendar: 'gregory',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now) + ' ' + new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    numberingSystem: 'latn',
-    timeZone: context.timeZone,
-  }).format(now);
+  const stamp =
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      calendar: 'gregory',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now) +
+    ' ' +
+    new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+      numberingSystem: 'latn',
+      timeZone: context.timeZone,
+    }).format(now);
   const total = calculateTotal(lines);
   const discounts = lines.reduce((sum, line) => sum + line.discountPence, 0);
   // Courier shows the Western European characters itself. A character outside them, such as the ř in
@@ -162,7 +173,6 @@ export function buildReceipt(
 }
 
 // Local helpers used by this document.
-
 
 /** A centred line of receipt text. */
 function center(text: string, marginTop = 0): TextBlock {

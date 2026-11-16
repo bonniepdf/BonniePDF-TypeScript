@@ -35,7 +35,10 @@ const months = (values: number[]) => MONTH_LABELS.map((label, i) => ({ label, va
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const now = context.now ?? new Date();
   const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
 

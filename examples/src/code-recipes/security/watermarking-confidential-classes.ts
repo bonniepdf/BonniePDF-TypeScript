@@ -36,7 +36,10 @@ import {
  * `watermarking-confidential.ts` (an equivalence test binds the two). Reach for
  * the options form first; this variant exists to show what it desugars to.
  */
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const now = context.now ?? new Date();
   const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
   const settings = new DocumentSettings(PdfSize.a4, 60);
@@ -57,7 +60,6 @@ export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { n
   metadata.author = 'BonniePDF';
 
   const doc = new Document(settings, metadata);
-
 
   const title = new TextBlock(`Financial Performance Report Q4 ${year}`);
   title.fontName = StandardFonts.HelveticaBold;

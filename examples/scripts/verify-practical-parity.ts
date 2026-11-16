@@ -18,11 +18,24 @@ for (const project of [
   'CodeRecipes/BonniePDF.Examples.PracticalRecipes',
   'IndustryTemplates/BonniePDF.Examples.PracticalDocuments',
 ]) {
-  const run = spawnSync('dotnet', ['run', '--project', resolve(netRoot, 'Examples', project), '-v:q', '--',
-    output, context.now.toISOString(), context.locale, context.timeZone], {
-    encoding: 'utf8',
-    maxBuffer: 8 * 1024 * 1024,
-  });
+  const run = spawnSync(
+    'dotnet',
+    [
+      'run',
+      '--project',
+      resolve(netRoot, 'Examples', project),
+      '-v:q',
+      '--',
+      output,
+      context.now.toISOString(),
+      context.locale,
+      context.timeZone,
+    ],
+    {
+      encoding: 'utf8',
+      maxBuffer: 8 * 1024 * 1024,
+    }
+  );
   assert.equal(run.status, 0, run.stdout + run.stderr);
 }
 function text(svg: string): string[] {

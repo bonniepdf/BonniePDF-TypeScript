@@ -26,15 +26,20 @@ const ITEMS: [string, string, string][] = [
   ['1️⃣', 'One priority this week', 'Finish the onboarding guide by Friday, so it is ready for the first customers.'],
 ];
 
-export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -57,7 +62,12 @@ export function generate(assets?: ReadonlyMap<string, Uint8Array>, context: { no
   doc.settings.defaultTextStyle = new TextStyle({ fontFamily: text, fontSize: 11, color: 'slate-700' });
 
   doc.add(new Heading('Team update', { level: 1, fontSize: 26, color: 'slate-900' }));
-  doc.add(new TextBlock(`Week 45  ·  5 November 2026  ·  Generated ${date.format(day)}`, { color: 'slate-500', margin: { top: 2, bottom: 18 } }));
+  doc.add(
+    new TextBlock(`Week 45  ·  5 November 2026  ·  Generated ${date.format(day)}`, {
+      color: 'slate-500',
+      margin: { top: 2, bottom: 18 },
+    })
+  );
 
   // Each item is a row: the emoji large in its own column, the news beside it.
   const card = new VerticalStack({ spacing: 16 });

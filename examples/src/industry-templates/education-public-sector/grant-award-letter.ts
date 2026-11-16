@@ -64,15 +64,20 @@ const DECISION_DETAILS: Detail[] = [
   { label: 'Grant', value: 'Community Project Grant' },
 ];
 
-export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  assets: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   // Convert the visitor’s date to a UTC calendar value for date-only arithmetic.
   const now = context.now ?? new Date();
-  const day = new Date(new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: context.timeZone,
-  }).format(now) + 'T00:00:00Z');
+  const day = new Date(
+    new Intl.DateTimeFormat('sv-SE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: context.timeZone,
+    }).format(now) + 'T00:00:00Z'
+  );
   const date = new Intl.DateTimeFormat(context.locale ?? 'en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -84,7 +89,7 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now
   const awardStart = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth() + 1, 1));
   const awardEnd = new Date(Date.UTC(awardStart.getUTCFullYear() + 1, awardStart.getUTCMonth(), 0));
   const firstInstalment = new Date(awardStart);
-  firstInstalment.setUTCDate(1 + (5 - awardStart.getUTCDay() + 7) % 7 + 21);
+  firstInstalment.setUTCDate(1 + ((5 - awardStart.getUTCDay() + 7) % 7) + 21);
   const gardenImage = assets.get('images/newsletter/community-garden.jpg')!;
   const doc = new Document({
     settings: {
@@ -173,8 +178,10 @@ export function generate(assets: ReadonlyMap<string, Uint8Array>, context: { now
   // Decision callout: headline outcome plus the key dates as a tagged grid.
   const details = new Grid({ columns: [1, 1], cellPadding: 5 });
   details.addRow(detail(DECISION_DETAILS[0]), detail(DECISION_DETAILS[1]));
-  details.addRow(detail({ label: 'Award period', value: `${date.format(awardStart)} to ${date.format(awardEnd)}` }),
-    detail({ label: 'First instalment', value: date.format(firstInstalment) }));
+  details.addRow(
+    detail({ label: 'Award period', value: `${date.format(awardStart)} to ${date.format(awardEnd)}` }),
+    detail({ label: 'First instalment', value: date.format(firstInstalment) })
+  );
 
   const calloutRow = new HorizontalStack({ widthDistribution: 'weighted', spacing: 14 });
   calloutRow.add(

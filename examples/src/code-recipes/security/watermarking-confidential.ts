@@ -11,7 +11,10 @@ import { Document, TextBlock, Table, StandardFonts } from '@bonniepdf/core';
  * nested `watermark` literal on `settings`; colours are tokens/hex and the table
  * border uses the `{ width, color }` sugar.
  */
-export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { now?: Date; locale?: string; timeZone?: string } = {}): Document {
+export function generate(
+  _assets?: ReadonlyMap<string, Uint8Array>,
+  context: { now?: Date; locale?: string; timeZone?: string } = {}
+): Document {
   const now = context.now ?? new Date();
   const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: context.timeZone }).format(now)) - 1;
   const doc = new Document({
@@ -29,7 +32,6 @@ export function generate(_assets?: ReadonlyMap<string, Uint8Array>, context: { n
       author: 'BonniePDF',
     },
   });
-
 
   doc.add(
     new TextBlock(`Financial Performance Report Q4 ${year}`, {

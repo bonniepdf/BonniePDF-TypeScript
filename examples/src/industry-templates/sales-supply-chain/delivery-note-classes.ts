@@ -180,7 +180,7 @@ export function generate(
   doc.add(cell('DELIVERY NOTE · PACKING SLIP', { bold: true, size: 8.5, color: ACCENT, mb: 4 }));
   doc.add(h1(`Delivery ${DELIVERY.number}`));
   doc.add(new TextBlock(`Generated ${date.format(day)}`, { fontSize: 8 }));
-  doc.add(cell('This is not an invoice. No payment is due against this document.', { color: MUTED, mb: 14 }));
+  doc.add(cell('This is not an invoice. No payment is due against this document.', { color: MUTED, mb: 4 }));
 
   doc.add(
     weightedRow(

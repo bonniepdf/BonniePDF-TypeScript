@@ -19,7 +19,12 @@ jobs:
   release:
     name: Publish to npm
     runs-on: ubuntu-latest
-    environment: production
+    # The environment's name is part of the identity npm trusted publishing
+    # checks; `deployment: false` keeps it without recording a deployment, so
+    # a failed run does not leave a failed "production" deployment behind.
+    environment:
+      name: production
+      deployment: false
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
@@ -87,6 +92,32 @@ jobs:
             echo "Set the version with the versioning tool, commit, then tag."
             exit 1
           fi
+
+      # Asks npm, before publishing, whether this run matches the package's
+      # trusted publisher. A mismatch otherwise surfaces only as E404 on
+      # publish. Prints the identity npm sees, never the token.
+      - name: Check npm trusted publishing
+        env:
+          PACKAGE: "@bonniepdf/core"
+        run: |
+          set -euo pipefail
+          id_token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          status=$(curl -sS -o exchange.json -w '%{http_code}' -X POST -H "Authorization: Bearer $id_token" "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/${PACKAGE/\//%2f}")
+          accepted=false
+          if [[ "$status" == 2* ]] && jq -e .token exchange.json > /dev/null 2>&1; then accepted=true; fi
+          rm -f exchange.json
+          if $accepted; then
+            echo "npm accepts this run as a trusted publisher for $PACKAGE."
+            exit 0
+          fi
+          payload=$(cut -d. -f2 <<< "$id_token" | tr '_-' '/+')
+          while (( ${#payload} % 4 )); do payload+='='; done
+          claims=$(base64 -d <<< "$payload" 2>/dev/null || echo '{}')
+          echo "::error::npm does not accept this run as a trusted publisher for $PACKAGE (HTTP $status)."
+          echo "On npmjs.com, open $PACKAGE, then Settings, then Trusted publishing, and make the GitHub Actions entry match exactly. The fields are case-sensitive:"
+          jq -r '"  Organization or user: \(.repository_owner)", "  Repository: \(.repository | split("/")[1])", "  Workflow filename: \(.workflow_ref | split("@")[0] | split("/") | last)", "  Environment: \(.environment // "(leave blank)")"' <<< "$claims" || true
+          echo "Then re-run this job."
+          exit 1
 
       # Publishes with npm OIDC trusted publishing: no long-lived NPM_TOKEN,
       # and provenance is attested from this workflow's identity.

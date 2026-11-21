@@ -6,11 +6,16 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+## 2026.11.21
+
+Status: Released
+Date: 2026-11-21
+
 ### Highlights
 
 - Generate tagged PDF 2.0 documents with PDF/UA-2.
 - Combine PDF/UA-2 and PDF/A-4f to retain attachments in an accessible archival PDF.
-- Select PDF/A through the conformance setting. The legacy enable flag has been removed.
+- Select PDF/A through the conformance setting.
 
 ### Document Engine & API
 

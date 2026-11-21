@@ -6,6 +6,11 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+### Packaging & Documentation
+
+- `core/README.md`, the README npm shows, is now generated from the repository README by `scripts/sync-package-readme.mjs` (`pnpm sync:readme`), and CI fails if the two differ or the README has a relative link. Lines meant only for one of them are marked in the repository README.
+- Remove the `fluent-api` npm keyword: the TypeScript package has no fluent builder.
+
 ## 2026.11.21
 
 Status: Released

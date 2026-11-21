@@ -62,6 +62,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git diff --quiet || (git add -A && git commit -m "chore: auto-format with Prettier" && git push origin "HEAD:$FORMAT_BRANCH")
 
+      - name: Verify the npm README matches the repository README
+        run: node scripts/sync-package-readme.mjs --check
+
       - name: Typecheck
         run: pnpm turbo typecheck
 

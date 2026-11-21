@@ -6,9 +6,21 @@
 [![minzipped size](https://img.shields.io/bundlephobia/minzip/@bonniepdf/core?style=flat-square)](https://bundlephobia.com/package/@bonniepdf/core)
 ![coverage](https://raw.githubusercontent.com/bonniepdf/BonniePDF-TypeScript/master/badges/coverage.svg)
 
+<!-- package-readme:omit-start -->
+
 [Live examples](https://www.bonniepdf.dev/examples/industry-templates) · [Documentation](https://www.bonniepdf.dev/docs/typescript/getting-started) · [npm](https://www.npmjs.com/package/@bonniepdf/core) · [.NET package](https://www.nuget.org/packages/BonniePDF)
+<!-- package-readme:omit-end -->
+<!-- package-readme:only
+[Live examples](https://www.bonniepdf.dev/examples/industry-templates) · [Documentation](https://www.bonniepdf.dev/docs/typescript/getting-started) · [In-browser Playground](https://www.bonniepdf.dev/playground/getting-started/simple-document) · [.NET package](https://www.nuget.org/packages/BonniePDF)
+-->
+
+<!-- package-readme:omit-start -->
 
 Create polished, tagged and preservation-focused PDFs directly from TypeScript and JavaScript. BonniePDF is a pure TypeScript document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A profile support. It runs in browsers, Node.js, Bun, Deno and edge runtimes with zero dependencies—and requires no Chromium, headless browser, canvas library, native add-ons or print server.
+<!-- package-readme:omit-end -->
+<!-- package-readme:only
+Create polished, tagged and preservation-focused PDFs directly from TypeScript and JavaScript. `@bonniepdf/core` is a pure TypeScript document engine with automatic layout and pagination, vector charts, embedded fonts, PDF/UA tagging and PDF/A profile support. It runs in browsers, Node.js, Bun, Deno and edge runtimes with zero dependencies—and requires no Chromium, headless browser, canvas library, WASM or native add-ons.
+-->
 
 BonniePDF creates new PDFs from code. It is not an HTML converter, PDF parser, form filler or editor for existing files.
 
@@ -157,6 +169,8 @@ BonniePDF generates structure while it lays out the document, so accessibility i
 
 The repository includes veraPDF-backed validation coverage for supported PDF/A and PDF/UA claims. Machine validation does not judge whether content is meaningful or establish legal compliance. Validate final documents, fonts, and configuration against the required profile, including human accessibility review where appropriate.
 
+<!-- package-readme:omit-start -->
+
 ## Workspace
 
 This repository is a pnpm workspace:
@@ -172,6 +186,8 @@ pnpm install
 pnpm build
 pnpm typecheck
 ```
+
+<!-- package-readme:omit-end -->
 
 ## Examples and documentation
 

@@ -1,3 +1,5 @@
+<!-- Generated from the repository README by scripts/sync-package-readme.mjs. Edit README.md at the repository root instead. -->
+
 # BonniePDF for TypeScript and JavaScript
 
 [![npm](https://img.shields.io/npm/v/@bonniepdf/core?label=%40bonniepdf%2Fcore&color=2196F3&style=flat-square&logo=npm)](https://www.npmjs.com/package/@bonniepdf/core)

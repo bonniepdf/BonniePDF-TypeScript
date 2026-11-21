@@ -15,7 +15,8 @@
     "prepare": "husky",
     "generate-tagged": "tsx scripts/generate-tagged-pdfs.ts",
     "check:preflight": "tsx scripts/check-preflight.ts",
-    "generate-examples": "tsx scripts/generate-examples-assets.ts"
+    "generate-examples": "tsx scripts/generate-examples-assets.ts",
+    "sync:readme": "node scripts/sync-package-readme.mjs"
   },
   "lint-staged": {
     "core/{src,tests}/**/*.ts": "eslint --fix",

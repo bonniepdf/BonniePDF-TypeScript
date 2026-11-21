@@ -102,6 +102,20 @@ export class UnorderedList extends ListElementBase {
     return this.measureListHeight(this._items, this.nestedLists, contentWidth);
   }
 
+  /** @internal */
+  public override get listNumbering(): string {
+    switch (this.bulletStyle) {
+      case BulletStyle.Disc:
+        return 'Disc';
+      case BulletStyle.Circle:
+        return 'Circle';
+      case BulletStyle.Square:
+        return 'Square';
+      default:
+        return 'Unordered';
+    }
+  }
+
   protected override renderItems(ctx: RenderContext, contentWidth: number): void {
     const itemWidth = contentWidth - this.indent;
 

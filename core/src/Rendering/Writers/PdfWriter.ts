@@ -212,7 +212,13 @@ export class PdfWriter implements IPdfWriter {
   /**
    * Writes a link annotation object (URI or in-document GoTo).
    */
-  public writeLinkAnnotation(id: number, link: RegisteredLink, pageIds: number[], structParentKey?: number): number {
+  public writeLinkAnnotation(
+    id: number,
+    link: RegisteredLink,
+    pageIds: number[],
+    structParentKey?: number,
+    goToActionId?: number
+  ): number {
     const dict = new Map<string, string>([
       [PdfKeys.Common.Type, '/Annot'],
       [PdfKeys.Common.Subtype, '/Link'],
@@ -228,7 +234,10 @@ export class PdfWriter implements IPdfWriter {
       [PdfKeys.Annotation.Contents, `(${PdfSyntax.escape((link.text ?? '').toString())})`],
     ]);
 
-    if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {
+    if (goToActionId != null) {
+      // PDF/UA-2: a go-to action with a structure destination (spec 04 §3.4).
+      dict.set(PdfKeys.Annotation.Action, `${goToActionId} 0 R`);
+    } else if (link.targetPageIndex != null && pageIds != null && pageIds.length > 0) {
       const pageIdx = Math.max(0, Math.min(link.targetPageIndex, pageIds.length - 1));
       dict.set(PdfKeys.Annotation.Action, `<< /S /GoTo /D [${pageIds[pageIdx]} 0 R /Fit] >>`);
     } else {
@@ -288,7 +297,13 @@ export class PdfWriter implements IPdfWriter {
     const dict = new Map<string, string>([
       [PdfKeys.Common.Type, '/Catalog'],
       [PdfKeys.Catalog.Pages, `${pagesId} 0 R`],
-      [PdfKeys.Catalog.OpenAction, this.getOpenActionString(firstPageId, settings)],
+      // A go-to action object under PDF/UA-2, else a destination.
+      [
+        PdfKeys.Catalog.OpenAction,
+        options.openActionId != null && options.openActionId > 0
+          ? `${options.openActionId} 0 R`
+          : this.getOpenActionString(firstPageId, settings),
+      ],
     ]);
 
     if (options?.outlinesId) dict.set(PdfKeys.Catalog.PageMode, '/UseOutlines');
@@ -384,17 +399,32 @@ export class PdfWriter implements IPdfWriter {
   }
 
   private getOpenActionString(firstPageId: number, settings: DocumentSettings): string {
-    switch (settings.defaultZoom) {
-      case ZoomLevel.FitPage:
-        return `[ ${firstPageId} 0 R /Fit ]`;
-      case ZoomLevel.FitWidth:
-        return `[ ${firstPageId} 0 R /FitH 0 ]`;
-      case ZoomLevel.FitHeight:
-        return `[ ${firstPageId} 0 R /FitV 0 ]`;
-      case ZoomLevel.Custom:
-        return `[ ${firstPageId} 0 R /XYZ 0 ${settings.customZoomLevel} null ]`;
-      default:
-        return `[ ${firstPageId} 0 R /Fit ]`;
-    }
+    return `[ ${firstPageId} 0 R ${openActionView(settings)} ]`;
   }
+}
+
+/** The view part of the opening destination: `/Fit`, `/FitH 0`, ... */
+export function openActionView(settings: DocumentSettings): string {
+  switch (settings.defaultZoom) {
+    case ZoomLevel.FitWidth:
+      return '/FitH 0';
+    case ZoomLevel.FitHeight:
+      return '/FitV 0';
+    case ZoomLevel.Custom:
+      return `/XYZ 0 ${settings.customZoomLevel} null`;
+    default:
+      return '/Fit';
+  }
+}
+
+/**
+ * A go-to action with both a page destination, for readers without PDF 2.0
+ * structure destinations, and a structure destination (ISO 32000-2 Table 202).
+ */
+export function goToAction(pageId: number, structElemId: number, view: string): Map<string, string> {
+  return new Map<string, string>([
+    ['/S', '/GoTo'],
+    ['/D', `[${pageId} 0 R ${view}]`],
+    ['/SD', `[${structElemId} 0 R ${view}]`],
+  ]);
 }

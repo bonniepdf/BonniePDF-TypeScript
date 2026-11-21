@@ -13,7 +13,17 @@ export class NavigationWriter {
     private asyncWriter?: IAsyncPdfWriter
   ) {}
 
-  public writeOutlineTree(rootId: number, bookmarks: BookmarkItem[], pageIds: number[]): number {
+  /**
+   * Writes the outline tree. `reserveGoTo`, given under PDF/UA-2, reserves the
+   * go-to action each item targets (it carries a structure destination and is
+   * written once the structure tree exists); without it items keep `/Dest`.
+   */
+  public writeOutlineTree(
+    rootId: number,
+    bookmarks: BookmarkItem[],
+    pageIds: number[],
+    reserveGoTo?: (pageIndex: number) => number
+  ): number {
     if (!bookmarks || bookmarks.length === 0) return 0;
 
     const flatList: Array<{ item: BookmarkItem; id: number; parentId: number; depth: number }> = [];
@@ -64,11 +74,10 @@ export class NavigationWriter {
       const dict = new Map<string, string>([
         [PdfKeys.Outline.Title, `(${PdfSyntax.escape(item.title)})`],
         [PdfKeys.Outline.Parent, `${parentId} 0 R`],
-        [
-          PdfKeys.Outline.Destination,
-          `[ ${pageIds[Math.max(0, Math.min(item.pageIndex, pageIds.length - 1))]} 0 R /Fit ]`,
-        ],
       ]);
+      const pageIdx = Math.max(0, Math.min(item.pageIndex, pageIds.length - 1));
+      if (reserveGoTo) dict.set(PdfKeys.Annotation.Action, `${reserveGoTo(pageIdx)} 0 R`);
+      else dict.set(PdfKeys.Outline.Destination, `[ ${pageIds[pageIdx]} 0 R /Fit ]`);
       if (siblingIdx > 0) dict.set(PdfKeys.Outline.Previous, `${flatList[siblings[siblingIdx - 1]].id} 0 R`);
       if (siblingIdx < siblings.length - 1)
         dict.set(PdfKeys.Outline.Next, `${flatList[siblings[siblingIdx + 1]].id} 0 R`);
@@ -84,8 +93,13 @@ export class NavigationWriter {
     return rootId;
   }
 
-  public async writeOutlineTreeAsync(rootId: number, bookmarks: BookmarkItem[], pageIds: number[]): Promise<number> {
+  public async writeOutlineTreeAsync(
+    rootId: number,
+    bookmarks: BookmarkItem[],
+    pageIds: number[],
+    reserveGoTo?: (pageIndex: number) => number
+  ): Promise<number> {
     // Delegate synchronously - async path is out of scope
-    return this.writeOutlineTree(rootId, bookmarks, pageIds);
+    return this.writeOutlineTree(rootId, bookmarks, pageIds, reserveGoTo);
   }
 }

@@ -53,7 +53,7 @@ const BUNDLED_FONTS: ReadonlyArray<readonly [string, string, string]> = [
  * Global font registry for BonniePDF.
  *
  * Fonts registered here are automatically substituted for standard PDF type-1
- * fonts (Helvetica, Times-Roman, Courier) when `pdfAEnabled: true` is set on
+ * fonts (Helvetica, Times-Roman, Courier) when a PDF/A `conformance` is set on
  * `DocumentSettings`. This allows the library to produce genuinely PDF/A-1b
  * conformant output without the caller having to supply font paths on every
  * element.
@@ -169,7 +169,7 @@ export class FontManager {
    * (e.g. `"Helvetica"`, `"Times-Bold"`, `"Courier-Oblique"`), or
    * `null` if no substitution font has been registered.
    *
-   * Called by `PdfResourceRegistry` when `pdfAEnabled = true` and the
+   * Called by `PdfResourceRegistry` when PDF/A output is on and the
    * document uses a standard-14 font.
    */
   public static getBytesForStandardFont(standardFontName: string): Uint8Array | null {

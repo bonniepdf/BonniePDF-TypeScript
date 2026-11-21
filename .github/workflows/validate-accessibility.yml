@@ -94,6 +94,8 @@ jobs:
           test -s generated-pdfs/pdfa1a_baseline.pdf
           test -s generated-pdfs/pdfa3a_baseline.pdf
           test -s generated-pdfs/pdfa4_baseline.pdf
+          test -s generated-pdfs/pdfua2_baseline.pdf
+          test -s generated-pdfs/pdfa4f_baseline.pdf
           test -s generated-pdfs/factur-x_invoice.pdf
 
       # Fail fast with a clear message if validate.sh lost its executable bit

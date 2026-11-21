@@ -50,6 +50,7 @@ export function beginChildTag(ctx: RenderContext, child: IElement): ChildTagToke
     ctx.canvas.beginArtifact();
   } else if (tagThis) {
     const elem = tagging!.tree.begin(role!);
+    if (!tagging!.elementStructure.has(child)) tagging!.elementStructure.set(child, elem);
     if (isAltTextProvider(child) && child.altText) tagging!.tree.setAlt(child.altText);
     // Wire the struct element back to a Hyperlink so the serializer can write
     // /StructParent + /OBJR on the annotation.

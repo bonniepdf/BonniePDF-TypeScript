@@ -49,7 +49,7 @@ describe('TaggedDocument', () => {
   });
 
   it('PDF/A only still emits MarkInfo for back-compat', () => {
-    // Behaviour from before PDF/UA tagging: pdfAEnabled adds /MarkInfo. Make sure this
+    // Behaviour from before PDF/UA tagging: PDF/A adds /MarkInfo. Make sure this
     // path is unchanged when tagging is off.
     doc = new Document();
     asPdfA(doc.settings);

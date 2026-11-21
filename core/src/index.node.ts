@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 configurePlatform(new NodePlatformIO());
 export { NodePlatformIO } from './Platform/NodePlatformIO';
 
-// Auto-register bundled Liberation fonts so pdfAEnabled: true works without
+// Auto-register bundled Liberation fonts so a PDF/A `conformance` works without
 // the caller having to supply font files. Reads go through the platform IO
 // configured above (static fs import in NodePlatformIO), so this works under
 // both CJS and strict ESM.

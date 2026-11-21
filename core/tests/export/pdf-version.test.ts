@@ -30,14 +30,14 @@ describe('PdfVersion', () => {
     doc = new Document();
     asPdf20(doc.settings);
     expect(doc.settings.version).toBe(PdfVersion.Pdf20);
-    expect(doc.settings.pdfAEnabled).toBe(false);
+    expect(doc.settings.conformance).toBe(PdfAConformance.None);
   });
 
-  it('asPdfA sets pdfAEnabled and version to Pdf17', () => {
+  it('asPdfA selects PDF/A-2b and version Pdf17', () => {
     doc = new Document();
     asPdfA(doc.settings);
     expect(doc.settings.version).toBe(PdfVersion.Pdf17);
-    expect(doc.settings.pdfAEnabled).toBe(true);
+    expect(doc.settings.conformance).toBe(PdfAConformance.PdfA2b);
   });
 
   it('asPdfA4 sets PdfA4 conformance and version to Pdf20', () => {
@@ -45,7 +45,6 @@ describe('PdfVersion', () => {
     asPdfA4(doc.settings);
     expect(doc.settings.version).toBe(PdfVersion.Pdf20);
     expect(doc.settings.conformance).toBe(PdfAConformance.PdfA4);
-    expect(doc.settings.pdfAEnabled).toBe(true);
   });
 
   it('Pdf14_GeneratesCorrectHeader', () => {
@@ -86,7 +85,7 @@ describe('PdfVersion', () => {
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
 
     expect(() => doc.generateBytes()).toThrow(
-      'PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.'
+      'PDF/UA-1 output is only supported with PdfVersion.Pdf17. Use AccessibilityMode.PdfUa2 for PdfVersion.Pdf20.'
     );
   });
 

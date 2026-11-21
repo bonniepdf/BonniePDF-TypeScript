@@ -82,6 +82,11 @@ export class XmpConformanceBlock {
     return XmpConformanceBlock.pdfAid('4', undefined, '2020');
   }
 
+  /** PDF/A-4f: ISO 19005-4:2020, part 4, conformance F (embedded files of any type). */
+  static pdfA4F(): XmpConformanceBlock {
+    return XmpConformanceBlock.pdfAid('4', 'F', '2020');
+  }
+
   /**
    * Returns the conformance block matching `conformance`, or
    * `undefined` if no PDF/A claim should be emitted.
@@ -102,6 +107,8 @@ export class XmpConformanceBlock {
         return XmpConformanceBlock.pdfA3A();
       case PdfAConformance.PdfA4:
         return XmpConformanceBlock.pdfA4();
+      case PdfAConformance.PdfA4f:
+        return XmpConformanceBlock.pdfA4F();
       default:
         return undefined;
     }
@@ -128,6 +135,36 @@ export class XmpConformanceBlock {
           'Integer',
           'internal',
           'Indicates, which part of ISO 14289 standard is followed'
+        ),
+      ])
+    );
+  }
+
+  /**
+   * PDF/UA-2 conformance claim (ISO 14289-2:2024): `pdfuaid:part` 2 and
+   * `pdfuaid:rev` 2024 (VeraPDF profile `ua2`, rules 5-2 and 5-5). The
+   * extension schema describes both properties, for a PDF/A claim that checks it.
+   */
+  static pdfUa2(): XmpConformanceBlock {
+    return new XmpConformanceBlock(
+      'pdfuaid',
+      'http://www.aiim.org/pdfua/ns/id/',
+      [
+        ['part', '2'],
+        ['rev', '2024'],
+      ],
+      new XmpExtensionSchema('http://www.aiim.org/pdfua/ns/id/', 'pdfuaid', 'PDF/UA identification schema', [
+        new XmpExtensionSchemaProperty(
+          'part',
+          'Integer',
+          'internal',
+          'Indicates, which part of ISO 14289 standard is followed'
+        ),
+        new XmpExtensionSchemaProperty(
+          'rev',
+          'Integer',
+          'internal',
+          'Indicates the year of the revision of the part of ISO 14289 that is followed'
         ),
       ])
     );

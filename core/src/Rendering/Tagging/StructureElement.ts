@@ -1,6 +1,12 @@
 import { SemanticRole, toPdfTag } from './SemanticRole';
 import type { IStructureVisitor } from './IStructureVisitor';
 
+/** A reference target: the anchor it names, if any, and the page it resolves to. */
+export interface StructureRef {
+  readonly anchor: string | undefined;
+  readonly pageIndex: number;
+}
+
 /**
  * Represents one semantic node and its marked-content references in the PDF
  * structure tree. Carries a {@link SemanticRole}, a parent reference, an ordered
@@ -73,6 +79,9 @@ export class StructureElement {
    * Emitted verbatim by the structure-tree writer.
    */
   public attributes?: string;
+
+  /** The element this one refers to, written as /Ref under PDF/UA-2 (a TOC entry's target). */
+  public refTarget?: StructureRef;
 
   /**
    * `/OBJR` annotation references. Each entry is a pair of

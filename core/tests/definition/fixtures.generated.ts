@@ -2294,6 +2294,46 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "structured-row-identities": {
+      "_fixture": {
+        "id": "document-definition/valid/structured-row-identities",
+        "description": "Unique cell-content identities in a structured row are visited once."
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Table",
+              "columns": [
+                1,
+                1
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "type": "TextBlock",
+                      "id": "first-cell",
+                      "text": "First"
+                    },
+                    {
+                      "type": "TableCell",
+                      "content": {
+                        "type": "TextBlock",
+                        "id": "second-cell",
+                        "text": "Second"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "template-authoring": {
       "_fixture": {
         "id": "document-definition/valid/template-authoring",
@@ -3149,6 +3189,52 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "structured-row-identities": {
+      "_fixture": {
+        "id": "document-definition/invalid/structured-row-identities",
+        "description": "An actual ID collision is reported once at the second cell content."
+      },
+      "_expectErrors": [
+        {
+          "path": "/pages/0/content/0/rows/0/cells/1/content/id",
+          "code": "duplicate-id"
+        }
+      ],
+      "version": 1,
+      "minorVersion": 0,
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "Table",
+              "columns": [
+                1,
+                1
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "type": "TextBlock",
+                      "id": "first-cell",
+                      "text": "First"
+                    },
+                    {
+                      "type": "TableCell",
+                      "content": {
+                        "type": "TextBlock",
+                        "id": "first-cell",
+                        "text": "Second"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
     "transforms": {
       "_fixture": {
         "id": "document-definition/invalid/transforms",
@@ -3566,6 +3652,32 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "pdfa2a-with-ua2": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa2a-with-ua2",
+        "description": "An \"a\" level with PDF/UA-2 reports the version conflict, not missing tagging."
+      },
+      "_expect": {
+        "valid": false,
+        "rule": "ua2-excludes-pdfa1-3"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-2a",
+        "accessibility": "pdf/ua-2"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
     "pdfa2b-sets-pdf17": {
       "_fixture": {
         "id": "document-definition/settings-rules/pdfa2b-sets-pdf17",
@@ -3607,6 +3719,32 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         "conformance": "pdf/a-2b",
         "accessibility": "pdf/ua-1",
         "pdfVersion": "pdf-2.0"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
+    "pdfa2b-with-ua2": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa2b-with-ua2",
+        "description": "PDF/UA-2 cannot be combined with PDF/A-2b, a PDF 1.7 format."
+      },
+      "_expect": {
+        "valid": false,
+        "rule": "ua2-excludes-pdfa1-3"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-2b",
+        "accessibility": "pdf/ua-2"
       },
       "pages": [
         {
@@ -3670,6 +3808,113 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
         }
       ]
     },
+    "pdfa4-with-ua2": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa4-with-ua2",
+        "description": "PDF/A-4 and PDF/UA-2 are both PDF 2.0 and combine."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-4",
+        "accessibility": "pdf/ua-2"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
+    "pdfa4f-raises-version": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa4f-raises-version",
+        "description": "PDF/A-4f is built on PDF 2.0, so the default version is raised to pdf-2.0. A PDF/A-4f document needs an attachment, so it carries one."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-4f"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ],
+      "resources": {
+        "data-xml": {
+          "kind": "attachment",
+          "mediaType": "text/xml",
+          "data": "PGEvPg=="
+        }
+      },
+      "attachments": [
+        {
+          "resource": "data-xml",
+          "fileName": "data.xml",
+          "relationship": "data",
+          "mediaType": "text/xml"
+        }
+      ]
+    },
+    "pdfa4f-with-ua2": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/pdfa4f-with-ua2",
+        "description": "PDF/A-4f and PDF/UA-2 are both PDF 2.0 and combine. A PDF/A-4f document needs an attachment, so it carries one."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "conformance": "pdf/a-4f",
+        "accessibility": "pdf/ua-2"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ],
+      "resources": {
+        "data-xml": {
+          "kind": "attachment",
+          "mediaType": "text/xml",
+          "data": "PGEvPg=="
+        }
+      },
+      "attachments": [
+        {
+          "resource": "data-xml",
+          "fileName": "data.xml",
+          "relationship": "data",
+          "mediaType": "text/xml"
+        }
+      ]
+    },
     "ua1-on-pdf20": {
       "_fixture": {
         "id": "document-definition/settings-rules/ua1-on-pdf20",
@@ -3709,6 +3954,57 @@ export const DEFINITION_FIXTURES: Record<'valid' | 'invalid' | 'unrepresentable'
       "minorVersion": 0,
       "settings": {
         "accessibility": "pdf/ua-1"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
+    "ua2-on-pdf17": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/ua2-on-pdf17",
+        "description": "PDF/UA-2 cannot be combined with an explicit PDF 1.7."
+      },
+      "_expect": {
+        "valid": false,
+        "rule": "ua2-needs-pdf20"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "accessibility": "pdf/ua-2",
+        "pdfVersion": "pdf-1.7"
+      },
+      "pages": [
+        {
+          "content": [
+            {
+              "type": "TextBlock",
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    },
+    "ua2-raises-version": {
+      "_fixture": {
+        "id": "document-definition/settings-rules/ua2-raises-version",
+        "description": "PDF/UA-2 raises the default PDF version to 2.0."
+      },
+      "_expect": {
+        "valid": true,
+        "pdfVersion": "pdf-2.0"
+      },
+      "version": 1,
+      "minorVersion": 0,
+      "settings": {
+        "accessibility": "pdf/ua-2"
       },
       "pages": [
         {

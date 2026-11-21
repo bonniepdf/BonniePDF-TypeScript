@@ -36,7 +36,13 @@ export interface IPdfWriter {
   writeDeflatedObject(id: number, dictionary: Map<string, string>, compressed: Uint8Array): void;
   writeCompressedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
   writeUnencryptedBinaryObject(id: number, dictionary: Map<string, string>, bytes: Uint8Array): void;
-  writeLinkAnnotation(id: number, link: RegisteredLink, pageIds: number[], structParentKey?: number): number;
+  writeLinkAnnotation(
+    id: number,
+    link: RegisteredLink,
+    pageIds: number[],
+    structParentKey?: number,
+    goToActionId?: number
+  ): number;
   writeEncryptDictionary(id: number): number;
   writeViewerPreferences(id: number, settings: ViewerPreferencesSettings): number;
   writeCatalog(

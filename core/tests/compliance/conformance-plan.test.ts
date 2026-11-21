@@ -154,7 +154,6 @@ describe('ConformancePlan', () => {
     expect(plan.needsOutputIntent).toBe(false);
     expect(xmpSettings).not.toBe(settings);
     expect(xmpSettings.conformance).toBe(PdfAConformance.None);
-    expect(xmpSettings.pdfAEnabled).toBe(false);
     expect(xmpSettings.getOrientedPageSize()).toEqual(settings.getOrientedPageSize());
   });
 });

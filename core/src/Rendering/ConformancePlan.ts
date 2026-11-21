@@ -70,7 +70,8 @@ export class ConformancePlan {
         : [];
     this.pdfAResourceIssues = registry?.getPdfAResourceIssues?.() ?? fallbackResourceIssues;
     const blockingIssues = this.pdfAResourceIssues.filter(issue => issue.severity === 'blocking');
-    const suppressPdfA = settings.pdfAEnabled && blockingIssues.length > 0;
+    const requestedPdfAEnabled = settings.conformance !== PdfAConformance.None;
+    const suppressPdfA = requestedPdfAEnabled && blockingIssues.length > 0;
     this.effectivePdfA = suppressPdfA ? PdfAConformance.None : settings.conformance;
     this.pdfAClaimSuppressedReason = suppressPdfA
       ? blockingIssues.some(issue => issue.code === 'non-embedded-standard-font')
@@ -79,22 +80,22 @@ export class ConformancePlan {
       : undefined;
 
     this.needsStructureTree =
-      settings.accessibility !== AccessibilityMode.None && settings.version === PdfVersion.Pdf17;
+      (settings.accessibility === AccessibilityMode.PdfUa1 && settings.version === PdfVersion.Pdf17) ||
+      (settings.accessibility === AccessibilityMode.PdfUa2 && settings.version === PdfVersion.Pdf20);
     this.effectiveAccessibility = this.needsStructureTree ? settings.accessibility : AccessibilityMode.None;
     const fontsUnembedded = registry?.hasNonEmbeddedStandardFont() === true;
     this.nonEmbeddedStandardFonts = fontsUnembedded ? (registry?.getNonEmbeddedStandardFonts?.() ?? []) : [];
     // The claim is withheld; the tagging (and the PDF/UA-only OutputIntent,
     // which is colour management rather than a claim) is not.
-    this.pdfUaClaimSuppressed = this.effectiveAccessibility === AccessibilityMode.PdfUa1 && fontsUnembedded;
+    this.pdfUaClaimSuppressed = this.effectiveAccessibility !== AccessibilityMode.None && fontsUnembedded;
     this.needsViewerPreferencesDisplayDocTitle = this.needsStructureTree;
     this.needsXmpMetadata = settings.version === PdfVersion.Pdf17 || settings.version === PdfVersion.Pdf20;
 
-    const requestedPdfAEnabled = settings.pdfAEnabled;
     const effectivePdfAEnabled = this.effectivePdfA !== PdfAConformance.None;
     const supportsOutputIntent = settings.version === PdfVersion.Pdf17 || settings.version === PdfVersion.Pdf20;
     this.needsOutputIntent =
       supportsOutputIntent &&
-      (effectivePdfAEnabled || (this.effectiveAccessibility === AccessibilityMode.PdfUa1 && !requestedPdfAEnabled));
+      (effectivePdfAEnabled || (this.effectiveAccessibility !== AccessibilityMode.None && !requestedPdfAEnabled));
     this.needsMarkInfo = effectivePdfAEnabled || this.needsStructureTree;
   }
 

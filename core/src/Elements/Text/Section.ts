@@ -73,5 +73,6 @@ export class Section extends ElementBase {
    */
   protected override renderContent(ctx: RenderContext): void {
     ctx.tocEntries.set(this.anchorId, ctx.currentPageIndex + 1);
+    ctx.tagging?.recordAnchor(this.anchorId, this);
   }
 }

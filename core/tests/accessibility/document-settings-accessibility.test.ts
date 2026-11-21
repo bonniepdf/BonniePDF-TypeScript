@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { DocumentSettings } from '../../src/Configuration/DocumentSettings';
 import { AccessibilityMode } from '../../src/Configuration/AccessibilityMode';
 
@@ -30,26 +31,26 @@ describe('DocumentSettings - accessibility', () => {
     expect(settings.language).toBe('en-GB');
   });
 
-  it('keeps accessibility and pdfAEnabled orthogonal', () => {
+  it('keeps accessibility and PDF/A conformance orthogonal', () => {
     // ZUGFeRD-style: PDF/A on, accessibility off.
     const zugferdStyle = new DocumentSettings();
-    zugferdStyle.pdfAEnabled = true;
+    zugferdStyle.conformance = PdfAConformance.PdfA3b;
     zugferdStyle.accessibility = AccessibilityMode.None;
-    expect(zugferdStyle.pdfAEnabled).toBe(true);
+    expect(zugferdStyle.conformance).toBe(PdfAConformance.PdfA3b);
     expect(zugferdStyle.accessibility).toBe(AccessibilityMode.None);
 
     // PDF/UA on, PDF/A off.
     const uaOnly = new DocumentSettings();
-    uaOnly.pdfAEnabled = false;
+    uaOnly.conformance = PdfAConformance.None;
     uaOnly.accessibility = AccessibilityMode.PdfUa1;
-    expect(uaOnly.pdfAEnabled).toBe(false);
+    expect(uaOnly.conformance).toBe(PdfAConformance.None);
     expect(uaOnly.accessibility).toBe(AccessibilityMode.PdfUa1);
 
     // Both on (e.g. PDF/A-3a + PDF/UA-1).
     const both = new DocumentSettings();
-    both.pdfAEnabled = true;
+    both.conformance = PdfAConformance.PdfA3a;
     both.accessibility = AccessibilityMode.PdfUa1;
-    expect(both.pdfAEnabled).toBe(true);
+    expect(both.conformance).toBe(PdfAConformance.PdfA3a);
     expect(both.accessibility).toBe(AccessibilityMode.PdfUa1);
   });
 });

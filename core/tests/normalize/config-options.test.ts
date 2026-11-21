@@ -195,23 +195,13 @@ describe('DocumentSettings options', () => {
     expect(s.watermark).toBe(wm);
   });
 
-  it('resolves conformance over pdfAEnabled regardless of key order', () => {
-    // `pdfAEnabled` is legacy sugar; `conformance` must win either way, so the
-    // outcome does not depend on the literal's key order.
-    const a = new DocumentSettings({ pdfAEnabled: true, conformance: 'pdf/a-4' });
-    const b = new DocumentSettings({ conformance: 'pdf/a-4', pdfAEnabled: true });
-    expect(a.conformance).toBe(PdfAConformance.PdfA4);
-    expect(b.conformance).toBe(PdfAConformance.PdfA4);
+  it('selects PDF/A only through conformance', () => {
+    expect(new DocumentSettings({ conformance: 'pdf/a-4' }).conformance).toBe(PdfAConformance.PdfA4);
+    expect('pdfAEnabled' in new DocumentSettings()).toBe(false);
   });
 
-  it('still honours pdfAEnabled on its own', () => {
-    const s = new DocumentSettings({ pdfAEnabled: true });
-    expect(s.pdfAEnabled).toBe(true);
-    expect(s.conformance).not.toBe(PdfAConformance.None);
-  });
-
-  it('covers its settable surface (36 keys)', () => {
-    expect(DOCUMENT_SETTINGS_OPTION_KEYS).toHaveLength(36);
+  it('covers its settable surface (35 keys)', () => {
+    expect(DOCUMENT_SETTINGS_OPTION_KEYS).toHaveLength(35);
     expect(settableSurface(new DocumentSettings())).toEqual([...DOCUMENT_SETTINGS_OPTION_KEYS].sort());
   });
 

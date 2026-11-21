@@ -62,6 +62,7 @@ export class SectionLink extends Hyperlink {
   public override render(ctx: RenderContext, width: number): void {
     const resolvedPageNumber = ctx.tocEntries.get(this.anchorTarget);
     this.targetPageIndex = resolvedPageNumber != null ? resolvedPageNumber - 1 : 0;
+    this.destinationAnchor = this.anchorTarget;
     super.render(ctx, width);
   }
 }

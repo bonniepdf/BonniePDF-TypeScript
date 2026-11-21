@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { Document } from '../../src/Document';
 import { Heading } from '../../src/Elements/Text/Heading';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
@@ -87,7 +88,7 @@ describe('Hardening fixtures', () => {
     const pdf = withoutRegisteredFonts(() =>
       generate(d => {
         d.settings.version = PdfVersion.Pdf17;
-        d.settings.pdfAEnabled = true;
+        d.settings.conformance = PdfAConformance.PdfA2b;
         d.settings.accessibility = AccessibilityMode.PdfUa1;
         d.settings.language = 'en-GB';
         const h = new Heading('Combined');
@@ -338,13 +339,13 @@ describe('Hardening fixtures', () => {
     });
 
     it('pdfaid XMP block emitted when all fonts are embedded via FontManager', () => {
-      // Register Liberation Sans so pdfAEnabled can be backed up.
+      // Register Liberation Sans so PDF/A can be backed up.
       const bytes = readFileSync(join(fontsDir, 'LiberationSans-Regular.ttf'));
       FontManager.registerFont(new Uint8Array(bytes));
 
       const pdf = generate(d => {
         d.settings.version = PdfVersion.Pdf17;
-        d.settings.pdfAEnabled = true;
+        d.settings.conformance = PdfAConformance.PdfA2b;
         const tb = new TextBlock();
         tb.text = 'Hello PDF/A';
         tb.fontName = StandardFonts.Helvetica;

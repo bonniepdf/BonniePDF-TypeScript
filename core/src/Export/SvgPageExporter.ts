@@ -10,7 +10,7 @@ import { TtfFont } from '../Typography/TrueType/TtfFont';
 import { TtfSubsetter } from '../Typography/TrueType/TtfSubsetter';
 import { SvgPageExportOptions, SVG_PAGE_EXPORT_DEFAULTS } from './SvgPageExportOptions';
 import { escapeXml, escapeAttr } from '../Core/XmlEscape';
-import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { isTagged } from '../Configuration/AccessibilityLevels';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { LayoutRecorder, LayoutSnapshot, SnapshotMeta, SnapshotPage, colorToHex } from '../Rendering/LayoutRecorder';
 import { debugSourceOf } from '../Rendering/DebugSource';
@@ -99,11 +99,11 @@ export async function exportSvgDocumentAsync(
   registry.oversizedContent = settings.oversizedContent;
   // PDF/UA requires standard fonts to be embedded independently of PDF/A.
   // Keep SVG font resolution in lockstep with PdfDocumentSerializer.
-  registry.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
+  registry.embedStandardFonts = isTagged(settings.accessibility);
   // Register document-owned bytes before asynchronous preloading can cache a missing face.
   // Keep this scope synchronous so another document's async export cannot inherit it.
   const registrationScope = beginDocumentFontMetricScope(
-    settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+    settings.conformance !== PdfAConformance.None || isTagged(settings.accessibility),
     undefined,
     undefined,
     document.fonts
@@ -144,7 +144,7 @@ export async function exportSvgDocumentAsync(
   let outputs!: SvgPageRenderOutput[];
   let recorder: LayoutRecorder | undefined;
   const fontScope = beginDocumentFontMetricScope(
-    settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+    settings.conformance !== PdfAConformance.None || isTagged(settings.accessibility),
     getRegistryFontInstances(registry),
     getRegistryFontPaths(registry),
     document.fonts

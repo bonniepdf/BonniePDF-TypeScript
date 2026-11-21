@@ -28,12 +28,12 @@ export function asPdf20(settings: DocumentSettings): DocumentSettings {
 }
 
 /**
- * Enables PDF/A archival mode. Automatically sets version to PDF 1.7.
+ * Selects PDF/A-2b archival mode. Automatically sets version to PDF 1.7.
  * Cannot be used with encryption.
  */
 export function asPdfA(settings: DocumentSettings): DocumentSettings {
   settings.version = PdfVersion.Pdf17;
-  settings.pdfAEnabled = true;
+  settings.conformance = PdfAConformance.PdfA2b;
   return settings;
 }
 

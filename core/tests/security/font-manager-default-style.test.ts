@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { PdfAConformance } from '../../src/Configuration/PdfAConformance';
 import { Document } from '../../src/Document';
 import { TextBlock } from '../../src/Elements/Text/TextBlock';
 import { FontManager } from '../../src/Typography/FontManager';
@@ -42,7 +43,7 @@ describe('FontManager', () => {
 
   it('PDF/A claim suppressed when Helvetica used without FontManager registration', () => {
     const doc = new Document();
-    doc.settings.pdfAEnabled = true;
+    doc.settings.conformance = PdfAConformance.PdfA2b;
     doc.settings.version = PdfVersion.Pdf17;
     const tb = new TextBlock('Test');
     tb.fontName = 'Helvetica';
@@ -57,7 +58,7 @@ describe('FontManager', () => {
   it('PDF/A claim emitted when all fonts are registered via FontManager', () => {
     FontManager.autoRegisterBundledFonts(fontsDir);
     const doc = new Document();
-    doc.settings.pdfAEnabled = true;
+    doc.settings.conformance = PdfAConformance.PdfA2b;
     doc.settings.version = PdfVersion.Pdf17;
     const tb = new TextBlock('Test');
     tb.fontName = 'Helvetica';

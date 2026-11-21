@@ -14,14 +14,20 @@ import { CatalogOptions } from './Writers/CatalogOptions';
 import { AttachmentWriter } from './Writers/AttachmentWriter';
 import { FileAttachment } from '../Attachments/FileAttachment';
 import { allowsEmbeddedFiles } from '../Attachments/AttachmentRules';
+import { defaultAttachmentMediaType } from '../Attachments/AttachmentMediaType';
 import { IPdfWriter } from './Writers/IPdfWriter';
 import { IAsyncPdfWriter } from './Writers/IAsyncPdfWriter';
 import { StructureTreeWriter } from './Writers/StructureTreeWriter';
 import { StructureTreeBuilder } from './Tagging/StructureTreeBuilder';
 import { TaggingContext } from './Tagging/TaggingContext';
+import { resolveStructureTarget } from './Tagging/StructureTargets';
+import { openActionView, goToAction } from './Writers/PdfWriter';
+import type { RegisteredLink } from './RegisteredLink';
 import { PdfVersion } from '../Configuration/PdfVersion';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
+import { isPdfA4Level } from '../Configuration/PdfALevels';
 import { AccessibilityMode } from '../Configuration/AccessibilityMode';
+import { isTagged, pdfUaClaimToken } from '../Configuration/AccessibilityLevels';
 import { PdfEncryptor } from '../Security/Encryption/PdfEncryptor';
 import { ConformancePlan, pdfAConformanceToken } from './ConformancePlan';
 import { documentRequiresTwoPassLayout } from './TocLayout';
@@ -72,7 +78,7 @@ export class PdfDocumentSerializer {
     const rasterizerRegistered = this.document.svgRasterizer !== undefined;
     for (const svg of collectDocumentPreloadResources(this.document).svgs) svg.prepare(rasterizerRegistered);
     const fontScope = beginDocumentFontMetricScope(
-      settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+      settings.conformance !== PdfAConformance.None || isTagged(settings.accessibility),
       getRegistryFontInstances(preloadedResources),
       getRegistryFontPaths(preloadedResources),
       this.document.fonts,
@@ -130,7 +136,7 @@ export class PdfDocumentSerializer {
     // PDF/UA-1 mandates font embedding (ISO 14289-1, veraPDF 7.21.4.1)
     // independently of any PDF/A claim - substitute embedded Liberation for
     // the standard-14 references in tagged output too.
-    ctx.resources.embedStandardFonts = settings.accessibility === AccessibilityMode.PdfUa1;
+    ctx.resources.embedStandardFonts = isTagged(settings.accessibility);
 
     // 2b. Two-pass TOC resolution.
     // A VisualToc renders *before* the headings it references (it typically
@@ -176,7 +182,7 @@ export class PdfDocumentSerializer {
     // (canvas attaches MCIDs to the builder) and the structure-tree
     // writer at the end (emits the populated tree).
     const taggingContext = conformancePlan.needsStructureTree
-      ? new TaggingContext(new StructureTreeBuilder())
+      ? new TaggingContext(new StructureTreeBuilder(), settings.accessibility === AccessibilityMode.PdfUa2)
       : undefined;
     ctx.tagging = taggingContext;
 
@@ -250,7 +256,8 @@ export class PdfDocumentSerializer {
           if (taggingContext) {
             structParentKey = ANNOT_STRUCT_PARENT_BASE + globalAnnotIndex++;
           }
-          writer.writeLinkAnnotation(annotId, link, pageIds, structParentKey);
+          const goTo = reserveGoTo(taggingContext, () => writer.getNewId(), link);
+          writer.writeLinkAnnotation(annotId, link, pageIds, structParentKey, goTo);
           annotIds.push(annotId);
           if (taggingContext && link.linkedStructElement != null && structParentKey != null) {
             link.linkedStructElement.objrAnnotations.push({ annotId, pageObjectId: pageId });
@@ -300,7 +307,7 @@ export class PdfDocumentSerializer {
     // prohibit the legacy dictionary (except for a narrow PieceInfo/ModDate
     // case), so PDF/A-4 metadata is carried exclusively by XMP.
     const metadataWriter = new MetadataWriter(writer);
-    const documentInfoId = conformancePlan.effectivePdfA === PdfAConformance.PdfA4 ? 0 : infoId;
+    const documentInfoId = isPdfA4Level(conformancePlan.effectivePdfA) ? 0 : infoId;
     if (documentInfoId > 0) metadataWriter.writeDocumentInfo(documentInfoId, this.document.metadata);
 
     const catalogOptions = new CatalogOptions();
@@ -346,7 +353,12 @@ export class PdfDocumentSerializer {
     ) {
       const navWriter = new NavigationWriter(writer);
       const outlinesStartId = writer.getNewId();
-      catalogOptions.outlinesId = navWriter.writeOutlineTree(outlinesStartId, settings.bookmarks, pageIds);
+      catalogOptions.outlinesId = navWriter.writeOutlineTree(
+        outlinesStartId,
+        settings.bookmarks,
+        pageIds,
+        outlineGoTos(taggingContext, () => writer.getNewId())
+      );
     }
 
     // 11. Write PDF/A output intents.
@@ -369,9 +381,31 @@ export class PdfDocumentSerializer {
     // through the canvas and threads annotation bindings for /OBJR.
     if (taggingContext) {
       const structureTreeWriter = new StructureTreeWriter(writer);
-      catalogOptions.structTreeRootId = structureTreeWriter.write(taggingContext.tree, pageIds, annotBindings);
+      catalogOptions.structTreeRootId = structureTreeWriter.write(
+        taggingContext.tree,
+        pageIds,
+        annotBindings,
+        taggingContext.pdf20 ? taggingContext : undefined
+      );
       catalogOptions.tagged = true;
       catalogOptions.language = settings.language;
+      if (taggingContext.pdf20) {
+        catalogOptions.openActionId = writer.getNewId();
+        taggingContext.pendingGoTos.push({
+          actionId: catalogOptions.openActionId,
+          pageIndex: 0,
+          anchor: undefined,
+          view: openActionView(settings),
+        });
+        for (const pending of taggingContext.pendingGoTos) {
+          const page = Math.max(0, Math.min(pending.pageIndex, pageIds.length - 1));
+          const target = resolveStructureTarget(taggingContext, pending.anchor, page);
+          writer.writeObject(
+            pending.actionId,
+            goToAction(pageIds[page], structureTreeWriter.elementIds.get(target)!, pending.view)
+          );
+        }
+      }
     }
 
     // 12. Write /PageLabels number tree if configured (PDF §12.4.2).
@@ -396,10 +430,23 @@ export class PdfDocumentSerializer {
     // conformance guard. Populates /Names /EmbeddedFiles and /AF.
     const attachmentsToWrite = this.resolveAttachments();
     if (attachmentsToWrite) {
-      const attachmentWriter = new AttachmentWriter(writer);
+      const attachmentWriter = new AttachmentWriter(writer, {
+        mediaType: defaultAttachmentMediaType(this.document.settings.conformance),
+        describeByFileName: this.document.settings.accessibility === AccessibilityMode.PdfUa2,
+      });
       const result = attachmentWriter.writeAttachments(attachmentsToWrite);
       catalogOptions.namesEmbeddedFilesId = result.namesEmbeddedFilesId;
       catalogOptions.associatedFileIds = result.associatedFileIds;
+      // A file name satisfies PDF/UA-2's /Desc rule without telling a reader
+      // what the file is, so each one used that way is reported (04 §10.1).
+      for (const fileName of result.describedByFileName) {
+        this.diagnostics.addWarning(
+          'attachment',
+          `Attachment '${fileName}' has no description; PDF/UA-2 requires one, so its file name was used. ` +
+            'Give it a description that tells readers what the file contains.',
+          fileName
+        );
+      }
     }
 
     // 13. Write /Catalog
@@ -435,11 +482,12 @@ export class PdfDocumentSerializer {
       this.diagnostics.addWarning('compliance', `The ${token} claim was withheld: ${reason}. ${remedy}`, token);
     }
     if (plan.pdfUaClaimSuppressed) {
+      const token = pdfUaClaimToken(plan.requestedAccessibility);
       this.diagnostics.addWarning(
         'compliance',
-        `The pdf/ua-1 claim was withheld: these fonts could not be embedded: ${fonts}. ` +
+        `The ${token} claim was withheld: these fonts could not be embedded: ${fonts}. ` +
           `The document is still tagged. ${remedy}`,
-        'pdf/ua-1'
+        token
       );
     }
   }
@@ -509,7 +557,7 @@ export class PdfDocumentSerializer {
     preRegistry.missingGlyphs = settings.missingGlyphs;
     preRegistry.oversizedContent = settings.oversizedContent;
     const registrationScope = beginDocumentFontMetricScope(
-      settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+      settings.conformance !== PdfAConformance.None || isTagged(settings.accessibility),
       undefined,
       undefined,
       this.document.fonts,
@@ -569,7 +617,7 @@ export class PdfDocumentSerializer {
         // Metric scopes are synchronous. Never retain the global active font scope
         // across an await: concurrent documents must not inherit each other's fonts.
         const scope = beginDocumentFontMetricScope(
-          settings.conformance !== PdfAConformance.None || settings.accessibility === AccessibilityMode.PdfUa1,
+          settings.conformance !== PdfAConformance.None || isTagged(settings.accessibility),
           getRegistryFontInstances(resources),
           getRegistryFontPaths(resources),
           this.document.fonts,
@@ -809,4 +857,37 @@ function addEmbeddedFonts(el: WalkableElement, paths: Set<string>): void {
   if (el.style && typeof el.style.fontName === 'string' && PdfResourceRegistry.isEmbeddedFont(el.style.fontName)) {
     paths.add(el.style.fontName);
   }
+}
+
+/**
+ * Under PDF/UA-2, reserves the go-to action an in-document link's annotation
+ * points at; it is written once the structure tree has object numbers.
+ */
+function reserveGoTo(
+  tagging: TaggingContext | undefined,
+  newId: () => number,
+  link: RegisteredLink
+): number | undefined {
+  if (tagging?.pdf20 !== true || link.targetPageIndex == null) return undefined;
+  const actionId = newId();
+  tagging.pendingGoTos.push({
+    actionId,
+    pageIndex: link.targetPageIndex,
+    anchor: link.destinationAnchor,
+    view: '/Fit',
+  });
+  return actionId;
+}
+
+/** Under PDF/UA-2, reserves a go-to action for each bookmark; otherwise undefined, and bookmarks keep /Dest. */
+function outlineGoTos(
+  tagging: TaggingContext | undefined,
+  newId: () => number
+): ((pageIndex: number) => number) | undefined {
+  if (tagging?.pdf20 !== true) return undefined;
+  return pageIndex => {
+    const actionId = newId();
+    tagging.pendingGoTos.push({ actionId, pageIndex, anchor: undefined, view: '/Fit' });
+    return actionId;
+  };
 }

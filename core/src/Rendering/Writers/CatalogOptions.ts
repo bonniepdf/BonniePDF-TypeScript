@@ -4,6 +4,8 @@
  */
 export class CatalogOptions {
   public viewerPrefsId?: number;
+  /** The go-to action object written as /OpenAction under PDF/UA-2 (unset writes the destination inline). */
+  public openActionId?: number;
   public xmpMetadataId?: number;
   public outlinesId?: number;
   public destsId?: number;

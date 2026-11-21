@@ -63,7 +63,6 @@ export const DOCUMENT_SETTINGS_OPTION_KEYS = [
   'displayDocTitle',
   'version',
   'conformance',
-  'pdfAEnabled',
   'accessibility',
   'language',
   'facturX',
@@ -130,7 +129,7 @@ export type DocumentSettingsOptions = Partial<
   pageMode?: PageModeInput;
   /** PDF/A claim. Accepts `'none'`, `'pdf/a-2b'`, `'pdf/a-2a'`, `'pdf/a-4'`, … */
   conformance?: PdfAConformanceInput;
-  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1' | 'pdf/ua-2'`. */
   accessibility?: AccessibilityModeInput;
   /** Watermark. Accepts an instance or an options literal. */
   watermark?: Watermark | WatermarkOptions;
@@ -405,20 +404,6 @@ export class DocumentSettings {
   }
 
   /**
-   * Legacy boolean view of {@link conformance}, not a separate PDF/A setting.
-   * Reading it returns `true` whenever any PDF/A level is selected. Writing it
-   * replaces the exact conformance level: `true` selects
-   * {@link PdfAConformance.PdfA2b}, the modern visual-reproducibility baseline,
-   * while `false` selects {@link PdfAConformance.None}. Prefer
-   * {@link conformance} in new code when the precise PDF/A profile matters.
-   */
-  public get pdfAEnabled(): boolean {
-    return this.conformance !== PdfAConformance.None;
-  }
-  public set pdfAEnabled(value: boolean) {
-    this.conformance = value ? PdfAConformance.PdfA2b : PdfAConformance.None;
-  }
-  /**
    * Gets or sets the accessibility / tagged-PDF conformance mode.
    * Default {@link AccessibilityMode.None} - the writer produces an
    * untagged PDF and ignores all tagging machinery. Set to
@@ -426,13 +411,13 @@ export class DocumentSettings {
    * emission (structure tree, MCIDs, XMP conformance claim, `/Lang`,
    * `/MarkInfo`).
    *
-   * Orthogonal to {@link pdfAEnabled}: a document can be PDF/A, PDF/UA,
+   * Orthogonal to {@link conformance}: a document can be PDF/A, PDF/UA,
    * both, or neither. See
    * the shared specification.
    */
   private _accessibility!: AccessibilityMode;
 
-  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1'`. */
+  /** Accessibility (tagging) mode. Accepts `'none' | 'pdf/ua-1' | 'pdf/ua-2'`. */
   public get accessibility(): AccessibilityMode {
     return this._accessibility;
   }
@@ -576,7 +561,7 @@ export class DocumentSettings {
 
 /**
  * Applies {@link DocumentSettingsOptions}, coercing nested literals into their
- * canonical types and resolving the `conformance` / `pdfAEnabled` overlap.
+ * canonical types.
  *
  * Concrete callers MUST use this rather than {@link applyOptions} directly: a
  * bare keyed assignment would store plain literals where the engine expects
@@ -586,7 +571,7 @@ export function applyDocumentSettingsOptions(
   target: DocumentSettings,
   options: DocumentSettingsOptions
 ): DocumentSettings {
-  const { watermark, encryption, pageLabel, defaultTextStyle, bookmarks, pdfAEnabled, conformance, ...rest } = options;
+  const { watermark, encryption, pageLabel, defaultTextStyle, bookmarks, ...rest } = options;
 
   applyOptions(target, rest);
 
@@ -605,17 +590,6 @@ export function applyDocumentSettingsOptions(
   }
   if (bookmarks !== undefined) {
     target.bookmarks = bookmarks.map(b => (b instanceof BookmarkItem ? b : new BookmarkItem(b)));
-  }
-
-  // `pdfAEnabled` is legacy sugar over `conformance` (it flips PdfA2b/None), so
-  // it is applied first and `conformance` wins when both are supplied. Without a
-  // fixed order this would depend on the literal's key order, which is not a
-  // contract callers should have to reason about.
-  if (pdfAEnabled !== undefined) {
-    target.pdfAEnabled = pdfAEnabled;
-  }
-  if (conformance !== undefined) {
-    target.conformance = conformance;
   }
 
   return target;

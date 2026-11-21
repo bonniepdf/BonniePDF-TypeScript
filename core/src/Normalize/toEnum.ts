@@ -132,6 +132,7 @@ export const toPdfAConformance = resolver<PdfAConformanceToken, PdfAConformance>
   'pdf/a-3b': PdfAConformance.PdfA3b,
   'pdf/a-3a': PdfAConformance.PdfA3a,
   'pdf/a-4': PdfAConformance.PdfA4,
+  'pdf/a-4f': PdfAConformance.PdfA4f,
 });
 
 /** A {@link AccessibilityMode} value or one of its string spellings ({@link AccessibilityModeToken}). */
@@ -142,6 +143,7 @@ export type AccessibilityModeInput = AccessibilityMode | AccessibilityModeToken;
 export const toAccessibilityMode = resolver<AccessibilityModeToken, AccessibilityMode>({
   none: AccessibilityMode.None,
   'pdf/ua-1': AccessibilityMode.PdfUa1,
+  'pdf/ua-2': AccessibilityMode.PdfUa2,
 });
 
 /** A {@link ZoomLevel} value or one of its string spellings ({@link ZoomLevelToken}). */

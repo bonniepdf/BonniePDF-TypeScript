@@ -35,6 +35,12 @@ export enum PdfAConformance {
   /** PDF/A-3a (ISO 19005-3:2012, conformance A). PDF/A-3b + tagging. */
   PdfA3a = 'PdfA3a',
 
-  /** PDF/A-4 (ISO 19005-4:2020 baseline). PDF 2.0-based archival output. */
+  /** PDF/A-4 (ISO 19005-4:2020 baseline). PDF 2.0-based archival output. Attachments are dropped. */
   PdfA4 = 'PdfA4',
+
+  /**
+   * PDF/A-4f (ISO 19005-4:2020, conformance F). PDF/A-4 that carries
+   * attachments of any type. The document must have at least one attachment.
+   */
+  PdfA4f = 'PdfA4f',
 }

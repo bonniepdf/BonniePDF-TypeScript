@@ -10,6 +10,7 @@ import { PdfSize } from './Configuration/PdfSize';
 import { PageOrientation } from './Core/PageOrientation';
 import { PdfVersion } from './Configuration/PdfVersion';
 import { PdfAConformance } from './Configuration/PdfAConformance';
+import { isPdfA4Level } from './Configuration/PdfALevels';
 import { AccessibilityMode } from './Configuration/AccessibilityMode';
 import { EncryptionAlgorithm } from './Security/Models/EncryptionAlgorithm';
 import { PdfWriter } from './Rendering/Writers/PdfWriter';
@@ -185,10 +186,11 @@ export class Document {
 
   /**
    * Files embedded into the generated PDF as associated files (PDF/A-3 /
-   * ZUGFeRD). Embedded files are honoured under `None`, PDF/A-3, and
-   * PDF/A-4; under levels that forbid them (PDF/A-1, PDF/A-2) they are
-   * dropped at generation time with a diagnostic, keeping the conformance
-   * claim honest.
+   * ZUGFeRD). Embedded files are honoured under `None`, PDF/A-3 and
+   * PDF/A-4f; under PDF/A-1, PDF/A-2 and PDF/A-4 they are dropped at
+   * generation time with a diagnostic, keeping the conformance claim honest.
+   * Under PDF/UA-2, an attachment with no `description` is described by its
+   * file name and records a warning.
    *
    * @remarks
    * A read-only array: read it or loop over it. It has no `add` or `push`; add a file with {@link Document.attach}.
@@ -580,13 +582,26 @@ export class Document {
       throw new Error('AES-256 encryption requires PdfVersion.Pdf17 or PdfVersion.Pdf20.');
     }
 
+    // PDF/UA-2 is PDF 2.0 output; PDF/A-1, -2 and -3 are PDF 1.7 formats, so
+    // no file can claim both. PDF/A-4 and -4f are the PDF 2.0 archival levels.
+    if (
+      s.accessibility === AccessibilityMode.PdfUa2 &&
+      s.conformance !== PdfAConformance.None &&
+      !isPdfA4Level(s.conformance)
+    ) {
+      throw new Error(
+        `PDF/UA-2 requires PDF 2.0, which ${s.conformance} cannot use. ` +
+          `Use PdfAConformance.PdfA4 with AccessibilityMode.PdfUa2, or AccessibilityMode.PdfUa1 with ${s.conformance}.`
+      );
+    }
+
     // PDF/A requires a matching PDF base version. Silently upgrade rather
     // than throw - the caller asked for archival output, so honour that intent.
-    if (s.conformance === PdfAConformance.PdfA4 && s.version !== PdfVersion.Pdf20) {
+    if (isPdfA4Level(s.conformance) && s.version !== PdfVersion.Pdf20) {
       s.version = PdfVersion.Pdf20;
     } else if (
       s.conformance !== PdfAConformance.None &&
-      s.conformance !== PdfAConformance.PdfA4 &&
+      !isPdfA4Level(s.conformance) &&
       s.version !== PdfVersion.Pdf17
     ) {
       s.version = PdfVersion.Pdf17;
@@ -612,11 +627,23 @@ export class Document {
 
     if (s.accessibility === AccessibilityMode.PdfUa1 && s.version === PdfVersion.Pdf20) {
       throw new Error(
-        'PDF/UA-1 output is only supported with PdfVersion.Pdf17. PDF/UA-2 for PdfVersion.Pdf20 is not implemented yet.'
+        'PDF/UA-1 output is only supported with PdfVersion.Pdf17. Use AccessibilityMode.PdfUa2 for PdfVersion.Pdf20.'
       );
     }
 
-    // "a" levels require tagged output (PDF/UA-1).
+    // PDF/UA-2 is bound to PDF 2.0. Upgrade the default version as PDF/UA-1
+    // does; an explicit PDF 1.7 request cannot carry it.
+    if (s.accessibility === AccessibilityMode.PdfUa2) {
+      if (s.version === PdfVersion.Pdf17) {
+        throw new Error(
+          'PDF/UA-2 output requires PdfVersion.Pdf20. Leave settings.version at its default, set it to PdfVersion.Pdf20, ' +
+            'or use AccessibilityMode.PdfUa1 for PDF 1.7.'
+        );
+      }
+      s.version = PdfVersion.Pdf20;
+    }
+
+    // "a" levels require tagged output (PDF/UA-1; PDF/UA-2 was refused above).
     if (requiresTagging(s.conformance) && s.accessibility !== AccessibilityMode.PdfUa1) {
       throw new Error(
         `${s.conformance} requires tagged output. Set settings.accessibility = AccessibilityMode.PdfUa1.`
@@ -625,6 +652,15 @@ export class Document {
 
     if (s.hasBookmarks && s.version !== PdfVersion.Pdf17 && s.version !== PdfVersion.Pdf20) {
       throw new Error('Bookmarks require PdfVersion.Pdf17 or PdfVersion.Pdf20.');
+    }
+
+    // PDF/A-4f is the PDF/A-4 level that carries files, and must carry at
+    // least one (ISO 19005-4 6.9). An attachment with no name or no content
+    // is dropped before writing, so it does not count.
+    if (s.conformance === PdfAConformance.PdfA4f && !this.attachments.some(isWritableAttachment)) {
+      throw new Error(
+        'PdfA4f requires at least one attachment. Attach a file with doc.attach(...), or use PdfAConformance.PdfA4.'
+      );
     }
   }
 
@@ -636,6 +672,11 @@ export class Document {
     this._pages.length = 0;
     this._disposed = true;
   }
+}
+
+/** True for an attachment that is written: one with a name and some content. */
+function isWritableAttachment(a: FileAttachment): boolean {
+  return !!a.fileName && a.content.length > 0;
 }
 
 /**

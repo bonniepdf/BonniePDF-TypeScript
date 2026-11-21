@@ -91,9 +91,10 @@ export class AsyncPdfWriter implements IAsyncPdfWriter {
     id: number,
     link: RegisteredLink,
     pageIds: number[],
-    structParentKey?: number
+    structParentKey?: number,
+    goToActionId?: number
   ): Promise<void> {
-    this._inner.writeLinkAnnotation(id, link, pageIds, structParentKey);
+    this._inner.writeLinkAnnotation(id, link, pageIds, structParentKey, goToActionId);
   }
 
   public async writeViewerPreferencesAsync(id: number, settings: ViewerPreferencesSettings): Promise<number> {

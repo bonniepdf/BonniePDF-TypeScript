@@ -120,8 +120,18 @@
     "fluent-api",
     "zero-dependency",
     "pdf-ua",
+    "pdf-ua-2",
     "pdf-a",
+    "pdf-a-4",
     "accessible-pdf",
+    "tagged-pdf",
+    "wcag",
+    "zugferd",
+    "factur-x",
+    "e-invoicing",
+    "barcode",
+    "qrcode",
+    "svg-to-pdf",
     "pdfkit-alternative",
     "nodejs"
   ],
@@ -135,7 +145,7 @@
   "bugs": {
     "url": "https://github.com/bonniepdf/bonniepdf-typescript/issues"
   },
-  "homepage": "https://bonniepdf.dev",
+  "homepage": "https://www.bonniepdf.dev",
   "publishConfig": {
     "access": "public"
   },

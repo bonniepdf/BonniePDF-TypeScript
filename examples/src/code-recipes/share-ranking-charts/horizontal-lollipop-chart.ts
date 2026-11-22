@@ -94,15 +94,34 @@ export function generate(): Document {
     series: [
       {
         color: C_VIOLET,
-        dataPoints: products.map(r => ({ label: r.label, value: r.value, labelFormat: 'N0' })),
+        dataPoints: products.map(r => ({ label: r.label, value: r.value })),
       },
     ],
-    yAxis: { prefix: '£', maxValue: 100000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
+    yAxis: { prefix: '£', valueFormat: 'K0', maxValue: 100000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
     xAxis: { legend: 'Product' },
   });
 
   const chart = new LollipopChart({
     theme: 'modern',
+    autoLayout: true,
+    defaultMarkerShape: 'diamond',
+    defaultMarkerHaloWidth: 1.5,
+    valueLabelPrefix: '£',
+    valueLabelFormat: 'K1',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 60000,
+        label: 'Quota £60K',
+        labelPosition: 'end',
+        labelBackgroundColor: '#ede9fe',
+        color: '#6d28d9',
+        thickness: 1.5,
+        dashPattern: [4, 3],
+      },
+    ],
     data,
     altText: 'Horizontal lollipop chart showing product revenue ranking for eight product lines.',
     orientation: ChartOrientation.Horizontal,

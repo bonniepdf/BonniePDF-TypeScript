@@ -489,6 +489,8 @@ function tradeChart(byTrade: ReadonlyMap<string, number>): BarChart {
   });
 
   return new BarChart({
+    theme: 'modern',
+    barStyle: { cornerRadius: 4 },
     data,
     altText:
       'Horizontal bar chart of open items by trade: ' +

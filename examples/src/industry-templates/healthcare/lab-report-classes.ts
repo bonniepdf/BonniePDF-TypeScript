@@ -329,6 +329,8 @@ function trendChart(title: string, values: number[], maxValue: number, color: Co
 
   const chart = new LineChart();
   chart.theme = 'modern';
+  chart.curve = 'smooth';
+  chart.defaultMarkerHaloWidth = 1.5;
   chart.data = data;
   chart.altText = altText;
   chart.height = 130;

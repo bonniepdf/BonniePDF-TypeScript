@@ -107,7 +107,27 @@ export function generate(): Document {
   data.xAxis.legend = 'Product';
 
   const chart = new DotPlotChart();
+  chart.data = data;
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.defaultMarkerShape = 'diamond';
+  chart.defaultMarkerFill = 'hollow';
+  chart.defaultDotRadius = 6;
+  chart.subtitle = 'Hollow diamond markers positioned along a value axis with target threshold';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 7500,
+      label: 'Target £7,500',
+      labelPosition: 'end',
+      labelBackgroundColor: '#ccfbf1',
+      color: '#0f766e',
+      thickness: 1.5,
+      dashPattern: [5, 3],
+    },
+  ];
   chart.height = 380;
   chart.stretchToFit = true;
   chart.dotColor = Color.fromHex(C_TEAL);
@@ -115,8 +135,6 @@ export function generate(): Document {
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.white;
-
-  chart.data = data;
   chart.altText = 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.';
   doc.add(chart);
 

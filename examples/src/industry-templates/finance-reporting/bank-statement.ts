@@ -185,6 +185,8 @@ export function generate(): Document {
   doc.add(h2('Where your everyday money went'));
   doc.add(
     new BarChart({
+      theme: 'modern',
+      barStyle: { cornerRadius: 4, gradient: { startColor: '#14b8a6', endColor: '#0f766e', scope: 'bar' } },
       data: new ChartData({
         series: [
           { color: ACCENT, dataPoints: spending.map(s => ({ label: s.category, value: Math.round(s.pence / 100) })) },

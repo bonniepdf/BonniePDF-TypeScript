@@ -95,6 +95,27 @@ export function generate(): Document {
 
   const chart = new BarChart({
     theme: 'modern',
+    autoLayout: true,
+    subtitle: 'FY 2026 monthly sales with plot-scoped gradient and annual target overlay',
+    caption: 'Source: Monthly sales ledger (GBP)',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    barStyle: {
+      cornerRadius: 6,
+      gradient: { startColor: '#818cf8', endColor: C_INDIGO, scope: 'plot' },
+    },
+    references: [
+      {
+        value: 9000,
+        label: 'Target £9k',
+        labelPosition: 'end',
+        labelBackgroundColor: '#fef3c7',
+        color: '#d97706',
+        thickness: 1.5,
+        dashPattern: [5, 3],
+      },
+    ],
     data,
     altText: 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.',
     height: 380,

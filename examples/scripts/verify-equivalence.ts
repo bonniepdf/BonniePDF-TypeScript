@@ -224,6 +224,41 @@ const EQUIVALENCE_PAIRS: Array<{ canonical: string; variant: string; why: string
     why: 'class/mutation companion must desugar to the options-object form',
   },
   {
+    canonical: 'stacked-bar-chart',
+    variant: 'stacked-bar-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'combo-chart',
+    variant: 'combo-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'waterfall-chart',
+    variant: 'waterfall-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'bullet-chart',
+    variant: 'bullet-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'stacked-area-chart',
+    variant: 'stacked-area-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'scatter-chart',
+    variant: 'scatter-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
+    canonical: 'heatmap-chart',
+    variant: 'heatmap-chart-classes',
+    why: 'class/mutation companion must desugar to the options-object form',
+  },
+  {
     canonical: 'watermarking',
     variant: 'watermarking-classes',
     why: 'class/mutation companion must desugar to the options-object form',

@@ -94,12 +94,18 @@ export function generate(): Document {
       series('Clothing', C_ROSE, [31000, 44000, 52000, 68000]),
       series('Home & Garden', C_GREEN, [24000, 37000, 41000, 53000]),
     ],
-    yAxis: { prefix: '£', maxValue: 110000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
+    yAxis: { prefix: '£', valueFormat: 'K0', maxValue: 110000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
     xAxis: { legend: 'Quarter' },
   });
 
   const chart = new GroupedBarChart({
     theme: 'modern',
+    autoLayout: true,
+    legendPosition: 'top',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    barStyle: { cornerRadius: 4 },
     data,
     altText: 'Horizontal grouped bar chart comparing quarterly sales across three product lines.',
     orientation: ChartOrientation.Horizontal,

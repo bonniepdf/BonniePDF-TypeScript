@@ -409,6 +409,7 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
 
   const chart = new BarChart();
   chart.theme = 'modern';
+  chart.barStyle = { cornerRadius: 4 };
   chart.data = chartData;
   chart.altText = `Monthly energy use over the last twelve months, from ${data.history[0]?.month ?? ''} to ${
     data.history[data.history.length - 1]?.month ?? ''

@@ -92,20 +92,39 @@ export function generate(
       {
         name: String(year - 1),
         color: '#94a3b8',
+        style: { dashPattern: [6, 3], markerShape: 'diamond', markerFill: 'hollow', markerRadius: 4 },
         dataPoints: points([65000, 69000, 80000, 72000, 85000, 88000, 72000, 68000, 75000, 81000, 92000, 105000]),
       },
       {
         name: String(year),
         color: '#4f46e5',
+        style: { lineWidth: 2.5, markerShape: 'circle', markerHaloWidth: 1.5, markerRadius: 4.5 },
         dataPoints: points([75000, 78000, 85000, 78000, 92000, 95000, 87000, 78000, 82000, 91000, 97000, 118000]),
       },
     ],
-    yAxis: { prefix: '£', maxValue: 150000, stepCount: 5, legend: 'Revenue' },
+    yAxis: { prefix: '£', valueFormat: 'K0', maxValue: 150000, stepCount: 5, legend: 'Revenue' },
     xAxis: { legend: 'Month' },
   });
 
   const chart = new LineChart({
     theme: 'modern',
+    autoLayout: true,
+    curve: 'smooth',
+    legendPosition: 'top',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 100000,
+        label: '£100K milestone',
+        labelPosition: 'start',
+        labelBackgroundColor: '#eef2ff',
+        color: '#4f46e5',
+        thickness: 1.25,
+        dashPattern: [4, 3],
+      },
+    ],
     // Twelve points per line: value labels would collide, so the axis carries the scale.
     showValueLabels: false,
     data,

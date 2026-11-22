@@ -90,10 +90,9 @@ export function generate(): Document {
 
   const series = new ChartSeries();
   series.name = 'Revenue';
-  // The share goes in the label, so the legend reads "Online shop (40%) - 412,600".
   series.dataPoints = CHANNELS.map(([channel, revenue]) => {
     const point = new ChartDataPoint();
-    point.label = `${channel} (${share(revenue)})`;
+    point.label = channel;
     point.value = revenue;
     point.labelFormat = 'N0';
     return point;
@@ -102,6 +101,15 @@ export function generate(): Document {
   data.series = [series];
 
   const chart = new PieChart();
+  chart.theme = 'modern';
+  chart.sliceGradient = true;
+  chart.sliceBorderWidth = 1.5;
+  chart.donutHoleRatio = 0.56;
+  chart.sliceLabelMode = 'callout';
+  chart.legendFormat = 'labelValuePercent';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
   chart.data = data;
   chart.altText = `Donut chart of revenue by channel, year to March 2026: ${CHANNELS.map(
     ([channel, revenue]) => `${channel} ${share(revenue)}`

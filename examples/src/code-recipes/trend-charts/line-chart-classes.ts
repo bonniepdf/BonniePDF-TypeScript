@@ -107,15 +107,32 @@ export function generate(): Document {
   data.xAxis.legend = 'Month';
 
   const chart = new LineChart();
+  chart.data = data;
+  chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.curve = 'smooth';
+  chart.defaultMarkerHaloWidth = 1.5;
+  chart.subtitle = 'Monotone cubic spline with haloed markers and target band';
+  chart.caption = 'Target corridor: £8,000 to £11,000 monthly recurring revenue';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 8000,
+      endValue: 11000,
+      label: 'Target band',
+      labelPosition: 'end',
+      color: '#ede9fe',
+    },
+  ];
   chart.height = 380;
   chart.stretchToFit = true;
   chart.lineColor = Color.fromHex(C_VIOLET);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
-
-  chart.data = data;
+  chart.backgroundColor = Color.white;
   chart.altText = 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.';
   doc.add(chart);
 

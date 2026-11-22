@@ -105,6 +105,17 @@ export function generate(
   barChart3.fontFamily = StandardFonts.Helvetica;
   barChart3.labelFontSize = 8;
   barChart3.barStyle = { cornerRadius: 4, gradient: { startColor: '#60a5fa', endColor: BLUE, scope: 'bar' } };
+  barChart3.references = [
+    {
+      value: 185,
+      label: 'Avg £185k',
+      labelPosition: 'start',
+      labelBackgroundColor: '#eff6ff',
+      color: BLUE,
+      thickness: 1,
+      dashPattern: [4, 2],
+    },
+  ];
   barChart3.data = {
     series: [{ name: 'Revenue', color: BLUE, dataPoints: months.map((label, i) => ({ label, value: revenue[i] })) }],
     yAxis: { prefix: '£', maxValue: 300, stepCount: 6 },
@@ -114,6 +125,8 @@ export function generate(
   const bars = barChart3;
   const pieChart4 = new PieChart();
   pieChart4.theme = 'modern';
+  pieChart4.sliceGradient = true;
+  pieChart4.sliceBorderWidth = 1.5;
   pieChart4.height = 132;
   pieChart4.stretchToFit = true;
   pieChart4.isDonut = true;

@@ -305,6 +305,9 @@ function controlDonut(): ChartBase {
   data.series = [series];
 
   const chart = new PieChart();
+  chart.theme = 'modern';
+  chart.sliceGradient = true;
+  chart.sliceBorderWidth = 1.5;
   chart.height = 130;
   chart.stretchToFit = true;
   chart.isDonut = true;
@@ -333,6 +336,8 @@ function severityBars(): ChartBase {
   data.yAxis.stepCount = 3;
 
   const chart = new BarChart();
+  chart.theme = 'modern';
+  chart.barStyle = { cornerRadius: 4 };
   chart.height = 130;
   chart.stretchToFit = true;
   chart.barColor = PRIMARY;

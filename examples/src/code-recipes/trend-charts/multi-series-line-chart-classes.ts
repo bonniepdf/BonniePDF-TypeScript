@@ -22,6 +22,7 @@ import {
   WidthDistribution,
   ChartData,
   ChartSeries,
+  ChartSeriesStyle,
   ChartDataPoint,
   LineChart,
   PdfAConformance,
@@ -96,6 +97,12 @@ export function generate(
   const previousYear = new ChartSeries();
   previousYear.color = Color.fromHex('#94a3b8');
   previousYear.name = String(year - 1);
+  previousYear.style = new ChartSeriesStyle({
+    dashPattern: [6, 3],
+    markerShape: 'diamond',
+    markerFill: 'hollow',
+    markerRadius: 4,
+  });
   previousYear.dataPoints = MONTH_LABELS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
@@ -107,6 +114,12 @@ export function generate(
   const currentYear = new ChartSeries();
   currentYear.color = Color.fromHex('#4f46e5');
   currentYear.name = String(year);
+  currentYear.style = new ChartSeriesStyle({
+    lineWidth: 2.5,
+    markerShape: 'circle',
+    markerHaloWidth: 1.5,
+    markerRadius: 4.5,
+  });
   currentYear.dataPoints = MONTH_LABELS.map((label, i) => {
     const p = new ChartDataPoint();
     p.label = label;
@@ -117,6 +130,7 @@ export function generate(
 
   data.series = [previousYear, currentYear];
   data.yAxis.prefix = '£';
+  data.yAxis.valueFormat = 'K0';
   data.yAxis.maxValue = 150000;
   data.yAxis.stepCount = 5;
   data.yAxis.legend = 'Revenue';
@@ -124,6 +138,23 @@ export function generate(
 
   const chart = new LineChart();
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.curve = 'smooth';
+  chart.legendPosition = 'top';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 100000,
+      label: '£100K milestone',
+      labelPosition: 'start',
+      labelBackgroundColor: '#eef2ff',
+      color: '#4f46e5',
+      thickness: 1.25,
+      dashPattern: [4, 3],
+    },
+  ];
   // Twelve points per line: value labels would collide, so the axis carries the scale.
   chart.showValueLabels = false;
   chart.height = 380;

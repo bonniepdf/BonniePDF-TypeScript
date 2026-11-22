@@ -91,6 +91,24 @@ export function generate(): Document {
   });
 
   const chart = new LineChart({
+    theme: 'modern',
+    autoLayout: true,
+    curve: 'smooth',
+    defaultMarkerHaloWidth: 1.5,
+    subtitle: 'Monotone cubic spline with haloed markers and target band',
+    caption: 'Target corridor: £8,000 to £11,000 monthly recurring revenue',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 8000,
+        endValue: 11000,
+        label: 'Target band',
+        labelPosition: 'end',
+        color: '#ede9fe',
+      },
+    ],
     data,
     altText: 'Line chart of monthly revenue from January to December, ending at 12,800 GBP.',
     height: 380,
@@ -99,7 +117,7 @@ export function generate(): Document {
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

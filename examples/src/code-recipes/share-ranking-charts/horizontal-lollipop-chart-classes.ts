@@ -105,7 +105,6 @@ export function generate(): Document {
     const p = new ChartDataPoint();
     p.label = r.label;
     p.value = r.value;
-    p.labelFormat = 'N0';
     return p;
   });
 
@@ -113,6 +112,7 @@ export function generate(): Document {
   data.title = 'Product Revenue';
   data.series = [s];
   data.yAxis.prefix = '£';
+  data.yAxis.valueFormat = 'K0';
   data.yAxis.maxValue = 100000;
   data.yAxis.stepCount = 5;
   data.yAxis.showGridLines = true;
@@ -121,6 +121,25 @@ export function generate(): Document {
 
   const chart = new LollipopChart();
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.defaultMarkerShape = 'diamond';
+  chart.defaultMarkerHaloWidth = 1.5;
+  chart.valueLabelPrefix = '£';
+  chart.valueLabelFormat = 'K1';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 60000,
+      label: 'Quota £60K',
+      labelPosition: 'end',
+      labelBackgroundColor: '#ede9fe',
+      color: '#6d28d9',
+      thickness: 1.5,
+      dashPattern: [4, 3],
+    },
+  ];
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 400;
   chart.stretchToFit = true;

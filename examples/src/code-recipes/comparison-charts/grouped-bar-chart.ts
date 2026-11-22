@@ -86,7 +86,7 @@ export function generate(): Document {
   });
 
   const data = new ChartData({
-    yAxis: { prefix: '£', maxValue: 35000, stepCount: 7 },
+    yAxis: { prefix: '£', valueFormat: 'K0', maxValue: 35000, stepCount: 7 },
     series: [
       series('Electronics', '#4f46e5', [14500, 21800, 22500, 31500]),
       series('Clothing', '#f43f5e', [10500, 14200, 14100, 19400]),
@@ -96,6 +96,13 @@ export function generate(): Document {
 
   const chart = new GroupedBarChart({
     theme: 'modern',
+    autoLayout: true,
+    legendPosition: 'top',
+    subtitle: 'Three product lines compared across all four quarters of 2026',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    barStyle: { cornerRadius: 4 },
     data,
     altText:
       'Grouped bar chart comparing Electronics, Clothing, and Home and Garden revenue in each quarter of 2026; Electronics leads every quarter, reaching 31,500 GBP in Q4.',

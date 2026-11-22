@@ -126,6 +126,7 @@ export function generate(): Document {
   const data = new ChartData();
   data.series = [electronics, clothing, home];
   data.yAxis.prefix = '£';
+  data.yAxis.valueFormat = 'K0';
   data.yAxis.maxValue = 110000;
   data.yAxis.stepCount = 5;
   data.yAxis.showGridLines = true;
@@ -134,6 +135,12 @@ export function generate(): Document {
 
   const chart = new GroupedBarChart();
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.legendPosition = 'top';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.barStyle = { cornerRadius: 4 };
   chart.orientation = ChartOrientation.Horizontal;
   chart.height = 380;
   chart.stretchToFit = true;

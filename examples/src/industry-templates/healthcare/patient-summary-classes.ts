@@ -299,8 +299,10 @@ export function generate(
   inrChart.height = 112;
   inrChart.stretchToFit = true;
   inrChart.theme = 'modern';
+  inrChart.curve = 'smooth';
+  inrChart.defaultMarkerHaloWidth = 1.5;
   inrChart.showValueLabels = false;
-  inrChart.references = [{ value: 2, endValue: 3, color: 'teal-50' }];
+  inrChart.references = [{ value: 2, endValue: 3, label: 'Target 2.0-3.0', labelPosition: 'end', color: 'teal-50' }];
   inrChart.altText =
     'INR results for the eight weeks to 18 June 2026 against the target range of 2.0 to 3.0: 1.8, 2.1, 2.6, 3.4, 2.9, 2.4, 2.2 and 2.5. Two results fell outside the range, on 30 April and 21 May.';
   const chart = new VerticalStack();
@@ -458,6 +460,9 @@ function observation(name: string, value: string, unit: string, points: number, 
   const high = Math.max(...trend);
   const line = new LineChart();
   line.sparkline = true;
+  line.curve = 'smooth';
+  line.sparklineFillOpacity = 0.16;
+  line.sparklineShowEndpoints = true;
   line.backgroundColor = flagged ? ColorPalette.amber[50] : ColorPalette.slate[50];
   line.height = 16;
   line.stretchToFit = true;

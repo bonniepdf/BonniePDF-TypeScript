@@ -404,6 +404,7 @@ function consumptionChart(data: UtilityBillData): VerticalStack {
   const top = Math.ceil(Math.max(...data.history.map(h => h.units)) / 500) * 500;
   const chart = new BarChart({
     theme: 'modern',
+    barStyle: { cornerRadius: 4 },
     data: new ChartData({
       series: [{ dataPoints: data.history.map(h => ({ label: h.month, value: h.units })) }],
       yAxis: { maxValue: top, stepCount: 4 },

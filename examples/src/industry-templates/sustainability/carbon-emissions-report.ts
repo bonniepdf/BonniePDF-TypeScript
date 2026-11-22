@@ -113,6 +113,10 @@ export function generate(): Document {
 
   // ── Emissions by scope: donut beside the table of sources ──
   const donut = new PieChart({
+    theme: 'modern',
+    sliceGradient: true,
+    sliceBorderWidth: 1.5,
+    donutHoleRatio: 0.56,
     data: new ChartData({
       series: [
         {
@@ -210,7 +214,18 @@ export function generate(): Document {
   doc.add(section('Progress towards the 2030 target'));
   const history = new BarChart({
     theme: 'modern',
-    references: [{ value: TARGET / 1000, color: 'green-900', thickness: 1.5, dashPattern: [5, 3] }],
+    barStyle: { cornerRadius: 4, gradient: { startColor: '#22c55e', endColor: '#15803d', scope: 'bar' } },
+    references: [
+      {
+        value: TARGET / 1000,
+        label: '2030 target',
+        labelPosition: 'end',
+        labelBackgroundColor: '#dcfce7',
+        color: 'green-900',
+        thickness: 1.5,
+        dashPattern: [5, 3],
+      },
+    ],
     data: new ChartData({
       series: [
         {

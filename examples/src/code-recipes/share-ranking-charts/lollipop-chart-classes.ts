@@ -107,7 +107,25 @@ export function generate(): Document {
   data.xAxis.legend = 'Month';
 
   const chart = new LollipopChart();
+  chart.data = data;
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.defaultMarkerHaloWidth = 1.5;
+  chart.subtitle = 'Stems with haloed circular heads and monthly benchmark overlay';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 2000,
+      label: 'Benchmark £2,000',
+      labelPosition: 'start',
+      labelBackgroundColor: '#fce7f3',
+      color: '#db2777',
+      thickness: 1.5,
+      dashPattern: [5, 3],
+    },
+  ];
   chart.height = 380;
   chart.stretchToFit = true;
   chart.lollipopColor = Color.fromHex(C_PINK);
@@ -115,8 +133,6 @@ export function generate(): Document {
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
   chart.backgroundColor = Color.white;
-
-  chart.data = data;
   chart.altText =
     'Lollipop chart of monthly revenue in 2026, rising from 1,420 GBP in January to 2,640 GBP in December.';
   doc.add(chart);

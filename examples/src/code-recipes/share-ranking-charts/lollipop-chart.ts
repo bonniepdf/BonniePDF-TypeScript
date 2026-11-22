@@ -89,6 +89,23 @@ export function generate(): Document {
 
   const chart = new LollipopChart({
     theme: 'modern',
+    autoLayout: true,
+    defaultMarkerHaloWidth: 1.5,
+    subtitle: 'Stems with haloed circular heads and monthly benchmark overlay',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 2000,
+        label: 'Benchmark £2,000',
+        labelPosition: 'start',
+        labelBackgroundColor: '#fce7f3',
+        color: '#db2777',
+        thickness: 1.5,
+        dashPattern: [5, 3],
+      },
+    ],
     data,
     altText: 'Lollipop chart of monthly revenue in 2026, rising from 1,420 GBP in January to 2,640 GBP in December.',
     height: 380,

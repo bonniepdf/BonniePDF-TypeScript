@@ -108,16 +108,35 @@ export function generate(): Document {
   data.xAxis.legend = 'Month';
 
   const chart = new AreaChart();
+  chart.data = data;
+  chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.curve = 'smooth';
+  chart.areaGradient = true;
+  chart.subtitle = 'Smooth spline with vertical fade gradient and break-even reference line';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.references = [
+    {
+      value: 7500,
+      label: 'Break-even £7.5k',
+      labelPosition: 'start',
+      labelBackgroundColor: '#fae8ff',
+      color: '#9333ea',
+      thickness: 1.5,
+      dashPattern: [5, 3],
+    },
+  ];
   chart.height = 380;
   chart.stretchToFit = true;
   chart.areaColor = Color.fromHex(C_PURPLE);
   chart.fillOpacity = 0.3;
+  chart.lineWidth = 2.5;
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.showValueLabels = true;
-  chart.backgroundColor = Color.fromHex('#fafafa');
-
-  chart.data = data;
+  chart.backgroundColor = Color.white;
   chart.altText = 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.';
   doc.add(chart);
 

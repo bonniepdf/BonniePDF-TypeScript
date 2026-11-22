@@ -94,15 +94,37 @@ export function generate(): Document {
     series: [
       {
         color: C_INDIGO,
-        dataPoints: regions.map(r => ({ label: r.label, value: r.value, labelFormat: 'N0' })),
+        dataPoints: regions.map(r => ({ label: r.label, value: r.value })),
       },
     ],
-    yAxis: { prefix: '£', maxValue: 300000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
+    yAxis: { prefix: '£', valueFormat: 'K0', maxValue: 300000, stepCount: 5, showGridLines: true, legend: 'Revenue' },
     xAxis: { legend: 'Region' },
   });
 
   const chart = new BarChart({
     theme: 'modern',
+    autoLayout: true,
+    valueLabelPosition: 'inside',
+    valueLabelPrefix: '£',
+    valueLabelFormat: 'K0',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    barStyle: {
+      cornerRadius: 5,
+      gradient: { startColor: '#6366f1', endColor: '#4338ca', scope: 'bar' },
+    },
+    references: [
+      {
+        value: 168000,
+        label: 'UK Avg £168K',
+        labelPosition: 'end',
+        labelBackgroundColor: '#e0e7ff',
+        color: '#3730a3',
+        thickness: 1.5,
+        dashPattern: [4, 3],
+      },
+    ],
     data,
     altText: 'Horizontal bar chart showing regional sales performance across six UK regions.',
     orientation: ChartOrientation.Horizontal,

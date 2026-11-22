@@ -501,6 +501,8 @@ function tradeChart(byTrade: ReadonlyMap<string, number>): BarChart {
   data.xAxis.legend = 'Trade';
 
   const chart = new BarChart();
+  chart.theme = 'modern';
+  chart.barStyle = { cornerRadius: 4 };
   chart.data = data;
   chart.altText =
     'Horizontal bar chart of open items by trade: ' +

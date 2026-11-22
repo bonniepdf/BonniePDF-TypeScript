@@ -280,6 +280,9 @@ function controlDonut(): ChartBase {
   });
 
   const chart = new PieChart({
+    theme: 'modern',
+    sliceGradient: true,
+    sliceBorderWidth: 1.5,
     data,
     altText: 'Donut chart: 71 compliant, 15 partial, 5 non-conformant, 2 not applicable of 93 controls.',
     height: 130,
@@ -303,6 +306,8 @@ function severityBars(): ChartBase {
   });
 
   const chart = new BarChart({
+    theme: 'modern',
+    barStyle: { cornerRadius: 4 },
     data,
     altText: 'Column chart of findings by severity: 2 Critical, 4 High, 4 Medium, 2 Low.',
     height: 130,

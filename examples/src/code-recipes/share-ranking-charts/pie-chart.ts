@@ -80,13 +80,21 @@ export function generate(): Document {
   );
 
   const chart = new PieChart({
+    theme: 'modern',
+    sliceGradient: true,
+    sliceBorderWidth: 1.5,
+    donutHoleRatio: 0.56,
+    sliceLabelMode: 'callout',
+    legendFormat: 'labelValuePercent',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
     data: new ChartData({
       series: [
         {
           name: 'Revenue',
-          // The share goes in the label, so the legend reads "Online shop (40%) - 412,600".
           dataPoints: CHANNELS.map(([channel, revenue]) => ({
-            label: `${channel} (${share(revenue)})`,
+            label: channel,
             value: revenue,
             labelFormat: 'N0',
           })),

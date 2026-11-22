@@ -340,6 +340,9 @@ function addRegisterAndActions(doc: Document): void {
 // ── Charts ───────────────────────────────────────────────────────────────────
 function statusDonut(): VerticalStack {
   const chart = new PieChart({
+    theme: 'modern',
+    sliceGradient: true,
+    sliceBorderWidth: 1.5,
     data: new ChartData({
       series: [
         {
@@ -374,6 +377,8 @@ function statusDonut(): VerticalStack {
 
 function categoryBars(): BarChart {
   return new BarChart({
+    theme: 'modern',
+    barStyle: { cornerRadius: 3 },
     data: new ChartData({
       series: [
         {

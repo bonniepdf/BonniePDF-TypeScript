@@ -309,6 +309,8 @@ function trendChart(
       new TextBlock(title, { fontName: StandardFonts.HelveticaBold, fontSize: 9.5, color: INK }),
       new LineChart({
         theme: 'modern',
+        curve: 'smooth',
+        defaultMarkerHaloWidth: 1.5,
         data: new ChartData({
           series: [
             { color, dataPoints: TREND_DATES.map((label, i) => ({ label, value: values[i], labelFormat: 'N0' })) },

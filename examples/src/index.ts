@@ -95,6 +95,20 @@ import { generate as pieChart } from './code-recipes/share-ranking-charts/pie-ch
 import { generate as pieChartClasses } from './code-recipes/share-ranking-charts/pie-chart-classes';
 import { generate as multiSeriesLineChart } from './code-recipes/trend-charts/multi-series-line-chart';
 import { generate as multiSeriesLineChartClasses } from './code-recipes/trend-charts/multi-series-line-chart-classes';
+import { generate as stackedBarChart } from './code-recipes/comparison-charts/stacked-bar-chart';
+import { generate as stackedBarChartClasses } from './code-recipes/comparison-charts/stacked-bar-chart-classes';
+import { generate as comboChart } from './code-recipes/comparison-charts/combo-chart';
+import { generate as comboChartClasses } from './code-recipes/comparison-charts/combo-chart-classes';
+import { generate as waterfallChart } from './code-recipes/comparison-charts/waterfall-chart';
+import { generate as waterfallChartClasses } from './code-recipes/comparison-charts/waterfall-chart-classes';
+import { generate as bulletChart } from './code-recipes/comparison-charts/bullet-chart';
+import { generate as bulletChartClasses } from './code-recipes/comparison-charts/bullet-chart-classes';
+import { generate as stackedAreaChart } from './code-recipes/trend-charts/stacked-area-chart';
+import { generate as stackedAreaChartClasses } from './code-recipes/trend-charts/stacked-area-chart-classes';
+import { generate as scatterChart } from './code-recipes/trend-charts/scatter-chart';
+import { generate as scatterChartClasses } from './code-recipes/trend-charts/scatter-chart-classes';
+import { generate as heatmapChart } from './code-recipes/share-ranking-charts/heatmap-chart';
+import { generate as heatmapChartClasses } from './code-recipes/share-ranking-charts/heatmap-chart-classes';
 import { generate as watermarking } from './code-recipes/security/watermarking';
 import { generate as watermarkingClasses } from './code-recipes/security/watermarking-classes';
 import { generate as encryption } from './code-recipes/security/encryption';
@@ -1343,7 +1357,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase',
     category: 'Comparison Charts',
     description:
-      'Eight landscape pages with the modern chart theme, rounded gradient bars, coordinated comparison colours and a product-mix doughnut. Every chart includes alt text.',
+      'Fifteen landscape pages covering all 14 chart families with the modern chart theme, rounded gradient bars, smooth splines, area fades, dual-axis combo, waterfall bridge, scatter bubbles, bullet gauges, and cohort heatmap. Every chart includes alt text.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
@@ -1355,7 +1369,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase (Class API)',
     category: 'Comparison Charts',
     description:
-      'The same eight-page all-chart-types showcase as Chart Showcase, built with the class API: construct each chart model and assign properties. The output is identical.',
+      'The same fifteen-page all-chart-types showcase as Chart Showcase, built with the class API: construct each chart model and assign properties. The output is identical.',
     filename: 'chart-showcase-classes.pdf',
     generate: chartShowcaseClasses,
     dotnetClass: 'ChartShowcaseExample',
@@ -1448,6 +1462,118 @@ export const examples: ExampleDef[] = [
     variantOf: 'horizontal-grouped-bar-chart',
     variantLabel: 'Class API',
   },
+  {
+    id: 'stacked-bar-chart',
+    name: 'Stacked Bar Chart',
+    category: 'Comparison Charts',
+    description:
+      'Multi-series stacked bars showing quarterly revenue by acquisition channel, with category stack totals, segment gaps, and auto-contrast inside labels.',
+    filename: 'stacked-bar-chart.pdf',
+    generate: stackedBarChart,
+    dotnetClass: 'StackedBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'stacked-bar-chart-classes',
+    name: 'Stacked Bar Chart (Class API)',
+    category: 'Comparison Charts',
+    description:
+      'The same chart as Stacked Bar Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'stacked-bar-chart-classes.pdf',
+    generate: stackedBarChartClasses,
+    dotnetClass: 'StackedBarChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'stacked-bar-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'combo-chart',
+    name: 'Combo Chart',
+    category: 'Comparison Charts',
+    description:
+      'Primary revenue bars paired with a smooth gross-margin percentage line on a secondary right-hand Y axis.',
+    filename: 'combo-chart.pdf',
+    generate: comboChart,
+    dotnetClass: 'ComboChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'combo-chart-classes',
+    name: 'Combo Chart (Class API)',
+    category: 'Comparison Charts',
+    description:
+      'The same chart as Combo Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'combo-chart-classes.pdf',
+    generate: comboChartClasses,
+    dotnetClass: 'ComboChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'combo-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'waterfall-chart',
+    name: 'Waterfall Chart',
+    category: 'Comparison Charts',
+    description:
+      'Cumulative annual recurring revenue movement bridge with positive/negative deltas, auto-computed ending total, and dashed connectors.',
+    filename: 'waterfall-chart.pdf',
+    generate: waterfallChart,
+    dotnetClass: 'WaterfallChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'waterfall-chart-classes',
+    name: 'Waterfall Chart (Class API)',
+    category: 'Comparison Charts',
+    description:
+      'The same chart as Waterfall Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'waterfall-chart-classes.pdf',
+    generate: waterfallChartClasses,
+    dotnetClass: 'WaterfallChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'waterfall-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'bullet-chart',
+    name: 'Bullet Chart',
+    category: 'Comparison Charts',
+    description:
+      'Executive KPI scorecard with three horizontal bullet gauges showing qualitative background bands, primary measure bars, and target markers.',
+    filename: 'bullet-chart.pdf',
+    generate: bulletChart,
+    dotnetClass: 'BulletChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'bullet-chart-classes',
+    name: 'Bullet Chart (Class API)',
+    category: 'Comparison Charts',
+    description:
+      'The same chart as Bullet Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'bullet-chart-classes.pdf',
+    generate: bulletChartClasses,
+    dotnetClass: 'BulletChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'bullet-chart',
+    variantLabel: 'Class API',
+  },
 
   // Recipes - Trend Charts
   {
@@ -1532,6 +1658,62 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'multi-series-line-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'stacked-area-chart',
+    name: 'Stacked Area Chart',
+    category: 'Trend Charts',
+    description:
+      '100% normalized smooth stacked area chart showing platform traffic share across Web, Mobile, and API with inline series labels.',
+    filename: 'stacked-area-chart.pdf',
+    generate: stackedAreaChart,
+    dotnetClass: 'StackedAreaChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'stacked-area-chart-classes',
+    name: 'Stacked Area Chart (Class API)',
+    category: 'Trend Charts',
+    description:
+      'The same chart as Stacked Area Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'stacked-area-chart-classes.pdf',
+    generate: stackedAreaChartClasses,
+    dotnetClass: 'StackedAreaChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'stacked-area-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'scatter-chart',
+    name: 'Scatter Chart',
+    category: 'Trend Charts',
+    description:
+      'Continuous numeric X/Y scatter plot comparing cluster latency against throughput, with area-scaled bubbles and OLS linear trendlines.',
+    filename: 'scatter-chart.pdf',
+    generate: scatterChart,
+    dotnetClass: 'ScatterChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'scatter-chart-classes',
+    name: 'Scatter Chart (Class API)',
+    category: 'Trend Charts',
+    description:
+      'The same chart as Scatter Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'scatter-chart-classes.pdf',
+    generate: scatterChartClasses,
+    dotnetClass: 'ScatterChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'scatter-chart',
     variantLabel: 'Class API',
   },
 
@@ -1646,6 +1828,34 @@ export const examples: ExampleDef[] = [
     pdfUa1: true,
     gallery: false,
     variantOf: 'pie-chart',
+    variantLabel: 'Class API',
+  },
+  {
+    id: 'heatmap-chart',
+    name: 'Heatmap Chart',
+    category: 'Share & Ranking Charts',
+    description:
+      '2D categorical matrix heatmap showing monthly cohort retention with linear colour interpolation, missing cells, continuous colour legend, and WCAG auto-contrast cell values.',
+    filename: 'heatmap-chart.pdf',
+    generate: heatmapChart,
+    dotnetClass: 'HeatmapChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    variantLabel: 'Options API',
+  },
+  {
+    id: 'heatmap-chart-classes',
+    name: 'Heatmap Chart (Class API)',
+    category: 'Share & Ranking Charts',
+    description:
+      'The same chart as Heatmap Chart, built with the class API: construct each chart model and assign properties. The output is identical.',
+    filename: 'heatmap-chart-classes.pdf',
+    generate: heatmapChartClasses,
+    dotnetClass: 'HeatmapChartExample',
+    thumbnails: false,
+    pdfUa1: true,
+    gallery: false,
+    variantOf: 'heatmap-chart',
     variantLabel: 'Class API',
   },
 

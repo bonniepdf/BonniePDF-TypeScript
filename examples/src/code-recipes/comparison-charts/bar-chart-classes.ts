@@ -112,15 +112,35 @@ export function generate(): Document {
   data.yAxis.stepCount = 5;
 
   const chart = new BarChart();
+  chart.data = data;
   chart.theme = 'modern';
+  chart.autoLayout = true;
+  chart.subtitle = 'FY 2026 monthly sales with plot-scoped gradient and annual target overlay';
+  chart.caption = 'Source: Monthly sales ledger (GBP)';
+  chart.borderRadius = 8;
+  chart.borderColor = '#e2e8f0';
+  chart.borderWidth = 1;
+  chart.barStyle = {
+    cornerRadius: 6,
+    gradient: { startColor: '#818cf8', endColor: C_INDIGO, scope: 'plot' },
+  };
+  chart.references = [
+    {
+      value: 9000,
+      label: 'Target £9k',
+      labelPosition: 'end',
+      labelBackgroundColor: '#fef3c7',
+      color: '#d97706',
+      thickness: 1.5,
+      dashPattern: [5, 3],
+    },
+  ];
   chart.height = 380;
   chart.stretchToFit = true;
   chart.barColor = Color.fromHex(C_INDIGO);
   chart.fontFamily = StandardFonts.Helvetica;
   chart.labelFontSize = 9;
   chart.backgroundColor = Color.white;
-
-  chart.data = data;
   chart.altText = 'Bar chart of monthly sales from January to December, rising from 4,500 to 12,800 GBP.';
   doc.add(chart);
 

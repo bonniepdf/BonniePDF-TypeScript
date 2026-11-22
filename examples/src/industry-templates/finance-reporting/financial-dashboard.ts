@@ -99,6 +99,17 @@ export function generate(
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 8,
     barStyle: { cornerRadius: 4, gradient: { startColor: '#60a5fa', endColor: BLUE, scope: 'bar' } },
+    references: [
+      {
+        value: 185,
+        label: 'Avg £185k',
+        labelPosition: 'start',
+        labelBackgroundColor: '#eff6ff',
+        color: BLUE,
+        thickness: 1,
+        dashPattern: [4, 2],
+      },
+    ],
     data: {
       series: [{ name: 'Revenue', color: BLUE, dataPoints: months.map((label, i) => ({ label, value: revenue[i] })) }],
       yAxis: { prefix: '£', maxValue: 300, stepCount: 6 },
@@ -108,6 +119,8 @@ export function generate(
   });
   const donut = new PieChart({
     theme: 'modern',
+    sliceGradient: true,
+    sliceBorderWidth: 1.5,
     height: 132,
     stretchToFit: true,
     isDonut: true,

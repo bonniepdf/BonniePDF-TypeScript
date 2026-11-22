@@ -89,6 +89,25 @@ export function generate(): Document {
 
   const chart = new DotPlotChart({
     theme: 'modern',
+    autoLayout: true,
+    defaultMarkerShape: 'diamond',
+    defaultMarkerFill: 'hollow',
+    defaultDotRadius: 6,
+    subtitle: 'Hollow diamond markers positioned along a value axis with target threshold',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 7500,
+        label: 'Target £7,500',
+        labelPosition: 'end',
+        labelBackgroundColor: '#ccfbf1',
+        color: '#0f766e',
+        thickness: 1.5,
+        dashPattern: [5, 3],
+      },
+    ],
     data,
     altText: 'Dot plot comparing eight product sales values, ranging from 4,500 to 9,500 GBP.',
     height: 380,

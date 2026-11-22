@@ -90,16 +90,36 @@ export function generate(): Document {
   });
 
   const chart = new AreaChart({
+    theme: 'modern',
+    autoLayout: true,
+    curve: 'smooth',
+    areaGradient: true,
+    subtitle: 'Smooth spline with vertical fade gradient and break-even reference line',
+    borderRadius: 8,
+    borderColor: '#e2e8f0',
+    borderWidth: 1,
+    references: [
+      {
+        value: 7500,
+        label: 'Break-even £7.5k',
+        labelPosition: 'start',
+        labelBackgroundColor: '#fae8ff',
+        color: '#9333ea',
+        thickness: 1.5,
+        dashPattern: [5, 3],
+      },
+    ],
     data,
     altText: 'Area chart of monthly sales from January to December, with a filled trend rising to 12,800 GBP.',
     height: 380,
     stretchToFit: true,
     areaColor: C_PURPLE,
     fillOpacity: 0.3,
+    lineWidth: 2.5,
     fontFamily: StandardFonts.Helvetica,
     labelFontSize: 9,
     showValueLabels: true,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#ffffff',
   });
   doc.add(chart);
 

@@ -12,12 +12,18 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      validate_only:
+        description: Verify source and npm trusted publishing without publishing
+        type: boolean
+        default: false
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
     name: Publish to npm
+    if: inputs.validate_only || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     # The environment's name is part of the identity npm trusted publishing
     # checks; `deployment: false` keeps it without recording a deployment, so
@@ -30,31 +36,41 @@ jobs:
     permissions:
       contents: write # create the GitHub release
       id-token: write # npm OIDC trusted publishing + provenance attestation
-      actions: write # delete prior workflow runs
 
     steps:
-      # Delete this workflow's prior runs before doing anything else, so the
-      # Actions tab only ever shows the current run. Best-effort: never block
-      # the release if the cleanup API call hiccups.
-      - name: Delete prior workflow runs
-        continue-on-error: true
+      # Asks npm, before publishing, whether this run matches the package's
+      # trusted publisher. A mismatch otherwise surfaces only as E404 on
+      # publish. Prints the identity npm sees, never the token.
+      - name: Check npm trusted publishing
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE: "@bonniepdf/core"
         run: |
-          gh run list \
-            --repo "${{ github.repository }}" \
-            --workflow release.yml \
-            --json databaseId \
-            --jq '.[].databaseId' \
-            --limit 100 \
-          | grep -v '^${{ github.run_id }}$' \
-          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
+          set -euo pipefail
+          echo "Checking $PACKAGE from $GITHUB_REPOSITORY (repository ID $GITHUB_REPOSITORY_ID)."
+          id_token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          status=$(curl -sS -o exchange.json -w '%{http_code}' -X POST -H "Authorization: Bearer $id_token" "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/${PACKAGE/\//%2f}")
+          accepted=false
+          if [[ "$status" == 2* ]] && jq -e .token exchange.json > /dev/null 2>&1; then accepted=true; fi
+          rm -f exchange.json
+          if $accepted; then
+            echo "npm accepts this run as a trusted publisher for $PACKAGE."
+            exit 0
+          fi
+          payload=$(cut -d. -f2 <<< "$id_token" | tr '_-' '/+')
+          while (( ${#payload} % 4 )); do payload+='='; done
+          claims=$(base64 -d <<< "$payload" 2>/dev/null || echo '{}')
+          echo "::error::npm does not accept this run as a trusted publisher for $PACKAGE (HTTP $status)."
+          echo "On npmjs.com, open $PACKAGE, then Settings, then Trusted publishing, and make the GitHub Actions entry match exactly. The fields are case-sensitive:"
+          jq -r '"  Organization or user: \(.repository_owner)", "  Repository: \(.repository | split("/")[1])", "  Workflow filename: \(.workflow_ref | split("@")[0] | split("/") | last)", "  Environment: \(.environment // "(leave blank)")"' <<< "$claims" || true
+          echo "Then re-run this job."
+          exit 1
 
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Require cross-engine gallery validation
+        if: ${{ !inputs.validate_only }}
         env:
           GH_TOKEN: ${{ secrets.PARITY_WORKFLOW_TOKEN }}
           PARITY_WORKFLOW_REPOSITORY: ${{ vars.PARITY_WORKFLOW_REPOSITORY }}
@@ -93,35 +109,10 @@ jobs:
             exit 1
           fi
 
-      # Asks npm, before publishing, whether this run matches the package's
-      # trusted publisher. A mismatch otherwise surfaces only as E404 on
-      # publish. Prints the identity npm sees, never the token.
-      - name: Check npm trusted publishing
-        env:
-          PACKAGE: "@bonniepdf/core"
-        run: |
-          set -euo pipefail
-          id_token=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
-          status=$(curl -sS -o exchange.json -w '%{http_code}' -X POST -H "Authorization: Bearer $id_token" "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/${PACKAGE/\//%2f}")
-          accepted=false
-          if [[ "$status" == 2* ]] && jq -e .token exchange.json > /dev/null 2>&1; then accepted=true; fi
-          rm -f exchange.json
-          if $accepted; then
-            echo "npm accepts this run as a trusted publisher for $PACKAGE."
-            exit 0
-          fi
-          payload=$(cut -d. -f2 <<< "$id_token" | tr '_-' '/+')
-          while (( ${#payload} % 4 )); do payload+='='; done
-          claims=$(base64 -d <<< "$payload" 2>/dev/null || echo '{}')
-          echo "::error::npm does not accept this run as a trusted publisher for $PACKAGE (HTTP $status)."
-          echo "On npmjs.com, open $PACKAGE, then Settings, then Trusted publishing, and make the GitHub Actions entry match exactly. The fields are case-sensitive:"
-          jq -r '"  Organization or user: \(.repository_owner)", "  Repository: \(.repository | split("/")[1])", "  Workflow filename: \(.workflow_ref | split("@")[0] | split("/") | last)", "  Environment: \(.environment // "(leave blank)")"' <<< "$claims" || true
-          echo "Then re-run this job."
-          exit 1
-
       # Publishes with npm OIDC trusted publishing: no long-lived NPM_TOKEN,
       # and provenance is attested from this workflow's identity.
       - name: Publish to npm
+        if: ${{ !inputs.validate_only }}
         run: pnpm publish --filter @bonniepdf/core --access public --no-git-checks
         env:
           NPM_CONFIG_PROVENANCE: 'true'
@@ -130,7 +121,7 @@ jobs:
       # already written by the time the tag exists. Lift it into the release
       # body rather than regenerating notes from commits.
       - name: Extract release notes from CHANGELOG.md
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: ${{ !inputs.validate_only && startsWith(github.ref, 'refs/tags/v') }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           awk -v v="## $VERSION" '
@@ -145,7 +136,7 @@ jobs:
           cat release-notes.md
 
       - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: ${{ !inputs.validate_only && startsWith(github.ref, 'refs/tags/v') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

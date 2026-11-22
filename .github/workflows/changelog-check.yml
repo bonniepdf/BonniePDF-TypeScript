@@ -6,30 +6,12 @@ on:
 
 permissions:
   contents: read # checkout
-  actions: write # delete prior workflow runs
 
 jobs:
   changelog:
     name: Require changelog entry for core changes
     runs-on: ubuntu-latest
     steps:
-      # Delete this workflow's prior runs before doing anything else, so the
-      # Actions tab only ever shows the current run. Best-effort: never block
-      # the real job if the cleanup API call hiccups.
-      - name: Delete prior workflow runs
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh run list \
-            --repo "${{ github.repository }}" \
-            --workflow changelog-check.yml \
-            --json databaseId \
-            --jq '.[].databaseId' \
-            --limit 100 \
-          | grep -v '^${{ github.run_id }}$' \
-          | xargs -r -I{} gh run delete --repo "${{ github.repository }}" {}
-
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0

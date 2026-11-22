@@ -222,6 +222,7 @@ const textFields = [
   'textDecoration',
   'letterSpacing',
   'fontFeatures',
+  'fontFeaturesExplicit',
   'decorationColor',
   'decorationThickness',
   'decorationStyle',
@@ -245,6 +246,7 @@ export class SharedTextOptions extends SharedOptions<SharedTextOptions> {
   static readonly default = new SharedTextOptions().shared();
 
   readonly fontFeatures: Readonly<Record<string, number>> | undefined = undefined;
+  readonly fontFeaturesExplicit: boolean = false;
   readonly fontFamily: string | undefined = undefined;
   readonly fontWeight: FontWeight = FontWeight.Normal;
   readonly italic: boolean = false;

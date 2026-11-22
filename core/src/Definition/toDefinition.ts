@@ -1180,11 +1180,12 @@ const NOT_SPECIAL = Symbol('not-special');
 const DROP_ELEMENT = Symbol('drop-element');
 
 const FONT_KEYS: Record<string, true> = { fontName: true, fontFamily: true, fontWeight: true, italic: true };
-const CASCADE_KEYS: Record<string, 'fontSize' | 'color' | 'lineHeight' | 'decoration' | undefined> = {
+const CASCADE_KEYS: Record<string, 'fontSize' | 'color' | 'lineHeight' | 'decoration' | 'fontFeatures' | undefined> = {
   fontSize: 'fontSize',
   color: 'color',
   lineHeight: 'lineHeight',
   decoration: 'decoration',
+  fontFeatures: 'fontFeatures',
 };
 
 /**

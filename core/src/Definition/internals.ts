@@ -25,6 +25,7 @@ export interface ExplicitText {
   color: boolean;
   lineHeight: boolean;
   decoration: boolean;
+  fontFeatures: boolean;
 }
 
 export function explicitText(element: TextElementBase): ExplicitText {
@@ -34,6 +35,7 @@ export function explicitText(element: TextElementBase): ExplicitText {
     color: element['_textColorExplicit'],
     lineHeight: element['_lineHeightExplicit'],
     decoration: element['_textDecorationExplicit'],
+    fontFeatures: element['_fontFeaturesExplicit'],
   };
 }
 

@@ -171,6 +171,7 @@ function convert(kind: string, value: unknown): unknown {
       return toPoints(value);
     case 'enum': {
       const spec = D.enums[arg];
+      if (!spec.tokens.includes(value as string)) return undefined;
       if (spec.via === 'options') return value;
       const member = spec.members![value as string];
       const target = ENUM_OBJECTS[spec.type!];
@@ -181,10 +182,10 @@ function convert(kind: string, value: unknown): unknown {
       if (value === 'none') return PdfPermissions.None;
       const list = Array.isArray(value) ? (value as string[]) : [value as string];
       const members = D.enums.PdfPermission.members!;
-      return list.reduce<number>(
-        (mask, token) => mask | (PdfPermissions as unknown as Record<string, number>)[members[token]],
-        0
-      );
+      return list.reduce<number>((mask, token) => {
+        const member = members[token];
+        return member ? mask | (PdfPermissions as unknown as Record<string, number>)[member] : mask;
+      }, 0);
     }
     case 'dateTime':
       return new Date(value as string);
@@ -319,22 +320,36 @@ async function loadResources(definition: DocumentDefinition, options: Definition
 }
 
 class Builder {
-  constructor(private readonly loaded: Loaded) {}
+  constructor(
+    private readonly loaded: Loaded,
+    private readonly bestEffort: boolean = false
+  ) {}
 
-  /** Builds an element, and marks it with its `id`. */
-  element(node: Obj): IElement {
+  /** Builds an element, and marks it with its `id`. Returns `undefined` when an unknown type is skipped under `bestEffort`. */
+  element(node: Obj): IElement | undefined {
     const element = this.build(node);
-    if (typeof node.id === 'string') markDebugSource(element, node.id);
+    if (element && typeof node.id === 'string') markDebugSource(element, node.id);
     return element;
   }
 
   private elements(nodes: unknown): IElement[] {
-    return (nodes as Obj[]).map(n => this.element(n));
+    const out: IElement[] = [];
+    for (const n of nodes as Obj[]) {
+      const el = this.element(n);
+      if (el) out.push(el);
+    }
+    return out;
   }
 
-  private build(node: Obj): IElement {
+  private build(node: Obj): IElement | undefined {
     const type = node.type as string;
     const spec = D.elements[type];
+    if (!spec) {
+      if (this.bestEffort) return undefined;
+      throw new DefinitionError([
+        { path: '', code: 'unknown-type', message: `Element type ${type} is not supported by this reader.` },
+      ]);
+    }
     const o = convertShape(node, spec);
     const child = node.child !== undefined ? this.element(node.child as Obj) : undefined;
 
@@ -352,16 +367,27 @@ class Builder {
       case 'HorizontalStack': {
         const stack = new HorizontalStack(o);
         for (const c of node.children as Obj[]) {
-          if (c.type === undefined && c.element !== undefined)
-            stack.add(this.element(c.element as Obj), c.weight as number);
-          else stack.add(this.element(c));
+          if (c.type === undefined && c.element !== undefined) {
+            const el = this.element(c.element as Obj);
+            if (el) stack.add(el, c.weight as number);
+          } else {
+            const el = this.element(c);
+            if (el) stack.add(el);
+          }
         }
         return stack;
       }
       case 'Layers': {
-        const layers = new Layers({ ...o, primaryLayer: this.element(node.primary as Obj) });
-        for (const b of (node.backgrounds as Obj[] | undefined) ?? []) layers.addBackground(this.element(b));
-        for (const f of (node.foregrounds as Obj[] | undefined) ?? []) layers.addForeground(this.element(f));
+        const primaryLayer = this.element(node.primary as Obj);
+        const layers = new Layers({ ...o, primaryLayer });
+        for (const b of (node.backgrounds as Obj[] | undefined) ?? []) {
+          const el = this.element(b);
+          if (el) layers.addBackground(el);
+        }
+        for (const f of (node.foregrounds as Obj[] | undefined) ?? []) {
+          const el = this.element(f);
+          if (el) layers.addForeground(el);
+        }
         return layers;
       }
       case 'Spacer':
@@ -370,6 +396,7 @@ class Builder {
         return new PageBreak(o);
       case 'SemanticGroup': {
         const { role, ...rest } = o;
+        if (role === undefined && this.bestEffort) return undefined;
         return new SemanticGroup({ ...rest, role: role as SemanticRole, children: this.elements(node.children) });
       }
       case 'EnsureSpace':
@@ -485,7 +512,8 @@ class Builder {
         : new OrderedList({ ...o, items: strings });
     for (const item of items) {
       if (typeof item === 'string') continue;
-      (list as UnorderedList).addNestedList(this.element(item) as UnorderedList);
+      const nested = this.element(item);
+      if (nested) (list as UnorderedList).addNestedList(nested as UnorderedList);
     }
     return list;
   }
@@ -518,10 +546,12 @@ class Builder {
     if (c.type === 'TableCell') {
       const options = convertShape(c, D.shapes.TableCell);
       const content =
-        typeof c.content === 'string' ? new TextBlock({ text: c.content }) : this.element(c.content as Obj);
+        typeof c.content === 'string'
+          ? new TextBlock({ text: c.content })
+          : (this.element(c.content as Obj) ?? new TextBlock({ text: '' }));
       return new TableCell({ ...options, content } as never);
     }
-    return new TableCell({ content: this.element(c) });
+    return new TableCell({ content: this.element(c) ?? new TextBlock({ text: '' }) });
   }
 }
 
@@ -573,7 +603,7 @@ export async function documentFromDefinition(input: unknown, options: Definition
   }
 
   const loaded = await loadResources(definition, options);
-  const builder = new Builder(loaded);
+  const builder = new Builder(loaded, options.bestEffort === true);
 
   const settings = isObj(definition.settings) ? definition.settings : {};
   const pages = definition.pages as Obj[];
@@ -648,7 +678,10 @@ export async function documentFromDefinition(input: unknown, options: Definition
     if (entry.pageColor !== undefined) page.pageColor = entry.pageColor as never;
     if (entry.background !== undefined) page.pageBackground = builder.element(entry.background as Obj);
     if (entry.foreground !== undefined) page.pageForeground = builder.element(entry.foreground as Obj);
-    for (const node of entry.content as Obj[]) page.add(builder.element(node));
+    for (const node of entry.content as Obj[]) {
+      const el = builder.element(node);
+      if (el) page.add(el);
+    }
   }
 
   for (const attachment of (definition.attachments ?? []) as Obj[]) {

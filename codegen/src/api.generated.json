@@ -1,10 +1,10 @@
 {
   "provenance": {
     "schemaId": "https://www.bonniepdf.dev/schema/definition/1.0.json",
-    "schemaSha256": "b54d81c8fabed4dad1cdcf4c3d3f50b21e5d61a8829bcf21644eb065da555415",
+    "schemaSha256": "24c3c8061b0457ba56af44ef7a158683f492b6db9fe91e6f67e30c7c4d65a6db",
     "assembly": "BonniePDF",
-    "assemblyVersion": "2026.10.28.0",
-    "publicApiSha256": "477359188976adffbedfcab741d3d2c0bed462b45f7e8f5693add524749978a9"
+    "assemblyVersion": "2026.11.21.0",
+    "publicApiSha256": "496f8c09c48160db3ab7931f2f5eb99ec6969c08003ae6b77c88d926f7b75e49"
   },
   "elements": [
     "TableCell",
@@ -938,16 +938,29 @@
           "enum": ["pdf-1.4", "pdf-1.7", "pdf-2.0"]
         },
         "conformance": {
-          "enum": ["none", "pdf/a-1b", "pdf/a-1a", "pdf/a-2b", "pdf/a-2a", "pdf/a-3b", "pdf/a-3a", "pdf/a-4"]
+          "enum": [
+            "none",
+            "pdf/a-1b",
+            "pdf/a-1a",
+            "pdf/a-2b",
+            "pdf/a-2a",
+            "pdf/a-3b",
+            "pdf/a-3a",
+            "pdf/a-4",
+            "pdf/a-4f"
+          ]
         },
         "accessibility": {
-          "enum": ["none", "pdf/ua-1"]
+          "enum": ["none", "pdf/ua-1", "pdf/ua-2"]
         },
         "emojiRendering": {
           "enum": ["outline", "colour"]
         },
         "missingGlyphs": {
           "enum": ["drop", "throw"]
+        },
+        "oversizedContent": {
+          "enum": ["clip", "throw"]
         },
         "language": {
           "type": "string"
@@ -1863,9 +1876,6 @@
             "maximum": 65535
           }
         },
-        "text": {
-          "type": "string"
-        },
         "alignment": {
           "enum": ["left", "center", "right", "middle", "justify", "start", "end"]
         },
@@ -1892,6 +1902,9 @@
         },
         "preserveWhitespace": {
           "type": "boolean"
+        },
+        "text": {
+          "type": "string"
         }
       },
       "required": ["type", "text"],
@@ -1982,9 +1995,6 @@
             "maximum": 65535
           }
         },
-        "text": {
-          "type": "string"
-        },
         "alignment": {
           "enum": ["left", "center", "right", "middle", "justify", "start", "end"]
         },
@@ -2011,6 +2021,9 @@
         },
         "preserveWhitespace": {
           "type": "boolean"
+        },
+        "text": {
+          "type": "string"
         },
         "level": {
           "type": "integer",
@@ -2162,9 +2175,6 @@
             "maximum": 65535
           }
         },
-        "text": {
-          "type": "string"
-        },
         "alignment": {
           "enum": ["left", "center", "right", "middle", "justify", "start", "end"]
         },
@@ -2192,6 +2202,9 @@
         "preserveWhitespace": {
           "type": "boolean"
         },
+        "text": {
+          "type": "string"
+        },
         "anchorTarget": {
           "type": "string"
         },
@@ -2199,7 +2212,7 @@
           "type": "string"
         }
       },
-      "required": ["type", "text", "anchorTarget"],
+      "required": ["type", "anchorTarget"],
       "patternProperties": {
         "^_": {}
       },
@@ -2340,6 +2353,9 @@
         },
         "color": {
           "$ref": "#/$defs/Color"
+        },
+        "underline": {
+          "type": "boolean"
         }
       },
       "required": ["type", "text", "anchorTarget"],
@@ -3861,6 +3877,9 @@
         "cornerRadius": {
           "$ref": "#/$defs/Length"
         },
+        "alternateRowBackgroundColor": {
+          "$ref": "#/$defs/Color"
+        },
         "columns": {
           "type": "array",
           "items": {
@@ -4209,7 +4228,8 @@
       "kind": "enum",
       "enumMembers": {
         "None": 0,
-        "PdfUa1": 1
+        "PdfUa1": 1,
+        "PdfUa2": 2
       },
       "properties": {},
       "constructors": []
@@ -4314,7 +4334,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -4544,7 +4564,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -5312,7 +5332,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -7205,6 +7225,11 @@
           "writable": true,
           "readable": true
         },
+        "OversizedContent": {
+          "type": "BonniePDF.OversizedContent",
+          "writable": true,
+          "readable": true
+        },
         "PageBackground": {
           "type": "Func<System.Int32,BonniePDF.IElement>",
           "writable": true,
@@ -7232,11 +7257,6 @@
         },
         "PageSize": {
           "type": "BonniePDF.PdfSize",
-          "writable": true,
-          "readable": true
-        },
-        "PdfAEnabled": {
-          "type": "System.Boolean",
           "writable": true,
           "readable": true
         },
@@ -7397,7 +7417,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -7499,6 +7519,61 @@
         }
       },
       "constructors": []
+    },
+    "ElementCycleException": {
+      "kind": "object",
+      "enumMembers": null,
+      "properties": {
+        "Data": {
+          "type": "System.Collections.IDictionary",
+          "writable": false,
+          "readable": true
+        },
+        "HResult": {
+          "type": "System.Int32",
+          "writable": true,
+          "readable": true
+        },
+        "HelpLink": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "InnerException": {
+          "type": "System.Exception",
+          "writable": false,
+          "readable": true
+        },
+        "Message": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "Source": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "StackTrace": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "TargetSite": {
+          "type": "System.Reflection.MethodBase",
+          "writable": false,
+          "readable": true
+        }
+      },
+      "constructors": [
+        [
+          {
+            "name": "elementType",
+            "type": "System.String",
+            "optional": false
+          }
+        ]
+      ]
     },
     "ElementExtensions": {
       "kind": "object",
@@ -8267,7 +8342,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -8905,6 +8980,73 @@
       "properties": {},
       "constructors": []
     },
+    "ImageDecodeException": {
+      "kind": "object",
+      "enumMembers": null,
+      "properties": {
+        "Data": {
+          "type": "System.Collections.IDictionary",
+          "writable": false,
+          "readable": true
+        },
+        "HResult": {
+          "type": "System.Int32",
+          "writable": true,
+          "readable": true
+        },
+        "HelpLink": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "InnerException": {
+          "type": "System.Exception",
+          "writable": false,
+          "readable": true
+        },
+        "Message": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "Source": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "StackTrace": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "TargetSite": {
+          "type": "System.Reflection.MethodBase",
+          "writable": false,
+          "readable": true
+        }
+      },
+      "constructors": [
+        [
+          {
+            "name": "message",
+            "type": "System.String",
+            "optional": false
+          }
+        ],
+        [
+          {
+            "name": "message",
+            "type": "System.String",
+            "optional": false
+          },
+          {
+            "name": "innerException",
+            "type": "System.Exception",
+            "optional": false
+          }
+        ]
+      ]
+    },
     "ImageExtensions": {
       "kind": "object",
       "enumMembers": null,
@@ -9519,7 +9661,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -9806,7 +9948,7 @@
           "readable": true
         },
         "References": {
-          "type": "List<BonniePDF.ChartReference>",
+          "type": "IList<BonniePDF.ChartReference>",
           "writable": true,
           "readable": true
         },
@@ -10195,6 +10337,70 @@
         }
       },
       "constructors": [[]]
+    },
+    "OversizedContent": {
+      "kind": "enum",
+      "enumMembers": {
+        "Clip": 0,
+        "Throw": 1
+      },
+      "properties": {},
+      "constructors": []
+    },
+    "OversizedContentException": {
+      "kind": "object",
+      "enumMembers": null,
+      "properties": {
+        "Data": {
+          "type": "System.Collections.IDictionary",
+          "writable": false,
+          "readable": true
+        },
+        "HResult": {
+          "type": "System.Int32",
+          "writable": true,
+          "readable": true
+        },
+        "HelpLink": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "InnerException": {
+          "type": "System.Exception",
+          "writable": false,
+          "readable": true
+        },
+        "Message": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "Source": {
+          "type": "System.String",
+          "writable": true,
+          "readable": true
+        },
+        "StackTrace": {
+          "type": "System.String",
+          "writable": false,
+          "readable": true
+        },
+        "TargetSite": {
+          "type": "System.Reflection.MethodBase",
+          "writable": false,
+          "readable": true
+        }
+      },
+      "constructors": [
+        [
+          {
+            "name": "message",
+            "type": "System.String",
+            "optional": false
+          }
+        ]
+      ]
     },
     "PaddingExtensions": {
       "kind": "object",
@@ -10770,7 +10976,8 @@
         "PdfA2a": 4,
         "PdfA3b": 5,
         "PdfA3a": 6,
-        "PdfA4": 7
+        "PdfA4": 7,
+        "PdfA4f": 8
       },
       "properties": {},
       "constructors": []

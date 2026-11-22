@@ -607,10 +607,6 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       }
     },
     "TextBlockKeys": {
-      "text": {
-        "kind": "string",
-        "required": true
-      },
       "alignment": {
         "kind": "enum:TextAlignment"
       },
@@ -1364,7 +1360,12 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "TextElement",
         "TextBlockKeys"
       ],
-      "keys": {},
+      "keys": {
+        "text": {
+          "kind": "string",
+          "required": true
+        }
+      },
       "conflicts": [
         [
           "fontName",
@@ -1379,6 +1380,10 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "TextBlockKeys"
       ],
       "keys": {
+        "text": {
+          "kind": "string",
+          "required": true
+        },
         "level": {
           "kind": "integer",
           "min": 1,
@@ -1434,6 +1439,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "TextBlockKeys"
       ],
       "keys": {
+        "text": {
+          "kind": "string"
+        },
         "anchorTarget": {
           "kind": "string",
           "required": true
@@ -1537,6 +1545,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "color": {
           "kind": "color"
+        },
+        "underline": {
+          "kind": "boolean"
         }
       },
       "refs": {
@@ -2064,6 +2075,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "Bordered"
       ],
       "keys": {
+        "alternateRowBackgroundColor": {
+          "kind": "color"
+        },
         "columns": {
           "kind": "array:number"
         },

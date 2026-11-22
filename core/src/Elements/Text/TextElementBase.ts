@@ -53,7 +53,10 @@ export abstract class TextElementBase extends ElementBase {
   public set fontFeatures(value: Readonly<Record<string, number>> | undefined) {
     // TextStyle validates the features and takes a frozen copy.
     const features = value == null ? undefined : Object.assign(new TextStyle(), { fontFeatures: value }).fontFeatures;
-    this._text = this._text.with('fontFeatures', features);
+    this._text = this._text.with('fontFeatures', features).with('fontFeaturesExplicit', true);
+  }
+  private get _fontFeaturesExplicit(): boolean {
+    return this._text.fontFeaturesExplicit;
   }
   private get _fontFamily(): string | undefined {
     return this._text.fontFamily;
@@ -382,7 +385,9 @@ export abstract class TextElementBase extends ElementBase {
    * can still override cascade values.
    */
   public applyDefaultStyleIfNotSet(style: TextStyle): void {
-    this.fontFeatures ??= style.fontFeatures;
+    if (!this._fontFeaturesExplicit) {
+      this._text = this._text.with('fontFeatures', style.fontFeatures);
+    }
     // Font: family, weight and italic cascade independently, each only if the user hasn't set it.
     // A property the style does not supply returns to its library default, so a default that was changed
     // or removed since the last cascade does not leave its old value behind.

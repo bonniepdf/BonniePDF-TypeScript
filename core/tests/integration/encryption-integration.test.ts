@@ -38,11 +38,12 @@ describe('Encryption integration', () => {
     expect(text.startsWith('%PDF-1.4')).toBe(true);
   });
 
-  it('withEncryptionAes256 generates valid PDF with Pdf17 header', () => {
+  it('withEncryptionAes256 generates valid PDF with Pdf17 header', async () => {
     doc = new Document();
     withEncryptionAes256(doc.settings, opt => opt.withUserPassword('aes').withOwnerPassword('aes'));
-    const text = pdfToText(doc.generateBytes());
+    const text = pdfToText(await doc.generateBytesAsync());
     expect(text.startsWith('%PDF-1.7')).toBe(true);
+    expect(text).toContain('/Encrypt ');
   });
 
   it('RC4_128 document with metadata generates valid PDF', () => {
@@ -53,12 +54,13 @@ describe('Encryption integration', () => {
     assertValidPdf(doc.generateBytes());
   });
 
-  it('AES256 document with content generates valid PDF', () => {
+  it('AES256 document with content generates valid PDF', async () => {
     doc = new Document();
     doc.add(new TextBlock('AES encrypted content', { fontSize: 12, fontName: StandardFonts.Helvetica }));
     withEncryptionAes256(doc.settings, opt => opt.withUserPassword('aes256').withOwnerPassword('aes256'));
-    const bytes = doc.generateBytes();
+    const bytes = await doc.generateBytesAsync();
     expect(bytes.length).toBeGreaterThan(0);
+    expect(pdfToText(bytes)).toContain('/Encrypt ');
   });
 
   it('encrypted document with restricted permissions generates valid PDF', () => {

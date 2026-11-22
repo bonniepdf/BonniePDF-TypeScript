@@ -26,11 +26,14 @@ describe('XmpMetadataWriter - conformance blocks', () => {
     expect(xml).toContain('<pdfaid:conformance>B</pdfaid:conformance>');
   });
 
-  it('no blocks => empty XMP body (preserves the behaviour from before the hook)', () => {
+  it('no blocks => valid XMP packet omitting pdfaid and pdfuaid', () => {
     const metadata = new DocumentMetadata('Plain');
     const xml = XmpMetadataWriter.generateXmpXml(metadata);
 
-    expect(xml).toBe('');
+    expect(xml).toContain('<?xpacket begin=');
+    expect(xml).toContain('Plain');
+    expect(xml).not.toContain('pdfaid');
+    expect(xml).not.toContain('pdfuaid');
   });
 
   it('PdfA + PdfUa1 composes both namespaces into one rdf:Description', () => {

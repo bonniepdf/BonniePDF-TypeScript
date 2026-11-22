@@ -122,7 +122,7 @@ export class PdfEncryptor {
   private getRc4EncryptDictionary(): Map<string, string> {
     const dict = new Map<string, string>([
       [PdfKeys.Encryption.Handler, '/Standard'],
-      [PdfKeys.Encryption.AlgorithmVersion, this.settings.versionValue.toString()],
+      [PdfKeys.Encryption.AlgorithmVersion, this.settings.versionValue().toString()],
       [PdfKeys.Encryption.HandlerRevision, this.settings.revisionValue.toString()],
       [PdfKeys.Encryption.OwnerEntry, PdfEncryptor.fmtHex(this.key!.ownerEntry)],
       [PdfKeys.Encryption.UserEntry, PdfEncryptor.fmtHex(this.key!.userEntry)],

@@ -138,13 +138,20 @@ describe('Encryption document integration', () => {
     expect(() => doc.generateBytes()).toThrow();
   });
 
-  it('AES256_WithPdf17_SavesSuccessfully', () => {
+  it('AES256_WithPdf17_SavesSuccessfully', async () => {
     doc = new Document();
     withEncryptionAes256(doc.settings, opt => opt.withUserPassword('secret').withOwnerPassword('secret'));
-    const bytes = doc.generateBytes();
+    const bytes = await doc.generateBytesAsync();
     expect(bytes.length).toBeGreaterThan(0);
     const text = pdfToText(bytes);
     expect(text.startsWith('%PDF-1.7')).toBe(true);
+    expect(text).toContain('/Encrypt ');
+  });
+
+  it('AES256_SyncGenerateBytes_Throws', () => {
+    doc = new Document();
+    withEncryptionAes256(doc.settings, opt => opt.withUserPassword('secret').withOwnerPassword('secret'));
+    expect(() => doc.generateBytes()).toThrow(/generateBytesAsync/);
   });
 
   it('RC4_128_StillWorksAfterChanges', () => {

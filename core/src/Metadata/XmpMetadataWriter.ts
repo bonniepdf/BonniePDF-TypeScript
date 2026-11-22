@@ -20,41 +20,40 @@ import { XmpConformanceBlock } from './XmpConformanceBlock';
  *   4. **XMP basic schema (xmp)** - CreatorTool, CreateDate, ModifyDate.
  *      Mirrors /Creator, /CreationDate, /ModDate.
  *
- * Returns an empty string when no conformance blocks are provided, which is the
- * "no XMP body" path plain (non-tagged, non-PDF/A) documents rely on.
+ * Always emits a well-formed XMP packet; callers decide whether to embed XMP.
  */
 export class XmpMetadataWriter {
   public static generateXmpXml(
     metadata: DocumentMetadata,
     conformanceBlocks?: ReadonlyArray<XmpConformanceBlock>
   ): string {
-    if (!conformanceBlocks || conformanceBlocks.length === 0) {
-      return '';
-    }
-
+    const blocks = conformanceBlocks ?? [];
     const parts: string[] = [];
     parts.push('<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>\n');
     parts.push('<x:xmpmeta xmlns:x="adobe:ns:meta/">\n');
     parts.push('  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n');
 
-    // 1. Conformance namespaces (pdfaid, pdfuaid, …) in one rdf:Description
-    parts.push('    <rdf:Description rdf:about=""');
-    for (const block of conformanceBlocks) {
-      parts.push(` xmlns:${block.prefix}="${block.namespaceUri}"`);
-    }
-    parts.push('>\n');
-    for (const block of conformanceBlocks) {
-      for (const [name, value] of block.elements) {
-        parts.push(`      <${block.prefix}:${name}>${escapeXmlText(value)}</${block.prefix}:${name}>\n`);
-      }
-    }
-    parts.push('    </rdf:Description>\n');
+    let wroteDescription = false;
 
-    // 2. Dublin Core - title, creator (author), subject (keywords),
-    //    description (subject). Naming is unintuitive because PDF and
-    //    Dublin Core overlap: PDF /Subject → dc:description, while
-    //    PDF /Keywords → dc:subject (an unordered Bag of topic words).
+    // 1. Conformance namespaces (pdfaid, pdfuaid, ...) in one rdf:Description
+    if (blocks.length > 0) {
+      wroteDescription = true;
+      parts.push('    <rdf:Description rdf:about=""');
+      for (const block of blocks) {
+        parts.push(` xmlns:${block.prefix}="${block.namespaceUri}"`);
+      }
+      parts.push('>\n');
+      for (const block of blocks) {
+        for (const [name, value] of block.elements) {
+          parts.push(`      <${block.prefix}:${name}>${escapeXmlText(value)}</${block.prefix}:${name}>\n`);
+        }
+      }
+      parts.push('    </rdf:Description>\n');
+    }
+
+    // 2. Dublin Core - title, creator (author), subject (keywords), description (subject).
     if (metadata?.title || metadata?.author || metadata?.keywords || metadata?.subject) {
+      wroteDescription = true;
       parts.push('    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n');
       if (metadata.title) {
         parts.push('      <dc:title>\n');
@@ -64,7 +63,6 @@ export class XmpMetadataWriter {
         parts.push('      </dc:title>\n');
       }
       if (metadata.author) {
-        // dc:creator is an ordered Seq of strings per XMP §8.6.
         parts.push('      <dc:creator>\n');
         parts.push('        <rdf:Seq>\n');
         parts.push(`          <rdf:li>${escapeXmlText(metadata.author)}</rdf:li>\n`);
@@ -72,8 +70,6 @@ export class XmpMetadataWriter {
         parts.push('      </dc:creator>\n');
       }
       if (metadata.keywords) {
-        // dc:subject - Bag of individual keywords (comma- or
-        // semicolon-separated in PDF /Keywords). Matches .NET behaviour.
         const tokens = metadata.keywords
           .split(/[,;]/)
           .map(t => t.trim())
@@ -87,7 +83,6 @@ export class XmpMetadataWriter {
         parts.push('      </dc:subject>\n');
       }
       if (metadata.subject) {
-        // PDF /Subject ↔ dc:description (language alternative).
         parts.push('      <dc:description>\n');
         parts.push('        <rdf:Alt>\n');
         parts.push(`          <rdf:li xml:lang="x-default">${escapeXmlText(metadata.subject)}</rdf:li>\n`);
@@ -99,6 +94,7 @@ export class XmpMetadataWriter {
 
     // 3. PDF schema - Keywords, Producer.
     if (metadata?.keywords || metadata?.producer) {
+      wroteDescription = true;
       parts.push('    <rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">\n');
       if (metadata.keywords) {
         parts.push(`      <pdf:Keywords>${escapeXmlText(metadata.keywords)}</pdf:Keywords>\n`);
@@ -111,9 +107,9 @@ export class XmpMetadataWriter {
 
     // 4. XMP basic schema - CreatorTool, CreateDate, ModifyDate.
     if (metadata?.creator || metadata?.creationDate || metadata?.modifiedDate) {
+      wroteDescription = true;
       parts.push('    <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">\n');
       if (metadata.creator) {
-        // PDF /Creator (the tool) ↔ xmp:CreatorTool.
         parts.push(`      <xmp:CreatorTool>${escapeXmlText(metadata.creator)}</xmp:CreatorTool>\n`);
       }
       if (metadata.creationDate) {
@@ -126,15 +122,10 @@ export class XmpMetadataWriter {
     }
 
     // 5. PDF/A extension schema declarations (ISO 19005-2/3 §6.6.2.3).
-    // Every conformance block whose namespace is NOT predefined by ISO
-    // 19005 must be declared in a pdfaExtension:schemas bag. Only emit
-    // when a PDF/A claim is also present - without PDF/A there's no
-    // validator that checks this rule and the bag is dead weight.
-    const hasPdfA = conformanceBlocks.some(b => b.prefix === 'pdfaid');
-    const extensionSchemas = conformanceBlocks
-      .map(b => b.extensionSchema)
-      .filter((s): s is NonNullable<typeof s> => !!s);
+    const hasPdfA = blocks.some(b => b.prefix === 'pdfaid');
+    const extensionSchemas = blocks.map(b => b.extensionSchema).filter((s): s is NonNullable<typeof s> => !!s);
     if (hasPdfA && extensionSchemas.length > 0) {
+      wroteDescription = true;
       parts.push('    <rdf:Description rdf:about=""\n');
       parts.push('        xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"\n');
       parts.push('        xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"\n');
@@ -171,6 +162,10 @@ export class XmpMetadataWriter {
       parts.push('        </rdf:Bag>\n');
       parts.push('      </pdfaExtension:schemas>\n');
       parts.push('    </rdf:Description>\n');
+    }
+
+    if (!wroteDescription) {
+      parts.push('    <rdf:Description rdf:about=""/>\n');
     }
 
     parts.push('  </rdf:RDF>\n');

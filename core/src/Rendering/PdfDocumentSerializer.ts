@@ -102,13 +102,16 @@ export class PdfDocumentSerializer {
     // 0. Set up encryption if configured.
     // RC4: created synchronously here.
     // AES-256: if serializeAsync() already set writer.encryptor (via async
-    // PdfEncryptor.create()), reuse it. Otherwise (pure sync generateBytes()
-    // call) we skip AES-256 - the async key derivation can't run here.
+    // PdfEncryptor.create()), reuse it. A synchronous generateBytes() call
+    // cannot run Web Crypto key derivation and must fail rather than emit
+    // unencrypted bytes.
     let encryptId = 0;
     if (settings.isEncrypted) {
       if (writer.encryptor) {
         encryptId = writer.getNewId();
-      } else if (settings.encryption!.algorithm !== EncryptionAlgorithm.AES_256) {
+      } else if (settings.encryption!.algorithm === EncryptionAlgorithm.AES_256) {
+        throw new Error('AES-256 encryption requires asynchronous generation; call generateBytesAsync() instead.');
+      } else {
         writer.encryptor = new PdfEncryptor(settings.encryption!);
         encryptId = writer.getNewId();
       }

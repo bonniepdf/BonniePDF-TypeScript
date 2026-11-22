@@ -573,6 +573,13 @@ export class Document {
   private validateSettings(): void {
     const s = this.settings;
 
+    // PDF/A cannot be combined with encryption. Checked before the
+    // version-specific encryption rule and before any version upgrade so
+    // the clearer message wins and settings are not mutated on error.
+    if (s.conformance !== PdfAConformance.None && s.isEncrypted) {
+      throw new Error('PDF/A mode cannot be combined with encryption.');
+    }
+
     if (
       s.isEncrypted &&
       s.encryption!.algorithm === EncryptionAlgorithm.AES_256 &&
@@ -605,10 +612,6 @@ export class Document {
       s.version !== PdfVersion.Pdf17
     ) {
       s.version = PdfVersion.Pdf17;
-    }
-
-    if (s.conformance !== PdfAConformance.None && s.isEncrypted) {
-      throw new Error('PDF/A mode cannot be combined with encryption.');
     }
 
     // PDF/UA-1 tagging requires PDF 1.7 too, and nothing else upgrades the

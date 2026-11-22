@@ -62,11 +62,18 @@ import { Barcode } from '../Elements/Shapes/Barcode';
 import { DataMatrix } from '../Elements/Shapes/DataMatrix';
 import { BarChart } from '../Charts/BarChart';
 import { GroupedBarChart } from '../Charts/GroupedBarChart';
+import { StackedBarChart } from '../Charts/StackedBarChart';
 import { LineChart } from '../Charts/LineChart';
 import { AreaChart } from '../Charts/AreaChart';
+import { StackedAreaChart } from '../Charts/StackedAreaChart';
+import { ComboChart } from '../Charts/ComboChart';
+import { WaterfallChart } from '../Charts/WaterfallChart';
+import { ScatterChart } from '../Charts/ScatterChart';
 import { DotPlotChart } from '../Charts/DotPlotChart';
 import { LollipopChart } from '../Charts/LollipopChart';
 import { PieChart } from '../Charts/PieChart';
+import { BulletChart } from '../Charts/BulletChart';
+import { HeatmapChart } from '../Charts/HeatmapChart';
 import { ELEMENT_DESCRIPTION } from './ElementDescription';
 import { keysOf } from './keysOf';
 import type { ShapeSpec } from './ElementDescriptionTypes';
@@ -468,16 +475,30 @@ class Builder {
         return new BarChart(o);
       case 'GroupedBarChart':
         return new GroupedBarChart(o);
+      case 'StackedBarChart':
+        return new StackedBarChart(o);
       case 'LineChart':
         return new LineChart(o);
       case 'AreaChart':
         return new AreaChart(o);
+      case 'StackedAreaChart':
+        return new StackedAreaChart(o);
+      case 'ComboChart':
+        return new ComboChart(o);
+      case 'WaterfallChart':
+        return new WaterfallChart(o);
+      case 'ScatterChart':
+        return new ScatterChart(o);
       case 'DotPlotChart':
         return new DotPlotChart(o);
       case 'LollipopChart':
         return new LollipopChart(o);
       case 'PieChart':
         return new PieChart(o);
+      case 'BulletChart':
+        return new BulletChart(o);
+      case 'HeatmapChart':
+        return new HeatmapChart(o);
       default:
         throw new DefinitionError([
           { path: '', code: 'unknown-type', message: `Element type ${type} is not supported by this reader.` },

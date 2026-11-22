@@ -1,9 +1,9 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { applyOptions, toLength, type LengthInput } from '../ChartHost';
+import type { ChartCurveMode } from '../Graphics/ChartCurves';
+import type { ChartMarkerFill, ChartMarkerShape } from '../Graphics/ChartMarkers';
+import type { ChartPatternKind } from '../Graphics/ChartPathPlan';
 
-/**
- * Series-specific styling options for fine-grained control over appearance.
- */
 /** Settable properties of {@link ChartSeriesStyle}. */
 export const CHART_SERIES_STYLE_OPTION_KEYS = [
   'lineWidth',
@@ -11,13 +11,19 @@ export const CHART_SERIES_STYLE_OPTION_KEYS = [
   'markerRadius',
   'showMarkers',
   'stemWidth',
+  'dashPattern',
+  'curve',
+  'markerShape',
+  'markerFill',
+  'markerHaloWidth',
+  'pattern',
 ] as const;
 
 /** Options for {@link ChartSeriesStyle}. */
 export type ChartSeriesStyleOptions = Partial<
   Omit<
     Pick<ChartSeriesStyle, (typeof CHART_SERIES_STYLE_OPTION_KEYS)[number]>,
-    'lineWidth' | 'markerRadius' | 'stemWidth'
+    'lineWidth' | 'markerRadius' | 'stemWidth' | 'markerHaloWidth'
   >
 > & {
   /** Line thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
@@ -26,13 +32,12 @@ export type ChartSeriesStyleOptions = Partial<
   markerRadius?: LengthInput;
   /** Stem thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
   stemWidth?: LengthInput;
+  /** Halo thickness behind markers. */
+  markerHaloWidth?: LengthInput;
 };
 
 /** Configures the colors and stroke used to render a chart series. */
 export class ChartSeriesStyle {
-  /**
-   * Line width for Line and Area charts (default: 2f).
-   */
   /** Creates series styling, optionally configured in one expression. */
   constructor(options?: ChartSeriesStyleOptions) {
     applyOptions(this, options);
@@ -40,11 +45,7 @@ export class ChartSeriesStyle {
 
   private _lineWidth: number = 2;
 
-  /**
-   * Line thickness for this series.
-   *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
-   */
+  /** Line thickness for this series. */
   public get lineWidth(): number {
     return this._lineWidth;
   }
@@ -52,18 +53,12 @@ export class ChartSeriesStyle {
     this._lineWidth = toLength(value);
   }
 
-  /**
-   * Fill opacity for Area charts (0.0 to 1.0, default: 0.3f).
-   */
+  /** Fill opacity for Area charts (0.0 to 1.0, default: 0.3f). */
   fillOpacity: number = 0.3;
 
   private _markerRadius: number = 5;
 
-  /**
-   * Marker radius for Line, Lollipop, and DotPlot charts (default: 5f).
-   *
-   * Accepts a length: a number of points, `'2mm'`, or `{ value, unit }`.
-   */
+  /** Marker radius for Line, Lollipop, and DotPlot charts (default: 5f). */
   public get markerRadius(): number {
     return this._markerRadius;
   }
@@ -71,22 +66,41 @@ export class ChartSeriesStyle {
     this._markerRadius = toLength(value);
   }
 
-  /**
-   * Whether to show circular markers at data points in Line charts (default: true).
-   */
+  /** Whether to show markers at data points in Line charts (default: true). */
   showMarkers: boolean = true;
 
   private _stemWidth: number = 2;
 
-  /**
-   * Stem width for Lollipop charts (default: 2f).
-   *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
-   */
+  /** Stem width for Lollipop charts (default: 2f). */
   public get stemWidth(): number {
     return this._stemWidth;
   }
   public set stemWidth(value: LengthInput) {
     this._stemWidth = toLength(value);
   }
+
+  /** Optional alternating dash and gap lengths in points for line strokes. */
+  dashPattern: readonly number[] | undefined;
+
+  /** Optional curve interpolation override for this series (`linear`, `smooth`, `stepBefore`, `stepAfter`, `stepMiddle`). */
+  curve: ChartCurveMode | undefined;
+
+  /** Optional marker shape override (`circle`, `square`, `diamond`, `triangle`). */
+  markerShape: ChartMarkerShape | undefined;
+
+  /** Optional marker fill style override (`solid`, `hollow`). */
+  markerFill: ChartMarkerFill | undefined;
+
+  private _markerHaloWidth: number | undefined;
+
+  /** Optional outer halo ring width around markers. */
+  public get markerHaloWidth(): number | undefined {
+    return this._markerHaloWidth;
+  }
+  public set markerHaloWidth(value: LengthInput | undefined) {
+    this._markerHaloWidth = value === undefined ? undefined : toLength(value);
+  }
+
+  /** Optional vector hatch/dot pattern fill for monochrome print accessibility. */
+  pattern: ChartPatternKind | undefined;
 }

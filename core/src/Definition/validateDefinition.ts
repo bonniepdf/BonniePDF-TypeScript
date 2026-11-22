@@ -445,6 +445,9 @@ class Validator {
           return this.badValue(path, `${value} is above the maximum ${spec.max}.`, owner, `<= ${spec.max}`);
         return;
       }
+      case 'nullableNumber':
+        if (value === null) return;
+        return this.checkKind('number', spec, value, path, owner, depth);
       case 'integerOrUnlimited':
         if (value === 'unlimited') return;
         if (typeof value === 'string')
@@ -533,7 +536,7 @@ class Validator {
           this.error(
             path,
             'unsupported-format',
-            `Chart number format ${JSON.stringify(value)} is not supported. Use G, F<n>, N<n> or P<n>, with n from 0 to 15.`,
+            `Chart number format ${JSON.stringify(value)} is not supported. Use G, F<n>, N<n>, P<n> or K<n>, with n from 0 to 15.`,
             { id: owner }
           );
         }
@@ -679,7 +682,8 @@ class Validator {
     if (!Array.isArray(value)) return this.wrongType(path, 'an array', value, owner);
     if (value.length > this.limits.arrayLength) return this.limit(path, 'An array');
     for (let i = 0; i < value.length; i++) {
-      if (value[i] === null) this.badValue(`${path}/${i}`, 'null is not a value in a definition.', owner);
+      if (value[i] === null && itemKind !== 'nullableNumber')
+        this.badValue(`${path}/${i}`, 'null is not a value in a definition.', owner);
       else this.checkKind(itemKind, { ...spec, kind: itemKind }, value[i], `${path}/${i}`, owner, depth);
       if (this.aborted) return;
     }
@@ -824,7 +828,7 @@ class Validator {
   private chartDuplicates(body: Record<string, unknown>, path: string, id?: string): void {
     const data = body.data;
     if (!isObject(data)) return;
-    for (const key of ['title', 'xAxis', 'yAxis']) {
+    for (const key of ['title', 'subtitle', 'xAxis', 'yAxis']) {
       if (body[key] === undefined || data[key] === undefined) continue;
       if (canonical(body[key]) !== canonical(data[key])) {
         this.error(path, 'conflicting-keys', `\`${key}\` is given on the chart and in \`data\`, and the two differ.`, {

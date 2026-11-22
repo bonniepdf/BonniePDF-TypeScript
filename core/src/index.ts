@@ -179,14 +179,33 @@ export * from './Elements/Shapes/BarcodeSymbology';
 export { type BarcodeOptions, Barcode } from './Elements/Shapes/Barcode';
 export { DataMatrixContentException } from './Elements/Shapes/DataMatrixEncoder';
 export { type DataMatrixOptions, DataMatrix } from './Elements/Shapes/DataMatrix';
-export { type ChartDataPointOptions, ChartDataPoint } from './Charts/Models/ChartDataPoint';
+export { type ChartDataPointOptions, type ChartDataPointKind, ChartDataPoint } from './Charts/Models/ChartDataPoint';
 export { type ChartSeriesStyleOptions, ChartSeriesStyle } from './Charts/Models/ChartSeriesStyle';
-export { type ChartSeriesOptions, ChartSeries } from './Charts/Models/ChartSeries';
+export {
+  type ChartSeriesOptions,
+  type ChartSeriesType,
+  type ChartAxisTarget,
+  ChartSeries,
+} from './Charts/Models/ChartSeries';
 export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
-export { type AxisOptionsOptions, AxisOptions } from './Charts/Models/AxisOptions';
+export { type AxisOptionsOptions, type AxisLabelOverflow, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';
+export {
+  type ChartThemeName,
+  type ChartGridLineStyle,
+  type ChartThemeDefinition,
+  type ChartThemeInput,
+} from './Charts/ChartTheme';
 export { type ChartBaseOptions, ChartBase } from './Charts/ChartBase';
-export { type CartesianChartOptions, type ChartReference, CartesianChartBase } from './Charts/CartesianChartBase';
+export {
+  type CartesianChartOptions,
+  type ChartReference,
+  type ChartLegendPosition,
+  type ChartValueLabelPosition,
+  type ChartReferenceLabelPosition,
+  type ChartReferenceLabelPlacement,
+  CartesianChartBase,
+} from './Charts/CartesianChartBase';
 export { type ChartElementOptions, ChartElement } from './Charts/ChartElement';
 export { type BarChartOptions, BarChart } from './Charts/BarChart';
 export { type AreaChartOptions, AreaChart } from './Charts/AreaChart';
@@ -195,7 +214,17 @@ export { type DotPlotChartOptions, DotPlotChart } from './Charts/DotPlotChart';
 export { type LollipopChartOptions, LollipopChart } from './Charts/LollipopChart';
 export { type GroupedBarChartOptions, GroupedBarChart } from './Charts/GroupedBarChart';
 export { type GroupedBarChartElementOptions, GroupedBarChartElement } from './Charts/GroupedBarChartElement';
-export { type PieChartOptions, PieChart } from './Charts/PieChart';
+export { type PieChartOptions, type PieLegendFormat, type PieSliceLabelMode, PieChart } from './Charts/PieChart';
+export { type StackedBarChartOptions, type ChartStackMode, StackedBarChart } from './Charts/StackedBarChart';
+export { type StackedAreaChartOptions, StackedAreaChart } from './Charts/StackedAreaChart';
+export { type ComboChartOptions, ComboChart } from './Charts/ComboChart';
+export { type WaterfallChartOptions, WaterfallChart } from './Charts/WaterfallChart';
+export { type ScatterChartOptions, type ScatterTrendlineMode, ScatterChart } from './Charts/ScatterChart';
+export { type BulletChartOptions, type BulletRange, BulletChart } from './Charts/BulletChart';
+export { type HeatmapChartOptions, HeatmapChart } from './Charts/HeatmapChart';
+export type { ChartCurveMode } from './Charts/Graphics/ChartCurves';
+export type { ChartMarkerShape, ChartMarkerFill } from './Charts/Graphics/ChartMarkers';
+export type { ChartPatternKind, ChartPatternFill } from './Charts/Graphics/ChartPathPlan';
 
 export * from './Document';
 

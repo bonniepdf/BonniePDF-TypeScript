@@ -86,6 +86,13 @@ const IMAGE_LIKE_TYPES = new Set([
   'PieChart',
   'DotPlotChart',
   'LollipopChart',
+  'StackedBarChart',
+  'StackedAreaChart',
+  'ComboChart',
+  'WaterfallChart',
+  'ScatterChart',
+  'BulletChart',
+  'HeatmapChart',
   'ChartElement',
   'GroupedBarChartElement',
 ]);

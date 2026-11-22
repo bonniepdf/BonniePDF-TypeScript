@@ -87,11 +87,18 @@ import { Barcode } from '../Elements/Shapes/Barcode';
 import { DataMatrix } from '../Elements/Shapes/DataMatrix';
 import { BarChart } from '../Charts/BarChart';
 import { GroupedBarChart } from '../Charts/GroupedBarChart';
+import { StackedBarChart } from '../Charts/StackedBarChart';
 import { LineChart } from '../Charts/LineChart';
 import { AreaChart } from '../Charts/AreaChart';
+import { StackedAreaChart } from '../Charts/StackedAreaChart';
+import { ComboChart } from '../Charts/ComboChart';
+import { WaterfallChart } from '../Charts/WaterfallChart';
+import { ScatterChart } from '../Charts/ScatterChart';
 import { DotPlotChart } from '../Charts/DotPlotChart';
 import { LollipopChart } from '../Charts/LollipopChart';
 import { PieChart } from '../Charts/PieChart';
+import { BulletChart } from '../Charts/BulletChart';
+import { HeatmapChart } from '../Charts/HeatmapChart';
 import { ChartBase } from '../Charts/ChartBase';
 import { CartesianChartBase } from '../Charts/CartesianChartBase';
 import { AxisOptions } from '../Charts/Models/AxisOptions';
@@ -213,11 +220,18 @@ const TYPE_BY_CLASS = new Map<Ctor, string>([
   [DataMatrix, 'DataMatrix'],
   [BarChart, 'BarChart'],
   [GroupedBarChart, 'GroupedBarChart'],
+  [StackedBarChart, 'StackedBarChart'],
   [LineChart, 'LineChart'],
   [AreaChart, 'AreaChart'],
+  [StackedAreaChart, 'StackedAreaChart'],
+  [ComboChart, 'ComboChart'],
+  [WaterfallChart, 'WaterfallChart'],
+  [ScatterChart, 'ScatterChart'],
   [DotPlotChart, 'DotPlotChart'],
   [LollipopChart, 'LollipopChart'],
   [PieChart, 'PieChart'],
+  [BulletChart, 'BulletChart'],
+  [HeatmapChart, 'HeatmapChart'],
 ]);
 
 /** A fresh element of each type, for its defaults. */
@@ -262,11 +276,18 @@ const BLANK: Record<string, () => unknown> = {
   DataMatrix: () => new DataMatrix(),
   BarChart: () => new BarChart(),
   GroupedBarChart: () => new GroupedBarChart(),
+  StackedBarChart: () => new StackedBarChart(),
   LineChart: () => new LineChart(),
   AreaChart: () => new AreaChart(),
+  StackedAreaChart: () => new StackedAreaChart(),
+  ComboChart: () => new ComboChart(),
+  WaterfallChart: () => new WaterfallChart(),
+  ScatterChart: () => new ScatterChart(),
   DotPlotChart: () => new DotPlotChart(),
   LollipopChart: () => new LollipopChart(),
   PieChart: () => new PieChart(),
+  BulletChart: () => new BulletChart(),
+  HeatmapChart: () => new HeatmapChart(),
 };
 
 const blankCache = new Map<string, unknown>();
@@ -473,6 +494,7 @@ class Writer {
 
   /** Converts one stored value to its wire form, or `undefined` when the value is unset. */
   wire(kind: string, value: unknown): unknown {
+    if (kind === 'nullableNumber' && value === null) return null;
     if (value === undefined || value === null) return undefined;
     const [head, ...rest] = kind.split(':');
     const arg = rest.join(':');
@@ -483,6 +505,7 @@ class Writer {
       case 'integerOrUnlimited':
         return value;
       case 'number':
+      case 'nullableNumber':
         return value;
       case 'length':
         return value;
@@ -773,8 +796,13 @@ class Writer {
       // charts
       case 'BarChart.data':
       case 'GroupedBarChart.data':
+      case 'StackedBarChart.data':
       case 'LineChart.data':
       case 'AreaChart.data':
+      case 'StackedAreaChart.data':
+      case 'ComboChart.data':
+      case 'WaterfallChart.data':
+      case 'ScatterChart.data':
       case 'DotPlotChart.data':
       case 'LollipopChart.data':
       case 'PieChart.data':
@@ -784,8 +812,21 @@ class Writer {
     }
     if (el instanceof ChartBase) {
       if (key === 'title') return (el.title as string) === '' ? undefined : el.title;
+      if (key === 'subtitle') return (el.subtitle as string) === '' ? undefined : el.subtitle;
+      if (key === 'theme' && typeof el.theme !== 'string') {
+        return this.cannot(at, id, 'Custom ChartThemeDefinition objects cannot be written to a Document Definition.');
+      }
       if ((key === 'xAxis' || key === 'yAxis') && el instanceof CartesianChartBase) {
         const axis = this.shape(el[key] as unknown as Obj, D.shapes.Axis, new AxisOptions() as unknown as Obj);
+        return isObj(axis) && Object.keys(axis).length ? axis : undefined;
+      }
+      if (key === 'secondaryYAxis' && el instanceof ComboChart) {
+        if (!el.secondaryYAxis) return undefined;
+        const axis = this.shape(
+          el.secondaryYAxis as unknown as Obj,
+          D.shapes.Axis,
+          new AxisOptions() as unknown as Obj
+        );
         return isObj(axis) && Object.keys(axis).length ? axis : undefined;
       }
     }
@@ -804,9 +845,15 @@ class Writer {
       const ordered: Obj = {};
       for (const key of Object.keys(D.shapes.Series.keys)) {
         if (key === 'dataPoints') {
-          ordered.dataPoints = s.dataPoints.map(p =>
-            this.shape(p as unknown as Obj, D.shapes.DataPoint, new ChartDataPoint() as unknown as Obj)
-          );
+          ordered.dataPoints = s.dataPoints.map(p => {
+            const pt = this.shape(
+              p as unknown as Obj,
+              D.shapes.DataPoint,
+              new ChartDataPoint() as unknown as Obj
+            ) as Obj;
+            if ((p.kind === 'delta' || p.hasExplicitValue) && pt.value === undefined) pt.value = p.value;
+            return pt;
+          });
         } else if (key === 'style') {
           const style = this.shape(
             s.style as unknown as Obj,

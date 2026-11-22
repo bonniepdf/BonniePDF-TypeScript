@@ -3,18 +3,11 @@ import { ChartSeries, type ChartSeriesOptions } from './ChartSeries';
 import { AxisOptions, type AxisOptionsOptions } from './AxisOptions';
 import { applyOptions } from '../ChartHost';
 
-/**
- * Data model for chart visualization.
- * Supports single-series and multi-series charts.
- */
-/**
- * Settable *property* surface of {@link ChartData}. `series`, `yAxis` and
- * `xAxis` accept nested literals via the constructor.
- */
-export const CHART_DATA_OPTION_KEYS = ['title', 'series', 'yAxis', 'xAxis'] as const;
+/** Settable property surface of {@link ChartData}. */
+export const CHART_DATA_OPTION_KEYS = ['title', 'subtitle', 'series', 'yAxis', 'xAxis'] as const;
 
 /** Options for {@link ChartData}. */
-export type ChartDataOptions = Partial<Pick<ChartData, 'title'>> & {
+export type ChartDataOptions = Partial<Pick<ChartData, 'title' | 'subtitle'>> & {
   /** Series; each may be an instance or an options literal. */
   series?: (ChartSeries | ChartSeriesOptions)[];
   /** Value axis; an instance or an options literal. */
@@ -36,24 +29,18 @@ export class ChartData {
     if (xAxis !== undefined) this.xAxis = xAxis instanceof AxisOptions ? xAxis : new AxisOptions(xAxis);
   }
 
-  /**
-   * Chart title displayed at the top
-   */
+  /** Chart title displayed at the top */
   title: string = '';
 
-  /**
-   * Multiple data series to display in the chart.
-   * Each series can have its own name, color, and data points.
-   */
+  /** Optional subtitle displayed beneath the chart title */
+  subtitle: string = '';
+
+  /** Multiple data series to display in the chart. */
   series: ChartSeries[] = [];
 
-  /**
-   * Y-axis (vertical) configuration
-   */
+  /** Y-axis (vertical) configuration */
   yAxis: AxisOptions = new AxisOptions();
 
-  /**
-   * X-axis (horizontal) configuration
-   */
+  /** X-axis (horizontal) configuration */
   xAxis: AxisOptions = new AxisOptions();
 }

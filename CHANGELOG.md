@@ -6,6 +6,11 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+### Features
+
+- **New chart families:** added `StackedBarChart` (`absolute` and 100% `percent` modes), `StackedAreaChart`, dual-axis `ComboChart`, `WaterfallChart`, `ScatterChart` (with bubble sizing and OLS linear trendlines), `BulletChart`, and `HeatmapChart`, with full Document Definition 1.0, PDF/UA tagging, and layout snapshot support.
+- **Chart rendering, themes & layout:** added `dark` and monochrome `print` (pure-vector hatch patterns) themes, composable `ChartThemeDefinition`, `autoScale` (Heckbert nice ticks), `autoLayout` dynamic margins, `K<n>` compact number formatting (`K`/`M`/`B`/`T`), smooth monotone splines and step curves, dashed series, shaped/hollow/haloed markers, vertical `areaGradient` fades, `PieChart` radial-elbow callout labels and configurable `donutHoleRatio`/`sliceBorderWidth`, annotated `ChartReference` labels, card borders, subtitles/captions, flexible `legendPosition`, and `inheritDocumentFont`.
+
 ### Fixes
 
 - **Encryption:** emit numeric `/V` values for RC4-40/128, and throw from synchronous `generateBytes()` when AES-256 is configured.

@@ -5,14 +5,17 @@ import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } fr
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
+import { drawChartMarker, type ChartMarkerFill, type ChartMarkerShape } from './Graphics/ChartMarkers';
 
-/**
- * Lollipop chart that renders vertical lines (stems) with circular markers (heads).
- * Now supports multiple series for comparing datasets.
- * Uses the ICanvas interface for rendering, making it backend-agnostic.
- */
 /** Settable properties declared by {@link LollipopChart} itself. */
-export const LOLLIPOP_CHART_OWN_OPTION_KEYS = ['defaultStemWidth', 'defaultHeadRadius', 'lollipopColor'] as const;
+export const LOLLIPOP_CHART_OWN_OPTION_KEYS = [
+  'defaultStemWidth',
+  'defaultHeadRadius',
+  'lollipopColor',
+  'defaultMarkerShape',
+  'defaultMarkerFill',
+  'defaultMarkerHaloWidth',
+] as const;
 
 /** The full option surface, bases included. */
 export const LOLLIPOP_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LOLLIPOP_CHART_OWN_OPTION_KEYS] as const;
@@ -20,7 +23,7 @@ export const LOLLIPOP_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...LO
 /** Options for {@link LollipopChart}. */
 export type LollipopChartOptions = CartesianChartOptions &
   Partial<Omit<Pick<LollipopChart, (typeof LOLLIPOP_CHART_OWN_OPTION_KEYS)[number]>, 'lollipopColor'>> & {
-    /** lollipopColor colour. Accepts a palette token or hex. */
+    /** Default stem and head colour for series without an explicit colour. */
     lollipopColor?: ColorInput;
   };
 
@@ -29,7 +32,6 @@ export class LollipopChart extends CartesianChartBase {
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_HEAD_RADIUS_VALUE = 8;
 
-  /** Creates a LollipopChart, optionally configured in one expression. */
   constructor(options?: LollipopChartOptions) {
     super();
     const { data, ...rest } = options ?? {};
@@ -37,22 +39,19 @@ export class LollipopChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
-  /**
-   * Default stem width for all series (can be overridden per series via Style).
-   */
+  /** Default stroke width of lollipop stems in points. */
   defaultStemWidth: number = 2;
-
-  /**
-   * Default head radius for all series (can be overridden per series via Style).
-   */
+  /** Default radius of lollipop head markers in points. */
   defaultHeadRadius: number = LollipopChart.DEFAULT_HEAD_RADIUS_VALUE;
+  /** Default geometric marker shape for lollipop heads. */
+  defaultMarkerShape: ChartMarkerShape = 'circle';
+  /** Default marker fill mode (`solid` or `hollow`). */
+  defaultMarkerFill: ChartMarkerFill = 'solid';
+  /** Default background-coloured halo width around lollipop heads in points. */
+  defaultMarkerHaloWidth: number = 0;
 
-  /**
-   * Color for the lollipop stems and heads (backward compatibility).
-   */
   private _lollipopColor: Color = Color.fromHex(LollipopChart.DEFAULT_COLOR_HEX);
-
-  /** Lollipop colour. Accepts a palette token or hex. */
+  /** Default stem and head colour for series without an explicit colour. */
   public get lollipopColor(): Color {
     return this._lollipopColor;
   }
@@ -60,10 +59,6 @@ export class LollipopChart extends CartesianChartBase {
     this._lollipopColor = toColor(value);
   }
 
-  /**
-   * Draws the lollipop chart elements for a single series (stems and heads).
-   * In vertical mode stems are vertical lines; in horizontal mode they are horizontal lines.
-   */
   protected override drawSeriesElements(
     canvas: ICanvas,
     data: ChartData,
@@ -74,36 +69,13 @@ export class LollipopChart extends CartesianChartBase {
     baselineY: number,
     _topY: number
   ): void {
-    const stemWidth =
-      series.style?.stemWidth && series.style.stemWidth > 0 ? series.style.stemWidth : this.defaultStemWidth;
+    const stemWidth = series.style?.stemWidth && series.style.stemWidth > 0 ? series.style.stemWidth : this.defaultStemWidth;
     const headRadius =
       series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultHeadRadius;
-
+    const seriesIdx = data.series.indexOf(series);
+    const color = this.resolveSeriesColor(series);
     const origin = this.valueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
-    this.drawLollipopStems(canvas, coordinates, origin, this.resolveSeriesColor(series), stemWidth);
-    this.drawLollipopHeads(canvas, coordinates, this.resolveSeriesColor(series), headRadius);
-  }
 
-  /**
-   * Gets the offset for value labels (accounts for lollipop head radius).
-   */
-  protected override getLabelVerticalOffset(series: ChartSeries): number {
-    const headRadius =
-      series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultHeadRadius;
-    return headRadius + 7;
-  }
-
-  /**
-   * Draws lollipop stems from the value origin to each data point: vertical lines in vertical
-   * mode and horizontal lines in horizontal mode.
-   */
-  private drawLollipopStems(
-    canvas: ICanvas,
-    coordinates: Point[],
-    origin: number,
-    color: Color,
-    stemWidth: number
-  ): void {
     for (const p of coordinates) {
       if (this.orientation === ChartOrientation.Horizontal) {
         canvas.drawLine(origin, p.y, p.x, p.y, color, stemWidth);
@@ -111,21 +83,22 @@ export class LollipopChart extends CartesianChartBase {
         canvas.drawLine(p.x, origin, p.x, p.y, color, stemWidth);
       }
     }
-  }
 
-  /**
-   * Draws the lollipop heads (circles at data points) for a series.
-   */
-  private drawLollipopHeads(canvas: ICanvas, coordinates: Point[], color: Color, radius: number): void {
+    const shape = this.resolveSeriesMarkerShape(series, seriesIdx, this.defaultMarkerShape);
+    const fill = series.style?.markerFill ?? this.defaultMarkerFill;
+    const halo = series.style?.markerHaloWidth ?? this.defaultMarkerHaloWidth;
+    const bg = this.effectiveBackgroundColor ?? Color.white;
     for (const p of coordinates) {
-      canvas.fillCircle(p.x, p.y, radius, color);
+      drawChartMarker(canvas, p.x, p.y, headRadius, color, shape, fill, halo, bg, stemWidth);
     }
   }
 
-  /**
-   * Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
-   * Returns the chart's LollipopColor property for backward compatibility.
-   */
+  protected override getLabelVerticalOffset(series: ChartSeries): number {
+    const headRadius =
+      series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultHeadRadius;
+    return headRadius + 7;
+  }
+
   protected override getDefaultSeriesColor(): Color {
     return this.lollipopColor;
   }

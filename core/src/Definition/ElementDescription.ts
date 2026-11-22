@@ -514,7 +514,9 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       "via": "options",
       "tokens": [
         "legacy",
-        "modern"
+        "modern",
+        "dark",
+        "print"
       ]
     },
     "PieTotalPosition": {
@@ -529,6 +531,141 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       "tokens": [
         "bar",
         "plot"
+      ]
+    },
+    "ChartCurveMode": {
+      "via": "options",
+      "tokens": [
+        "linear",
+        "smooth",
+        "stepBefore",
+        "stepAfter",
+        "stepMiddle"
+      ]
+    },
+    "ChartMarkerShape": {
+      "via": "options",
+      "tokens": [
+        "circle",
+        "square",
+        "diamond",
+        "triangle"
+      ]
+    },
+    "ChartMarkerFill": {
+      "via": "options",
+      "tokens": [
+        "solid",
+        "hollow"
+      ]
+    },
+    "ChartPatternKind": {
+      "via": "options",
+      "tokens": [
+        "none",
+        "diagonal",
+        "reverseDiagonal",
+        "horizontal",
+        "vertical",
+        "crosshatch",
+        "dots"
+      ]
+    },
+    "AxisLabelOverflow": {
+      "via": "options",
+      "tokens": [
+        "auto",
+        "omit",
+        "rotate",
+        "wrap"
+      ]
+    },
+    "ChartDataPointKind": {
+      "via": "options",
+      "tokens": [
+        "delta",
+        "total",
+        "subtotal"
+      ]
+    },
+    "ChartSeriesType": {
+      "via": "options",
+      "tokens": [
+        "bar",
+        "line",
+        "area"
+      ]
+    },
+    "ChartValueAxis": {
+      "via": "options",
+      "tokens": [
+        "primary",
+        "secondary"
+      ]
+    },
+    "ChartLegendPosition": {
+      "via": "options",
+      "tokens": [
+        "bottom",
+        "top",
+        "right",
+        "inline",
+        "none"
+      ]
+    },
+    "ChartValueLabelPosition": {
+      "via": "options",
+      "tokens": [
+        "outside",
+        "inside",
+        "auto"
+      ]
+    },
+    "ChartReferenceLabelPosition": {
+      "via": "options",
+      "tokens": [
+        "start",
+        "center",
+        "end"
+      ]
+    },
+    "ChartReferenceLabelPlacement": {
+      "via": "options",
+      "tokens": [
+        "above",
+        "below",
+        "inside"
+      ]
+    },
+    "PieLegendFormat": {
+      "via": "options",
+      "tokens": [
+        "labelValue",
+        "labelPercent",
+        "labelValuePercent",
+        "labelOnly"
+      ]
+    },
+    "PieSliceLabelMode": {
+      "via": "options",
+      "tokens": [
+        "none",
+        "inside",
+        "callout"
+      ]
+    },
+    "ChartStackMode": {
+      "via": "options",
+      "tokens": [
+        "absolute",
+        "percent"
+      ]
+    },
+    "ScatterTrendlineMode": {
+      "via": "options",
+      "tokens": [
+        "none",
+        "linear"
       ]
     }
   },
@@ -647,12 +784,14 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "required": true
       }
     },
-    "Chart": {
-      "data": {
-        "kind": "object:ChartData",
-        "required": true
-      },
+    "ChartCommon": {
       "title": {
+        "kind": "string"
+      },
+      "subtitle": {
+        "kind": "string"
+      },
+      "caption": {
         "kind": "string"
       },
       "width": {
@@ -663,6 +802,75 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       },
       "backgroundColor": {
         "kind": "color"
+      },
+      "borderRadius": {
+        "kind": "length"
+      },
+      "borderColor": {
+        "kind": "color"
+      },
+      "borderWidth": {
+        "kind": "length"
+      },
+      "autoLayout": {
+        "kind": "boolean"
+      },
+      "inheritDocumentFont": {
+        "kind": "boolean"
+      },
+      "stretchToFit": {
+        "kind": "boolean"
+      },
+      "svgShapeRendering": {
+        "kind": "enum:SvgShapeRendering"
+      },
+      "altText": {
+        "kind": "string"
+      },
+      "isDecorative": {
+        "kind": "boolean"
+      },
+      "theme": {
+        "kind": "enum:ChartTheme"
+      }
+    },
+    "Chart": {
+      "data": {
+        "kind": "object:ChartData",
+        "required": true
+      },
+      "title": {
+        "kind": "string"
+      },
+      "subtitle": {
+        "kind": "string"
+      },
+      "caption": {
+        "kind": "string"
+      },
+      "width": {
+        "kind": "length"
+      },
+      "height": {
+        "kind": "length"
+      },
+      "backgroundColor": {
+        "kind": "color"
+      },
+      "borderRadius": {
+        "kind": "length"
+      },
+      "borderColor": {
+        "kind": "color"
+      },
+      "borderWidth": {
+        "kind": "length"
+      },
+      "autoLayout": {
+        "kind": "boolean"
+      },
+      "inheritDocumentFont": {
+        "kind": "boolean"
       },
       "stretchToFit": {
         "kind": "boolean"
@@ -699,11 +907,29 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       "labelFontSize": {
         "kind": "length"
       },
+      "valueLabelFormat": {
+        "kind": "chartNumberFormat"
+      },
+      "valueLabelPrefix": {
+        "kind": "string"
+      },
+      "valueLabelSuffix": {
+        "kind": "string"
+      },
+      "valueLabelPosition": {
+        "kind": "enum:ChartValueLabelPosition"
+      },
       "showLegend": {
         "kind": "boolean"
       },
+      "legendPosition": {
+        "kind": "enum:ChartLegendPosition"
+      },
       "orientation": {
         "kind": "enum:ChartOrientation"
+      },
+      "clipToPlotArea": {
+        "kind": "boolean"
       }
     },
     "Code": {
@@ -946,6 +1172,22 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "verticalLegend": {
           "kind": "boolean"
+        },
+        "autoScale": {
+          "kind": "boolean"
+        },
+        "includeZero": {
+          "kind": "boolean"
+        },
+        "headroom": {
+          "kind": "number",
+          "min": 0
+        },
+        "valueFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "labelOverflow": {
+          "kind": "enum:AxisLabelOverflow"
         }
       }
     },
@@ -967,6 +1209,24 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "stemWidth": {
           "kind": "length"
+        },
+        "dashPattern": {
+          "kind": "array:number"
+        },
+        "curve": {
+          "kind": "enum:ChartCurveMode"
+        },
+        "markerShape": {
+          "kind": "enum:ChartMarkerShape"
+        },
+        "markerFill": {
+          "kind": "enum:ChartMarkerFill"
+        },
+        "markerHaloWidth": {
+          "kind": "length"
+        },
+        "pattern": {
+          "kind": "enum:ChartPatternKind"
         }
       }
     },
@@ -977,11 +1237,19 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
           "required": true
         },
         "value": {
-          "kind": "number",
-          "required": true
+          "kind": "number"
         },
         "labelFormat": {
           "kind": "chartNumberFormat"
+        },
+        "x": {
+          "kind": "number"
+        },
+        "size": {
+          "kind": "number"
+        },
+        "kind": {
+          "kind": "enum:ChartDataPointKind"
         }
       }
     },
@@ -999,12 +1267,21 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "style": {
           "kind": "object:SeriesStyle"
+        },
+        "seriesType": {
+          "kind": "enum:ChartSeriesType"
+        },
+        "valueAxis": {
+          "kind": "enum:ChartValueAxis"
         }
       }
     },
     "ChartData": {
       "keys": {
         "title": {
+          "kind": "string"
+        },
+        "subtitle": {
           "kind": "string"
         },
         "series": {
@@ -1120,6 +1397,32 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "dashPattern": {
           "kind": "array:number"
+        },
+        "label": {
+          "kind": "string"
+        },
+        "labelPosition": {
+          "kind": "enum:ChartReferenceLabelPosition"
+        },
+        "labelPlacement": {
+          "kind": "enum:ChartReferenceLabelPlacement"
+        },
+        "labelColor": {
+          "kind": "color"
+        },
+        "labelBackgroundColor": {
+          "kind": "color"
+        }
+      }
+    },
+    "BulletRange": {
+      "keys": {
+        "max": {
+          "kind": "number",
+          "required": true
+        },
+        "color": {
+          "kind": "color"
         }
       }
     },
@@ -1946,6 +2249,20 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "sparkline": {
           "kind": "boolean"
         },
+        "sparklineFillOpacity": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "sparklineShowEndpoints": {
+          "kind": "boolean"
+        },
+        "sparklineHighlightMinMax": {
+          "kind": "boolean"
+        },
+        "sparklineReferenceValue": {
+          "kind": "number"
+        },
         "defaultLineWidth": {
           "kind": "length"
         },
@@ -1954,6 +2271,18 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "defaultMarkerRadius": {
           "kind": "length"
+        },
+        "defaultMarkerShape": {
+          "kind": "enum:ChartMarkerShape"
+        },
+        "defaultMarkerFill": {
+          "kind": "enum:ChartMarkerFill"
+        },
+        "defaultMarkerHaloWidth": {
+          "kind": "length"
+        },
+        "curve": {
+          "kind": "enum:ChartCurveMode"
         },
         "lineColor": {
           "kind": "color"
@@ -1988,6 +2317,12 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         },
         "lineWidth": {
           "kind": "length"
+        },
+        "curve": {
+          "kind": "enum:ChartCurveMode"
+        },
+        "areaGradient": {
+          "kind": "boolean"
         }
       },
       "rules": [
@@ -2002,6 +2337,15 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
       ],
       "keys": {
         "defaultDotRadius": {
+          "kind": "length"
+        },
+        "defaultMarkerShape": {
+          "kind": "enum:ChartMarkerShape"
+        },
+        "defaultMarkerFill": {
+          "kind": "enum:ChartMarkerFill"
+        },
+        "defaultMarkerHaloWidth": {
           "kind": "length"
         },
         "dotColor": {
@@ -2025,6 +2369,15 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "defaultHeadRadius": {
           "kind": "length"
         },
+        "defaultMarkerShape": {
+          "kind": "enum:ChartMarkerShape"
+        },
+        "defaultMarkerFill": {
+          "kind": "enum:ChartMarkerFill"
+        },
+        "defaultMarkerHaloWidth": {
+          "kind": "length"
+        },
         "lollipopColor": {
           "kind": "color"
         }
@@ -2045,11 +2398,31 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "isDonut": {
           "kind": "boolean"
         },
+        "donutHoleRatio": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "sliceBorderWidth": {
+          "kind": "length"
+        },
         "totalLabel": {
           "kind": "string"
         },
         "totalValueFormat": {
           "kind": "chartNumberFormat"
+        },
+        "valueFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "percentFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "legendFormat": {
+          "kind": "enum:PieLegendFormat"
+        },
+        "sliceLabelMode": {
+          "kind": "enum:PieSliceLabelMode"
         },
         "showLegend": {
           "kind": "boolean"
@@ -2068,6 +2441,271 @@ export const ELEMENT_DESCRIPTION: ElementDescription = {
         "singleSeries",
         "chartDuplicates"
       ]
+    },
+    "StackedBarChart": {
+      "uses": [
+        "Element",
+        "Chart",
+        "Cartesian"
+      ],
+      "keys": {
+        "mode": {
+          "kind": "enum:ChartStackMode"
+        },
+        "barWidthRatio": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
+        },
+        "showStackTotals": {
+          "kind": "boolean"
+        },
+        "stackTotalFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "segmentGap": {
+          "kind": "number",
+          "min": 0
+        }
+      },
+      "rules": [
+        "chartDuplicates"
+      ]
+    },
+    "StackedAreaChart": {
+      "uses": [
+        "Element",
+        "Chart",
+        "Cartesian"
+      ],
+      "keys": {
+        "mode": {
+          "kind": "enum:ChartStackMode"
+        },
+        "curve": {
+          "kind": "enum:ChartCurveMode"
+        },
+        "defaultFillOpacity": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "defaultLineWidth": {
+          "kind": "length"
+        }
+      },
+      "rules": [
+        "chartDuplicates"
+      ]
+    },
+    "ComboChart": {
+      "uses": [
+        "Element",
+        "Chart",
+        "Cartesian"
+      ],
+      "keys": {
+        "secondaryYAxis": {
+          "kind": "object:Axis"
+        },
+        "barWidthRatio": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "groupGapRatio": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
+        }
+      },
+      "rules": [
+        "chartDuplicates"
+      ]
+    },
+    "WaterfallChart": {
+      "uses": [
+        "Element",
+        "Chart",
+        "Cartesian"
+      ],
+      "keys": {
+        "positiveColor": {
+          "kind": "color"
+        },
+        "negativeColor": {
+          "kind": "color"
+        },
+        "totalColor": {
+          "kind": "color"
+        },
+        "showConnectors": {
+          "kind": "boolean"
+        },
+        "barWidthRatio": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "barStyle": {
+          "kind": "object:ChartBarStyle"
+        },
+        "showSignOnDeltas": {
+          "kind": "boolean"
+        }
+      },
+      "rules": [
+        "chartDuplicates"
+      ]
+    },
+    "ScatterChart": {
+      "uses": [
+        "Element",
+        "Chart",
+        "Cartesian"
+      ],
+      "keys": {
+        "defaultMarkerRadius": {
+          "kind": "length"
+        },
+        "defaultMarkerShape": {
+          "kind": "enum:ChartMarkerShape"
+        },
+        "defaultMarkerFill": {
+          "kind": "enum:ChartMarkerFill"
+        },
+        "minBubbleRadius": {
+          "kind": "length"
+        },
+        "maxBubbleRadius": {
+          "kind": "length"
+        },
+        "bubbleFillOpacity": {
+          "kind": "number",
+          "min": 0,
+          "max": 1
+        },
+        "showTrendline": {
+          "kind": "enum:ScatterTrendlineMode"
+        },
+        "xReferences": {
+          "kind": "array:object:ChartReference"
+        },
+        "showVerticalGridLines": {
+          "kind": "boolean"
+        }
+      },
+      "rules": [
+        "chartDuplicates"
+      ]
+    },
+    "BulletChart": {
+      "uses": [
+        "Element",
+        "ChartCommon"
+      ],
+      "keys": {
+        "value": {
+          "kind": "number"
+        },
+        "target": {
+          "kind": "number"
+        },
+        "ranges": {
+          "kind": "array:object:BulletRange"
+        },
+        "minValue": {
+          "kind": "number"
+        },
+        "maxValue": {
+          "kind": "number"
+        },
+        "measureColor": {
+          "kind": "color"
+        },
+        "targetColor": {
+          "kind": "color"
+        },
+        "orientation": {
+          "kind": "enum:ChartOrientation"
+        },
+        "showScale": {
+          "kind": "boolean"
+        },
+        "showValueLabel": {
+          "kind": "boolean"
+        },
+        "valueFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "valuePrefix": {
+          "kind": "string"
+        },
+        "valueSuffix": {
+          "kind": "string"
+        },
+        "label": {
+          "kind": "string"
+        }
+      }
+    },
+    "HeatmapChart": {
+      "uses": [
+        "Element",
+        "ChartCommon"
+      ],
+      "keys": {
+        "xCategories": {
+          "kind": "array:string"
+        },
+        "yCategories": {
+          "kind": "array:string"
+        },
+        "values": {
+          "kind": "array:array:nullableNumber"
+        },
+        "colorScale": {
+          "kind": "array:color"
+        },
+        "minValue": {
+          "kind": "number"
+        },
+        "maxValue": {
+          "kind": "number"
+        },
+        "cellGap": {
+          "kind": "number",
+          "min": 0
+        },
+        "cellCornerRadius": {
+          "kind": "number",
+          "min": 0
+        },
+        "showCellValues": {
+          "kind": "boolean"
+        },
+        "valueFormat": {
+          "kind": "chartNumberFormat"
+        },
+        "valuePrefix": {
+          "kind": "string"
+        },
+        "valueSuffix": {
+          "kind": "string"
+        },
+        "showColorLegend": {
+          "kind": "boolean"
+        },
+        "emptyCellColor": {
+          "kind": "color"
+        }
+      }
     },
     "Grid": {
       "uses": [

@@ -1,6 +1,8 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { ChartBarStyle, type ChartBarStyleOptions } from './ChartBarStyle';
 import { drawChartBar } from './Graphics/ChartBars';
+import { fillPatternRect } from './Graphics/ChartPatterns';
+import { isBelowOrigin } from './Graphics/ChartValueScale';
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
 import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } from './ChartHost';
@@ -8,11 +10,6 @@ import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
 
-/**
- * Bar chart that renders vertical bars with value labels above each bar.
- * Now supports multiple series.
- * Uses the ICanvas interface for rendering, making it backend-agnostic.
- */
 /** Settable properties declared by {@link BarChart} itself. */
 export const BAR_CHART_OWN_OPTION_KEYS = ['barColor', 'barWidthRatio', 'barStyle'] as const;
 
@@ -22,39 +19,24 @@ export const BAR_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...BAR_CHA
 /** Options for {@link BarChart}. */
 export type BarChartOptions = CartesianChartOptions &
   Partial<Omit<Pick<BarChart, (typeof BAR_CHART_OWN_OPTION_KEYS)[number]>, 'barColor' | 'barStyle'>> & {
-    /** barColor colour. Accepts a palette token or hex. */
+    /** Default bar colour for series without an explicit colour. */
     barColor?: ColorInput;
-    /** Value-end rounding and optional opaque linear gradient. */
+    /** Corner rounding and gradient style applied to bars. */
     barStyle?: ChartBarStyle | ChartBarStyleOptions;
   };
 
 /** Renders a data series as vertical or horizontal bars. */
 export class BarChart extends CartesianChartBase {
-  protected override drawLegendSwatch(
-    canvas: ICanvas,
-    x: number,
-    y: number,
-    size: number,
-    series: ChartSeries
-  ): void {
-    drawChartBar(
-      canvas,
-      x,
-      y,
-      size,
-      size,
-      this.resolveSeriesColor(series),
-      this.barStyle,
-      this.appearance,
-      false,
-      x,
-      y,
-      size,
-      size
-    );
+  protected override drawLegendSwatch(canvas: ICanvas, x: number, y: number, size: number, series: ChartSeries): void {
+    const color = this.resolveSeriesColor(series);
+    const idx = (this._renderData ?? this.data).series.indexOf(series);
+    const pat = this.resolveSeriesPattern(series, idx);
+    drawChartBar(canvas, x, y, size, size, color, this.barStyle, this.appearance, false, x, y, size, size);
+    if (pat !== 'none') fillPatternRect(canvas, x, y, size, size, { kind: pat, foreground: Color.white });
   }
+
   private _barStyle = new ChartBarStyle();
-  /** Value-end rounding and optional opaque linear gradient. */
+  /** Corner rounding and gradient style applied to bars. */
   get barStyle(): ChartBarStyle {
     return this._barStyle;
   }
@@ -68,13 +50,9 @@ export class BarChart extends CartesianChartBase {
 
   private static readonly BAR_COLOR_HEX = '#4f46e5';
 
-  /** Bars and gridlines are axis-aligned, so crisp edges render sharper than antialiased. */
+  /** SVG `shape-rendering` hint (`auto` or `crispEdges`). */
   override svgShapeRendering: 'auto' | 'crispEdges' | undefined = 'crispEdges';
 
-  /**
-   * Color for the bars (backward compatibility).
-   */
-  /** Creates a BarChart, optionally configured in one expression. */
   constructor(options?: BarChartOptions) {
     super();
     const { data, ...rest } = options ?? {};
@@ -83,8 +61,7 @@ export class BarChart extends CartesianChartBase {
   }
 
   private _barColor: Color = Color.fromHex(BarChart.BAR_COLOR_HEX);
-
-  /** Bar colour. Accepts a palette token or hex. */
+  /** Default bar colour for series without an explicit colour. */
   public get barColor(): Color {
     return this._barColor;
   }
@@ -92,15 +69,9 @@ export class BarChart extends CartesianChartBase {
     this._barColor = toColor(value);
   }
 
-  /**
-   * Width of bars as percentage of available space (0.0 to 1.0, default: 0.6).
-   */
+  /** Fraction of each category slot occupied by the bar (`0..1`). */
   barWidthRatio: number = 0.6;
 
-  /**
-   * Draws the bar chart elements for a single series.
-   * In vertical mode draws upward bars; in horizontal mode draws rightward bars.
-   */
   protected override drawSeriesElements(
     canvas: ICanvas,
     data: ChartData,
@@ -109,105 +80,83 @@ export class BarChart extends CartesianChartBase {
     chartAreaWidth: number,
     chartAreaHeight: number,
     baselineY: number,
-    _topY: number
+    topY: number
   ): void {
     const dataPointCount = series.dataPoints.length;
+    if (dataPointCount === 0) return;
     const origin = this.valueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
+    const color = this.resolveSeriesColor(series);
+    const seriesIdx = data.series.indexOf(series);
+    const pat = this.resolveSeriesPattern(series, seriesIdx);
 
     if (this.orientation === ChartOrientation.Horizontal) {
       const totalBarSpace = chartAreaHeight / dataPointCount;
       const barThickness = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      this.drawBars(
-        canvas,
-        coordinates,
-        barThickness,
-        origin,
-        this.resolveSeriesColor(series),
-        chartAreaWidth,
-        chartAreaHeight,
-        _topY
-      );
+      for (const p of coordinates) {
+        const barWidth = p.x - origin;
+        const barY = p.y - barThickness / 2;
+        drawChartBar(canvas, origin, barY, barWidth, barThickness, color, this.barStyle, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        if (pat !== 'none') {
+          const rx = barWidth < 0 ? origin + barWidth : origin;
+          fillPatternRect(canvas, rx, barY, Math.abs(barWidth), barThickness, { kind: pat, foreground: Color.white });
+        }
+      }
     } else {
       const totalBarSpace = chartAreaWidth / dataPointCount;
       const barWidth = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      this.drawBars(
-        canvas,
-        coordinates,
-        barWidth,
-        origin,
-        this.resolveSeriesColor(series),
-        chartAreaWidth,
-        chartAreaHeight,
-        _topY
-      );
-    }
-  }
-
-  /**
-   * Gets the offset for value labels (spacing above bars in vertical mode, to the right in horizontal).
-   */
-  protected override getLabelVerticalOffset(_series: ChartSeries): number {
-    return 7;
-  }
-
-  /**
-   * Draws bars for each data point.
-   * Bars run from the value origin to each point, up or right for values above it.
-   */
-  private drawBars(
-    canvas: ICanvas,
-    coordinates: Point[],
-    thickness: number,
-    origin: number,
-    color: Color,
-    plotWidth: number,
-    plotHeight: number,
-    plotY: number
-  ): void {
-    for (const p of coordinates) {
-      if (this.orientation === ChartOrientation.Horizontal) {
-        const barWidth = p.x - origin;
-        drawChartBar(
-          canvas,
-          origin,
-          p.y - thickness / 2,
-          barWidth,
-          thickness,
-          color,
-          this.barStyle,
-          this.appearance,
-          true,
-          CartesianChartBase.LEFT_PADDING,
-          plotY,
-          plotWidth,
-          plotHeight
-        );
-      } else {
+      for (const p of coordinates) {
         const barHeight = origin - p.y;
-        const barX = p.x - thickness / 2;
-        drawChartBar(
-          canvas,
-          barX,
-          p.y,
-          thickness,
-          barHeight,
-          color,
-          this.barStyle,
-          this.appearance,
-          false,
-          CartesianChartBase.LEFT_PADDING,
-          plotY,
-          plotWidth,
-          plotHeight
-        );
+        const barX = p.x - barWidth / 2;
+        drawChartBar(canvas, barX, p.y, barWidth, barHeight, color, this.barStyle, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        if (pat !== 'none') {
+          const ry = barHeight < 0 ? p.y + barHeight : p.y;
+          fillPatternRect(canvas, barX, ry, barWidth, Math.abs(barHeight), { kind: pat, foreground: Color.white });
+        }
       }
     }
   }
 
-  /**
-   * Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
-   * Returns the chart's BarColor property for backward compatibility.
-   */
+  protected override drawValueLabels(
+    canvas: ICanvas,
+    data: ChartData,
+    chartAreaWidth: number,
+    chartAreaHeight: number,
+    baselineY: number,
+    topY: number
+  ): void {
+    if (!this.showValueLabels) return;
+    if (this.valueLabelPosition === 'outside') {
+      super.drawValueLabels(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+      return;
+    }
+    const origin = this.valueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
+    for (const series of data.series) {
+      const dataPointCount = series.dataPoints.length;
+      if (dataPointCount === 0) continue;
+      const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
+      const color = this.resolveSeriesColor(series);
+      const offset = this.getLabelVerticalOffset(series);
+      const thickness =
+        this.orientation === ChartOrientation.Horizontal
+          ? Math.min((chartAreaHeight / dataPointCount) * this.barWidthRatio, 50)
+          : Math.min((chartAreaWidth / dataPointCount) * this.barWidthRatio, 50);
+      for (let i = 0; i < dataPointCount; i++) {
+        const p = coordinates[i];
+        const text = this.formatPointValue(series.dataPoints[i]);
+        const below = isBelowOrigin(series.dataPoints[i].value, this._effectiveMin, this._effectiveMax);
+        if (this.orientation === ChartOrientation.Horizontal) {
+          this.drawBarValueLabel(canvas, origin, p.y - thickness / 2, p.x - origin, thickness, text, color, below, offset, p.x, p.y);
+        } else {
+          this.drawBarValueLabel(canvas, p.x - thickness / 2, p.y, thickness, origin - p.y, text, color, below, offset, p.x, p.y);
+        }
+      }
+    }
+  }
+
+  protected override getLabelVerticalOffset(_series: ChartSeries): number {
+    return 7;
+  }
+
   protected override getDefaultSeriesColor(): Color {
     return this.barColor;
   }

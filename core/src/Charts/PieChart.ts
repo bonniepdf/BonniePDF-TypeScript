@@ -1,27 +1,32 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { formatChartNumber, sumChartNumbers } from './ChartNumberFormat';
 import { ChartData } from './Models/ChartData';
-import { applyOptions, Color, Point, type ICanvas, TextAlignment, StandardFonts } from './ChartHost';
+import { applyOptions, Color, Point, type ICanvas, TextAlignment } from './ChartHost';
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartDataPoint } from './Models/ChartDataPoint';
 import { ChartBase } from './ChartBase';
-import type { ChartPathPlan } from './Graphics/ChartPathPlan';
+import type { ChartPathCommand, ChartPathPlan } from './Graphics/ChartPathPlan';
 import { tintColor } from './Graphics/ChartTint';
-import { fillChartPath } from './Graphics/ChartVector';
+import { contrastTextColor } from './Graphics/ChartValueScale';
+import { fillChartPath, strokeChartPath } from './Graphics/ChartVector';
 
-/**
- * Pie chart that renders pie slices with a legend on the right side.
- * Supports donut style with a transparent center hole.
- * Uses the ICanvas interface for rendering, making it backend-agnostic.
- * All layout is computed dynamically from Width and Height, so the chart
- * adapts correctly to any size or StretchToFit mode.
- */
+/** Format of legend rows on a {@link PieChart}. */
+export type PieLegendFormat = 'labelValue' | 'labelPercent' | 'labelValuePercent' | 'labelOnly';
+/** Placement of data labels directly on pie slices (`none`, `inside`, or `callout`). */
+export type PieSliceLabelMode = 'none' | 'inside' | 'callout';
+
 /** Settable properties declared by {@link PieChart} itself. */
 export const PIE_CHART_OWN_OPTION_KEYS = [
   'colors',
   'isDonut',
+  'donutHoleRatio',
+  'sliceBorderWidth',
   'totalLabel',
   'totalValueFormat',
+  'valueFormat',
+  'percentFormat',
+  'legendFormat',
+  'sliceLabelMode',
   'showLegend',
   'showTotal',
   'totalPosition',
@@ -34,9 +39,10 @@ export const PIE_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...PIE_CHART_OW
 /** Options for {@link PieChart}. Intersects {@link ChartBaseOptions}. */
 export type PieChartOptions = ChartBaseOptions & Partial<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>>;
 
+const ROUNDED_K = (4 / 3) * (Math.SQRT2 - 1);
+
 /** Renders a data series as proportional slices of a circle. */
 export class PieChart extends ChartBase {
-  // Layout proportions (relative to chart dimensions)
   private static readonly TITLE_AREA_HEIGHT = 60;
   private static readonly TOP_PADDING = 20;
   private static readonly BOTTOM_PADDING = 20;
@@ -44,28 +50,19 @@ export class PieChart extends ChartBase {
   private static readonly LEGEND_GAP_FROM_PIE = 30;
   private static readonly RIGHT_PADDING = 20;
 
-  // Legend item layout
   private static readonly LEGEND_ITEM_HEIGHT = 24;
   private static readonly LEGEND_BOX_SIZE = 14;
   private static readonly LEGEND_BOX_TEXT_GAP = 8;
   private static readonly LEGEND_FONT_SIZE = 11;
   private static readonly TOTAL_ROW_GAP = 8;
 
-  // Donut hole proportions
-  private static readonly DONUT_HOLE_RATIO = 0.33;
-  /** A donut with its total in the hole needs a wider hole. */
+  private static readonly DEFAULT_DONUT_HOLE_RATIO = 0.33;
   private static readonly CENTRE_TOTAL_HOLE_RATIO = 0.56;
   private static readonly CENTRE_VALUE_MAX_SIZE = 22;
   private static readonly CENTRE_VALUE_MIN_SIZE = 7;
   private static readonly CENTRE_LABEL_GAP = 3;
   private static readonly CENTRE_VALUE_COLOR = Color.fromHex('#111827');
 
-  private static readonly FONT_FAMILY = StandardFonts.Helvetica;
-
-  // Styling constants
-  private static readonly LEGEND_TEXT_COLOR = Color.fromHex('#333333');
-
-  // Default colors matching the SVG
   private static readonly DEFAULT_COLORS = [
     '#4f46e5',
     '#7c3aed',
@@ -81,7 +78,6 @@ export class PieChart extends ChartBase {
     '#06b6d4',
   ];
 
-  /** Creates a pie chart, optionally configured in one expression. */
   constructor(options?: PieChartOptions) {
     super();
     const { data, ...rest } = options ?? {};
@@ -89,85 +85,69 @@ export class PieChart extends ChartBase {
     applyOptions(this, rest);
   }
 
-  /**
-   * Custom colors to use for the pie slices.
-   * If null, uses the default color palette.
-   */
+  /** Optional custom hex colour palette cycled across slices. */
   colors: string[] | undefined;
-
-  /**
-   * Whether to render as a donut chart with a transparent center hole.
-   * Default is true.
-   */
+  /** Whether to draw a donut ring with a hollow centre instead of a filled pie. */
   isDonut: boolean = true;
 
-  /**
-   * Label prefix for the total row in the legend (e.g. "Total").
-   * Default is "Total".
-   */
+  private _donutHoleRatio: number | undefined;
+  /** Optional explicit inner/outer radius ratio (`0..0.85`) when `isDonut` is true. */
+  get donutHoleRatio(): number | undefined {
+    return this._donutHoleRatio;
+  }
+  set donutHoleRatio(value: number | undefined) {
+    if (value !== undefined && (!Number.isFinite(value) || value < 0 || value > 0.85)) {
+      throw new RangeError('donutHoleRatio must be finite and between 0 and 0.85.');
+    }
+    this._donutHoleRatio = value;
+  }
+
+  /** Optional background-coloured separator stroke width between slices in points. */
+  sliceBorderWidth: number = 0;
+
+  /** Label displayed beside or above the total value. */
   totalLabel: string = 'Total';
-
-  /**
-   * Number format for the total: `G` (default), `F<n>`, `N<n>` or `P<n>`.
-   * Culture-invariant; see {@link formatChartNumber}. Anything else throws when the chart is drawn.
-   */
+  /** Optional number format for the total value. */
   totalValueFormat: string | undefined;
-
-  /**
-   * Whether to show the legend.
-   * Default is true.
-   */
+  /** Optional number format for legend and callout slice values. */
+  valueFormat: string | undefined;
+  /** Percentage format when `legendFormat` or `sliceLabelMode` displays percentages (default `F0`). */
+  percentFormat: string = 'F0';
+  /** Format of legend rows (`labelValue`, `labelPercent`, `labelValuePercent`, `labelOnly`). */
+  legendFormat: PieLegendFormat = 'labelValue';
+  /** Direct slice label placement (`none`, `inside`, or `callout`). */
+  sliceLabelMode: PieSliceLabelMode = 'none';
+  /** Whether to display the legend beside the chart. */
   showLegend: boolean = true;
-
-  /**
-   * Whether to show the total value as a summary row below the legend items.
-   * Default is true.
-   */
+  /** Whether to display the sum of all slice values. */
   showTotal: boolean = true;
-
-  /**
-   * Where the total is shown: `'legend'` (default), as a row below the legend items, or
-   * `'center'`, as a large figure with `totalLabel` beneath it in the donut hole, which then
-   * widens to fit. A full pie has no hole, so it keeps the total in the legend.
-   */
+  /** Where to render the total (`legend` or donut `center`). */
   totalPosition: 'legend' | 'center' = 'legend';
-
-  /**
-   * Fill each slice with a gradient from a lighter tint of its colour at the centre side to its
-   * own colour at the rim. Slice colours must be opaque. Default is false.
-   */
+  /** Whether to shade each slice with a subtle tonal gradient. */
   sliceGradient: boolean = false;
 
   /** @internal */
   override get usesStyledGeometry(): boolean {
-    return super.usesStyledGeometry || this.sliceGradient;
+    return super.usesStyledGeometry || this.sliceGradient || this.sliceBorderWidth > 0 || this.sliceLabelMode === 'callout';
   }
 
-  /**
-   * Draws the pie chart content.
-   * All positions are computed dynamically from Width and Height.
-   */
   protected override drawContent(canvas: ICanvas, data: ChartData): void {
     if (data.series.length === 0 || data.series[0].dataPoints.length === 0) return;
 
     const dataPoints = data.series[0].dataPoints;
-
-    // Calculate total value
     const total = dataPoints.reduce((sum, dp) => sum + dp.value, 0);
-
-    // Calculate dynamic layout
-    const layout = this.calculateLayout(dataPoints.length, data.title !== '');
-
-    // Calculate start angle for each slice
+    const layout = this.calculateLayout(canvas, dataPoints, total, data.title !== '', data.subtitle !== '');
     const angles = this.calculateSliceAngles(dataPoints, total);
-
-    // Get colors to use
     const colors = this.getColors(dataPoints.length);
 
-    // Draw pie slices (annular sectors when isDonut, full wedges otherwise)
     this.drawPieSlices(canvas, dataPoints, angles, colors, layout);
 
-    // Draw legend (including optional total row)
+    if (this.sliceLabelMode === 'inside') {
+      this.drawInsideSliceLabels(canvas, dataPoints, angles, colors, layout, total);
+    } else if (this.sliceLabelMode === 'callout') {
+      this.drawCalloutLabels(canvas, dataPoints, angles, layout, total);
+    }
+
     if (this.showLegend) {
       this.drawLegend(canvas, dataPoints, colors, layout, total);
     }
@@ -177,12 +157,10 @@ export class PieChart extends ChartBase {
     }
   }
 
-  /** The total sits in the donut hole rather than the legend. */
   private get totalInCentre(): boolean {
     return this.isDonut && this.totalPosition === 'center';
   }
 
-  /** The total as text: the exact sum of the values as written, so 0.1 + 0.2 is 0.3 in every implementation. */
   private totalValueText(dataPoints: ChartDataPoint[]): string {
     return formatChartNumber(
       sumChartNumbers(dataPoints.map((dp) => dp.value)),
@@ -190,133 +168,154 @@ export class PieChart extends ChartBase {
     );
   }
 
-  /**
-   * Draws the total in the donut hole: the figure as large as fits (up to 22pt, shrinking a
-   * point at a time while it is wider than 80% of the hole), with `totalLabel` beneath it at
-   * 55% of that size, the pair centred on the hole.
-   */
+  private formatSliceValue(dp: ChartDataPoint): string {
+    if (dp.hasExplicitLabelFormat) return dp.formattedValue;
+    return this.valueFormat ? formatChartNumber(dp.value, this.valueFormat) : dp.formattedValue;
+  }
+
+  private formatSlicePercent(value: number, total: number): string {
+    const pct = total > 0 ? (value / total) * 100 : 0;
+    return `${formatChartNumber(pct, this.percentFormat)}%`;
+  }
+
+  private formatLegendEntry(dp: ChartDataPoint, total: number): string {
+    switch (this.legendFormat) {
+      case 'labelOnly': return dp.label;
+      case 'labelPercent': return `${dp.label} (${this.formatSlicePercent(dp.value, total)})`;
+      case 'labelValuePercent': return `${dp.label} - ${this.formatSliceValue(dp)} (${this.formatSlicePercent(dp.value, total)})`;
+      default: return `${dp.label} - ${this.formatSliceValue(dp)}`;
+    }
+  }
+
   private drawCentreTotal(canvas: ICanvas, dataPoints: ChartDataPoint[], layout: PieLayout): void {
     const value = this.totalValueText(dataPoints);
     const maxWidth = layout.donutHoleRadius * 1.6;
     let size = Math.min(PieChart.CENTRE_VALUE_MAX_SIZE, Math.floor(layout.donutHoleRadius * 0.45));
-    while (size > PieChart.CENTRE_VALUE_MIN_SIZE && canvas.measureText(value, size, StandardFonts.HelveticaBold).width > maxWidth) {
+    const boldFont = this.resolveTitleFontFamily();
+    const regularFont = this.resolveFontFamily();
+    while (size > PieChart.CENTRE_VALUE_MIN_SIZE && canvas.measureText(value, size, boldFont).width > maxWidth) {
       size -= 1;
     }
     const labelSize = Math.max(PieChart.CENTRE_VALUE_MIN_SIZE, Math.round(size * 0.55));
     const hasLabel = this.totalLabel !== '';
     const blockHeight = size + (hasLabel ? PieChart.CENTRE_LABEL_GAP + labelSize : 0);
     const top = layout.centerY - blockHeight / 2;
-    canvas.drawText(layout.centerX, top, value, PieChart.CENTRE_VALUE_COLOR, size, StandardFonts.HelveticaBold, TextAlignment.Center);
+    const valueColor = this.appearance.backgroundColor ? this.appearance.titleColor : PieChart.CENTRE_VALUE_COLOR;
+    canvas.drawText(layout.centerX, top, value, valueColor, size, boldFont, TextAlignment.Center);
     if (hasLabel) {
       canvas.drawText(
         layout.centerX,
         top + size + PieChart.CENTRE_LABEL_GAP,
         this.totalLabel,
-        PieChart.LEGEND_TEXT_COLOR,
+        this.appearance.legendTextColor,
         labelSize,
-        PieChart.FONT_FAMILY,
+        regularFont,
         TextAlignment.Center
       );
     }
   }
 
-  /**
-   * Computes all layout metrics from the current Width and Height.
-   *
-   * The title band is only reserved when a title is actually drawn; a titleless
-   * pie centres symmetrically in the box instead of being pushed down by the
-   * empty title gap.
-   */
-  private calculateLayout(dataPointCount: number, hasTitle: boolean): PieLayout {
-    const titleBand = hasTitle ? PieChart.TITLE_AREA_HEIGHT : 0;
+  private calculateLayout(
+    canvas: ICanvas,
+    dataPoints: ChartDataPoint[],
+    total: number,
+    hasTitle: boolean,
+    hasSubtitle: boolean
+  ): PieLayout {
+    const titleBand = (hasTitle ? PieChart.TITLE_AREA_HEIGHT : 0) + (hasSubtitle ? 18 : 0);
+    const captionBand = this.caption !== '' ? 16 : 0;
+    const availableHeight = this.height - titleBand - PieChart.TOP_PADDING - PieChart.BOTTOM_PADDING - captionBand;
+    const font = this.resolveFontFamily();
 
-    // Available vertical space for the pie (between title and bottom padding)
-    const availableHeight = this.height - titleBand - PieChart.TOP_PADDING - PieChart.BOTTOM_PADDING;
-
-    // Estimate legend width when legend is shown
     let legendWidth = 0;
     if (this.showLegend) {
-      // Reserve a reasonable width for legend items
-      // LegendBoxSize + gap + ~150pt for text
-      legendWidth = PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP + 150;
+      if (this.autoLayout) {
+        let maxW = 0;
+        for (const dp of dataPoints) {
+          const w = canvas.measureText(this.formatLegendEntry(dp, total), PieChart.LEGEND_FONT_SIZE, font).width;
+          if (w > maxW) maxW = w;
+        }
+        if (this.showTotal && !this.totalInCentre) {
+          const tw = canvas.measureText(`${this.totalLabel}: ${this.totalValueText(dataPoints)}`, PieChart.LEGEND_FONT_SIZE, font).width;
+          if (tw > maxW) maxW = tw;
+        }
+        legendWidth = Math.max(80, Math.min(this.width * 0.45, Math.ceil(PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP + maxW + 6)));
+      } else {
+        legendWidth = PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP + 150;
+      }
     }
 
-    // Available horizontal space for the pie
-    let availableWidthForPie = this.width - PieChart.LEFT_PADDING - PieChart.RIGHT_PADDING;
+    let calloutReserve = 0;
+    if (this.sliceLabelMode === 'callout') {
+      let maxLbl = 0;
+      for (const dp of dataPoints) {
+        const w = canvas.measureText(`${dp.label} ${this.formatSlicePercent(dp.value, total)}`, 9, font).width;
+        if (w > maxLbl) maxLbl = w;
+      }
+      calloutReserve = Math.min(this.width * 0.25, maxLbl + 24);
+    }
+
+    let availableWidthForPie = this.width - PieChart.LEFT_PADDING - PieChart.RIGHT_PADDING - calloutReserve * 2;
     if (this.showLegend) {
       availableWidthForPie -= legendWidth + PieChart.LEGEND_GAP_FROM_PIE;
     }
 
-    // Pie radius is constrained by both available width and height
     const maxRadiusFromWidth = availableWidthForPie / 2;
     const maxRadiusFromHeight = availableHeight / 2;
     let pieRadius = Math.min(maxRadiusFromWidth, maxRadiusFromHeight);
-    pieRadius = Math.max(pieRadius, 20); // minimum viable radius
+    pieRadius = Math.max(pieRadius, 20);
 
-    // Center the pie vertically in the available area
     const pieCenterY = titleBand + PieChart.TOP_PADDING + availableHeight / 2;
-
-    // Center the pie horizontally in its allocated space
     const pieAreaWidth =
       this.width -
       (this.showLegend ? legendWidth + PieChart.LEGEND_GAP_FROM_PIE + PieChart.RIGHT_PADDING : PieChart.RIGHT_PADDING) -
       PieChart.LEFT_PADDING;
     const pieCenterX = PieChart.LEFT_PADDING + pieAreaWidth / 2;
-
-    // Legend position: to the right of the pie
-    const legendX = pieCenterX + pieRadius + PieChart.LEGEND_GAP_FROM_PIE;
-
-    // Vertically center the legend items relative to the pie center
-    const totalLegendHeight = dataPointCount * PieChart.LEGEND_ITEM_HEIGHT;
+    const legendX = pieCenterX + pieRadius + calloutReserve + PieChart.LEGEND_GAP_FROM_PIE;
+    const totalLegendHeight = dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT;
     const legendStartY = pieCenterY - totalLegendHeight / 2;
 
-    // Donut hole radius
-    const donutHoleRadius =
-      pieRadius * (this.totalInCentre && this.showTotal ? PieChart.CENTRE_TOTAL_HOLE_RATIO : PieChart.DONUT_HOLE_RATIO);
+    const holeRatio = !this.isDonut
+      ? 0
+      : this._donutHoleRatio !== undefined
+        ? this._donutHoleRatio
+        : this.totalInCentre && this.showTotal
+          ? PieChart.CENTRE_TOTAL_HOLE_RATIO
+          : PieChart.DEFAULT_DONUT_HOLE_RATIO;
 
-    return new PieLayout(pieCenterX, pieCenterY, pieRadius, donutHoleRadius, legendX, legendStartY);
+    return new PieLayout(
+      pieCenterX,
+      pieCenterY,
+      pieRadius,
+      pieRadius * holeRatio,
+      legendX,
+      legendStartY,
+      titleBand + PieChart.TOP_PADDING,
+      this.height - PieChart.BOTTOM_PADDING - captionBand
+    );
   }
 
-  /**
-   * Calculates the start and end angles for each pie slice.
-   */
-  private calculateSliceAngles(
-    dataPoints: ChartDataPoint[],
-    total: number
-  ): { startAngle: number; endAngle: number }[] {
+  private calculateSliceAngles(dataPoints: ChartDataPoint[], total: number): { startAngle: number; endAngle: number }[] {
     const angles: { startAngle: number; endAngle: number }[] = [];
-    let currentAngle = -90; // Start from top (12 o'clock position)
-
+    let currentAngle = -90;
     for (const dataPoint of dataPoints) {
-      const sliceAngle = 360 * (dataPoint.value / total);
+      const sliceAngle = total > 0 ? 360 * (dataPoint.value / total) : 0;
       const endAngle = currentAngle + sliceAngle;
       angles.push({ startAngle: currentAngle, endAngle });
       currentAngle = endAngle;
     }
-
     return angles;
   }
 
-  /**
-   * Gets the colors to use for the pie slices.
-   */
   private getColors(count: number): Color[] {
     const colors: Color[] = [];
     const sourceColors = this.colors ?? PieChart.DEFAULT_COLORS;
-
     for (let i = 0; i < count; i++) {
-      const colorHex = sourceColors[i % sourceColors.length];
-      colors.push(Color.fromHex(colorHex));
+      colors.push(Color.fromHex(sourceColors[i % sourceColors.length]));
     }
-
     return colors;
   }
 
-  /**
-   * Draws the pie slices.
-   * Uses annular sector paths when isDonut is true (transparent center hole),
-   * or full triangular wedge paths when isDonut is false.
-   */
   private drawPieSlices(
     canvas: ICanvas,
     dataPoints: ChartDataPoint[],
@@ -324,21 +323,132 @@ export class PieChart extends ChartBase {
     colors: Color[],
     layout: PieLayout
   ): void {
+    const borderColor = this.effectiveBackgroundColor ?? Color.white;
     for (let i = 0; i < dataPoints.length; i++) {
       const { startAngle, endAngle } = angles[i];
+      if (endAngle <= startAngle) continue;
       const color = colors[i];
       const path = this.isDonut
         ? this.createAnnularSectorPath(startAngle, endAngle, layout)
         : this.createPieSlicePath(startAngle, endAngle, layout);
       if (this.sliceGradient) fillChartPath(canvas, this.gradientSlice(path, startAngle, endAngle, color, layout));
       else canvas.fillPath(path, color);
+
+      if (this.sliceBorderWidth > 0) {
+        const cmds: ChartPathCommand[] = [
+          ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+          { op: 'Z' as const, values: [] },
+        ];
+        strokeChartPath(canvas, {
+          commands: cmds,
+          color: borderColor,
+          lineWidth: this.sliceBorderWidth,
+          lineJoin: 'round',
+        });
+      }
     }
   }
 
-  /**
-   * A slice outline painted along its bisector, from its tint at the inner edge (the centre, or the
-   * donut hole) to its own colour at the rim.
-   */
+  private drawInsideSliceLabels(
+    canvas: ICanvas,
+    dataPoints: ChartDataPoint[],
+    angles: { startAngle: number; endAngle: number }[],
+    colors: Color[],
+    layout: PieLayout,
+    total: number
+  ): void {
+    const font = this.resolveFontFamily();
+    const fontSize = 9;
+    const midRadius = this.isDonut ? (layout.donutHoleRadius + layout.radius) / 2 : layout.radius * 0.65;
+    for (let i = 0; i < dataPoints.length; i++) {
+      const dp = dataPoints[i];
+      if (dp.value <= 0) continue;
+      const { startAngle, endAngle } = angles[i];
+      const spanRad = ((endAngle - startAngle) * Math.PI) / 180;
+      const text = this.formatSlicePercent(dp.value, total);
+      const measured = canvas.measureText(text, fontSize, font);
+      const chord = 2 * midRadius * Math.sin(Math.min(Math.PI, spanRad) / 2);
+      if (chord < measured.width + 4) continue;
+      const midRad = (((startAngle + endAngle) / 2) * Math.PI) / 180;
+      const x = layout.centerX + midRadius * Math.cos(midRad);
+      const y = layout.centerY + midRadius * Math.sin(midRad) - fontSize / 2;
+      canvas.drawText(x, y, text, contrastTextColor(colors[i]), fontSize, font, TextAlignment.Center);
+    }
+  }
+
+  private drawCalloutLabels(
+    canvas: ICanvas,
+    dataPoints: ChartDataPoint[],
+    angles: { startAngle: number; endAngle: number }[],
+    layout: PieLayout,
+    total: number
+  ): void {
+    const font = this.resolveFontFamily();
+    const fontSize = 9;
+    const rowHeight = fontSize + 4;
+    type Entry = { text: string; midRad: number; anchorY: number; y: number };
+    const right: Entry[] = [];
+    const left: Entry[] = [];
+
+    for (let i = 0; i < dataPoints.length; i++) {
+      const dp = dataPoints[i];
+      if (dp.value <= 0) continue;
+      const { startAngle, endAngle } = angles[i];
+      const midRad = (((startAngle + endAngle) / 2) * Math.PI) / 180;
+      const anchorY = layout.centerY + layout.radius * Math.sin(midRad);
+      const text = `${dp.label} ${this.formatSlicePercent(dp.value, total)}`;
+      const entry: Entry = { text, midRad, anchorY, y: anchorY };
+      if (Math.cos(midRad) >= 0) right.push(entry);
+      else left.push(entry);
+    }
+
+    const relax = (items: Entry[], isRight: boolean): void => {
+      items.sort((a, b) => a.anchorY - b.anchorY);
+      for (let i = 1; i < items.length; i++) {
+        if (items[i].y < items[i - 1].y + rowHeight) items[i].y = items[i - 1].y + rowHeight;
+      }
+      if (items.length > 0 && items[items.length - 1].y > layout.plotBottom - rowHeight / 2) {
+        items[items.length - 1].y = layout.plotBottom - rowHeight / 2;
+        for (let i = items.length - 2; i >= 0; i--) {
+          if (items[i].y > items[i + 1].y - rowHeight) items[i].y = items[i + 1].y - rowHeight;
+        }
+        if (items[0].y < layout.plotTop + rowHeight / 2) {
+          items[0].y = layout.plotTop + rowHeight / 2;
+        }
+      }
+      const dir = isRight ? 1 : -1;
+      const endX = layout.centerX + dir * (layout.radius + 18);
+      for (const item of items) {
+        const sx = layout.centerX + (layout.radius + 2) * Math.cos(item.midRad);
+        const sy = layout.centerY + (layout.radius + 2) * Math.sin(item.midRad);
+        const mx = layout.centerX + (layout.radius + 10) * Math.cos(item.midRad);
+        const my = layout.centerY + (layout.radius + 10) * Math.sin(item.midRad);
+        strokeChartPath(canvas, {
+          commands: [
+            { op: 'M', values: [sx, sy] },
+            { op: 'L', values: [mx, my] },
+            { op: 'L', values: [endX, item.y] },
+          ],
+          color: this.appearance.axisColor,
+          lineWidth: 0.75,
+          lineJoin: 'round',
+        });
+        canvas.drawText(
+          endX + dir * 4,
+          item.y - fontSize / 2,
+          item.text,
+          this.appearance.legendTextColor,
+          fontSize,
+          font,
+          isRight ? TextAlignment.Left : TextAlignment.Right
+        );
+      }
+    };
+
+    relax(right, true);
+    relax(left, false);
+  }
+
   private gradientSlice(path: Point[], startAngle: number, endAngle: number, color: Color, layout: PieLayout): ChartPathPlan {
     const middle = (((startAngle + endAngle) / 2) * Math.PI) / 180;
     const inner = this.isDonut ? layout.donutHoleRadius : 0;
@@ -359,117 +469,89 @@ export class PieChart extends ChartBase {
     };
   }
 
-  /**
-   * Creates a full triangular wedge path for a pie slice (non-donut mode).
-   */
   private createPieSlicePath(startAngle: number, endAngle: number, layout: PieLayout): Point[] {
-    const path: Point[] = [];
-
-    // Start at the center
-    path.push(new Point(layout.centerX, layout.centerY));
-
-    // Add arc points
+    const path: Point[] = [new Point(layout.centerX, layout.centerY)];
     const segments = Math.max(Math.ceil((endAngle - startAngle) / 5), 1);
     for (let i = 0; i <= segments; i++) {
-      const angle = startAngle + ((endAngle - startAngle) * i) / segments;
-      const radians = (angle * Math.PI) / 180;
-      const x = layout.centerX + layout.radius * Math.cos(radians);
-      const y = layout.centerY + layout.radius * Math.sin(radians);
-      path.push(new Point(x, y));
+      const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
+      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians)));
     }
-
     return path;
   }
 
-  /**
-   * Creates an annular sector path for a donut slice (donut mode).
-   * The path traces the outer arc forward then the inner arc in reverse,
-   * producing a ring wedge with a genuinely transparent center.
-   */
   private createAnnularSectorPath(startAngle: number, endAngle: number, layout: PieLayout): Point[] {
     const path: Point[] = [];
     const segments = Math.max(Math.ceil((endAngle - startAngle) / 5), 1);
-
-    // Outer arc: startAngle → endAngle
     for (let i = 0; i <= segments; i++) {
-      const angle = startAngle + ((endAngle - startAngle) * i) / segments;
-      const radians = (angle * Math.PI) / 180;
-      path.push(
-        new Point(
-          layout.centerX + layout.radius * Math.cos(radians),
-          layout.centerY + layout.radius * Math.sin(radians)
-        )
-      );
+      const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
+      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians)));
     }
-
-    // Inner arc: endAngle → startAngle (reversed)
     for (let i = segments; i >= 0; i--) {
-      const angle = startAngle + ((endAngle - startAngle) * i) / segments;
-      const radians = (angle * Math.PI) / 180;
-      path.push(
-        new Point(
-          layout.centerX + layout.donutHoleRadius * Math.cos(radians),
-          layout.centerY + layout.donutHoleRadius * Math.sin(radians)
-        )
-      );
+      const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
+      path.push(new Point(layout.centerX + layout.donutHoleRadius * Math.cos(radians), layout.centerY + layout.donutHoleRadius * Math.sin(radians)));
     }
-
     return path;
   }
 
-  /**
-   * Draws the legend on the right side, with an optional total summary row below.
-   */
+  private drawLegendSwatch(canvas: ICanvas, x: number, y: number, color: Color): void {
+    if (!this.appearance.roundedLegendSwatches) {
+      canvas.fillRect(x, y, PieChart.LEGEND_BOX_SIZE, PieChart.LEGEND_BOX_SIZE, color);
+      return;
+    }
+    const s = 12;
+    const ox = x + 1;
+    const oy = y + 1;
+    const r = 3;
+    const c = ROUNDED_K * r;
+    fillChartPath(canvas, {
+      commands: [
+        { op: 'M', values: [ox + r, oy] },
+        { op: 'L', values: [ox + s - r, oy] },
+        { op: 'C', values: [ox + s - r + c, oy, ox + s, oy + r - c, ox + s, oy + r] },
+        { op: 'L', values: [ox + s, oy + s - r] },
+        { op: 'C', values: [ox + s, oy + s - r + c, ox + s - r + c, oy + s, ox + s - r, oy + s] },
+        { op: 'L', values: [ox + r, oy + s] },
+        { op: 'C', values: [ox + r - c, oy + s, ox, oy + s - r + c, ox, oy + s - r] },
+        { op: 'L', values: [ox, oy + r] },
+        { op: 'C', values: [ox, oy + r - c, ox + r - c, oy, ox + r, oy] },
+        { op: 'Z', values: [] },
+      ],
+      color,
+    });
+  }
+
   private drawLegend(
     canvas: ICanvas,
     dataPoints: ChartDataPoint[],
     colors: Color[],
     layout: PieLayout,
-    _total: number
+    total: number
   ): void {
+    const textColor = this.appearance.legendTextColor;
+    const font = this.resolveFontFamily();
+
     for (let i = 0; i < dataPoints.length; i++) {
       const dataPoint = dataPoints[i];
       const color = colors[i];
       const y = layout.legendStartY + i * PieChart.LEGEND_ITEM_HEIGHT;
 
-      // Draw color box
-      canvas.fillRect(layout.legendX, y, PieChart.LEGEND_BOX_SIZE, PieChart.LEGEND_BOX_SIZE, color);
+      this.drawLegendSwatch(canvas, layout.legendX, y, color);
 
-      // Draw label text (vertically centered with the color box)
-      const labelText = `${dataPoint.label} - ${dataPoint.formattedValue}`;
+      const labelText = this.formatLegendEntry(dataPoint, total);
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
       const textY = y + PieChart.LEGEND_BOX_SIZE / 2 - PieChart.LEGEND_FONT_SIZE / 2;
-      canvas.drawText(
-        textX,
-        textY,
-        labelText,
-        PieChart.LEGEND_TEXT_COLOR,
-        PieChart.LEGEND_FONT_SIZE,
-        PieChart.FONT_FAMILY,
-        TextAlignment.Left
-      );
+      canvas.drawText(textX, textY, labelText, textColor, PieChart.LEGEND_FONT_SIZE, font, TextAlignment.Left);
     }
 
     if (this.showTotal && !this.totalInCentre) {
       const totalText = `${this.totalLabel}: ${this.totalValueText(dataPoints)}`;
       const textX = layout.legendX + PieChart.LEGEND_BOX_SIZE + PieChart.LEGEND_BOX_TEXT_GAP;
       const totalY = layout.legendStartY + dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT + PieChart.TOTAL_ROW_GAP;
-      canvas.drawText(
-        textX,
-        totalY,
-        totalText,
-        PieChart.LEGEND_TEXT_COLOR,
-        PieChart.LEGEND_FONT_SIZE,
-        PieChart.FONT_FAMILY,
-        TextAlignment.Left
-      );
+      canvas.drawText(textX, totalY, totalText, textColor, PieChart.LEGEND_FONT_SIZE, font, TextAlignment.Left);
     }
   }
 }
 
-/**
- * Holds all computed layout positions for a pie chart render pass.
- */
 class PieLayout {
   constructor(
     public centerX: number,
@@ -477,6 +559,8 @@ class PieLayout {
     public radius: number,
     public donutHoleRadius: number,
     public legendX: number,
-    public legendStartY: number
+    public legendStartY: number,
+    public plotTop: number,
+    public plotBottom: number
   ) {}
 }

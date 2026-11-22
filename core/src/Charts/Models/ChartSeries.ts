@@ -3,16 +3,13 @@ import { Color, toColor, type ColorInput, applyOptions } from '../ChartHost';
 import { ChartDataPoint, type ChartDataPointOptions } from './ChartDataPoint';
 import { ChartSeriesStyle, type ChartSeriesStyleOptions } from './ChartSeriesStyle';
 
-/**
- * Represents a single data series in a chart.
- * Similar to datasets in Chart.js or series in ApexCharts.
- */
-/**
- * Settable *property* surface of {@link ChartSeries}. `color` is widened to
- * accept tokens; `dataPoints` and `style` accept nested literals via the
- * constructor.
- */
-export const CHART_SERIES_OPTION_KEYS = ['name', 'color', 'dataPoints', 'style'] as const;
+/** Mark type for a series inside a {@link ComboChart}. */
+export type ChartSeriesType = 'bar' | 'line' | 'area';
+/** Value axis binding for a series inside a {@link ComboChart}. */
+export type ChartAxisTarget = 'primary' | 'secondary';
+
+/** Settable property surface of {@link ChartSeries}. */
+export const CHART_SERIES_OPTION_KEYS = ['name', 'color', 'dataPoints', 'style', 'seriesType', 'valueAxis'] as const;
 
 /** Options for {@link ChartSeries}. */
 export type ChartSeriesOptions = Partial<
@@ -40,21 +37,12 @@ export class ChartSeries {
     }
   }
 
-  /**
-   * Series name/label (e.g., "Year Sales", "Product A", "Q1 Revenue")
-   * Used in legends and tooltips.
-   */
+  /** Series name/label used in legends. */
   name: string = '';
 
-  /**
-   * Color to use for this series (lines, bars, markers, etc.)
-   */
   private _color: Color | undefined;
 
-  /**
-   * Series colour. Accepts a palette token or hex. A series the author gave no colour reads as `#4f46e5`
-   * and is drawn in its chart's own colour (`barColor`, `lineColor`, `areaColor`, `dotColor`, `lollipopColor`).
-   */
+  /** Series colour. Accepts a palette token or hex. */
   public get color(): Color {
     return this._color ?? ChartSeries.DEFAULT_COLOR;
   }
@@ -64,20 +52,20 @@ export class ChartSeries {
 
   private static readonly DEFAULT_COLOR = Color.fromHex('#4f46e5');
 
-  /** @internal Whether the author gave this series a colour; an unset series takes its chart's colour. */
+  /** @internal Whether the author gave this series a colour. */
   public get hasColor(): boolean {
     return this._color !== undefined;
   }
 
-  /**
-   * Data points for this series.
-   * Each data point contains a label, value, and optional format string.
-   */
+  /** Data points for this series. */
   dataPoints: ChartDataPoint[] = [];
 
-  /**
-   * Series-specific styling options.
-   * Allows customization of line width, opacity, marker size, etc.
-   */
+  /** Series-specific styling options. */
   style: ChartSeriesStyle = new ChartSeriesStyle();
+
+  /** Renderer role when used in ComboChart: `bar` (default), `line`, or `area`. */
+  seriesType: ChartSeriesType = 'bar';
+
+  /** Value axis binding when used in ComboChart: `primary` (default) or `secondary`. */
+  valueAxis: ChartAxisTarget = 'primary';
 }

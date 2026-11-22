@@ -5,12 +5,10 @@ import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas, toL
 import { ChartSeries } from './Models/ChartSeries';
 import { ChartOrientation } from './ChartOrientation';
 import { CartesianChartBase } from './CartesianChartBase';
+import { buildCurveCommands, type ChartCurveMode } from './Graphics/ChartCurves';
+import type { ChartPathCommand } from './Graphics/ChartPathPlan';
+import { fillChartPath } from './Graphics/ChartVector';
 
-/**
- * Area chart that renders a filled polygon with a line overlay.
- * Now supports multiple series with transparency for overlapping areas.
- * Uses the ICanvas interface for rendering, making it backend-agnostic.
- */
 /** Settable properties declared by {@link AreaChart} itself. */
 export const AREA_CHART_OWN_OPTION_KEYS = [
   'defaultFillOpacity',
@@ -18,6 +16,8 @@ export const AREA_CHART_OWN_OPTION_KEYS = [
   'areaColor',
   'fillOpacity',
   'lineWidth',
+  'curve',
+  'areaGradient',
 ] as const;
 
 /** The full option surface, bases included. */
@@ -26,9 +26,9 @@ export const AREA_CHART_OPTION_KEYS = [...CARTESIAN_CHART_OPTION_KEYS, ...AREA_C
 /** Options for {@link AreaChart}. */
 export type AreaChartOptions = CartesianChartOptions &
   Partial<Omit<Pick<AreaChart, (typeof AREA_CHART_OWN_OPTION_KEYS)[number]>, 'areaColor' | 'lineWidth'>> & {
-    /** Line thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
+    /** Stroke width of the upper area boundary line. */
     lineWidth?: LengthInput;
-    /** areaColor colour. Accepts a palette token or hex. */
+    /** Default colour for series without an explicit colour. */
     areaColor?: ColorInput;
   };
 
@@ -36,7 +36,6 @@ export type AreaChartOptions = CartesianChartOptions &
 export class AreaChart extends CartesianChartBase {
   private static readonly DEFAULT_AREA_COLOR_HEX = '#4f46e5';
 
-  /** Creates an AreaChart, optionally configured in one expression. */
   constructor(options?: AreaChartOptions) {
     super();
     const { data, ...rest } = options ?? {};
@@ -44,22 +43,13 @@ export class AreaChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
-  /**
-   * Default fill opacity for all series (can be overridden per series via Style).
-   */
+  /** Default fill opacity for series without an explicit opacity (`0..1`). */
   defaultFillOpacity: number = 0.3;
-
-  /**
-   * Default line width for all series (can be overridden per series via Style).
-   */
+  /** Default stroke width for series boundary lines in points. */
   defaultLineWidth: number = 2;
 
-  /**
-   * Color for the area fill and line (backward compatibility for single-series charts).
-   */
   private _areaColor: Color = Color.fromHex(AreaChart.DEFAULT_AREA_COLOR_HEX);
-
-  /** Area colour. Accepts a palette token or hex. */
+  /** Default colour for series without an explicit colour. */
   public get areaColor(): Color {
     return this._areaColor;
   }
@@ -67,18 +57,11 @@ export class AreaChart extends CartesianChartBase {
     this._areaColor = toColor(value);
   }
 
-  /**
-   * Opacity for the area fill (backward compatibility for single-series charts).
-   */
+  /** Fill opacity for area polygons (`0..1`). */
   fillOpacity: number = 0.3;
 
   private _lineWidth: number = 2;
-
-  /**
-   * Width of the line stroke (backward compatibility for single-series charts).
-   *
-   * Accepts a length: a number of points, `'0.5mm'`, or `{ value, unit }`.
-   */
+  /** Stroke width of the upper area boundary line in points. */
   public get lineWidth(): number {
     return this._lineWidth;
   }
@@ -86,13 +69,24 @@ export class AreaChart extends CartesianChartBase {
     this._lineWidth = toLength(value);
   }
 
-  /**
-   * Draws the area chart elements for a single series (area fill and connecting line).
-   * The fill spans from the line to the value origin, in either orientation.
-   */
+  /** Curve interpolation mode: `linear` (default), `smooth`, `stepBefore`, `stepAfter`, `stepMiddle`. */
+  curve: ChartCurveMode = 'linear';
+
+  /** Vertical (or horizontal) fade gradient from series colour to near-transparent at the baseline. */
+  areaGradient: boolean = false;
+
+  /** @internal */
+  override get usesStyledGeometry(): boolean {
+    return super.usesStyledGeometry || this.areaGradient || this.curve !== 'linear';
+  }
+
+  protected override get supportsInlineLegend(): boolean {
+    return true;
+  }
+
   protected override drawSeriesElements(
     canvas: ICanvas,
-    _data: ChartData,
+    data: ChartData,
     series: ChartSeries,
     coordinates: Point[],
     chartAreaWidth: number,
@@ -103,62 +97,93 @@ export class AreaChart extends CartesianChartBase {
     const fillOpacity =
       series.style?.fillOpacity && series.style.fillOpacity > 0 && series.style.fillOpacity !== this.defaultFillOpacity
         ? series.style.fillOpacity
-        : _data.series.length === 1
+        : data.series.length === 1
           ? this.fillOpacity
           : this.defaultFillOpacity;
     const lineWidth =
       series.style?.lineWidth && series.style.lineWidth > 0 && series.style.lineWidth !== this.defaultLineWidth
         ? series.style.lineWidth
-        : _data.series.length === 1
+        : data.series.length === 1
           ? this.lineWidth
           : this.defaultLineWidth;
 
-    const origin = this.valueOrigin(_data, chartAreaWidth, chartAreaHeight, baselineY);
-    this.drawAreaFill(canvas, coordinates, origin, this.resolveSeriesColor(series), fillOpacity);
-    this.drawConnectingLine(canvas, coordinates, this.resolveSeriesColor(series), lineWidth);
+    const origin = this.valueOrigin(data, chartAreaWidth, chartAreaHeight, baselineY);
+    const color = this.resolveSeriesColor(series);
+    const curve = series.style?.curve ?? this.curve;
+    const seriesIdx = data.series.indexOf(series);
+    const dash = this.resolveSeriesDashPattern(series, seriesIdx);
+
+    this.drawAreaFill(canvas, coordinates, origin, color, fillOpacity, curve);
+    this.drawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash);
   }
 
-  /**
-   * Gets the vertical offset for value labels (simple spacing above area/line).
-   */
   protected override getLabelVerticalOffset(_series: ChartSeries): number {
     return 7;
   }
 
-  /**
-   * Draws the area fill as a single closed polygon spanning from the value origin to the line.
-   */
   private drawAreaFill(
     canvas: ICanvas,
     coordinates: Point[],
     origin: number,
     color: Color,
-    opacity: number
+    opacity: number,
+    curve: ChartCurveMode
   ): void {
     if (coordinates.length < 2) return;
-
-    const fillColor = color.withAlpha(opacity);
+    const horizontal = this.orientation === ChartOrientation.Horizontal;
     const first = coordinates[0];
     const last = coordinates[coordinates.length - 1];
 
-    if (this.orientation === ChartOrientation.Horizontal) {
-      canvas.fillPath(
-        [
-          new Point(origin, first.y),
-          ...coordinates,
-          new Point(origin, last.y),
-        ],
-        fillColor
-      );
-    } else {
-      canvas.fillPath([new Point(first.x, origin), ...coordinates, new Point(last.x, origin)], fillColor);
+    if (!this.areaGradient && curve === 'linear') {
+      const fillColor = color.withAlpha(opacity);
+      if (horizontal) {
+        canvas.fillPath([new Point(origin, first.y), ...coordinates, new Point(origin, last.y)], fillColor);
+      } else {
+        canvas.fillPath([new Point(first.x, origin), ...coordinates, new Point(last.x, origin)], fillColor);
+      }
+      return;
     }
+
+    const curveCmds = buildCurveCommands(coordinates, curve, horizontal, false);
+    const commands: ChartPathCommand[] = horizontal
+      ? [{ op: 'M', values: [origin, first.y] }, ...curveCmds, { op: 'L', values: [origin, last.y] }, { op: 'Z', values: [] }]
+      : [{ op: 'M', values: [first.x, origin] }, ...curveCmds, { op: 'L', values: [last.x, origin] }, { op: 'Z', values: [] }];
+
+    if (!this.areaGradient) {
+      fillChartPath(canvas, { commands, color: color.withAlpha(opacity) });
+      return;
+    }
+
+    const topColor = color.withAlpha(opacity);
+    const bottomColor = color.withAlpha(0.02);
+    let peak = origin;
+    for (const p of coordinates) {
+      if (horizontal) {
+        if (Math.abs(p.x - origin) > Math.abs(peak - origin)) peak = p.x;
+      } else {
+        if (Math.abs(p.y - origin) > Math.abs(peak - origin)) peak = p.y;
+      }
+    }
+    if (peak === origin) peak = horizontal ? origin + 1 : origin - 1;
+
+    fillChartPath(canvas, {
+      commands,
+      color: topColor,
+      gradient: {
+        startX: horizontal ? peak : first.x,
+        startY: horizontal ? first.y : peak,
+        endX: horizontal ? origin : first.x,
+        endY: horizontal ? first.y : origin,
+        startColor: topColor,
+        endColor: bottomColor,
+        stops: [
+          { offset: 0, color: topColor },
+          { offset: 1, color: bottomColor },
+        ],
+      },
+    });
   }
 
-  /**
-   * Gets the default color for the series when converting from old API (DataPoints) to new API (Series).
-   * Returns the chart's AreaColor property for backward compatibility.
-   */
   protected override getDefaultSeriesColor(): Color {
     return this.areaColor;
   }

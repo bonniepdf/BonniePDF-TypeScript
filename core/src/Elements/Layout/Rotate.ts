@@ -4,6 +4,7 @@ import {
   renderTransformedChild,
   resetTransformChild,
 } from '../../Rendering/AtomicTransform';
+import { applyOptions } from '../../Core/applyOptions';
 import { ElementBase } from '../ElementBase';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { type IElement, type IStatefulElement, type RenderContext, RenderStatus } from '../IElement';
@@ -46,7 +47,7 @@ export class Rotate extends ElementBase implements IContentContainer, IStatefulE
   /** Configure native rotation in one expression. */
   constructor(options: RotateOptions = {}) {
     super();
-    Object.assign(this, options);
+    applyOptions(this, options as Partial<Rotate>);
   }
   /** Native child traversal for fonts, styles and accessibility. */
   public getChildren(): readonly IElement[] {

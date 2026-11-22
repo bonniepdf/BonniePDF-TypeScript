@@ -1,3 +1,4 @@
+import { applyOptions } from '../../Core/applyOptions';
 import { ElementBase } from '../ElementBase';
 import { ELEMENT_OPTION_KEYS, type ElementOptions } from '../ElementOptions';
 import { type IElement, type IStatefulElement, type RenderContext, RenderStatus } from '../IElement';
@@ -41,7 +42,7 @@ export class Flip extends ElementBase implements IContentContainer, IStatefulEle
   /** Configure the native transform in one expression. */
   constructor(options: FlipOptions = {}) {
     super();
-    Object.assign(this, options);
+    applyOptions(this, options as Partial<Flip>);
   }
   /** Traverse the child for fonts, styles and accessibility. */
   public getChildren(): readonly IElement[] {

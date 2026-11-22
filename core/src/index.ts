@@ -164,7 +164,7 @@ export * from './Elements/Lists/BulletStyle';
 export { type ListElementOptions, ListElementBase } from './Elements/Lists/ListElementBase';
 export * from './Elements/Lists/NumberFormat';
 export { NumberFormat as ListNumberFormat } from './Elements/Lists/NumberFormat';
-export { OrderedList } from './Elements/Lists/OrderedList';
+export { type OrderedListOptions, OrderedList } from './Elements/Lists/OrderedList';
 export { type UnorderedListOptions, UnorderedList } from './Elements/Lists/UnorderedList';
 
 export * from './Elements/Shapes/QrEcc';

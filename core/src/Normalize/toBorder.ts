@@ -43,13 +43,15 @@ export function toBorder(input: BorderInput): ResolvedBorder {
   if (typeof input === 'number') return { border: new Border(input) };
 
   const colors = input.color === undefined ? undefined : new BorderColors(toColor(input.color));
-
-  if (input.width !== undefined) {
-    return { border: new Border(input.width), colors };
-  }
+  const baseWidth = input.width ?? 0;
 
   return {
-    border: new Border(input.left ?? 0, input.top ?? 0, input.right ?? 0, input.bottom ?? 0),
+    border: new Border(
+      input.left ?? baseWidth,
+      input.top ?? baseWidth,
+      input.right ?? baseWidth,
+      input.bottom ?? baseWidth
+    ),
     colors,
   };
 }

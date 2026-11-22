@@ -280,6 +280,9 @@ export type TextDecorationInput = TextDecoration | TextDecorationToken | readonl
 export function toTextDecoration(input: TextDecorationInput): TextDecoration {
   if (typeof input === 'number') return input;
   if (typeof input === 'string') return DECORATION_FLAGS[input] ?? TextDecoration.None;
+  if (input.length > 1 && input.includes('none')) {
+    throw new Error("TextDecoration cannot combine 'none' with other decoration tokens.");
+  }
   return input.reduce<TextDecoration>(
     (flags, token) => flags | (DECORATION_FLAGS[token] ?? TextDecoration.None),
     TextDecoration.None

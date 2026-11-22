@@ -13,7 +13,9 @@ export interface ChartLinearGradientOptions {
 /** Opaque two-stop gradient; endpoints are resolved by the chart engine. */
 export class ChartLinearGradient {
   constructor(options: ChartLinearGradientOptions = {}) {
-    Object.assign(this, options);
+    if (options.startColor !== undefined) this.startColor = options.startColor;
+    if (options.endColor !== undefined) this.endColor = options.endColor;
+    if (options.scope !== undefined) this.scope = options.scope;
   }
   private _startColor = Color.fromHex('#93c5fd');
   private _endColor = Color.fromHex('#2563eb');

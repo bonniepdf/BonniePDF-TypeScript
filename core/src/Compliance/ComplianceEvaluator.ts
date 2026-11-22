@@ -315,7 +315,8 @@ function checkTableHeaders(table: LayoutNode, out: ComplianceFinding[]): void {
     standard: UA,
     clause: 'ISO 14289-1:2014 §7.5',
     message: 'Table has no header cells (TH); screen readers cannot associate data cells with headers.',
-    fixHint: 'Mark the header row/column cells as headers (e.g. Table.addHeaderRow / cell.isHeader).',
+    fixHint:
+      'Mark header rows or cells as headers (e.g. table.addHeader / cell.isHeader), or use Grid or table.presentation = true for layout grids.',
     nodeId: table.id,
     role: 'Table',
     page: pageOf(table),

@@ -599,6 +599,7 @@ export class PdfCanvas implements ICanvas {
         this.emitGradientFill(p as LinearGradientPaint | RadialGradientPaint, rule);
       }
     });
+    this.currentPath = [];
   }
 
   /** Clip to the current path inside a fresh q, for a gradient's shading or its fallback. */
@@ -618,7 +619,10 @@ export class PdfCanvas implements ICanvas {
     // so it strokes nothing - and writes nothing, not even the stroke settings.
     if (!(p instanceof SolidPaint)) {
       const t = (p as LinearGradientPaint | RadialGradientPaint).transform;
-      if (!isIdentityPaintTransform(t) && invertPaintTransform(t!) === null) return;
+      if (!isIdentityPaintTransform(t) && invertPaintTransform(t!) === null) {
+        this.currentPath = [];
+        return;
+      }
     }
     this.drawAsArtifactFallback(() => {
       // Translucency is set outside the stroke's own q/Q, as for fills.
@@ -648,6 +652,7 @@ export class PdfCanvas implements ICanvas {
       PdfOperators.restoreState(this.stream);
       if (p instanceof SolidPaint) this.endColorAlpha(p.color);
     });
+    this.currentPath = [];
   }
 
   /**
@@ -710,8 +715,10 @@ export class PdfCanvas implements ICanvas {
 
   public clipToCurrentPath(rule: FillRule = 'nonzero'): void {
     this.contrast?.unknownState();
+    if (this.currentPath.length === 0) return;
     this.emitCurrentPath();
     this.stream.push(rule === 'evenodd' ? 'W* n\n' : 'W n\n');
+    this.currentPath = [];
   }
 
   public setGlobalAlpha(alpha: number): void {

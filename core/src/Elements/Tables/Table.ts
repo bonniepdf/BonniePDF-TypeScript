@@ -1161,6 +1161,8 @@ export class Table extends BorderedElementBase implements IRoleProvider, IBorder
         ctx.currentX = columns.x[i] + padding.left;
         ctx.currentY = cellTop;
         rec?.openNode(cell, captureTypeOf(cell), captureNameOf(cell), page, columns.x[i], top, columns.width[i]);
+        const cellBg = this.cellFill(cell, row, dataIndex);
+        if (cellBg) rec?.annotatePaint(cell, paintForBackground(cellBg));
 
         const tag = this.openSplitCellTag(ctx, split, i, cell, content, dataTagging, presTagging);
         try {

@@ -708,6 +708,7 @@ export class SvgCanvas implements ICanvas {
       const gradId = this.emitGradientDef(p as LinearGradientPaint | RadialGradientPaint);
       this.svgElements.push(`<path d="${d}" fill="url(#${gradId})"${ruleAttr}/>`);
     }
+    this.currentPathData = [];
   }
 
   public strokeCurrentPath(style: StrokeStyle): void {
@@ -735,6 +736,7 @@ export class SvgCanvas implements ICanvas {
       attrs.push(`stroke="url(#${gradId})"`);
       this.svgElements.push(`<path d="${d}" fill="none" ${attrs.join(' ')}/>`);
     }
+    this.currentPathData = [];
   }
 
   // -- Affine transforms --------------------------------------------
@@ -776,6 +778,7 @@ export class SvgCanvas implements ICanvas {
     this.svgElements.push(`<defs><clipPath id="${id}"><path d="${d}"${ruleAttr}/></clipPath></defs>`);
     this.svgElements.push(`<g clip-path="url(#${id})">`);
     this.groupDepth++;
+    this.currentPathData = [];
   }
 
   public setGlobalAlpha(alpha: number): void {

@@ -169,6 +169,8 @@ export class FontFamilyResolver {
     const isBold = weight >= FontWeight.SemiBold;
     const customFamily = FontFamilyResolver.customFamilies.get(family);
     if (customFamily) return customFamily.getVariant(isBold, italic);
+    const registered = FontManager.resolveFamily(family, weight, italic);
+    if (registered) return registered;
     return FontFamilyResolver.standardFonts.get(`${FontFamilyResolver.resolveAlias(family)},${isBold},${italic}`);
   }
 

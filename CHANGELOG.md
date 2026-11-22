@@ -6,6 +6,17 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+### Fixes
+
+- **Encryption:** emit numeric `/V` values for RC4-40/128, and throw from synchronous `generateBytes()` when AES-256 is configured.
+- **PDF/A & XMP:** Flate-compress the sRGB ICC profile with `/Length1`, await `writeOutputIntentAsync`, always emit well-formed XMP with UTC `Z` dates, and split keywords on `,` and `;`.
+- **Settings validation:** check PDF/A and encryption conflicts before AES-256 version checks without mutating `settings.version`.
+- **Text `fontFeatures`:** track explicit assignment so inherited `defaultTextStyle.fontFeatures` updates on regeneration.
+- **Document Definition:** skip unknown element types and enum tokens under `bestEffort: true`, make `PageNumberOf.text` optional, and support `SectionLink.underline` and `Grid.alternateRowBackgroundColor`.
+- **Authoring & normalisers:** export `OrderedListOptions`, let per-side `toBorder` widths override `width`, reject combining `'none'` in `toTextDecoration`, and ignore explicit `undefined` in `Flip`, `Rotate`, `Translate`, and `ChartLinearGradient`.
+- **Layout snapshots & preflight:** record cell fills on split table rows and update the `table-no-header` fix hint (`addHeader`, `isHeader`, `Grid`, `presentation = true`).
+- **Canvas & SVG fonts:** clear the current path after fill, stroke, and clip on `PdfCanvas` and `SvgCanvas`; check `FontManager` before standard aliases in `FontFamilyResolver.resolveKnown`.
+
 ## 2026.11.21
 
 Status: Released

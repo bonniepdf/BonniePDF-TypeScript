@@ -9,7 +9,12 @@ export {
 export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
 export { type AxisOptionsOptions, type AxisLabelOverflow, AxisOptions } from './Charts/Models/AxisOptions';
 export * from './Charts/ChartOrientation';
-export { type ChartTheme, type ChartThemeDefinition, type ChartThemeInput } from './Charts/ChartTheme';
+export {
+  type ChartThemeName,
+  type ChartGridLineStyle,
+  type ChartThemeDefinition,
+  type ChartThemeInput,
+} from './Charts/ChartTheme';
 export { type ChartCurveMode } from './Charts/Graphics/ChartCurves';
 export { type ChartMarkerShape, type ChartMarkerFill } from './Charts/Graphics/ChartMarkers';
 export { type ChartPatternKind } from './Charts/Graphics/ChartPathPlan';

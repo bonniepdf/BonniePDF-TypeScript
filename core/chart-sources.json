@@ -2,7 +2,7 @@
   "version": 1,
   "source": {
     "name": "BonnieCharts",
-    "sha256": "0ce5f77e8ec89b7e7be7d9eb32cc67a7574d2d5fbb60097d1e1452b19b1375e6",
+    "sha256": "dd117a072791e9290e4753edbe0bf629089a9a5e241bb6e22996eedaeda82a70",
     "files": {
       "typescript/src/Charts/AreaChart.ts": "1c0be90f5b6e479ec14855101f8d7687637db24ff31b02ec85ef90e066c585ba",
       "typescript/src/Charts/BarChart.ts": "1b9a9bd7eb7ef3ac9fcd0ef18e017373e1ad1ce9e665c66d6c08208050417013",
@@ -110,7 +110,7 @@
       "integration/original-files.json": "61ada299ac7683070c431b2a78b05c8ae8910ea78e5cad72c20d96ab6c915039",
       "integration/typescript/Charts/ChartBase.ts.slots": "ad29eebb31907dbf931e570342cc96ee693c6d496d468c7bd40469c9892665c7",
       "integration/typescript/Charts/ChartHost.ts": "b9081349ff4fdeabfae9acc0a76a7806d2e637c82c312cae05c7ad09a6da5206",
-      "integration/typescript/Charts/Graphics/ChartVector.ts": "0df74275f56c40fb5640af370e3ebb88694378ca3c6224a0cee3fa44df6443d0",
+      "integration/typescript/Charts/Graphics/ChartVector.ts": "26bc407934ce03ae03e247ed332624d4466f9347e1af50fa95ba21330bba58a4",
       "fixtures/appearance-cases.json": "9b42c9102f54fb2a3c517588fc46612b882a78904a6955fa3afe1107f97bf9a7",
       "fixtures/appearance.json": "b4f1c07965c7844070baabe2abf1d06d5dedc7bc2eda97d3ab31670e4d3df79e",
       "fixtures/cases.json": "f1190e5d14fc376e4bfae60d218b4364cfb004b959e3f533c3c9c01d853f114c",
@@ -145,7 +145,7 @@
     "src/Charts/Graphics/ChartPatterns.ts": "b07b17295cb8d70151ce01c81d3b84d4cd3fc444dbd00955d60ab4bf4c486d09",
     "src/Charts/Graphics/ChartTint.ts": "b720aa33fd1e189f2c070a19dbb969c5b60741000e6a9286efaf242feb574585",
     "src/Charts/Graphics/ChartValueScale.ts": "00b9ca609694ac22a407c4c8413a5c21f8e77a26d2ee46e4b9ec731f2ac889f0",
-    "src/Charts/Graphics/ChartVector.ts": "e5b3367c253e803a0718da42d375f9cb4d150a7203f1f7296d4b19fbb9373782",
+    "src/Charts/Graphics/ChartVector.ts": "a2d7d1d69532c555e2e29bd17fc5dcc093da261722295e6aac2210d517e47acd",
     "src/Charts/GroupedBarChart.ts": "da7b0981fa224175b416d96fcfe7dda10317beb121df728ac0b7215b7eb49941",
     "src/Charts/HeatmapChart.ts": "56c71c30b205c5dcdd1e50cbe6b9b1b50f0f92ccba6a5d06fa6b955a400b190f",
     "src/Charts/LineChart.ts": "9d46fc5735a58dcbecb0c844c57228e19e8b0d1d4153a56d4d65651b283ba8bb",

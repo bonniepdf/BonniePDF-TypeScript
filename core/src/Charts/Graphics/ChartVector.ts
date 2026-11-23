@@ -45,7 +45,7 @@ export function strokeChartPath(sink: ICanvas, plan: ChartStrokePlan): void {
       width: plan.lineWidth,
       lineCap: plan.lineCap ?? 'butt',
       lineJoin: plan.lineJoin ?? 'miter',
-      miterLimit: plan.miterLimit ?? 10,
+      miterLimit: plan.miterLimit !== undefined && plan.miterLimit !== 10 ? plan.miterLimit : undefined,
       dashPattern: plan.dashPattern,
       dashOffset: plan.dashOffset ?? 0,
     });

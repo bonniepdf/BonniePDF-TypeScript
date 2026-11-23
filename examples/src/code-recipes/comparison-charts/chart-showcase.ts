@@ -1,6 +1,6 @@
 /**
  * Chart Examples.
- * Fifteen landscape pages covering all 14 chart families, from bar and line to stacked, combo, waterfall, scatter, bullet, and heatmap charts, each carrying alt text for screen readers.
+ * Seventeen landscape pages covering all 14 chart families, from bar and line to stacked, combo, waterfall, scatter, bullet, and heatmap charts, each carrying alt text for screen readers.
  * Build with generate(); export with await doc.generateBytesAsync().
  */
 import {

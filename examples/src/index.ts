@@ -1357,7 +1357,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase',
     category: 'Comparison Charts',
     description:
-      'Fifteen landscape pages covering all 14 chart families with the modern chart theme, rounded gradient bars, smooth splines, area fades, dual-axis combo, waterfall bridge, scatter bubbles, bullet gauges, and cohort heatmap. Every chart includes alt text.',
+      'Seventeen landscape pages covering all 14 chart families with the modern chart theme, rounded gradient bars, smooth splines, area fades, dual-axis combo, waterfall bridge, scatter bubbles, bullet gauges, and cohort heatmap. Every chart includes alt text.',
     filename: 'chart-showcase.pdf',
     generate: chartShowcase,
     dotnetClass: 'ChartShowcaseExample',
@@ -1369,7 +1369,7 @@ export const examples: ExampleDef[] = [
     name: 'Chart Showcase (Class API)',
     category: 'Comparison Charts',
     description:
-      'The same fifteen-page all-chart-types showcase as Chart Showcase, built with the class API: construct each chart model and assign properties. The output is identical.',
+      'The same seventeen-page all-chart-types showcase as Chart Showcase, built with the class API: construct each chart model and assign properties. The output is identical.',
     filename: 'chart-showcase-classes.pdf',
     generate: chartShowcaseClasses,
     dotnetClass: 'ChartShowcaseExample',

@@ -10,6 +10,9 @@ import { ShowIf } from '../../src/Elements/Layout/Pagination/ShowIf';
 import { Svg } from '../../src/Elements/Media/Svg';
 import { Image } from '../../src/Elements/Media/Image';
 import { Container } from '../../src/Elements/Layout/Container';
+import { PieChart } from '../../src/Charts/PieChart';
+import { BarChart } from '../../src/Charts/BarChart';
+import { LineChart } from '../../src/Charts/LineChart';
 import { DEFINITION_FIXTURES } from './fixtures.generated';
 import { PNG, maskedPdf, stateDiff } from './helpers';
 
@@ -635,5 +638,74 @@ describe('constructs a definition cannot express', () => {
       '/pages/0/content/1 unrepresentable',
       '/pages/0/content/2 unrepresentable',
     ]);
+  });
+});
+
+describe('chart options a definition cannot express', () => {
+  const fixture = DEFINITION_FIXTURES.unrepresentable['chart-options'];
+
+  function documentFromRecipe(): Document {
+    const doc = new Document();
+    doc.add(new TextBlock({ text: 'Kept' }));
+    doc.add(
+      new PieChart({
+        data: {
+          series: [
+            {
+              dataPoints: [
+                { label: 'A', value: 1 },
+                { label: 'B', value: 2 },
+              ],
+            },
+          ],
+        },
+        explodedSlices: [0],
+        pie3d: { tilt: 50 },
+      })
+    );
+    doc.add(new BarChart({ data: { series: [{ dataPoints: [{ label: 'A', value: 3, color: '#e11d48' }] }] } }));
+    doc.add(
+      new LineChart({
+        data: {
+          yAxis: { scale: 'log' },
+          series: [
+            {
+              dataPoints: [
+                { label: 'A', value: 1 },
+                { label: 'B', value: 10 },
+              ],
+            },
+          ],
+        },
+      })
+    );
+    doc.add(new BarChart({ theme: 'executive', data: { series: [{ dataPoints: [{ label: 'A', value: 1 }] }] } }));
+    return doc;
+  }
+
+  it('fails by default, listing each option at its path', async () => {
+    const error = await toDefinition(documentFromRecipe()).catch(e => e);
+    expect(error).toBeInstanceOf(DefinitionError);
+    expect(error.issues.map((i: { path: string; code: string }) => ({ path: i.path, code: i.code }))).toEqual(
+      fixture._expectNotes.strict.issues
+    );
+  });
+
+  it('writes the charts without them on request and notes each one', async () => {
+    const { definition, notes } = await toDefinition(documentFromRecipe(), { onUnrepresentable: 'drop' });
+    expect(notes.map(n => ({ path: n.path, code: n.code }))).toEqual(fixture._expectNotes.drop.notes);
+    expect(definition).toEqual(fixture._expectNotes.drop.definition);
+  });
+
+  it('ignores options left at their defaults and ones that do not change the output', async () => {
+    const doc = new Document();
+    doc.add(
+      new PieChart({
+        data: { series: [{ dataPoints: [{ label: 'A', value: 1 }] }] },
+        explodedSlices: [],
+        captureName: 'share',
+      })
+    );
+    await expect(toDefinition(doc)).resolves.toBeDefined();
   });
 });

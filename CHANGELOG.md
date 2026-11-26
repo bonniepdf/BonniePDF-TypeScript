@@ -18,6 +18,7 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 ### Fixes
 
 - **Compliance preflight and layout snapshots:** every chart is now a figure, so preflight reports `figure-missing-alt` for every chart type. The 26 chart types added after the original 14 were skipped.
+- **Document Definition:** `toDefinition` reports chart options that Document Definition 1.0 cannot hold, such as `pie3d`, `explodedSlices`, a data point's `color`, a logarithmic axis or the `executive`, `vivid`, `pastel` and `midnight` themes, as `unrepresentable` instead of leaving them out without a word. A document that used to write with those options lost now fails by default; with `onUnrepresentable: 'drop'` the charts are written without them and each one is noted.
 
 ## 2026.11.23
 

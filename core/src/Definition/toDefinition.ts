@@ -85,26 +85,26 @@ import { Ellipse } from '../Elements/Shapes/Ellipse';
 import { QRCode } from '../Elements/Shapes/QRCode';
 import { Barcode } from '../Elements/Shapes/Barcode';
 import { DataMatrix } from '../Elements/Shapes/DataMatrix';
-import { BarChart } from '../Charts/BarChart';
-import { GroupedBarChart } from '../Charts/GroupedBarChart';
-import { StackedBarChart } from '../Charts/StackedBarChart';
-import { LineChart } from '../Charts/LineChart';
-import { AreaChart } from '../Charts/AreaChart';
-import { StackedAreaChart } from '../Charts/StackedAreaChart';
-import { ComboChart } from '../Charts/ComboChart';
-import { WaterfallChart } from '../Charts/WaterfallChart';
-import { ScatterChart } from '../Charts/ScatterChart';
-import { DotPlotChart } from '../Charts/DotPlotChart';
-import { LollipopChart } from '../Charts/LollipopChart';
-import { PieChart } from '../Charts/PieChart';
-import { BulletChart } from '../Charts/BulletChart';
-import { HeatmapChart } from '../Charts/HeatmapChart';
+import { BarChart, BAR_CHART_OPTION_KEYS } from '../Charts/BarChart';
+import { GroupedBarChart, GROUPED_BAR_CHART_OPTION_KEYS } from '../Charts/GroupedBarChart';
+import { StackedBarChart, STACKED_BAR_CHART_OPTION_KEYS } from '../Charts/StackedBarChart';
+import { LineChart, LINE_CHART_OPTION_KEYS } from '../Charts/LineChart';
+import { AreaChart, AREA_CHART_OPTION_KEYS } from '../Charts/AreaChart';
+import { StackedAreaChart, STACKED_AREA_CHART_OPTION_KEYS } from '../Charts/StackedAreaChart';
+import { ComboChart, COMBO_CHART_OPTION_KEYS } from '../Charts/ComboChart';
+import { WaterfallChart, WATERFALL_CHART_OPTION_KEYS } from '../Charts/WaterfallChart';
+import { ScatterChart, SCATTER_CHART_OPTION_KEYS } from '../Charts/ScatterChart';
+import { DotPlotChart, DOT_PLOT_CHART_OPTION_KEYS } from '../Charts/DotPlotChart';
+import { LollipopChart, LOLLIPOP_CHART_OPTION_KEYS } from '../Charts/LollipopChart';
+import { PieChart, PIE_CHART_OPTION_KEYS } from '../Charts/PieChart';
+import { BulletChart, BULLET_CHART_OPTION_KEYS } from '../Charts/BulletChart';
+import { HeatmapChart, HEATMAP_CHART_OPTION_KEYS } from '../Charts/HeatmapChart';
 import { ChartBase } from '../Charts/ChartBase';
 import { CartesianChartBase } from '../Charts/CartesianChartBase';
-import { AxisOptions } from '../Charts/Models/AxisOptions';
-import { ChartSeries } from '../Charts/Models/ChartSeries';
-import { ChartSeriesStyle } from '../Charts/Models/ChartSeriesStyle';
-import { ChartDataPoint } from '../Charts/Models/ChartDataPoint';
+import { AxisOptions, AXIS_OPTIONS_OPTION_KEYS } from '../Charts/Models/AxisOptions';
+import { ChartSeries, CHART_SERIES_OPTION_KEYS } from '../Charts/Models/ChartSeries';
+import { ChartSeriesStyle, CHART_SERIES_STYLE_OPTION_KEYS } from '../Charts/Models/ChartSeriesStyle';
+import { ChartDataPoint, CHART_DATA_POINT_OPTION_KEYS } from '../Charts/Models/ChartDataPoint';
 import { ELEMENT_DESCRIPTION } from './ElementDescription';
 import { keysOf } from './keysOf';
 import type { KeySpec, ShapeSpec } from './ElementDescriptionTypes';
@@ -314,6 +314,42 @@ const SHAPE_BLANK: Record<string, () => unknown> = {
   PageLabel: () => new PageLabel(),
 };
 
+/**
+ * Every option of each chart type the definition describes. An option missing from the description that differs
+ * from a fresh chart's cannot be written (15 §8.2): the chart would render differently without it.
+ */
+const CHART_OPTION_KEYS: Record<string, readonly string[]> = {
+  BarChart: BAR_CHART_OPTION_KEYS,
+  GroupedBarChart: GROUPED_BAR_CHART_OPTION_KEYS,
+  StackedBarChart: STACKED_BAR_CHART_OPTION_KEYS,
+  LineChart: LINE_CHART_OPTION_KEYS,
+  AreaChart: AREA_CHART_OPTION_KEYS,
+  StackedAreaChart: STACKED_AREA_CHART_OPTION_KEYS,
+  ComboChart: COMBO_CHART_OPTION_KEYS,
+  WaterfallChart: WATERFALL_CHART_OPTION_KEYS,
+  ScatterChart: SCATTER_CHART_OPTION_KEYS,
+  DotPlotChart: DOT_PLOT_CHART_OPTION_KEYS,
+  LollipopChart: LOLLIPOP_CHART_OPTION_KEYS,
+  PieChart: PIE_CHART_OPTION_KEYS,
+  BulletChart: BULLET_CHART_OPTION_KEYS,
+  HeatmapChart: HEATMAP_CHART_OPTION_KEYS,
+};
+
+/** The same for the chart values nested in a chart, by shape name. `own` checks a plain object's own keys. */
+const SHAPE_OPTION_KEYS: Record<string, readonly string[] | 'own'> = {
+  Series: CHART_SERIES_OPTION_KEYS,
+  DataPoint: CHART_DATA_POINT_OPTION_KEYS,
+  SeriesStyle: CHART_SERIES_STYLE_OPTION_KEYS,
+  Axis: AXIS_OPTIONS_OPTION_KEYS,
+  ChartBarStyle: ['cornerRadius', 'gradient', 'effects'],
+  ChartLinearGradient: ['startColor', 'endColor', 'scope'],
+  ChartReference: 'own',
+  BulletRange: 'own',
+};
+
+/** Chart options that do not change the rendered output, so are never reported. `data` is checked through its shapes. */
+const UNCHECKED_CHART_OPTIONS = new Set(['captureName', 'data']);
+
 // ── tokens ──────────────────────────────────────────────────────────────────
 
 const norm = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -493,7 +529,7 @@ class Writer {
   }
 
   /** Converts one stored value to its wire form, or `undefined` when the value is unset. */
-  wire(kind: string, value: unknown): unknown {
+  wire(kind: string, value: unknown, at?: string): unknown {
     if (kind === 'nullableNumber' && value === null) return null;
     if (value === undefined || value === null) return undefined;
     const [head, ...rest] = kind.split(':');
@@ -538,7 +574,7 @@ class Writer {
       case 'enum':
         return enumToken(arg, value);
       case 'array':
-        return (value as unknown[]).map(v => this.wire(arg, v));
+        return (value as unknown[]).map((v, i) => this.wire(arg, v, at === undefined ? undefined : `${at}/${i}`));
       case 'fontFeatures':
         return { ...(value as Record<string, number>) };
       case 'map':
@@ -549,23 +585,77 @@ class Writer {
           ])
         );
       case 'object':
-        return this.shape(value as Obj, D.shapes[arg] ?? D.objects[arg], SHAPE_BLANK[arg]?.() as Obj | undefined);
+        return this.shape(
+          value as Obj,
+          D.shapes[arg] ?? D.objects[arg],
+          SHAPE_BLANK[arg]?.() as Obj | undefined,
+          undefined,
+          arg,
+          at
+        );
       default:
         return undefined;
     }
   }
 
-  /** A nested value object, writing only what differs from a fresh instance. `undefined` when nothing does. */
-  shape(value: Obj, spec: ShapeSpec, blank?: Obj, skip: ReadonlySet<string> = new Set()): unknown {
+  /**
+   * A nested value object, writing only what differs from a fresh instance. `undefined` when nothing does. Given
+   * its shape `name` and its path `at`, a chart value also reports the options it holds that the shape does not describe.
+   */
+  shape(
+    value: Obj,
+    spec: ShapeSpec,
+    blank?: Obj,
+    skip: ReadonlySet<string> = new Set(),
+    name?: string,
+    at?: string
+  ): unknown {
     const out: Obj = {};
     for (const [key, ks] of Object.entries(keysOf(spec))) {
       if (skip.has(key)) continue;
-      const w = this.wire(ks.kind, value[key]);
-      if (w === undefined) continue;
+      const keyAt = at === undefined ? undefined : `${at}/${escapeKey(key)}`;
+      const w = this.wire(ks.kind, value[key], keyAt);
+      if (w === undefined) {
+        if (keyAt !== undefined) this.untokened(ks.kind, value[key], blank?.[key], keyAt);
+        continue;
+      }
       if (!ks.required && blank !== undefined && same(w, this.wire(ks.kind, blank[key]))) continue;
       out[key] = w;
     }
+    const options = name === undefined ? undefined : SHAPE_OPTION_KEYS[name];
+    if (at !== undefined && options !== undefined) this.undescribed(value, blank, keysOf(spec), options, skip, at);
     return out;
+  }
+
+  /**
+   * Reports an enumeration value that has no token in this version, such as a theme preset added after it
+   * (15 §8.2). Left at its default it is not reported: leaving it out changes nothing.
+   */
+  private untokened(kind: string, value: unknown, blank: unknown, at: string, id?: string): void {
+    if (!kind.startsWith('enum:') || value === undefined || value === null || same(value, blank)) return;
+    const version = `${D.definition.version}.${D.definition.minorVersion}`;
+    this.cannot(at, id, `${JSON.stringify(value)} is not a ${kind.slice(5)} token in Document Definition ${version}.`);
+  }
+
+  /**
+   * Reports each option of a chart value that the description leaves out and that differs from a fresh instance's,
+   * in ordinal key order (15 §8.2). Writing the value without it would render differently.
+   */
+  private undescribed(
+    value: Obj,
+    blank: Obj | undefined,
+    described: Record<string, KeySpec>,
+    options: readonly string[] | 'own',
+    skip: ReadonlySet<string>,
+    at: string,
+    id?: string
+  ): void {
+    const version = `${D.definition.version}.${D.definition.minorVersion}`;
+    for (const key of [...(options === 'own' ? Object.keys(value) : options)].sort()) {
+      if (key in described || skip.has(key)) continue;
+      if (same(value[key], blank?.[key])) continue;
+      this.cannot(`${at}/${escapeKey(key)}`, id, `\`${key}\` is not part of Document Definition ${version}.`);
+    }
   }
 
   // ── elements ──────────────────────────────────────────────────────────────
@@ -640,12 +730,17 @@ class Writer {
         setByAuthor = true;
       }
 
-      const w = this.wire(ks.kind, self[key]);
-      if (w === undefined) continue;
+      const w = this.wire(ks.kind, self[key], at);
+      if (w === undefined) {
+        this.untokened(ks.kind, self[key], blank[key], at, id);
+        continue;
+      }
       if (!ks.required && !setByAuthor && same(w, this.wire(ks.kind, blank[key]))) continue;
       if (isObj(w) && Object.keys(w).length === 0 && head === 'object') continue;
       node[key] = w;
     }
+    const options = CHART_OPTION_KEYS[type];
+    if (options !== undefined) this.undescribed(self, blank, keysOf(spec), options, UNCHECKED_CHART_OPTIONS, path, id);
     return node;
   }
 
@@ -806,7 +901,7 @@ class Writer {
       case 'DotPlotChart.data':
       case 'LollipopChart.data':
       case 'PieChart.data':
-        return this.chartData(el as ChartBase);
+        return this.chartData(el as ChartBase, at);
       default:
         break;
     }
@@ -817,7 +912,14 @@ class Writer {
         return this.cannot(at, id, 'Custom ChartThemeDefinition objects cannot be written to a Document Definition.');
       }
       if ((key === 'xAxis' || key === 'yAxis') && el instanceof CartesianChartBase) {
-        const axis = this.shape(el[key] as unknown as Obj, D.shapes.Axis, new AxisOptions() as unknown as Obj);
+        const axis = this.shape(
+          el[key] as unknown as Obj,
+          D.shapes.Axis,
+          new AxisOptions() as unknown as Obj,
+          undefined,
+          'Axis',
+          at
+        );
         return isObj(axis) && Object.keys(axis).length ? axis : undefined;
       }
       if (key === 'secondaryYAxis' && el instanceof ComboChart) {
@@ -825,7 +927,10 @@ class Writer {
         const axis = this.shape(
           el.secondaryYAxis as unknown as Obj,
           D.shapes.Axis,
-          new AxisOptions() as unknown as Obj
+          new AxisOptions() as unknown as Obj,
+          undefined,
+          'Axis',
+          at
         );
         return isObj(axis) && Object.keys(axis).length ? axis : undefined;
       }
@@ -833,23 +938,28 @@ class Writer {
     return NOT_SPECIAL;
   }
 
-  private chartData(chart: ChartBase): Obj {
+  private chartData(chart: ChartBase, at: string): Obj {
     const series: unknown[] = [];
-    for (const s of chart.data.series) {
+    const blankSeries = new ChartSeries() as unknown as Obj;
+    chart.data.series.forEach((s, i) => {
+      const seriesAt = `${at}/series/${i}`;
       const node = this.shape(
         s as unknown as Obj,
         D.shapes.Series,
-        new ChartSeries() as unknown as Obj,
+        blankSeries,
         new Set(['dataPoints', 'style'])
       ) as Obj;
       const ordered: Obj = {};
       for (const key of Object.keys(D.shapes.Series.keys)) {
         if (key === 'dataPoints') {
-          ordered.dataPoints = s.dataPoints.map(p => {
+          ordered.dataPoints = s.dataPoints.map((p, j) => {
             const pt = this.shape(
               p as unknown as Obj,
               D.shapes.DataPoint,
-              new ChartDataPoint() as unknown as Obj
+              new ChartDataPoint() as unknown as Obj,
+              undefined,
+              'DataPoint',
+              `${seriesAt}/dataPoints/${j}`
             ) as Obj;
             if ((p.kind === 'delta' || p.hasExplicitValue) && pt.value === undefined) pt.value = p.value;
             return pt;
@@ -858,13 +968,18 @@ class Writer {
           const style = this.shape(
             s.style as unknown as Obj,
             D.shapes.SeriesStyle,
-            new ChartSeriesStyle() as unknown as Obj
+            new ChartSeriesStyle() as unknown as Obj,
+            undefined,
+            'SeriesStyle',
+            `${seriesAt}/style`
           );
           if (isObj(style) && Object.keys(style).length) ordered.style = style;
         } else if (node[key] !== undefined) ordered[key] = node[key];
       }
+      const options = SHAPE_OPTION_KEYS.Series as readonly string[];
+      this.undescribed(s as unknown as Obj, blankSeries, keysOf(D.shapes.Series), options, new Set(), seriesAt);
       series.push(ordered);
-    }
+    });
     return { series };
   }
 

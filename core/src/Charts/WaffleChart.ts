@@ -49,7 +49,7 @@ export class WaffleChart extends ChartBase {
     const totalCells = this.rows * this.columns;
     const exact = points.map((p) => (p.value / total) * totalCells);
     const counts = exact.map((e) => Math.floor(e));
-    const remaining = totalCells - counts.reduce((a, b) => a + b, 0);
+    let remaining = totalCells - counts.reduce((a, b) => a + b, 0);
     const order = points.map((_, i) => i).sort((a, b) => (exact[b] - counts[b]) - (exact[a] - counts[a]) || a - b);
     for (let k = 0; k < remaining; k++) counts[order[k]]++;
 

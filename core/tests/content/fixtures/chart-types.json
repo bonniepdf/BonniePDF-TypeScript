@@ -177,11 +177,23 @@
             "dataPoints": [
               {
                 "label": "A",
-                "samples": [1, 2, 3, 50, 400]
+                "samples": [
+                  1,
+                  2,
+                  3,
+                  50,
+                  400
+                ]
               },
               {
                 "label": "B",
-                "samples": [5, 9, 70, 80, 900]
+                "samples": [
+                  5,
+                  9,
+                  70,
+                  80,
+                  900
+                ]
               }
             ]
           }
@@ -548,7 +560,9 @@
           "end": "2026-03-20",
           "progress": 0.4,
           "group": "Build",
-          "dependsOn": ["a"]
+          "dependsOn": [
+            "a"
+          ]
         },
         {
           "id": "d",
@@ -557,7 +571,9 @@
           "end": "2026-05-08",
           "progress": 0.1,
           "group": "Build",
-          "dependsOn": ["c"],
+          "dependsOn": [
+            "c"
+          ],
           "color": "#e11d48"
         },
         {
@@ -565,7 +581,9 @@
           "label": "Launch",
           "start": "2026-05-15",
           "milestone": true,
-          "dependsOn": ["d"]
+          "dependsOn": [
+            "d"
+          ]
         }
       ],
       "data": {
@@ -673,11 +691,26 @@
       "theme": "modern",
       "width": 560,
       "height": 340,
-      "xCategories": ["M0", "M1", "M2"],
-      "yCategories": ["Jan", "Feb"],
+      "xCategories": [
+        "M0",
+        "M1",
+        "M2"
+      ],
+      "yCategories": [
+        "Jan",
+        "Feb"
+      ],
       "values": [
-        [100, 82, 71],
-        [100, 86, null]
+        [
+          100,
+          82,
+          71
+        ],
+        [
+          100,
+          86,
+          null
+        ]
       ],
       "valueSuffix": "%",
       "data": {
@@ -1562,7 +1595,14 @@
       "valuePrefix": "$",
       "comparisonValue": 112000,
       "comparisonLabel": "vs last month",
-      "trend": [96, 102, 108, 112, 121, 128.4],
+      "trend": [
+        96,
+        102,
+        108,
+        112,
+        121,
+        128.4
+      ],
       "target": 150000
     }
   },
@@ -1786,19 +1826,32 @@
       ],
       "intersections": [
         {
-          "sets": ["ts", "net"],
+          "sets": [
+            "ts",
+            "net"
+          ],
           "size": 30
         },
         {
-          "sets": ["ts", "pdf"],
+          "sets": [
+            "ts",
+            "pdf"
+          ],
           "size": 25
         },
         {
-          "sets": ["net", "pdf"],
+          "sets": [
+            "net",
+            "pdf"
+          ],
           "size": 20
         },
         {
-          "sets": ["ts", "net", "pdf"],
+          "sets": [
+            "ts",
+            "net",
+            "pdf"
+          ],
           "size": 12
         }
       ],

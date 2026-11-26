@@ -23,6 +23,7 @@ core/src/Charts/**
 !core/src/Charts/GroupedBarChartElement.ts
 core/chart-sources.json
 core/tests/content/fixtures/chart-extraction.json
+core/tests/content/fixtures/chart-types.json
 
 # Independent shaping fixture copied verbatim from the shared specification.
 core/tests/typography/fixtures/harfbuzz.json

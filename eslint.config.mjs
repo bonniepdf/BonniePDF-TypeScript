@@ -40,6 +40,11 @@ export default tseslint.config(
       // Vendored: maintained upstream and copied in by tooling (see .prettierignore and VENDORED.json).
       'core/src/Rendering/Svg/**',
       'core/src/Typography/Engine/**',
+      // Synced upstream chart sources verified byte-for-byte against core/chart-sources.json (see .prettierignore).
+      'core/src/Charts/**',
+      '!core/src/Charts/ChartElement.ts',
+      '!core/src/Charts/ChartTagging.ts',
+      '!core/src/Charts/GroupedBarChartElement.ts',
     ],
   },
 

@@ -9,10 +9,15 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 ### Features
 
 - **Charting engine:** sync updated BonnieCharts sources across 40 chart families, presentation themes, paint gradients, visual effects, annotations, pseudo-3D depth, and generated chart exports and fixtures.
+- **Charts:** export every chart type from `@bonniepdf/core` and `@bonniepdf/core/charts`, including the 26 added after the original 14, such as `FunnelChart`, `GanttChart`, `TreemapChart` and `SankeyChart`, with their option types and the types they use. They were already in the package but could not be imported, while .NET exposed them. They are not Document Definition types yet.
 
 ### Changes
 
 - **Factur-X:** `applyFacturX` now checks the invoice XML before binding it. It must be well-formed UTF-8 CII with no DOCTYPE, and its profile identifier (BT-24) must be a recognised Factur-X / ZUGFeRD 2.1+ profile that matches `options.profile`. On failure it throws a `FacturXError` carrying a `code` and leaves the document unchanged. When `options.profile` is omitted, the profile is read from the XML instead of defaulting to EN 16931. This is not business-rule validation: totals, VAT rules and the CII schema are still not checked.
+
+### Fixes
+
+- **Compliance preflight and layout snapshots:** every chart is now a figure, so preflight reports `figure-missing-alt` for every chart type. The 26 chart types added after the original 14 were skipped.
 
 ## 2026.11.23
 

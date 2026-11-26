@@ -20,6 +20,7 @@
 // ---------------------------------------------------------------------------
 
 import { debugSourceOf } from './DebugSource';
+import { ChartBase } from '../Charts/ChartBase';
 import type { Color } from '../Core/Color';
 
 /** Schema version emitted in every snapshot, so consumers can feature-detect.
@@ -72,6 +73,7 @@ export interface NodeAccessibility {
 }
 
 const HEADING_LEVELS: Record<string, number> = { H1: 1, H2: 2, H3: 3, H4: 4, H5: 5, H6: 6 };
+// Figure-like elements that are not charts. Every chart (any ChartBase subclass) is figure-like too.
 const IMAGE_LIKE_TYPES = new Set([
   'Image',
   'Svg',
@@ -79,20 +81,6 @@ const IMAGE_LIKE_TYPES = new Set([
   'Barcode',
   'DataMatrix',
   'CanvasElement',
-  'BarChart',
-  'GroupedBarChart',
-  'LineChart',
-  'AreaChart',
-  'PieChart',
-  'DotPlotChart',
-  'LollipopChart',
-  'StackedBarChart',
-  'StackedAreaChart',
-  'ComboChart',
-  'WaterfallChart',
-  'ScatterChart',
-  'BulletChart',
-  'HeatmapChart',
   'ChartElement',
   'GroupedBarChartElement',
 ]);
@@ -113,7 +101,7 @@ export function accessibilityOf(element: object, type: string): NodeAccessibilit
   const level = HEADING_LEVELS[roleValue];
   if (level) a11y.headingLevel = level;
 
-  if (IMAGE_LIKE_TYPES.has(type)) a11y.imageLike = true;
+  if (IMAGE_LIKE_TYPES.has(type) || element instanceof ChartBase) a11y.imageLike = true;
 
   const altText = (element as { altText?: string }).altText;
   if (typeof altText === 'string' && altText.length > 0) a11y.alt = altText;

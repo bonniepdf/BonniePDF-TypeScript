@@ -58,6 +58,7 @@ These are not TS quirks; they are correctness requirements of the format and the
 ### Build / runtime
 
 - Chart drawing files under `core/src/Charts/` with a generated header are maintained upstream. `core/chart-sources.json` pins their source inputs and file hashes; builds verify those hashes with `core/scripts/verify-chart-sources.mjs`. Change the authoritative source and regenerate both language bindings. Layout/tagging bindings preserve chart APIs and document output, and the generated files add no runtime dependency.
+- **Chart exports are generated too.** Both barrels re-export `core/src/Charts/ChartExports.ts`, so every chart type the upstream package exports is public here; don't list chart names in the barrels by hand. `core/tests/content/every-chart.test.ts` renders the generated `chart-types.json` (one case per chart type) as tagged figures, checks preflight, and lists the chart types Document Definition does not describe yet. Recognise a chart by `ChartBase`, never by a list of chart names.
 
 - **Use static `import * as fs from 'fs'` in Node-only modules.** `tsup` compiles dynamic `require()` to a shim that throws _"Dynamic require of 'fs' is not supported"_ under Node ESM; a try/catch swallows it and the call silently no-ops. The browser bundle must not import `fs` at all.
 

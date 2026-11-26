@@ -44,13 +44,7 @@ export { MissingGlyphs } from './Configuration/MissingGlyphs';
 export { OversizedContent } from './Configuration/OversizedContent';
 export { MissingGlyphException } from './Core/MissingGlyphException';
 export { pageTemplate, type PageTemplate, type PageTemplateElements } from './Configuration/PageTemplate';
-export {
-  formatChartNumber,
-  isChartNumberFormat,
-  sumChartNumbers,
-  toChartDecimal,
-  type ChartDecimal,
-} from './Charts/ChartNumberFormat';
+export { sumChartNumbers, toChartDecimal, type ChartDecimal } from './Charts/ChartNumberFormat';
 export { DocumentFonts, type DocumentFontFace, type DocumentFontOptions } from './Typography/DocumentFonts';
 export { loadFontFromUrl } from './Typography/loadFontFromUrl';
 export * from './Configuration/AccessibilityMode';
@@ -180,52 +174,10 @@ export * from './Elements/Shapes/BarcodeSymbology';
 export { type BarcodeOptions, Barcode } from './Elements/Shapes/Barcode';
 export { DataMatrixContentException } from './Elements/Shapes/DataMatrixEncoder';
 export { type DataMatrixOptions, DataMatrix } from './Elements/Shapes/DataMatrix';
-export { type ChartDataPointOptions, type ChartDataPointKind, ChartDataPoint } from './Charts/Models/ChartDataPoint';
-export { type ChartSeriesStyleOptions, ChartSeriesStyle } from './Charts/Models/ChartSeriesStyle';
-export {
-  type ChartSeriesOptions,
-  type ChartSeriesType,
-  type ChartAxisTarget,
-  ChartSeries,
-} from './Charts/Models/ChartSeries';
-export { type ChartDataOptions, ChartData } from './Charts/Models/ChartData';
-export { type AxisOptionsOptions, type AxisLabelOverflow, AxisOptions } from './Charts/Models/AxisOptions';
-export * from './Charts/ChartOrientation';
-export {
-  type ChartThemeName,
-  type ChartGridLineStyle,
-  type ChartThemeDefinition,
-  type ChartThemeInput,
-} from './Charts/ChartTheme';
-export { type ChartBaseOptions, ChartBase } from './Charts/ChartBase';
-export {
-  type CartesianChartOptions,
-  type ChartReference,
-  type ChartLegendPosition,
-  type ChartValueLabelPosition,
-  type ChartReferenceLabelPosition,
-  type ChartReferenceLabelPlacement,
-  CartesianChartBase,
-} from './Charts/CartesianChartBase';
+// Chart names come from Charts/ChartExports.ts, generated with the chart sources (see core/chart-sources.json).
+export * from './Charts/ChartExports';
 export { type ChartElementOptions, ChartElement } from './Charts/ChartElement';
-export { type BarChartOptions, BarChart } from './Charts/BarChart';
-export { type AreaChartOptions, AreaChart } from './Charts/AreaChart';
-export { type LineChartOptions, LineChart } from './Charts/LineChart';
-export { type DotPlotChartOptions, DotPlotChart } from './Charts/DotPlotChart';
-export { type LollipopChartOptions, LollipopChart } from './Charts/LollipopChart';
-export { type GroupedBarChartOptions, GroupedBarChart } from './Charts/GroupedBarChart';
 export { type GroupedBarChartElementOptions, GroupedBarChartElement } from './Charts/GroupedBarChartElement';
-export { type PieChartOptions, type PieLegendFormat, type PieSliceLabelMode, PieChart } from './Charts/PieChart';
-export { type StackedBarChartOptions, type ChartStackMode, StackedBarChart } from './Charts/StackedBarChart';
-export { type StackedAreaChartOptions, StackedAreaChart } from './Charts/StackedAreaChart';
-export { type ComboChartOptions, ComboChart } from './Charts/ComboChart';
-export { type WaterfallChartOptions, WaterfallChart } from './Charts/WaterfallChart';
-export { type ScatterChartOptions, type ScatterTrendlineMode, ScatterChart } from './Charts/ScatterChart';
-export { type BulletChartOptions, type BulletRange, BulletChart } from './Charts/BulletChart';
-export { type HeatmapChartOptions, HeatmapChart } from './Charts/HeatmapChart';
-export type { ChartCurveMode } from './Charts/Graphics/ChartCurves';
-export type { ChartMarkerShape, ChartMarkerFill } from './Charts/Graphics/ChartMarkers';
-export type { ChartPatternKind, ChartPatternFill } from './Charts/Graphics/ChartPathPlan';
 
 export * from './Document';
 
@@ -297,10 +249,3 @@ export { configurePlatform, type IPlatformIO } from './Platform/PlatformIO';
 export * from './Platform/BrowserPlatformIO';
 
 export * from './Prototyping/Placeholders';
-
-export {
-  ChartBarStyle,
-  ChartLinearGradient,
-  type ChartBarStyleOptions,
-  type ChartLinearGradientOptions,
-} from './Charts/ChartBarStyle';

@@ -27,6 +27,10 @@ export type DotPlotChartOptions = CartesianChartOptions &
 
 /** Renders each data value as a dot positioned along a Cartesian scale. */
 export class DotPlotChart extends CartesianChartBase {
+  protected override get supportsAnnotations(): boolean {
+    return true;
+  }
+
   private static readonly DEFAULT_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DOT_RADIUS_VALUE = 10;
 

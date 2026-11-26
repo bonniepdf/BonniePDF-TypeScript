@@ -1,5 +1,7 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { Color, toColor, type ColorInput } from './ChartHost';
+import { toEffects, type ChartEffectInput } from './Graphics/ChartEffects';
+import type { ChartResolvedEffect } from './Graphics/ChartPathPlan';
 
 /** Optional endpoints and coordinate scope for a two-stop gradient. */
 export interface ChartLinearGradientOptions {
@@ -42,15 +44,26 @@ export interface ChartBarStyleOptions {
   cornerRadius?: number;
   /** Opaque two-stop fill; omitted retains the series colour. */
   gradient?: ChartLinearGradient | ChartLinearGradientOptions;
+  /** Shadow, glow or gloss for every bar. */
+  effects?: readonly ChartEffectInput[];
 }
 /** Explicit settings override the theme, including a corner radius of zero. */
 export class ChartBarStyle {
   constructor(options: ChartBarStyleOptions = {}) {
     this.cornerRadius = options.cornerRadius;
     if (options.gradient) this.gradient = options.gradient;
+    if (options.effects) this.effects = options.effects;
   }
   /** Value-end radius in points. Undefined uses the theme default; zero keeps square ends. */
   cornerRadius?: number;
+  private _effects: ChartResolvedEffect[] = [];
+  /** Shadow, glow or gloss for every bar. */
+  get effects(): readonly ChartResolvedEffect[] {
+    return this._effects;
+  }
+  set effects(value: readonly ChartEffectInput[] | undefined) {
+    this._effects = toEffects(value);
+  }
   private _gradient?: ChartLinearGradient;
   /** Optional opaque fill, resolved into absolute coordinates before drawing. */
   get gradient(): ChartLinearGradient | undefined {

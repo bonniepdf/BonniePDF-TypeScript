@@ -137,7 +137,24 @@ export function contrastTextColor(background: Color): Color {
   return lum < 0.1791 ? Color.white : Color.fromHex('#0f172a');
 }
 
+/** WCAG 2.1 relative luminance of an opaque colour. */
+export function relativeLuminance(c: Color): number {
+  return 0.2126 * srgbLinear(c.scR) + 0.7152 * srgbLinear(c.scG) + 0.0722 * srgbLinear(c.scB);
+}
+
+/** WCAG 2.1 contrast ratio (1 to 21) between two opaque colours. */
+export function contrastRatio(a: Color, b: Color): number {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
 /** Blends a possibly translucent colour over an opaque background (PDF/A-1 opaque substitute). */
+/** Fraction of the way from `min` to `max` on a logarithmic scale. The base cancels, so it is not needed. */
+export function logFraction(value: number, min: number, max: number): number {
+  return (Math.log(value) - Math.log(min)) / (Math.log(max) - Math.log(min));
+}
+
 export function blendOverOpaque(foreground: Color, background: Color): Color {
   const a = foreground.scA;
   if (a >= 1) return foreground;

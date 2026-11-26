@@ -113,7 +113,7 @@ export class BulletChart extends ChartBase {
     const font = this.resolveFontFamily();
     const horizontal = this.orientation === ChartOrientation.Horizontal;
     const titlePad = data.title !== '' ? 36 : 0;
-    const scaleBand = this.showScale ? 16 : 0;
+    const scaleBand = horizontal && this.showScale ? 16 : 0;
     const captionPad = this.caption !== '' ? 16 : 0;
 
     let leftPad = 8;
@@ -126,13 +126,31 @@ export class BulletChart extends ChartBase {
       rightPad = Math.min(this.width * 0.25, Math.ceil(canvas.measureText(formattedVal, 10, font).width + 14));
     }
 
+    // Vertical strips carry their label above, the value below and the scale on the right.
+    const vertical = !horizontal;
+    const labelBand = vertical && this.label !== '' ? Math.ceil(canvas.measureText(this.label, 10, font).height) + 6 : 0;
+    const valueBand = vertical && this.showValueLabel ? 16 : 0;
+    if (vertical && this.showScale) {
+      let widest = 0;
+      for (let i = 0; i <= 4; i++) {
+        const v = this.minValue + (i / 4) * (maxV - this.minValue);
+        const text = `${this.valuePrefix}${formatChartNumber(v, this.valueFormat)}${this.valueSuffix}`;
+        widest = Math.max(widest, canvas.measureText(text, 8, font).width);
+      }
+      rightPad = 8 + 4 + Math.ceil(widest);
+    }
+
     const plotX = leftPad;
-    const plotY = titlePad + 6;
+    const plotY = titlePad + 6 + labelBand;
     const plotW = Math.max(10, this.width - leftPad - rightPad);
-    const plotH = Math.max(10, this.height - plotY - 6 - scaleBand - captionPad);
+    const plotH = Math.max(10, this.height - plotY - 6 - scaleBand - captionPad - valueBand);
 
     if (horizontal && this.label !== '') {
       canvas.drawText(plotX - 8, plotY + plotH / 2 - 5, this.label, this.appearance.titleColor, 10, font, TextAlignment.Right);
+    }
+
+    if (vertical && this.label !== '') {
+      canvas.drawText(plotX + plotW / 2, titlePad + 6, this.label, this.appearance.titleColor, 10, font, TextAlignment.Center);
     }
 
     // Qualitative background ranges painted largest-to-smallest so smaller bands sit on top
@@ -179,6 +197,19 @@ export class BulletChart extends ChartBase {
 
     if (horizontal && this.showValueLabel) {
       canvas.drawText(plotX + plotW + 6, plotY + plotH / 2 - 5, formattedVal, this.appearance.titleColor, 10, font, TextAlignment.Left);
+    }
+
+    if (vertical && this.showValueLabel) {
+      canvas.drawText(plotX + plotW / 2, plotY + plotH + 4, formattedVal, this.appearance.titleColor, 10, font, TextAlignment.Center);
+    }
+
+    if (this.showScale && vertical) {
+      for (let i = 0; i <= 4; i++) {
+        const ty = plotY + plotH - (i / 4) * plotH;
+        const v = this.minValue + (i / 4) * (maxV - this.minValue);
+        const lbl = `${this.valuePrefix}${formatChartNumber(v, this.valueFormat)}${this.valueSuffix}`;
+        canvas.drawText(plotX + plotW + 4, ty - 4, lbl, this.appearance.axisColor, 8, font, TextAlignment.Left);
+      }
     }
 
     if (this.showScale && horizontal) {

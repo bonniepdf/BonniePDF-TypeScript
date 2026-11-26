@@ -84,13 +84,13 @@ export class WaterfallChart extends CartesianChartBase {
   }
 
   private get effectivePositiveColor(): Color {
-    return this._positiveColor ?? (this.appearance.styledGeometry ? Color.fromHex('#0d9488') : Color.fromHex('#16a34a'));
+    return this._positiveColor ?? this.appearance.positiveColor ?? (this.appearance.styledGeometry ? Color.fromHex('#0d9488') : Color.fromHex('#16a34a'));
   }
   private get effectiveNegativeColor(): Color {
-    return this._negativeColor ?? (this.appearance.styledGeometry ? Color.fromHex('#e11d48') : Color.fromHex('#dc2626'));
+    return this._negativeColor ?? this.appearance.negativeColor ?? (this.appearance.styledGeometry ? Color.fromHex('#e11d48') : Color.fromHex('#dc2626'));
   }
   private get effectiveTotalColor(): Color {
-    return this._totalColor ?? (this.appearance.styledGeometry ? Color.fromHex('#2563eb') : Color.fromHex('#4f46e5'));
+    return this._totalColor ?? this.appearance.totalColor ?? (this.appearance.styledGeometry ? Color.fromHex('#2563eb') : Color.fromHex('#4f46e5'));
   }
 
   /** Corner rounding and gradient style applied to waterfall bars. */
@@ -184,7 +184,10 @@ export class WaterfallChart extends CartesianChartBase {
       if (horizontal) {
         const xStart = this._plotLeft + fStart * chartAreaWidth;
         const xEnd = this._plotLeft + fEnd * chartAreaWidth;
-        drawChartBar(canvas, xStart, center - thickness / 2, xEnd - xStart, thickness, color, this.barStyle, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        this.markGroup(canvas, data, data.series[0], i, { x: xStart, y: center, axis: 'x' }, () => {
+          this.drawBarDepth(canvas, xStart, center - thickness / 2, xEnd - xStart, thickness, color);
+          drawChartBar(canvas, xStart, center - thickness / 2, xEnd - xStart, thickness, color, this.barStyle, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        }, b.displayValue);
         if (this.showConnectors && i < bars.length - 1) {
           const nextCenter = topY + (i + 1) * slot + slot / 2;
           strokeChartPath(canvas, {
@@ -197,7 +200,10 @@ export class WaterfallChart extends CartesianChartBase {
       } else {
         const yStart = baselineY - fStart * chartAreaHeight;
         const yEnd = baselineY - fEnd * chartAreaHeight;
-        drawChartBar(canvas, center - thickness / 2, yEnd, thickness, yStart - yEnd, color, this.barStyle, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        this.markGroup(canvas, data, data.series[0], i, { x: center, y: yStart, axis: 'y' }, () => {
+          this.drawBarDepth(canvas, center - thickness / 2, yEnd, thickness, yStart - yEnd, color);
+          drawChartBar(canvas, center - thickness / 2, yEnd, thickness, yStart - yEnd, color, this.barStyle, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+        }, b.displayValue);
         if (this.showConnectors && i < bars.length - 1) {
           const nextCenter = this._plotLeft + (i + 1) * slot + slot / 2;
           strokeChartPath(canvas, {
@@ -209,6 +215,10 @@ export class WaterfallChart extends CartesianChartBase {
         }
       }
     }
+  }
+
+  protected override get supportsDepth3d(): boolean {
+    return true;
   }
 
   protected override drawSeriesElements(): void {}

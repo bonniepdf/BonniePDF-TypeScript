@@ -175,3 +175,19 @@ export function formatChartNumber(value: number | ChartDecimal, format?: string)
   const sign = decimal.negative && !isZero ? '-' : '';
   return `${sign}${whole}${fraction ? `.${fraction}` : ''}${parsed.kind === 'P' ? '%' : ''}`;
 }
+
+/**
+ * How a negative number combines with a prefix and suffix: `minus` (`-$1.1`), `parentheses` (`($1.1)`) or
+ * `minusAfterPrefix` (`$-1.1`, the default, which reproduces earlier releases).
+ */
+export type ChartNegativeStyle = 'minus' | 'parentheses' | 'minusAfterPrefix';
+
+/** Wraps formatted number text in a prefix and suffix, placing a leading minus sign by `style`. */
+export function applyChartAffixes(text: string, prefix: string, suffix: string, style: ChartNegativeStyle = 'minusAfterPrefix'): string {
+  const negative = text.startsWith('-');
+  if (!negative || style === 'minusAfterPrefix') return `${prefix}${text}${suffix}`;
+  const magnitude = text.slice(1);
+  if (style === 'parentheses') return `(${prefix}${magnitude}${suffix})`;
+  if (style === 'minus') return `-${prefix}${magnitude}${suffix}`;
+  throw new RangeError(`Unsupported negativeStyle '${style}'. Use minus, parentheses or minusAfterPrefix.`);
+}

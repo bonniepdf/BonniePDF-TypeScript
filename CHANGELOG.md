@@ -6,6 +6,10 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 ## Unreleased
 
+### Features
+
+- **Charting engine:** sync updated BonnieCharts sources across 40 chart families, presentation themes, paint gradients, visual effects, annotations, pseudo-3D depth, and generated chart exports and fixtures.
+
 ## 2026.11.23
 
 Status: Released

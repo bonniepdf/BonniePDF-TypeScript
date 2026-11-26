@@ -2,8 +2,10 @@
 import type { Color, ICanvas } from '../ChartHost';
 import type { ChartBarStyle } from '../ChartBarStyle';
 import type { ChartTheme } from '../ChartTheme';
-import type { ChartPathCommand, ChartPathPlan } from './ChartPathPlan';
-import { fillChartPath } from './ChartVector';
+import type { ChartPathCommand, ChartPathPlan, ChartResolvedEffect } from './ChartPathPlan';
+import { fillChartPath, strokeChartPath } from './ChartVector';
+import { darkenColor, tintColor } from './ChartTint';
+import type { ChartFill, ChartBox, ChartFillBoxes } from './ChartFill';
 
 /** Core-owned rounded outline and paint coordinates; adapters only replay this plan. */
 export function drawChartBar(
@@ -19,14 +21,19 @@ export function drawChartBar(
   plotX: number,
   plotY: number,
   plotW: number,
-  plotH: number
+  plotH: number,
+  fill?: { fill: ChartFill; boxes: (mark: ChartBox) => ChartFillBoxes },
+  effects?: readonly ChartResolvedEffect[]
 ): void {
   const radius = style.cornerRadius ?? theme.barCornerRadius;
-  const g = style.gradient;
+  // A theme that tints fills gives every plain bar a gradient from a lighter tint at the value end to its colour at the baseline.
+  const g: { startColor: Color; endColor: Color; scope: 'bar' | 'plot' } | undefined =
+    style.gradient ?? (theme.autoFill === 'tint' && !fill && color.scA === 1 ? { startColor: tintColor(color), endColor: color, scope: 'bar' } : undefined);
   if (!Number.isFinite(radius) || radius < 0) throw new RangeError('cornerRadius must be finite and nonnegative.');
   if (g && (g.startColor.scA !== 1 || g.endColor.scA !== 1 || !['bar', 'plot'].includes(g.scope)))
     throw new RangeError('Bar gradients require opaque colours and scope bar or plot.');
-  if (!theme.styledGeometry && radius === 0 && !g) {
+  const hasEffects = effects !== undefined && effects.length > 0;
+  if (!theme.styledGeometry && radius === 0 && !g && !fill && !hasEffects && theme.markOutline === 'none') {
     sink.fillRect(x, y, w, h, color);
     return;
   }
@@ -63,7 +70,11 @@ export function drawChartBar(
   if (tl) add('C', x0, y0 + tl - k * tl, x0 + tl - k * tl, y0, x0 + tl, y0);
   add('Z');
   const plan: ChartPathPlan = { commands, color };
-  if (g) {
+  if (hasEffects) plan.effects = effects;
+  if (fill) {
+    // A point or series fill wins over the bar style's two-stop gradient.
+    Object.assign(plan, fill.fill.resolve(fill.boxes({ x: x0, y: y0, width: x1 - x0, height: y1 - y0 })));
+  } else if (g) {
     const px = g.scope === 'plot' ? plotX : x0,
       py = g.scope === 'plot' ? plotY : y0,
       pw = g.scope === 'plot' ? plotW : x1 - x0,
@@ -82,4 +93,5 @@ export function drawChartBar(
     }
   }
   fillChartPath(sink, plan);
+  if (theme.markOutline === 'darker') strokeChartPath(sink, { commands, color: darkenColor(color), lineWidth: 1, lineJoin: 'round' });
 }

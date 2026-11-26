@@ -18,6 +18,7 @@ export const AREA_CHART_OWN_OPTION_KEYS = [
   'lineWidth',
   'curve',
   'areaGradient',
+  'dropLines',
 ] as const;
 
 /** The full option surface, bases included. */
@@ -34,6 +35,14 @@ export type AreaChartOptions = CartesianChartOptions &
 
 /** Renders one or more data series as filled areas against Cartesian axes. */
 export class AreaChart extends CartesianChartBase {
+  protected override get supportsAnnotations(): boolean {
+    return true;
+  }
+
+  protected override get supportsTimeAxis(): boolean {
+    return true;
+  }
+
   private static readonly DEFAULT_AREA_COLOR_HEX = '#4f46e5';
 
   constructor(options?: AreaChartOptions) {
@@ -41,6 +50,14 @@ export class AreaChart extends CartesianChartBase {
     const { data, ...rest } = options ?? {};
     if (data !== undefined) this.data = data;
     applyOptions(this, rest);
+  }
+
+  /** Thin lines from each point to the category axis. */
+  dropLines: boolean = false;
+
+  protected override drawAllSeries(canvas: ICanvas, data: ChartData, chartAreaWidth: number, chartAreaHeight: number, baselineY: number, topY: number): void {
+    if (this.dropLines) this.drawDropLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
+    super.drawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
   }
 
   /** Default fill opacity for series without an explicit opacity (`0..1`). */
@@ -114,7 +131,7 @@ export class AreaChart extends CartesianChartBase {
     const dash = this.resolveSeriesDashPattern(series, seriesIdx);
 
     this.drawAreaFill(canvas, coordinates, origin, color, fillOpacity, curve);
-    this.drawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash);
+    this.drawSeriesLine(canvas, coordinates, this.resolveSeriesStrokeColor(series), lineWidth, curve, dash, this.resolveLineEffects(series));
   }
 
   protected override getLabelVerticalOffset(_series: ChartSeries): number {

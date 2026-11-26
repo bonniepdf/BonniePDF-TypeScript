@@ -27,6 +27,14 @@ export type BarChartOptions = CartesianChartOptions &
 
 /** Renders a data series as vertical or horizontal bars. */
 export class BarChart extends CartesianChartBase {
+  protected override get supportsAnnotations(): boolean {
+    return true;
+  }
+
+  protected override annotationBarThickness(slot: number, _seriesCount: number): number {
+    return Math.min(slot * this.barWidthRatio, 50);
+  }
+
   protected override drawLegendSwatch(canvas: ICanvas, x: number, y: number, size: number, series: ChartSeries): void {
     const color = this.resolveSeriesColor(series);
     const idx = (this._renderData ?? this.data).series.indexOf(series);
@@ -92,26 +100,34 @@ export class BarChart extends CartesianChartBase {
     if (this.orientation === ChartOrientation.Horizontal) {
       const totalBarSpace = chartAreaHeight / dataPointCount;
       const barThickness = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      for (const p of coordinates) {
+      for (const [index, p] of coordinates.entries()) {
         const barWidth = p.x - origin;
         const barY = p.y - barThickness / 2;
-        drawChartBar(canvas, origin, barY, barWidth, barThickness, color, this.barStyle, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
-        if (pat !== 'none') {
-          const rx = barWidth < 0 ? origin + barWidth : origin;
-          fillPatternRect(canvas, rx, barY, Math.abs(barWidth), barThickness, { kind: pat, foreground: Color.white });
-        }
+        const paint = this.resolveMarkPaint(series, series.dataPoints[index], color);
+        this.markGroup(canvas, data, series, index, { x: origin, y: p.y, axis: 'x' }, () => {
+          this.drawBarDepth(canvas, origin, barY, barWidth, barThickness, paint.color);
+          drawChartBar(canvas, origin, barY, barWidth, barThickness, paint.color, this.barStyle, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight, paint.fill && { fill: paint.fill, boxes: (m) => this.fillBoxes(m) }, this.resolveBarEffects(series, this.barStyle.effects));
+          if (pat !== 'none') {
+            const rx = barWidth < 0 ? origin + barWidth : origin;
+            fillPatternRect(canvas, rx, barY, Math.abs(barWidth), barThickness, { kind: pat, foreground: Color.white });
+          }
+        });
       }
     } else {
       const totalBarSpace = chartAreaWidth / dataPointCount;
       const barWidth = Math.min(totalBarSpace * this.barWidthRatio, 50);
-      for (const p of coordinates) {
+      for (const [index, p] of coordinates.entries()) {
         const barHeight = origin - p.y;
         const barX = p.x - barWidth / 2;
-        drawChartBar(canvas, barX, p.y, barWidth, barHeight, color, this.barStyle, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
-        if (pat !== 'none') {
-          const ry = barHeight < 0 ? p.y + barHeight : p.y;
-          fillPatternRect(canvas, barX, ry, barWidth, Math.abs(barHeight), { kind: pat, foreground: Color.white });
-        }
+        const paint = this.resolveMarkPaint(series, series.dataPoints[index], color);
+        this.markGroup(canvas, data, series, index, { x: p.x, y: origin, axis: 'y' }, () => {
+          this.drawBarDepth(canvas, barX, p.y, barWidth, barHeight, paint.color);
+          drawChartBar(canvas, barX, p.y, barWidth, barHeight, paint.color, this.barStyle, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight, paint.fill && { fill: paint.fill, boxes: (m) => this.fillBoxes(m) }, this.resolveBarEffects(series, this.barStyle.effects));
+          if (pat !== 'none') {
+            const ry = barHeight < 0 ? p.y + barHeight : p.y;
+            fillPatternRect(canvas, barX, ry, barWidth, Math.abs(barHeight), { kind: pat, foreground: Color.white });
+          }
+        });
       }
     }
   }
@@ -135,6 +151,7 @@ export class BarChart extends CartesianChartBase {
       if (dataPointCount === 0) continue;
       const coordinates = this.calculateSeriesCoordinates(series, data, chartAreaWidth, chartAreaHeight, baselineY);
       const color = this.resolveSeriesColor(series);
+      const labelColor = this.rawSeriesStrokeColor(series);
       const offset = this.getLabelVerticalOffset(series);
       const thickness =
         this.orientation === ChartOrientation.Horizontal
@@ -145,16 +162,20 @@ export class BarChart extends CartesianChartBase {
         const text = this.formatPointValue(series.dataPoints[i]);
         const below = isBelowOrigin(series.dataPoints[i].value, this._effectiveMin, this._effectiveMax);
         if (this.orientation === ChartOrientation.Horizontal) {
-          this.drawBarValueLabel(canvas, origin, p.y - thickness / 2, p.x - origin, thickness, text, color, below, offset, p.x, p.y);
+          this.drawBarValueLabel(canvas, origin, p.y - thickness / 2, p.x - origin, thickness, text, this.dimMark(series, i, color), below, offset, p.x, p.y, true, this.dimMark(series, i, labelColor));
         } else {
-          this.drawBarValueLabel(canvas, p.x - thickness / 2, p.y, thickness, origin - p.y, text, color, below, offset, p.x, p.y);
+          this.drawBarValueLabel(canvas, p.x - thickness / 2, p.y, thickness, origin - p.y, text, this.dimMark(series, i, color), below, offset, p.x, p.y, true, this.dimMark(series, i, labelColor));
         }
       }
     }
   }
 
   protected override getLabelVerticalOffset(_series: ChartSeries): number {
-    return 7;
+    return 7 + (this.orientation === ChartOrientation.Horizontal ? this.depthShift.dx : this.depthShift.dy);
+  }
+
+  protected override get supportsDepth3d(): boolean {
+    return true;
   }
 
   protected override getDefaultSeriesColor(): Color {

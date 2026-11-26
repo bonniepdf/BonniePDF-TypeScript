@@ -4,8 +4,9 @@ import { drawChartBar } from './Graphics/ChartBars';
 import { buildCurveCommands } from './Graphics/ChartCurves';
 import { drawChartMarker } from './Graphics/ChartMarkers';
 import { checkValueRange, computeNiceScale, originFraction, valueFraction } from './Graphics/ChartValueScale';
-import { fillChartPath } from './Graphics/ChartVector';
-import { formatChartNumber } from './ChartNumberFormat';
+import { fillChartPath, strokeChartPath } from './Graphics/ChartVector';
+import type { ChartPathCommand } from './Graphics/ChartPathPlan';
+import { applyChartAffixes, formatChartNumber } from './ChartNumberFormat';
 import { AxisOptions, type AxisOptionsOptions } from './Models/AxisOptions';
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
@@ -80,6 +81,14 @@ export class ComboChart extends CartesianChartBase {
     applyOptions(this, rest);
   }
 
+  /** The lowest and highest value a point spans: its `low` and `high` for a range series, else its value. */
+  private extent(series: ChartSeries, dp: ChartSeries['dataPoints'][number]): [number, number] {
+    if (series.seriesType !== 'range') return [dp.value, dp.value];
+    if (dp.low === undefined || dp.high === undefined) throw new RangeError('Range series points need low and high.');
+    if (!(dp.low <= dp.high)) throw new RangeError('Range series points must satisfy low <= high.');
+    return [dp.low, dp.high];
+  }
+
   private usesSecondary(data: ChartData): boolean {
     return this._secondaryYAxis !== undefined || data.series.some((s) => s.valueAxis === 'secondary');
   }
@@ -90,8 +99,9 @@ export class ComboChart extends CartesianChartBase {
     for (const s of data.series) {
       if (s.valueAxis === 'secondary') continue;
       for (const dp of s.dataPoints) {
-        if (dp.value < min) min = dp.value;
-        if (dp.value > max) max = dp.value;
+        const [lo, hi] = this.extent(s, dp);
+        if (lo < min) min = lo;
+        if (hi > max) max = hi;
       }
     }
     return min <= max ? [min, max] : super.getValueDataRange(data);
@@ -113,8 +123,9 @@ export class ComboChart extends CartesianChartBase {
       for (const s of data.series) {
         if (s.valueAxis !== 'secondary') continue;
         for (const dp of s.dataPoints) {
-          if (dp.value < min) min = dp.value;
-          if (dp.value > max) max = dp.value;
+          const [lo, hi] = this.extent(s, dp);
+          if (lo < min) min = lo;
+          if (hi > max) max = hi;
         }
       }
       if (min <= max) {
@@ -148,7 +159,7 @@ export class ComboChart extends CartesianChartBase {
     const family = this.effectiveFontFamily;
     let maxW = 0;
     for (let i = 0; i <= steps; i++) {
-      const lbl = `${secAxis.prefix}${formatChartNumber(this._secMin + i * stepVal, this._secTickFormat)}${secAxis.suffix}`;
+      const lbl = applyChartAffixes(formatChartNumber(this._secMin + i * stepVal, this._secTickFormat), secAxis.prefix, secAxis.suffix, secAxis.negativeStyle);
       const w = canvas.measureText(lbl, CartesianChartBase.AXIS_LABEL_FONT_SIZE, family).width;
       if (w > maxW) maxW = w;
     }
@@ -176,6 +187,23 @@ export class ComboChart extends CartesianChartBase {
     baselineY: number,
     topY: number
   ): void {
+    // 0. Range series, beneath everything else
+    for (const series of data.series) {
+      if (series.seriesType !== 'range' || series.dataPoints.length < 2) continue;
+      const min = series.valueAxis === 'secondary' ? this._secMin : this._effectiveMin;
+      const max = series.valueAxis === 'secondary' ? this._secMax : this._effectiveMax;
+      const slot = chartAreaWidth / series.dataPoints.length;
+      const at = (i: number, v: number): [number, number] => [this._plotLeft + i * slot + slot / 2, baselineY - valueFraction(v, min, max) * chartAreaHeight];
+      const highs = series.dataPoints.map((p, i) => at(i, this.extent(series, p)[1]));
+      const lows = series.dataPoints.map((p, i) => at(i, this.extent(series, p)[0]));
+      const color = this.resolveSeriesColor(series);
+      const edge = (pts: [number, number][]): ChartPathCommand[] => pts.map((p, i) => ({ op: i === 0 ? 'M' : 'L', values: [p[0], p[1]] }));
+      const band: ChartPathCommand[] = [...edge(highs), ...[...lows].reverse().map((p) => ({ op: 'L' as const, values: [p[0], p[1]] })), { op: 'Z', values: [] }];
+      fillChartPath(canvas, { commands: band, color: color.withAlpha(series.style?.fillOpacity ?? 0.3) });
+      strokeChartPath(canvas, { commands: edge(highs), color, lineWidth: 1.5, lineJoin: 'round', miterLimit: 10 });
+      strokeChartPath(canvas, { commands: edge(lows), color, lineWidth: 1.5, lineJoin: 'round', miterLimit: 10 });
+    }
+
     // 1. Area series
     for (let sIdx = 0; sIdx < data.series.length; sIdx++) {
       const series = data.series[sIdx];
@@ -265,7 +293,7 @@ export class ComboChart extends CartesianChartBase {
 
     for (let i = 0; i <= steps; i++) {
       const y = baselineY - i * stepH;
-      const lbl = `${secAxis.prefix}${formatChartNumber(this._secMin + i * stepVal, this._secTickFormat)}${secAxis.suffix}`;
+      const lbl = applyChartAffixes(formatChartNumber(this._secMin + i * stepVal, this._secTickFormat), secAxis.prefix, secAxis.suffix, secAxis.negativeStyle);
       canvas.drawText(rightX + 8, y - CartesianChartBase.AXIS_LABEL_FONT_SIZE / 2, lbl, this.axisColor, CartesianChartBase.AXIS_LABEL_FONT_SIZE, family, TextAlignment.Left);
     }
     if (secAxis.legend !== '') {

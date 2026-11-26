@@ -1,5 +1,4 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
-import { valueFraction } from './Graphics/ChartValueScale';
 import { buildCurveCommands, type ChartCurveMode } from './Graphics/ChartCurves';
 import { drawChartMarker, type ChartMarkerFill, type ChartMarkerShape } from './Graphics/ChartMarkers';
 import { fillChartPath, strokeChartPath } from './Graphics/ChartVector';
@@ -9,6 +8,7 @@ import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './Carte
 import { applyOptions, toColor, type ColorInput, Color, Point, type ICanvas } from './ChartHost';
 import { ChartSeries } from './Models/ChartSeries';
 import { CartesianChartBase } from './CartesianChartBase';
+import type { ChartUpDownBars } from './Graphics/ChartAnalysis';
 
 /** Settable properties declared by {@link LineChart} itself. */
 export const LINE_CHART_OWN_OPTION_KEYS = [
@@ -25,6 +25,9 @@ export const LINE_CHART_OWN_OPTION_KEYS = [
   'defaultMarkerHaloWidth',
   'curve',
   'lineColor',
+  'dropLines',
+  'highLowLines',
+  'upDownBars',
 ] as const;
 
 /** The full option surface, bases included. */
@@ -39,6 +42,14 @@ export type LineChartOptions = CartesianChartOptions &
 
 /** Renders one or more data series as lines against Cartesian axes. */
 export class LineChart extends CartesianChartBase {
+  protected override get supportsAnnotations(): boolean {
+    return true;
+  }
+
+  protected override get supportsTimeAxis(): boolean {
+    return true;
+  }
+
   private static readonly DEFAULT_LINE_COLOR_HEX = '#4f46e5';
   private static readonly DEFAULT_DATA_POINT_RADIUS = 5;
 
@@ -51,6 +62,18 @@ export class LineChart extends CartesianChartBase {
 
   /** Default stroke width for line series in points. */
   defaultLineWidth: number = 2;
+  /** Thin lines from each point to the category axis. */
+  dropLines: boolean = false;
+  /** A line from the lowest to the highest series value at each category (two or more series). */
+  highLowLines: boolean = false;
+  /** A bar between the first and the last series at each category, coloured by direction (two or more series). */
+  upDownBars: ChartUpDownBars | undefined;
+
+  protected override drawAllSeries(canvas: ICanvas, data: ChartData, chartAreaWidth: number, chartAreaHeight: number, baselineY: number, topY: number): void {
+    this.drawBandLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, this.highLowLines, this.upDownBars);
+    if (this.dropLines) this.drawDropLines(canvas, data, chartAreaWidth, chartAreaHeight, baselineY);
+    super.drawAllSeries(canvas, data, chartAreaWidth, chartAreaHeight, baselineY, topY);
+  }
   /** Draws the chart as a compact sparkline without axes, gridlines, or legend. */
   sparkline = false;
   /** Optional subtle fill opacity (`0..1`) beneath sparkline curves. */
@@ -84,7 +107,7 @@ export class LineChart extends CartesianChartBase {
       super.drawLegendSwatch(canvas, x, y, size, series);
       return;
     }
-    const color = this.resolveSeriesColor(series);
+    const color = this.resolveSeriesStrokeColor(series);
     const idx = (this._renderData ?? this.data).series.indexOf(series);
     const dash = this.resolveSeriesDashPattern(series, idx);
     const midY = y + size / 2;
@@ -103,7 +126,7 @@ export class LineChart extends CartesianChartBase {
     if (!this.sparkline) return false;
     const horizontal = this.orientation === ChartOrientation.Horizontal;
     if (this.sparklineReferenceValue !== undefined) {
-      const frac = Math.max(0, Math.min(1, valueFraction(this.sparklineReferenceValue, this._effectiveMin, this._effectiveMax)));
+      const frac = Math.max(0, Math.min(1, this.fraction(this.sparklineReferenceValue)));
       const ry = (1 - frac) * this.height;
       strokeChartPath(canvas, {
         commands: [{ op: 'M', values: [0, ry] }, { op: 'L', values: [this.width, ry] }],
@@ -118,13 +141,13 @@ export class LineChart extends CartesianChartBase {
       const inset = Math.min(lineWidth / 2 + (this.sparklineShowEndpoints || this.sparklineHighlightMinMax ? 2 : 0), this.width / 2, this.height / 2);
       const points = series.dataPoints.map(({ value }, index, all) => {
         const category = all.length > 1 ? index / (all.length - 1) : 0.5;
-        const fraction = Math.max(0, Math.min(1, valueFraction(value, this._effectiveMin, this._effectiveMax)));
+        const fraction = Math.max(0, Math.min(1, this.fraction(value)));
         return new Point(
           inset + (horizontal ? fraction : category) * (this.width - 2 * inset),
           inset + (horizontal ? category : 1 - fraction) * (this.height - 2 * inset)
         );
       });
-      const color = this.resolveSeriesColor(series);
+      const color = this.resolveSeriesStrokeColor(series);
       const curve = series.style?.curve ?? this.curve;
       const dash = this.resolveSeriesDashPattern(series, sIdx);
       if (this.sparklineFillOpacity > 0 && points.length >= 2) {
@@ -134,7 +157,7 @@ export class LineChart extends CartesianChartBase {
           : [{ op: 'M' as const, values: [points[0].x, this.height - inset] }, ...curveCmds, { op: 'L' as const, values: [points[points.length - 1].x, this.height - inset] }, { op: 'Z' as const, values: [] }];
         fillChartPath(canvas, { commands: cmds, color: color.withAlpha(this.sparklineFillOpacity) });
       }
-      this.drawSeriesLine(canvas, points, color, lineWidth, curve, dash);
+      this.drawSeriesLine(canvas, points, color, lineWidth, curve, dash, this.resolveLineEffects(series));
       if (this.sparklineShowEndpoints && points.length > 0) {
         canvas.fillCircle(points[0].x, points[0].y, 2.5, color);
         if (points.length > 1) canvas.fillCircle(points[points.length - 1].x, points[points.length - 1].y, 2.5, color);
@@ -177,11 +200,11 @@ export class LineChart extends CartesianChartBase {
     const markerRadius =
       series.style?.markerRadius && series.style.markerRadius > 0 ? series.style.markerRadius : this.defaultMarkerRadius;
     const seriesIdx = data.series.indexOf(series);
-    const color = this.resolveSeriesColor(series);
+    const color = this.resolveSeriesStrokeColor(series);
     const curve = series.style?.curve ?? this.curve;
     const dash = this.resolveSeriesDashPattern(series, seriesIdx);
 
-    this.drawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash);
+    this.drawSeriesLine(canvas, coordinates, color, lineWidth, curve, dash, this.resolveLineEffects(series));
 
     if (showMarkers) {
       const shape = this.resolveSeriesMarkerShape(series, seriesIdx, this.defaultMarkerShape);
@@ -192,6 +215,11 @@ export class LineChart extends CartesianChartBase {
         drawChartMarker(canvas, p.x, p.y, markerRadius, color, shape, fill, halo, bg, lineWidth);
       }
     }
+  }
+
+  protected override resolveSeriesColor(series: ChartSeries): Color {
+    // Pale fill palettes (pastel) keep lines legible through a darker stroke palette.
+    return this.appearance.strokePalette.length > 0 && !series.hasColor ? this.resolveSeriesStrokeColor(series) : super.resolveSeriesColor(series);
   }
 
   protected override getLabelVerticalOffset(series: ChartSeries): number {

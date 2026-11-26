@@ -1,8 +1,12 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { applyOptions, toLength, type LengthInput } from '../ChartHost';
+import { ChartFill, type ChartFillInput } from '../Graphics/ChartFill';
+import { toEffects, type ChartEffectInput } from '../Graphics/ChartEffects';
+import type { ChartResolvedEffect } from '../Graphics/ChartPathPlan';
 import type { ChartCurveMode } from '../Graphics/ChartCurves';
 import type { ChartMarkerFill, ChartMarkerShape } from '../Graphics/ChartMarkers';
 import type { ChartPatternKind } from '../Graphics/ChartPathPlan';
+import { validateErrorBars, type ChartErrorBars } from '../Graphics/ChartAnalysis';
 
 /** Settable properties of {@link ChartSeriesStyle}. */
 export const CHART_SERIES_STYLE_OPTION_KEYS = [
@@ -17,15 +21,27 @@ export const CHART_SERIES_STYLE_OPTION_KEYS = [
   'markerFill',
   'markerHaloWidth',
   'pattern',
+  'fill',
+  'effects',
+  'errorBars',
+  'xErrorBars',
 ] as const;
 
 /** Options for {@link ChartSeriesStyle}. */
 export type ChartSeriesStyleOptions = Partial<
   Omit<
     Pick<ChartSeriesStyle, (typeof CHART_SERIES_STYLE_OPTION_KEYS)[number]>,
-    'lineWidth' | 'markerRadius' | 'stemWidth' | 'markerHaloWidth'
+    'lineWidth' | 'markerRadius' | 'stemWidth' | 'markerHaloWidth' | 'fill' | 'effects'
   >
 > & {
+  /** Shadow, glow or gloss for this series' marks (a glow on a line is a halo around the stroke). */
+  effects?: readonly ChartEffectInput[];
+  /** Fill of this series' marks (a colour or a gradient). `color` remains the stroke and legend colour. */
+  fill?: ChartFillInput;
+  /** Error bars for the series' points. */
+  errorBars?: ChartErrorBars;
+  /** Horizontal error bars for scatter charts. */
+  xErrorBars?: ChartErrorBars;
   /** Line thickness. Accepts a length: `2`, `'0.5mm'`, or `{ value, unit }`. */
   lineWidth?: LengthInput;
   /** Marker radius. Accepts a length: `5`, `'2mm'`, or `{ value, unit }`. */
@@ -66,6 +82,26 @@ export class ChartSeriesStyle {
     this._markerRadius = toLength(value);
   }
 
+  private _errorBars: ChartErrorBars | undefined;
+  /** Error bars drawn at each point of the series (bar, grouped bar, line, area and dot plot charts). */
+  get errorBars(): ChartErrorBars | undefined {
+    return this._errorBars;
+  }
+  set errorBars(value: ChartErrorBars | undefined) {
+    validateErrorBars(value);
+    this._errorBars = value === undefined ? undefined : { ...value };
+  }
+
+  private _xErrorBars: ChartErrorBars | undefined;
+  /** Horizontal error bars at each point of a scatter series. */
+  get xErrorBars(): ChartErrorBars | undefined {
+    return this._xErrorBars;
+  }
+  set xErrorBars(value: ChartErrorBars | undefined) {
+    validateErrorBars(value);
+    this._xErrorBars = value === undefined ? undefined : { ...value };
+  }
+
   /** Whether to show markers at data points in Line charts (default: true). */
   showMarkers: boolean = true;
 
@@ -103,4 +139,22 @@ export class ChartSeriesStyle {
 
   /** Optional vector hatch/dot pattern fill for monochrome print accessibility. */
   pattern: ChartPatternKind | undefined;
+
+  private _effects: ChartResolvedEffect[] = [];
+  /** Shadow, glow or gloss for this series' marks. */
+  get effects(): readonly ChartResolvedEffect[] {
+    return this._effects;
+  }
+  set effects(value: readonly ChartEffectInput[] | undefined) {
+    this._effects = toEffects(value);
+  }
+
+  private _fill: ChartFill | undefined;
+  /** Fill of this series' marks (a colour or a gradient). `color` remains the stroke and legend colour. */
+  get fill(): ChartFill | undefined {
+    return this._fill;
+  }
+  set fill(value: ChartFillInput | undefined) {
+    this._fill = value === undefined ? undefined : ChartFill.from(value);
+  }
 }

@@ -1,8 +1,10 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import type { ICanvas } from '../../Drawing/ICanvas';
-import { LinearGradientPaint } from '../../Drawing/Paint';
+import { LinearGradientPaint, RadialGradientPaint } from '../../Drawing/Paint';
 import { Point } from '../../Core/Point';
 import type { ChartPathPlan, ChartStrokePlan } from './ChartPathPlan';
+import type { ChartGroupInfo } from './ChartGroups';
+import { expandEffects, expandStrokeEffects } from './ChartEffects';
 
 function replayCommands(sink: ICanvas, commands: ChartPathPlan['commands']): void {
   sink.beginPath();
@@ -17,10 +19,28 @@ function replayCommands(sink: ICanvas, commands: ChartPathPlan['commands']): voi
   }
 }
 
+/**
+ * PDF canvases do not expose whether transparency is allowed (PDF/A-1 forbids it), so shadow and glow are omitted here and
+ * only the opaque-safe parts of an effect (the gloss overlay) are drawn.
+ */
 export function fillChartPath(sink: ICanvas, plan: ChartPathPlan): void {
+  if (plan.effects && plan.effects.length > 0) {
+    for (const expanded of expandEffects(plan, 'none')) fillOnePath(sink, expanded);
+    return;
+  }
+  fillOnePath(sink, plan);
+}
+
+function fillOnePath(sink: ICanvas, plan: ChartPathPlan): void {
   sink.saveState();
   try {
     replayCommands(sink, plan.commands);
+    if (plan.radial) {
+      const r = plan.radial;
+      const focal = r.fx !== r.cx || r.fy !== r.cy ? new Point(r.fx, r.fy) : undefined;
+      sink.fillCurrentPath(new RadialGradientPaint(new Point(r.cx, r.cy), r.r, r.stops.map((s) => ({ offset: s.offset, color: s.color })), focal));
+      return;
+    }
     const g = plan.gradient;
     const stops = g
       ? (g.stops && g.stops.length >= 2
@@ -36,6 +56,14 @@ export function fillChartPath(sink: ICanvas, plan: ChartPathPlan): void {
 }
 
 export function strokeChartPath(sink: ICanvas, plan: ChartStrokePlan): void {
+  if (plan.effects && plan.effects.length > 0) {
+    for (const expanded of expandStrokeEffects(plan, 'none')) strokeOnePath(sink, expanded);
+    return;
+  }
+  strokeOnePath(sink, plan);
+}
+
+function strokeOnePath(sink: ICanvas, plan: ChartStrokePlan): void {
   if (!plan.commands.some((c) => c.op === 'L' || c.op === 'C')) return;
   sink.saveState();
   try {
@@ -52,6 +80,11 @@ export function strokeChartPath(sink: ICanvas, plan: ChartStrokePlan): void {
   } finally {
     sink.restoreState();
   }
+}
+
+/** PDF canvases keep no groups: the marks are drawn as they are. */
+export function withChartGroup(_sink: ICanvas, _info: () => ChartGroupInfo, draw: () => void): void {
+  draw();
 }
 
 export function pushClipRect(sink: ICanvas, x: number, y: number, width: number, height: number): void {

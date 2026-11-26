@@ -21,11 +21,33 @@ export interface ChartResolvedGradient {
   stops?: readonly ChartGradientStop[];
 }
 
-/** Resolved chart geometry shared by vector backends. */
+/** A resolved visual effect attached to a plan. Sinks realise it natively, or the core expands it into layers. */
+export type ChartResolvedEffect =
+  | { kind: 'shadow'; color: Color; opacity: number; blur: number; offsetX: number; offsetY: number }
+  | { kind: 'glow'; color: Color | undefined; opacity: number; radius: number }
+  | { kind: 'gloss'; opacity: number; extent: number };
+
+/** A resolved radial gradient: absolute centre, radius and focal point. */
+export interface ChartResolvedRadialGradient {
+  cx: number;
+  cy: number;
+  r: number;
+  fx: number;
+  fy: number;
+  stops: readonly ChartGradientStop[];
+}
+
+/**
+ * Resolved chart geometry shared by vector backends. At most one of `gradient` and `radial` is set;
+ * `color` is the solid fallback.
+ */
 export interface ChartPathPlan {
   commands: ChartPathCommand[];
   color: Color;
   gradient?: ChartResolvedGradient;
+  radial?: ChartResolvedRadialGradient;
+  /** Shadow, glow and gloss for the shape. See {@link ChartResolvedEffect}. */
+  effects?: readonly ChartResolvedEffect[];
 }
 
 export type ChartLineCap = 'butt' | 'round' | 'square';
@@ -41,6 +63,8 @@ export interface ChartStrokePlan {
   miterLimit?: number;
   dashPattern?: readonly number[];
   dashOffset?: number;
+  /** Shadow and glow for the stroke (realised as wider translucent strokes beneath it). */
+  effects?: readonly ChartResolvedEffect[];
 }
 
 /** Pure-vector hatch or dot pattern kind for bar fills. */

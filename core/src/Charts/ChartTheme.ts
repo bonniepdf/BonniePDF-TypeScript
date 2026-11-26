@@ -1,10 +1,12 @@
 // Generated chart source. Do not edit here; the source manifest records its provenance.
 import { Color, toColor, type ColorInput, StandardFonts, TextAlignment } from './ChartHost';
 import type { ChartMarkerShape } from './Graphics/ChartMarkers';
-import type { ChartPatternKind } from './Graphics/ChartPathPlan';
+import type { ChartPatternKind, ChartResolvedEffect } from './Graphics/ChartPathPlan';
+import { ChartFill, type ChartFillInput } from './Graphics/ChartFill';
+import { toEffects, type ChartEffectInput } from './Graphics/ChartEffects';
 
 /** Built-in chart appearance preset name. */
-export type ChartThemeName = 'legacy' | 'modern' | 'dark' | 'print';
+export type ChartThemeName = 'legacy' | 'modern' | 'dark' | 'print' | 'executive' | 'vivid' | 'pastel' | 'midnight';
 /** Gridline stroke style used by a chart theme. */
 export type ChartGridLineStyle = 'solid' | 'dashed' | 'none';
 
@@ -64,6 +66,42 @@ export interface ChartThemeDefinition {
   tabularNums?: boolean;
   /** Whether to draw rounded square swatches in legends. */
   roundedLegendSwatches?: boolean;
+  /** Whether a reference label with no explicit colour must meet 4.5:1 contrast against the chart background. */
+  adaptiveReferenceLabels?: boolean;
+  /** Chart background (a colour or gradient). A chart's own `backgroundFill` or `backgroundColor` wins. */
+  backgroundFill?: ChartFillInput;
+  /** Fill of the plot rectangle of Cartesian charts. */
+  plotAreaFill?: ChartFillInput;
+  /** Colour of a border around the plot rectangle. */
+  plotAreaBorderColor?: ColorInput;
+  /** Corner radius of the chart card. A chart's own `borderRadius` greater than zero wins. */
+  cardRadius?: number;
+  /** Border colour of the chart card. A chart's own `borderColor` wins. */
+  cardBorderColor?: ColorInput;
+  /** Border width of the chart card. A chart's own `borderWidth` greater than zero wins. */
+  cardBorderWidth?: number;
+  /** Distance between the chart edge and its card, leaving room for the card's shadow. */
+  cardInset?: number;
+  /** Effects on the chart card. */
+  cardEffects?: readonly ChartEffectInput[];
+  /** Default effects on bars. */
+  barEffects?: readonly ChartEffectInput[];
+  /** Default effects on line strokes. */
+  lineEffects?: readonly ChartEffectInput[];
+  /** Default effects on pie slices. */
+  sliceEffects?: readonly ChartEffectInput[];
+  /** How a series colour becomes a fill: `solid` (default) or `tint` (a gradient from a lighter tint at the value end). */
+  autoFill?: 'solid' | 'tint';
+  /** `darker` outlines bars and slices in a darker shade of their colour. */
+  markOutline?: 'none' | 'darker';
+  /** Ordered colours for lines and markers of series without a colour, when fills use a paler palette. */
+  strokePalette?: readonly ColorInput[];
+  /** Colour of increases (waterfall deltas, growth annotations). */
+  positiveColor?: ColorInput;
+  /** Colour of decreases. */
+  negativeColor?: ColorInput;
+  /** Colour of totals. */
+  totalColor?: ColorInput;
 }
 
 /** Theme preset name or custom {@link ChartThemeDefinition} override object. */
@@ -101,13 +139,55 @@ export interface ChartTheme {
   readonly pdfTextBaseline: boolean;
   readonly tabularNums: boolean;
   readonly roundedLegendSwatches: boolean;
+  readonly adaptiveReferenceLabels: boolean;
+  readonly backgroundFill: ChartFill | undefined;
+  readonly plotAreaFill: ChartFill | undefined;
+  readonly plotAreaBorderColor: Color | undefined;
+  readonly cardRadius: number | undefined;
+  readonly cardBorderColor: Color | undefined;
+  readonly cardBorderWidth: number | undefined;
+  readonly cardInset: number | undefined;
+  readonly cardEffects: readonly ChartResolvedEffect[];
+  readonly barEffects: readonly ChartResolvedEffect[];
+  readonly lineEffects: readonly ChartResolvedEffect[];
+  readonly sliceEffects: readonly ChartResolvedEffect[];
+  readonly autoFill: 'solid' | 'tint';
+  readonly markOutline: 'none' | 'darker';
+  readonly strokePalette: readonly Color[];
+  readonly positiveColor: Color | undefined;
+  readonly negativeColor: Color | undefined;
+  readonly totalColor: Color | undefined;
 }
+
+/** Presentation fields that the shipped presets leave unset. */
+const NO_PRESENTATION = {
+  backgroundFill: undefined,
+  plotAreaFill: undefined,
+  plotAreaBorderColor: undefined,
+  cardRadius: undefined,
+  cardBorderColor: undefined,
+  cardBorderWidth: undefined,
+  cardInset: undefined,
+  cardEffects: [],
+  barEffects: [],
+  lineEffects: [],
+  sliceEffects: [],
+  autoFill: 'solid',
+  markOutline: 'none',
+  strokePalette: [],
+  positiveColor: undefined,
+  negativeColor: undefined,
+  totalColor: undefined,
+} as const;
+
+const hex = (values: readonly string[]): Color[] => values.map((v) => Color.fromHex(v));
+const shadow = (opacity: number, blur: number, offsetY: number) => toEffects([{ type: 'shadow', opacity, blur, offsetY }]);
 
 /** The library's default series colour; a theme palette replaces only this colour. */
 const LIBRARY_SERIES_COLOR = '#4f46e5';
 
 /** @internal */
-export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
+const BASE_THEMES: Readonly<Record<'legacy' | 'modern' | 'dark' | 'print', ChartTheme>> = {
   legacy: {
     backgroundColor: undefined,
     titleX: undefined,
@@ -135,6 +215,8 @@ export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
     pdfTextBaseline: false,
     tabularNums: false,
     roundedLegendSwatches: false,
+    adaptiveReferenceLabels: false,
+    ...NO_PRESENTATION,
   },
   modern: {
     backgroundColor: undefined,
@@ -163,6 +245,8 @@ export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
     pdfTextBaseline: true,
     tabularNums: true,
     roundedLegendSwatches: true,
+    adaptiveReferenceLabels: true,
+    ...NO_PRESENTATION,
   },
   dark: {
     backgroundColor: Color.fromHex('#0f172a'),
@@ -191,6 +275,8 @@ export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
     pdfTextBaseline: true,
     tabularNums: true,
     roundedLegendSwatches: true,
+    adaptiveReferenceLabels: true,
+    ...NO_PRESENTATION,
   },
   print: {
     backgroundColor: Color.fromHex('#ffffff'),
@@ -219,11 +305,104 @@ export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
     pdfTextBaseline: true,
     tabularNums: true,
     roundedLegendSwatches: true,
+    adaptiveReferenceLabels: true,
+    ...NO_PRESENTATION,
   },
 };
 
+const derive = (base: ChartTheme, over: Partial<ChartTheme>): ChartTheme => ({ ...base, ...over });
+
+/**
+ * The shipped presets plus the four presentation presets. Colours are `ColorPalette` tokens resolved once and frozen here
+ * (and in the .NET theme table), so a later palette change cannot alter existing charts.
+ * @internal
+ */
+export const CHART_THEMES: Readonly<Record<ChartThemeName, ChartTheme>> = {
+  ...BASE_THEMES,
+  /** Board decks and annual reports: restrained blue, teal and amber on white, a quiet card with a soft shadow. */
+  executive: derive(BASE_THEMES.modern, {
+    seriesPalette: hex(['#1c398e', '#00786f', '#bb4d00', '#45556c', '#432dd7', '#7e2a0c']),
+    titleColor: Color.fromHex('#0f172b'),
+    subtitleColor: Color.fromHex('#45556c'),
+    axisColor: Color.fromHex('#45556c'),
+    gridLineColor: Color.fromHex('#e2e8f0'),
+    legendTextColor: Color.fromHex('#1d293d'),
+    barCornerRadius: 2,
+    cardRadius: 10,
+    cardBorderColor: Color.fromHex('#e2e8f0'),
+    cardBorderWidth: 1,
+    cardInset: 12,
+    cardEffects: shadow(0.1, 12, 4),
+    positiveColor: Color.fromHex('#00786f'),
+    negativeColor: Color.fromHex('#c10007'),
+    totalColor: Color.fromHex('#1c398e'),
+  }),
+  /** Marketing and keynote slides: saturated colours, tinted fills, raised bars and slices. */
+  vivid: derive(BASE_THEMES.modern, {
+    seriesPalette: hex(['#155dfc', '#e60076', '#e17100', '#009966', '#7f22fe', '#e7000b']),
+    titleColor: Color.fromHex('#0f172b'),
+    titleFontSize: 22,
+    subtitleColor: Color.fromHex('#45556c'),
+    axisColor: Color.fromHex('#45556c'),
+    gridLineStyle: 'none',
+    legendTextColor: Color.fromHex('#1d293d'),
+    barCornerRadius: 6,
+    cardRadius: 12,
+    cardInset: 14,
+    cardEffects: shadow(0.16, 16, 6),
+    autoFill: 'tint',
+    barEffects: shadow(0.18, 6, 2),
+    sliceEffects: shadow(0.18, 6, 2),
+    positiveColor: Color.fromHex('#009966'),
+    negativeColor: Color.fromHex('#e7000b'),
+    totalColor: Color.fromHex('#155dfc'),
+  }),
+  /** Friendly internal reports: pale fills outlined in a darker shade, lines in the darker shade, a white plot on a pale card. */
+  pastel: derive(BASE_THEMES.modern, {
+    backgroundColor: Color.fromHex('#f8fafc'),
+    plotAreaFill: ChartFill.solid('#ffffff'),
+    plotAreaBorderColor: Color.fromHex('#e2e8f0'),
+    seriesPalette: hex(['#8ec5ff', '#fda5d5', '#ffd230', '#5ee9b5', '#c4b4ff', '#ffa2a2']),
+    strokePalette: hex(['#1447e6', '#c6005c', '#bb4d00', '#007a55', '#7008e7', '#c10007']),
+    markOutline: 'darker',
+    titleColor: Color.fromHex('#1d293d'),
+    subtitleColor: Color.fromHex('#45556c'),
+    axisColor: Color.fromHex('#45556c'),
+    gridLineStyle: 'dashed',
+    gridLineColor: Color.fromHex('#e2e8f0'),
+    legendTextColor: Color.fromHex('#1d293d'),
+    barCornerRadius: 8,
+    cardRadius: 14,
+    cardBorderColor: Color.fromHex('#e2e8f0'),
+    cardBorderWidth: 1,
+    positiveColor: Color.fromHex('#007a55'),
+    negativeColor: Color.fromHex('#c10007'),
+    totalColor: Color.fromHex('#1447e6'),
+  }),
+  /** Dark keynote and dashboard slides: a gradient slate surface, bright series colours, glowing lines. */
+  midnight: derive(BASE_THEMES.modern, {
+    backgroundFill: ChartFill.from({ type: 'linear', angle: 90, stops: [{ offset: 0, color: '#0f172b' }, { offset: 1, color: '#1d293d' }] }),
+    seriesPalette: hex(['#00bcff', '#fb64b6', '#fdc700', '#00d492', '#a684ff', '#ff8904']),
+    titleColor: Color.fromHex('#f8fafc'),
+    titleFontSize: 22,
+    subtitleColor: Color.fromHex('#90a1b9'),
+    axisColor: Color.fromHex('#cad5e2'),
+    gridLineColor: Color.fromHex('#314158'),
+    legendTextColor: Color.fromHex('#e2e8f0'),
+    barCornerRadius: 6,
+    cardRadius: 12,
+    cardInset: 14,
+    cardEffects: shadow(0.4, 18, 6),
+    autoFill: 'tint',
+    lineEffects: toEffects([{ type: 'glow', opacity: 0.45, radius: 5 }]),
+    positiveColor: Color.fromHex('#00d492'),
+    negativeColor: Color.fromHex('#ff6467'),
+    totalColor: Color.fromHex('#00bcff'),
+  }),
+};
+
 export function isChartThemeName(value: unknown): value is ChartThemeName {
-  return value === 'legacy' || value === 'modern' || value === 'dark' || value === 'print';
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(CHART_THEMES, value);
 }
 
 /** Resolves a theme preset name or custom definition into a complete {@link ChartTheme}. @internal */
@@ -262,6 +441,24 @@ export function resolveChartTheme(input: ChartThemeInput): ChartTheme {
     pdfTextBaseline: input.pdfTextBaseline ?? base.pdfTextBaseline,
     tabularNums: input.tabularNums ?? base.tabularNums,
     roundedLegendSwatches: input.roundedLegendSwatches ?? base.roundedLegendSwatches,
+    adaptiveReferenceLabels: input.adaptiveReferenceLabels ?? base.adaptiveReferenceLabels,
+    backgroundFill: input.backgroundFill !== undefined ? ChartFill.from(input.backgroundFill) : base.backgroundFill,
+    plotAreaFill: input.plotAreaFill !== undefined ? ChartFill.from(input.plotAreaFill) : base.plotAreaFill,
+    plotAreaBorderColor: input.plotAreaBorderColor !== undefined ? toColor(input.plotAreaBorderColor) : base.plotAreaBorderColor,
+    cardRadius: input.cardRadius ?? base.cardRadius,
+    cardBorderColor: input.cardBorderColor !== undefined ? toColor(input.cardBorderColor) : base.cardBorderColor,
+    cardBorderWidth: input.cardBorderWidth ?? base.cardBorderWidth,
+    cardInset: input.cardInset ?? base.cardInset,
+    cardEffects: input.cardEffects !== undefined ? toEffects(input.cardEffects) : base.cardEffects,
+    barEffects: input.barEffects !== undefined ? toEffects(input.barEffects) : base.barEffects,
+    lineEffects: input.lineEffects !== undefined ? toEffects(input.lineEffects) : base.lineEffects,
+    sliceEffects: input.sliceEffects !== undefined ? toEffects(input.sliceEffects) : base.sliceEffects,
+    autoFill: input.autoFill ?? base.autoFill,
+    markOutline: input.markOutline ?? base.markOutline,
+    strokePalette: input.strokePalette ? input.strokePalette.map(toColor) : base.strokePalette,
+    positiveColor: input.positiveColor !== undefined ? toColor(input.positiveColor) : base.positiveColor,
+    negativeColor: input.negativeColor !== undefined ? toColor(input.negativeColor) : base.negativeColor,
+    totalColor: input.totalColor !== undefined ? toColor(input.totalColor) : base.totalColor,
   };
 }
 

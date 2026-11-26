@@ -2,11 +2,12 @@
 import { ChartData } from './Models/ChartData';
 import { ChartSeries } from './Models/ChartSeries';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions, type ChartReference, CartesianChartBase } from './CartesianChartBase';
-import { applyOptions, Color, type ICanvas, TextAlignment } from './ChartHost';
-import { formatChartNumber } from './ChartNumberFormat';
+import { applyOptions, Color, Point, toColor, type ICanvas, TextAlignment } from './ChartHost';
+import { applyChartAffixes, formatChartNumber } from './ChartNumberFormat';
 import { checkValueRange, computeNiceScale, valueFraction } from './Graphics/ChartValueScale';
 import { drawChartMarker, type ChartMarkerFill, type ChartMarkerShape } from './Graphics/ChartMarkers';
-import { strokeChartPath } from './Graphics/ChartVector';
+import { strokeChartPath, withChartGroup } from './Graphics/ChartVector';
+import { fitTrendline, sampleStandardDeviation } from './Graphics/ChartTrendlineMath';
 
 /** Trendline overlay mode for {@link ScatterChart} (`none` or OLS `linear`). */
 export type ScatterTrendlineMode = 'none' | 'linear';
@@ -93,6 +94,39 @@ export class ScatterChart extends CartesianChartBase {
     return x;
   }
 
+  protected override get supportsErrorBars(): boolean {
+    return true;
+  }
+
+  /** The amounts left and right of a point's x that its horizontal error bars span, or `undefined`. */
+  private xErrorAmounts(series: ChartSeries, index: number): { plus: number; minus: number } | undefined {
+    const config = series.style.xErrorBars;
+    if (config === undefined) return undefined;
+    const xs = series.dataPoints.map((_, i) => this.pointX(series, i));
+    const x = xs[index];
+    let base = config.amount;
+    if (config.type === 'percent') base = (Math.abs(x) * config.amount) / 100;
+    else if (config.type === 'stdDev') base = sampleStandardDeviation(xs) * config.amount;
+    else if (config.type === 'stdError') base = (sampleStandardDeviation(xs) / Math.sqrt(xs.length)) * config.amount;
+    const direction = config.direction ?? 'both';
+    return { plus: direction === 'minus' ? 0 : base, minus: direction === 'plus' ? 0 : base };
+  }
+
+  protected override drawTrendlines(canvas: ICanvas, data: ChartData, chartAreaWidth: number, chartAreaHeight: number, baselineY: number): void {
+    const family = this.effectiveFontFamily;
+    for (const t of this.trendlines) {
+      const index = typeof t.series === 'number' ? t.series : data.series.findIndex((s) => s.name === t.series);
+      if (!Number.isInteger(index) || index < 0 || index >= data.series.length) throw new RangeError(`Trendline names a missing series '${t.series}'.`);
+      const series = data.series[index];
+      const xs = series.dataPoints.map((_, i) => this.pointX(series, i));
+      const ys = series.dataPoints.map((p) => p.value);
+      const fit = fitTrendline(t.type, xs, ys, t.order ?? 2, t.period ?? 2);
+      const color = t.color !== undefined ? toColor(t.color) : this.rawSeriesStrokeColor(series);
+      const pts = fit.points.map((p) => new Point(this._plotLeft + valueFraction(p.x, this._xMin, this._xMax) * chartAreaWidth, baselineY - this.fraction(p.y) * chartAreaHeight));
+      this.strokeFit(canvas, t, fit, pts, color, family, true);
+    }
+  }
+
   protected override resolveValueScale(data: ChartData): void {
     super.resolveValueScale(data);
 
@@ -105,8 +139,9 @@ export class ScatterChart extends CartesianChartBase {
     for (const s of data.series) {
       for (let i = 0; i < s.dataPoints.length; i++) {
         const x = this.pointX(s, i);
-        if (x < xMin) xMin = x;
-        if (x > xMax) xMax = x;
+        const xe = this.xErrorAmounts(s, i);
+        if (x - (xe?.minus ?? 0) < xMin) xMin = x - (xe?.minus ?? 0);
+        if (x + (xe?.plus ?? 0) > xMax) xMax = x + (xe?.plus ?? 0);
         const sz = s.dataPoints[i].size;
         if (sz !== undefined) {
           if (!Number.isFinite(sz) || sz <= 0) throw new RangeError('ScatterChart bubble sizes must be finite and positive.');
@@ -199,19 +234,31 @@ export class ScatterChart extends CartesianChartBase {
         const px = this._plotLeft + valueFraction(xv, this._xMin, this._xMax) * chartAreaWidth;
         const py = baselineY - valueFraction(yv, this._effectiveMin, this._effectiveMax) * chartAreaHeight;
         const r = this.bubbleRadius(dp.size, baseR);
-        return { xv, yv, px, py, r, isBubble: dp.size !== undefined };
+        return { index: i, xv, yv, px, py, r, isBubble: dp.size !== undefined };
       });
 
       // Draw largest bubbles first so smaller bubbles remain visible on top
       const sorted = [...items].sort((a, b) => b.r - a.r);
       for (const pt of sorted) {
-        if (pt.isBubble) {
-          canvas.fillCircle(pt.px, pt.py, pt.r, color.withAlpha(this.bubbleFillOpacity));
-          drawChartMarker(canvas, pt.px, pt.py, pt.r, color, 'circle', 'hollow', 0, new Color(0, 0, 0, 0), 1);
-        } else {
-          drawChartMarker(canvas, pt.px, pt.py, pt.r, color, shape, fill, series.style?.markerHaloWidth ?? 0, bg, 1.5);
-        }
+        withChartGroup(
+          canvas,
+          () => {
+            const point = series.dataPoints[pt.index];
+            const description = this.describeMark('{series}, {label}: {x}, {y}', { series: series.name, label: point.label, x: formatChartNumber(pt.xv, 'G'), y: this.formatPointValue(point), raw: point.value });
+            return { role: 'mark', seriesIndex: sIdx, pointIndex: pt.index, name: point.label, description, anchor: { x: pt.px, y: pt.py, axis: 'both' } };
+          },
+          () => {
+            if (pt.isBubble) {
+              canvas.fillCircle(pt.px, pt.py, pt.r, color.withAlpha(this.bubbleFillOpacity));
+              drawChartMarker(canvas, pt.px, pt.py, pt.r, color, 'circle', 'hollow', 0, new Color(0, 0, 0, 0), 1);
+            } else {
+              drawChartMarker(canvas, pt.px, pt.py, pt.r, color, shape, fill, series.style?.markerHaloWidth ?? 0, bg, 1.5);
+            }
+          }
+        );
       }
+
+      this.drawScatterErrorBars(canvas, series, items, chartAreaWidth, chartAreaHeight, baselineY);
 
       if (this.showTrendline === 'linear' && items.length >= 2) {
         let sumX = 0;
@@ -257,6 +304,43 @@ export class ScatterChart extends CartesianChartBase {
     }
   }
 
+  private drawScatterErrorBars(
+    canvas: ICanvas,
+    series: ChartSeries,
+    items: { xv: number; yv: number; px: number; py: number }[],
+    chartAreaWidth: number,
+    chartAreaHeight: number,
+    baselineY: number
+  ): void {
+    const y = series.style.errorBars;
+    const xcfg = series.style.xErrorBars;
+    const draw = (config: typeof y, x1: number, y1: number, x2: number, y2: number, capDx: number, capDy: number, color: Color): void => {
+      const width = config?.width ?? 1;
+      canvas.drawLine(x1, y1, x2, y2, color, width);
+      const cap = config?.capWidth ?? 6;
+      if (cap > 0) {
+        canvas.drawLine(x1 - capDx * cap, y1 - capDy * cap, x1 + capDx * cap, y1 + capDy * cap, color, width);
+        canvas.drawLine(x2 - capDx * cap, y2 - capDy * cap, x2 + capDx * cap, y2 + capDy * cap, color, width);
+      }
+    };
+    items.forEach((pt, i) => {
+      const ya = this.errorAmounts(series, i);
+      if (ya !== undefined) {
+        const color = y?.color !== undefined ? toColor(y.color) : this.appearance.legendTextColor;
+        const lo = baselineY - this.fraction(pt.yv - ya.minus) * chartAreaHeight;
+        const hi = baselineY - this.fraction(pt.yv + ya.plus) * chartAreaHeight;
+        draw(y, pt.px, lo, pt.px, hi, 0.5, 0, color);
+      }
+      const xa = this.xErrorAmounts(series, i);
+      if (xa !== undefined) {
+        const color = xcfg?.color !== undefined ? toColor(xcfg.color) : this.appearance.legendTextColor;
+        const lo = this._plotLeft + valueFraction(pt.xv - xa.minus, this._xMin, this._xMax) * chartAreaWidth;
+        const hi = this._plotLeft + valueFraction(pt.xv + xa.plus, this._xMin, this._xMax) * chartAreaWidth;
+        draw(xcfg, lo, pt.py, hi, pt.py, 0, 0.5, color);
+      }
+    });
+  }
+
   protected override drawSeriesElements(): void {}
 
   protected override drawValueLabels(
@@ -297,7 +381,7 @@ export class ScatterChart extends CartesianChartBase {
     for (let i = 0; i <= steps; i++) {
       const x = this._plotLeft + i * stepW;
       const v = this._xMin + i * stepVal;
-      const label = `${data.xAxis.prefix}${formatChartNumber(v, this._xTickFormat)}${data.xAxis.suffix}`;
+      const label = applyChartAffixes(formatChartNumber(v, this._xTickFormat), data.xAxis.prefix, data.xAxis.suffix, data.xAxis.negativeStyle);
       canvas.drawText(x, baselineY + 12, label, this.axisColor, CartesianChartBase.AXIS_LABEL_FONT_SIZE, family, TextAlignment.Center);
     }
   }

@@ -11,6 +11,10 @@ import { resolveChartTheme, type ChartTheme, type ChartThemeInput } from './Char
 import { ChartData, type ChartDataOptions } from './Models/ChartData';
 import type { ChartPathCommand } from './Graphics/ChartPathPlan';
 import { fillChartPath, strokeChartPath } from './Graphics/ChartVector';
+import { ChartFill, type ChartBox, type ChartFillBoxes, type ChartFillInput } from './Graphics/ChartFill';
+import { toEffects, type ChartEffectInput } from './Graphics/ChartEffects';
+import { applyChartTemplate } from './Graphics/ChartTemplate';
+import type { ChartResolvedEffect } from './Graphics/ChartPathPlan';
 
 const ROUNDED_K = (4 / 3) * (Math.SQRT2 - 1);
 
@@ -51,6 +55,9 @@ export const CHART_BASE_OPTION_KEYS = [
   'width',
   'height',
   'backgroundColor',
+  'backgroundFill',
+  'cardEffects',
+  'cardInset',
   'borderRadius',
   'borderColor',
   'borderWidth',
@@ -60,15 +67,20 @@ export const CHART_BASE_OPTION_KEYS = [
   'svgShapeRendering',
   'altText',
   'isDecorative',
+  'markDescriptionTemplate',
 ] as const;
 
 /** Options common to every chart. */
 export type ChartBaseOptions = ElementOptions & Partial<
   Omit<
     Pick<ChartBase, Exclude<(typeof CHART_BASE_OPTION_KEYS)[number], (typeof ELEMENT_OPTION_KEYS)[number]>>,
-    'backgroundColor' | 'borderColor' | 'borderRadius' | 'borderWidth' | 'data' | 'width' | 'height' | 'theme'
+    'backgroundColor' | 'backgroundFill' | 'cardEffects' | 'borderColor' | 'borderRadius' | 'borderWidth' | 'data' | 'width' | 'height' | 'theme'
   >
 > & {
+  /** Background fill: a colour or a gradient. Takes precedence over `backgroundColor`. */
+  backgroundFill?: ChartFillInput;
+  /** Shadow, glow or gloss for the chart card. */
+  cardEffects?: readonly ChartEffectInput[];
   /** Appearance preset (`legacy`, `modern`, `dark`, `print`) or custom theme definition. */
   theme?: ChartThemeInput;
   /** Chart width. Accepts a length: `800`, `'20cm'`, or `{ value, unit }`. */
@@ -108,7 +120,14 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   }
   /** @internal */
   get usesStyledGeometry(): boolean {
-    return this.appearance.styledGeometry || this._borderRadius > 0 || (this._borderColor !== undefined && this._borderWidth > 0);
+    const fill = this.effectiveBackgroundFill;
+    return (
+      this.appearance.styledGeometry ||
+      this.effectiveCardRadius > 0 ||
+      (this.effectiveBorderColor !== undefined && this.effectiveBorderWidth > 0) ||
+      (fill !== undefined && fill.kind !== 'solid') ||
+      this.effectiveCardEffects.length > 0
+    );
   }
 
   private _data: ChartData = new ChartData();
@@ -153,6 +172,18 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   public isDecorative = false;
 
   /**
+   * The accessible description of each mark, for sinks that keep groups (`SvgOptions.markTitles`). `{series}`, `{label}` and
+   * `{value}` (formatted as the chart would label it) are replaced, and `{raw}` is the number, which takes a format: `{raw:F1}`.
+   * Unset uses the chart family's default, `'{series}, {label}: {value}'` for category charts.
+   */
+  public markDescriptionTemplate: string | undefined = undefined;
+
+  /** Builds a mark's description from `markDescriptionTemplate`, or from the family's `fallback` template. @internal */
+  protected describeMark(fallback: string, tokens: Readonly<Record<string, string | number>>): string {
+    return applyChartTemplate(this.markDescriptionTemplate ?? fallback, tokens);
+  }
+
+  /**
    * Charts self-tag because their positioned canvas is flushed separately.
    * @internal
    */
@@ -194,6 +225,29 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
   }
 
   private _borderRadius: number = 0;
+  private _cardEffects: ChartResolvedEffect[] = [];
+
+  /** Shadow, glow or gloss for the chart card (its background shape; white when the chart sets none). */
+  public get cardEffects(): readonly ChartResolvedEffect[] {
+    return this._cardEffects;
+  }
+  public set cardEffects(value: readonly ChartEffectInput[] | undefined) {
+    this._cardEffects = toEffects(value);
+  }
+
+  private _backgroundFill: ChartFill | undefined;
+
+  /** Background fill (a colour, or a linear or radial gradient). Takes precedence over `backgroundColor`. */
+  public get backgroundFill(): ChartFill | undefined {
+    return this._backgroundFill;
+  }
+  public set backgroundFill(value: ChartFillInput | undefined) {
+    this._backgroundFill = value === undefined ? undefined : ChartFill.from(value);
+  }
+
+  /** Distance in points between the chart edge and its card (background, border and effects), leaving room for a shadow. */
+  public cardInset: number | undefined = undefined;
+
   /** Optional card border corner radius in points. */
   public get borderRadius(): number {
     return this._borderRadius;
@@ -254,15 +308,68 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
 
   /** Resolves the effective background fill (explicit overrides theme). */
   protected get effectiveBackgroundColor(): Color | undefined {
-    return this._backgroundColor ?? this.appearance.backgroundColor;
+    // A gradient background stands in as its middle colour wherever a single surface colour is needed (contrast, borders).
+    return this.effectiveBackgroundFill?.color ?? this._backgroundColor ?? this.appearance.backgroundColor;
+  }
+
+  /** The chart's own fill, else (when the chart sets no background colour) the theme's. */
+  protected get effectiveBackgroundFill(): ChartFill | undefined {
+    return this._backgroundFill ?? (this._backgroundColor === undefined ? this.appearance.backgroundFill : undefined);
+  }
+
+  /** The card corner radius: the chart's own when greater than zero, else the theme's. */
+  protected get effectiveCardRadius(): number {
+    return this._borderRadius > 0 ? this._borderRadius : (this.appearance.cardRadius ?? 0);
+  }
+
+  protected get effectiveBorderColor(): Color | undefined {
+    return this._borderColor ?? this.appearance.cardBorderColor;
+  }
+
+  protected get effectiveBorderWidth(): number {
+    return this._borderWidth > 0 ? this._borderWidth : (this.appearance.cardBorderWidth ?? 0);
+  }
+
+  protected get effectiveCardInset(): number {
+    return this.cardInset ?? this.appearance.cardInset ?? 0;
+  }
+
+  protected get effectiveCardEffects(): readonly ChartResolvedEffect[] {
+    return this._cardEffects.length > 0 ? this._cardEffects : this.appearance.cardEffects;
+  }
+
+  /** The chart rectangle. */
+  protected get chartBox(): ChartBox {
+    return { x: 0, y: 0, width: this.width, height: this.height };
+  }
+
+  /** The plot rectangle gradient fills may span; charts without a plot use the whole chart. */
+  protected get plotBox(): ChartBox {
+    return this.chartBox;
+  }
+
+  /** The boxes a fill's geometry can be relative to, for a mark occupying `mark`. */
+  protected fillBoxes(mark: ChartBox): ChartFillBoxes {
+    return { mark, plot: this.plotBox, chart: this.chartBox };
   }
 
   /** Renders the chart onto the given vector sink using `data` (defaults to `this.data`). */
   draw(canvas: ICanvas, data: ChartData = this.data): void {
     const bg = this.effectiveBackgroundColor;
-    if (bg !== undefined) {
-      if (this._borderRadius > 0) {
-        fillChartPath(canvas, { commands: roundedRectCommands(0, 0, this.width, this.height, this._borderRadius), color: bg });
+    const inset = this.effectiveCardInset;
+    if (!Number.isFinite(inset) || inset < 0) throw new RangeError('cardInset must be finite and nonnegative.');
+    const radius = this.effectiveCardRadius;
+    const fill = this.effectiveBackgroundFill;
+    const effects = this.effectiveCardEffects;
+    const cardPath = roundedRectCommands(inset, inset, this.width - 2 * inset, this.height - 2 * inset, radius);
+    if (fill !== undefined && fill.kind !== 'solid') {
+      const resolved = fill.resolve(this.fillBoxes({ x: inset, y: inset, width: this.width - 2 * inset, height: this.height - 2 * inset }));
+      fillChartPath(canvas, { commands: cardPath, ...resolved, effects });
+    } else if (effects.length > 0) {
+      fillChartPath(canvas, { commands: cardPath, color: bg ?? toColor('#ffffff'), effects });
+    } else if (bg !== undefined) {
+      if (radius > 0 || inset > 0) {
+        fillChartPath(canvas, { commands: cardPath, color: bg });
       } else {
         canvas.fillRect(0, 0, this.width, this.height, bg);
       }
@@ -283,12 +390,14 @@ export abstract class ChartBase extends ElementBase implements IRoleProvider, IA
       this.drawCaption(canvas, this.caption);
     }
 
-    if (this._borderColor !== undefined && this._borderWidth > 0) {
-      const inset = this._borderWidth / 2;
+    const borderColor = this.effectiveBorderColor;
+    const borderWidth = this.effectiveBorderWidth;
+    if (borderColor !== undefined && borderWidth > 0) {
+      const half = borderWidth / 2 + inset;
       strokeChartPath(canvas, {
-        commands: roundedRectCommands(inset, inset, this.width - this._borderWidth, this.height - this._borderWidth, Math.max(0, this._borderRadius - inset)),
-        color: this._borderColor,
-        lineWidth: this._borderWidth,
+        commands: roundedRectCommands(half, half, this.width - 2 * half, this.height - 2 * half, Math.max(0, radius - borderWidth / 2)),
+        color: borderColor,
+        lineWidth: borderWidth,
         lineJoin: 'round',
       });
     }

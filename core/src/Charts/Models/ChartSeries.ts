@@ -4,7 +4,7 @@ import { ChartDataPoint, type ChartDataPointOptions } from './ChartDataPoint';
 import { ChartSeriesStyle, type ChartSeriesStyleOptions } from './ChartSeriesStyle';
 
 /** Mark type for a series inside a {@link ComboChart}. */
-export type ChartSeriesType = 'bar' | 'line' | 'area';
+export type ChartSeriesType = 'bar' | 'line' | 'area' | 'range';
 /** Value axis binding for a series inside a {@link ComboChart}. */
 export type ChartAxisTarget = 'primary' | 'secondary';
 

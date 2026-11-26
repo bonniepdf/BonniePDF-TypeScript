@@ -2,7 +2,7 @@
 import { ChartBarStyle, type ChartBarStyleOptions } from './ChartBarStyle';
 import { drawChartBar } from './Graphics/ChartBars';
 import { fillPatternRect } from './Graphics/ChartPatterns';
-import { formatChartNumber } from './ChartNumberFormat';
+import { applyChartAffixes, formatChartNumber } from './ChartNumberFormat';
 import { valueFraction } from './Graphics/ChartValueScale';
 import { ChartData } from './Models/ChartData';
 import { CARTESIAN_CHART_OPTION_KEYS, type CartesianChartOptions } from './CartesianChartBase';
@@ -197,23 +197,33 @@ export class StackedBarChart extends CartesianChartBase {
           if (gap > 0 && startVal !== 0) xStart += val > 0 ? gap : -gap;
           const w = xEnd - xStart;
           const by = center - thickness / 2;
-          drawChartBar(canvas, xStart, by, w, thickness, color, style, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
-          if (pat !== 'none') {
-            fillPatternRect(canvas, w < 0 ? xStart + w : xStart, by, Math.abs(w), thickness, { kind: pat, foreground: Color.white });
-          }
+          this.markGroup(canvas, data, series, i, { x: xStart, y: center, axis: 'x' }, () => {
+            this.drawBarDepth(canvas, xStart, by, w, thickness, color);
+            drawChartBar(canvas, xStart, by, w, thickness, color, style, this.appearance, true, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+            if (pat !== 'none') {
+              fillPatternRect(canvas, w < 0 ? xStart + w : xStart, by, Math.abs(w), thickness, { kind: pat, foreground: Color.white });
+            }
+          });
         } else {
           let yStart = baselineY - fStart * chartAreaHeight;
           const yEnd = baselineY - fEnd * chartAreaHeight;
           if (gap > 0 && startVal !== 0) yStart += val > 0 ? -gap : gap;
           const h = yStart - yEnd;
           const bx = center - thickness / 2;
-          drawChartBar(canvas, bx, yEnd, thickness, h, color, style, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
-          if (pat !== 'none') {
-            fillPatternRect(canvas, bx, h < 0 ? yEnd + h : yEnd, thickness, Math.abs(h), { kind: pat, foreground: Color.white });
-          }
+          this.markGroup(canvas, data, series, i, { x: center, y: yStart, axis: 'y' }, () => {
+            this.drawBarDepth(canvas, bx, yEnd, thickness, h, color);
+            drawChartBar(canvas, bx, yEnd, thickness, h, color, style, this.appearance, false, this._plotLeft, topY, chartAreaWidth, chartAreaHeight);
+            if (pat !== 'none') {
+              fillPatternRect(canvas, bx, h < 0 ? yEnd + h : yEnd, thickness, Math.abs(h), { kind: pat, foreground: Color.white });
+            }
+          });
         }
       }
     }
+  }
+
+  protected override get supportsDepth3d(): boolean {
+    return true;
   }
 
   protected override drawSeriesElements(): void {}
@@ -274,7 +284,7 @@ export class StackedBarChart extends CartesianChartBase {
       if (this.showStackTotals && this.mode === 'absolute') {
         const net = posAcc !== 0 ? posAcc : negAcc;
         const fmt = this.stackTotalFormat ?? this.valueLabelFormat ?? 'G';
-        const txt = `${this.valueLabelPrefix}${formatChartNumber(net, fmt)}${this.valueLabelSuffix}`;
+        const txt = applyChartAffixes(formatChartNumber(net, fmt), this.valueLabelPrefix, this.valueLabelSuffix, this.negativeStyle);
         const fNet = valueFraction(net, this._effectiveMin, this._effectiveMax);
         if (horizontal) {
           const x = this._plotLeft + fNet * chartAreaWidth;

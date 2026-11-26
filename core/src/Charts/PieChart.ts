@@ -5,10 +5,12 @@ import { applyOptions, Color, Point, type ICanvas, TextAlignment } from './Chart
 import { CHART_BASE_OPTION_KEYS, type ChartBaseOptions } from './ChartBase';
 import { ChartDataPoint } from './Models/ChartDataPoint';
 import { ChartBase } from './ChartBase';
-import type { ChartPathCommand, ChartPathPlan } from './Graphics/ChartPathPlan';
-import { tintColor } from './Graphics/ChartTint';
+import type { ChartGradientStop, ChartPathCommand, ChartPathPlan, ChartResolvedEffect } from './Graphics/ChartPathPlan';
+import { toEffects, type ChartEffectInput } from './Graphics/ChartEffects';
+import { darkenColor, tintColor } from './Graphics/ChartTint';
+import { PIE3D_MAX_SLICES, resolvePie3d, type ChartPie3d } from './Graphics/ChartPie3d';
 import { contrastTextColor } from './Graphics/ChartValueScale';
-import { fillChartPath, strokeChartPath } from './Graphics/ChartVector';
+import { fillChartPath, strokeChartPath, withChartGroup } from './Graphics/ChartVector';
 
 /** Format of legend rows on a {@link PieChart}. */
 export type PieLegendFormat = 'labelValue' | 'labelPercent' | 'labelValuePercent' | 'labelOnly';
@@ -31,13 +33,21 @@ export const PIE_CHART_OWN_OPTION_KEYS = [
   'showTotal',
   'totalPosition',
   'sliceGradient',
+  'sliceEffects',
+  'pie3d',
+  'explodedSlices',
+  'explodeOffset',
 ] as const;
 
 /** The full option surface, base included. */
 export const PIE_CHART_OPTION_KEYS = [...CHART_BASE_OPTION_KEYS, ...PIE_CHART_OWN_OPTION_KEYS] as const;
 
 /** Options for {@link PieChart}. Intersects {@link ChartBaseOptions}. */
-export type PieChartOptions = ChartBaseOptions & Partial<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>>;
+export type PieChartOptions = ChartBaseOptions &
+  Partial<Omit<Pick<PieChart, (typeof PIE_CHART_OWN_OPTION_KEYS)[number]>, 'sliceEffects'>> & {
+    /** Shadow, glow or gloss for every slice. */
+    sliceEffects?: readonly ChartEffectInput[];
+  };
 
 const ROUNDED_K = (4 / 3) * (Math.SQRT2 - 1);
 
@@ -117,6 +127,55 @@ export class PieChart extends ChartBase {
   legendFormat: PieLegendFormat = 'labelValue';
   /** Direct slice label placement (`none`, `inside`, or `callout`). */
   sliceLabelMode: PieSliceLabelMode = 'none';
+
+  /** The label placement drawn: a tilted pie writes its shares inside the slices unless `pie3d.labels` is `false`. */
+  private get effectiveSliceLabelMode(): PieSliceLabelMode {
+    return this.sliceLabelMode === 'none' && this._pie3d !== undefined && this._pie3d.labels !== false ? 'inside' : this.sliceLabelMode;
+  }
+
+  private _explodedSlices: number[] = [];
+  /** Indices of the slices pulled out from the centre, along the middle of each slice. */
+  get explodedSlices(): readonly number[] {
+    return this._explodedSlices;
+  }
+  set explodedSlices(value: readonly number[]) {
+    for (const i of value) if (!Number.isInteger(i) || i < 0) throw new RangeError('explodedSlices must hold slice indices: integers from 0.');
+    this._explodedSlices = [...value];
+  }
+
+  private _explodeOffset = 16;
+  /** How far exploded slices move out, in points (`16`). */
+  get explodeOffset(): number {
+    return this._explodeOffset;
+  }
+  set explodeOffset(value: number) {
+    if (!Number.isFinite(value) || value < 0) throw new RangeError('explodeOffset must be finite and nonnegative.');
+    this._explodeOffset = value;
+  }
+
+  /** Whether any slice is pulled out. */
+  private get isExploded(): boolean {
+    return this._explodedSlices.length > 0 && this._explodeOffset > 0;
+  }
+
+  /** The layout of slice `i`: the pie's, moved out along the slice's middle when the slice is exploded. */
+  private sliceLayout(i: number, angles: { startAngle: number; endAngle: number }[], layout: PieLayout): PieLayout {
+    if (!this.isExploded || !this._explodedSlices.includes(i)) return layout;
+    const mid = (((angles[i].startAngle + angles[i].endAngle) / 2) * Math.PI) / 180;
+    const dx = this._explodeOffset * Math.cos(mid);
+    const dy = this._explodeOffset * Math.sin(mid) * layout.yScale;
+    return new PieLayout(layout.centerX + dx, layout.centerY + dy, layout.radius, layout.donutHoleRadius, layout.legendX, layout.legendStartY, layout.plotTop, layout.plotBottom, layout.yScale, layout.depth);
+  }
+
+  private _pie3d: ChartPie3d | undefined;
+  /** Tilts the pie and gives its slices side walls: at most eight slices. Flat pies are easier to read accurately. */
+  get pie3d(): ChartPie3d | undefined {
+    return this._pie3d;
+  }
+  set pie3d(value: ChartPie3d | undefined) {
+    resolvePie3d(value);
+    this._pie3d = value === undefined ? undefined : { ...value };
+  }
   /** Whether to display the legend beside the chart. */
   showLegend: boolean = true;
   /** Whether to display the sum of all slice values. */
@@ -126,25 +185,54 @@ export class PieChart extends ChartBase {
   /** Whether to shade each slice with a subtle tonal gradient. */
   sliceGradient: boolean = false;
 
+  private get effectiveSliceGradient(): boolean {
+    return this.sliceGradient || this.appearance.autoFill === 'tint';
+  }
+
+  private get effectiveSliceEffects(): readonly ChartResolvedEffect[] {
+    return this._sliceEffects.length > 0 ? this._sliceEffects : this.appearance.sliceEffects;
+  }
+
+  private _sliceEffects: ChartResolvedEffect[] = [];
+  /** Shadow, glow or gloss for every slice. */
+  get sliceEffects(): readonly ChartResolvedEffect[] {
+    return this._sliceEffects;
+  }
+  set sliceEffects(value: readonly ChartEffectInput[] | undefined) {
+    this._sliceEffects = toEffects(value);
+  }
+
   /** @internal */
   override get usesStyledGeometry(): boolean {
-    return super.usesStyledGeometry || this.sliceGradient || this.sliceBorderWidth > 0 || this.sliceLabelMode === 'callout';
+    return super.usesStyledGeometry || this._pie3d !== undefined || this.effectiveSliceGradient || this.effectiveSliceEffects.length > 0 || this.appearance.markOutline !== 'none' || this.sliceBorderWidth > 0 || this.sliceLabelMode === 'callout';
   }
 
   protected override drawContent(canvas: ICanvas, data: ChartData): void {
     if (data.series.length === 0 || data.series[0].dataPoints.length === 0) return;
 
     const dataPoints = data.series[0].dataPoints;
+    if (this._pie3d !== undefined && dataPoints.length > PIE3D_MAX_SLICES) throw new RangeError(`A pie3d chart takes at most ${PIE3D_MAX_SLICES} slices.`);
     const total = dataPoints.reduce((sum, dp) => sum + dp.value, 0);
     const layout = this.calculateLayout(canvas, dataPoints, total, data.title !== '', data.subtitle !== '');
     const angles = this.calculateSliceAngles(dataPoints, total);
-    const colors = this.getColors(dataPoints.length);
+    const colors = this.getColors(dataPoints.length, dataPoints);
 
-    this.drawPieSlices(canvas, dataPoints, angles, colors, layout);
+    for (const i of this._explodedSlices) if (i >= dataPoints.length) throw new RangeError(`explodedSlices names slice ${i}, but the pie has ${dataPoints.length} slices.`);
+    if (this._pie3d !== undefined && this.isExploded) {
+      // Exploded slices are separate solids: paint them back to front, each with its walls and then its top.
+      const front = ({ startAngle: s, endAngle: e }: { startAngle: number; endAngle: number }): number =>
+        s <= 90 && e >= 90 ? 1 : Math.max(Math.sin((s * Math.PI) / 180), Math.sin((e * Math.PI) / 180));
+      const order = angles.map((_, i) => i).sort((a, b) => front(angles[a]) - front(angles[b]) || a - b);
+      this.drawPieSlices(canvas, dataPoints, angles, colors, layout, data.series[0].name, order, (i) => this.drawSliceSolid(canvas, i, angles, colors, layout));
+    } else {
+      this.drawPieWalls(canvas, angles, colors, layout);
+      this.drawPieSlices(canvas, dataPoints, angles, colors, layout, data.series[0].name);
+    }
 
-    if (this.sliceLabelMode === 'inside') {
+    const labelMode = this.effectiveSliceLabelMode;
+    if (labelMode === 'inside') {
       this.drawInsideSliceLabels(canvas, dataPoints, angles, colors, layout, total);
-    } else if (this.sliceLabelMode === 'callout') {
+    } else if (labelMode === 'callout') {
       this.drawCalloutLabels(canvas, dataPoints, angles, layout, total);
     }
 
@@ -261,11 +349,22 @@ export class PieChart extends ChartBase {
     }
 
     const maxRadiusFromWidth = availableWidthForPie / 2;
-    const maxRadiusFromHeight = availableHeight / 2;
+    const geometry = resolvePie3d(this._pie3d);
+    const yScale = geometry?.yScale ?? 1;
+    const depth = geometry?.depth ?? 0;
+    const maxRadiusFromHeight = geometry === undefined ? availableHeight / 2 : (availableHeight - depth) / (2 * yScale);
     let pieRadius = Math.min(maxRadiusFromWidth, maxRadiusFromHeight);
+    if (this.isExploded) pieRadius -= this._explodeOffset;
     pieRadius = Math.max(pieRadius, 20);
 
-    const pieCenterY = titleBand + PieChart.TOP_PADDING + availableHeight / 2;
+    let pieCenterY = titleBand + PieChart.TOP_PADDING + availableHeight / 2;
+    let blockCenterY = pieCenterY;
+    if (geometry !== undefined) {
+      const blockHeight = 2 * pieRadius * yScale + depth;
+      const blockTop = titleBand + PieChart.TOP_PADDING + (availableHeight - blockHeight) / 2;
+      pieCenterY = blockTop + pieRadius * yScale;
+      blockCenterY = blockTop + blockHeight / 2;
+    }
     const pieAreaWidth =
       this.width -
       (this.showLegend ? legendWidth + PieChart.LEGEND_GAP_FROM_PIE + PieChart.RIGHT_PADDING : PieChart.RIGHT_PADDING) -
@@ -273,7 +372,7 @@ export class PieChart extends ChartBase {
     const pieCenterX = PieChart.LEFT_PADDING + pieAreaWidth / 2;
     const legendX = pieCenterX + pieRadius + calloutReserve + PieChart.LEGEND_GAP_FROM_PIE;
     const totalLegendHeight = dataPoints.length * PieChart.LEGEND_ITEM_HEIGHT;
-    const legendStartY = pieCenterY - totalLegendHeight / 2;
+    const legendStartY = blockCenterY - totalLegendHeight / 2;
 
     const holeRatio = !this.isDonut
       ? 0
@@ -291,7 +390,9 @@ export class PieChart extends ChartBase {
       legendX,
       legendStartY,
       titleBand + PieChart.TOP_PADDING,
-      this.height - PieChart.BOTTOM_PADDING - captionBand
+      this.height - PieChart.BOTTOM_PADDING - captionBand,
+      yScale,
+      depth
     );
   }
 
@@ -307,11 +408,13 @@ export class PieChart extends ChartBase {
     return angles;
   }
 
-  private getColors(count: number): Color[] {
+  private getColors(count: number, dataPoints: readonly ChartDataPoint[] = []): Color[] {
     const colors: Color[] = [];
     const sourceColors = this.colors ?? PieChart.DEFAULT_COLORS;
     for (let i = 0; i < count; i++) {
-      colors.push(Color.fromHex(sourceColors[i % sourceColors.length]));
+      // A point's own fill or colour wins over the palette; a gradient fill stands in as its middle colour.
+      const own = dataPoints[i]?.fill?.color ?? dataPoints[i]?.color;
+      colors.push(own ?? Color.fromHex(sourceColors[i % sourceColors.length]));
     }
     return colors;
   }
@@ -321,31 +424,94 @@ export class PieChart extends ChartBase {
     dataPoints: ChartDataPoint[],
     angles: { startAngle: number; endAngle: number }[],
     colors: Color[],
-    layout: PieLayout
+    pieLayout: PieLayout,
+    seriesName: string,
+    order?: readonly number[],
+    beforeSlice?: (i: number) => void
   ): void {
+    const total = dataPoints.reduce((sum, dp) => sum + dp.value, 0);
     const borderColor = this.effectiveBackgroundColor ?? Color.white;
-    for (let i = 0; i < dataPoints.length; i++) {
+    for (const i of order ?? dataPoints.map((_, n) => n)) {
       const { startAngle, endAngle } = angles[i];
       if (endAngle <= startAngle) continue;
-      const color = colors[i];
-      const path = this.isDonut
-        ? this.createAnnularSectorPath(startAngle, endAngle, layout)
-        : this.createPieSlicePath(startAngle, endAngle, layout);
-      if (this.sliceGradient) fillChartPath(canvas, this.gradientSlice(path, startAngle, endAngle, color, layout));
-      else canvas.fillPath(path, color);
+      beforeSlice?.(i);
+      const layout = this.sliceLayout(i, angles, pieLayout);
+      withChartGroup(
+        canvas,
+        () => ({
+          role: 'mark',
+          seriesIndex: 0,
+          pointIndex: i,
+          name: dataPoints[i].label,
+          description: this.describeMark('{label}: {value} ({percent})', {
+            series: seriesName,
+            label: dataPoints[i].label,
+            value: this.formatSliceValue(dataPoints[i]),
+            percent: `${this.formatSlicePercent(dataPoints[i].value, total)}`,
+            raw: dataPoints[i].value,
+          }),
+          anchor: { x: layout.centerX, y: layout.centerY, axis: 'both' },
+        }),
+        () => {
+          const color = colors[i];
+          const path = this.isDonut
+            ? this.createAnnularSectorPath(startAngle, endAngle, layout)
+            : this.createPieSlicePath(startAngle, endAngle, layout);
+          const pointFill = dataPoints[i].fill;
+          if (pointFill && pointFill.kind !== 'solid') {
+            const box = { x: layout.centerX - layout.radius, y: layout.centerY - layout.radius * layout.yScale, width: layout.radius * 2, height: layout.radius * 2 * layout.yScale };
+            const commands: ChartPathCommand[] = [
+              ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+              { op: 'Z' as const, values: [] },
+            ];
+            fillChartPath(canvas, { commands, ...pointFill.resolve(this.fillBoxes(box)) });
+          } else if (this.effectiveSliceGradient) {
+            const plan = this.gradientSlice(path, startAngle, endAngle, color, layout);
+            fillChartPath(canvas, this.effectiveSliceEffects.length > 0 ? { ...plan, effects: this.effectiveSliceEffects } : plan);
+          } else if (this.effectiveSliceEffects.length > 0) {
+            const commands: ChartPathCommand[] = [
+              ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+              { op: 'Z' as const, values: [] },
+            ];
+            fillChartPath(canvas, { commands, color, effects: this.effectiveSliceEffects });
+          } else canvas.fillPath(path, color);
 
-      if (this.sliceBorderWidth > 0) {
-        const cmds: ChartPathCommand[] = [
-          ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
-          { op: 'Z' as const, values: [] },
-        ];
-        strokeChartPath(canvas, {
-          commands: cmds,
-          color: borderColor,
-          lineWidth: this.sliceBorderWidth,
-          lineJoin: 'round',
-        });
-      }
+          if (this._pie3d !== undefined && this.isExploded && this._explodedSlices.includes(i)) {
+            // A lit bevel along the top edges of a pulled-out slice, so the top reads as a separate surface from its walls.
+            strokeChartPath(canvas, {
+              commands: [...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })), { op: 'Z' as const, values: [] }],
+              color: PieChart.edgeHighlight(color),
+              lineWidth: 1,
+              lineJoin: 'round',
+            });
+          }
+
+          if (this.appearance.markOutline === 'darker') {
+            strokeChartPath(canvas, {
+              commands: [
+                ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+                { op: 'Z' as const, values: [] },
+              ],
+              color: darkenColor(color),
+              lineWidth: 1,
+              lineJoin: 'round',
+            });
+          }
+
+          if (this.sliceBorderWidth > 0) {
+            const cmds: ChartPathCommand[] = [
+              ...path.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })),
+              { op: 'Z' as const, values: [] },
+            ];
+            strokeChartPath(canvas, {
+              commands: cmds,
+              color: borderColor,
+              lineWidth: this.sliceBorderWidth,
+              lineJoin: 'round',
+            });
+          }
+        }
+      );
     }
   }
 
@@ -370,8 +536,9 @@ export class PieChart extends ChartBase {
       const chord = 2 * midRadius * Math.sin(Math.min(Math.PI, spanRad) / 2);
       if (chord < measured.width + 4) continue;
       const midRad = (((startAngle + endAngle) / 2) * Math.PI) / 180;
-      const x = layout.centerX + midRadius * Math.cos(midRad);
-      const y = layout.centerY + midRadius * Math.sin(midRad) - fontSize / 2;
+      const slice = this.sliceLayout(i, angles, layout);
+      const x = slice.centerX + midRadius * Math.cos(midRad);
+      const y = slice.centerY + midRadius * Math.sin(midRad) * layout.yScale - fontSize / 2;
       canvas.drawText(x, y, text, contrastTextColor(colors[i]), fontSize, font, TextAlignment.Center);
     }
   }
@@ -386,7 +553,7 @@ export class PieChart extends ChartBase {
     const font = this.resolveFontFamily();
     const fontSize = 9;
     const rowHeight = fontSize + 4;
-    type Entry = { text: string; midRad: number; anchorY: number; y: number };
+    type Entry = { text: string; midRad: number; anchorY: number; y: number; cx: number; cy: number };
     const right: Entry[] = [];
     const left: Entry[] = [];
 
@@ -395,9 +562,10 @@ export class PieChart extends ChartBase {
       if (dp.value <= 0) continue;
       const { startAngle, endAngle } = angles[i];
       const midRad = (((startAngle + endAngle) / 2) * Math.PI) / 180;
-      const anchorY = layout.centerY + layout.radius * Math.sin(midRad);
+      const slice = this.sliceLayout(i, angles, layout);
+      const anchorY = slice.centerY + layout.radius * Math.sin(midRad) * layout.yScale;
       const text = `${dp.label} ${this.formatSlicePercent(dp.value, total)}`;
-      const entry: Entry = { text, midRad, anchorY, y: anchorY };
+      const entry: Entry = { text, midRad, anchorY, y: anchorY, cx: slice.centerX, cy: slice.centerY };
       if (Math.cos(midRad) >= 0) right.push(entry);
       else left.push(entry);
     }
@@ -419,10 +587,10 @@ export class PieChart extends ChartBase {
       const dir = isRight ? 1 : -1;
       const endX = layout.centerX + dir * (layout.radius + 18);
       for (const item of items) {
-        const sx = layout.centerX + (layout.radius + 2) * Math.cos(item.midRad);
-        const sy = layout.centerY + (layout.radius + 2) * Math.sin(item.midRad);
-        const mx = layout.centerX + (layout.radius + 10) * Math.cos(item.midRad);
-        const my = layout.centerY + (layout.radius + 10) * Math.sin(item.midRad);
+        const sx = item.cx + (layout.radius + 2) * Math.cos(item.midRad);
+        const sy = item.cy + (layout.radius + 2) * Math.sin(item.midRad) * layout.yScale;
+        const mx = item.cx + (layout.radius + 10) * Math.cos(item.midRad);
+        const my = item.cy + (layout.radius + 10) * Math.sin(item.midRad) * layout.yScale;
         strokeChartPath(canvas, {
           commands: [
             { op: 'M', values: [sx, sy] },
@@ -460,9 +628,9 @@ export class PieChart extends ChartBase {
       color,
       gradient: {
         startX: layout.centerX + inner * Math.cos(middle),
-        startY: layout.centerY + inner * Math.sin(middle),
+        startY: layout.centerY + inner * Math.sin(middle) * layout.yScale,
         endX: layout.centerX + layout.radius * Math.cos(middle),
-        endY: layout.centerY + layout.radius * Math.sin(middle),
+        endY: layout.centerY + layout.radius * Math.sin(middle) * layout.yScale,
         startColor: tintColor(color),
         endColor: color,
       },
@@ -474,9 +642,145 @@ export class PieChart extends ChartBase {
     const segments = Math.max(Math.ceil((endAngle - startAngle) / 5), 1);
     for (let i = 0; i <= segments; i++) {
       const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
-      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians)));
+      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians) * layout.yScale));
     }
     return path;
+  }
+
+  /** The highlight along the top edges of an exploded slice: each channel 40 % of the way to white, in integers. */
+  private static edgeHighlight(color: Color): Color {
+    const hex = color.toHexString();
+    const channel = (offset: number): number => {
+      const c = parseInt(hex.slice(offset, offset + 2), 16);
+      return c + Math.floor(((255 - c) * 40 + 50) / 100);
+    };
+    return new Color(channel(1), channel(3), channel(5));
+  }
+
+  /**
+   * The colour of a wall whose outward normal points at `normalDeg` (screen angles, 90° towards the viewer). Light comes
+   * from the front left: a wall facing it is shaded 12 %, a wall facing away 38 %, plus `extra`. Integer channel maths,
+   * so every implementation gives the same colour.
+   */
+  private static wallShade(color: Color, normalDeg: number, extra = 0): Color {
+    const lambert = Math.max(0, Math.cos(((normalDeg - 125) * Math.PI) / 180));
+    const pct = Math.round(38 - 26 * lambert) + extra;
+    const hex = color.toHexString();
+    const channel = (offset: number): number => {
+      const c = parseInt(hex.slice(offset, offset + 2), 16);
+      return c - Math.floor((c * pct + 50) / 100);
+    };
+    return new Color(channel(1), channel(3), channel(5));
+  }
+
+  /**
+   * Fills the wall that hangs from the rim arc at `radius` between two angles. The outside of the rim (`inside` false) faces
+   * away from the centre, the inside of the hole towards it; the light changes along the curve, so the wall is a horizontal
+   * gradient sampled every 15° or less. Across the front or back half of the rim, x follows the angle one to one.
+   */
+  private drawRimWall(canvas: ICanvas, layout: PieLayout, radius: number, from: number, to: number, color: Color, inside: boolean): void {
+    const segments = Math.max(Math.ceil((to - from) / 5), 1);
+    const rim: Point[] = [];
+    for (let i = 0; i <= segments; i++) {
+      const radians = ((from + ((to - from) * i) / segments) * Math.PI) / 180;
+      rim.push(new Point(layout.centerX + radius * Math.cos(radians), layout.centerY + radius * Math.sin(radians) * layout.yScale));
+    }
+    const outline = [...rim, ...[...rim].reverse().map((p) => new Point(p.x, p.y + layout.depth))];
+    const commands: ChartPathCommand[] = [...outline.map((p, n) => ({ op: n === 0 ? ('M' as const) : ('L' as const), values: [p.x, p.y] })), { op: 'Z' as const, values: [] }];
+    const shade = (angle: number): Color => PieChart.wallShade(color, inside ? angle + 180 : angle, inside ? 12 : 0);
+    const xAt = (angle: number): number => layout.centerX + radius * Math.cos((angle * Math.PI) / 180);
+    const x0 = xAt(from);
+    const x1 = xAt(to);
+    if (Math.abs(x1 - x0) < 0.5) {
+      fillChartPath(canvas, { commands, color: shade((from + to) / 2) });
+      return;
+    }
+    const count = Math.max(Math.ceil((to - from) / 15), 1);
+    const stops: ChartGradientStop[] = [];
+    for (let k = 0; k <= count; k++) {
+      const angle = from + ((to - from) * k) / count;
+      stops.push({ offset: (xAt(angle) - x0) / (x1 - x0), color: shade(angle) });
+    }
+    fillChartPath(canvas, {
+      commands,
+      color: shade((from + to) / 2),
+      gradient: { startX: x0, startY: layout.centerY, endX: x1, endY: layout.centerY, startColor: stops[0].color, endColor: stops[stops.length - 1].color, stops },
+    });
+  }
+
+  /** The parts of each slice that fall between `from` and `to` degrees. */
+  private static spans(angles: { startAngle: number; endAngle: number }[], colors: Color[], from: number, to: number, only?: number): { from: number; to: number; color: Color }[] {
+    const out: { from: number; to: number; color: Color }[] = [];
+    angles.forEach(({ startAngle, endAngle }, i) => {
+      if (only !== undefined && i !== only) return;
+      const a = Math.max(startAngle, from);
+      const b = Math.min(endAngle, to);
+      if (endAngle > startAngle && b > a) out.push({ from: a, to: b, color: colors[i] });
+    });
+    return out;
+  }
+
+  /** How far a span of the far half of the hole is from the back (270°): the back is painted first. */
+  private static backDistance(w: { from: number; to: number }): number {
+    const mid = (w.from + w.to) / 2;
+    return Math.abs((mid < 0 ? mid + 360 : mid) - 270);
+  }
+
+  /**
+   * Draws the side walls of a tilted pie. A donut first gets the inside of its hole: the far half of the hole's rim
+   * (screen angles 180° to 360°), dropped by the depth and shaded twice, which the top faces then frame. Every pie then
+   * gets the outside of the near half of its rim (0° to 180°), shaded once.
+   */
+  private drawPieWalls(canvas: ICanvas, angles: { startAngle: number; endAngle: number }[], colors: Color[], layout: PieLayout): void {
+    if (this._pie3d === undefined || layout.depth <= 0) return;
+    if (this.isDonut && layout.donutHoleRadius > 0) {
+      // Slice angles run from -90° to 270°, so the far half of the hole is -90° to 0° and 180° to 270°.
+      const inner = [...PieChart.spans(angles, colors, -90, 0), ...PieChart.spans(angles, colors, 180, 270)];
+      inner.sort((x, y) => PieChart.backDistance(x) - PieChart.backDistance(y));
+      for (const w of inner) this.drawRimWall(canvas, layout, layout.donutHoleRadius, w.from, w.to, w.color, true);
+    }
+    // Outermost angles first, so the wall at the bottom of the pie is painted last.
+    const outer = PieChart.spans(angles, colors, 0, 180);
+    outer.sort((x, y) => Math.abs((y.from + y.to) / 2 - 90) - Math.abs((x.from + x.to) / 2 - 90));
+    for (const w of outer) this.drawRimWall(canvas, layout, layout.radius, w.from, w.to, w.color, false);
+  }
+
+  /**
+   * Draws the walls of one slice of an exploded tilted pie, before its top: the inside of the hole, the two cut faces
+   * along its edges (which the gap now shows), then the outside of its rim.
+   */
+  private drawSliceSolid(canvas: ICanvas, i: number, angles: { startAngle: number; endAngle: number }[], colors: Color[], pieLayout: PieLayout): void {
+    if (pieLayout.depth <= 0) return;
+    const layout = this.sliceLayout(i, angles, pieLayout);
+    const color = colors[i];
+    const inner = this.isDonut ? layout.donutHoleRadius : 0;
+    if (inner > 0) {
+      const spans = [...PieChart.spans(angles, colors, -90, 0, i), ...PieChart.spans(angles, colors, 180, 270, i)];
+      spans.sort((x, y) => PieChart.backDistance(x) - PieChart.backDistance(y));
+      for (const w of spans) this.drawRimWall(canvas, layout, inner, w.from, w.to, color, true);
+    }
+    const { startAngle, endAngle } = angles[i];
+    if (endAngle - startAngle < 360) {
+      // A cut face's outward normal points away from the slice: back from its start edge, on from its end edge.
+      for (const [angle, normal] of [[startAngle, startAngle - 90], [endAngle, endAngle + 90]]) {
+        const t = (angle * Math.PI) / 180;
+        const cos = Math.cos(t);
+        const sin = Math.sin(t) * layout.yScale;
+        const x1 = layout.centerX + inner * cos;
+        const y1 = layout.centerY + inner * sin;
+        const x2 = layout.centerX + layout.radius * cos;
+        const y2 = layout.centerY + layout.radius * sin;
+        const commands: ChartPathCommand[] = [
+          { op: 'M', values: [x1, y1] },
+          { op: 'L', values: [x2, y2] },
+          { op: 'L', values: [x2, y2 + layout.depth] },
+          { op: 'L', values: [x1, y1 + layout.depth] },
+          { op: 'Z', values: [] },
+        ];
+        fillChartPath(canvas, { commands, color: PieChart.wallShade(color, normal) });
+      }
+    }
+    for (const w of PieChart.spans(angles, colors, 0, 180, i)) this.drawRimWall(canvas, layout, layout.radius, w.from, w.to, color, false);
   }
 
   private createAnnularSectorPath(startAngle: number, endAngle: number, layout: PieLayout): Point[] {
@@ -484,11 +788,11 @@ export class PieChart extends ChartBase {
     const segments = Math.max(Math.ceil((endAngle - startAngle) / 5), 1);
     for (let i = 0; i <= segments; i++) {
       const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
-      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians)));
+      path.push(new Point(layout.centerX + layout.radius * Math.cos(radians), layout.centerY + layout.radius * Math.sin(radians) * layout.yScale));
     }
     for (let i = segments; i >= 0; i--) {
       const radians = ((startAngle + ((endAngle - startAngle) * i) / segments) * Math.PI) / 180;
-      path.push(new Point(layout.centerX + layout.donutHoleRadius * Math.cos(radians), layout.centerY + layout.donutHoleRadius * Math.sin(radians)));
+      path.push(new Point(layout.centerX + layout.donutHoleRadius * Math.cos(radians), layout.centerY + layout.donutHoleRadius * Math.sin(radians) * layout.yScale));
     }
     return path;
   }
@@ -561,6 +865,8 @@ class PieLayout {
     public legendX: number,
     public legendStartY: number,
     public plotTop: number,
-    public plotBottom: number
+    public plotBottom: number,
+    public yScale: number = 1,
+    public depth: number = 0
   ) {}
 }

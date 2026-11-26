@@ -10,8 +10,9 @@ import { applyFacturX } from '../../src/EInvoice/FacturX';
 import { FacturXProfile, facturXConformanceLevel } from '../../src/EInvoice/FacturXProfile';
 import { pdfToText } from '../helpers/test-base';
 
-const invoiceXml = () =>
-  new TextEncoder().encode('<rsm:CrossIndustryInvoice><total>42.00</total></rsm:CrossIndustryInvoice>');
+// The shared EN 16931 fixture (spec fixtures/factur-x): applyFacturX checks the XML is CII and
+// that its profile identifier matches, so a stub root element is no longer enough.
+const invoiceXml = () => new Uint8Array(readFileSync(join(__dirname, 'fixtures/factur-x/en16931-invoice.xml')));
 
 // The fx block only survives when the PDF/A-3 claim survives, which requires
 // an embeddable font (PDF/A forces standard-14 embedding). Register Liberation
@@ -58,7 +59,7 @@ describe('Factur-X / ZUGFeRD e-invoice', () => {
     doc.settings.conformance = PdfAConformance.PdfA3a;
     doc.settings.accessibility = AccessibilityMode.PdfUa1;
     doc.settings.language = 'en-GB';
-    applyFacturX(doc, invoiceXml(), { profile: FacturXProfile.Basic });
+    applyFacturX(doc, invoiceXml());
     expect(doc.settings.conformance).toBe(PdfAConformance.PdfA3a);
   });
 

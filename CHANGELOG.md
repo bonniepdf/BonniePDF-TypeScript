@@ -10,6 +10,10 @@ by pushing a `v<version>` tag (see `.github/workflows/release.yml`).
 
 - **Charting engine:** sync updated BonnieCharts sources across 40 chart families, presentation themes, paint gradients, visual effects, annotations, pseudo-3D depth, and generated chart exports and fixtures.
 
+### Changes
+
+- **Factur-X:** `applyFacturX` now checks the invoice XML before binding it. It must be well-formed UTF-8 CII with no DOCTYPE, and its profile identifier (BT-24) must be a recognised Factur-X / ZUGFeRD 2.1+ profile that matches `options.profile`. On failure it throws a `FacturXError` carrying a `code` and leaves the document unchanged. When `options.profile` is omitted, the profile is read from the XML instead of defaulting to EN 16931. This is not business-rule validation: totals, VAT rules and the CII schema are still not checked.
+
 ## 2026.11.23
 
 Status: Released

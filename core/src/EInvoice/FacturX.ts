@@ -2,13 +2,19 @@ import { Document } from '../Document';
 import { PdfAConformance } from '../Configuration/PdfAConformance';
 import { AttachmentRelationship } from '../Attachments/AttachmentRelationship';
 import { FacturXProfile, facturXConformanceLevel } from './FacturXProfile';
+import { FacturXError } from './FacturXError';
+import { checkFacturXXml } from './FacturXXmlCheck';
 
 /** The Factur-X-mandated file name for the embedded invoice XML. */
 export const FACTUR_X_DEFAULT_FILENAME = 'factur-x.xml';
 
 /** Options for {@link applyFacturX}. */
 export interface FacturXOptions {
-  /** The semantic profile the XML conforms to. Default {@link FacturXProfile.En16931}. */
+  /**
+   * The semantic profile the XML conforms to. When omitted, it is read from the XML's profile
+   * identifier (BT-24). When given, it must match that identifier, or {@link applyFacturX} throws
+   * a {@link FacturXError} with code `profile-mismatch`.
+   */
   profile?: FacturXProfile;
   /** Embedded file name. Default `factur-x.xml`; must match the XMP. */
   fileName?: string;
@@ -23,18 +29,31 @@ export interface FacturXOptions {
  * associated file with the `Data` relationship, and registers the `fx:` XMP
  * metadata block. Mutates and returns the document for chaining.
  *
+ * Before changing the document it checks only what the Factur-X claim
+ * depends on: the XML is well-formed UTF-8 CII (no DOCTYPE) and declares a
+ * recognised profile identifier (BT-24) that matches `options.profile`. Any
+ * failure throws a {@link FacturXError} and leaves the document unchanged.
+ *
  * **BonniePDF does not generate or validate the invoice XML.** The XML is a
  * caller input — produced by an ERP or a dedicated e-invoicing toolchain
- * (Mustangproject, the Factur-X reference libraries, …). The profile here is
- * metadata describing that XML, not a schema the engine enforces. Validate
- * generated files against veraPDF (PDF/A-3) *and* an independent ZUGFeRD
- * validator before claiming conformance.
+ * (Mustangproject, the Factur-X reference libraries, …). The check above does
+ * not read the CII schema, totals or VAT rules. Validate generated files
+ * against veraPDF (PDF/A-3) *and* an independent ZUGFeRD validator before
+ * claiming conformance.
  */
 export function applyFacturX(doc: Document, invoiceXml: Uint8Array, options: FacturXOptions = {}): Document {
   if (!invoiceXml || invoiceXml.length === 0) {
     throw new Error('Invoice XML cannot be null or empty.');
   }
-  const profile = options.profile ?? FacturXProfile.En16931;
+  const declared = checkFacturXXml(invoiceXml);
+  if (options.profile !== undefined && options.profile !== declared.profile) {
+    throw new FacturXError(
+      'profile-mismatch',
+      `Factur-X profile ${facturXConformanceLevel(options.profile)} was requested, but the invoice XML declares ` +
+        `${facturXConformanceLevel(declared.profile)} ("${declared.guideline}")`
+    );
+  }
+  const profile = declared.profile;
   const fileName = options.fileName ?? FACTUR_X_DEFAULT_FILENAME;
   const documentType = options.documentType ?? 'INVOICE';
 

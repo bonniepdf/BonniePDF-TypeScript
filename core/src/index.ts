@@ -68,6 +68,7 @@ export * from './Attachments/AttachmentRelationship';
 export * from './Attachments/AttachmentRules';
 
 export * from './EInvoice/FacturX';
+export * from './EInvoice/FacturXError';
 export * from './EInvoice/FacturXProfile';
 export * from './EInvoice/FacturXMetadata';
 
